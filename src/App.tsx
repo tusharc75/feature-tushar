@@ -105,6 +105,7 @@ import TransferAssetDetailPage from './pages/TransferAssets/TransferAssetDetailP
 import Address from "./pages/Address";
 import Logout from './pages/Auth/Logout';
 
+
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
@@ -255,7 +256,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, []);
 
   const conditionalRedirect = (Comp, location) => {
@@ -577,7 +578,7 @@ function App() {
             <PrivateRoute exact path={`${routes.transferAssetDetail.path}/:id`}>
               <TransferAssetDetailPage />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.address.path}>
+            <PrivateRoute exact path={`${routes.address.path}`}>
               <Address />
             </PrivateRoute>
             <Route path="*" component={NotFound} />

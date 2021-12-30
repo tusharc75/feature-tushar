@@ -8,6 +8,17 @@
   -webkit-gap: 0.50rem;
   align-items: center;
 }
+.sort_title{
+  background-color: white !important;
+  padding: 8px 24px !important;
+  font-weight: 700;
+  color: var(--secondary);
+}
+.mobile_filter_content{
+  height: 400px;
+}
+
+
 
 .mobile_filter_side_header{
   display: flex;

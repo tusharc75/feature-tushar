@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Fragment, useContext, useReducer } from 'react';
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
@@ -10,13 +10,13 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { FaAddressBook } from 'react-icons/fa';
+import { FaWarehouse } from 'react-icons/fa';
 import styles from '../Leads/Header.module.scss';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomContainer from '../../components/CustomContainer';
 import ManageAddressDialog from '../../components/Address/ManageAddressDialog';
 import routes from '../../components/Helpers/Routes';
-import {AddOutlined, ExpandMore} from '@material-ui/icons';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../constants/helpers';
@@ -24,17 +24,17 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
-import EntitySelectionsDialog from "../../components/EntitySelections"
-import { AiOutlineDeploymentUnit } from "react-icons/ai"
+import EntitySelectionsDialog from '../../components/EntitySelections';
+import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import Chip from "@material-ui/core/Chip"
-import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
-import { prepareDataForGrid } from "../../constants/helpers"
-import { useLocation } from "react-router-dom";
-import queryString from "query-string";
-import { MdAccountCircle } from "react-icons/md";
-import {AiFillCrown, MdAdd} from "react-icons/all";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import Chip from '@material-ui/core/Chip';
+import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import { prepareDataForGrid } from '../../constants/helpers';
+import { useLocation } from 'react-router-dom';
+import queryString from 'query-string';
+import { MdAccountCircle } from 'react-icons/md';
+import { AiFillCrown, MdAdd } from 'react-icons/all';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 
@@ -45,40 +45,35 @@ const Address = () => {
   const {
     state: { permissions, user, selectedEntity }
   }: any = useData();
-  const {getColumnData} = useColumns();
+  const { getColumnData } = useColumns();
 
-  const [addressPermissions, setAddressPermissions] = useState({
+  const [addressPermissions] = useState({
     isCreate: permissions?.address?.isCreate,
     isUpdate: permissions?.address?.isUpdate,
     isRead: permissions?.address?.isRead,
-    isDelete: permissions?.address?.isDelete,
+    isDelete: permissions?.address?.isDelete
   });
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [open, setOpen] = useState({ open: false, isClone: false });
+  const [open, setOpen] = useState({ title: '', open: false, isClone: false, edit: false });
   const [addressResource, setAddressResource] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [showEntityDialog, setShowEntityDialog] = useState(false)
-  const [addressId, setAddressId] = useState("")
-  const [entities, setEntities] = useState([])
-  const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false)
-  const [columns, setColumns] = useState([
-
-  ])
-  const [frameWorkComponent, setFrameWorkComponent] = useState({})
-
-
+  const [showEntityDialog, setShowEntityDialog] = useState(false);
+  const [addressId, setAddressId] = useState('');
+  const [entities, setEntities] = useState([]);
+  const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false);
+  const [columns, setColumns] = useState([]);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({});
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([])
-  const localStorageSelectedRecords = "address_selected";
+  const [clonedData, setClonedData] = useState([]);
+  const localStorageSelectedRecords = 'address_selected';
 
- console.log(state,"state")
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('addressResourcePage'));
   if (columnState) {
@@ -92,60 +87,61 @@ const Address = () => {
   }
   //  Grid Variables - End
 
-  const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
+  const storedRoutes = localStorage.getItem('routes') ? JSON.parse(localStorage.getItem('routes')) : null;
+
+  // useEffect(() => {
+  //   const parsedParams = queryString.parse(location?.search);
+  //   if (parsedParams?.id) {
+  //     setAddressResource({ id: parsedParams?.id });
+  //     setOpen({ open: true, isClone: false });
+  //   }
+  // }, [location])
 
   useEffect(() => {
-    if (permissions && permissions.address) {
-      setAddressPermissions(permissions.address);
-    }
-  }, [permissions]);
-
-  useEffect(() => {
-    const parsedParams = queryString.parse(location?.search);
-    if (parsedParams?.id) {
-      setAddressResource({ id: parsedParams?.id });
-      setOpen({ open: true, isClone: false });
-    }
-  }, [location])
-
-  useEffect(() => {
-    fetchGridColumns()
-  }, [])
+    fetchGridColumns();
+  }, []);
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get("/field?resource=Address")
+      .get('/field?resource=Address')
       .then(({ data: { data } }) => {
-        let columns = []
-        let rendererNames = []
-        data.forEach(o => {
+        let columns = [];
+        let rendererNames = [];
+        data.forEach((o) => {
           if (o?.fieldData?.primaryField === true) {
-            columns = [...columns,
-            { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, primaryField: true, show: true, disabled: true, cellRenderer: 'nameRenderer' }]
-          }
-          else {
-            let currentColumn = getColumnData(routes.address.title, o?.fieldData, routes.address.path)
+            columns = [
+              ...columns,
+              {
+                field: o?.fieldData?.fieldName,
+                headerName: o?.fieldData?.fieldLabel,
+                primaryField: true,
+                show: true,
+                disabled: true,
+                cellRenderer: 'nameRenderer'
+              }
+            ];
+          } else {
+            let currentColumn = getColumnData(routes.address.title, o?.fieldData, routes.address.path);
 
             if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData]
+              columns = [...columns, currentColumn?.columnData];
               if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName)
+                rendererNames.push(currentColumn?.rendererName);
               }
             }
           }
-        })
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
           nameRenderer: NameRenderer,
           actionsRenderer: ActionsRenderer
-        }
-        setFrameWorkComponent({ ...tempFrameworkComponent })
-        columns = [...columns, ...getStaticFields()]
-        setColumns([...columns])
-      })
-  }
-
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns = [...columns, ...getStaticFields()];
+        setColumns([...columns]);
+      });
+  };
 
   const fetchAddresses = () => {
     dispatch({ type: 'loading', loading: true });
@@ -157,37 +153,45 @@ const Address = () => {
 
     axiosInstance()
       .get(`/address${queryString}`)
-      .then(({ data: { data, count } }) => {
-          console.log(data,"data")
-        let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u,user);
-          finalObject["canDelete"] = addressPermissions.isDelete;
-          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-          finalObject["allowedToEdit"] = addressPermissions.isUpdate;
-          console.log(finalObject,"finalObject")
-          return finalObject
-          
-        });
+      .then(
+        ({
+          data: {
+            data: { data, count }
+          }
+        }) => {
+          let rows = data.map((u) => {
+            let finalObject = prepareDataForGrid(u, user);
+            finalObject['canDelete'] = addressPermissions.isDelete;
+            finalObject['allowedToEdit'] = addressPermissions.isUpdate;
+            finalObject['isChecked'] = false;
 
-        setIsAllChecked(false);
-        setClonedData(data);
-        if (appendRows) {
-          dispatch({
-            type: "initialize", data: [...dataRows, ...rows],
-            count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+            return finalObject;
           });
-        } else {
-          dispatch({
-            type: "initialize", data: rows, count: count,
-            selectedRecords: rows.filter(f => f.isChecked === true)
-          });
+
+          setIsAllChecked(false);
+          setClonedData(data);
+          if (appendRows) {
+            dispatch({
+              type: 'initialize',
+              data: [...dataRows, ...rows],
+              count: count,
+              selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+            });
+          } else {
+            dispatch({
+              type: 'initialize',
+              data: rows,
+              count: count,
+              selectedRecords: rows.filter((f) => f.isChecked === true)
+            });
+          }
+
+          dispatch({ type: 'initialize', data: rows, count: count });
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
         }
-
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
+      )
       .catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
@@ -200,42 +204,48 @@ const Address = () => {
 
   const NameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
-      <Link to={`${routes.warehouseDetail.path}/${params.data._id}`} title={params.value}>
-        <span
-          className="link"
-          onClick={() => {
-            if (params.data?.isAllowedToUpdate) {
-              setAddressResource(params.data);
-              setOpen({ open: true, isClone: false });
-            }
-          }}
-        >
-          <CustomRenderCell value={params.value} />
-        </span>
-      </Link>
+      <span
+      // className="link"
+      // onClick={() => {
+      //   if (params.data?.isAllowedToUpdate) {
+      //     setAddressResource(params.data);
+      //     setOpen({ title: `Edit Address`, open: true, edit: true, isClone: false });
+      //   }
+      // }}
+      >
+        <CustomRenderCell value={params.value} />
+      </span>
     </span>
   );
-
-
 
   const ActionsRenderer = (params) => (
     <>
       <Tooltip
-        className={addressPermissions.isCreate ? "" : "cursor-stop"}
-        title={addressPermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setAddressResource(params.data);
-            setOpen({ open: true, isClone: true })
-          }}>
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
-      {addressPermissions.isDelete && params?.data?.createdById === user?.user?._id ? (
-        <Tooltip title="Delete">
+        className={addressPermissions.isCreate ? '' : 'cursor-stop'}
+        title={addressPermissions.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
+      >
+        <span>
           <IconButton
+            disabled={!addressPermissions.isCreate}
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setAddressResource(params.data);
+              setOpen({ title: 'Clone Address', open: true, edit: false, isClone: true });
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </span>
+      </Tooltip>
+
+      <Tooltip
+        className={addressPermissions.isDelete && params?.data?.createdById === user?.user?._id ? '' : 'cursor-stop'}
+        title={addressPermissions.isDelete && params?.data?.createdById === user?.user?._id ? 'Delete' : "You don't have permission to delete"}
+      >
+        <span>
+          <IconButton
+            disabled={!addressPermissions.isDelete && params?.dataa?.createdById !== user?.user?._id}
             aria-label="Delete"
             onClick={() => {
               setDeleteRecord(params.data);
@@ -244,45 +254,8 @@ const Address = () => {
           >
             <DeleteIcon fontSize="small" color="error" />
           </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title={`You do not have permission to delete `}>
-          <IconButton aria-label="Delete">
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-      {
-        addressPermissions.isUpdate && params.data?.isAllowedToUpdate ?
-          <Tooltip title="Entity">
-            <IconButton
-              size="small"
-              aria-label="Entity"
-              onClick={() => {
-                setShowEntityDialog(true)
-                setAddressId(params.data._id)
-                // if (params?.data?.entity) {
-                //   let entities = []
-                //   if (params?.data?.entityId) {
-                //     entities.push(params?.data?.entityId)
-                //   }
-                //   if (params?.data?.restentity) {
-                //     let restEntities = params?.data?.restentity.map(o => o.optionValue)
-                //     entities = [...entities, ...restEntities]
-                //   }
-                //   setEntities([...entities])
-                // }
-              }}>
-              <AiOutlineDeploymentUnit fontSize="15" color="primary" />
-            </IconButton>
-          </Tooltip> : (
-            <Tooltip className="cursor-stop" title="You do not have permission to update entity">
-              <IconButton aria-label="Clone" size="small">
-                <AiOutlineDeploymentUnit fontSize="15" />
-              </IconButton>
-            </Tooltip>
-          )
-      }
+        </span>
+      </Tooltip>
     </>
   );
 
@@ -362,14 +335,13 @@ const Address = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: 'address' }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.address.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
             permissions={addressPermissions}
             module="address"
             api={'address'}
-
             afterImportCompleted={() => {
               fetchAddresses();
             }}
@@ -378,8 +350,8 @@ const Address = () => {
             recordsToExport={selectedRecords.length}
             ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll()
-              else fetchAddresses()
+              if (gridApi) gridApi.deselectAll();
+              else fetchAddresses();
             }}
           />
         </Grid>
@@ -388,121 +360,90 @@ const Address = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-              <FaAddressBook size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">Address</span>
+              <FaWarehouse size={20} style={{ paddingBottom: '3px' }} /> <span className="listingHeader">{routes.address.title}</span>
             </Grid>
-            <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
+            <Grid md={6} sm={6} xs={12} className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-
-                <Grid style={{display: "flex", flex:1}}>
+                <div style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
-                      onSearch={handleSearch}
-                      searchbox={styles.search_box_input}
-                      width={isMobile ? "200px" : "242px"}
-                      style={isMobile ? {flex:1} : {}}
-                      size="small"
-                      value={search}
-                      placeholder={`Search ${routes.warehouse.title}`}
+                    onSearch={handleSearch}
+                    searchbox={styles.search_box_input}
+                    width={isMobile ? '200px' : '242px'}
+                    style={isMobile ? { flex: 1 } : {}}
+                    size="small"
+                    value={search}
+                    placeholder={`Search ${routes.warehouse.title}`}
                   />
-                </Grid>
+                </div>
 
-                <Grid style={{display: "flex" , gap:"5px"}}>
+                <div style={{ display: 'flex', gap: '5px' }}>
                   {addressPermissions.isCreate && (
                     <Button
                       onClick={() => {
                         setAddressResource(null);
-                        setOpen({ open: true, isClone: false });
+                        setOpen({ title: 'Add New Address', open: true, edit: false, isClone: false });
                       }}
-                      variant={isMobile ? "text" : "contained"}
+                      variant={isMobile ? 'text' : 'contained'}
                       size="small"
                       color="primary"
-                      className={isMobile ? "mobile_button" : styles.add_submit_btn}
+                      className={isMobile ? 'mobile_button' : styles.add_submit_btn}
                       startIcon={isMobile ? null : <AddOutlined />}
                     >
-                      {isMobile ? <MdAdd size={23}/> : "Add"}
+                      {isMobile ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
 
-
-                    <Button
-                        variant={isMobile ? "text" : "contained"}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
-                    >
-                      {isMobile ? "" :  "Actions" } <ExpandMore/>
-                    </Button>
-
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {addressPermissions.isDelete ?
+                  {addressPermissions.isDelete && (
+                    <>
+                      {' '}
+                      <Button
+                        variant={isMobile ? 'text' : 'contained'}
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        disabled={selectedRecords.length ? false : true}
+                        aria-controls="action-menu"
+                        className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                      >
+                        {isMobile ? '' : 'Actions'} <ExpandMore />
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
                         <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                        : null}
-                      {addressPermissions.isUpdate && (
-                        <MenuItem
-                          disabled={selectedRecords.length === 0}
-                          onClick={() => {
-                            if (selectedRecords.some((d) => d.isUpdate === false)) {
-                              closeActions();
-                              setShowUpdateWarningConfirmBox(true)
-                            } else {
-                              closeActions();
-                              // if (selectedRecords.length) {
-                              //   let entities = []
-                              //   selectedRecords.map(current => {
-                              //     if (current?.entity) {
-                              //       if (current?.entityId) {
-                              //         entities.push(current?.entityId)
-                              //       }
-                              //       if (current?.restentity) {
-                              //         let restEntities = current?.restentity.map(o => o.optionValue)
-                              //         entities = [...entities, ...restEntities]
-                              //       }
-                              //     }
-                              //   })
-                              //   setEntities([...entities])
-                              // }
-                              // setShowEntityDialog(true)
-                            }
-                          }}
-                        >
-                          Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
-                        </MenuItem>
-                      )}
-                    </Menu>
-                </Grid>
+                      </Menu>{' '}
+                    </>
+                  )}
+                </div>
               </Box>
             </Grid>
           </Grid>
         </div>
 
-        {
-          Object.keys(frameWorkComponent).length > 0 ?
-            isMobile ? <CustomSwipableList
+        {Object.keys(frameWorkComponent).length > 0 ? (
+          isMobile ? (
+            <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions.address}
-              primaryField={columns?.find(d => d.field)}
+              primaryField={columns?.find((d) => d.field)}
               onClick={(data) => {
-                history.push(`${routes.warehouseDetail.path}/${data._id}`)
+                history.push(`${routes.warehouseDetail.path}/${data._id}`);
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.warehouseDetail.path}/${data._id}?openEdit=true`)
+                history.push(`${routes.address.path}/${data._id}?openEdit=true`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {
@@ -512,22 +453,16 @@ const Address = () => {
               rowCount={rowCount}
               page={page}
               loading={loading}
-              additionalDetails={[
-
-              ]}
-              chips={[
-                {
-                  label: "Storage Type",
-                  field: "storageType",
-                },
-
-              ]}
+              additionalDetails={[]}
+              chips={[]}
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={false}
               onClone={() => { }}
-              renderedFrom={"address"}
-            /> : <CustomAgGrid
+              renderedFrom={'address'}
+            />
+          ) : (
+            <CustomAgGrid
               columns={columns}
               dataRows={dataRows}
               frameworkComponents={frameWorkComponent}
@@ -537,19 +472,21 @@ const Address = () => {
               limit={limit}
               pageSizes={pageSizes}
               page={page}
-              actionWidth={150}
+              actionWidth={110}
               loading={loading}
               renderedFrom="address"
               refreshGrid={fetchAddresses}
-            /> : null}
+            />
+          )
+        ) : null}
 
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes.warehouse.title.toLowerCase()} ${deleteRecord ? deleteRecord?._id ? deleteRecord?.addressName : "" : ""}?`}
+            message={`Are you sure you want to delete Address ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.addressName : '') : ''}?`}
             onClose={() => {
               setDeleteRecord(null);
-              setShowDeleteConfirmBox(false)
+              setShowDeleteConfirmBox(false);
             }}
             onOk={handleDelete}
           />
@@ -557,11 +494,13 @@ const Address = () => {
 
         {open?.open && (
           <ManageAddressDialog
-            // addressResource={addressResource}
+            addressData={addressResource}
+            isEdit={open?.edit}
+            title={open.title}
             open={open?.open}
-            close={() => setOpen({ open: false, isClone: false })}
+            close={() => setOpen({ title: '', open: false, edit: false, isClone: false })}
             onSuccess={() => {
-              setOpen({ open: false, isClone: false });
+              setOpen({ title: '', open: false, edit: false, isClone: false });
               fetchAddresses();
             }}
             isClone={open?.isClone}
@@ -574,20 +513,6 @@ const Address = () => {
             onClose={() => setShowUpdateWarningConfirmBox(false)}
           />
         ) : null}
-        {/* {
-          showEntityDialog ?
-            <EntitySelectionsDialog
-              open={showEntityDialog}
-              resource={sidebarResource.warehouse}
-              resourceIds={selectedRecords.length ? selectedRecords.map(o => o._id) : [addressId]}
-              onClose={() => {
-                setShowEntityDialog(false)
-                setAddressId("")
-              }}
-              onSuccess={fetchAddresses}
-              entities={entities}
-            /> : null
-        } */}
       </CustomContainer>
     </Fragment>
   );

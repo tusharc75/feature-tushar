@@ -22,7 +22,7 @@ import moment from "moment";
 import { useData } from "../../StateProvider/Provider";
 
 const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, productId = null, productCategory = null,
-    productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null, warehouseId = null
+    productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null, warehouseId = null, currencyDisable = false
     , deliveryDateMax = null }) => {
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
@@ -471,7 +471,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                     : <FormTypes
                                                                                         isNew={Boolean(purchaseOrderId)}
                                                                                         {...field}
-                                                                                        disabled={(Boolean(purchaseOrderId) && field.disableOnEdit && !isClone) || field.fieldName === "purchaseOrderNumber" || field.fieldName === "status"}
+                                                                                        disabled={(Boolean(purchaseOrderId) && field.disableOnEdit && !isClone) || field.fieldName === "purchaseOrderNumber" || field.fieldName === "status" || (field.fieldName === "currency" && currencyDisable)}
                                                                                         values={values}
                                                                                         errors={errors}
                                                                                         touched={touched}

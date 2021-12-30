@@ -293,7 +293,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         page={page}
                         allowAction={false}
                         loading={loading}
-                        allowSelection={false}
+                        allowSelection={true}
                         isClientSideGrid={true}
                         renderedFrom="purchaseOrderDetailsPageIssuePO"
                         onCellValueChanged={(row) => {

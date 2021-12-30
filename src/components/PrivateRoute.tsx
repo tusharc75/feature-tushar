@@ -63,7 +63,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'delivery-ticket',
         'entity',
         'logout',
-        'address'
+        "address"
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
