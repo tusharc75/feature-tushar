@@ -81,8 +81,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   }, []);
 
   const fetchRecords = async () => {
-
-
     try {
       setNextStep(false)
       if (gridApi) {
@@ -206,7 +204,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       <Button
         onClick={() => {
           setDownlodingFile(true);
-
           axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
             .then(({ data }) => {
               axiosInstance()
@@ -234,16 +231,15 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         color="primary"
         type="button"
         size="small"
-        disabled={downlodingFile}
+        disabled={downlodingFile || isOffline}
         startIcon={<AiFillFilePdf />}
       >
         {downlodingFile ? "Please wait..." : "Preview"}
       </Button>
       <Box mx={1} />
-
       <Button variant="outlined" color="primary" aria-controls="simple-menu"
         aria-haspopup="true"
-        disabled={selectedRecords.length === 0}
+        disabled={selectedRecords.length === 0 || isOffline}
         size="small"
         onClick={handleClick}
         endIcon={<ArrowDropDownIcon />}>
@@ -278,7 +274,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           setStatusToUpdate({ open: true, isUpdating: false, status: "Lost", message: "" })
         }}>Lost</MenuItem>
       </Menu>
-
       <Box mx={1} />
       <IconButton
         disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || ["Lost"].includes(f.status)))}

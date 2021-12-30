@@ -112,7 +112,7 @@ const MapView = (props: MapViewProps) => {
                         text: asset.count.toString(),
                         fontWeight: 'bold',
                         color: 'white',
-                        fontSize: '18px'
+                        fontSize: '14px'
                       }}
                       onClick={() => fetchLocationData(asset._id, asset)}
                       position={new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude)}

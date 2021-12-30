@@ -70,6 +70,7 @@ export const quoteStepColors = {
   "__default__": { backgroundColor: "#023e7d", color: "#fff" }
 }
 
+
 export const roleTypes = [
   {
     key: 'Global',
@@ -358,6 +359,11 @@ export const product = {
   api: '/product',
   route: '/product',
   permission: 'product'
+};
+
+export const eProduct = {
+  api: '/e-product',
+  route: '/e-product',
 };
 
 export const productInventory = {
@@ -850,9 +856,9 @@ export const simplifyValues = (obj, fields) => {
   return newObj;
 };
 
-export const review = {
-  reviewsApi: '/product/review'
-};
+// export const review = {
+//   reviewsApi: '/product/review'
+// };
 
 export const getUniqueCurrencies = () => {
   return uniqBy(currencies, 'currencyCode');
@@ -1321,7 +1327,6 @@ export function treeToFlatArray(array, childrenProperty) {
   return result;
 }
 
-
 export const arrayToDropwdownOption = (array) => {
   const option: any = []
   array?.forEach((element, index) => {
@@ -1333,3 +1338,19 @@ export const arrayToDropwdownOption = (array) => {
   });
   return option;
 }
+
+export const INVENTORY_STATUS = {
+  customer: 'With Customer',
+  supplier: 'With Supplier',
+  reserved: 'Reserved',
+  inSale: 'In Sale',
+  inUse: 'In-Use',
+  indTransit: 'In-Transit',
+  underRevives: 'Under Review',
+  repair: 'Repair',
+  available: 'Available',
+  readyToShip: 'Ready to ship',
+  new: 'New',
+  scrap: 'Scrap',
+  lost: 'Lost',
+};

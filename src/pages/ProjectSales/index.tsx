@@ -24,6 +24,8 @@ import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { useHistory } from 'react-router-dom';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
+import { StayPrimaryPortraitSharp } from "@material-ui/icons";
+import { BiDollar } from "react-icons/bi";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -554,11 +556,31 @@ const ProjectSales: FC = () => {
                   rowCount={rowCount}
                   page={page}
                   loading={loading}
+                  additionalDetails={[
+
+                    { 
+                      icon: <BiDollar size={18} />,
+                      field:"amount"
+                    }
+                  ]}
                   chips={[
                     {
-                      label: "Status: ",
-                      field: "status",
-                    }
+                      label: "Award Date : ",
+                      field: "awardDate",
+
+                    },
+                  {
+                    label:"Market:",
+                    field:"marketSegment",
+                  },
+                  {
+                    label:"Sub-Market:",
+                    field:"subMarketSegment"
+                  },
+                  {
+                    label:"Scope:",
+                    field:"scope"
+                  },
                   ]}
                   onCreate={false}
                   showClone={true}
@@ -566,7 +588,8 @@ const ProjectSales: FC = () => {
                     setIsOpen({ open: true, isClone: true, idToClone: data._id })
                    }}
                   renderedFrom={routes.projectSales.title}
-                /> :
+                />
+                 :
                 <CustomAgGrid
                   columns={columns}
                   dataRows={dataRows}

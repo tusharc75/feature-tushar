@@ -2,6 +2,53 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.30.0](https://github.com/vebholic/oms_frontend/compare/v2.29.0...v2.30.0) (2021-12-30)
+
+
+### Features
+
+* - e-commerce changes done ([1768f2c](https://github.com/vebholic/oms_frontend/commit/1768f2cf954135e2caa9aa124d8916f2274ba974))
+* **address listing:** address listing ([45c8679](https://github.com/vebholic/oms_frontend/commit/45c867952a6044e813661175998ee7538ac71be5))
+* **dashboard:** add limit filter ([3d88bec](https://github.com/vebholic/oms_frontend/commit/3d88bec1e39d1ebf5f4bc8bfe043b11fe7aeba1f))
+* delivery ticket ([bd1f659](https://github.com/vebholic/oms_frontend/commit/bd1f6590978b854235a20647ff3d8ad02e029f22))
+* delivery ticket offline ([1cf96cc](https://github.com/vebholic/oms_frontend/commit/1cf96cc55912818d5f544a7655c5cff5b0f6220c))
+* download in attachment ([f7a9b69](https://github.com/vebholic/oms_frontend/commit/f7a9b69864c9f750555cfea0628eb6102da418b4))
+* **feature/avisekh:** feature/avisekh ([a0a7eb3](https://github.com/vebholic/oms_frontend/commit/a0a7eb397cfdb6910d3f1887ad470521347b23ca))
+
+
+### Bug Fixes
+
+* **address:** address resource fix ([05c829c](https://github.com/vebholic/oms_frontend/commit/05c829c39c5100b8d5d9cd8d751c8a7c3c4edff2))
+* bug fix ([2e330f2](https://github.com/vebholic/oms_frontend/commit/2e330f2078454c63aa01109cc4260febe25db926))
+* change label to assign plant in product master PO-708 ([9fde031](https://github.com/vebholic/oms_frontend/commit/9fde0313126bc8956383e0ef771d209d8e9cc615))
+* oMS-732 ([dc29b7d](https://github.com/vebholic/oms_frontend/commit/dc29b7d6f6567ab2aeb2ff3ac32110ac73b4cbd0))
+* pO changes ([58a1f30](https://github.com/vebholic/oms_frontend/commit/58a1f306a008ddfd4e98b04591d0e7fe80c1607f))
+* remove console ([911f051](https://github.com/vebholic/oms_frontend/commit/911f05167605343983b73b3b4dba0674096b2788))
+
+## [2.29.0](https://github.com/vebholic/oms_frontend/compare/v2.28.0...v2.29.0) (2021-12-29)
+
+
+### Features
+
+* **dashboard:** changes for in charts ([212e93d](https://github.com/vebholic/oms_frontend/commit/212e93df8b1567b4d10e21c5ebedc29cbeb59a02))
+* renal offline ([5e90640](https://github.com/vebholic/oms_frontend/commit/5e90640a5ac34d2f9b02475ec2f8a98b8ba53b12))
+* rental offline ([87a8f29](https://github.com/vebholic/oms_frontend/commit/87a8f2912a92abedac45b2bc6b8e7a211ec240ba))
+* version status grid change ([bd4e327](https://github.com/vebholic/oms_frontend/commit/bd4e3275839998e0611c316f189a95be937c9c43))
+
+
+### Bug Fixes
+
+* **account bugs:** account bugs ([b878252](https://github.com/vebholic/oms_frontend/commit/b8782526c90f7fdb4bdf4a323d4dcde7e3f95668))
+* **accounts:** multiple approive bug fix ([4c39c4c](https://github.com/vebholic/oms_frontend/commit/4c39c4cd2c8fe6cff8519f5e532d971e37cb1334))
+* budget fix ([e913ed7](https://github.com/vebholic/oms_frontend/commit/e913ed763f89c5d7af34d8ccc47a23399b5f28d4))
+* bug fix ([74f439f](https://github.com/vebholic/oms_frontend/commit/74f439f351c45013c49f91a39185c2a27a348a5b))
+* **dashboard:** chart fix ([c2c569b](https://github.com/vebholic/oms_frontend/commit/c2c569bf4b6176192f958431817b0dd98eae9690))
+* **dashboard:** entity change fix ([686a0af](https://github.com/vebholic/oms_frontend/commit/686a0af0689cf8343085692923b1eeeceff1cd5d))
+* **dashboard:** font size fix ([48306eb](https://github.com/vebholic/oms_frontend/commit/48306eb33203e8760941b6c223b5451f5951e2af))
+* **pdftemplate:** entity variable in options ([0502e4f](https://github.com/vebholic/oms_frontend/commit/0502e4ff46f2e6af87700715eb7a0fd92c529661))
+* purchase order reciving asset step color ([814c61a](https://github.com/vebholic/oms_frontend/commit/814c61ae7b259046826d5636d87de23605597b3f))
+* viersion grid changes ([badc65e](https://github.com/vebholic/oms_frontend/commit/badc65e71570bd994874a87fae1988b287f6ec01))
+
 ## [2.28.0](https://github.com/vebholic/oms_frontend/compare/v2.27.2...v2.28.0) (2021-12-28)
 
 

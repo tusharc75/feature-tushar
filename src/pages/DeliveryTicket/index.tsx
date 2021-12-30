@@ -152,8 +152,7 @@ const DeliveryTicket = () => {
     if (renderCount > 0) {
       fetchDeliveryTicket();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, selectedEntity]);
-
+  }, [page, limit, filters, sorting, selectedEntity, isOffline]);
 
   const ActionsRenderer = (params) => (
     <>
@@ -215,8 +214,6 @@ const DeliveryTicket = () => {
     }
     return deepFilter;
   };
-
-
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
