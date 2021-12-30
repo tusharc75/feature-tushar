@@ -102,6 +102,7 @@ import PurchaseOrderDetailsPage from './pages/PurchaseOrder/PurchaseOrderDetails
 import { entity } from './constants/helpers';
 import TransferAsset from './pages/TransferAssets/Index';
 import TransferAssetDetailPage from './pages/TransferAssets/TransferAssetDetailPage';
+import Address from "./pages/Address";
 import Logout from './pages/Auth/Logout';
 
 function App() {
@@ -575,6 +576,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.transferAssetDetail.path}/:id`}>
               <TransferAssetDetailPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.address.path}>
+              <Address />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
