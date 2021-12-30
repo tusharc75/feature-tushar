@@ -37,6 +37,7 @@ import Calender from './pages/Activity/Calendar';
 import PasswordSetup from './pages/Auth/PasswordSetup';
 import ForgetPassword from './pages/Auth/ForgetPassword';
 import ProductCategory from './pages/ProductCategory';
+import ProductCategoryDetailPage from "./pages/ProductCategory/ProductCategoryDetailPage"
 import ProductTemplate from './pages/ProductTemplate';
 import CreateProductTemplate from './pages/ProductTemplate/CreateProductTemplate';
 import User from './pages/User';
@@ -416,6 +417,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.productCategory.path}>
               <ProductCategory />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.productCategoryDetail.path + '/:id'}>
+              <ProductCategoryDetailPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.productTemplate.path}>
               <ProductTemplate />
