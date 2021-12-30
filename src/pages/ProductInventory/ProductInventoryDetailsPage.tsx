@@ -130,6 +130,10 @@ const ProductInventoryDetailsPage = () => {
                 <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
                   {params.value}
                 </Link>
+                :  params.data.type.lowerCase().includes("purchase") ? 
+                <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
+                {params.value}
+              </Link>
                 : params.value
       ) : (
         <NoDataCell />
