@@ -41,11 +41,11 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   lineAddStyle: {
-    width: "2px",
-    backgroundColor: "white",
-    paddingRight: "5px",
-    margin: "5px 7px",
-    borderRadius: "2px"
+    // width: "2px",
+    // backgroundColor: "white",
+    // paddingRight: "5px",
+    // margin: "5px 7px",
+    // borderRadius: "2px"
   },
   labelColor: {
     color: "#fff",

@@ -1,10 +1,10 @@
-import { useEffect, useState, Fragment } from 'react';
+import { useEffect, useState, Fragment, useContext } from 'react';
 import ManageQuoteDialog from '../../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
 import { Button, Box, Grid } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import { currencyCodeToSymbol } from '../../../constants/helpers';
 import Typography from '@material-ui/core/Typography';
 import { BsFillInfoCircleFill } from 'react-icons/bs';
@@ -19,6 +19,9 @@ import RemoveCircleOutlineOutlinedIcon from '@material-ui/icons/RemoveCircleOutl
 import Carousel from "react-material-ui-carousel";
 
 import styles from './my-cart.module.scss';
+import PlusMinusTextboxComponent from '../../PlusMinusTextboxComponent/PlusMinusTextboxComponent';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -55,7 +58,9 @@ function MyOwnCart() {
   const {
     state: { user }
   }: any = useData();
+
   const history = useHistory();
+  const toastConfig = useContext(CustomToastContext)
   const [totalCount, setTotalCount] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [checkoutLabel, setCheckoutLabel] = useState('Checkout');
@@ -63,6 +68,7 @@ function MyOwnCart() {
   const [cart, setCart] = useState([]);
   const [cartProducts, setCartProducts] = useState([]);
   const [cartProductsLoading, setCartProductsLoading] = useState(false);
+  const [deleteProductFromCartConfirmationDialog, setDeleteProductFromCartConfirmationDialog] = useState({ show: false, okBtnLoading: false, recordToRemove: null })
 
   const deleteCartItem = (cartId) => {
     if (cartId) {
@@ -97,7 +103,7 @@ function MyOwnCart() {
             tempTotalPrice = (d.product?.mrp ? parseInt(d.product?.mrp) : 0) + tempTotalPrice;
           });
           setCart(data);
-          setCartProducts(data.map((d) => { return { ...d.product, quantity: d.quantity } }));
+          setCartProducts(data.map((d) => { return { ...d.product, cartId: d.id, productId: d.productId, quantity: d.quantity } }));
           setTotalPrice(tempTotalPrice);
           setTotalCount(data.length);
         }
@@ -105,6 +111,7 @@ function MyOwnCart() {
           setCheckoutLabel('Create Quote');
         }
         setCartProductsLoading(false);
+        setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false, recordToRemove: null })
       });
   };
 
@@ -152,7 +159,7 @@ function MyOwnCart() {
                   return (
                     <div key={item.id} className={styles.checkout_items}>
                       <div className={styles.card}>
-                        <div className={styles.products_image_layout}>
+                        <div className={`${styles.products_image_layout} d-flex justify-content-center`}>
 
                           {item.sliderImage && item.sliderImage.length > 0 ? (
                             <Carousel
@@ -178,7 +185,7 @@ function MyOwnCart() {
                               ))}
                             </Carousel>
                           ) : (
-                            <BsImage className={styles.product_no_image} />
+                            <BsImage className={styles.no_image} />
                           )}
 
                         </div>
@@ -186,7 +193,7 @@ function MyOwnCart() {
                           <div className={styles.card_body_layout}>
                             <div className={styles.card_product_name_and_price}>
                               <div className={styles.card_seller}>
-                                <strong> {item.productName}</strong>
+                                <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}`}>{item.productName}</Link>
                               </div>
                               <div className={styles.card_price}>
                                 {/* Price:{'  '} */}
@@ -204,7 +211,25 @@ function MyOwnCart() {
                             </div>
                           </div>
 
-                          <Grid container spacing={1} alignItems="flex-end">
+                          <PlusMinusTextboxComponent
+                            inputTextLabel="Quantity"
+                            value={item.quantity}
+                            isRequired={true}
+                            onChange={(value) => {
+                              let items = [...cartProducts];
+                              items[index].quantity = parseInt(items[index].quantity) - 1;
+                              setCartProducts([...items]);
+
+                              axiosInstance().put(`/user/cart/${item.cartId}`, { quantity: value?.toString() }).then(() => {
+
+                              }).catch((error) => {
+                                toastConfig.setToastConfig(error);
+                                dispatch({ type: SET_CART, payload: [...items] });
+                              })
+                            }}
+                          />
+
+                          {/* <Grid container spacing={1} alignItems="flex-end">
                             <Grid item>
                               <IconButton onClick={() => {
                                 let items = [...cartProducts];
@@ -230,14 +255,14 @@ function MyOwnCart() {
                                 <AddCircleOutlineOutlinedIcon />
                               </IconButton>
                             </Grid>
-                          </Grid>
+                          </Grid> */}
 
                           <div className={styles.card_controls}>
                             <Button
                               variant="outlined"
                               color="primary"
                               onClick={() => {
-                                onDeleteCartItem(item);
+                                setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, show: true, recordToRemove: item } })
                               }}
                               className={styles.remove_product}
                             >
@@ -341,8 +366,25 @@ function MyOwnCart() {
             onHandleSubmit={handleCreateQuote}
           />
         )}
+
+        {
+          deleteProductFromCartConfirmationDialog.show ? (
+            <ConfirmationDialog
+              open={true}
+              message={`You want to remove this product from cart ?`}
+              onClose={() =>
+                setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false, recordToRemove: null })
+              }
+              okBtnLoading={deleteProductFromCartConfirmationDialog.okBtnLoading}
+              onOk={() => {
+                setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, okBtnLoading: true } })
+                onDeleteCartItem(deleteProductFromCartConfirmationDialog.recordToRemove)
+              }}
+            />
+          ) : null
+        }
       </Box>
-    </Fragment>
+    </Fragment >
   );
 }
 

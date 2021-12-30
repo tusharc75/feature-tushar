@@ -28,21 +28,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
-import RemoveCircleOutlineOutlinedIcon from '@material-ui/icons/RemoveCircleOutlineOutlined';
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import NumberFormat from 'react-number-format';
-
-interface NumberFormatCustomProps {
-  inputRef: (instance: NumberFormat | null) => void;
-  onChange: (event: { target: { name: string; value: string } }) => void;
-  name: string;
-}
-
-const CustomFormat = (props: NumberFormatCustomProps | any) => {
-  const { inputRef, onChange, ...other } = props;
-  return <NumberFormat {...other} getInputRef={inputRef} isNumericString />;
-};
+import PlusMinusTextboxComponent from "../../components/PlusMinusTextboxComponent/PlusMinusTextboxComponent";
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -69,7 +56,7 @@ export default function ProductDetails() {
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, cartItems }, dispatch }: any = useData();
   const [wishlist, setWishlist] = useState({ loading: false, disabled: false });
-  const [indexOfProductInCart, setIndexOfProductInCart] = useState(null);
+  const [indexOfProductInCart, setIndexOfProductInCart] = useState(-1);
   const [rateCurrency, setRateCurrency] = useState({ rate: "", mrp: "", rateWithCurrency: "", unit: "", pricingMethod: "", isRateMrpSame: false })
   const [deleteProductFromCartConfirmationDialog, setDeleteProductFromCartConfirmationDialog] = useState({ show: false, okBtnLoading: false })
 
@@ -77,15 +64,6 @@ export default function ProductDetails() {
 
   const history = useHistory();
   let { id } = useParams();
-
-  const inputNumberRef = useRef(null);
-
-  useEffect(() => {
-    const ignoreScroll = (e) => {
-      e.preventDefault();
-    };
-    inputNumberRef.current && inputNumberRef.current.addEventListener('wheel', ignoreScroll);
-  }, [inputNumberRef]);
 
   useEffect(() => {
     fetchCart()
@@ -157,7 +135,7 @@ export default function ProductDetails() {
       .get(`/user/cart`).then(({ data: { data } }) => {
 
         if (data) {
-          dispatch({ type: SET_CART, payload: [...data] });
+          dispatch({ type: SET_CART, payload: [...data] });          
           setIndexOfProductInCart(data.findIndex(({ productId }) => productId === id));
           if (addToCartBtnLoading) setAddToCartBtnLoading(false)
 
@@ -184,6 +162,9 @@ export default function ProductDetails() {
         }]
       }).then(({ data }) => {
         fetchCart()
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+        setAddToCartBtnLoading(false)
       })
   }
 
@@ -479,104 +460,58 @@ export default function ProductDetails() {
 
                 <div className="d-flex gap-2" >
                   {
-                    indexOfProductInCart > -1 && cartItems.length > 0 && cartItems.some(s => s.productId === id) ? <Grid container spacing={1} alignItems="flex-end">
-                      <Grid item>
-                        <IconButton onClick={() => {
+                    indexOfProductInCart > -1 && cartItems.length > 0 && cartItems.some(s => s.productId === productDetails?._id)
+                      ? <PlusMinusTextboxComponent
+                        inputTextLabel="Quantity"
+                        value={indexOfProductInCart > -1 ? cartItems[indexOfProductInCart]?.quantity?.toString() ?? "1" : "1"}
+                        isRequired={true}
+                        onChange={(value) => {
                           let items = [...cartItems];
                           const indexOfProduct = items.findIndex(s => s.productId === id);
 
-                          if ((parseInt(items[indexOfProduct].quantity) - 1) === 0) {
-                            setDeleteProductFromCartConfirmationDialog({ show: true, okBtnLoading: false })
-                          } else {
-                            items[indexOfProduct].quantity = parseInt(items[indexOfProduct].quantity) - 1;
-                            dispatch({ type: SET_CART, payload: [...items] });
-
-                            axiosInstance().put(`/user/cart/${items[indexOfProduct].id}`, { quantity: items[indexOfProduct].quantity?.toString() }).then(() => {
-
-                            }).catch((error) => {
-                              toastConfig.setToastConfig(error);
-
-                              items[indexOfProduct].quantity = parseInt(items[indexOfProduct].quantity) - 1;
-                              dispatch({ type: SET_CART, payload: [...items] });
-                            })
-                          }
-
-                        }} size="small">
-                          <RemoveCircleOutlineOutlinedIcon />
-                        </IconButton>
-                      </Grid>
-                      <Grid item>
-                        <TextField
-                          id="quantity"
-                          name="quantity"
-                          label="Quantity"
-                          ref={inputNumberRef}
-                          value={indexOfProductInCart ? cartItems[indexOfProductInCart]?.quantity?.toString() ?? "1" : "1"}
-                          InputProps={{
-                            inputComponent: CustomFormat as any,
-                            inputProps: {
-                              allowNegative: false,
-                              min: 1,
-                              onValueChange: (values) => {
-                                let items = [...cartItems];
-                                const indexOfProduct = items.findIndex(s => s.productId === id);
-                                const oldValue = items[indexOfProduct].quantity;
-                                items[indexOfProduct].quantity = values.value;
-
-                                dispatch({ type: SET_CART, payload: [...items] });
-
-                                axiosInstance().put(`/user/cart/${items[indexOfProduct].id}`, { quantity: items[indexOfProduct].quantity?.toString() }).then(() => {
-
-                                }).catch((error) => {
-                                  toastConfig.setToastConfig(error);
-
-                                  items[indexOfProduct].quantity = oldValue;
-                                  dispatch({ type: SET_CART, payload: [...items] });
-                                })
-                              },
-                            }
-                          }} />
-                      </Grid>
-                      <Grid item>
-                        <IconButton onClick={() => {
-                          let items = [...cartItems];
-                          const indexOfProduct = items.findIndex(s => s.productId === id);
-                          items[indexOfProduct].quantity = parseInt(items[indexOfProduct].quantity) + 1;
-
-                          dispatch({ type: SET_CART, payload: [...items] });
-
-                          axiosInstance().put(`/user/cart/${items[indexOfProduct].id}`, { quantity: items[indexOfProduct].quantity?.toString() }).then(() => {
+                          axiosInstance().put(`/user/cart/${items[indexOfProduct].id}`, { quantity: value?.toString() }).then(() => {
 
                           }).catch((error) => {
                             toastConfig.setToastConfig(error);
-
-                            items[indexOfProduct].quantity = parseInt(items[indexOfProduct].quantity) - 1;
                             dispatch({ type: SET_CART, payload: [...items] });
                           })
-
-                        }} size="small">
-                          <AddCircleOutlineOutlinedIcon />
-                        </IconButton>
-                      </Grid>
-                    </Grid> : <CustomButton
-                      type="button"
-                      className="mt-2"
-                      color="primary"
-                      variant="outlined"
-                      disabled={addToCartBtnLoading}
-                      loading={addToCartBtnLoading}
-                      startIcon={addToCartBtnLoading ? null : <AddShoppingCartIcon />}
-                      onClick={() => {
-                        setAddToCartBtnLoading(true)
-                        onAddToCartItem(productDetails)
-                      }}
-                    >
-                      Add to cart
-                    </CustomButton>
+                        }}
+                      />
+                      : <CustomButton
+                        type="button"
+                        className="mt-2"
+                        color="primary"
+                        variant="outlined"
+                        disabled={addToCartBtnLoading}
+                        loading={addToCartBtnLoading}
+                        startIcon={addToCartBtnLoading ? null : <AddShoppingCartIcon />}
+                        onClick={() => {
+                          setAddToCartBtnLoading(true)
+                          onAddToCartItem(productDetails)
+                        }}
+                      >
+                        Add to cart
+                      </CustomButton>
                   }
                 </div>
 
-                <div className={'footer' && styles.button_layout}>
+                <div className={`${styles.button_layout} footer d-flex gap-2`}>
+
+                  {
+                    indexOfProductInCart !== -1 && <CustomButton
+                      type="button"
+                      color="primary"
+                      variant="outlined"
+                      disabled={deleteProductFromCartConfirmationDialog.okBtnLoading}
+                      loading={deleteProductFromCartConfirmationDialog.okBtnLoading}
+                      onClick={() => {
+                        setDeleteProductFromCartConfirmationDialog({ show: true, okBtnLoading: false })
+                      }}
+                    >
+                      Remove from cart
+                    </CustomButton>
+                  }
+
                   <Button
                     variant="contained"
                     color="primary"
@@ -622,126 +557,43 @@ export default function ProductDetails() {
 
       </Box>
 
-      {deleteProductFromCartConfirmationDialog.show ? (
-        <ConfirmationDialog
-          open={true}
-          message={`You want to remove this product from cart ?`}
-          onClose={() =>
-            setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false })
-          }
-          okBtnLoading={deleteProductFromCartConfirmationDialog.okBtnLoading}
-          onOk={() => {
-            setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, okBtnLoading: true } })
-
-            let items = [...cartItems];
-            const indexOfProduct = items.findIndex(s => s.productId === id);
-
-            const productsToUpdate = items.filter(s => s.productId !== id);
-            dispatch({ type: SET_CART, payload: [...productsToUpdate] });
-
-            axiosInstance().delete(`/user/cart/${items[indexOfProduct].id}`).then(({ data }) => {
+      {
+        deleteProductFromCartConfirmationDialog.show ? (
+          <ConfirmationDialog
+            open={true}
+            message={`You want to remove this product from cart ?`}
+            onClose={() =>
               setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false })
+            }
+            okBtnLoading={deleteProductFromCartConfirmationDialog.okBtnLoading}
+            onOk={() => {
+              setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, okBtnLoading: true } })
 
-              toastConfig.setToastConfig({
-                open: true,
-                type: "success",
-                message: data.message,
-              });
-            }).catch((error) => {
-              toastConfig.setToastConfig(error);
-              dispatch({ type: SET_CART, payload: [...items] });
-            })
-          }}
-        />
-      ) : null}
+              let items = [...cartItems];
+              const indexOfProduct = items.findIndex(s => s.productId === id);
+
+              const productsToUpdate = items.filter(s => s.productId !== id);
+              dispatch({ type: SET_CART, payload: [...productsToUpdate] });
+
+              axiosInstance().delete(`/user/cart/${items[indexOfProduct].id}`).then(({ data }) => {
+                setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false })
+                setAddToCartBtnLoading(false)
+                setIndexOfProductInCart(-1)
+
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: "success",
+                  message: data.message,
+                });
+              }).catch((error) => {
+                toastConfig.setToastConfig(error);
+                dispatch({ type: SET_CART, payload: [...items] });
+              })
+            }}
+          />
+        ) : null
+      }
 
     </Fragment >
   );
 }
-
-// return (
-//     <Layout>
-//         <>
-//             {
-//                 productDetails ? <div>
-//                     <div>
-//                         <h2>Home {`>`} Product {`>`} Item </h2>
-//                         <div className={styles.grid_container}>
-//                             <div className={styles.left_side}>
-//                                 <div className="productImage">
-//                                     <img src={productDetails.productImage} alt={productDetails.productName} />
-//                                 </div>
-//                             </div>
-//                             <div className={styles.right_side}>
-//                                 <div className={styles.name}>{productDetails.productName}</div>
-//                                 <div className={styles.availability}>Availability: <span>{productDetails?.qty > 0 ? "In Stock" : "Out of Stock"}</span></div>
-//                                 <div className={styles.seller}>Sold By: {productDetails?.brand?.optionLabel}</div>
-//                                 <hr />
-//                                 <div className={styles.description}>
-//                                     <div className={styles.listItem}>
-//                                         <ul>
-//                                             <li>MFG Value - {productDetails?.mfg}</li>
-//                                             <li>Product Number - {productDetails?.productNumber}</li>
-//                                             <li>{productDetails?.description}</li>
-//                                             <li>Measuring Unit - {productDetails?.unit}</li>
-//                                         </ul>
-//                                     </div>
-//                                     <div className={styles.price}>{calculateNetPrice(parseInt(productDetails.mrp), productDetails.discount)}<span className={styles.originalPrice}>{productDetails.mrp} {productDetails.currency}</span></div>
-//                                     <h4>You Save: <span>{amountOfDiscount(parseInt(productDetails.mrp), productDetails.discount)}</span> </h4>
-//                                     <div className={styles.rating}>
-//                                         <Rating name="half-rating-read" defaultValue={2.5} precision={0.5} value={productDetails.rating} readOnly size="small" />
-//                                         <span className={styles.ml_2}>{productDetails.rating}</span>
-//                                     </div>
-//                                     <div className={styles.buttons}>
-//                                         <div>
-//                                             <Button
-//                                                 variant="outlined"
-//                                                 color="primary"
-//                                                 size="small"
-//                                                 className="mr-2"
-//                                             >
-//                                                 Add to Cart
-//                                             </Button>
-//                                             <Button
-//                                                 variant="outlined"
-//                                                 color="primary"
-//                                                 size="small"
-//                                             >
-//                                                 Check Out
-//                                             </Button>
-//                                         </div>
-//                                         <div>
-//                                             <Button
-//                                                 variant="outlined"
-//                                                 color="primary"
-//                                                 size="small"
-//                                                 className="mr-2"
-//                                             >
-//                                                 Add to Configure
-//                                             </Button>
-//                                             <Button
-//                                                 variant="outlined"
-//                                                 color="primary"
-//                                                 size="small"
-//                                                 className="mr-2"
-//                                             >
-//                                                 Add to Planner
-//                                             </Button>
-//                                         </div>
-
-//                                     </div>
-//                                 </div>
-//                             </div>
-
-//                         </div>
-//                     </div>
-//                     {/* <div className="a-divider a-divider-section"><div className={styles.a_divider_inner}></div></div>
-//                     <FrequentlyBought /> */}
-//                     <div className="a-divider a-divider-section"><div className={styles.a_divider_inner}></div></div>
-//                     <SimilarItems similarItems={similarItems} />
-//                 </div> : <span>Loading...</span>
-//             }
-//         </>
-
-//     </Layout>
-// )
