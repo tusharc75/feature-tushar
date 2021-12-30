@@ -295,7 +295,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
       {
         repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
         <IconButton
-          disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("isDelivered")) || selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")) || selectedRecords.some(f => f.repaired === true)}
+          disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("isDelivered") && f.isDelivered === true) || selectedRecords.some(f => f.repaired === true)}
           onClick={() => {
             setShowRemoveAssetFromLoadingTicketDialog(true)
           }}

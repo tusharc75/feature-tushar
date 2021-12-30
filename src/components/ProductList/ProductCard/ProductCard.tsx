@@ -1,13 +1,21 @@
+import { useContext, useState } from "react";
 import PropTypes from "prop-types";
-import { Box, Avatar, makeStyles } from "@material-ui/core";
+import { Box, Avatar, makeStyles, IconButton } from "@material-ui/core";
 import { Rating } from "@material-ui/lab";
 import styles from './product-card.module.scss'
 import { useHistory } from "react-router-dom";
-import { formatAmountWithCurrency } from "../../../constants/helpers";
+import { eProduct, formatAmountWithCurrency } from "../../../constants/helpers";
 import { BsImage } from 'react-icons/bs';
 import { MdAddShoppingCart } from 'react-icons/md';
 import routes from "../../Helpers/Routes";
 import Carousel from "react-material-ui-carousel";
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
+import { WishlistContext } from "../../../StateProvider/WishlistContext/WishlistProvider";
+import { id } from "date-fns/locale";
+import axiosInstance from "../../../axios/axiosInstance";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import AutorenewIcon from '@material-ui/icons/Autorenew';
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -23,14 +31,10 @@ const useStyles = makeStyles(() => ({
 const ProductCard = (props: { product: any, onAddItem: any }) => {
   const { product, onAddItem } = props;
   const classes = useStyles();
-  const history = useHistory()
-
-  //  replace below images variable with the array of images of the product
-  const images = [
-    "https://images.unsplash.com/photo-1506467493604-25d7861a6703?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTF8fHxlbnwwfHx8fA%3D%3D&w=1000&q=80",
-    "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2016/10/colima_volcano/16186851-1-eng-GB/Colima_volcano.jpg",
-    "https://news.cornell.edu/sites/default/files/styles/full_size/public/2020-10/1012_nasa.jpg?itok=KJ3jzpto"
-  ]
+  const history = useHistory();
+  const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
+  const [disableWishlistButton, setDisableWishlistButton] = useState(false)
+  const toastConfig = useContext(CustomToastContext);
 
   return (
     <div className={styles.product_card}>
@@ -44,7 +48,68 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
             history.push(`${routes.eCommerceDetail.path}/${product._id}`);
           }}
         >{`${product.productName}, ${product.productCategory.optionLabel} `}</h4>
-        <Avatar className={styles.product_less}>-10%</Avatar>
+
+        {
+          wishlistState.wishlist.some(d => d._id === product._id) ? (
+            <IconButton
+              id="removeFromWishlist"
+              title="Remove from wishlist"
+              size="small"
+              aria-label="removeFromWishlist"
+              disabled={disableWishlistButton}
+              onClick={() => {
+                setDisableWishlistButton(true);
+
+                axiosInstance().put(`${eProduct.api}/wishlist/remove`, { productId: product._id }).then(({ data }) => {
+                  wishlistDispatch({ type: "REMOVE", payload: product._id })
+                  setDisableWishlistButton(false);
+
+                  toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: data.message,
+                  });
+
+                }).catch((error) => {
+                  toastConfig.setToastConfig(error);
+                  setDisableWishlistButton(false);
+                })
+              }}
+            >
+              {disableWishlistButton ? <AutorenewIcon className="rotate" /> : <FavoriteIcon />}
+            </IconButton>
+          ) : (
+            <IconButton
+              id="addToWishlist"
+              title="Add to wishlist"
+              size="small"
+              aria-label="addToWishlist"
+              disabled={disableWishlistButton}
+              onClick={() => {
+                setDisableWishlistButton(true);
+
+                axiosInstance().put(`${eProduct.api}/wishlist`, { productId: product._id }).then(({ data }) => {
+                  wishlistDispatch({ type: "ADD", payload: { _id: product._id } })
+                  setDisableWishlistButton(false);
+
+                  toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: data.message,
+                  });
+
+                }).catch((error) => {
+                  toastConfig.setToastConfig(error);
+                  setDisableWishlistButton(false);
+                })
+
+              }}
+            >
+              {disableWishlistButton ? <AutorenewIcon className="rotate" /> : <FavoriteBorderIcon />}
+            </IconButton>
+          )
+        }
+
       </div>
       <Box
         display="flex"
@@ -54,7 +119,7 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
       //   history.push(`${routes.eCommerceDetail.path}/${product._id}`);
       // }}
       >
-        {images
+        {product.sliderImage && product.sliderImage.length > 0
           ?
           <Carousel
             strictIndexing
@@ -72,7 +137,7 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
               }
             }}
           >
-            {images.map((image: any, i) => (
+            {product.sliderImage.map((image: any, i) => (
               <div key={i} className={classes.imageContainer}>
                 <img className={classes.img} src={image}
                   onClick={() => {
@@ -82,7 +147,9 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
               </div>
             ))}
           </Carousel>
-          : <BsImage className={`${styles.no_image} cursor-pointer`} />}
+          : <BsImage className={`${styles.no_image} cursor-pointer`} onClick={() => {
+            history.push(`${routes.eCommerceDetail.path}/${product._id}`);
+          }} />}
       </Box>
 
       <div className={styles.text}>

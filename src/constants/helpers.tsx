@@ -361,6 +361,11 @@ export const product = {
   permission: 'product'
 };
 
+export const eProduct = {
+  api: '/e-product',
+  route: '/e-product',
+};
+
 export const productInventory = {
   api: '/product-inventory',
   route: '/product-inventory',
@@ -851,9 +856,9 @@ export const simplifyValues = (obj, fields) => {
   return newObj;
 };
 
-export const review = {
-  reviewsApi: '/product/review'
-};
+// export const review = {
+//   reviewsApi: '/product/review'
+// };
 
 export const getUniqueCurrencies = () => {
   return uniqBy(currencies, 'currencyCode');

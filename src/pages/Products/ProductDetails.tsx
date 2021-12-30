@@ -1,14 +1,14 @@
-import { useState, useEffect, useContext, Fragment } from "react";
+import { useState, useEffect, useContext, Fragment, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
-import { formatAmountWithCurrency, product, review } from "../../constants/helpers";
+import { formatAmountWithCurrency, eProduct } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { Rating } from "@material-ui/lab";
-import styles from "./product-detail-page.module.scss";
-import { Button, Box, Grid, makeStyles } from "@material-ui/core";
+import { Button, Box, Grid, makeStyles, IconButton, TextField, Typography } from "@material-ui/core";
 import FrequentlyBought from "../../components/ProductList/FrequentlyBought/FrequentlyBought";
 import SimilarItems from "../../components/ProductList/SimilarItems/SimilarItems";
 import AddShoppingCartIcon from "@material-ui/icons/AddShoppingCart";
+import RemoveShoppingCartIcon from "@material-ui/icons/RemoveShoppingCart";
 import { BsImage } from "react-icons/bs";
 import RatingAndReviewChart from "../../components/ProductList/RatingAndReviewChart";
 import { Link } from "react-router-dom";
@@ -17,8 +17,32 @@ import { useData } from "../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { SET_CART_COUNT } from "../../StateProvider/actionTypes"
+import { SET_CART } from "../../StateProvider/actionTypes";
 import Carousel from "react-material-ui-carousel";
+import styles from "./product-detail-page.module.scss";
+import { WishlistContext } from "../../StateProvider/WishlistContext/WishlistProvider";
+import CustomButton from "../../components/Helpers/CustomButton";
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
+import RemoveCircleOutlineOutlinedIcon from '@material-ui/icons/RemoveCircleOutlineOutlined';
+import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import NumberFormat from 'react-number-format';
+
+interface NumberFormatCustomProps {
+  inputRef: (instance: NumberFormat | null) => void;
+  onChange: (event: { target: { name: string; value: string } }) => void;
+  name: string;
+}
+
+const CustomFormat = (props: NumberFormatCustomProps | any) => {
+  const { inputRef, onChange, ...other } = props;
+  return <NumberFormat {...other} getInputRef={inputRef} isNumericString />;
+};
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -28,7 +52,7 @@ const useStyles = makeStyles(() => ({
   },
   img: {
     maxWidth: "500px",
-  }
+  },
 }));
 
 export default function ProductDetails() {
@@ -38,36 +62,87 @@ export default function ProductDetails() {
   const [productDetails, setProductDetails] = useState(null);
   const [similarItems, setSimilarItems] = useState([]);
   const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
+  const [addToCartBtnLoading, setAddToCartBtnLoading] = useState(false);
   const [checkoutLabel, setCheckoutLabel] = useState("Checkout")
   const [addedCartItems, setAddedCartItems] = useState([])
   const [products, setProducts] = useState([]);
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user }, dispatch }: any = useData();
+  const { state: { user, cartItems }, dispatch }: any = useData();
+  const [wishlist, setWishlist] = useState({ loading: false, disabled: false });
+  const [indexOfProductInCart, setIndexOfProductInCart] = useState(null);
+  const [rateCurrency, setRateCurrency] = useState({ rate: "", mrp: "", rateWithCurrency: "", unit: "", pricingMethod: "", isRateMrpSame: false })
+  const [deleteProductFromCartConfirmationDialog, setDeleteProductFromCartConfirmationDialog] = useState({ show: false, okBtnLoading: false })
+
+  const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
+
   const history = useHistory();
   let { id } = useParams();
+
+  const inputNumberRef = useRef(null);
+
+  useEffect(() => {
+    const ignoreScroll = (e) => {
+      e.preventDefault();
+    };
+    inputNumberRef.current && inputNumberRef.current.addEventListener('wheel', ignoreScroll);
+  }, [inputNumberRef]);
 
   useEffect(() => {
     fetchCart()
     fetchProducts()
-    fetchReviews()
+    // fetchReviews()
   }, []);
 
-  const fetchReviews = () => {
-    axiosInstance()
-      .get(`${review.reviewsApi}/${id}`)
-      .then(({ data: { data } }) => {
-        if (data.review) {
-          setReviews(data.review)
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  useEffect(() => {
+    axiosInstance().get(`${eProduct.api}/${id}`).then(({ data: { data } }) => {
+      setProductDetails({ ...data });
+
+      let firstUnit = data.unit && data.unit.length > 0 ? data.unit[0] : "";
+      let firstPricingMethod = data.pricingMethod && data.pricingMethod.length > 0 ? data.pricingMethod[0] : "";
+
+      changeRateCurrency(data, firstUnit, firstPricingMethod)
+      setIndexOfProductInCart(cartItems.findIndex(({ productId }) => productId === id))
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    })
+  }, [id])
+
+  const changeRateCurrency = (data, unit, pricingMethod) => {
+
+    if (unit && pricingMethod) {
+      const record = data.priceCalculation.find(d => d.pricingMethod === pricingMethod && d.unit === unit);
+      if (record) {
+        setRateCurrency({ unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
+      }
+    } else if (unit) {
+      const record = data.priceCalculation.find(d => d.unit === unit);
+      if (record) {
+        setRateCurrency({ unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: false })
+      }
+    } else if (pricingMethod) {
+      const record = data.priceCalculation.find(d => d.pricingMethod === pricingMethod);
+      if (record) {
+        setRateCurrency({ unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: false })
+      }
+    }
   }
+
+  // const fetchReviews = () => {
+  //   axiosInstance()
+  //     .get(`${review.reviewsApi}/${id}`)
+  //     .then(({ data: { data } }) => {
+  //       if (data.review) {
+  //         setReviews(data.review)
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       toastConfig.setToastConfig(error);
+  //     });
+  // }
 
   const fetchProducts = () => {
     axiosInstance()
-      .get(`${product.api}?limit=0`)
+      .get(`${eProduct.api}?limit=0`)
       .then(({ data: { data } }) => {
         data = data.map(obj => ({ ...obj, selected: false }))
         setProducts(data);
@@ -82,7 +157,10 @@ export default function ProductDetails() {
       .get(`/user/cart`).then(({ data: { data } }) => {
 
         if (data) {
-          dispatch({ type: SET_CART_COUNT, payload: data.length });
+          dispatch({ type: SET_CART, payload: [...data] });
+          setIndexOfProductInCart(data.findIndex(({ productId }) => productId === id));
+          if (addToCartBtnLoading) setAddToCartBtnLoading(false)
+
           setAddedCartItems(data)
         }
         if (data && data.length >= 1) {
@@ -98,18 +176,10 @@ export default function ProductDetails() {
   }
 
   const onAddToCartItem = (item) => {
-    let tempQuantity = 1
-    addedCartItems.some(o => {
-      if (o.productId === item._id) {
-        tempQuantity = tempQuantity + 1
-        return true
-      }
-    })
-
     axiosInstance()
       .post(`/user/cart`, {
         products: [{
-          quantity: `${tempQuantity}`,
+          quantity: "1",
           productId: item._id
         }]
       }).then(({ data }) => {
@@ -118,27 +188,10 @@ export default function ProductDetails() {
   }
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/product/` + id)
-      .then(({ data: { data } }) => {
-        setProductDetails({
-          ...data.productData, images: [
-            "https://images.unsplash.com/photo-1506467493604-25d7861a6703?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTF8fHxlbnwwfHx8fA%3D%3D&w=1000&q=80",
-            "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2016/10/colima_volcano/16186851-1-eng-GB/Colima_volcano.jpg",
-            "https://news.cornell.edu/sites/default/files/styles/full_size/public/2020-10/1012_nasa.jpg?itok=KJ3jzpto"
-          ]
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, []);
-
-  useEffect(() => {
     if (productDetails) {
       axiosInstance()
         .get(
-          `${product.api}?filterById=[{"field":"productCategory", "term": "${productDetails.productCategory}"}]&limit=0`
+          `${eProduct.api}?filterById=[{"field":"productCategory", "term": "${productDetails.productCategory}"}]&limit=0`
         )
         .then(({ data: { data } }) => {
           setSimilarItems(data);
@@ -204,7 +257,7 @@ export default function ProductDetails() {
               <div className={styles.product_image}>
                 <Box display="flex" justifyContent="center" alignItems="center" >
 
-                  {productDetails.images ? (
+                  {productDetails.sliderImage && productDetails.sliderImage.length > 0 ? (
                     <Carousel
                       strictIndexing
                       animation="slide"
@@ -221,7 +274,7 @@ export default function ProductDetails() {
                         }
                       }}
                     >
-                      {productDetails.images.map((image: any, i) => (
+                      {productDetails.sliderImage.map((image: any, i) => (
                         <div key={i} className={classes.imageContainer}>
                           <img className={classes.img} src={image} />
                         </div>
@@ -231,10 +284,82 @@ export default function ProductDetails() {
                     <BsImage className={styles.product_no_image} />
                   )}
                 </Box>
+
+                {
+                  wishlistState.wishlist.length === 0 || !wishlistState.wishlist.find(s => s._id === id) ? <CustomButton
+                    type="button"
+                    className="mt-2"
+                    color="primary"
+                    variant="contained"
+                    disabled={wishlist.disabled}
+                    loading={wishlist.loading}
+                    startIcon={wishlist.loading ? null : <FavoriteIcon />}
+                    onClick={() => {
+                      setWishlist({ disabled: true, loading: true });
+                      axiosInstance().put(`${eProduct.api}/wishlist`, { productId: id }).then(({ data }) => {
+                        setWishlist({ disabled: false, loading: false });
+                        wishlistDispatch({ type: "ADD", payload: { _id: id } })
+
+                        toastConfig.setToastConfig({
+                          open: true,
+                          type: "success",
+                          message: data.message,
+                        });
+
+                      }).catch((error) => {
+                        toastConfig.setToastConfig(error);
+                        setWishlist({ disabled: false, loading: false });
+                      })
+                    }}
+                  >
+                    Add to wishlist
+                  </CustomButton> : <CustomButton
+                    type="button"
+                    className="mt-2"
+                    color="primary"
+                    variant="outlined"
+                    disabled={wishlist.disabled}
+                    loading={wishlist.loading}
+                    onClick={() => {
+                      setWishlist({ disabled: true, loading: true });
+
+                      axiosInstance().put(`${eProduct.api}/wishlist/remove`, { productId: id }).then(({ data }) => {
+                        setWishlist({ disabled: false, loading: false });
+                        wishlistDispatch({ type: "REMOVE", payload: id })
+
+                        toastConfig.setToastConfig({
+                          open: true,
+                          type: "success",
+                          message: data.message,
+                        });
+                      }).catch((error) => {
+                        toastConfig.setToastConfig(error);
+                        setWishlist({ disabled: false, loading: false });
+                      })
+                    }}
+                  >
+                    Remove from wishlist
+                  </CustomButton>
+
+                }
+
               </div>
               <div className={styles.product_details}>
                 <header>
                   <h1 className={styles.title}>{productDetails.productName}</h1>
+
+                  <div className={styles.user_rating}>
+                    <Rating
+                      name="half-rating-read"
+                      defaultValue={4.5}
+                      precision={0.5}
+                      value={productDetails?.averageRating}
+                      readOnly
+                      size="small"
+                    />
+                    <p>{productDetails?.averageRating}</p>
+                  </div>
+
                   <span className={styles.avaibility}>
                     <h3>Avaibility-&nbsp;</h3>
                     {productDetails?.qty > 0 ? "In Stock" : "Out of Stock"}
@@ -267,14 +392,61 @@ export default function ProductDetails() {
                     <a className="option">(UK 8)</a>
                   </div> */}
                   {productDetails.productNumber && <div className={styles.controls_over}>
-                    <h5><li>Product Number </li></h5>
+                    <h5><li>Product Number - </li></h5>
                     <a className="option">{` ${productDetails.productNumber}`}</a>
                   </div>}
-                  {productDetails.unit && <div className={styles.controls_over}>
-                    <h5><li>Measuring Unit </li></h5>
-                    <a className="option">{` ${productDetails.unit}`}</a>
-                  </div>}
                 </div>
+
+                {
+                  productDetails.unit && <FormControl variant="outlined" fullWidth>
+                    <InputLabel id="unit-label">Unit</InputLabel>
+                    <Select
+                      labelId="unit-label"
+                      id="unit"
+                      value={rateCurrency.unit}
+                      onChange={(e) => {
+                        changeRateCurrency(productDetails, e.target.value, rateCurrency.pricingMethod)
+                      }}
+                      label="Unit"
+                    >
+                      {
+                        productDetails.unit.map(m => (
+                          <MenuItem value={m}>{m}</MenuItem>
+                        ))
+                      }
+                    </Select>
+                  </FormControl>
+                }
+
+                {
+                  productDetails.pricingMethod && <FormControl className="mt-3" variant="outlined" fullWidth>
+                    <InputLabel id="pricing-method-label">Pricing Method</InputLabel>
+                    <Select
+                      labelId="pricing-method-label"
+                      id="pricing-method"
+                      value={rateCurrency.pricingMethod}
+                      onChange={(e) => {
+                        changeRateCurrency(productDetails, rateCurrency.unit, e.target.value)
+                      }}
+                      label="Pricing Method"
+                    >
+                      {
+                        productDetails.pricingMethod.map(m => (
+                          <MenuItem value={m}>{m}</MenuItem>
+                        ))
+                      }
+                    </Select>
+                  </FormControl>
+                }
+
+
+                <Box className="mt-2 d-flex gap-4 align-items-baseline">
+                  <Typography variant="h4">{rateCurrency.rateWithCurrency}</Typography>
+                  {
+                    rateCurrency.isRateMrpSame === false && <Typography variant="h5" className="custom-strike">{rateCurrency.mrp}</Typography>
+                  }
+                </Box>
+
 
                 {/*<div className={styles.set_width_2}> <hr/> </div>*/}
                 <div className={styles.price_and_discount}>
@@ -303,43 +475,107 @@ export default function ProductDetails() {
                       ).fullFormatAmount
                     }
                   </span>
-
                 </div>
 
-                <div className={styles.user_rating}>
-                  <Rating
-                    name="half-rating-read"
-                    defaultValue={4.5}
-                    precision={0.5}
-                    value={productDetails?.averageRating}
-                    readOnly
-                    size="small"
-                  />
-                  <p>{productDetails?.averageRating}</p>
-                </div>
-                <div className={'footer' && styles.button_layout} >
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    className={styles.primary_buttons}
-                    startIcon={<AddShoppingCartIcon />}
-                    onClick={() => onAddToCartItem(productDetails)}
-                  >
-                    Add to cart
-                  </Button>
-                  <Link to="/product/my-cart">
-                    <Button
-                      variant="contained"
+                <div className="d-flex gap-2" >
+                  {
+                    indexOfProductInCart > -1 && cartItems.length > 0 && cartItems.some(s => s.productId === id) ? <Grid container spacing={1} alignItems="flex-end">
+                      <Grid item>
+                        <IconButton onClick={() => {
+                          let items = [...cartItems];
+                          const indexOfProduct = items.findIndex(s => s.productId === id);
+
+                          if ((parseInt(items[indexOfProduct].quantity) - 1) === 0) {
+                            setDeleteProductFromCartConfirmationDialog({ show: true, okBtnLoading: false })
+                          } else {
+                            items[indexOfProduct].quantity = parseInt(items[indexOfProduct].quantity) - 1;
+                            dispatch({ type: SET_CART, payload: [...items] });
+
+                            axiosInstance().put(`/user/cart/${items[indexOfProduct].id}`, { quantity: items[indexOfProduct].quantity?.toString() }).then(() => {
+
+                            }).catch((error) => {
+                              toastConfig.setToastConfig(error);
+
+                              items[indexOfProduct].quantity = parseInt(items[indexOfProduct].quantity) - 1;
+                              dispatch({ type: SET_CART, payload: [...items] });
+                            })
+                          }
+
+                        }} size="small">
+                          <RemoveCircleOutlineOutlinedIcon />
+                        </IconButton>
+                      </Grid>
+                      <Grid item>
+                        <TextField
+                          id="quantity"
+                          name="quantity"
+                          label="Quantity"
+                          ref={inputNumberRef}
+                          value={indexOfProductInCart ? cartItems[indexOfProductInCart]?.quantity?.toString() ?? "1" : "1"}
+                          InputProps={{
+                            inputComponent: CustomFormat as any,
+                            inputProps: {
+                              allowNegative: false,
+                              min: 1,
+                              onValueChange: (values) => {
+                                let items = [...cartItems];
+                                const indexOfProduct = items.findIndex(s => s.productId === id);
+                                const oldValue = items[indexOfProduct].quantity;
+                                items[indexOfProduct].quantity = values.value;
+
+                                dispatch({ type: SET_CART, payload: [...items] });
+
+                                axiosInstance().put(`/user/cart/${items[indexOfProduct].id}`, { quantity: items[indexOfProduct].quantity?.toString() }).then(() => {
+
+                                }).catch((error) => {
+                                  toastConfig.setToastConfig(error);
+
+                                  items[indexOfProduct].quantity = oldValue;
+                                  dispatch({ type: SET_CART, payload: [...items] });
+                                })
+                              },
+                            }
+                          }} />
+                      </Grid>
+                      <Grid item>
+                        <IconButton onClick={() => {
+                          let items = [...cartItems];
+                          const indexOfProduct = items.findIndex(s => s.productId === id);
+                          items[indexOfProduct].quantity = parseInt(items[indexOfProduct].quantity) + 1;
+
+                          dispatch({ type: SET_CART, payload: [...items] });
+
+                          axiosInstance().put(`/user/cart/${items[indexOfProduct].id}`, { quantity: items[indexOfProduct].quantity?.toString() }).then(() => {
+
+                          }).catch((error) => {
+                            toastConfig.setToastConfig(error);
+
+                            items[indexOfProduct].quantity = parseInt(items[indexOfProduct].quantity) - 1;
+                            dispatch({ type: SET_CART, payload: [...items] });
+                          })
+
+                        }} size="small">
+                          <AddCircleOutlineOutlinedIcon />
+                        </IconButton>
+                      </Grid>
+                    </Grid> : <CustomButton
+                      type="button"
+                      className="mt-2"
                       color="primary"
-                      size="small"
-                      className={styles.primary_buttons}
-                      startIcon={<AddShoppingCartIcon />}
+                      variant="outlined"
+                      disabled={addToCartBtnLoading}
+                      loading={addToCartBtnLoading}
+                      startIcon={addToCartBtnLoading ? null : <AddShoppingCartIcon />}
+                      onClick={() => {
+                        setAddToCartBtnLoading(true)
+                        onAddToCartItem(productDetails)
+                      }}
                     >
-                      Checkout
-                    </Button>
-                  </Link>
+                      Add to cart
+                    </CustomButton>
+                  }
                 </div>
+
                 <div className={'footer' && styles.button_layout}>
                   <Button
                     variant="contained"
@@ -376,8 +612,8 @@ export default function ProductDetails() {
           )}
           <div className="a_divider_inner"></div>
 
-          <FrequentlyBought id={productDetails?._id} />
-          <div className="a_divider_inner"></div>
+          {/* <FrequentlyBought id={productDetails?._id} />
+          <div className="a_divider_inner"></div> */}
           <SimilarItems similarItems={similarItems} />
           <div className="a_divider_inner"></div>
           <RatingAndReviewChart id={id} reviews={reviews}
@@ -385,7 +621,41 @@ export default function ProductDetails() {
         </div>
 
       </Box>
-    </Fragment>
+
+      {deleteProductFromCartConfirmationDialog.show ? (
+        <ConfirmationDialog
+          open={true}
+          message={`You want to remove this product from cart ?`}
+          onClose={() =>
+            setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false })
+          }
+          okBtnLoading={deleteProductFromCartConfirmationDialog.okBtnLoading}
+          onOk={() => {
+            setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, okBtnLoading: true } })
+
+            let items = [...cartItems];
+            const indexOfProduct = items.findIndex(s => s.productId === id);
+
+            const productsToUpdate = items.filter(s => s.productId !== id);
+            dispatch({ type: SET_CART, payload: [...productsToUpdate] });
+
+            axiosInstance().delete(`/user/cart/${items[indexOfProduct].id}`).then(({ data }) => {
+              setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false })
+
+              toastConfig.setToastConfig({
+                open: true,
+                type: "success",
+                message: data.message,
+              });
+            }).catch((error) => {
+              toastConfig.setToastConfig(error);
+              dispatch({ type: SET_CART, payload: [...items] });
+            })
+          }}
+        />
+      ) : null}
+
+    </Fragment >
   );
 }
 
