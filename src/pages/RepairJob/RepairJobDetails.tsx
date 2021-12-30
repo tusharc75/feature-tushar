@@ -14,7 +14,8 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import {
   gridLoadingTimeout, prepareDataForGrid, repairJob, sidebarResource,
   repairJobProcessSteps,
-  repairJobStatus
+  repairJobStatus,
+  INVENTORY_STATUS
 } from '../../constants/helpers';
 import ManageRepairJob from './ManageRepairJob';
 import queryString from "query-string";
@@ -37,7 +38,6 @@ import InfoIcon from "@material-ui/icons/Info";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
-const reservedStatus = "Reserved";
 const renderedFrom = "repairJobDetails"
 const step1RenderedFrom = `${renderedFrom}_assets`
 const completedStatus = repairJobStatus[2];
@@ -311,7 +311,7 @@ const RepairJobDetails = () => {
       }
 
       {
-        params.data?.status === reservedStatus ? <GridDeleteIcon
+        params.data?.status === INVENTORY_STATUS.reserved ? <GridDeleteIcon
           hasDeletePermission={permissions?.repairJob?.isUpdate}
           ownerId={user?.user?._id}
           userId={user?.user?._id}
@@ -658,7 +658,7 @@ const RepairJobDetails = () => {
                                     color="primary"
                                     type="button"
                                     size="small"
-                                    disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.status !== reservedStatus)}
+                                    disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.status !== INVENTORY_STATUS.reserved)}
                                     onClick={() => {
                                       setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: step1SelectedRecords.map(m => m._id ?? m.id) });
                                     }}

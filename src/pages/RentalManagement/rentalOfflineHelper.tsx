@@ -22,11 +22,11 @@ export const getRentalDeliveryTicket = async (id) => {
     }
 };
 
-export const updateRentalAssetStatus = async (id, status) => {
+export const updateRentalAssetStatus = async (id, status, asset) => {
     try {
         const rentalManagement = await findOne(objectStore.rentalManagement, id);
         rentalManagement?.productInventory?.forEach(element => {
-            if (element?.inventoryDetail) {
+            if (element?.inventoryDetail && asset.includes(element?.inventory)) {
                 element.inventoryDetail.status = status;
             }
         });
