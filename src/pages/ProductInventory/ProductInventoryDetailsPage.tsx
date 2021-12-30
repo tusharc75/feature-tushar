@@ -172,12 +172,17 @@ const ProductInventoryDetailsPage = () => {
     getProductInventoryFields();
     fetchProductInventoryData();
     fetchProductInventoryHistory();
+    
   }
 
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
-    // mainPoint['Account Name'] = data?.accountName?.optionLabel || '';
+    mainPoint['Number Of Days After Repair'] = data?.noOfDaysAfterRepair;
+    mainPoint['Number Of Job From Last Repair'] = data?.noOfJobFromLastRepair;
+    mainPoint['Total Number Of Rental Job'] = data?.totalNoOfRentalJob;
+    mainPoint['Use Time From Last Repair'] = data?.useTimeFromLastRepair;
+    mainPoint['Total Repair'] = data?.totalRepair;
     setMainPoints(mainPoint);
   };
 
@@ -203,6 +208,17 @@ const ProductInventoryDetailsPage = () => {
     });
   };
 
+  const fetchProductInventoryStates = async () => {
+    try {
+      const {
+        data: { data },
+      } = await axiosInstance().post(`${productInventory.api}/inventory-stats`, { "ids": [id] });
+      handleMainPoints(data);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const fetchProductInventoryData = async () => {
     setLoadingProductInventory(true);
     try {
@@ -210,7 +226,8 @@ const ProductInventoryDetailsPage = () => {
         data: { data },
       } = await axiosInstance().get(`${productInventory.api}/${id}`);
 
-      handleMainPoints(data);
+      // handleMainPoints(data);
+      fetchProductInventoryStates()
       setHeadingLbl(`${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
       setCustomizedRoutes([routes.productInventory,
       { title: `${data?.serialNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
