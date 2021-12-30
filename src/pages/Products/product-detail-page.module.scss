@@ -33,14 +33,13 @@ $bgt: #e2e2e2;
         color: var(--grey);
     }
 }
-.price_and_discount{
+.price_and_discount {
     display: flex;
     width: 60%;
     align-items: center;
     padding: 1rem 0 0.5rem 0;
 
-
-    .current > h2{
+    .current > h2 {
         padding: 0 0.5rem 0 0.5rem;
         font-size: 2rem;
         color: var(--productRed);
@@ -53,14 +52,12 @@ $bgt: #e2e2e2;
         padding-left: 0.5rem;
         padding-top: 0.35rem;
     }
-
 }
-.user_rating{
-    padding: 0 8px;
+.user_rating {
     display: flex;
     align-items: flex-end;
-    p{
-        color: #FFB400;
+    p {
+        color: #ffb400;
         font-weight: 600;
         padding-left: 10px;
         font-size: 0.7rem;
@@ -109,7 +106,7 @@ $bgt: #e2e2e2;
             font-size: 12px;
             color: green;
 
-            h3{
+            h3 {
                 text-transform: uppercase !important;
                 display: inline;
                 font-size: 0.8rem;
@@ -123,7 +120,6 @@ $bgt: #e2e2e2;
             .current {
                 color: var(--productRed);
                 margin-right: 6px;
-
             }
         }
 
@@ -161,61 +157,57 @@ $bgt: #e2e2e2;
         }
     }
 }
-.set_width{
+.set_width {
     display: flex;
-    hr{
+    hr {
         width: 30rem;
         margin: 1rem 3rem 0 0;
     }
 }
-.controls_over{
+.controls_over {
     display: flex;
     flex-direction: row !important;
-
 }
 .footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-.button_layout{
+.button_layout {
     padding: 1rem 0 0 0;
     display: flex;
     flex-wrap: wrap;
     width: 100%;
 }
 
-.primary_buttons{
+.primary_buttons {
     padding: 0.5rem 0 !important;
     width: 9.5rem;
     border-radius: 8px !important;
     margin: 0.3rem 0.5rem 0 0 !important;
-
 }
-.secondary_buttons{
+
+.secondary_buttons {
     padding: 0.43rem 0 !important;
     width: 9.5rem;
     border-radius: 8px !important;
     margin: 0.3rem 0.5rem 0 0 !important;
-
 }
-.vendor{
-    h5{
+.vendor {
+    h5 {
         font-weight: 700;
         font-size: 0.8rem;
         padding-bottom: 0.5rem;
 
-            span{
-                text-transform: capitalize !important;
-            }
+        span {
+            text-transform: capitalize !important;
+        }
     }
-
 }
-.container_box{
+.container_box {
     background: white;
     border-radius: 8px;
 }
-
 
 @include bp(600) {
     .product_details {
@@ -251,11 +243,10 @@ $bgt: #e2e2e2;
     }
 }
 
-@media only screen and (max-width:900px) {
+@media only screen and (max-width: 900px) {
     .product_container {
         margin: 1% !important;
         width: 98% !important;
         box-shadow: none;
     }
 }
-

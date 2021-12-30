@@ -224,6 +224,7 @@ export default function CustomSwipableList({
                                             {
                                                 d[owerCollaboratorInitialsOrImages].length > 5 && <span className="font-weight-bold bold mt-2 ml-1">+{d[owerCollaboratorInitialsOrImages].length - 5} more</span>
                                             }
+                                          
                                         </div>
                                     }
 
