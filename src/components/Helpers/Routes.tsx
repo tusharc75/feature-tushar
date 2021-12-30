@@ -317,6 +317,10 @@ const routes = {
     title: storedRoutes ? storedRoutes.address?.title : RESOURCE_LABEL.address,
     path: "/address",
   },
+  addressDetail: {
+    title: storedRoutes ? storedRoutes.address?.title : RESOURCE_LABEL.address,
+    path: "/address/detail",
+  },
   eCommerce: {
     title: storedRoutes ? storedRoutes.eCommerce?.title : RESOURCE_LABEL.eCommerce,
     path: "/e-commerce",

@@ -46,6 +46,8 @@ import { CustomOfflineContext } from '../../StateProvider/OfflineContext/Offline
 import { GridApi } from 'ag-grid-community';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { MdAdd } from 'react-icons/all';
+import {IoFilterCircle,  MdFilterList, MdSort} from "react-icons/all";
+import { FaSuitcase } from 'react-icons/fa';
 
 const AccTypes = [
   {
@@ -94,7 +96,6 @@ export default function Account(props) {
   const [selectedType, setselectedType] = useState(1);
   const [accountId, setAccountId] = useState(null);
   const [showEntityDialog, setShowEntityDialog] = useState(false);
-  const [isApproving, setIsApproving] = useState(false);
 
   const [singleAccountDelete, setSingleAccountDelete] = useState({
     id: null,
@@ -878,8 +879,7 @@ export default function Account(props) {
   };
 
   const approveDisapproveAccounts = () => {
-    const selectedAccountIds = selectedRecords.map((m) => m._id);
-    setIsApproving(true)
+    const selectedAccountIds = selectedRecords.filter((d) => d.approved === !multipleApproveDisapproveAccount.approved).map((m) => m._id);
 
     axiosInstance()
       .post(`/${accountApi}/approve`, {
@@ -897,7 +897,6 @@ export default function Account(props) {
           approved: false,
           selectedRecords: 0
         });
-        setIsApproving(true)
         fetchAccounts();
       })
       .catch((error) => {
@@ -907,7 +906,6 @@ export default function Account(props) {
           approved: false,
           selectedRecords: 0
         });
-        setIsApproving(true)
       });
   };
 
@@ -969,6 +967,35 @@ export default function Account(props) {
                 <span id="resourceHeader" className="listingHeader">
                   {routes[accountResource].title}
                 </span>
+                {isMobile && <>
+        <Button
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        color="secondary"
+        variant="text"
+        disableElevation
+        startIcon={<MdSort />}
+        style={{marginLeft:"50px"}}
+      >
+        Sort 
+        </Button>
+
+        <Button
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        variant="text"
+        color="secondary"
+        disableElevation
+        startIcon={<MdFilterList />}
+      >
+        Filter 
+        </Button>
+        </>}
+        
                 {isOffline ? (
                   <></>
                 ) : (
@@ -1047,6 +1074,9 @@ export default function Account(props) {
               </div>
             </Grid>
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1 " justify={isMobile ? 'flex-start' : 'flex-end'}>
+              
+          
+              
               <div
                 id="resourceOperations"
                 className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${accountClass['account_header-mobile']
@@ -1112,7 +1142,7 @@ export default function Account(props) {
                           setMultipleApproveDisapproveAccount({
                             show: true,
                             approved: true,
-                            selectedRecords: selectedRecords.filter((d) => !d.approved)
+                            selectedRecords: selectedRecords.filter((d) => !d.approved).length
                           });
                         }}
                       >
@@ -1127,7 +1157,7 @@ export default function Account(props) {
                           setMultipleApproveDisapproveAccount({
                             show: true,
                             approved: false,
-                            selectedRecords: selectedRecords.filter((d) => d.approved)
+                            selectedRecords: selectedRecords.filter((d) => d.approved).length
                           });
                         }}
                       >
@@ -1225,24 +1255,36 @@ export default function Account(props) {
               page={page}
               loading={loading}
               additionalDetails={[
-                 {
-                  //  field:"accountLogo"
-                 }
+                {
+                  icon: <FaSuitcase size={18} />,
+                  field: "parentAccount"
+                },
+                
 
               ]}
               chips={
                 [
                   {
-                      label: "Website : ",
+                      label: "Website:",
                       field: "website",
                   },
-                  {
-                    label: "Parent Account: ",
-                    field: "parentAccount",
-                },
+                  // {
+
+                  //     logo: "accountLogo:",
+                  //     field: "accountLogo",
+
+                  // },
                 ]
               }
-              owerCollaboratorInitialsOrImages=""
+              // avatarLogo={[
+              //   {
+
+              //     label: "accountLogo:",
+              //     field: "accountLogo",
+
+              // }
+              // ]}
+              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
               onClone={(data) => {
@@ -1325,7 +1367,7 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords.length
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
               } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
@@ -1334,7 +1376,6 @@ export default function Account(props) {
                 selectedRecords: 0
               })
             }
-            okBtnLoading={isApproving}
             onOk={approveDisapproveAccounts}
           />
         ) : null}
