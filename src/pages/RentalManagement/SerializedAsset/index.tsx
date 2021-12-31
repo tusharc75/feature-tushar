@@ -59,6 +59,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       accessor: 'detail',
       Header: 'Detail',
       width: 300,
+      sticky: "left",
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate" title={row.original.detail}  >
@@ -435,7 +436,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                 ? "calc(100vw - 20px)"
                 : isSmallScreen
                   ? "calc(100vw - 78px)"
-                  : showActivity ? "100%" : "calc(100vw - 100px)"
+                  : showActivity ? "100%" : "calc(100vw - 103px)"
             }
             height="calc(100vh - 350px)"
           >
