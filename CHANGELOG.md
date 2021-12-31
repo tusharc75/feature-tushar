@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.31.0](https://github.com/vebholic/oms_frontend/compare/v2.30.0...v2.31.0) (2021-12-31)
+
+
+### Features
+
+* - e-commerce code is done ([d1248a9](https://github.com/vebholic/oms_frontend/commit/d1248a91b14246e9771ee2184e2ffd3521043f3a))
+* **asset:** fix and change ([92f63d5](https://github.com/vebholic/oms_frontend/commit/92f63d553355f699f90d9765cdade8663c0bd608))
+* **avisekh/feature:** avisekh/feature ([db189dd](https://github.com/vebholic/oms_frontend/commit/db189dd52ba2035470c0b0eb3c33969870a5df25))
+* product inventory card ([861c14d](https://github.com/vebholic/oms_frontend/commit/861c14d8c727cc7739305d2bbc175a6b65801406))
+
+
+### Bug Fixes
+
+* rental issue ([3448c5c](https://github.com/vebholic/oms_frontend/commit/3448c5cd12b828cb3595bf43d186d62f60b52b63))
+
 ## [2.30.0](https://github.com/vebholic/oms_frontend/compare/v2.29.0...v2.30.0) (2021-12-30)
 
 
