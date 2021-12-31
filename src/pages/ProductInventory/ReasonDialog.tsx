@@ -14,7 +14,7 @@ export default function ReasonDialog({ onClose, onAddReason, ...rest }) {
     const [value, setValue] = React.useState("");
 
     const handleChange = (event) => {
-        setValue(event.target.value);
+        setValue(event.target.value.trimStart());
     };
 
     return (
