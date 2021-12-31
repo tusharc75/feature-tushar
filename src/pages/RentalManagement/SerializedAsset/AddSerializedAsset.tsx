@@ -7,7 +7,7 @@ import { Box, CircularProgress } from "@material-ui/core";
 import SearchBox from '../../../components/Helpers/SearchBox'
 import routes from "../../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData } from '../../../constants/helpers';
+import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData, INVENTORY_STATUS } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { useData } from "../../../StateProvider/Provider";
 import Dialog from "@material-ui/core/Dialog/Dialog";
@@ -213,7 +213,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     };
 
     const getRowStyleScheduled = (params) => {
-        if (["Available", "New"].indexOf(params?.data?.status) >= 0) {
+        if ([INVENTORY_STATUS.available, INVENTORY_STATUS.new].indexOf(params?.data?.status) >= 0) {
             return {
                 'background-color': "#d3ffe0",
             }

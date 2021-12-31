@@ -69,6 +69,7 @@ const DeliveryTicket = () => {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}&entity=${selectedEntity}&view=true&showHiddenFields=true`)
       data = response?.data?.data
     }
+    data = data.filter((e) => e?.fieldData?.fieldName !== "productInventory")
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
