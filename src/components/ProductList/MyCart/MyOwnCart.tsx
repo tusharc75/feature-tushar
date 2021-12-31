@@ -1,18 +1,54 @@
-import { useEffect, useState, Fragment } from 'react';
-import styles from './my-cart.module.scss';
+import { useEffect, useState, Fragment, useContext } from 'react';
 import ManageQuoteDialog from '../../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
 import { Button, Box, Grid } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import { currencyCodeToSymbol } from '../../../constants/helpers';
 import Typography from '@material-ui/core/Typography';
 import { BsFillInfoCircleFill } from 'react-icons/bs';
 import { AiOutlineSafetyCertificate } from 'react-icons/ai';
-import { SET_CART_COUNT } from '../../../StateProvider/actionTypes';
+import { SET_CART } from '../../../StateProvider/actionTypes';
+import { BsImage } from "react-icons/bs";
+import IconButton from '@material-ui/core/IconButton';
+import TextField from '@material-ui/core/TextField';
+import { makeStyles } from '@material-ui/core/styles';
+import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
+import RemoveCircleOutlineOutlinedIcon from '@material-ui/icons/RemoveCircleOutlineOutlined';
+import Carousel from "react-material-ui-carousel";
+
+import styles from './my-cart.module.scss';
+import PlusMinusTextboxComponent from '../../PlusMinusTextboxComponent/PlusMinusTextboxComponent';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  margin: {
+    margin: theme.spacing(1),
+  },
+  withoutLabel: {
+    marginTop: theme.spacing(3),
+  },
+  textField: {
+    width: '25ch',
+  },
+  imageContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  img: {
+    maxWidth: "500px",
+  }
+}));
 
 function MyOwnCart() {
+  const classes = useStyles();
   const { dispatch }: any = useData();
 
   useEffect(() => {
@@ -22,7 +58,9 @@ function MyOwnCart() {
   const {
     state: { user }
   }: any = useData();
+
   const history = useHistory();
+  const toastConfig = useContext(CustomToastContext)
   const [totalCount, setTotalCount] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [checkoutLabel, setCheckoutLabel] = useState('Checkout');
@@ -30,8 +68,7 @@ function MyOwnCart() {
   const [cart, setCart] = useState([]);
   const [cartProducts, setCartProducts] = useState([]);
   const [cartProductsLoading, setCartProductsLoading] = useState(false);
-
-  const FracImage = 'https://freepngimg.com/thumb/disney_pluto/32386-8-pluto-transparent.png';
+  const [deleteProductFromCartConfirmationDialog, setDeleteProductFromCartConfirmationDialog] = useState({ show: false, okBtnLoading: false, recordToRemove: null })
 
   const deleteCartItem = (cartId) => {
     if (cartId) {
@@ -61,12 +98,12 @@ function MyOwnCart() {
       .get(`/user/cart`)
       .then(({ data: { data } }) => {
         if (data) {
-          dispatch({ type: SET_CART_COUNT, payload: data.length });
+          dispatch({ type: SET_CART, payload: [...data] });
           data.map((d) => {
             tempTotalPrice = (d.product?.mrp ? parseInt(d.product?.mrp) : 0) + tempTotalPrice;
           });
           setCart(data);
-          setCartProducts(data.map((d) => d.product));
+          setCartProducts(data.map((d) => { return { ...d.product, cartId: d.id, productId: d.productId, quantity: d.quantity } }));
           setTotalPrice(tempTotalPrice);
           setTotalCount(data.length);
         }
@@ -74,6 +111,7 @@ function MyOwnCart() {
           setCheckoutLabel('Create Quote');
         }
         setCartProductsLoading(false);
+        setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false, recordToRemove: null })
       });
   };
 
@@ -121,14 +159,41 @@ function MyOwnCart() {
                   return (
                     <div key={item.id} className={styles.checkout_items}>
                       <div className={styles.card}>
-                        <div className={styles.products_image_layout}>
-                          <img className={styles.card_img} src={item?.productImage || FracImage} />
+                        <div className={`${styles.products_image_layout} d-flex justify-content-center`}>
+
+                          {item.sliderImage && item.sliderImage.length > 0 ? (
+                            <Carousel
+                              strictIndexing
+                              animation="slide"
+                              autoPlay={false}
+                              navButtonsAlwaysVisible
+                              // indicators={false}
+                              cycleNavigation={false}
+                              timeout={150}
+                              navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
+                                style: {
+                                  opacity: 0.4,
+                                  padding: 5,
+                                  borderRadius: "50%"
+                                }
+                              }}
+                            >
+                              {item.sliderImage.map((image: any, i) => (
+                                <div key={i} className={classes.imageContainer}>
+                                  <img className={classes.img} src={image} />
+                                </div>
+                              ))}
+                            </Carousel>
+                          ) : (
+                            <BsImage className={styles.no_image} />
+                          )}
+
                         </div>
                         <div className={styles.card_body}>
                           <div className={styles.card_body_layout}>
                             <div className={styles.card_product_name_and_price}>
                               <div className={styles.card_seller}>
-                                <strong> {item.productName}</strong>
+                                <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}`}>{item.productName}</Link>
                               </div>
                               <div className={styles.card_price}>
                                 {/* Price:{'  '} */}
@@ -137,20 +202,67 @@ function MyOwnCart() {
                               </div>
                             </div>
 
-                            <div className={styles.card_desc}>
+                            {/* <div className={styles.card_desc}>
                               {item.description}The iPad Pro is Apple's high-end tablet computer. The latest iPad Pro models feature a powerful M1
                               chip
-                            </div>
+                            </div> */}
                             <div className={styles.card_vendor}>
                               <span>Sold by:</span> {user?.user?.brandName}
                             </div>
                           </div>
+
+                          <PlusMinusTextboxComponent
+                            inputTextLabel="Quantity"
+                            value={item.quantity}
+                            isRequired={true}
+                            onChange={(value) => {
+                              let items = [...cartProducts];
+                              items[index].quantity = parseInt(items[index].quantity) - 1;
+                              setCartProducts([...items]);
+
+                              axiosInstance().put(`/user/cart/${item.cartId}`, { quantity: value?.toString() }).then(() => {
+
+                              }).catch((error) => {
+                                toastConfig.setToastConfig(error);
+                                dispatch({ type: SET_CART, payload: [...items] });
+                              })
+                            }}
+                          />
+
+                          {/* <Grid container spacing={1} alignItems="flex-end">
+                            <Grid item>
+                              <IconButton onClick={() => {
+                                let items = [...cartProducts];
+                                items[index].quantity = parseInt(items[index].quantity) - 1;
+                                setCartProducts([...items]);
+                              }} size="small">
+                                <RemoveCircleOutlineOutlinedIcon />
+                              </IconButton>
+                            </Grid>
+                            <Grid item>
+                              <TextField id="input-with-icon-grid" type="number" label="Quantity" value={item.quantity} onChange={(e) => {
+                                let items = [...cartProducts];
+                                items[index].quantity = e.target.value;
+                                setCartProducts([...items]);
+                              }} />
+                            </Grid>
+                            <Grid item>
+                              <IconButton onClick={() => {
+                                let items = [...cartProducts];
+                                items[index].quantity = parseInt(items[index].quantity) + 1;
+                                setCartProducts([...items]);
+                              }} size="small">
+                                <AddCircleOutlineOutlinedIcon />
+                              </IconButton>
+                            </Grid>
+                          </Grid> */}
+
                           <div className={styles.card_controls}>
                             <Button
                               variant="outlined"
                               color="primary"
                               onClick={() => {
-                                onDeleteCartItem(item);
+                                setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, show: true, recordToRemove: item } })
                               }}
                               className={styles.remove_product}
                             >
@@ -254,8 +366,25 @@ function MyOwnCart() {
             onHandleSubmit={handleCreateQuote}
           />
         )}
+
+        {
+          deleteProductFromCartConfirmationDialog.show ? (
+            <ConfirmationDialog
+              open={true}
+              message={`You want to remove this product from cart ?`}
+              onClose={() =>
+                setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false, recordToRemove: null })
+              }
+              okBtnLoading={deleteProductFromCartConfirmationDialog.okBtnLoading}
+              onOk={() => {
+                setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, okBtnLoading: true } })
+                onDeleteCartItem(deleteProductFromCartConfirmationDialog.recordToRemove)
+              }}
+            />
+          ) : null
+        }
       </Box>
-    </Fragment>
+    </Fragment >
   );
 }
 

@@ -69,6 +69,7 @@ const DeliveryTicket = () => {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}&entity=${selectedEntity}&view=true&showHiddenFields=true`)
       data = response?.data?.data
     }
+    data = data.filter((e) => e?.fieldData?.fieldName !== "productInventory")
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
@@ -152,8 +153,7 @@ const DeliveryTicket = () => {
     if (renderCount > 0) {
       fetchDeliveryTicket();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, selectedEntity]);
-
+  }, [page, limit, filters, sorting, selectedEntity, isOffline]);
 
   const ActionsRenderer = (params) => (
     <>
@@ -215,8 +215,6 @@ const DeliveryTicket = () => {
     }
     return deepFilter;
   };
-
-
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });

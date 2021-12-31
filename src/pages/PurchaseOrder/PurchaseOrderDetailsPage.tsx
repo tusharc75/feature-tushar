@@ -71,7 +71,7 @@ const PurchaseOrderDetailsPage = () => {
     const [downlodingFile, setDownlodingFile] = useState(false)
     const [anchorEl, setAnchorEl] = useState(null);
 
-    const [tabValue, setTabValue] = useState(0);
+    const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
 
     function a11yProps(index: any) {
         return {
@@ -82,7 +82,14 @@ const PurchaseOrderDetailsPage = () => {
 
     const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
         setTabValue(newValue);
+        history.replace(`?tab=${newValue}`);
     };
+
+    useEffect(() => {
+        if (parsed) {
+            history.replace(`?tab=${tabValue}`);
+        }
+    }, []);
 
     useEffect(() => {
         if (id) {
@@ -433,55 +440,62 @@ const PurchaseOrderDetailsPage = () => {
                             </TabPanel>
                             <TabPanel value={tabValue} index={1}>
                                 <Grid item xs={12} sm={12} md={12} lg={12} >
-                                    <Grid item xs={12} sm={12} md={12} lg={12}>
-                                        <>
-                                            <Paper>
-                                                <Steps
-                                                    // className={styles.steps_box}
-                                                    currentStepDisable={currentStepDisable}
-                                                    steps={purchaseOrderSteps.slice(0, 4)}
-                                                    currentStep={currentStep}
-                                                    setCurrentStep={setCurrentStep}
-                                                />
-                                                {currentStep === 0 &&
-                                                    <Product
-                                                        purchaseOrderData={purchaseOrderData}
+                                    {!purchaseOrderData ? (
+                                        <Grid container spacing={2} style={{ padding: "8px" }}>
+                                            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                                        </Grid>
+                                    ) : (
+                                        <Grid item xs={12} sm={12} md={12} lg={12}>
+                                            <>
+                                                <Paper>
+                                                    <Steps
+                                                        // className={styles.steps_box}
                                                         currentStepDisable={currentStepDisable}
-                                                        setCurrentStepDisable={setCurrentStepDisable}
-                                                        id={id}
-                                                        setPurchaseOrderProduct={setPurchaseOrderProduct}
-                                                    />
-                                                }
-                                                {(currentStep === 1) && (
-                                                    <Service
-                                                        purchaseOrderData={purchaseOrderData}
-                                                        id={id}
-                                                    />
-                                                )}
-                                                {currentStep === 2 &&
-                                                    <IssuePo
-                                                        purchaseOrderData={purchaseOrderData}
-                                                        handleViewPdf={handleViewPdf}
-                                                        handleUpdateData={handleUpdateData}
-                                                        setCurrentStep={setCurrentStep}
+                                                        steps={purchaseOrderSteps.slice(0, 4)}
                                                         currentStep={currentStep}
-                                                        handleAttachments={handleAttachments}
-                                                    />
-                                                }
-                                                {(currentStep === 3 || currentStep === 4) &&
-                                                    <ReceivingAsset
-                                                        currencySymbol={currencySymbol}
-                                                        purchaseOrderData={purchaseOrderData}
                                                         setCurrentStep={setCurrentStep}
-                                                        handleUpdateData={handleUpdateData}
-                                                        statusOptions={statusOptions}
-                                                        handleViewPdf={handleViewPdf}
-                                                        handleAttachments={handleAttachments}
                                                     />
-                                                }
-                                            </Paper>
-                                        </>
-                                    </Grid>
+                                                    {currentStep === 0 &&
+                                                        <Product
+                                                            purchaseOrderData={purchaseOrderData}
+                                                            currentStepDisable={currentStepDisable}
+                                                            setCurrentStepDisable={setCurrentStepDisable}
+                                                            id={id}
+                                                            setPurchaseOrderProduct={setPurchaseOrderProduct}
+                                                        />
+                                                    }
+                                                    {(currentStep === 1) && (
+                                                        <Service
+                                                            purchaseOrderData={purchaseOrderData}
+                                                            id={id}
+                                                        />
+                                                    )}
+                                                    {currentStep === 2 &&
+                                                        <IssuePo
+                                                            purchaseOrderData={purchaseOrderData}
+                                                            handleViewPdf={handleViewPdf}
+                                                            handleUpdateData={handleUpdateData}
+                                                            setCurrentStep={setCurrentStep}
+                                                            currentStep={currentStep}
+                                                            handleAttachments={handleAttachments}
+                                                        />
+                                                    }
+                                                    {(currentStep === 3 || currentStep === 4) &&
+                                                        <ReceivingAsset
+                                                            currencySymbol={currencySymbol}
+                                                            purchaseOrderData={purchaseOrderData}
+                                                            setCurrentStep={setCurrentStep}
+                                                            handleUpdateData={handleUpdateData}
+                                                            statusOptions={statusOptions}
+                                                            handleViewPdf={handleViewPdf}
+                                                            handleAttachments={handleAttachments}
+                                                        />
+                                                    }
+                                                </Paper>
+                                            </>
+                                        </Grid>
+                                    )}
+
                                 </Grid>
                             </TabPanel>
                         </Paper>

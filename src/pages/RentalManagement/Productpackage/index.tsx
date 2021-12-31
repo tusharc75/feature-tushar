@@ -26,14 +26,11 @@ import InfoIcon from "@material-ui/icons/Info";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 
-const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) => {
+const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
 
-    const isSmallScreen = useMediaQuery('(max-width:1300px)');
-    const isTabletScreen = useMediaQuery('(max-width:960px)');
-    const [showActivity, setActivityShow] = useState(defaultActivityShow);
     const [isUpdating, setUpdating] = useState(false);
 
     const [selectedProducts, setSelectedProducts] = useState([])
@@ -73,6 +70,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             Header: 'Detail',
             minWidth: 300,
             width: 300,
+            sticky: "left",
             Cell: ({ row }) => (
                 <div style={{ display: "flex", alignItems: 'center' }}>
                     {isOffline ? <p> {row.original.detail}</p>
@@ -363,100 +361,103 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
     };
 
     return (<Fragment>
-        <Box display="flex" justifyContent="space-between" m={1}>
-            <Box display="flex" alignItems="center">
-                <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    disabled={isOffline}
-                    onClick={() => {
-                        setAddExistingProductDialog({ open: true, type: "product", parentId: null });
-                    }}
-                >
-                    {`Add ${routes.product.title}`}
-                </Button>
-                <Box mx={1} />
-                <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    disabled={isOffline}
-                    onClick={() => {
-                        setAddExistingProductDialog({ open: true, type: "package", parentId: null });
-                    }}
-                >
-                    {`Add ${routes.packages.title}`}
-                </Button>
-            </Box>
-            <Box display="flex">
-                <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
-                    <span>
+        <Grid container spacing={2} >
+            <Grid item xs={12} md={12} sm={12} >
+                <Box display="flex" justifyContent="space-between" m={1}>
+                    <Box display="flex">
                         <Button
                             variant="contained"
                             color="primary"
                             size="small"
-                            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                            onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
+                            disabled={isOffline}
+                            onClick={() => {
+                                setAddExistingProductDialog({ open: true, type: "product", parentId: null });
+                            }}
                         >
-                            Bulk Edit
+                            {`Add ${routes.product.title}`}
                         </Button>
-                    </span>
-                </HtmlTooltip>
-                <Box mx={1} />
-                <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-                        onClick={() => {
-                            const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection).map((rec: any) => {
-                                const obj: any = {};
-                                obj.id = rec._id;
-                                obj.type = rec?.type;
-                                obj.materialId = rec?.materialId;
-                                return obj
-                            })
-                            setDeleteData(dataToDelete)
-                        }}
-                        endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
-                    >
-                        Delete
-                    </Button>
-                </HtmlTooltip>
-            </Box>
-        </Box>
-        {columns && rowsData ?
-            <>
-                <Box
-                    p="6px"
-                    zIndex={5}
-                    width={
-                        isTabletScreen
-                            ? "calc(100vw - 20px)"
-                            : isSmallScreen
-                                ? "calc(100vw - 78px)"
-                                : showActivity ? "100%" : "calc(100vw - 100px)"
-                    }
-                    height="calc(100vh - 330px)"
-                >
-                    <CustomReactTable
-                        height="calc(100vh - 345px)"
-                        columns={columns}
-                        data={rowsData}
-                        isInValidCheck={(rowData) => !rowData.isValid}
-                        onSelect={setSelectedProducts}
-                        childrenProperty="subRows"
-                        uniqueKey="_id"
-                        hideSelection={isOffline}
-                    />
+                        <Box mx={1} />
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            disabled={isOffline}
+                            onClick={() => {
+                                setAddExistingProductDialog({ open: true, type: "package", parentId: null });
+                            }}
+                        >
+                            {`Add ${routes.packages.title}`}
+                        </Button>
+                    </Box>
+                    <Box display="flex">
+                        <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
+                            <span>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    size="small"
+                                    disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+                                    onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
+                                >
+                                    Bulk Edit
+                                </Button>
+                            </span>
+                        </HtmlTooltip>
+                        <Box mx={1} />
+                        <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+                                onClick={() => {
+                                    const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection).map((rec: any) => {
+                                        const obj: any = {};
+                                        obj.id = rec._id;
+                                        obj.type = rec?.type;
+                                        obj.materialId = rec?.materialId;
+                                        return obj
+                                    })
+                                    setDeleteData(dataToDelete)
+                                }}
+                                endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
+                            >
+                                Delete
+                            </Button>
+                        </HtmlTooltip>
+                    </Box>
                 </Box>
-            </>
-            : <Box p={2} height={500} bgcolor="white">
-                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-        }
+            </Grid>
+            <Grid item xs={12} md={12} sm={12} >
+                {columns && rowsData ?
+                    <Box
+                        zIndex={5}
+                        width={
+                            isTabletScreen
+                                ? "calc(100vw - 20px)"
+                                : isSmallScreen
+                                    ? "calc(100vw - 78px)"
+                                    : showActivity ? "100%" : "calc(100vw - 103px)"
+                        }
+                        height="calc(100vh - 350px)"
+                    >
+                        <CustomReactTable
+                            height="calc(100vh - 345px)"
+                            columns={columns}
+                            data={rowsData}
+                            isInValidCheck={(rowData) => !rowData.isValid}
+                            onSelect={setSelectedProducts}
+                            childrenProperty="subRows"
+                            uniqueKey="_id"
+                            hideSelection={isOffline}
+                        />
+                    </Box>
+                    : <Box p={2} height={500} bgcolor="white">
+                        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                    </Box>
+                }
+            </Grid>
+        </Grid>
         {deleteData && <ConfirmationDialog
             open={true}
             message={`Are you sure you want to delete the record(s)?`}

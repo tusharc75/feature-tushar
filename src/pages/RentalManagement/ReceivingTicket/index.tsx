@@ -16,7 +16,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
   gridLoadingTimeout, deliveryTicket, rentalManagement,
-  sidebarResource, productInventory as productInventoryHelperObject
+  sidebarResource, productInventory as productInventoryHelperObject, INVENTORY_STATUS
 } from "../../../constants/helpers";
 import { groupBy } from "lodash";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -81,8 +81,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   }, []);
 
   const fetchRecords = async () => {
-
-
     try {
       setNextStep(false)
       if (gridApi) {
@@ -121,9 +119,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
       })
       productAssets.forEach((d) => {
-        d["hideSelection"] = d.status === "In-Transit";
+        d["hideSelection"] = d.status === INVENTORY_STATUS.indTransit;
       })
-      if (productAssets.filter((e) => ["Under Review", "Scrap", "Lost"].includes(e.status)).length === productAssets.length) {
+      if (productAssets.filter((e) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(e.status)).length === productAssets.length) {
         setNextStep(true)
       }
       dispatch({ type: "initialize", data: productAssets, count: productAssets.length });
@@ -206,7 +204,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       <Button
         onClick={() => {
           setDownlodingFile(true);
-
           axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
             .then(({ data }) => {
               axiosInstance()
@@ -234,16 +231,15 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         color="primary"
         type="button"
         size="small"
-        disabled={downlodingFile}
+        disabled={downlodingFile || isOffline}
         startIcon={<AiFillFilePdf />}
       >
         {downlodingFile ? "Please wait..." : "Preview"}
       </Button>
       <Box mx={1} />
-
       <Button variant="outlined" color="primary" aria-controls="simple-menu"
         aria-haspopup="true"
-        disabled={selectedRecords.length === 0}
+        disabled={selectedRecords.length === 0 || isOffline}
         size="small"
         onClick={handleClick}
         endIcon={<ArrowDropDownIcon />}>
@@ -271,17 +267,17 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         }}>Repair</MenuItem> */}
         <MenuItem onClick={() => {
           setAnchorEl(null)
-          setStatusToUpdate({ open: true, isUpdating: false, status: "Scrap", message: "" })
+          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
         }}>Scrap</MenuItem>
         <MenuItem onClick={() => {
           setAnchorEl(null)
-          setStatusToUpdate({ open: true, isUpdating: false, status: "Lost", message: "" })
+          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
         }}>Lost</MenuItem>
       </Menu>
-
       <Box mx={1} />
       <IconButton
-        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || ["Lost"].includes(f.status)))}
+        disabled={(selectedRecords.length === 0)
+          || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
         onClick={() => {
           handleReceivingTicketDialog(selectedRecords)
         }}
@@ -295,7 +291,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       </IconButton>
       <Box mx={1} />
       <IconButton
-        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || ["Under Review"].includes(f.status)))}
+        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)))}
         onClick={() => {
           setShowRemoveAssetFromReceivingTicketDialog(true)
         }}

@@ -251,7 +251,7 @@ export default function NewCreateQuotePdfTemplate() {
                 responseType: "blob",
             })
             .then(({ data }) => {
-
+                setIsPreview(false)
                 toastConfig.setToastConfig({
                     open: true,
                     type: "success",
@@ -265,6 +265,7 @@ export default function NewCreateQuotePdfTemplate() {
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
+                setIsPreview(false)
             });
     }
 
@@ -403,14 +404,14 @@ export default function NewCreateQuotePdfTemplate() {
                                     </Grid>
                                     <Grid item xs={12} md={6} className={`${classes.saveButtonContainer} gap-2`}>
                                         <Button disabled={isUpdating || !hasPermissionToUpdate} size="small" color="primary"
-                                            onClick={submitForm} variant="contained">
-                                            {isUpdating && <CircularProgress size={24} />} {" "} Save
+                                            onClick={submitForm} variant="contained" endIcon={isUpdating && <CircularProgress color='inherit' size={18} />}>
+                                            Save
                                         </Button>
 
                                         {!quoteData &&
                                             <Button disabled={isUpdatingAndPreview || !hasPermissionToUpdate} size="small" color="primary"
-                                                onClick={() => { setIsPreview(true); submitForm() }} variant="contained">
-                                                {isUpdatingAndPreview && <CircularProgress size={24} />} {" "} Save & Preview
+                                                onClick={() => { setIsPreview(true); submitForm() }} variant="contained" endIcon={isUpdatingAndPreview && <CircularProgress color='inherit' size={18} />}>
+                                                 Save & Preview
                                             </Button>
                                         }
 

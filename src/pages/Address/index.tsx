@@ -204,17 +204,19 @@ const Address = () => {
 
   const NameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
+      <Link to={`${routes.addressDetail.path}/${params.data._id}`}>
       <span
-      // className="link"
-      // onClick={() => {
-      //   if (params.data?.isAllowedToUpdate) {
-      //     setAddressResource(params.data);
-      //     setOpen({ title: `Edit Address`, open: true, edit: true, isClone: false });
-      //   }
-      // }}
+      className="link"
+      onClick={() => {
+        if (params.data?.isAllowedToUpdate) {
+          setAddressResource(params.data);
+          setOpen({ title: `Edit Address`, open: true, edit: true, isClone: false });
+        }
+      }}
       >
         <CustomRenderCell value={params.value} />
       </span>
+      </Link>
     </span>
   );
 
@@ -335,7 +337,7 @@ const Address = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.address.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.address.title}]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
@@ -360,7 +362,7 @@ const Address = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-              <FaWarehouse size={20} style={{ paddingBottom: '3px' }} /> <span className="listingHeader">{routes.address.title}</span>
+              <FaWarehouse size={20} style={{ paddingBottom: '3px' }} /> <span className="listingHeader">Address</span>
             </Grid>
             <Grid md={6} sm={6} xs={12} className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">

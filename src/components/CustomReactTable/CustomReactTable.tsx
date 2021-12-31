@@ -269,9 +269,9 @@ export default function CustomReactTable({
                         rows?.length > 0 &&
                         <TableFooter style={{ overflowY: "auto", overflowX: "hidden" }} className="footer">
                             {footerGroups.map(group => (
-                                <TableRow {...group.getFooterGroupProps()}>
+                                <TableRow {...group.getFooterGroupProps()} className="tr">
                                     {group.headers.map(column => (
-                                        <TableCell {...column.getFooterProps()} className="font-weight-bold text-black">
+                                        <TableCell {...column.getHeaderProps()} className="th text-truncate font-weight-bold text-black">
                                             {column.render('Footer')}
                                         </TableCell>
                                     ))}
@@ -279,10 +279,8 @@ export default function CustomReactTable({
                             ))}
                         </TableFooter>
                     }
-
                 </MaUTable>
             </div>
-
             {/* <TablePagination
                 component="div"
                 count={data.length}

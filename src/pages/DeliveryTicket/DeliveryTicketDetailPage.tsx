@@ -33,6 +33,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { AiFillFilePdf } from "react-icons/ai";
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
+import { updateSignatureOffline } from './deliveryTicketOfflineHelper';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -116,7 +117,6 @@ export default function DeliveryTicketDetail(props) {
 
         } else {
           setLocationKeys((keys) => [location.key, ...keys])
-          console.log(tab)
           // Handle back event
           setTabValue(tab ? parseInt(tab) : 1)
 
@@ -242,11 +242,11 @@ export default function DeliveryTicketDetail(props) {
         }
         getDeliveryTicketFields(data)
         setDeliveryTicketData(data)
-        const startDeliverySignatures = data?.signatures.filter(f => f.status === "Start Delivery" && f.date);
+        const startDeliverySignatures = data?.signatures?.filter(f => f.status === "Start Delivery" && f.date);
         if (startDeliverySignatures && startDeliverySignatures.length > 0) {
           setStartDeliveryDate(moment(startDeliverySignatures[startDeliverySignatures.length - 1].date).format(dateTimeFormat));
         }
-        const signOffSignatures = data?.signatures.filter(f => f.status === "Sign-Off" && f.date);
+        const signOffSignatures = data?.signatures?.filter(f => f.status === "Sign-Off" && f.date);
         if (signOffSignatures && signOffSignatures.length > 0) {
           setSignOffDate(moment(signOffSignatures[signOffSignatures.length - 1].date).format(dateTimeFormat));
         }
@@ -324,6 +324,8 @@ export default function DeliveryTicketDetail(props) {
         data = response?.productInventory.map((u) => {
           return u.inventoryDetail;
         })
+        const inventory = deliveryTicket?.productInventory?.map((e) => e.optionValue);
+        data = response?.productInventory?.filter(d => inventory?.includes(d.inventory)).map(obj => obj.inventoryDetail)
       }
       else {
         let ids = JSON.stringify(productInventories)
@@ -337,7 +339,7 @@ export default function DeliveryTicketDetail(props) {
         };
         return res;
       });
-      dispatch({ type: "initialize", data: rows, count: rows.count });
+      dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
     }
     catch (error) {
@@ -404,7 +406,7 @@ export default function DeliveryTicketDetail(props) {
   let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Sign-off - Dispatch" :
     (deliveryTicketData?.status === "In-Transit") ? "Sign-off - Delivery" : "" : ""
 
-  const handleSignature = (signedData) => {
+  const handleSignature = async (signedData) => {
     let signaturesToSend = [...signatures];
     const status = label === "Sign-off - Dispatch" ? "Start Delivery" : "Sign-Off";
 
@@ -423,19 +425,28 @@ export default function DeliveryTicketDetail(props) {
     }
     setSignatures([...signaturesToSend]);
     if (signaturesToSend.length === 2 || signaturesToSend.length === 4) {
-      setSubmittingSign(true)
-      axiosInstance().put(`${deliveryTicketApi}/signature`, {
-        _id: id,
-        signatures: [...signaturesToSend]
-      }).then(() => {
-        handleChangeStatus(label)
+      if (isOffline) {
+        setSubmittingSign(true)
+        const response = await updateSignatureOffline(id, signaturesToSend)
+        fetchDeliveryTicketData()
         setOpenSignatureDialog(false)
         setSubmittingSign(false)
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-        setOpenSignatureDialog(false)
-        setSubmittingSign(false)
-      });
+      }
+      else {
+        setSubmittingSign(true)
+        axiosInstance().put(`${deliveryTicketApi}/signature`, {
+          _id: id,
+          signatures: [...signaturesToSend]
+        }).then(() => {
+          handleChangeStatus(label)
+          setOpenSignatureDialog(false)
+          setSubmittingSign(false)
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+          setOpenSignatureDialog(false)
+          setSubmittingSign(false)
+        });
+      }
     }
   }
 
@@ -622,12 +633,12 @@ export default function DeliveryTicketDetail(props) {
                         <Typography variant="subtitle1" className="font-weight-bold text-primary">
                           Serialized Assets
                         </Typography>
-
                         {
                           deliveryTicketData?.status === "New" && <IconButton
                             onClick={() => {
                               setAddSerializedAssetDialog(true)
                             }}
+                            disabled={isOffline}
                             color='primary'
                             size="small"
                           >
@@ -639,7 +650,7 @@ export default function DeliveryTicketDetail(props) {
                         }
                         {
                           deliveryTicketData?.status === "New" && <IconButton
-                            disabled={selectedRecords.length === 0}
+                            disabled={selectedRecords.length === 0 || isOffline}
                             onClick={() => {
                               setShowRemoveAssetFromLoadingTicketDialog(true)
                             }}
@@ -660,7 +671,7 @@ export default function DeliveryTicketDetail(props) {
                             type="button"
                             size="small"
                             startIcon={isMobile ? '' : <AiFillFilePdf />}
-                            disabled={downlodingFile}
+                            disabled={downlodingFile || isOffline}
                             onClick={() => { handleViewPdf(false) }}
                           >
                             {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
@@ -673,7 +684,7 @@ export default function DeliveryTicketDetail(props) {
                             type="button"
                             size="small"
                             startIcon={isMobile ? '' : <AiFillFilePdf />}
-                            disabled={downlodingFile}
+                            disabled={downlodingFile || isOffline}
                             onClick={() => { handleViewPdf(true) }}
                           >
                             {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
@@ -714,26 +725,26 @@ export default function DeliveryTicketDetail(props) {
                           renderedFrom={"receivingTicketDetailInventoryPage"}
                           onClone={() => {
                           }}
-
                         /> :
-
-                          Object.keys(frameWorkComponent).length > 0 ? <CustomAgGrid
-                            allowSelection={deliveryTicketData?.status === "New"}
-                            allowAction={false}
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameWorkComponent}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            actionWidth={150}
-                            loading={false}
-                            renderedFrom={renderedFrom}
-                            refreshGrid={fetchProductInventory}
-                          /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+                          Object.keys(frameWorkComponent).length > 0 ?
+                            <CustomAgGrid
+                              isClientSideGrid={true}
+                              allowSelection={deliveryTicketData?.status === "New"}
+                              allowAction={false}
+                              columns={columns}
+                              dataRows={dataRows}
+                              frameworkComponents={frameWorkComponent}
+                              setGridApi={setGridApi}
+                              dispatch={dispatch}
+                              rowCount={rowCount}
+                              limit={limit}
+                              pageSizes={pageSizes}
+                              page={page}
+                              actionWidth={150}
+                              loading={false}
+                              renderedFrom={renderedFrom}
+                              refreshGrid={fetchProductInventory}
+                            /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                         }
                       </Grid>
                     </Grid>

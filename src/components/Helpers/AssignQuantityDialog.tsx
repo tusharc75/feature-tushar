@@ -98,7 +98,6 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
         allResourceData.length > 0
           ? allResourceData.filter((d) => !customFormArr.includes(d?.id))
           : resourceData.filter((d) => !customFormArr.includes(d?.id));
-      console.log(customFormArr, filteredData);
       setResourceData(filteredData);
     }
   }, [formData]);
@@ -119,7 +118,6 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
             });
           }
 
-          console.log(existingData);
 
           let newData = [];
           if (resource.includes('warehouse')) {

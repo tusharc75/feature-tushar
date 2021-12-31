@@ -88,7 +88,6 @@ const RentalManagementDetailsPage = () => {
 
         } else {
           setLocationKeys((keys) => [location.key, ...keys])
-          console.log(tab)
           // Handle back event
           setTabValue(tab ? parseInt(tab) : 0)
         }
@@ -424,7 +423,11 @@ const RentalManagementDetailsPage = () => {
                     <Productpackage
                       rentalManagementData={rentalManagementData}
                       setNextStep={setNextStep}
-                      currencySymbol={currencySymbol} />
+                      currencySymbol={currencySymbol}
+                      isSmallScreen={isSmallScreen}
+                      isTabletScreen={isTabletScreen}
+                      showActivity={showActivity}
+                    />
                   )}
                   {currentStep === 1 && rentalManagementData &&
                     <AdditionalCost

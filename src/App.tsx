@@ -37,6 +37,7 @@ import Calender from './pages/Activity/Calendar';
 import PasswordSetup from './pages/Auth/PasswordSetup';
 import ForgetPassword from './pages/Auth/ForgetPassword';
 import ProductCategory from './pages/ProductCategory';
+import ProductCategoryDetailPage from "./pages/ProductCategory/ProductCategoryDetailPage"
 import ProductTemplate from './pages/ProductTemplate';
 import CreateProductTemplate from './pages/ProductTemplate/CreateProductTemplate';
 import User from './pages/User';
@@ -102,14 +103,19 @@ import PurchaseOrderDetailsPage from './pages/PurchaseOrder/PurchaseOrderDetails
 import { entity } from './constants/helpers';
 import TransferAsset from './pages/TransferAssets/Index';
 import TransferAssetDetailPage from './pages/TransferAssets/TransferAssetDetailPage';
+import Address from "./pages/Address";
+import AddressDetailPage from './pages/Address/AddressDetailPage'
 import Logout from './pages/Auth/Logout';
-import Address from './pages/Address';
+import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
+
+var notificationInterval: any = null;
+
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
-  const [isOffline, setIsOffline] = useState(false);
+  const { isOffline } = useContext(CustomOfflineContext);
   let mappedEntities = JSON.parse(localStorage.getItem('mappedEntities'));
 
   const {
@@ -137,39 +143,6 @@ function App() {
   });
   // ReactGA.initialize(TRACKING_ID);
 
-  window.addEventListener(
-    'load',
-    function (e) {
-      //@ts-ignore
-      if (navigator.onLine) {
-        if (isOffline) setIsOffline(false);
-      } else {
-        setIsOffline(true);
-      }
-    },
-    false
-  );
-
-  window.addEventListener(
-    'online',
-    function (e) {
-      if (isOffline) setIsOffline(false);
-    },
-    false
-  );
-
-  window.addEventListener(
-    'offline',
-    function (e) {
-      const pathnames = history.location.pathname.split('/').filter((x) => x);
-
-      if (!(history.location.pathname === '/' || ['rental-management'].indexOf(pathnames[0]) >= 0)) {
-        setIsOffline(true);
-      }
-    },
-    false
-  );
-
   useEffect(() => {
     if (!mappedEntities) {
       axiosInstance()
@@ -186,15 +159,37 @@ function App() {
     }
   }, [mappedEntities]);
 
+  useEffect(() => {
+    try {
+      if (!isOffline) {
+        getNotification();
+        getChatNotification();
+        history.listen((location, action) => {
+          ReactGA.set({ page: location.pathname });
+          ReactGA.pageview(location.pathname);
+        });
+      }
+      if (isOffline) {
+        if (notificationInterval) {
+          clearInterval(notificationInterval)
+        }
+      }
+      else {
+        notificationInterval = setInterval(async () => {
+          await getNotification();
+        }, 60000);
+      }
+    } catch (e) { }
+  }, [isOffline]);
+
   const getNotification = async () => {
-    if (localStorage.getItem('token')) {
+    if (localStorage.getItem('token') && !isOffline) {
       await axiosInstance()
         .get(`/user/notification/unseen`)
         .then(({ data: { frontendReloadRequired, count } }) => {
           if (count > 0) {
             notification.setCount(count);
           }
-
           if (frontendReloadRequired) {
             // dispatch({ type: USER_LOADING, payload: true });
             axiosInstance()
@@ -229,34 +224,16 @@ function App() {
   };
 
   const getChatNotification = async () => {
-    if (localStorage.getItem('token')) {
-      if (!isOffline) {
-        await axiosInstance()
-          .get(`/user/user-notification/unseen`)
-          .then(({ data: { count } }) => {
-            if (count > 0) {
-              chatNotification.setCount(count);
-            }
-          });
-      }
+    if (localStorage.getItem('token') && !isOffline) {
+      await axiosInstance()
+        .get(`/user/user-notification/unseen`)
+        .then(({ data: { count } }) => {
+          if (count > 0) {
+            chatNotification.setCount(count);
+          }
+        });
     }
   };
-
-  useEffect(() => {
-    try {
-      if (!isOffline) {
-        getNotification();
-        getChatNotification();
-        history.listen((location, action) => {
-          ReactGA.set({ page: location.pathname });
-          ReactGA.pageview(location.pathname);
-        });
-        setInterval(async () => {
-          await getNotification();
-        }, 60000);
-      }
-    } catch (e) { }
-  }, []);
 
   const conditionalRedirect = (Comp, location) => {
     let redirectToAnotherScreen = null;
@@ -440,6 +417,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.productCategory.path}>
               <ProductCategory />
+              </PrivateRoute>
+              <PrivateRoute exact path={routes.productCategoryDetail.path + '/:id'}>
+              <ProductCategoryDetailPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.productTemplate.path}>
               <ProductTemplate />
@@ -579,6 +559,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.address.path}`}>
               <Address />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.addressDetail.path}/:id`}>
+              <AddressDetailPage />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
