@@ -948,6 +948,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                     setErrors
                                                 );
                                             }}
+                                            close={() => setShowConfirmDialog(false)}
                                             onClose={() => {
                                                 setShowConfirmDialog(false)
                                                 onClose()

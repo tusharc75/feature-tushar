@@ -691,6 +691,7 @@ export default function ManageContact(props) {
                   </CustomDialogFooter>
                   {showConfirmDialog ? (
                     <ConfirmCancelDialog
+                      close={() => setShowConfirmDialog(false)}
                       open={showConfirmDialog}
                       onSave={() => {
                         setShowConfirmDialog(false);

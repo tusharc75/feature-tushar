@@ -71,13 +71,12 @@ const DetailsPageHeader = (props) => {
   return (
     <>
       <Paper elevation={0} className={"mainHeader"}>
-        <Grid container justify="space-between" className="detailHeader detail-header-purchase-order">
+        <Grid container justifyContent="space-between" className="detailHeader detail-header-purchase-order">
           <Grid item className="d-flex align-items-center">
             {loading ? (
               <Skeleton width={100} />
             ) : showHeading ? (
-              <>
-                <Grid className={"mobileHeading"}>
+                <div className={"mobileHeading"}>
                   <Typography
                     className="text-capitalize"
                     style={{ display: "inline-block" }}
@@ -101,15 +100,14 @@ const DetailsPageHeader = (props) => {
                       }
                     </span>
                   </Typography>
-                </Grid>
-              </>
+                </div>
             ) : null}
           </Grid>
-          <Grid id="detailHeaderPageActions" item className={isMobile ? "d-flex align-items-center " : "d-flex align-items-center gap-2"} justify="flex-end">{children}</Grid>
+          <Grid id="detailHeaderPageActions" item className={isMobile ? "d-flex align-items-center justify-flex-end" : "d-flex align-items-center gap-2 justify-flex-end"}>{children}</Grid>
         </Grid>
         <Box className="gap-2 detailHeaderDashboard">
           {loading ? (
-            <Grid container wrap="nowrap">
+            <Box display="flex" flexWrap="nowrap">
               {[...Array(4).keys()].map((i, index) => (
                 <React.Fragment key={index}>
                   <Skeleton
@@ -121,7 +119,7 @@ const DetailsPageHeader = (props) => {
                   <Box marginY={1} />
                 </React.Fragment>
               ))}
-            </Grid>
+            </Box>
           ) : mainPoints && Object.keys(mainPoints).length ? (
             Object.keys(mainPoints).map((key, i) => {
               return (

@@ -456,6 +456,7 @@ export const AddField = (props) => {
           {
             showConfirmDialog ?
               <ConfirmCancelDialog
+                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false)
