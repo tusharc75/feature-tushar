@@ -23,13 +23,14 @@ const AssetChart = (props: ChartProps) => {
   React.useEffect(() => {
     if (data.length > 0) {
       const length = data.length;
-      const total = data.map((_d) => _d?.inUsePercentage).reduce((acc, val) => acc + val) / length ?? 0;
+      let total = data.map((_d) => _d?.inUsePercentage).reduce((acc, val) => acc + val) / length ?? 0;
+      total = total !== 0 ? parseFloat(total.toFixed(4)) : total
 
       const labels = data.map((_d) => _d?.assetNumber)
       const dataSet = data.map((_d) => msToH(_d?.useTime))
 
       setPieData({
-        "labels": ["In Use (%)", "Total Utilization (%)"],
+        "labels": [`In Use (${total} %)`, "Total Utilization (%)"],
         datasets: [{
           label: "(%) Utilization",
           data: [total, 100],
