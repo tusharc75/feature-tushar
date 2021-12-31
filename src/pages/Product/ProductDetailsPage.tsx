@@ -111,7 +111,7 @@ const ProductDetailsPage = () => {
     if (selectedWarehouse) {
       setWarehouseInventoriesLoading(true);
       axiosInstance()
-        .get(`${productInventory.api}?limit=5&filterById=[{"field":"warehouse","term":"${selectedWarehouse}"},{"field":"product","term":"${id}"}]&filterByIdType=and`)
+        .get(`${productInventory.api}?limit=6&filterById=[{"field":"warehouse","term":"${selectedWarehouse}"},{"field":"product","term":"${id}"}]&filterByIdType=and`)
         .then(({ data: { data } }) => {
           setWarehouseInventories(data);
           setWarehouseInventoriesLoading(false);
@@ -649,9 +649,10 @@ const ProductDetailsPage = () => {
                                     className="d-flex align-items-center"
                                     style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
                                   >
-                                    Loading {inventoriesWarehouse[0].assetNu}
+                                    Loading
                                   </Typography>
-                                  : inventoriesWarehouse.map((i, index) => (
+                                  :
+                                  inventoriesWarehouse.map((i, index) => (
                                     <Fragment key={i._id}>
                                       {i?.assetNumber ? (
                                         index === 5 ? (
@@ -662,7 +663,7 @@ const ProductDetailsPage = () => {
                                             color="primary"
                                             onClick={() => {
                                               history.push(`${routes.productInventory.path}`, {
-                                                warehouse: productWarehouseData.find((d) => d?.warehouse?.optionLabel === selectedWarehouse).warehouse,
+                                                warehouse: productWarehouseData.find((d) => d?.warehouse?.optionValue === selectedWarehouse).warehouse,
                                                 product: { id: id, name: headingLabel }
                                               });
                                             }}
