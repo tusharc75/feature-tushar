@@ -63,7 +63,7 @@ export default function ManageContact(props) {
   const {
     state: { user, permissions }
   }: any = useData();
- 
+
 
   const disableOwnerSelection = !isNew && user.user._id !== contactData.initialValues.owner;
 
@@ -79,7 +79,7 @@ export default function ManageContact(props) {
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showContactDialog, setShowContactDialog] = useState(false);
-  const [addressOpen, setAddressOpen] = useState({open:false, isClone: false})
+  const [addressOpen, setAddressOpen] = useState({ open: false, isClone: false })
   const [addressDataSource, setAddressDataSource] = useState([]);
 
   useEffect(() => {
@@ -101,7 +101,7 @@ export default function ManageContact(props) {
       if (accountId && addressDataDropdown) {
         setAddressDataSource(addressDataDropdown?.option?.filter(d => contactData?.initialValues?.mailingAddress?.includes(d.optionValue)) ?? [])
       }
-    
+
 
       if (fromProject) {
         setOwnerCollaboratorCommonDataSource(owners);
@@ -178,7 +178,7 @@ export default function ManageContact(props) {
     setReportsToDataSource(reportsToMainDataSource.filter((d) => d.parentAccount === selectedAccount));
   };
 
- 
+
 
   const handleGetAddedContact = (data, selectedAccount) => {
     if (data?._id) {
@@ -260,10 +260,10 @@ export default function ManageContact(props) {
             isClone
               ? 'Clone'
               : isNew
-              ? contactResource === 'customerContact'
-                ? 'Add Customer Contact'
-                : 'Add Supplier Contact'
-              : `Editing ${contactData.initialValues?.firstName ?? ''} ${contactData.initialValues?.lastName ?? ''}`
+                ? contactResource === 'customerContact'
+                  ? 'Add Customer Contact'
+                  : 'Add Supplier Contact'
+                : `Editing ${contactData.initialValues?.firstName ?? ''} ${contactData.initialValues?.lastName ?? ''}`
           }
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
@@ -386,8 +386,8 @@ export default function ManageContact(props) {
                                                 }}
                                               />
                                             </Grid>
-                                                
-                                              {permissions.customerContact?.isCreate && (
+
+                                            {permissions.customerContact?.isCreate && (
                                               <Grid item xs={1} sm={1} md={1}>
                                                 <Tooltip title="Add Address" className="mt-1">
                                                   <IconButton
@@ -401,8 +401,8 @@ export default function ManageContact(props) {
                                                   </IconButton>
                                                 </Tooltip>
                                               </Grid>
-                                              )}
-                                            
+                                            )}
+
 
                                             {field?.tooltipMessage ? (
                                               <Grid item xs={1} sm={1} md={1}>
@@ -607,8 +607,8 @@ export default function ManageContact(props) {
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                               : null
                                           }
                                         />
@@ -621,24 +621,24 @@ export default function ManageContact(props) {
                           ))}
                     </Form>
                     {addressOpen?.open && (
-                  <ManageAddressDialog
-                  open={addressOpen?.open}
-                  onClose={() => setAddressOpen({open:false,isClone:false}) }
-                  onSuccess={(data) => {
-                   
-                    setAddressOpen({open:false,isClone:false})
-                    setFieldValue("mailingAddress",data.fullAddress)
-                    setAddressDataSource((prevState) => [...prevState,
-                      {
-                        default: false,
-                        optionLabel: data.fullAddress,
-                        optionValue: data._id,
-                        order: addressDataSource.length + 1,
-                      }]);
-                  }}
-               
-                  />
-                )}
+                      <ManageAddressDialog
+                        open={addressOpen?.open}
+                        onClose={() => setAddressOpen({ open: false, isClone: false })}
+                        onSuccess={(data) => {
+
+                          setAddressOpen({ open: false, isClone: false })
+                          setFieldValue("mailingAddress", data.fullAddress)
+                          setAddressDataSource((prevState) => [...prevState,
+                          {
+                            default: false,
+                            optionLabel: data.fullAddress,
+                            optionValue: data._id,
+                            order: addressDataSource.length + 1,
+                          }]);
+                        }}
+
+                      />
+                    )}
                   </CustomDialogContent>
                   {showContactDialog ? (
                     <ManageContactDialog
