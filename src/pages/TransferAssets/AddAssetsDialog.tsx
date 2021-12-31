@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment, FC } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import { Box, CircularProgress } from '@material-ui/core';
@@ -12,7 +11,6 @@ import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransi
 import { prepareDataForGrid } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { useData } from '../../StateProvider/Provider';
 import Dialog from '@material-ui/core/Dialog/Dialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -42,10 +40,6 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
   const { getColumnData } = useColumns();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-
-  const {
-    state: { permissions }
-  }: any = useData();
 
   useEffect(() => {
     fetchGridColumns();
@@ -182,10 +176,10 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
       axiosInstance()
         .put(`${routes.transferAsset.path}/add-asset/${transferAssetId}`, { assets: ids })
         .then(() => {
-          setAdding(false);
-          fetchAssets();
-          closeDialog();
           updateTransferStatus('In Progress');
+          fetchAssets();
+          setAdding(false);
+          closeDialog();
         })
         .catch((err) => {
           setAdding(false);
