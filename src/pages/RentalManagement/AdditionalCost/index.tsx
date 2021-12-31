@@ -229,6 +229,8 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                     }}
                     renderedFrom="rentalmanagmentadditionalcost"
                     refreshGrid={fetchAdditionalCost}
+                    isFooter={true}
+                    currency={rentalManagementData?.currency?.toLowerCase()}
                 />
                 : <Box
                     p={2}
