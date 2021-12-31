@@ -52,6 +52,8 @@ const User: FC = () => {
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [showBrandAssignConfirmation, setShowBrandAssignConfirmation] = useState(false)
   const [brandAssigningLoading, setBrandAssigningLoading] = useState(false);
+  const [showBrandUnAssignConfirmation, setShowBrandUnAssignConfirmation] = useState(false)
+  const [brandUnAssigningLoading, setBrandUnAssigningLoading] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [unAssignLoading, setUnAssignLoading] = useState(false);
@@ -416,6 +418,10 @@ const User: FC = () => {
     setShowBrandAssignConfirmation(true)
   }
 
+  const handleUnAssignBrandAdmin = () => {
+    setShowBrandUnAssignConfirmation(true)
+  }
+
   const assignBrandAdmin = async () => {
     setBrandAssigningLoading(true)
     const records = selectedRecords.map((record) => record._id)
@@ -435,6 +441,28 @@ const User: FC = () => {
       toastConfig.setToastConfig(error);
       setShowBrandAssignConfirmation(false)
       setBrandAssigningLoading(false)
+    });
+  }
+
+  const unAssignBrandAdmin = async () => {
+    setBrandUnAssigningLoading(true)
+    const records = selectedRecords.map((record) => record._id)
+    axiosInstance()
+      .put('/user/unassign-user-admin',{'users': records})
+      .then(({data}) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
+        setShowBrandUnAssignConfirmation(false)
+        setBrandUnAssigningLoading(false)
+        fetchUsers()
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setShowBrandUnAssignConfirmation(false)
+        setBrandUnAssigningLoading(false)
     });
   }
 
@@ -526,6 +554,10 @@ const User: FC = () => {
     }
   }
 
+  const isLoggedInUserBrandAdmin = 'userType' in user?.user && user?.user?.userType === userType.brandAdmin;
+  const isRoleSetUpPermission = permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate;
+  const isUserSetupPermission = isLoggedInUserBrandAdmin || isRoleSetUpPermission;
+
 
   return (
     <>
@@ -535,7 +567,9 @@ const User: FC = () => {
             open={isOpen?.open}
             isClone={isOpen?.isClone}
             close={handleClose} onSuccess={(obj) => { setUserList([]); fetchUsers() }}
-            userId={isOpen?.idToClone} dataToUpdate={null} isNew={true} />
+            userId={isOpen?.idToClone} dataToUpdate={null} isNew={true} 
+            isUserSetupPermission = {isUserSetupPermission}
+            />
           // <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
         )
       }
@@ -552,7 +586,8 @@ const User: FC = () => {
             fetchUsers={() => fetchUsers()}
             userList={userList}
             selectedRecords={selectedRecords}
-            isRoleSetUpPermission = {permissions?.role?.isCreate && permissions?.entity?.isCreate && permissions?.user?.isCreate}
+            isRoleSetUpPermission = {isRoleSetUpPermission}
+            isApprovalProcess = {isLoggedInUserBrandAdmin}
             />
         )
       }
@@ -674,15 +709,18 @@ const User: FC = () => {
               openUserSetupDialog={() => {
                 setOpenUserSetupDialog(true);
               }}
-              userSetupDisabled={selectedRecords.length === 0 || !(user?.user?.userType === userType.brandAdmin)}
+              userSetupDisabled={selectedRecords.length === 0}
               manageDeleteUser={() => {
                 if (selectedRecords[0] && selectedRecords[0]?._id) {
                   setDeleteUser(selectedRecords[0])
                   setShowDeleteDialog(true)
                 }
               }}
-              isAssignBrandAdmin={user?.user?.userType === userType.brandAdmin}
+              isAssignBrandAdmin={user?.user?.userType === userType.brandAdmin && selectedRecords.some((records) => 'userType' in records && records.userType === userType.brandAdmin)}
               handleAssignBrandAdmin={handleAssignBrandAdmin}
+              isUserSetupPermission={isUserSetupPermission}
+              isUnAssignBrandAdmin={selectedRecords.length > 0 && selectedRecords.filter((records) => 'userType' in records).length === selectedRecords.length}
+              handleUnAssignBrandAdmin={handleUnAssignBrandAdmin}
             />
           </div>
 
@@ -768,6 +806,19 @@ const User: FC = () => {
             okBtnLoading={brandAssigningLoading}
             onOk={assignBrandAdmin}
           />
+        }
+        {
+          showBrandUnAssignConfirmation && 
+            <ConfirmationDialog
+              open={showBrandUnAssignConfirmation}
+              onClose={() => {
+                setShowBrandUnAssignConfirmation(false)
+                fetchUsers()
+              }}
+              message={`Are you sure want to unassign the user from Brand Admin role`}
+              okBtnLoading={brandUnAssigningLoading}
+              onOk={unAssignBrandAdmin}
+            />
         }
         {
           showDeleteDialog ?

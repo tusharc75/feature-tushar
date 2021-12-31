@@ -230,7 +230,7 @@ const ProductInventoryDetailsPage = () => {
       fetchProductInventoryStates()
       setHeadingLbl(`${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
       setCustomizedRoutes([routes.productInventory,
-      { title: `${data?.serialNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
+      { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
       setProductId(data?.product?.optionValue)
       setProductInventoryData(data);
       setLoadingProductInventory(false);

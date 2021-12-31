@@ -365,6 +365,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
+                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
