@@ -10,12 +10,12 @@ import axiosInstance from "../../axios/axiosInstance";
 import { GiStockpiles } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { AddOutlined, ExpandMore } from "@material-ui/icons";
-import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
+import { Box, Chip, Menu, MenuItem, TextField } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
+import { productInventory, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL, product } from '../../constants/helpers';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import ManageProductInventory from "./ManageProductInventory";
@@ -30,6 +30,7 @@ import { MdAccountCircle } from "react-icons/md";
 import { AiFillCrown, MdAdd } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
+import { Autocomplete } from "@material-ui/lab";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -49,6 +50,11 @@ const ProductInventory = () => {
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
     const localStorageSelectedRecords = "warehouse_selected";
+
+    const [productCategoryList, setProductCategoryList] = useState([]);
+    const [productFilterList, setProductFilterList] = useState([]);
+    const [productCategory, setProductCategory] = useState(null);
+    const [productFilter, setProductFilter] = useState(null);
 
     const {
         state: { permissions },
@@ -71,7 +77,27 @@ const ProductInventory = () => {
 
     useEffect(() => {
         fetchProductInventory()
-    }, [page, limit, filters, sorting, search, warehouse, redirectProduct, fromPurchaseOrder]);
+    }, [page, limit, filters, sorting, search, warehouse, redirectProduct, fromPurchaseOrder, productCategory, productFilter]);
+
+    useEffect(() => {
+        axiosInstance().get("/product-category?sortBy=name&orderBy=asc").then(({ data: { data } }) => {
+            setProductCategoryList(data)
+        })
+    }, [])
+
+    useEffect(() => {
+        if (productCategory && productCategory !== "") {
+            axiosInstance().get(`${product.api}?filterById=[{"field":"productCategory","term":"${productCategory}"}]`).then(({ data }) => {
+                setProductFilterList(data?.data)
+                setProductFilter(null);
+            })
+        }
+        else {
+            setProductFilterList([])
+            setProductFilter(null);
+        }
+
+    }, [productCategory])
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -160,6 +186,12 @@ const ProductInventory = () => {
         if (fromPurchaseOrder?.pOId && fromPurchaseOrder?.productId) {
             filterById.push({ field: "pONumber", term: fromPurchaseOrder.pOId });
             filterById.push({ field: "product", term: fromPurchaseOrder.productId });
+        }
+        if (productCategory && productCategory !== "") {
+            filterById.push({ field: 'productCategory', term: productCategory });
+        }
+        if (productFilter && productFilter !== "") {
+            filterById.push({ field: 'product', term: productFilter });
         }
         if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
@@ -331,8 +363,71 @@ const ProductInventory = () => {
                                 />
                             </>
                         )
-
                         }
+                        <Autocomplete
+                            style={{ width: "250px" }}
+                            options={productCategoryList}
+                            getOptionLabel={(option: any) => option ? option.name : ""}
+                            getOptionSelected={(option: any, val) =>
+                                option._id === val
+                            }
+                            value={productCategoryList.filter((data) => data._id === productCategory).length
+                                ? productCategoryList.filter((data) => data._id === productCategory)[0]
+                                : ""
+                            }
+                            onChange={(e, val) => {
+                                setProductCategory(val && val._id ? val._id : "")
+                            }}
+                            renderInput={(params) => (
+
+                                isMobile ?
+                                    <TextField
+                                        {...params}
+                                        margin="dense"
+                                        name="productCategory"
+                                        placeholder="Product Category"
+                                        variant="standard"
+                                        fullWidth
+                                        className={isMobile ? "serchBox" : ""}
+
+
+                                    /> :
+                                    <TextField
+                                        {...params}
+                                        margin="dense"
+                                        name="productCategory"
+                                        label="Product Category"
+                                        variant="outlined"
+                                        fullWidth
+                                    />
+                            )}
+                        />
+                        {productCategory &&
+                            <Autocomplete
+                                style={{ width: "250px" }}
+                                options={productFilterList}
+                                getOptionLabel={(option: any) => option ? option.productName : ""}
+                                getOptionSelected={(option: any, val) =>
+                                    option._id === val
+                                }
+                                value={productFilterList.filter((data) => data._id === productFilter).length
+                                    ? productFilterList.filter((data) => data._id === productFilter)[0]
+                                    : ""
+                                }
+                                onChange={(e, val) => {
+                                    setProductFilter(val && val._id ? val._id : "")
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        margin="dense"
+                                        name="product"
+                                        label="Product"
+                                        variant="outlined"
+                                        fullWidth
+                                    />
+                                )}
+                            />}
                     </Grid>
                     <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
