@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.30.0](https://github.com/vebholic/oms_frontend/compare/v2.29.0...v2.30.0) (2021-12-30)
+
+
+### Features
+
+* - e-commerce changes done ([1768f2c](https://github.com/vebholic/oms_frontend/commit/1768f2cf954135e2caa9aa124d8916f2274ba974))
+* **address listing:** address listing ([45c8679](https://github.com/vebholic/oms_frontend/commit/45c867952a6044e813661175998ee7538ac71be5))
+* **dashboard:** add limit filter ([3d88bec](https://github.com/vebholic/oms_frontend/commit/3d88bec1e39d1ebf5f4bc8bfe043b11fe7aeba1f))
+* delivery ticket ([bd1f659](https://github.com/vebholic/oms_frontend/commit/bd1f6590978b854235a20647ff3d8ad02e029f22))
+* delivery ticket offline ([1cf96cc](https://github.com/vebholic/oms_frontend/commit/1cf96cc55912818d5f544a7655c5cff5b0f6220c))
+* download in attachment ([f7a9b69](https://github.com/vebholic/oms_frontend/commit/f7a9b69864c9f750555cfea0628eb6102da418b4))
+* **feature/avisekh:** feature/avisekh ([a0a7eb3](https://github.com/vebholic/oms_frontend/commit/a0a7eb397cfdb6910d3f1887ad470521347b23ca))
+
+
+### Bug Fixes
+
+* **address:** address resource fix ([05c829c](https://github.com/vebholic/oms_frontend/commit/05c829c39c5100b8d5d9cd8d751c8a7c3c4edff2))
+* bug fix ([2e330f2](https://github.com/vebholic/oms_frontend/commit/2e330f2078454c63aa01109cc4260febe25db926))
+* change label to assign plant in product master PO-708 ([9fde031](https://github.com/vebholic/oms_frontend/commit/9fde0313126bc8956383e0ef771d209d8e9cc615))
+* oMS-732 ([dc29b7d](https://github.com/vebholic/oms_frontend/commit/dc29b7d6f6567ab2aeb2ff3ac32110ac73b4cbd0))
+* pO changes ([58a1f30](https://github.com/vebholic/oms_frontend/commit/58a1f306a008ddfd4e98b04591d0e7fe80c1607f))
+* remove console ([911f051](https://github.com/vebholic/oms_frontend/commit/911f05167605343983b73b3b4dba0674096b2788))
+
 ## [2.29.0](https://github.com/vebholic/oms_frontend/compare/v2.28.0...v2.29.0) (2021-12-29)
 
 

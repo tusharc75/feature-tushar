@@ -1,14 +1,14 @@
-import { useState, useEffect, useContext, Fragment } from "react";
+import { useState, useEffect, useContext, Fragment, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
-import { formatAmountWithCurrency, product, review } from "../../constants/helpers";
+import { formatAmountWithCurrency, eProduct } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { Rating } from "@material-ui/lab";
-import styles from "./product-detail-page.module.scss";
-import { Button, Box, Grid, makeStyles } from "@material-ui/core";
+import { Button, Box, Grid, makeStyles, IconButton, TextField, Typography } from "@material-ui/core";
 import FrequentlyBought from "../../components/ProductList/FrequentlyBought/FrequentlyBought";
 import SimilarItems from "../../components/ProductList/SimilarItems/SimilarItems";
 import AddShoppingCartIcon from "@material-ui/icons/AddShoppingCart";
+import RemoveShoppingCartIcon from "@material-ui/icons/RemoveShoppingCart";
 import { BsImage } from "react-icons/bs";
 import RatingAndReviewChart from "../../components/ProductList/RatingAndReviewChart";
 import { Link } from "react-router-dom";
@@ -17,8 +17,19 @@ import { useData } from "../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { SET_CART_COUNT } from "../../StateProvider/actionTypes"
+import { SET_CART } from "../../StateProvider/actionTypes";
 import Carousel from "react-material-ui-carousel";
+import styles from "./product-detail-page.module.scss";
+import { WishlistContext } from "../../StateProvider/WishlistContext/WishlistProvider";
+import CustomButton from "../../components/Helpers/CustomButton";
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import PlusMinusTextboxComponent from "../../components/PlusMinusTextboxComponent/PlusMinusTextboxComponent";
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -28,7 +39,7 @@ const useStyles = makeStyles(() => ({
   },
   img: {
     maxWidth: "500px",
-  }
+  },
 }));
 
 export default function ProductDetails() {
@@ -38,36 +49,78 @@ export default function ProductDetails() {
   const [productDetails, setProductDetails] = useState(null);
   const [similarItems, setSimilarItems] = useState([]);
   const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
+  const [addToCartBtnLoading, setAddToCartBtnLoading] = useState(false);
   const [checkoutLabel, setCheckoutLabel] = useState("Checkout")
   const [addedCartItems, setAddedCartItems] = useState([])
   const [products, setProducts] = useState([]);
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user }, dispatch }: any = useData();
+  const { state: { user, cartItems }, dispatch }: any = useData();
+  const [wishlist, setWishlist] = useState({ loading: false, disabled: false });
+  const [indexOfProductInCart, setIndexOfProductInCart] = useState(-1);
+  const [rateCurrency, setRateCurrency] = useState({ rate: "", mrp: "", rateWithCurrency: "", unit: "", pricingMethod: "", isRateMrpSame: false })
+  const [deleteProductFromCartConfirmationDialog, setDeleteProductFromCartConfirmationDialog] = useState({ show: false, okBtnLoading: false })
+
+  const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
+
   const history = useHistory();
   let { id } = useParams();
 
   useEffect(() => {
     fetchCart()
     fetchProducts()
-    fetchReviews()
+    // fetchReviews()
   }, []);
 
-  const fetchReviews = () => {
-    axiosInstance()
-      .get(`${review.reviewsApi}/${id}`)
-      .then(({ data: { data } }) => {
-        if (data.review) {
-          setReviews(data.review)
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  useEffect(() => {
+    axiosInstance().get(`${eProduct.api}/${id}`).then(({ data: { data } }) => {
+      setProductDetails({ ...data });
+
+      let firstUnit = data.unit && data.unit.length > 0 ? data.unit[0] : "";
+      let firstPricingMethod = data.pricingMethod && data.pricingMethod.length > 0 ? data.pricingMethod[0] : "";
+
+      changeRateCurrency(data, firstUnit, firstPricingMethod)
+      setIndexOfProductInCart(cartItems.findIndex(({ productId }) => productId === id))
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    })
+  }, [id])
+
+  const changeRateCurrency = (data, unit, pricingMethod) => {
+
+    if (unit && pricingMethod) {
+      const record = data.priceCalculation.find(d => d.pricingMethod === pricingMethod && d.unit === unit);
+      if (record) {
+        setRateCurrency({ unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
+      }
+    } else if (unit) {
+      const record = data.priceCalculation.find(d => d.unit === unit);
+      if (record) {
+        setRateCurrency({ unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: false })
+      }
+    } else if (pricingMethod) {
+      const record = data.priceCalculation.find(d => d.pricingMethod === pricingMethod);
+      if (record) {
+        setRateCurrency({ unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: false })
+      }
+    }
   }
+
+  // const fetchReviews = () => {
+  //   axiosInstance()
+  //     .get(`${review.reviewsApi}/${id}`)
+  //     .then(({ data: { data } }) => {
+  //       if (data.review) {
+  //         setReviews(data.review)
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       toastConfig.setToastConfig(error);
+  //     });
+  // }
 
   const fetchProducts = () => {
     axiosInstance()
-      .get(`${product.api}?limit=0`)
+      .get(`${eProduct.api}?limit=0`)
       .then(({ data: { data } }) => {
         data = data.map(obj => ({ ...obj, selected: false }))
         setProducts(data);
@@ -82,7 +135,10 @@ export default function ProductDetails() {
       .get(`/user/cart`).then(({ data: { data } }) => {
 
         if (data) {
-          dispatch({ type: SET_CART_COUNT, payload: data.length });
+          dispatch({ type: SET_CART, payload: [...data] });          
+          setIndexOfProductInCart(data.findIndex(({ productId }) => productId === id));
+          if (addToCartBtnLoading) setAddToCartBtnLoading(false)
+
           setAddedCartItems(data)
         }
         if (data && data.length >= 1) {
@@ -98,47 +154,25 @@ export default function ProductDetails() {
   }
 
   const onAddToCartItem = (item) => {
-    let tempQuantity = 1
-    addedCartItems.some(o => {
-      if (o.productId === item._id) {
-        tempQuantity = tempQuantity + 1
-        return true
-      }
-    })
-
     axiosInstance()
       .post(`/user/cart`, {
         products: [{
-          quantity: `${tempQuantity}`,
+          quantity: "1",
           productId: item._id
         }]
       }).then(({ data }) => {
         fetchCart()
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+        setAddToCartBtnLoading(false)
       })
   }
-
-  useEffect(() => {
-    axiosInstance()
-      .get(`/product/` + id)
-      .then(({ data: { data } }) => {
-        setProductDetails({
-          ...data.productData, images: [
-            "https://images.unsplash.com/photo-1506467493604-25d7861a6703?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MTF8fHxlbnwwfHx8fA%3D%3D&w=1000&q=80",
-            "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2016/10/colima_volcano/16186851-1-eng-GB/Colima_volcano.jpg",
-            "https://news.cornell.edu/sites/default/files/styles/full_size/public/2020-10/1012_nasa.jpg?itok=KJ3jzpto"
-          ]
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, []);
 
   useEffect(() => {
     if (productDetails) {
       axiosInstance()
         .get(
-          `${product.api}?filterById=[{"field":"productCategory", "term": "${productDetails.productCategory}"}]&limit=0`
+          `${eProduct.api}?filterById=[{"field":"productCategory", "term": "${productDetails.productCategory}"}]&limit=0`
         )
         .then(({ data: { data } }) => {
           setSimilarItems(data);
@@ -204,7 +238,7 @@ export default function ProductDetails() {
               <div className={styles.product_image}>
                 <Box display="flex" justifyContent="center" alignItems="center" >
 
-                  {productDetails.images ? (
+                  {productDetails.sliderImage && productDetails.sliderImage.length > 0 ? (
                     <Carousel
                       strictIndexing
                       animation="slide"
@@ -221,7 +255,7 @@ export default function ProductDetails() {
                         }
                       }}
                     >
-                      {productDetails.images.map((image: any, i) => (
+                      {productDetails.sliderImage.map((image: any, i) => (
                         <div key={i} className={classes.imageContainer}>
                           <img className={classes.img} src={image} />
                         </div>
@@ -231,10 +265,82 @@ export default function ProductDetails() {
                     <BsImage className={styles.product_no_image} />
                   )}
                 </Box>
+
+                {
+                  wishlistState.wishlist.length === 0 || !wishlistState.wishlist.find(s => s._id === id) ? <CustomButton
+                    type="button"
+                    className="mt-2"
+                    color="primary"
+                    variant="contained"
+                    disabled={wishlist.disabled}
+                    loading={wishlist.loading}
+                    startIcon={wishlist.loading ? null : <FavoriteIcon />}
+                    onClick={() => {
+                      setWishlist({ disabled: true, loading: true });
+                      axiosInstance().put(`${eProduct.api}/wishlist`, { productId: id }).then(({ data }) => {
+                        setWishlist({ disabled: false, loading: false });
+                        wishlistDispatch({ type: "ADD", payload: { _id: id } })
+
+                        toastConfig.setToastConfig({
+                          open: true,
+                          type: "success",
+                          message: data.message,
+                        });
+
+                      }).catch((error) => {
+                        toastConfig.setToastConfig(error);
+                        setWishlist({ disabled: false, loading: false });
+                      })
+                    }}
+                  >
+                    Add to wishlist
+                  </CustomButton> : <CustomButton
+                    type="button"
+                    className="mt-2"
+                    color="primary"
+                    variant="outlined"
+                    disabled={wishlist.disabled}
+                    loading={wishlist.loading}
+                    onClick={() => {
+                      setWishlist({ disabled: true, loading: true });
+
+                      axiosInstance().put(`${eProduct.api}/wishlist/remove`, { productId: id }).then(({ data }) => {
+                        setWishlist({ disabled: false, loading: false });
+                        wishlistDispatch({ type: "REMOVE", payload: id })
+
+                        toastConfig.setToastConfig({
+                          open: true,
+                          type: "success",
+                          message: data.message,
+                        });
+                      }).catch((error) => {
+                        toastConfig.setToastConfig(error);
+                        setWishlist({ disabled: false, loading: false });
+                      })
+                    }}
+                  >
+                    Remove from wishlist
+                  </CustomButton>
+
+                }
+
               </div>
               <div className={styles.product_details}>
                 <header>
                   <h1 className={styles.title}>{productDetails.productName}</h1>
+
+                  <div className={styles.user_rating}>
+                    <Rating
+                      name="half-rating-read"
+                      defaultValue={4.5}
+                      precision={0.5}
+                      value={productDetails?.averageRating}
+                      readOnly
+                      size="small"
+                    />
+                    <p>{productDetails?.averageRating}</p>
+                  </div>
+
                   <span className={styles.avaibility}>
                     <h3>Avaibility-&nbsp;</h3>
                     {productDetails?.qty > 0 ? "In Stock" : "Out of Stock"}
@@ -267,14 +373,61 @@ export default function ProductDetails() {
                     <a className="option">(UK 8)</a>
                   </div> */}
                   {productDetails.productNumber && <div className={styles.controls_over}>
-                    <h5><li>Product Number </li></h5>
+                    <h5><li>Product Number - </li></h5>
                     <a className="option">{` ${productDetails.productNumber}`}</a>
                   </div>}
-                  {productDetails.unit && <div className={styles.controls_over}>
-                    <h5><li>Measuring Unit </li></h5>
-                    <a className="option">{` ${productDetails.unit}`}</a>
-                  </div>}
                 </div>
+
+                {
+                  productDetails.unit && <FormControl variant="outlined" fullWidth>
+                    <InputLabel id="unit-label">Unit</InputLabel>
+                    <Select
+                      labelId="unit-label"
+                      id="unit"
+                      value={rateCurrency.unit}
+                      onChange={(e) => {
+                        changeRateCurrency(productDetails, e.target.value, rateCurrency.pricingMethod)
+                      }}
+                      label="Unit"
+                    >
+                      {
+                        productDetails.unit.map(m => (
+                          <MenuItem value={m}>{m}</MenuItem>
+                        ))
+                      }
+                    </Select>
+                  </FormControl>
+                }
+
+                {
+                  productDetails.pricingMethod && <FormControl className="mt-3" variant="outlined" fullWidth>
+                    <InputLabel id="pricing-method-label">Pricing Method</InputLabel>
+                    <Select
+                      labelId="pricing-method-label"
+                      id="pricing-method"
+                      value={rateCurrency.pricingMethod}
+                      onChange={(e) => {
+                        changeRateCurrency(productDetails, rateCurrency.unit, e.target.value)
+                      }}
+                      label="Pricing Method"
+                    >
+                      {
+                        productDetails.pricingMethod.map(m => (
+                          <MenuItem value={m}>{m}</MenuItem>
+                        ))
+                      }
+                    </Select>
+                  </FormControl>
+                }
+
+
+                <Box className="mt-2 d-flex gap-4 align-items-baseline">
+                  <Typography variant="h4">{rateCurrency.rateWithCurrency}</Typography>
+                  {
+                    rateCurrency.isRateMrpSame === false && <Typography variant="h5" className="custom-strike">{rateCurrency.mrp}</Typography>
+                  }
+                </Box>
+
 
                 {/*<div className={styles.set_width_2}> <hr/> </div>*/}
                 <div className={styles.price_and_discount}>
@@ -303,44 +456,62 @@ export default function ProductDetails() {
                       ).fullFormatAmount
                     }
                   </span>
-
                 </div>
 
-                <div className={styles.user_rating}>
-                  <Rating
-                    name="half-rating-read"
-                    defaultValue={4.5}
-                    precision={0.5}
-                    value={productDetails?.averageRating}
-                    readOnly
-                    size="small"
-                  />
-                  <p>{productDetails?.averageRating}</p>
+                <div className="d-flex gap-2" >
+                  {
+                    indexOfProductInCart > -1 && cartItems.length > 0 && cartItems.some(s => s.productId === productDetails?._id)
+                      ? <PlusMinusTextboxComponent
+                        inputTextLabel="Quantity"
+                        value={indexOfProductInCart > -1 ? cartItems[indexOfProductInCart]?.quantity?.toString() ?? "1" : "1"}
+                        isRequired={true}
+                        onChange={(value) => {
+                          let items = [...cartItems];
+                          const indexOfProduct = items.findIndex(s => s.productId === id);
+
+                          axiosInstance().put(`/user/cart/${items[indexOfProduct].id}`, { quantity: value?.toString() }).then(() => {
+
+                          }).catch((error) => {
+                            toastConfig.setToastConfig(error);
+                            dispatch({ type: SET_CART, payload: [...items] });
+                          })
+                        }}
+                      />
+                      : <CustomButton
+                        type="button"
+                        className="mt-2"
+                        color="primary"
+                        variant="outlined"
+                        disabled={addToCartBtnLoading}
+                        loading={addToCartBtnLoading}
+                        startIcon={addToCartBtnLoading ? null : <AddShoppingCartIcon />}
+                        onClick={() => {
+                          setAddToCartBtnLoading(true)
+                          onAddToCartItem(productDetails)
+                        }}
+                      >
+                        Add to cart
+                      </CustomButton>
+                  }
                 </div>
-                <div className={'footer' && styles.button_layout} >
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    className={styles.primary_buttons}
-                    startIcon={<AddShoppingCartIcon />}
-                    onClick={() => onAddToCartItem(productDetails)}
-                  >
-                    Add to cart
-                  </Button>
-                  <Link to="/product/my-cart">
-                    <Button
-                      variant="contained"
+
+                <div className={`${styles.button_layout} footer d-flex gap-2`}>
+
+                  {
+                    indexOfProductInCart !== -1 && <CustomButton
+                      type="button"
                       color="primary"
-                      size="small"
-                      className={styles.primary_buttons}
-                      startIcon={<AddShoppingCartIcon />}
+                      variant="outlined"
+                      disabled={deleteProductFromCartConfirmationDialog.okBtnLoading}
+                      loading={deleteProductFromCartConfirmationDialog.okBtnLoading}
+                      onClick={() => {
+                        setDeleteProductFromCartConfirmationDialog({ show: true, okBtnLoading: false })
+                      }}
                     >
-                      Checkout
-                    </Button>
-                  </Link>
-                </div>
-                <div className={'footer' && styles.button_layout}>
+                      Remove from cart
+                    </CustomButton>
+                  }
+
                   <Button
                     variant="contained"
                     color="primary"
@@ -376,8 +547,8 @@ export default function ProductDetails() {
           )}
           <div className="a_divider_inner"></div>
 
-          <FrequentlyBought id={productDetails?._id} />
-          <div className="a_divider_inner"></div>
+          {/* <FrequentlyBought id={productDetails?._id} />
+          <div className="a_divider_inner"></div> */}
           <SimilarItems similarItems={similarItems} />
           <div className="a_divider_inner"></div>
           <RatingAndReviewChart id={id} reviews={reviews}
@@ -385,93 +556,44 @@ export default function ProductDetails() {
         </div>
 
       </Box>
-    </Fragment>
+
+      {
+        deleteProductFromCartConfirmationDialog.show ? (
+          <ConfirmationDialog
+            open={true}
+            message={`You want to remove this product from cart ?`}
+            onClose={() =>
+              setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false })
+            }
+            okBtnLoading={deleteProductFromCartConfirmationDialog.okBtnLoading}
+            onOk={() => {
+              setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, okBtnLoading: true } })
+
+              let items = [...cartItems];
+              const indexOfProduct = items.findIndex(s => s.productId === id);
+
+              const productsToUpdate = items.filter(s => s.productId !== id);
+              dispatch({ type: SET_CART, payload: [...productsToUpdate] });
+
+              axiosInstance().delete(`/user/cart/${items[indexOfProduct].id}`).then(({ data }) => {
+                setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false })
+                setAddToCartBtnLoading(false)
+                setIndexOfProductInCart(-1)
+
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: "success",
+                  message: data.message,
+                });
+              }).catch((error) => {
+                toastConfig.setToastConfig(error);
+                dispatch({ type: SET_CART, payload: [...items] });
+              })
+            }}
+          />
+        ) : null
+      }
+
+    </Fragment >
   );
 }
-
-// return (
-//     <Layout>
-//         <>
-//             {
-//                 productDetails ? <div>
-//                     <div>
-//                         <h2>Home {`>`} Product {`>`} Item </h2>
-//                         <div className={styles.grid_container}>
-//                             <div className={styles.left_side}>
-//                                 <div className="productImage">
-//                                     <img src={productDetails.productImage} alt={productDetails.productName} />
-//                                 </div>
-//                             </div>
-//                             <div className={styles.right_side}>
-//                                 <div className={styles.name}>{productDetails.productName}</div>
-//                                 <div className={styles.availability}>Availability: <span>{productDetails?.qty > 0 ? "In Stock" : "Out of Stock"}</span></div>
-//                                 <div className={styles.seller}>Sold By: {productDetails?.brand?.optionLabel}</div>
-//                                 <hr />
-//                                 <div className={styles.description}>
-//                                     <div className={styles.listItem}>
-//                                         <ul>
-//                                             <li>MFG Value - {productDetails?.mfg}</li>
-//                                             <li>Product Number - {productDetails?.productNumber}</li>
-//                                             <li>{productDetails?.description}</li>
-//                                             <li>Measuring Unit - {productDetails?.unit}</li>
-//                                         </ul>
-//                                     </div>
-//                                     <div className={styles.price}>{calculateNetPrice(parseInt(productDetails.mrp), productDetails.discount)}<span className={styles.originalPrice}>{productDetails.mrp} {productDetails.currency}</span></div>
-//                                     <h4>You Save: <span>{amountOfDiscount(parseInt(productDetails.mrp), productDetails.discount)}</span> </h4>
-//                                     <div className={styles.rating}>
-//                                         <Rating name="half-rating-read" defaultValue={2.5} precision={0.5} value={productDetails.rating} readOnly size="small" />
-//                                         <span className={styles.ml_2}>{productDetails.rating}</span>
-//                                     </div>
-//                                     <div className={styles.buttons}>
-//                                         <div>
-//                                             <Button
-//                                                 variant="outlined"
-//                                                 color="primary"
-//                                                 size="small"
-//                                                 className="mr-2"
-//                                             >
-//                                                 Add to Cart
-//                                             </Button>
-//                                             <Button
-//                                                 variant="outlined"
-//                                                 color="primary"
-//                                                 size="small"
-//                                             >
-//                                                 Check Out
-//                                             </Button>
-//                                         </div>
-//                                         <div>
-//                                             <Button
-//                                                 variant="outlined"
-//                                                 color="primary"
-//                                                 size="small"
-//                                                 className="mr-2"
-//                                             >
-//                                                 Add to Configure
-//                                             </Button>
-//                                             <Button
-//                                                 variant="outlined"
-//                                                 color="primary"
-//                                                 size="small"
-//                                                 className="mr-2"
-//                                             >
-//                                                 Add to Planner
-//                                             </Button>
-//                                         </div>
-
-//                                     </div>
-//                                 </div>
-//                             </div>
-
-//                         </div>
-//                     </div>
-//                     {/* <div className="a-divider a-divider-section"><div className={styles.a_divider_inner}></div></div>
-//                     <FrequentlyBought /> */}
-//                     <div className="a-divider a-divider-section"><div className={styles.a_divider_inner}></div></div>
-//                     <SimilarItems similarItems={similarItems} />
-//                 </div> : <span>Loading...</span>
-//             }
-//         </>
-
-//     </Layout>
-// )

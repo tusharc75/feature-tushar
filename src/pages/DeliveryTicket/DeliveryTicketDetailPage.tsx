@@ -324,6 +324,8 @@ export default function DeliveryTicketDetail(props) {
         data = response?.productInventory.map((u) => {
           return u.inventoryDetail;
         })
+        const inventory = deliveryTicket?.productInventory?.map((e) => e.optionValue);
+        data = response?.productInventory?.filter(d => inventory?.includes(d.inventory)).map(obj => obj.inventoryDetail)
       }
       else {
         let ids = JSON.stringify(productInventories)

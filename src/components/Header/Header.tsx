@@ -38,8 +38,10 @@ import ChatIcon from '@material-ui/icons/Chat';
 import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { backendApi } from '../../config';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import { SET_CART_COUNT } from '../../StateProvider/actionTypes';
+import { SET_CART } from '../../StateProvider/actionTypes';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import { WishlistContext } from '../../StateProvider/WishlistContext/WishlistProvider';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -170,7 +172,7 @@ const Header = ({ toggleDrawer }) => {
   const account = useAccount(accounts[0] || {});
 
   const {
-    state: { user, selectedEntity, cartCount, permissions },
+    state: { user, selectedEntity, cartItems, permissions },
     dispatch
   }: any = useData();
 
@@ -200,6 +202,8 @@ const Header = ({ toggleDrawer }) => {
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [notificationList, setNotificationList] = useState([]);
 
+  const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
+
   // For FullScreen Notification - Start
   const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
 
@@ -219,7 +223,7 @@ const Header = ({ toggleDrawer }) => {
       .get(`/user/cart`)
       .then(({ data: { data } }) => {
         if (data) {
-          dispatch({ type: SET_CART_COUNT, payload: data.length });
+          dispatch({ type: SET_CART, payload: [...data] });
         }
       });
   };
@@ -865,7 +869,24 @@ const Header = ({ toggleDrawer }) => {
             });
           }}
         >
-          <Badge color="secondary" badgeContent={cartCount}>
+          <Badge color="secondary" badgeContent={wishlistState.wishlist.length}>
+            <FavoriteIcon className="setIcon" />
+          </Badge>
+          <Box component="span" mx={1} />
+          <p>Wishlist</p>
+        </MenuItem>
+      }
+
+      {
+        permissions?.eCommerce?.isRead && <MenuItem
+          id="shoppingCartButton"
+          onClick={() => {
+            history.push({
+              pathname: '/product/my-cart'
+            });
+          }}
+        >
+          <Badge color="secondary" badgeContent={cartItems.length}>
             <ShoppingCartIcon className="setIcon" />
           </Badge>
           <Box component="span" mx={1} />
@@ -1067,6 +1088,26 @@ const Header = ({ toggleDrawer }) => {
                 </IconButton>
               )}
 
+              {
+                permissions?.eCommerce?.isRead && <IconButton
+                  id="shoppingCartButton"
+                  title="Wishlist"
+                  aria-describedby={fullScreenNotificationId}
+                  aria-label="settings"
+                  color="inherit"
+                  onClick={() => {
+                    history.push({
+                      pathname: '/product/my-cart'
+                    });
+                  }}
+                  className="showIconLayout"
+                >
+                  <Badge color="secondary" badgeContent={wishlistState.wishlist.length}>
+                    <FavoriteIcon className="setIcon" />
+                  </Badge>
+                </IconButton>
+              }
+
               {/*Only show cart icon if environment is local || development*/}
               {
                 permissions?.eCommerce?.isRead && (
@@ -1083,7 +1124,7 @@ const Header = ({ toggleDrawer }) => {
                     }}
                     className="showIconLayout"
                   >
-                    <Badge color="secondary" badgeContent={cartCount}>
+                    <Badge color="secondary" badgeContent={cartItems.length}>
                       <ShoppingCartIcon className="setIcon" />
                     </Badge>
                   </IconButton>

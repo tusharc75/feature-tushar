@@ -361,6 +361,11 @@ export const product = {
   permission: 'product'
 };
 
+export const eProduct = {
+  api: '/e-product',
+  route: '/e-product',
+};
+
 export const productInventory = {
   api: '/product-inventory',
   route: '/product-inventory',
@@ -851,9 +856,9 @@ export const simplifyValues = (obj, fields) => {
   return newObj;
 };
 
-export const review = {
-  reviewsApi: '/product/review'
-};
+// export const review = {
+//   reviewsApi: '/product/review'
+// };
 
 export const getUniqueCurrencies = () => {
   return uniqBy(currencies, 'currencyCode');
@@ -1341,11 +1346,17 @@ export const INVENTORY_STATUS = {
   inSale: 'In Sale',
   inUse: 'In-Use',
   indTransit: 'In-Transit',
-  underRevives: 'Under Review',
+  underReview: 'Under Review',
   repair: 'Repair',
   available: 'Available',
   readyToShip: 'Ready to ship',
   new: 'New',
   scrap: 'Scrap',
   lost: 'Lost',
+};
+
+export const DELIVERY_TICKET_STATUS = {
+  new: 'New',
+  indTransit: 'In-Transit',
+  delivered: 'Delivered',
 };
