@@ -55,9 +55,10 @@ export default function ManageAccount(props) {
   }: any = useData();
   const [disableOwnerSelection] = useState(
     !isNew && user.user._id !== accountData.initialValues.owner
-  );
-
-
+  )
+  const formikRef = {
+    current: null
+  }
   //  Owner, Collaborator Code - Start
   const [formsData, setFormsData] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -257,15 +258,17 @@ export default function ManageAccount(props) {
   }
 
   const isFieldNotTouched = (accountData, values) => {
-    return Object.values(
-      simplifyValues(
-        accountData.initialValues,
-        accountData.fields
-      )
-    ).toString() ===
-      Object.values(
-        simplifyValues(values, accountData.fields)
+    if(formikRef.current) {
+      return Object.values(
+        simplifyValues(
+          accountData.initialValues,
+          accountData.fields
+          )
+          ).toString() ===
+          Object.values(
+        simplifyValues(formikRef.current.values, accountData.fields)
       ).toString()
+    }
   }
 
   const initializeMarketSegmentDropdown = (values, marketSegmentSource) => {
@@ -347,7 +350,11 @@ export default function ManageAccount(props) {
               initialValues={accountData.initialValues}
               validationSchema={yupSchema(accountData.fields)}
               validateOnMount
-
+              innerRef={(ref) => {
+                if(ref) {
+                  formikRef.current = ref
+                }
+              }}
               onSubmit={onSubmit}
             >
               {({
@@ -1106,6 +1113,7 @@ export default function ManageAccount(props) {
                     showConfirmDialog ?
                       <ConfirmCancelDialog
                         open={showConfirmDialog}
+                        close={() => setShowConfirmDialog(false)}
                         onSave={() => {
                           setShowConfirmDialog(false)
                           // e.preventDefault();

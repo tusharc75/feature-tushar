@@ -201,6 +201,7 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
             {
                 showConfirmDialog ?
                     <ConfirmCancelDialog
+                    close={() => setShowConfirmDialog(false)}
                         open={showConfirmDialog}
                         onSave={() => {
                             setShowConfirmDialog(false);

@@ -695,6 +695,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                         {
                             showConfirmDialog ?
                                 <ConfirmCancelDialog
+                                close={() => setShowConfirmDialog(false)}
                                     open={showConfirmDialog}
                                     onSave={() => {
                                         setShowConfirmDialog(false)

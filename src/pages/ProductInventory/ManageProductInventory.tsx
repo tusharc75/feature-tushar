@@ -703,6 +703,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
 
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog
+                    close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false);

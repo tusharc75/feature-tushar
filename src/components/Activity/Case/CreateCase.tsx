@@ -361,6 +361,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
+                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
