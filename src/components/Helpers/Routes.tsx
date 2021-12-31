@@ -314,11 +314,11 @@ const routes = {
     path: "/transfer-asset/detail",
   },
   address: {
-    title: storedRoutes ? storedRoutes.address?.title : RESOURCE_LABEL.address,
+    title: storedRoutes && storedRoutes.address ? storedRoutes.address?.title : RESOURCE_LABEL.address,
     path: "/address",
   },
   addressDetail: {
-    title: storedRoutes ? storedRoutes.address?.title : RESOURCE_LABEL.address,
+    title: storedRoutes && storedRoutes.address ? storedRoutes.address?.title : RESOURCE_LABEL.address,
     path: "/address/detail",
   },
   eCommerce: {

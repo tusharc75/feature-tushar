@@ -3,6 +3,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import { deliveryTicket, sidebarResource } from "../../constants/helpers";
 import { CustomToastContext } from "../CustomToastContext/CustomToastContext";
 import { objectStore, findAll, deleteOne } from "../../constants/indexdbhelper";
+import { rentalJobOfflineUpdate } from "../../pages/RentalManagement/rentalOfflineHelper";
 
 export const CustomOfflineContext = createContext(null);
 const limit = 500;
@@ -59,11 +60,13 @@ export const CustomOfflineProvider = ({ children }) => {
         //                 await axiosInstance().post(`${deliveryTicket.deliveryTicketApi}/offlinedatasync`, d.data)
         //                     .then(({ data: { data } }) => {
         //                         deleteOne(objectStore.offlineDataSync, d.data._id)
+        //                         deleteOne(objectStore.deliveryTicket, d.data._id)
         //                     })
         //                     .catch((error) => {
         //                     });
         //             }
         //         });
+        //         await rentalJobOfflineUpdate([])
         //     }
         //     else {
         //         setIsSynch(false)

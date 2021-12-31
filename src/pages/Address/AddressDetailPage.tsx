@@ -29,41 +29,27 @@ const AddressDetailPage = () => {
   const [addressData, setAddressData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [addressFields, setAddressFields] = useState([]);
-  const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [addressResource, setAddressResource] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
-
     routes.address,
   ]);
-
-
-
 
 
   useEffect(() => {
     if (id) {
       getAddressFields();
       fetchAddressData();
-
     }
   }, [id]);
-
-
 
   const fetchAddressData = async () => {
     setLoading(true);
     try {
-      const {
-        data: { data },
-      } = await axiosInstance().get(`/address/${id}`);
-      console.log(data,"data")
-
-      handleMainPoints(data);
+      const { data: { data }, } = await axiosInstance().get(`/address/${id}`);
       setHeadingLbl(data.fullAddress);
       setAddressData(data);
       setAddressResource({ id: data._id });
-
       setCustomizedRoutes([routes.address, { title: data.fullAddress }]);
       setLoading(false);
     } catch (error) {
@@ -71,23 +57,11 @@ const AddressDetailPage = () => {
     }
   };
 
-
-
-  const handleMainPoints = (data) => {
-    let tempMp = {
-      name: `${data.searchAddress}`,
-      taxJurisdiction: data.taxJurisdiction || "",
-    };
-    setMainPoints(tempMp);
-  };
-
   const getAddressFields = () => {
     axiosInstance()
       .get("/field?resource=Address")
       .then(({ data }) => {
-
         setAddressFields(data.data?.filter((field) => field.isRead))
-
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -114,7 +88,6 @@ const AddressDetailPage = () => {
   };
 
 
-
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -122,7 +95,6 @@ const AddressDetailPage = () => {
   const closeUpdateDialog = () => {
     setOpenUpdateDialog(false);
   };
-
 
 
   return (
@@ -184,7 +156,6 @@ const AddressDetailPage = () => {
 
                 <DetailsPageHeader
                   heading={headingLbl}
-                  mainPoints={mainPoints}
                   showHeading={true}
                 >
                   {permissions?.address?.isUpdate && (
@@ -214,8 +185,6 @@ const AddressDetailPage = () => {
                   )}
                 </DetailsPageHeader>
               )}
-
-
               <Box>
                 {loading || !addressFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
@@ -225,11 +194,9 @@ const AddressDetailPage = () => {
                   <DetailsPage data={addressData} fields={addressFields} />
                 )}
               </Box>
-
             </Paper>
           </Grid>
         </Grid>
-
       </Fragment>
 
     </>
