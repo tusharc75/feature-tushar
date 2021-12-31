@@ -561,7 +561,7 @@ const UserDetailsPage = () => {
       });
   };
 
-  const isLoggedInUserBrandAdmin = 'userType' in user?.user;
+  const isLoggedInUserBrandAdmin = 'userType' in user?.user && user?.user?.userType === userType.brandAdmin;
   return (
     <>
       {openUpdateDialog && (
@@ -1318,6 +1318,7 @@ const UserDetailsPage = () => {
           userList={userList}
           selectedRecords={[{ ...userData }]}
           isRoleSetUpPermission = {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate}
+          isApprovalProcess = {isLoggedInUserBrandAdmin}
         />
       }
       {
