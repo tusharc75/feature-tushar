@@ -167,7 +167,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                             setSelectedCostData(null)
                         }}
                     >
-                        {isMobile ? <GrBusinessService size={20} /> : "Add Cost"}
+                        {isMobile ? <GrBusinessService size={20} /> : "Add Service"}
                     </Button>
                 </Box>
             </Box>

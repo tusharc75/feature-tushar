@@ -423,7 +423,11 @@ const RentalManagementDetailsPage = () => {
                     <Productpackage
                       rentalManagementData={rentalManagementData}
                       setNextStep={setNextStep}
-                      currencySymbol={currencySymbol} />
+                      currencySymbol={currencySymbol}
+                      isSmallScreen={isSmallScreen}
+                      isTabletScreen={isTabletScreen}
+                      showActivity={showActivity}
+                    />
                   )}
                   {currentStep === 1 && rentalManagementData &&
                     <AdditionalCost

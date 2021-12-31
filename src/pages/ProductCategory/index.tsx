@@ -1,5 +1,6 @@
 import { useState, useEffect, Fragment, useContext, useReducer } from 'react';
 import Grid from '@material-ui/core/Grid';
+import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import AddIcon from '@material-ui/icons/Add';
@@ -249,19 +250,25 @@ const ProductCategory = () => {
 
   const NameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
+     
       {productCategoryPermissions.isUpdate ? (
+         <Link to={`${routes.productCategoryDetail.path}/${params.data._id}`}>
         <Chip
           className="ml-3 link"
           style={{ backgroundColor: `${params.data.chipColour}` }}
           label={<p style={{ color: params.data.isLowContrast ? "white" : "black" }}>{params.value}</p>}
           onClick={() => {
             setProductCategoryId(params.data.id);
-            setOpen({ open: true, isClone: false });
+            // setOpen({ open: true, isClone: false });
           }}
         />
+        </Link>
       ) : (
+        <Link to={`${routes.productCategoryDetail.path}/${params.data._id}`}>
         <Chip className="ml-3" style={{ backgroundColor: `${params.data.chipColour}` }} label={`${params.value}`} />
+        </Link>
       )}
+    
     </span>
   );
 
