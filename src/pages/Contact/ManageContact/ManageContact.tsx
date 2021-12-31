@@ -99,7 +99,7 @@ export default function ManageContact(props) {
         (d) => d.fieldName === "mailingAddress"
       );
       if (accountId && addressDataDropdown) {
-        setAddressDataSource(addressDataDropdown.option?.filter(d => contactData?.initialValues?.mailingAddress?.includes(d.optionValue)))
+        setAddressDataSource(addressDataDropdown?.option?.filter(d => contactData?.initialValues?.mailingAddress?.includes(d.optionValue)) ?? [])
       }
 
 
