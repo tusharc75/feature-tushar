@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.32.0](https://github.com/vebholic/oms_frontend/compare/v2.31.0...v2.32.0) (2022-01-01)
+
+
+### Features
+
+* **dashboard:** changes and fix ([5272c50](https://github.com/vebholic/oms_frontend/commit/5272c50d021dfd3f30cf93fb783a73bea417f7ac))
+
+
+### Bug Fixes
+
+* add opportunity save button multiclick restrict PO-138 ([4b4fd73](https://github.com/vebholic/oms_frontend/commit/4b4fd733e6036fa50358caa615369e12cc0ab429))
+* add product-category save button multi click restrict PO-138 ([8fa7a28](https://github.com/vebholic/oms_frontend/commit/8fa7a2845485c282b8858c0190a0e0ed88c8a8a2))
+* bug fix ([c5eac3b](https://github.com/vebholic/oms_frontend/commit/c5eac3b0f9c5d99ecbc1256ed2279a667290e749))
+* bug fix ([1679833](https://github.com/vebholic/oms_frontend/commit/1679833aa451185594c6737181c08a56c15d9235))
+* bug fix ([859d650](https://github.com/vebholic/oms_frontend/commit/859d650d5a69a35a883feb5ec37d3aa9de82a641))
+* **confirmcanceldialog:** close cance fix ([72e0158](https://github.com/vebholic/oms_frontend/commit/72e0158bfa2cf4fb7d95c18210af3cd3d587165a))
+* **contacts:** conflict resolve ([23c498a](https://github.com/vebholic/oms_frontend/commit/23c498a50e8ed48ef6740e09135aa2fda563ee20))
+* **pdftemplate:** fix btn issue ([77b3686](https://github.com/vebholic/oms_frontend/commit/77b3686888bee19cdab5f40a519fa25d7676c19d))
+* pO-744 ([6be456a](https://github.com/vebholic/oms_frontend/commit/6be456aca953394245f88d607f12db5d1f06bac8))
+* pO-744,749,767 ([578c2d9](https://github.com/vebholic/oms_frontend/commit/578c2d96d59c9a94fd60b3827dff04b8c5e6873e))
+* **rental:** adding contact fix ([1915fb8](https://github.com/vebholic/oms_frontend/commit/1915fb86d6c1d13c7deb0617dc78ac2f703934cf))
+
 ## [2.31.0](https://github.com/vebholic/oms_frontend/compare/v2.30.0...v2.31.0) (2021-12-31)
 
 
