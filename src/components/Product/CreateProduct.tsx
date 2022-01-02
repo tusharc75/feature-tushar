@@ -550,7 +550,7 @@ const CreateProduct = (props) => {
                 }) => (
                     <Fragment>
                         <CustomDialogHeader
-                            title={`${(productId && !isClone) ? "Edit" : "New"} Product - ${values?.productName}`}
+                            title={`${(productId && !isClone) ? `Edit Product - ${values?.productName}` : `New Product`}`}
                             isMinimized={!fullScreen}
                             onMinimizeMaximize={() => {
                                 setFullScreen(prevState => !prevState)
@@ -942,6 +942,7 @@ const CreateProduct = (props) => {
                         {
                             showConfirmDialog ?
                                 <ConfirmCancelDialog
+                                    close={() => setShowConfirmDialog(false)}
                                     open={showConfirmDialog}
                                     onSave={() => {
                                         setShowConfirmDialog(false)

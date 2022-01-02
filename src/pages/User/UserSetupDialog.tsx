@@ -32,14 +32,15 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-const stepsLabel = ["Set Approval Process"]
 
-const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, userPermissions = null, fetchUsers, userList, selectedRecords, isRoleSetUpPermission }) => {
+const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, userPermissions = null, fetchUsers, userList, selectedRecords, isRoleSetUpPermission, isApprovalProcess }) => {
     const { state: { user, permissions }, } = useData();
     const [activeStep, setActiveStep] = useState(0)
+    const [stepsLabel, setStepsLabel] = useState([]);
     const classes = useStyles();
     useEffect(() => {
-        isRoleSetUpPermission && stepsLabel.push('Assign Role');
+        isApprovalProcess && setStepsLabel((prevStep) => [...prevStep,'Set Approval Process'])
+        isRoleSetUpPermission && setStepsLabel((prevStep) => [...prevStep,'Assign Role'])
     }, [])
 
 
