@@ -11,12 +11,12 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import ManageAddressDialog from "../../components/Address/ManageAddressDialog";
+import CreateProductCategory from './CreateProductCategory';
 import DeleteButton from "../../components/Helpers/DeleteButton";
 
 
 
-const AddressDetailPage = () => {
+const ProductCategoryDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -26,42 +26,68 @@ const AddressDetailPage = () => {
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [addressData, setAddressData] = useState(null);
+  const [productCategoryData, setProductCategoryData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [addressFields, setAddressFields] = useState([]);
+  const [productCategoryFields, setCategoryFields] = useState([]);
+  const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [addressResource, setAddressResource] = useState(null);
+  const [productCategoryResource, setProductCategoryResource] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
+
     routes.address,
   ]);
 
 
+
+
+
   useEffect(() => {
     if (id) {
-      getAddressFields();
-      fetchAddressData();
+      getProductCategoryFields();
+      fetchProductCategoryData();
+
     }
   }, [id]);
 
-  const fetchAddressData = async () => {
+
+
+  const fetchProductCategoryData = async () => {
     setLoading(true);
     try {
-      const { data: { data }, } = await axiosInstance().get(`/address/${id}`);
-      setHeadingLbl(data.fullAddress);
-      setAddressData(data);
-      setAddressResource({ id: data._id });
-      setCustomizedRoutes([routes.address, { title: data.fullAddress }]);
+      const {
+        data: { data },
+      } = await axiosInstance().get(`/product-category/${id}`);
+      
+
+      handleMainPoints(data);
+      setHeadingLbl(data.name);
+      setProductCategoryData(data);
+      setProductCategoryResource({ id: data._id });
+
+      setCustomizedRoutes([routes.productCategory, { title: data.name }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
 
-  const getAddressFields = () => {
+
+
+  const handleMainPoints = (data) => {
+    let tempMp = {
+      name: `${data.searchAddress}`,
+      taxJurisdiction: data.taxJurisdiction || "",
+    };
+    setMainPoints(tempMp);
+  };
+
+  const getProductCategoryFields = () => {
     axiosInstance()
-      .get("/field?resource=Address")
+      .get("/field?resource=Product Category")
       .then(({ data }) => {
-        setAddressFields(data.data?.filter((field) => field.isRead))
+
+        setCategoryFields(data.data?.filter((field) => field.isRead))
+
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -72,7 +98,7 @@ const AddressDetailPage = () => {
     if (id) {
       if (permissions?.address?.isDelete) {
         axiosInstance()
-          .put(`/address/remove`, { ids: [id] })
+          .put(`/product-category/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
 
@@ -88,6 +114,7 @@ const AddressDetailPage = () => {
   };
 
 
+
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -97,20 +124,21 @@ const AddressDetailPage = () => {
   };
 
 
+
   return (
     <>
 
       {openUpdateDialog && (
-        <ManageAddressDialog
+        <CreateProductCategory
           open={openUpdateDialog}
           close={closeUpdateDialog}
           fetchData={() => {
-            fetchAddressData();
+            fetchProductCategoryData();
           }}
-          addressResource={addressResource}
+          productCategoryResource={productCategoryResource}
           isClone={false}
           onSuccess={() => {
-            fetchAddressData();
+            fetchProductCategoryData();
             closeUpdateDialog();
           }}
 
@@ -135,7 +163,7 @@ const AddressDetailPage = () => {
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
             <Paper>
-              {!addressData ? (
+              {!productCategoryData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
                   <Box display="flex">
@@ -156,6 +184,7 @@ const AddressDetailPage = () => {
 
                 <DetailsPageHeader
                   heading={headingLbl}
+                  mainPoints={mainPoints}
                   showHeading={true}
                 >
                   {permissions?.address?.isUpdate && (
@@ -185,22 +214,26 @@ const AddressDetailPage = () => {
                   )}
                 </DetailsPageHeader>
               )}
+
+
               <Box>
-                {loading || !addressFields.length ? (
+                {loading || !productCategoryFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
                 ) : (
-                  <DetailsPage data={addressData} fields={addressFields} />
+                  <DetailsPage data={productCategoryData} fields={productCategoryFields} />
                 )}
               </Box>
+
             </Paper>
           </Grid>
         </Grid>
+
       </Fragment>
 
     </>
   );
 };
 
-export default AddressDetailPage;
+export default ProductCategoryDetailPage;

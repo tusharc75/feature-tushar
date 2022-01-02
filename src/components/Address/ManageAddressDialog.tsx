@@ -215,7 +215,7 @@ const ManageAddressDialog = (props) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={title}
+                title={title ? title : "Add Address"}
                 onClose={() => {
                   if (
                     isFieldNotTouched(
@@ -236,7 +236,6 @@ const ManageAddressDialog = (props) => {
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form noValidate>
-                  {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                   {formsData &&
                     formsData.map((form, index1) => {
                       return form.name ? (
@@ -334,6 +333,7 @@ const ManageAddressDialog = (props) => {
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
+                close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

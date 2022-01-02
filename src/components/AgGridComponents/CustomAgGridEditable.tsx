@@ -152,11 +152,11 @@ export default function CustomAgGridEditable({
   renderedFrom = null,
   customGridOptions = null,
   selectedRecords = [],
-  fromPurchaseOrderGrid = false,
+  isFooter = false,
   saveColumnOptions = false,
   showOnlyShowFilteredRecordSwitch = false,
   priceTemplateField = [],
-  fromPurchaseOrderGridReceivingAsset = false
+  fromPurchaseOrderGrid = false,
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -358,7 +358,6 @@ export default function CustomAgGridEditable({
                     function (params) {
                       const tsp = params.data[`totalSalesPrice_${currency}`] || 0;
                       const qty = params.data.qty;
-
                       return qty === 0 || tsp === 0;
                     }) || (fromPurchaseOrderGrid && function (params) {
                       const finalPrice = params.data[`finalPrice_${currency.toLowerCase()}`] || 0;
@@ -390,7 +389,7 @@ export default function CustomAgGridEditable({
                 }
                 return false;
               }}
-              pinnedBottomRowData={fromProductGrid || forProductBuilder || fromPurchaseOrderGrid || fromPurchaseOrderGridReceivingAsset ? createdPinnedData() : []}
+              pinnedBottomRowData={isFooter || fromProductGrid || forProductBuilder || fromPurchaseOrderGrid ? createdPinnedData() : []}
               enableCellChangeFlash={false}
               defaultColDef={{
                 resizable: true,

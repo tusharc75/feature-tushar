@@ -345,7 +345,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             onCellValueChanged={(row) => {
                             }}
                             currency={purchaseOrderData?.currency?.toLowerCase()}
-                            fromPurchaseOrderGridReceivingAsset={true}
+                            isFooter={true}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                     }

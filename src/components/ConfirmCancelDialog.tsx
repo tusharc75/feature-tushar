@@ -5,6 +5,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 import { Typography } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
@@ -17,11 +19,17 @@ const useStyles = makeStyles((theme) => ({
         width: '80%',
         maxHeight: 435,
     },
+    closeButton: {
+        position: 'absolute',
+        right: theme.spacing(1),
+        top: theme.spacing(1),
+        color: theme.palette.grey[500],
+      },
 }));
 
 export default function ConfirmationCancelDialog(props) {
     const classes = useStyles();
-    const { onClose, onSave, open } = props;
+    const { onClose, onSave, open, close } = props;
 
     return (
         <Dialog
@@ -39,13 +47,20 @@ export default function ConfirmationCancelDialog(props) {
                 }
             }}
         >
-            <DialogTitle id="confirmation-dialog-title" className="text-white">Confirm</DialogTitle>
+            <DialogTitle id="confirmation-dialog-title" className="text-white">
+                Confirm
+                {onClose ? (
+        <IconButton title="Close Confirm Dialog" aria-label="close" className={classes.closeButton} onClick={close}>
+          <CloseIcon />
+        </IconButton>
+      ) : null}
+            </DialogTitle>
             <DialogContent dividers>
-                <Typography>Do you want to save changes or leave ?</Typography>
+                <Typography>Do you want to save changes or leave?</Typography>
             </DialogContent>
             <DialogActions>
-                <Button size="small" autoFocus onClick={onClose} color="primary">Leave</Button>
-                <Button size="small" onClick={onSave}
+                <Button title='Leave Form' size="small" autoFocus onClick={onClose} color="primary">Leave</Button>
+                <Button title='Save and Close' size="small" onClick={onSave}
                     color="primary">
                     Save</Button>
             </DialogActions>
@@ -57,5 +72,6 @@ ConfirmationCancelDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
     open: PropTypes.bool.isRequired,
     onSave: PropTypes.func,
+    close: PropTypes.func
 };
 
