@@ -6,29 +6,10 @@ import { ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
-import {isMobile} from "react-device-detect";
-import {MdAdd} from "react-icons/all";
+import { isMobile } from "react-device-detect";
+import { MdAdd } from "react-icons/all";
 
 function SalesOrderHeader(props) {
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const [filter, setFilter] = useState('All Sales Orders');
-
-  const handleFilter = (event, newFilter) => {
-    if (newFilter != null) {
-      setFilter(newFilter);
-      onTypeChange(options.find((d) => d.key === newFilter).value);
-    }
-  };
-
   const {
     selectedRecords,
     onTypeChange,
@@ -45,6 +26,27 @@ function SalesOrderHeader(props) {
     showTransferEntityDialog
     // showCloneRentalManagementDialog
   } = props;
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const [filter, setFilter] = useState(options[0].key);
+
+  const handleFilter = (event, newFilter) => {
+    if (newFilter != null) {
+      setFilter(newFilter);
+      onTypeChange(options.find((d) => d.key === newFilter).value);
+    }
+  };
+
+
   return (
     <Grid className={styles.filter_side_container} container>
       <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
@@ -65,60 +67,60 @@ function SalesOrderHeader(props) {
       <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
 
-          <Grid style={{display: "flex", flex:1}}>
-          <SearchBox
-            onSearch={onSearch}
-            searchbox={styles.search_box_input}
-            value={searchVal}
-            size="small"
-            width="200px"
-            placeholder="Search Sales Orders"
-            style={isMobile ? {flex:1} : {}}
-          />
+          <Grid style={{ display: "flex", flex: 1 }}>
+            <SearchBox
+              onSearch={onSearch}
+              searchbox={styles.search_box_input}
+              value={searchVal}
+              size="small"
+              width="200px"
+              placeholder="Search Sales Orders"
+              style={isMobile ? { flex: 1 } : {}}
+            />
 
           </Grid>
 
 
-          <Grid style={{display: "flex" , gap:"5px"}}>
-          {SalesOrderPermissions?.isCreate && SalesOrderPermissions?.isUpdate && (
-            <Button  variant={isMobile ? "text" : "contained"} color="primary" size="small" className={isMobile ? "mobile_button" : styles.add_submit_btn} onClick={onCreate} >
-              {isMobile ? <MdAdd size={23}/> : "Add"}
-            </Button>
-          )}
-          {SalesOrderPermissions?.isDelete && (
-            <>
-              <Button
-                disabled={canDelete}
-                variant={isMobile ? "text" : "contained"}
-                color="default"
-                size="small"
-                onClick={openActions}
-                className={isMobile ? "mobile_button" : styles.action_submit_btn}
-                aria-controls="action-menu"
-              >
-                {isMobile ? "" :  "Actions" } <ExpandMore/>
+          <Grid style={{ display: "flex", gap: "5px" }}>
+            {SalesOrderPermissions?.isCreate && SalesOrderPermissions?.isUpdate && (
+              <Button variant={isMobile ? "text" : "contained"} color="primary" size="small" className={isMobile ? "mobile_button" : styles.add_submit_btn} onClick={onCreate} >
+                {isMobile ? <MdAdd size={23} /> : "Add"}
               </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    showConfirmBox(null);
-                  }}
+            )}
+            {SalesOrderPermissions?.isDelete && (
+              <>
+                <Button
+                  disabled={canDelete}
+                  variant={isMobile ? "text" : "contained"}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                  aria-controls="action-menu"
                 >
-                  Delete
-                </MenuItem>
-                {/* {SalesOrderPermissions.isUpdate && (
+                  {isMobile ? "" : "Actions"} <ExpandMore />
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      showConfirmBox(null);
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
+                  {/* {SalesOrderPermissions.isUpdate && (
                   <MenuItem
                     disabled={selectedRecords.find((d) => d.canDelete === false)}
                     onClick={() => {
@@ -129,7 +131,7 @@ function SalesOrderHeader(props) {
                     Transfer Entity
                   </MenuItem>
                 )} */}
-                {/* <MenuItem
+                  {/* <MenuItem
                   disabled={selectedRecords.length !== 1}
                   onClick={() => {
                     closeActions();
@@ -138,9 +140,9 @@ function SalesOrderHeader(props) {
                 >
                   Clone
                 </MenuItem> */}
-              </Menu>
-            </>
-          )}
+                </Menu>
+              </>
+            )}
           </Grid>
         </Box>
       </Grid>

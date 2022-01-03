@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Tabs, Tab, useMediaQuery } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -11,18 +11,40 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { salesOrder } from '../../constants/helpers';
+import { salesOrder, defaultActivityShow } from '../../constants/helpers';
 import ManageSalesOrder from './ManageSalesOrder';
 import DeleteButton from '../../components/Helpers/DeleteButton';
+import TabPanel from '../../components/TabPanel';
+import queryString from 'query-string';
+import { FaWpforms } from 'react-icons/fa';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import Steps from './Steps';
+import Productpackage from './Productpackage';
+import AdditionalCost from './AdditionalCost';
+import SerializedAsset from './SerializedAsset';
+import LoadingTicket from './LoadingTicket';
+import Invoice from './Invoice';
+import { findOne, objectStore } from '../../constants/indexdbhelper';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+
+const rentalProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
+  const { isOffline, updateOfflineGridData } = useContext(CustomOfflineContext);
 
   const { id } = useParams();
   const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit, tab }: any = parsed;
+
   const {
     state: { user, permissions }
   }: any = useData();
+
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
+  const isTabletScreen = useMediaQuery('(max-width:960px)');
+
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [salesOrderData, setSalesOrderData] = useState(null);
@@ -31,6 +53,24 @@ const SalesOrderDetails = () => {
   const [salesOrderFields, setSalesOrderFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
+  const [nextStep, setNextStep] = useState(true);
+  const [currentStep, setCurrentStep] = useState(null);
+  const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
+  const [statusOptions, setStatusOptions] = useState([])
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+    history.push(`?tab=${newValue}`);
+  };
+
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
+  }
 
   useEffect(() => {
     if (id) {
@@ -45,18 +85,39 @@ const SalesOrderDetails = () => {
     setMainPoints(mainPoint);
   };
 
-  const getRessourceFields = () => {
-    setLoading(true);
-    axiosInstance()
-      .get('/field?resource=Sales Order')
-      .then(({ data: { data } }) => {
-        setSalesOrderFields(data);
+  const getRessourceFields = async () => {
+    try {
+      setLoading(true);
+      if (!isOffline) {
+        const response: any = await axiosInstance().get('/field?resource=Sales Order');
+        response?.data?.data.some(o => {
+          if (o?.fieldData?.fieldName === "status") {
+            setStatusOptions([...o.fieldData.option])
+            return true
+          }
+        })
         setLoading(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setLoading(false);
-      });
+        setSalesOrderFields(response?.data?.data);
+      } else {
+        const response: any = await findOne(objectStore.resource, objectStore.rentalManagement)
+        setSalesOrderFields(response);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+      setLoading(false);
+    }
+
+
+    // axiosInstance()
+    //   .get('/field?resource=Sales Order')
+    //   .then(({ data: { data } }) => {
+    //     setSalesOrderFields(data);
+    //     setLoading(false);
+    //   })
+    //   .catch((err) => {
+    //     toastConfig.setToastConfig(err);
+    //     setLoading(false);
+    //   });
   };
 
   const fetchSalesOrderData = () => {
@@ -93,6 +154,23 @@ const SalesOrderDetails = () => {
       });
   };
 
+  const updateJobStatus = (status) => {
+    //  need to change the api
+    // axiosInstance().patch(`${rentalManagement.rentalManagementApi}/status/${rentalManagementData._id}`, { status: status }).then(({ data: { data } }) => {
+    //   fetchRentalManagementData();
+    //   if (status === "Invoiced") {
+    //     setCurrentStep(4)
+    //   }
+    //   toastConfig.setToastConfig({
+    //     open: true,
+    //     type: 'success',
+    //     message: `Status changed to ${status}`
+    //   });
+    // }).catch((error) => {
+    //   toastConfig.setToastConfig(error);
+    // });
+  }
+
   return (
     <>
       <Fragment>
@@ -122,17 +200,112 @@ const SalesOrderDetails = () => {
                 </DetailsPageHeader>
               )}
 
-              <Box>
-                {loading || !salesOrderFields.length ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <>
-                    <DetailsPage data={salesOrderData} fields={salesOrderFields} />
-                  </>
-                )}
-              </Box>
+              <Tabs
+                className="quote-tab"
+                value={tabValue}
+                onChange={handleMainTabChange}
+                textColor="primary"
+                TabIndicatorProps={{
+                  style: {
+                    display: 'none'
+                  }
+                }}
+              >
+                <Tab
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 1 ? 'white' : '',
+                    color: tabValue === 1 ? '#163340' : '#163340'
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                    </div>
+                  }
+                  {...a11yProps(0)}
+                />
+                <Tab
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 2 ? 'white' : '',
+                    color: tabValue === 2 ? 'blue' : '#163340'
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                    </div>
+                  }
+                  {...a11yProps(1)}
+                />
+                <div className={'uio'}> </div>
+
+              </Tabs>
+
+              <TabPanel value={tabValue} index={0}>
+                <Box>
+                  {loading || !salesOrderFields.length ? (
+                    <Grid container spacing={2} style={{ padding: '8px' }}>
+                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                    </Grid>
+                  ) : (
+                    <>
+                      <DetailsPage data={salesOrderData} fields={salesOrderFields} />
+                    </>
+                  )}
+                </Box>
+              </TabPanel>
+
+              <TabPanel value={tabValue} index={1}>
+                <Paper>
+                  <Steps
+                    isNextStep={false}
+                    nextStep={nextStep}
+                    steps={rentalProcessSteps}
+                    currentStep={currentStep}
+                    setCurrentStep={setCurrentStep}
+                  />
+                  {currentStep === 0 && salesOrderData && (
+                    <Productpackage
+                      rentalManagementData={salesOrderData}
+                      setNextStep={setNextStep}
+                      currencySymbol={currencySymbol} />
+                  )}
+                  {currentStep === 1 && salesOrderData &&
+                    <AdditionalCost
+                      salesOrderData={salesOrderData}
+                      setNextStep={setNextStep} />}
+                  {currentStep === 2 && salesOrderData && (
+                    <SerializedAsset
+                      rentalManagementData={salesOrderData}
+                      setNextStep={setNextStep}
+                      isSmallScreen={isSmallScreen}
+                      isTabletScreen={isTabletScreen}
+                      showActivity={showActivity}
+                      currencySymbol={currencySymbol}
+                    />
+                  )}
+                  {currentStep === 3 && salesOrderData && (
+                    <LoadingTicket
+                      fetchRentalData={fetchSalesOrderData}
+                      rentalManagementData={salesOrderData}
+                      currentStep={currentStep}
+                      setNextStep={setNextStep}
+                    />
+                  )}
+
+                  {(currentStep === 4) && salesOrderData && (
+                    <Invoice
+                      rentalManagementData={salesOrderData}
+                      setNextStep={setNextStep}
+                      fetchRentalData={fetchSalesOrderData}
+                      updateJobStatus={updateJobStatus}
+                      statusOptions={statusOptions}
+                    />
+                  )}
+                </Paper>
+              </TabPanel>
+
+
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}></Grid>
