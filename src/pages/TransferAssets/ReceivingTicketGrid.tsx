@@ -29,6 +29,7 @@ interface ReceivingGridProps {
   updateTransferStatus?: any;
   handleViewPdf?: any;
   fileDownloading?: boolean;
+  isTransferEnded: boolean;
 }
 
 const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
@@ -43,7 +44,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     setTransferIsEnded,
     updateTransferStatus,
     handleViewPdf,
-    fileDownloading
+    fileDownloading,
+    isTransferEnded
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -279,7 +281,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           )}
         </Box>
 
-        <Box marginTop={isMobile ? 2 : 0}>
+        {!isTransferEnded && <Box marginTop={isMobile ? 2 : 0}>
           {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isCreate && (
             <Button
               variant="contained"
@@ -308,7 +310,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               Remove Receiving Ticket
             </Button>
           )}
-        </Box>
+        </Box>}
       </Box>
 
       <Box mt={1}>

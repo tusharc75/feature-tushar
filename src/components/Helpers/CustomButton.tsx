@@ -6,14 +6,11 @@ import {MdRateReview} from "react-icons/md";
 function CustomButton(props) {
   const { loading, children, disabled, ...rest } = props;
   return (
-    <Button {...rest} disabled={disabled} size="small" variant={isMobile ? "text" : "contained"} style={isMobile ? {color:"var(--danger-light)"} : {}}>
-      {loading ? (
-        <CircularProgress
-          style={{ marginRight: "8px" }}
-          size={20}
-          color="inherit"
-        />
-      ) : null}
+    <Button {...rest} disabled={disabled} size="small" variant={isMobile ? "text" : "contained"} style={isMobile ? {color:"var(--danger-light)"} : {}} endIcon={loading &&
+      <CircularProgress
+        size={18}
+        color="inherit"
+      />}>
       {isMobile ? <MdRateReview size={20}/> : children}
     </Button>
   );
