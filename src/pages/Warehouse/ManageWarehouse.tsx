@@ -1,12 +1,11 @@
 import { useState, useEffect, Fragment, useContext } from "react";
-import { Box, Dialog, Button } from '@material-ui/core';
+import { Box, Dialog, Button, CircularProgress } from '@material-ui/core';
 import { Formik, Form } from "formik";
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../constants/helpers";
@@ -21,6 +20,7 @@ const ManageWarehouse = (props) => {
     const { addressResource, close, onSuccess, isClone = false, open } = props;
 
     const [loading, setLoading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -64,10 +64,11 @@ const ManageWarehouse = (props) => {
 
 
     const handleSubmit = (values) => {
+        setSubmitting(true)
         if (addressResource?.id && !isClone) {
             values._id = addressResource?.id
             axiosInstance().put(`/warehouse`, values).then(({ data }) => {
-                setLoading(false);
+                setSubmitting(false);
                 onSuccess()
                 toastConfig.setToastConfig({
                     open: true,
@@ -75,13 +76,13 @@ const ManageWarehouse = (props) => {
                     message: data.message,
                 });
             }).catch((error) => {
-                setLoading(false);
+                setSubmitting(false);
                 toastConfig.setToastConfig(error);
             });
         }
         else {
             axiosInstance().post(`/warehouse`, values).then(({ data }) => {
-                setLoading(false);
+                setSubmitting(false);
                 onSuccess(data)
                 toastConfig.setToastConfig({
                     open: true,
@@ -89,7 +90,7 @@ const ManageWarehouse = (props) => {
                     message: data.message,
                 });
             }).catch((error) => {
-                setLoading(false);
+                setSubmitting(false);
                 toastConfig.setToastConfig(error);
             });
         }
@@ -152,7 +153,8 @@ const ManageWarehouse = (props) => {
                             </Form>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button size="small" color="primary"
+                            <Button size="small" color="primary" 
+                                disabled={submitting}
                                 onClick={() => {
                                     if (isFieldNotTouched({
                                         initialValues: initialData.values,
@@ -161,13 +163,14 @@ const ManageWarehouse = (props) => {
                                     else setShowConfirmDialog(true)
                                 }}
                             >Cancel</Button>
-                            <CustomButton
-                                loading={loading}
+                            <Button
+                                disabled={loading || submitting}
                                 variant="contained"
                                 color="primary"
                                 type="submit"
                                 onClick={submitForm}
-                            > Save</CustomButton>
+                                endIcon={submitting && <CircularProgress color='inherit' size={18} />}
+                            > Save</Button>
                         </CustomDialogFooter>
                         {
                             showConfirmDialog ?
