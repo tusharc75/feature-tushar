@@ -173,7 +173,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const fetchLoadingTickets = () =>
     new Promise((resolve, reject) => {
       axiosInstance()
-        .get(`${routes.deliveryTicket.path}/typewise?refrenceType=${routes.transferAsset.title}&refrenceId=${transferAssetId}`)
+        .get(`${routes.deliveryTicket.path}/typewise?refrenceType=Transfer Asset&refrenceId=${transferAssetId}`)
         .then(({ data: { data } }) => {
           resolve(data);
         })

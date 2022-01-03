@@ -27,7 +27,7 @@ export const CustomOfflineProvider = ({ children }) => {
     const [offlineGridData, setOfflineGridData] = useState(null);
 
     useEffect(() => {
-        synchronizationData();
+        //synchronizationData();
     }, [isOffline])
 
     window.addEventListener(
@@ -51,27 +51,27 @@ export const CustomOfflineProvider = ({ children }) => {
     });
 
     const synchronizationData = async () => {
-        // if (!isOffline) {
-        //     const data = await findAll(objectStore.offlineDataSync);
-        //     if (data.length) {
-        //         setIsSynch(true)
-        //         await data.forEach(async (d: any) => {
-        //             if (d.type === "deliveryTicket") {
-        //                 await axiosInstance().post(`${deliveryTicket.deliveryTicketApi}/offlinedatasync`, d.data)
-        //                     .then(({ data: { data } }) => {
-        //                         deleteOne(objectStore.offlineDataSync, d.data._id)
-        //                         deleteOne(objectStore.deliveryTicket, d.data._id)
-        //                     })
-        //                     .catch((error) => {
-        //                     });
-        //             }
-        //         });
-        //         await rentalJobOfflineUpdate([])
-        //     }
-        //     else {
-        //         setIsSynch(false)
-        //     }
-        // }
+        if (!isOffline) {
+            const data = await findAll(objectStore.offlineDataSync);
+            if (data.length) {
+                setIsSynch(true)
+                await data.forEach(async (d: any) => {
+                    if (d.type === "deliveryTicket") {
+                        await axiosInstance().post(`${deliveryTicket.deliveryTicketApi}/offlinedatasync`, d.data)
+                            .then(({ data: { data } }) => {
+                                deleteOne(objectStore.offlineDataSync, d.data._id)
+                                deleteOne(objectStore.deliveryTicket, d.data._id)
+                            })
+                            .catch((error) => {
+                            });
+                    }
+                });
+                await rentalJobOfflineUpdate([])
+            }
+            else {
+                setIsSynch(false)
+            }
+        }
     }
 
     const passDataToSave = () => {
