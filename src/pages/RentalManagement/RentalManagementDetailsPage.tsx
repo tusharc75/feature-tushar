@@ -39,7 +39,7 @@ import LoadingTicket from './LoadingTicket';
 import ReceivingTicket from './ReceivingTicket';
 import Invoice from './Invoice';
 
-const rentalProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Ready To Invoice'];
+const rentalProcessSteps = ['Add Products', 'Ad hoc Charges', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Ready To Invoice'];
 
 const RentalManagementDetailsPage = () => {
 

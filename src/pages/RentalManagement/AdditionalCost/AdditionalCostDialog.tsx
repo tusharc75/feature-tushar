@@ -99,7 +99,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
         }) => (
           <Fragment>
             <CustomDialogHeader
-              title={costData ? "Edit Service" : "Add Service"}
+              title={costData ? "Edit Service" : "Ad hoc Charges"}
               onClose={() => {
                 if (!isEqual(ref?.current?.values, initialData.values)) {
                   setShowConfirmDialog(true)

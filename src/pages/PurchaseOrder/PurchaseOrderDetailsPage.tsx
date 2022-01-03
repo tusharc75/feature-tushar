@@ -42,7 +42,7 @@ import accountClass from "../Account/account.module.scss";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
-const purchaseOrderSteps = ["Add Product", "Add Services", "Issue PO", "Receiving Asset", "Ready to Invoice"]
+const purchaseOrderSteps = ["Add Product", "Ad hoc Charges", "Issue PO", "Receiving Asset", "Ready to Invoice"]
 
 const PurchaseOrderDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
