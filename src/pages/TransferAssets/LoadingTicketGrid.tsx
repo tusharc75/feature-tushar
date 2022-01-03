@@ -30,6 +30,7 @@ interface LoadingGridProps {
   updateTransferStatus?: any;
   handleViewPdf?: any;
   fileDownloading?: boolean;
+  isTransferEnded: boolean;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
@@ -44,7 +45,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     setTransferIsEnded,
     updateTransferStatus,
     handleViewPdf,
-    fileDownloading
+    fileDownloading,
+    isTransferEnded
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -253,7 +255,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             </Button>
           )}
         </Box>
-        <Box marginTop={isMobile ? 2 : 0}>
+        {!isTransferEnded &&  <Box marginTop={isMobile ? 2 : 0}>
           {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isCreate && (
             <Button
               variant="contained"
@@ -286,7 +288,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               Remove Loading Ticket
             </Button>
           )}
-        </Box>
+        </Box>}
       </Box>
 
       <Box mt={1}>
