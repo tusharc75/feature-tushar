@@ -242,6 +242,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                         loading={loading}
                         onCellValueChanged={onCellValueChanged}
                         showOnlyShowFilteredRecordSwitch={true}
+                        renderedFrom={"rentalJobManagementAddProducts"}
                     />
                     : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
             </div>
