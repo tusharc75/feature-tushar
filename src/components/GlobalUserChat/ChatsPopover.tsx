@@ -43,6 +43,17 @@ const ChatsPopover = (props) => {
   useEffect(() => {
     fetchUsersList();
   }, []);
+  
+
+  useEffect(() => {
+    if(selectedChat) {
+      msgSeen(selectedChat.id)
+    }
+  }, [selectedChat])
+
+  const msgSeen = (id) => {
+    axiosInstance().put(`chatter/mark-read/${id}`);
+  }
 
   const fetchUsersList = () => {
     axiosInstance()
@@ -131,9 +142,9 @@ const ChatsPopover = (props) => {
           {newChat ? (
             <NewChat userId={user._id} setNewChat={setNewChat} setSelectedChat={setSelectedChat} users={users} />
           ) : selectedChat ? (
-            <ChatBox getChats={getChats} />
+            <ChatBox msgSeen={msgSeen} user={user} />
           ) : (
-            <List disablePadding className={classes.listRoot}>
+            <List disablePadding dense className={classes.listRoot}>
               {chatList.map((chat, i) => (
                 <ChatList key={i} userId={user._id} socket={socket} chat={chat} setSelectedChat={setSelectedChat} getChats={getChats} />
               ))}
