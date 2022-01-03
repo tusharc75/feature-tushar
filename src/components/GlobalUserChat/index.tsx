@@ -33,7 +33,7 @@ const GlobalUserChat = () => {
 
   const getChats = useCallback(() => {
     axiosInstance()
-      .get('/chatter/user-to-user/my?orderBy=desc&sortBy=message.date')
+      .get('/chatter/user-to-user/my?orderBy=desc&sortBy=message.date&limit=100')
       .then(({ data: { data } }) => {
         let newData = [];
         data.forEach((d: any) => {
