@@ -10,7 +10,7 @@ import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../constants/helpers";
 import InputField from "../../components/Helpers/InputField";
-import { getObjKeysWithValues, getObjKeys, yupSchema, isFieldNotTouched } from "../../constants/helpers";
+import { getObjKeysWithValues, getObjKeys, yupSchema, isFieldNotTouched, sidebarResource } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
@@ -124,7 +124,7 @@ const ManageWarehouse = (props) => {
                 }) => (
                     <Fragment>
                         <CustomDialogHeader
-                            title={addressResource?.id ? "Update " + initialData?.values["warehouseName"] ?? "" : "Create " + routes.warehouse.title}
+                            title={isClone ? `Clone Plant` : addressResource?.id ? `Update ${initialData?.values["warehouseName"] ?? ""}` : "Create Plant"}
                             onClose={() => {
                                 if (isFieldNotTouched({
                                     initialValues: initialData.values,
