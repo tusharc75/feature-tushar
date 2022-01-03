@@ -78,7 +78,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
 
         dispatch({ type: "loading", loading: true });
         axiosInstance()
-          .get(`${repairJob.repairJobApi}/${repairJobData._id}/delivery-ticket`)
+          .get(`${routes.deliveryTicket.path}/typewise?refrenceType=Repair Job&refrenceId=${repairJobData._id}`)
           .then(({ data }) => {
 
             // let disableNextButtonIfNonDeliveredFound = true;
@@ -105,6 +105,12 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
                     tempProductInventory[index]["isDelivered"] = obj?.status === "Delivered";
                   }
                 })
+              }
+            })
+
+            tempProductInventory.forEach((d) => {
+              if (!d.hasOwnProperty("isDelivered")) {
+                d["isDelivered"] = false;
               }
             })
 
@@ -295,7 +301,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
       {
         repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
         <IconButton
-          disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("isDelivered") && f.isDelivered === true) || selectedRecords.some(f => f.repaired === true)}
+          disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId") === false) || selectedRecords.some(f => f.isDelivered === true)}
           onClick={() => {
             setShowRemoveAssetFromLoadingTicketDialog(true)
           }}

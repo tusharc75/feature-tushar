@@ -126,7 +126,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         }
       });
       additionalcost?.forEach((e) => {
-        e.type = "Service";
+        e.type = "Ad-hoc Charge";
       })
       combinedData = [...combinedData, ...additionalcost];
       let rows = combinedData?.map((item) => {
