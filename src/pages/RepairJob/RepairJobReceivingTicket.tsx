@@ -92,7 +92,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                 let tempProductInventory = data.data.map(u => ({ ...u, _id: u?.id, productName: u?.product?.optionLabel }))
                 dispatch({ type: "loading", loading: true });
                 axiosInstance()
-                    .get(`${repairJob.repairJobApi}/${repairJobData._id}/delivery-ticket`)
+                    .get(`${routes.deliveryTicket.path}/typewise?refrenceType=Repair Job&refrenceId=${repairJobData._id}`)
                     .then(({ data }) => {
 
                         data.data.map(obj => {
