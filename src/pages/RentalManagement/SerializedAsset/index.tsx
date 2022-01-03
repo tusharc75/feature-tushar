@@ -9,7 +9,7 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, productInventory } from "../../../constants/helpers";
+import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, productInventory, INVENTORY_STATUS } from "../../../constants/helpers";
 import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
@@ -59,6 +59,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       accessor: 'detail',
       Header: 'Detail',
       width: 300,
+      sticky: "left",
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate" title={row.original.detail}  >
@@ -69,7 +70,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           {row.original?.type === "asset" &&
             <span className="d-flex align-items-center gap-2">
               <Chip label="Asset" size="small" color="primary" />
-              {(row.original.status === "Reserved" && !isOffline) &&
+              {(row.original.status === INVENTORY_STATUS.reserved && !isOffline) &&
                 <IconButton size="small" onClick={() => {
                   setShowConfirmBox(true)
                   setDeleteData([row.original.inventory])
@@ -415,7 +416,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               color="primary"
               type="button"
               size="small"
-              disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === "Reserved").length === 0)}
+              disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
               onClick={() => {
                 setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
                 setShowConfirmBox(true)
@@ -435,7 +436,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                 ? "calc(100vw - 20px)"
                 : isSmallScreen
                   ? "calc(100vw - 78px)"
-                  : showActivity ? "100%" : "calc(100vw - 100px)"
+                  : showActivity ? "100%" : "calc(100vw - 103px)"
             }
             height="calc(100vh - 350px)"
           >

@@ -16,7 +16,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import {
     gridLoadingTimeout, receivingTicket, repairJob,
-    sidebarResource, productInventory as productInventoryHelperObject, repairJobStatus, deliveryTicket
+    sidebarResource, productInventory as productInventoryHelperObject, repairJobStatus, deliveryTicket, INVENTORY_STATUS
 } from "../../constants/helpers";
 import { groupBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -114,7 +114,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
 
                         tempProductInventory.forEach((d) => {
                             d["_id"] = d["id"];
-                            d["hideSelection"] = d.status === "In-Transit" || d.status === "Lost" || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true);
+                            d["hideSelection"] = d.status === INVENTORY_STATUS.indTransit || d.status === INVENTORY_STATUS.lost || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true);
                         })
 
                         setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))

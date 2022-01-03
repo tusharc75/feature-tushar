@@ -147,7 +147,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             setCustomerContactMainDataSource(customerContactDropdownData.option);
             if (rentalManagementId) {
                 setCustomerContactDataSource(
-                    customerContactDropdownData.option.filter(
+                    customerContactDropdownData?.option.filter(
                         (d) =>
                             d.parentAccount === rentalManagementData?.customerAccount.optionValue
                     )
@@ -948,6 +948,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                     setErrors
                                                 );
                                             }}
+                                            close={() => setShowConfirmDialog(false)}
                                             onClose={() => {
                                                 setShowConfirmDialog(false)
                                                 onClose()

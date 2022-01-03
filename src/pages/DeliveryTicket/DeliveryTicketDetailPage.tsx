@@ -324,6 +324,8 @@ export default function DeliveryTicketDetail(props) {
         data = response?.productInventory.map((u) => {
           return u.inventoryDetail;
         })
+        const inventory = deliveryTicket?.productInventory?.map((e) => e.optionValue);
+        data = response?.productInventory?.filter(d => inventory?.includes(d.inventory)).map(obj => obj.inventoryDetail)
       }
       else {
         let ids = JSON.stringify(productInventories)
@@ -337,7 +339,7 @@ export default function DeliveryTicketDetail(props) {
         };
         return res;
       });
-      dispatch({ type: "initialize", data: rows, count: rows.count });
+      dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
     }
     catch (error) {
@@ -723,26 +725,26 @@ export default function DeliveryTicketDetail(props) {
                           renderedFrom={"receivingTicketDetailInventoryPage"}
                           onClone={() => {
                           }}
-
                         /> :
-
-                          Object.keys(frameWorkComponent).length > 0 ? <CustomAgGrid
-                            allowSelection={deliveryTicketData?.status === "New"}
-                            allowAction={false}
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameWorkComponent}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            actionWidth={150}
-                            loading={false}
-                            renderedFrom={renderedFrom}
-                            refreshGrid={fetchProductInventory}
-                          /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+                          Object.keys(frameWorkComponent).length > 0 ?
+                            <CustomAgGrid
+                              isClientSideGrid={true}
+                              allowSelection={deliveryTicketData?.status === "New"}
+                              allowAction={false}
+                              columns={columns}
+                              dataRows={dataRows}
+                              frameworkComponents={frameWorkComponent}
+                              setGridApi={setGridApi}
+                              dispatch={dispatch}
+                              rowCount={rowCount}
+                              limit={limit}
+                              pageSizes={pageSizes}
+                              page={page}
+                              actionWidth={150}
+                              loading={false}
+                              renderedFrom={renderedFrom}
+                              refreshGrid={fetchProductInventory}
+                            /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                         }
                       </Grid>
                     </Grid>

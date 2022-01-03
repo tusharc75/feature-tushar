@@ -54,7 +54,7 @@ const localStorageSelectedRecords = `${renderedFrom}_selected`
 const RentalManagement = () => {
 
   const toastConfig = useContext(CustomToastContext);
-  const { isOffline } = useContext(CustomOfflineContext);
+  const { isOffline, isSynch } = useContext(CustomOfflineContext);
 
   const pageTitle = camelCase(`${routes.rentalManagement.title}`)
   const history = useHistory();
@@ -607,7 +607,6 @@ const RentalManagement = () => {
           ) : null}
         </CustomContainer>
       </Fragment>
-
       {
         showManageRentalManagementDialog.open && (
           <ManageRentalManagementDialog

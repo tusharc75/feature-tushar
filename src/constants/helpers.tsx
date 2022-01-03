@@ -1346,11 +1346,17 @@ export const INVENTORY_STATUS = {
   inSale: 'In Sale',
   inUse: 'In-Use',
   indTransit: 'In-Transit',
-  underRevives: 'Under Review',
+  underReview: 'Under Review',
   repair: 'Repair',
   available: 'Available',
   readyToShip: 'Ready to ship',
   new: 'New',
   scrap: 'Scrap',
   lost: 'Lost',
+};
+
+export const DELIVERY_TICKET_STATUS = {
+  new: 'New',
+  indTransit: 'In-Transit',
+  delivered: 'Delivered',
 };

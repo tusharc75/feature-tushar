@@ -14,7 +14,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { product, warehouse } from '../../constants/helpers';
+import { product, productInventory, warehouse } from '../../constants/helpers';
 import CreateProduct from '../../components/Product/CreateProduct';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import DeleteButton from '../../components/Helpers/DeleteButton';
@@ -69,6 +69,8 @@ const ProductDetailsPage = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [frequentlyBoughtProduct, setFrequentlyBoughtProduct] = useState([]);
   const [inventoriesData, setInventoriesData] = useState([]);
+  const [inventoriesWarehouse, setWarehouseInventories] = useState([]);
+  const [inventoriesWarehouseLoading, setWarehouseInventoriesLoading] = useState(false);
   const [BOMData, setBOMData] = useState([]);
   const [activeTable, setActiveTable] = useState('packages');
   const [productWarehouseData, setProductWarehouseData] = useState([]);
@@ -104,6 +106,21 @@ const ProductDetailsPage = () => {
       getColumns();
     }
   }, [activeTable, productData]);
+
+  useEffect(() => {
+    if (selectedWarehouse) {
+      setWarehouseInventoriesLoading(true);
+      axiosInstance()
+        .get(`${productInventory.api}?limit=6&filterById=[{"field":"warehouse","term":"${selectedWarehouse}"},{"field":"product","term":"${id}"}]&filterByIdType=and`)
+        .then(({ data: { data } }) => {
+          setWarehouseInventories(data);
+          setWarehouseInventoriesLoading(false);
+        })
+        .catch((err) => {
+          setWarehouseInventoriesLoading(false);
+        });
+    }
+  }, [selectedWarehouse]);
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
@@ -259,44 +276,33 @@ const ProductDetailsPage = () => {
 
   const getWarehouses = () => {
     setLoadingWarehouse(true);
-    axiosInstance()
-      .get(`product/${id}/inventory`)
-      .then(async ({ data: { data } }) => {
-        setProductWarehouseData(data);
-        if (productData?.serializedProduct) {
-          let wareHouses = [];
-          let byStatus = [];
-          for (const d of data) {
-            if (!wareHouses.includes(d?.warehouse?.optionLabel)) {
-              wareHouses.push(d?.warehouse?.optionLabel);
-            }
-            if (!byStatus.includes(d?.status)) {
-              byStatus.push(d?.status);
-            }
-          }
-          const inventories = wareHouses.map((w) => {
-            let inventory = data.filter((d) => w === d?.warehouse?.optionLabel);
-            let status = byStatus
-              .map((status) => {
-                let count = data.filter((d) => w === d?.warehouse?.optionLabel).filter((d) => status === d?.status).length;
-                if (count) {
-                  return { status, count };
-                }
-              })
-              .filter((x) => x);
-            return { warehouse: w, inventory, status };
-          });
-          setInventoriesData(inventories);
-          setLoadingWarehouse(false);
-        } else {
+    if (productData?.serializedProduct) {
+      axiosInstance()
+        .get(`product/${id}/warehouse`)
+        .then(async ({ data: { data } }) => {
+          setProductWarehouseData(data);
+
           setInventoriesData(data);
           setLoadingWarehouse(false);
-        }
-      })
-      .catch((err) => {
-        setLoadingWarehouse(false);
-        toastConfig.setToastConfig(err);
-      });
+        })
+        .catch((err) => {
+          setLoadingWarehouse(false);
+          toastConfig.setToastConfig(err);
+        });
+    } else {
+      axiosInstance()
+        .get(`product/${id}/inventory`)
+        .then(async ({ data: { data } }) => {
+          setProductWarehouseData(data);
+          setInventoriesData(data);
+          setLoadingWarehouse(false);
+        })
+        .catch((err) => {
+          setLoadingWarehouse(false);
+          toastConfig.setToastConfig(err);
+        });
+    }
+
   };
 
   const getColumns = () => {
@@ -311,14 +317,14 @@ const ProductDetailsPage = () => {
     if (activeTable === 'parent') {
       rowsData = parent
         ? parent.map((product) => ({
-            ...product,
-            serializedProduct: product?.serializedProduct ? 'Yes' : 'No',
-            productType: product?.productType,
-            createdBy: product?.createdBy?.user?.concatedName,
-            createdByDate: product?.createdBy?.date,
-            updatedBy: product?.updatedBy?.user?.concatedName,
-            updatedByDate: product?.updatedBy?.date
-          }))
+          ...product,
+          serializedProduct: product?.serializedProduct ? 'Yes' : 'No',
+          productType: product?.productType,
+          createdBy: product?.createdBy?.user?.concatedName,
+          createdByDate: product?.createdBy?.date,
+          updatedBy: product?.updatedBy?.user?.concatedName,
+          updatedByDate: product?.updatedBy?.date
+        }))
         : [];
       newColumns = [
         { field: 'productName', headerName: 'Product Description', show: true, disabled: false, cellRenderer: 'productNameRenderer' },
@@ -335,12 +341,12 @@ const ProductDetailsPage = () => {
     } else {
       rowsData = packages
         ? packages.map((p) => ({
-            ...p,
-            createdBy: p.createdBy.user.concatedName,
-            createdByDate: p.createdBy.date,
-            updatedBy: p.updatedBy.user.concatedName,
-            updatedByDate: p.updatedBy.date
-          }))
+          ...p,
+          createdBy: p.createdBy.user.concatedName,
+          createdByDate: p.createdBy.date,
+          updatedBy: p.updatedBy.user.concatedName,
+          updatedByDate: p.updatedBy.date
+        }))
         : [];
       newColumns = [
         { field: 'packageName', headerName: 'Package Name', show: true, cellRenderer: 'packageNameRenderer' },
@@ -549,7 +555,7 @@ const ProductDetailsPage = () => {
               </Paper>
               <Paper className="mt-2" style={{ overflow: 'hidden' }}>
                 <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="subtitle2">Plants ({inventoriesData.length || 0})</Typography>
+                  <Typography variant="subtitle2">Plants ({inventoriesData?.length || 0})</Typography>
 
                   {permissions?.productInventory?.isCreate && (
                     <IconButton
@@ -581,9 +587,9 @@ const ProductDetailsPage = () => {
                           </Box>
                         </BoxWithBorder>
                       ))
-                    ) : inventoriesData.length ? (
+                    ) : inventoriesData?.length ? (
                       productData?.serializedProduct ? (
-                        inventoriesData.map(({ inventory, warehouse, status }, i) => (
+                        inventoriesData.map(({ products, warehouse, count }, i) => (
                           <Box key={i}>
                             <Box display="flex" bgcolor="#f7f5f5" borderRadius="3px" borderBottom="1px solid #efe7e7">
                               <Grid>
@@ -593,14 +599,14 @@ const ProductDetailsPage = () => {
                                       <IconButton
                                         size="small"
                                         onClick={() => {
-                                          if (selectedWarehouse !== warehouse) {
-                                            setSelectedWarehouse(warehouse);
+                                          if (selectedWarehouse !== warehouse.optionValue) {
+                                            setSelectedWarehouse(warehouse.optionValue);
                                           } else {
                                             setSelectedWarehouse(null);
                                           }
                                         }}
                                       >
-                                        {selectedWarehouse === warehouse ? <ExpandLess /> : <ExpandMore />}
+                                        {selectedWarehouse === warehouse.optionValue ? <ExpandLess /> : <ExpandMore />}
                                       </IconButton>
                                     </Box>
                                     <Box ml={1} display="flex" alignItems="center">
@@ -610,7 +616,7 @@ const ProductDetailsPage = () => {
                                         className="d-flex align-items-center"
                                         style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
                                       >
-                                        {warehouse} ({inventory.length || 0})
+                                        {warehouse.optionLabel} ({count || 0})
                                       </Typography>
                                       <Box mx={1} />
                                       <HtmlTooltip
@@ -619,8 +625,8 @@ const ProductDetailsPage = () => {
                                         title={
                                           <>
                                             <Typography>Inventory Status: </Typography>
-                                            {status.map((s) => (
-                                              <Typography>{`(${s.count}) ${s.status}`}</Typography>
+                                            {products.map((s) => (
+                                              <Typography>{`(${s?.count}) ${s?.status}`}</Typography>
                                             ))}
                                           </>
                                         }
@@ -635,51 +641,51 @@ const ProductDetailsPage = () => {
                               </Grid>
                             </Box>
                             <Box p={1}>
-                              {selectedWarehouse === warehouse &&
-                                inventory?.slice(0, 6).map((i, index) => (
-                                  <Fragment key={i._id}>
-                                    {i?.asssetNumber ? (
-                                      index === 5 ? (
-                                        <Button
-                                          fullWidth
-                                          className="mt-2"
-                                          variant="outlined"
-                                          color="primary"
-                                          onClick={() => {
-                                            history.push(`${routes.productInventory.path}`, {
-                                              warehouse: productWarehouseData.find((d) => d?.warehouse?.optionLabel === selectedWarehouse).warehouse,
-                                              product: { id: id, name: headingLabel }
-                                            });
-                                          }}
-                                        >
-                                          View All
-                                        </Button>
-                                      ) : (
-                                        // <Chip
-                                        //     label={"show more"}
-                                        //     // color="secondary"
-                                        //     style={{ marginRight: '2px', background: "#1aa3ff" }}
-                                        //     onClick={() => {
-                                        //         history.push(`${routes.productInventory.path}`, {
-                                        //             warehouse: productWarehouseData.find(d => d?.warehouse?.optionLabel === selectedWarehouse).warehouse,
-                                        //             product: { "id": id, "name": headingLabel },
-                                        //         })
-                                        //     }} />
-                                        <Chip
-                                          label={i?.asssetNumber}
-                                          // color="secondary"
-                                          style={{
-                                            marginRight: '2px',
-                                            background: ['New', 'Available'].indexOf(i?.status) >= 0 ? '#b9ffce' : '#ffb4b4'
-                                          }}
-                                          onClick={() => {
-                                            history.push({ pathname: `${routes.productInventoryDetail.path}/${i._id}` });
-                                          }}
-                                        />
-                                      )
-                                    ) : null}
-                                  </Fragment>
-                                ))}
+                              {selectedWarehouse === warehouse.optionValue ?
+                                inventoriesWarehouseLoading ?
+                                  <Typography
+                                    variant="subtitle2"
+                                    color="primary"
+                                    className="d-flex align-items-center"
+                                    style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
+                                  >
+                                    Loading
+                                  </Typography>
+                                  :
+                                  inventoriesWarehouse.map((i, index) => (
+                                    <Fragment key={i._id}>
+                                      {i?.assetNumber ? (
+                                        index === 5 ? (
+                                          <Button
+                                            fullWidth
+                                            className="mt-2"
+                                            variant="outlined"
+                                            color="primary"
+                                            onClick={() => {
+                                              history.push(`${routes.productInventory.path}`, {
+                                                warehouse: productWarehouseData.find((d) => d?.warehouse?.optionValue === selectedWarehouse).warehouse,
+                                                product: { id: id, name: headingLabel }
+                                              });
+                                            }}
+                                          >
+                                            View All
+                                          </Button>
+                                        ) : (
+                                          <Chip
+                                            label={i?.assetNumber}
+                                            // color="secondary"
+                                            style={{
+                                              marginRight: '2px',
+                                              background: ['New', 'Available'].indexOf(i?.status) >= 0 ? '#b9ffce' : '#ffb4b4'
+                                            }}
+                                            onClick={() => {
+                                              history.push({ pathname: `${routes.productInventoryDetail.path}/${i._id}` });
+                                            }}
+                                          />
+                                        )
+                                      ) : null}
+                                    </Fragment>
+                                  )) : null}
                             </Box>
                           </Box>
                         ))
@@ -689,7 +695,7 @@ const ProductDetailsPage = () => {
                             <Typography variant="h6">Plants</Typography>
                             <Typography variant="h6">Qty.</Typography>
                           </Box>
-                          {inventoriesData.map(({ qty, wareHouse }) => (
+                          {inventoriesData?.map(({ qty, wareHouse }) => (
                             <List disablePadding key={wareHouse?._id}>
                               <ListItem dense>
                                 <ListItemText primary={wareHouse?.warehouseName} />
