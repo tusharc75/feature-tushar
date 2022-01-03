@@ -486,7 +486,7 @@ const RepairJobDetails = () => {
       .then(() => {
         setDisableNextStep(false)
         if (previousStep === 0) {
-          fetchAssignedSerializedAssets(false);
+          fetchAssignedSerializedAssets(null, false);
         }
 
       }).catch((error) => {
