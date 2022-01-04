@@ -696,7 +696,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                 accountResource={supplierAccount.accountResource}
                                 accountApi={supplierAccount.accountApi}
                                 isGetAccountData={true}
-                                onGetAddedAccount={({ data }) => {
+                                onGetAddedAccount={({ data, addressDataSource }) => {
                                     setAccountData((prevState) => {
                                         return [
                                             ...prevState,
@@ -705,9 +705,25 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                 optionLabel: data.accountName,
                                                 order: accountData.length,
                                                 default: false,
+                                                billingAddress: data?.billingAddress,
+                                                shippingAddress: data?.shippingAddress
                                             }
                                         ];
                                     });
+                                    if (addressDataSource) {
+                                        setCountryBillToMainData((prevState) => {
+                                            return [
+                                                ...prevState,
+                                                ...addressDataSource
+                                            ];
+                                        });
+                                        setCountrySellToMainData((prevState) => {
+                                            return [
+                                                ...prevState,
+                                                ...addressDataSource
+                                            ];
+                                        });
+                                    }
                                     setFieldValue("supplier", data._id);
                                     setFieldValue("supplierContact", "");
                                 }}

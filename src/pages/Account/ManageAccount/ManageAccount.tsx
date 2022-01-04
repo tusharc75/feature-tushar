@@ -47,7 +47,9 @@ export default function ManageAccount(props) {
     isClone,
     accountNameForClone,
     accountResource,
-    accountApi
+    accountApi,
+    addressDataSource,
+    setAddressDataSource
   } = props;
 
   const {
@@ -82,7 +84,6 @@ export default function ManageAccount(props) {
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false)
-  const [addressDataSource, setAddressDataSource] = useState([]);
   const [addressType, setAddressType] = useState(null);
   const [isShippingSameAsBilling, setIsShippingSameAsBilling] =useState(false)
   useEffect(() => {
