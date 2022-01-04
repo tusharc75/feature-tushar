@@ -52,15 +52,19 @@ export default function ManageAccount(props) {
     setAddressDataSource
   } = props;
 
+ 
   const {
     state: { user, permissions },
   }: any = useData();
   const [disableOwnerSelection] = useState(
     !isNew && user.user._id !== accountData.initialValues.owner
-  )
+  );
+
   const formikRef = {
     current: null
   }
+
+
   //  Owner, Collaborator Code - Start
   const [formsData, setFormsData] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -164,7 +168,10 @@ export default function ManageAccount(props) {
     const addressDataDropdown = accountData.fields.find(
       (d) => d.fieldName === "billingAddress"
     );
-    if (accountId && addressDataDropdown) {
+
+   
+
+    if (addressDataDropdown) {
       setAddressDataSource(addressDataDropdown.option.filter(d => accountData?.initialValues?.billingAddress?.includes(d.optionValue) || accountData?.initialValues?.shippingAddress?.includes(d.optionValue)))
     }
     else if (addressDataDropdown) {
@@ -603,7 +610,7 @@ export default function ManageAccount(props) {
                                               type={field.type}
                                               options={addressDataSource}
                                               setFieldValue={(name, value) => {
-                                                setFieldValue(name, value)
+                                                setFieldValue(field.fieldName, value)
                                                 handleValuesChange({ [name]: value })
                                                 if (
                                                   values.isShippingAddressSameAsBillingAddress ===
@@ -702,7 +709,7 @@ export default function ManageAccount(props) {
                                                 options={addressDataSource}
                                                 setFieldValue={(name, value) => {
                                                   handleValuesChange({ [name]: value })
-                                                  setFieldValue(name, value)
+                                                  setFieldValue(field.fieldName, value )
                                                 }}
                                                 required={field.required}
                                                 fullWidth
