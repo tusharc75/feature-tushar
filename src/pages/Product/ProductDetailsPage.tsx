@@ -83,7 +83,7 @@ const ProductDetailsPage = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const [currentTab, setCurrentTab] = useState(null);
   const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-  const ignoreField = ['priceTemplate'];
+  const ignoreField = ['priceTemplate', 'brand'];
 
   useEffect(() => {
     if (id) {
@@ -168,7 +168,7 @@ const ProductDetailsPage = () => {
             fields.forEach((_f) => {
               newField.push({ fieldData: _f });
             });
-            setProductFields(newField);
+            setProductFields(newField.filter(d => !ignoreField.includes(d?.fieldData?.fieldName)));
             handleMainPoints(data.productData);
             setHeadingLabel(
               data.productData?.productNumber
