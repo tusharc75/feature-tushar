@@ -328,8 +328,7 @@ const ProductInventoryDetailsPage = () => {
 
 
   useEffect(() => {
-    let statuses = ["Available", "Repair", "Scrap", "Lost"]
-
+    let statuses = ["Available", "Scrap", "Lost"]
     if (productInventoryData) {
       if (productInventoryData.status === "Lost" || productInventoryData.status === "Repair") {
         setManualStatus(statuses)

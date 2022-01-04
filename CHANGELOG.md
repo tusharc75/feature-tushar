@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.33.0](https://github.com/vebholic/oms_frontend/compare/v2.32.1...v2.33.0) (2022-01-04)
+
+
+### Features
+
+* - Repair job delivery tickets api changed, suggested by romit ([3badadb](https://github.com/vebholic/oms_frontend/commit/3badadb7c1bf78d2ca2b6129990817622498c0f9))
+
+
+### Bug Fixes
+
+* bug fix ([3a8391e](https://github.com/vebholic/oms_frontend/commit/3a8391e5eae523b5cc4b4bd48c1dfef80cc28bce))
+* **chatter:** chat not showing ([f221ab1](https://github.com/vebholic/oms_frontend/commit/f221ab16e4eb97e4b4ff9ac47fcbdfa742b51810))
+* **plants:** address update ([6c6138e](https://github.com/vebholic/oms_frontend/commit/6c6138e529328a27f60202c0a3078a1befa528df))
+* **plants:** fix dialog title ([4170e0e](https://github.com/vebholic/oms_frontend/commit/4170e0e31f062eb67d924dbe59c26a15cf975234))
+* pO-736 , 756 ([33275f0](https://github.com/vebholic/oms_frontend/commit/33275f059354d25c6d566a3ad3899cb368faae06))
+* **renaljob:** grid fix ([96f46b9](https://github.com/vebholic/oms_frontend/commit/96f46b95901f54d156a115cda6bb0c52c5f1bbb6))
+* rental bug fix ([fc93b13](https://github.com/vebholic/oms_frontend/commit/fc93b1306bbbfabec406e64b6b953adae26b7d96))
+* **signature:** dialog label fix ([4c4eef3](https://github.com/vebholic/oms_frontend/commit/4c4eef3611ecd0a94a26eca33d5be24d53729e2c))
+* **transferasset:** hide buttons ([afdf5d2](https://github.com/vebholic/oms_frontend/commit/afdf5d256cacfdd91720f005c5492ccadf96bb04))
+
 ### [2.32.1](https://github.com/vebholic/oms_frontend/compare/v2.32.0...v2.32.1) (2022-01-02)
 
 ## [2.32.0](https://github.com/vebholic/oms_frontend/compare/v2.31.0...v2.32.0) (2022-01-01)
