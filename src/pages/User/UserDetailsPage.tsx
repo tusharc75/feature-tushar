@@ -1193,7 +1193,7 @@ const UserDetailsPage = () => {
                 <IoIosArrowDropleft className="icon" />
               </span>} */}
 
-            <Paper className="fixedRightPanel">
+            <Paper className={`${!isSmallScreen ? 'fixedRightPanel' : null}`}>
               {!isSmallScreen && <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
                 {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
               </span>}
