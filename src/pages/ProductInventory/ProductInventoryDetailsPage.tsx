@@ -130,11 +130,11 @@ const ProductInventoryDetailsPage = () => {
                 <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
                   {params.value}
                 </Link>
-                :  params.data.type.toLowerCase().includes("purchase") ? 
-                <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
-                {params.value}
-              </Link>
-                : params.value
+                : params.data.type.toLowerCase().includes("purchase") ?
+                  <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
+                    {params.value}
+                  </Link>
+                  : params.value
       ) : (
         <NoDataCell />
       )
@@ -172,7 +172,7 @@ const ProductInventoryDetailsPage = () => {
     getProductInventoryFields();
     fetchProductInventoryData();
     fetchProductInventoryHistory();
-    
+
   }
 
 
@@ -329,8 +329,7 @@ const ProductInventoryDetailsPage = () => {
 
 
   useEffect(() => {
-    let statuses = ["Available", "Repair", "Scrap", "Lost"]
-
+    let statuses = ["Available", "Scrap", "Lost"]
     if (productInventoryData) {
       if (productInventoryData.status === "Lost" || productInventoryData.status === "Repair") {
         setManualStatus(statuses)
