@@ -31,6 +31,7 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 import CustomTimeline from "../../components/CustomTimeline";
 import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
 import { MdEdit } from "react-icons/md";
+import { startCase } from "lodash";
 
 
 
@@ -130,11 +131,11 @@ const ProductInventoryDetailsPage = () => {
                 <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
                   {params.value}
                 </Link>
-                :  params.data.type.toLowerCase().includes("purchase") ? 
-                <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
-                {params.value}
-              </Link>
-                : params.value
+                : params.data.type.toLowerCase().includes("purchase") ?
+                  <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
+                    {params.value}
+                  </Link>
+                  : params.value
       ) : (
         <NoDataCell />
       )
@@ -172,17 +173,15 @@ const ProductInventoryDetailsPage = () => {
     getProductInventoryFields();
     fetchProductInventoryData();
     fetchProductInventoryHistory();
-    
+
   }
 
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
-    mainPoint['Number Of Days After Repair'] = data?.noOfDaysAfterRepair;
-    mainPoint['Number Of Job From Last Repair'] = data?.noOfJobFromLastRepair;
-    mainPoint['Total Number Of Rental Job'] = data?.totalNoOfRentalJob;
-    mainPoint['Use Time From Last Repair'] = data?.useTimeFromLastRepair;
-    mainPoint['Total Repair'] = data?.totalRepair;
+    Object.keys(data).map((stat: any) => (
+      mainPoint[startCase(stat)] = data[stat] ?? 0
+    ))
     setMainPoints(mainPoint);
   };
 
@@ -329,8 +328,7 @@ const ProductInventoryDetailsPage = () => {
 
 
   useEffect(() => {
-    let statuses = ["Available", "Repair", "Scrap", "Lost"]
-
+    let statuses = ["Available", "Scrap", "Lost"]
     if (productInventoryData) {
       if (productInventoryData.status === "Lost" || productInventoryData.status === "Repair") {
         setManualStatus(statuses)

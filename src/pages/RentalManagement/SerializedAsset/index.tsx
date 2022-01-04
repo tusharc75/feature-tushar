@@ -496,7 +496,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         }}
         productsToSave={[...showManagePurchaseOrderDialog.products]}
         isFromSerializedAssetStepFromRental={true}
-        currency={rentalManagementData.currencyCode}
+        currency={rentalManagementData.currency}
         rentalManagementId={rentalManagementData._id}
         warehouseId={rentalManagementData?.warehouse?.optionValue}
         deliveryDateMax={rentalManagementData.estimateStartDate}
