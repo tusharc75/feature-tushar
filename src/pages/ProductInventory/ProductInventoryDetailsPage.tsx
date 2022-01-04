@@ -31,6 +31,7 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 import CustomTimeline from "../../components/CustomTimeline";
 import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
 import { MdEdit } from "react-icons/md";
+import { startCase } from "lodash";
 
 
 
@@ -130,7 +131,11 @@ const ProductInventoryDetailsPage = () => {
                 <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
                   {params.value}
                 </Link>
-                : params.value
+                : params.data.type.toLowerCase().includes("purchase") ?
+                  <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
+                    {params.value}
+                  </Link>
+                  : params.value
       ) : (
         <NoDataCell />
       )
@@ -168,12 +173,15 @@ const ProductInventoryDetailsPage = () => {
     getProductInventoryFields();
     fetchProductInventoryData();
     fetchProductInventoryHistory();
+
   }
 
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
-    // mainPoint['Account Name'] = data?.accountName?.optionLabel || '';
+    Object.keys(data).map((stat: any) => (
+      mainPoint[startCase(stat)] = data[stat] ?? 0
+    ))
     setMainPoints(mainPoint);
   };
 
@@ -199,6 +207,17 @@ const ProductInventoryDetailsPage = () => {
     });
   };
 
+  const fetchProductInventoryStates = async () => {
+    try {
+      const {
+        data: { data },
+      } = await axiosInstance().post(`${productInventory.api}/inventory-stats`, { "ids": [id] });
+      handleMainPoints(data);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const fetchProductInventoryData = async () => {
     setLoadingProductInventory(true);
     try {
@@ -206,10 +225,11 @@ const ProductInventoryDetailsPage = () => {
         data: { data },
       } = await axiosInstance().get(`${productInventory.api}/${id}`);
 
-      handleMainPoints(data);
+      // handleMainPoints(data);
+      fetchProductInventoryStates()
       setHeadingLbl(`${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
       setCustomizedRoutes([routes.productInventory,
-      { title: `${data?.serialNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
+      { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
       setProductId(data?.product?.optionValue)
       setProductInventoryData(data);
       setLoadingProductInventory(false);
@@ -308,8 +328,7 @@ const ProductInventoryDetailsPage = () => {
 
 
   useEffect(() => {
-    let statuses = ["Available", "Repair", "Scrap", "Lost"]
-
+    let statuses = ["Available", "Scrap", "Lost"]
     if (productInventoryData) {
       if (productInventoryData.status === "Lost" || productInventoryData.status === "Repair") {
         setManualStatus(statuses)

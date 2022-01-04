@@ -18,7 +18,7 @@ import routes from "../../../components/Helpers/Routes";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
-import useColumns, {getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import { prepareDataForGrid } from "../../../constants/helpers";
 
 var levalOrderBy = [
@@ -54,7 +54,7 @@ const AddExistingProduct = (props) => {
     const [productCategory, setProductCategory] = useState(null);
     const [productTemplate, setProductTemplate] = useState(null);
     const [isProductTemplate, setIsProductTemplate] = useState(true);
-    const {getColumnData} = useColumns();
+    const { getColumnData } = useColumns();
 
     useEffect(() => {
         axiosInstance().get("/product-category?sortBy=name&orderBy=asc").then(({ data: { data } }) => {
@@ -335,7 +335,7 @@ const AddExistingProduct = (props) => {
         <CustomDialogHeader title={"Add Existing Product"} onClose={handleClose} ></CustomDialogHeader>
         <div className="listing-grid p-3">
             <Box mb={2}>
-                <h6 className="form-label-style mt-0 mb-0" style={{ borderBottom: "none" }}>* Select product using checkbox and click Add button for add product</h6>
+                <h6 className="form-label-style mt-0 mb-0" style={{ borderBottom: "none" }}>* Select checkboxes and then click Add button to add the products</h6>
                 <Grid container >
                     <Grid className="d-flex align-items-center gap-1" item xs={12} sm={6}>
                         <Autocomplete

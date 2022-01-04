@@ -43,6 +43,7 @@ export default function ManageUserDialog({
   dataToUpdate,
   isClone = false,
   redirectToDetailsScreen = true,
+  isUserSetupPermission = false
 }) {
   const {
     state: { user, permissions },
@@ -151,7 +152,7 @@ export default function ManageUserDialog({
           // if (redirectToDetailsScreen) {
           history.push({
             pathname: `/user/detail/${newId}`,
-            search: '?userSetup=true',
+            search: isUserSetupPermission ? '?userSetup=true' : '',
             state: { location: location },
           });
           close();
@@ -399,6 +400,7 @@ export default function ManageUserDialog({
               {
                 showConfirmDialog ?
                   <ConfirmCancelDialog
+                  close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false)

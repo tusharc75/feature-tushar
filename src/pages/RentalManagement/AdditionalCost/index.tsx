@@ -167,7 +167,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                             setSelectedCostData(null)
                         }}
                     >
-                        {isMobile ? <GrBusinessService size={20} /> : "Add Cost"}
+                        {isMobile ? <GrBusinessService size={20} /> : "Add Ad-hoc Charge"}
                     </Button>
                 </Box>
             </Box>
@@ -229,6 +229,8 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                     }}
                     renderedFrom="rentalmanagmentadditionalcost"
                     refreshGrid={fetchAdditionalCost}
+                    isFooter={true}
+                    currency={rentalManagementData?.currency?.toLowerCase()}
                 />
                 : <Box
                     p={2}

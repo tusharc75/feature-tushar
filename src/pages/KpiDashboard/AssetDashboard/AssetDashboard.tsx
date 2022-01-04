@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Box, useMediaQuery, useTheme, CircularProgress, Typography, TextField } from '@material-ui/core';
+import { Grid, Box, useMediaQuery, useTheme, CircularProgress, Typography, TextField, Paper, Card, CardContent } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 
 import axiosInstance from '../../../axios/axiosInstance';
@@ -7,6 +7,7 @@ import MapView from './MapView';
 import AssetFilters from './AssetFilters';
 import AssetChart from './AssetChart';
 import { useData } from '../../../StateProvider/Provider';
+import AssetStats from './AssetStats';
 
 export type FilterType = {
   productCategory: { id: string; title: string }[];
@@ -75,7 +76,9 @@ const AssetDashboard = ({ salesFilter }) => {
   };
 
   React.useEffect(() => {
-    fetchAssetsData();
+    if(selectedEntity && from && to && limit) {
+      fetchAssetsData();
+    }
   }, [from, to, selectedEntity, limit]);
 
   const fetchAssetsData = () => {
@@ -108,6 +111,9 @@ const AssetDashboard = ({ salesFilter }) => {
       });
   };
 
+
+
+ 
   return (
     <div>
       <Box mb={1} display="flex" justifyContent="space-between" alignItems={'center'} height={50}>
@@ -116,7 +122,7 @@ const AssetDashboard = ({ salesFilter }) => {
           <Autocomplete
             options={['10', '20', '50', '100', '200']}
             value={limit}
-            onChange={(_, val) => setLimit(val ? val : "10")}
+            onChange={(_, val) => setLimit(val ? val : '10')}
             style={{ width: 100 }}
             loading={loadingChartData}
             getOptionSelected={(option, val) => option === val}
@@ -151,6 +157,7 @@ const AssetDashboard = ({ salesFilter }) => {
             <AssetChart loading={loading || loadingChartData} data={assetUtilizationData} />
           </Grid>
         </Grid>
+        <AssetStats filter={filter}/>
       </Box>
     </div>
   );

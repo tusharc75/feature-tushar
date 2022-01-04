@@ -2,6 +2,88 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.33.0](https://github.com/vebholic/oms_frontend/compare/v2.32.1...v2.33.0) (2022-01-04)
+
+
+### Features
+
+* - Repair job delivery tickets api changed, suggested by romit ([3badadb](https://github.com/vebholic/oms_frontend/commit/3badadb7c1bf78d2ca2b6129990817622498c0f9))
+
+
+### Bug Fixes
+
+* bug fix ([3a8391e](https://github.com/vebholic/oms_frontend/commit/3a8391e5eae523b5cc4b4bd48c1dfef80cc28bce))
+* **chatter:** chat not showing ([f221ab1](https://github.com/vebholic/oms_frontend/commit/f221ab16e4eb97e4b4ff9ac47fcbdfa742b51810))
+* **plants:** address update ([6c6138e](https://github.com/vebholic/oms_frontend/commit/6c6138e529328a27f60202c0a3078a1befa528df))
+* **plants:** fix dialog title ([4170e0e](https://github.com/vebholic/oms_frontend/commit/4170e0e31f062eb67d924dbe59c26a15cf975234))
+* pO-736 , 756 ([33275f0](https://github.com/vebholic/oms_frontend/commit/33275f059354d25c6d566a3ad3899cb368faae06))
+* **renaljob:** grid fix ([96f46b9](https://github.com/vebholic/oms_frontend/commit/96f46b95901f54d156a115cda6bb0c52c5f1bbb6))
+* rental bug fix ([fc93b13](https://github.com/vebholic/oms_frontend/commit/fc93b1306bbbfabec406e64b6b953adae26b7d96))
+* **signature:** dialog label fix ([4c4eef3](https://github.com/vebholic/oms_frontend/commit/4c4eef3611ecd0a94a26eca33d5be24d53729e2c))
+* **transferasset:** hide buttons ([afdf5d2](https://github.com/vebholic/oms_frontend/commit/afdf5d256cacfdd91720f005c5492ccadf96bb04))
+
+### [2.32.1](https://github.com/vebholic/oms_frontend/compare/v2.32.0...v2.32.1) (2022-01-02)
+
+## [2.32.0](https://github.com/vebholic/oms_frontend/compare/v2.31.0...v2.32.0) (2022-01-01)
+
+
+### Features
+
+* **dashboard:** changes and fix ([5272c50](https://github.com/vebholic/oms_frontend/commit/5272c50d021dfd3f30cf93fb783a73bea417f7ac))
+
+
+### Bug Fixes
+
+* add opportunity save button multiclick restrict PO-138 ([4b4fd73](https://github.com/vebholic/oms_frontend/commit/4b4fd733e6036fa50358caa615369e12cc0ab429))
+* add product-category save button multi click restrict PO-138 ([8fa7a28](https://github.com/vebholic/oms_frontend/commit/8fa7a2845485c282b8858c0190a0e0ed88c8a8a2))
+* bug fix ([c5eac3b](https://github.com/vebholic/oms_frontend/commit/c5eac3b0f9c5d99ecbc1256ed2279a667290e749))
+* bug fix ([1679833](https://github.com/vebholic/oms_frontend/commit/1679833aa451185594c6737181c08a56c15d9235))
+* bug fix ([859d650](https://github.com/vebholic/oms_frontend/commit/859d650d5a69a35a883feb5ec37d3aa9de82a641))
+* **confirmcanceldialog:** close cance fix ([72e0158](https://github.com/vebholic/oms_frontend/commit/72e0158bfa2cf4fb7d95c18210af3cd3d587165a))
+* **contacts:** conflict resolve ([23c498a](https://github.com/vebholic/oms_frontend/commit/23c498a50e8ed48ef6740e09135aa2fda563ee20))
+* **pdftemplate:** fix btn issue ([77b3686](https://github.com/vebholic/oms_frontend/commit/77b3686888bee19cdab5f40a519fa25d7676c19d))
+* pO-744 ([6be456a](https://github.com/vebholic/oms_frontend/commit/6be456aca953394245f88d607f12db5d1f06bac8))
+* pO-744,749,767 ([578c2d9](https://github.com/vebholic/oms_frontend/commit/578c2d96d59c9a94fd60b3827dff04b8c5e6873e))
+* **rental:** adding contact fix ([1915fb8](https://github.com/vebholic/oms_frontend/commit/1915fb86d6c1d13c7deb0617dc78ac2f703934cf))
+
+## [2.31.0](https://github.com/vebholic/oms_frontend/compare/v2.30.0...v2.31.0) (2021-12-31)
+
+
+### Features
+
+* - e-commerce code is done ([d1248a9](https://github.com/vebholic/oms_frontend/commit/d1248a91b14246e9771ee2184e2ffd3521043f3a))
+* **asset:** fix and change ([92f63d5](https://github.com/vebholic/oms_frontend/commit/92f63d553355f699f90d9765cdade8663c0bd608))
+* **avisekh/feature:** avisekh/feature ([db189dd](https://github.com/vebholic/oms_frontend/commit/db189dd52ba2035470c0b0eb3c33969870a5df25))
+* product inventory card ([861c14d](https://github.com/vebholic/oms_frontend/commit/861c14d8c727cc7739305d2bbc175a6b65801406))
+
+
+### Bug Fixes
+
+* rental issue ([3448c5c](https://github.com/vebholic/oms_frontend/commit/3448c5cd12b828cb3595bf43d186d62f60b52b63))
+
+## [2.30.0](https://github.com/vebholic/oms_frontend/compare/v2.29.0...v2.30.0) (2021-12-30)
+
+
+### Features
+
+* - e-commerce changes done ([1768f2c](https://github.com/vebholic/oms_frontend/commit/1768f2cf954135e2caa9aa124d8916f2274ba974))
+* **address listing:** address listing ([45c8679](https://github.com/vebholic/oms_frontend/commit/45c867952a6044e813661175998ee7538ac71be5))
+* **dashboard:** add limit filter ([3d88bec](https://github.com/vebholic/oms_frontend/commit/3d88bec1e39d1ebf5f4bc8bfe043b11fe7aeba1f))
+* delivery ticket ([bd1f659](https://github.com/vebholic/oms_frontend/commit/bd1f6590978b854235a20647ff3d8ad02e029f22))
+* delivery ticket offline ([1cf96cc](https://github.com/vebholic/oms_frontend/commit/1cf96cc55912818d5f544a7655c5cff5b0f6220c))
+* download in attachment ([f7a9b69](https://github.com/vebholic/oms_frontend/commit/f7a9b69864c9f750555cfea0628eb6102da418b4))
+* **feature/avisekh:** feature/avisekh ([a0a7eb3](https://github.com/vebholic/oms_frontend/commit/a0a7eb397cfdb6910d3f1887ad470521347b23ca))
+
+
+### Bug Fixes
+
+* **address:** address resource fix ([05c829c](https://github.com/vebholic/oms_frontend/commit/05c829c39c5100b8d5d9cd8d751c8a7c3c4edff2))
+* bug fix ([2e330f2](https://github.com/vebholic/oms_frontend/commit/2e330f2078454c63aa01109cc4260febe25db926))
+* change label to assign plant in product master PO-708 ([9fde031](https://github.com/vebholic/oms_frontend/commit/9fde0313126bc8956383e0ef771d209d8e9cc615))
+* oMS-732 ([dc29b7d](https://github.com/vebholic/oms_frontend/commit/dc29b7d6f6567ab2aeb2ff3ac32110ac73b4cbd0))
+* pO changes ([58a1f30](https://github.com/vebholic/oms_frontend/commit/58a1f306a008ddfd4e98b04591d0e7fe80c1607f))
+* remove console ([911f051](https://github.com/vebholic/oms_frontend/commit/911f05167605343983b73b3b4dba0674096b2788))
+
 ## [2.29.0](https://github.com/vebholic/oms_frontend/compare/v2.28.0...v2.29.0) (2021-12-29)
 
 

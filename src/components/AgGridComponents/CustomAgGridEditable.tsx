@@ -152,10 +152,11 @@ export default function CustomAgGridEditable({
   renderedFrom = null,
   customGridOptions = null,
   selectedRecords = [],
-  fromPurchaseOrderGrid = false,
+  isFooter = false,
   saveColumnOptions = false,
   showOnlyShowFilteredRecordSwitch = false,
   priceTemplateField = [],
+  fromPurchaseOrderGrid = false,
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -225,7 +226,7 @@ export default function CustomAgGridEditable({
     dataRows.forEach((data) => {
       let obj = {}
       Object.entries(data).forEach(([k, v]) => {
-        if (fromPurchaseOrderGrid && typeof v === "number") {
+        if ((fromPurchaseOrderGrid || isFooter) && typeof v === "number") {
           obj[k] = v
         }
         else if (typeof v === "number" && k.includes(currency && currency.toLowerCase())) {
@@ -357,7 +358,6 @@ export default function CustomAgGridEditable({
                     function (params) {
                       const tsp = params.data[`totalSalesPrice_${currency}`] || 0;
                       const qty = params.data.qty;
-
                       return qty === 0 || tsp === 0;
                     }) || (fromPurchaseOrderGrid && function (params) {
                       const finalPrice = params.data[`finalPrice_${currency.toLowerCase()}`] || 0;
@@ -389,7 +389,7 @@ export default function CustomAgGridEditable({
                 }
                 return false;
               }}
-              pinnedBottomRowData={fromProductGrid || forProductBuilder || fromPurchaseOrderGrid ? createdPinnedData() : []}
+              pinnedBottomRowData={isFooter || fromProductGrid || forProductBuilder || fromPurchaseOrderGrid ? createdPinnedData() : []}
               enableCellChangeFlash={false}
               defaultColDef={{
                 resizable: true,

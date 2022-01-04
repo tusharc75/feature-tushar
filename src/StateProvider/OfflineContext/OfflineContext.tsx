@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axiosInstance from "../../axios/axiosInstance";
-import { rentalManagement, sidebarResource } from "../../constants/helpers";
+import { deliveryTicket, sidebarResource } from "../../constants/helpers";
 import { CustomToastContext } from "../CustomToastContext/CustomToastContext";
+import { objectStore, findAll, deleteOne } from "../../constants/indexdbhelper";
+import { rentalJobOfflineUpdate } from "../../pages/RentalManagement/rentalOfflineHelper";
 
 export const CustomOfflineContext = createContext(null);
 const limit = 500;
@@ -14,19 +16,31 @@ Object.keys(sidebarResource).forEach((key) => {
     })
 })
 
-// This context provider is passed to any component requiring the context
 export const CustomOfflineProvider = ({ children }) => {
 
     const toastConfig = useContext(CustomToastContext);
 
     const [isOffline, setIsOffline] = useState(false)
+    const [isSynch, setIsSynch] = useState(false)
 
     const [offlineFieldsData, setOfflineFieldsData] = useState(null);
     const [offlineGridData, setOfflineGridData] = useState(null);
 
     useEffect(() => {
-        passDataToSave();
+        //synchronizationData();
     }, [isOffline])
+
+    window.addEventListener(
+        'load',
+        function (e) {
+            if (navigator.onLine) {
+                if (isOffline) setIsOffline(false);
+            } else {
+                setIsOffline(true);
+            }
+        },
+        false
+    );
 
     window.addEventListener('online', function (e) {
         setIsOffline(false)
@@ -35,6 +49,30 @@ export const CustomOfflineProvider = ({ children }) => {
     window.addEventListener('offline', function (e) {
         setIsOffline(true)
     });
+
+    const synchronizationData = async () => {
+        if (!isOffline) {
+            const data = await findAll(objectStore.offlineDataSync);
+            if (data.length) {
+                setIsSynch(true)
+                await data.forEach(async (d: any) => {
+                    if (d.type === "deliveryTicket") {
+                        await axiosInstance().post(`${deliveryTicket.deliveryTicketApi}/offlinedatasync`, d.data)
+                            .then(({ data: { data } }) => {
+                                deleteOne(objectStore.offlineDataSync, d.data._id)
+                                deleteOne(objectStore.deliveryTicket, d.data._id)
+                            })
+                            .catch((error) => {
+                            });
+                    }
+                });
+                await rentalJobOfflineUpdate([])
+            }
+            else {
+                setIsSynch(false)
+            }
+        }
+    }
 
     const passDataToSave = () => {
         if (!isOffline && localStorage.getItem("offlineDataToSave")) {
@@ -63,7 +101,7 @@ export const CustomOfflineProvider = ({ children }) => {
             }
         }
     }
-  
+
     const updateFieldsData = (module, data) => {
         let initializeOfflineData = {}
         initializeOfflineData[module] = {
@@ -199,7 +237,7 @@ export const CustomOfflineProvider = ({ children }) => {
 
     return (
         <CustomOfflineContext.Provider
-            value={{ isOffline, offlineFieldsData, offlineGridData, fetchFieldsData, updateOfflineGridData, updateFieldsData }}
+            value={{ isOffline, isSynch, offlineFieldsData, offlineGridData, fetchFieldsData, updateOfflineGridData, updateFieldsData }}
         >
             {children}
         </CustomOfflineContext.Provider>

@@ -9,27 +9,24 @@ import { CustomDialogTransition, dateFormat, dateTimeFormat } from "../../consta
 
 
 const ViewSignsDialog = ({ close, signatures }) => {
+
   const [signs, setSigns] = useState([]);
 
   useEffect(() => {
     if (signatures) {
       let newSigns = [];
-
       for (const s of signatures) {
         if (!newSigns.includes(s.status)) {
           newSigns.push(s.status)
         }
       }
-
       newSigns = newSigns.map(status => {
         const signGroup = signatures.filter((d: any) => d.status === status);
-
         return {
           status,
           signs: signGroup
         }
       })
-
       setSigns(newSigns)
     }
   }, [signatures])
@@ -43,7 +40,7 @@ const ViewSignsDialog = ({ close, signatures }) => {
             <Grid item xs={12} sm={6}>
               <Box textAlign="center">
                 <Typography variant='body1' >"{sign.status === "Start Delivery" ? "Sign-off - Dispatched" : "Sign-off - Delivered"}"&nbsp;
-                {sign?.signs && sign.signs.length > 1 && sign.signs[1].date ? moment(sign.signs[1].date).format(dateTimeFormat) : ""}</Typography>
+                  {sign?.signs && sign.signs.length > 1 && sign.signs[1].date ? moment(sign.signs[1].date).format(dateTimeFormat) : ""}</Typography>
               </Box>
               <Box mt={4}>
                 <Grid container spacing={2} justifyContent='center'>
@@ -60,7 +57,6 @@ const ViewSignsDialog = ({ close, signatures }) => {
               </Box>
             </Grid>
           ))}
-
         </Grid>
       </CustomDialogContent>
       <CustomDialogFooter>

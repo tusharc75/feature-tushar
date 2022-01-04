@@ -477,6 +477,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                 {
                     showConfirmDialog ?
                         <ConfirmCancelDialog
+                            close={() => setShowConfirmDialog(false)}
                             open={showConfirmDialog}
                             onSave={() => {
                                 setShowConfirmDialog(false)

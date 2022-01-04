@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext, Fragment, useCallback } from 'react'
 import axiosInstance from '../../axios/axiosInstance';
 import ProductList from '../../components/ProductList/ProductList/ProductList';
-import { product } from '../../constants/helpers';
+import { eProduct } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 export default function Products() {
@@ -23,7 +23,7 @@ export default function Products() {
         setLoading(true);
 
         if (categoryId) {
-            axiosInstance().get(`${product.api}?page=${page}&limit=${limit}&deepFilter=[{"field":"productCategory","term":"${categoryId}"}]&filterType=and`).then(({ data: { data, count } }) => {
+            axiosInstance().get(`${eProduct.api}?page=${page}&limit=${limit}&deepFilter=[{"field":"productCategory","term":"${categoryId}"}]&filterType=and`).then(({ data: { data, count } }) => {
                 setTotalCount(count);
                 setProducts(prevState => [...prevState, ...data]);
             }).catch((error) => {
@@ -33,7 +33,7 @@ export default function Products() {
             });
         }
         else if (page !== 0) {
-            axiosInstance().get(`${product.api}?page=${page}&limit=${limit}`).then(({ data: { data, count } }) => {
+            axiosInstance().get(`${eProduct.api}?page=${page}&limit=${limit}`).then(({ data: { data, count } }) => {
                 setTotalCount(count);
                 setProducts(prevState => [...prevState, ...data]);
             }).catch((error) => {
@@ -42,7 +42,7 @@ export default function Products() {
                 setLoading(false);
             });
         } else {
-            axiosInstance().get(`${product.api}?page=0&limit=${limit}`).then(({ data: { data, count } }) => {
+            axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}`).then(({ data: { data, count } }) => {
                 setTotalCount(count);
                 setProducts([...data]);
             }).catch((error) => {

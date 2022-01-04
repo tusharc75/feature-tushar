@@ -129,7 +129,7 @@ function PricingConditionsDetailsPage() {
     //     data.customer = [];
     //     data.warehouse = [];
     //     axiosInstance().post(pricingConditionApi + `/calculatePrice`, data).then(({ data: { data } }) => {
-    //         console.log(data)
+    //         
     //     })
     // }, []);
 
@@ -905,6 +905,7 @@ function PricingConditionsDetailsPage() {
                             {
                                 showConfirmDialog &&
                                 <ConfirmCancelDialog
+                                    close={() => setShowConfirmDialog(false)}
                                     open={showConfirmDialog}
                                     onSave={() => {
                                         setShowConfirmDialog(false)

@@ -52,9 +52,9 @@ const renderedFrom = "rental_management";
 const localStorageSelectedRecords = `${renderedFrom}_selected`
 
 const RentalManagement = () => {
-  
+
   const toastConfig = useContext(CustomToastContext);
-  const { isOffline } = useContext(CustomOfflineContext);
+  const { isOffline, isSynch } = useContext(CustomOfflineContext);
 
   const pageTitle = camelCase(`${routes.rentalManagement.title}`)
   const history = useHistory();
@@ -165,17 +165,6 @@ const RentalManagement = () => {
     setColumns([...columns])
   }
 
-  const columnState = JSON.parse(localStorage.getItem("rentalManagementPage"));
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
     if (rentalManagementTimeout) {
@@ -190,17 +179,7 @@ const RentalManagement = () => {
     if (renderCount > 0) {
       fetchRentalManagement();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [
-    page,
-    limit,
-    selectedType,
-    filters,
-    sorting,
-    accountDetails,
-    selectedEntity,
-    isOffline,
-    showFilteredRecordsOnly
-  ]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, isOffline, showFilteredRecordsOnly]);
 
   const handleSingleDeleteRentalManagement = async () => {
     dispatch({ type: "loading", loading: true });
@@ -488,7 +467,6 @@ const RentalManagement = () => {
             </Grid>
           </Grid>
         </Grid>
-
         {/* Tables Begins Here */}
         <CustomContainer>
           <div className="header-panel">
@@ -502,7 +480,6 @@ const RentalManagement = () => {
               RentalManagementPermissions={permissions.rentalManagement}
               onCreate={clickCreateNew}
               showConfirmBox={showConfirmBox}
-              canDelete={selectedRecords.length === 0}
               icon={<FaRegistered className="headerLogo" />}
               heading={routes.rentalManagement.title}
               showTransferEntityDialog={handleTransferEntityDialog}
@@ -630,7 +607,6 @@ const RentalManagement = () => {
           ) : null}
         </CustomContainer>
       </Fragment>
-
       {
         showManageRentalManagementDialog.open && (
           <ManageRentalManagementDialog

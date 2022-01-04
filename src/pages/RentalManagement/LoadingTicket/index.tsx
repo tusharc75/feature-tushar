@@ -15,7 +15,8 @@ import {
   deliveryTicket,
   gridLoadingTimeout,
   rentalManagement,
-  sidebarResource
+  sidebarResource,
+  INVENTORY_STATUS
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { useHistory } from "react-router-dom";
@@ -24,7 +25,6 @@ import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
-import { FaSuitcase } from "react-icons/fa";
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
@@ -90,9 +90,13 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         }
       })
       productAssets.forEach((d) => {
-        d["hideSelection"] = ["In-Use", "In-Transit", "Repair", "Scrap", "Lost", "Under Review"].includes(d.status);
+        d["hideSelection"] = [INVENTORY_STATUS.inUse, INVENTORY_STATUS.indTransit, INVENTORY_STATUS.repair,
+        INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(d.status);
       })
-      if (productAssets.filter((e) => ["In-Use", "Repair", "Scrap", "Lost", "In-Transit", "Under Review", "Ready to ship"].includes(e.status)).length === productAssets.length) {
+      if (productAssets.filter((e) => [INVENTORY_STATUS.inUse, INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap,
+      INVENTORY_STATUS.lost, INVENTORY_STATUS.indTransit, INVENTORY_STATUS.underReview, INVENTORY_STATUS.readyToShip].includes(e.status)
+        || productAssets?.deliveryTicketId
+      ).length === productAssets.length) {
         setNextStep(true)
       }
       dispatch({ type: "initialize", data: productAssets, count: productAssets.length });
@@ -190,7 +194,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         color="primary"
         type="button"
         size="small"
-        disabled={downlodingFile}
+        disabled={downlodingFile || isOffline}
         startIcon={<AiFillFilePdf />}
       >
         {downlodingFile ? "Please wait..." : "Preview"}

@@ -14,7 +14,6 @@ import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
 import { isMobile, isTablet } from "react-device-detect";
 import { AiFillFilePdf } from "react-icons/ai";
 import routes from "../../../components/Helpers/Routes";
-import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import { BiPurchaseTagAlt, MdEmail } from "react-icons/all";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
@@ -22,6 +21,8 @@ import { prepareDataForGrid } from "../../../constants/helpers";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import { Link } from "react-router-dom";
 import { startCase } from "lodash";
+import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
+import { objectStore, findOne } from '../../../constants/indexdbhelper';
 
 
 const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJobStatus, statusOptions }) => {
@@ -45,6 +46,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
 
   const [downlodingFile, setDownlodingFile] = useState(null)
   const [emailAttachments, setEmailAttachments] = useState([]);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const NameRenderer = (params) => (
     <Link
@@ -58,61 +60,88 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
 
   useEffect(() => {
     if (statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice") > statusOptions.findIndex(d => d.optionLabel === rentalManagementData?.status)) {
-      updateJobStatus("Ready to Invoice")
+      if (!isOffline) {
+        updateJobStatus("Ready to Invoice")
+      }
     }
   }, []);
 
   useEffect(() => {
-    axiosInstance().get("/field/child?resource=Rental Management Product").then(({ data: { data } }) => {
-      let fields = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
-      axiosInstance().get("/field/child?resource=Rental Management Cost").then(({ data: { data } }) => {
-        fields = [...fields, ...CURReplaceByCurrencySingle(data, rentalManagementData.currency)]
-        let rendererNames = [];
-        genrateColoum(fields, columns, rendererNames, false);
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-        tempFrameworkComponent = {
-          commonRenderer: CommonRenderer,
-          nameRenderer: NameRenderer,
-          ...tempFrameworkComponent,
-        }
-        setFrameWorkComponent({ ...tempFrameworkComponent })
-        setColumns([...columns])
-        fetchData()
-      })
-    })
-  }, []);
+    fetchFields()
+  }, [isOffline]);
 
-  const fetchData = () => {
+  const fetchFields = async () => {
+    try {
+      let fields = []
+      if (isOffline) {
+        const resultProduct = await findOne(objectStore.resource, "rentalManagementProduct")
+        fields = CURReplaceByCurrencySingle(resultProduct, rentalManagementData.currency)
+        const resultCost = await findOne(objectStore.resource, "rentalManagementCost")
+        fields = [...fields, ...CURReplaceByCurrencySingle(resultCost, rentalManagementData.currency)]
+      }
+      else {
+        const resultProduct = await axiosInstance().get("/field/child?resource=Rental Management Product")
+        fields = CURReplaceByCurrencySingle(resultProduct?.data?.data, rentalManagementData.currency)
+        const resultCost = await axiosInstance().get("/field/child?resource=Rental Management Cost")
+        fields = [...fields, ...CURReplaceByCurrencySingle(resultCost?.data?.data, rentalManagementData.currency)]
+      }
+      let rendererNames = [];
+      genrateColoum(fields, columns, rendererNames, false);
+      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+      tempFrameworkComponent = {
+        commonRenderer: CommonRenderer,
+        nameRenderer: NameRenderer,
+        ...tempFrameworkComponent,
+      }
+      setFrameWorkComponent({ ...tempFrameworkComponent })
+      setColumns([...columns])
+      fetchData()
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error)
+    }
+  }
+
+  const fetchData = async () => {
     let combinedData: any = []
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`).then(({ data: { data } }) => {
-      data?.material?.forEach((item) => {
+    let material: any = []
+    let additionalcost: any = []
+    try {
+      if (isOffline) {
+        const result= await findOne(objectStore.rentalManagement, rentalManagementData._id);
+        material = result?.material;
+        additionalcost = result?.additionalCost;
+      }
+      else {
+        const resultMaterial = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`)
+        material = resultMaterial?.data?.data?.material;
+        const resultCost = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`)
+        additionalcost = resultCost?.data?.data;
+      }
+      material?.forEach((item) => {
         if (!item.parentId) {
           item.description = `${item.type === "product" ? item.productDetail?.productName : item.packageDetail?.packageName}`
           item.type = startCase(item.type);
           combinedData.push(item);
         }
       });
-      axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`).then(({ data: { data } }) => {
-        data?.forEach((e) => {
-          e.type = "Service";
-        })
-        combinedData = [...combinedData, ...data];
-        let rows = combinedData?.map((item) => {
-          let res: any = {
-            ...prepareDataForGrid(item),
-          };
-          return res;
-        });
-        dispatch({ type: "initialize", data: rows, count: rows.length });
-        dispatch({ type: "loading", loading: false });
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: "loading", loading: false });
+      additionalcost?.forEach((e) => {
+        e.type = "Ad-hoc Charge";
+      })
+      combinedData = [...combinedData, ...additionalcost];
+      let rows = combinedData?.map((item) => {
+        let res: any = {
+          ...prepareDataForGrid(item),
+        };
+        return res;
       });
-    }).catch((error) => {
+      dispatch({ type: "initialize", data: rows, count: rows.length });
+      dispatch({ type: "loading", loading: false });
+    }
+    catch (error) {
       dispatch({ type: "loading", loading: false });
       toastConfig.setToastConfig(error)
-    });
+    }
   };
 
   const handlePDF = (type) => {
@@ -200,7 +229,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             color="primary"
             type="button"
             size="small"
-            disabled={downlodingFile === "Preview" ? true : false}
+            disabled={downlodingFile === "Preview" ? true : (false || isOffline)}
             startIcon={isMobile ? '' : <AiFillFilePdf />}
             onClick={() => handlePDF("Preview")}
           >
@@ -214,7 +243,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             color="primary"
             type="button"
             size="small"
-            disabled={downlodingFile === "Download" ? true : false}
+            disabled={downlodingFile === "Download" ? true : (false || isOffline)}
             startIcon={isMobile ? '' : <AiFillFilePdf />}
             onClick={() => handlePDF("Download")}
           >
@@ -226,7 +255,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           variant={isMobile ? "outlined" : "contained"}
           color="primary"
           size="small"
-          disabled={downlodingFile === "Email" ? true : false}
+          disabled={downlodingFile === "Email" ? true : (false || isOffline)}
           onClick={() => {
             fetchEmailsData()
             handlePDF("Email")

@@ -22,8 +22,8 @@ const InputField = (props) => {
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(fieldsData));
-    const addressOption = fieldsData.filter((obj) => obj?.fieldName==="address")
-    setAddressOptions(addressOption[0]?.option);
+    const addressOption = fieldsData.find((obj) => obj?.fieldName==="address")
+    setAddressOptions(addressOption?.option);
     // eslint-disable-next-line
   }, [fieldsData]);
 
@@ -159,20 +159,19 @@ const InputField = (props) => {
                   open={addressOpen?.open}
                   onClose={() => setAddressOpen({open:false,isClone:false}) }
                   onSuccess={(data) => {
-                
-                    setAddressOpen({open:false,isClone:false})
-                    setFieldValue("address",data.brand)
+                    setFieldValue("address",data._id)
                     setAddressOptions((prevState) => {
                       return [
                         ...prevState,
                         {
-                          optionValue: data.brand,
+                          optionValue: data._id,
                           optionLabel: data.fullAddress,
                           order: addressOptions.length,
                           default: false
                         }
                       ]
                     })
+                    setAddressOpen({open:false,isClone:false})
                   }}
                
                   />

@@ -48,6 +48,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         : [
             { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
         ]
+
     useEffect(() => {
         fetchMaterial()
     }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
@@ -207,9 +208,16 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                 <Button
                                     size="small"
                                     color="primary"
-                                    onClick={() => addProductInventory(materialList.filter((data) =>
-                                        selectedRecords.some((rec) => rec.id === data._id)
-                                    ))}
+                                    onClick={() => {
+                                        const data = []
+                                        selectedRecords.forEach((element: any) => {
+                                            const result: any = materialList.filter((rec) => rec._id === element.id);
+                                            if (result.length) {
+                                                data.push({ ...result[0], qty: element.qty })
+                                            }
+                                        });
+                                        addProductInventory(data)
+                                    }}
                                     variant="contained"
                                     disabled={!Boolean(selectedRecords.length) || isAddingProducts}
                                     endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
@@ -234,11 +242,13 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                         loading={loading}
                         onCellValueChanged={onCellValueChanged}
                         showOnlyShowFilteredRecordSwitch={true}
+                        renderedFrom={"rentalJobManagementAddProducts"}
                     />
                     : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
             </div>
         </Dialog>
-        {packageDialog &&
+        {
+            packageDialog &&
             <Dialog open fullWidth maxWidth="md" onClose={() => setPackageDialog(false)}>
                 <CustomDialogHeader title={"Package Details"} onClose={() => setPackageDialog(false)} />
                 <CustomDialogContent>
@@ -289,8 +299,9 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                         Save
                     </Button> */}
                 </CustomDialogFooter>
-            </Dialog>}
-    </Fragment>
+            </Dialog>
+        }
+    </Fragment >
     );
 }
 

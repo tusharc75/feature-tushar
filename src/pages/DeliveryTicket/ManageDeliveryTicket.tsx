@@ -20,6 +20,9 @@ import moment from "moment";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { isEqual } from 'lodash';
+import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
+import { objectStore, findOne, findAll, insertUpdate } from '../../constants/indexdbhelper';
+import { createDeliveryTicketOffline } from './deliveryTicketOfflineHelper';
 
 const ManageDeliveryTicket = (props) => {
 
@@ -40,6 +43,8 @@ const ManageDeliveryTicket = (props) => {
     const [ownerData, setOwnerData] = useState([]);
     const [collaboratorData, setCollaboratorData] = useState([]);
     const [disableOwnerSelection, setDisableOwnerSelection] = useState(false);
+    const { isOffline } = useContext(CustomOfflineContext);
+
     const ref = useRef(null);
 
     useEffect(() => {
@@ -123,7 +128,6 @@ const ManageDeliveryTicket = (props) => {
     }, [initialData.fields, refrenceData]);
 
     const updateFieldProperty = (fields, _type, _ticketType, _transferType, _typeOfRepair) => {
-
         fields.forEach((element: any) => {
             if (_type === "Rental Job") {
                 if (_ticketType === "Loading" && (element.sectionName?.includes("Pickup Plant") || element.sectionName?.includes("Customer"))) {
@@ -165,20 +169,36 @@ const ManageDeliveryTicket = (props) => {
     }
 
     useEffect(() => {
-        axiosInstance().get(`/field?resource=${sidebarResource["deliveryTicket"]}`).then(({ data: { data } }) => {
+        fetchFields()
+    }, [deliveryTicketId, refrenceData]);
+
+    const fetchFields = async () => {
+        try {
+            let data;
+            if (isOffline) {
+                data = await findOne(objectStore.resource, objectStore.deliveryTicket)
+            }
+            else {
+                const response = await axiosInstance().get(`/field?resource=${sidebarResource["deliveryTicket"]}`)
+                data = response?.data?.data
+            }
             let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             if (deliveryTicketId) {
-                axiosInstance().get(`${deliveryTicketApi}/${deliveryTicketId}`).then(({ data: { data } }) => {
-                    setDeliveryTicketData(data)
-                    setDisableOwnerSelection(deliveryTicketId && user.user._id !== data?.owner?.optionValue);
-                    fieldsDataForUpdate = updateFieldProperty(fieldsDataForUpdate, data?.type, data?.ticketType, data?.typeDetails?.transferType, data?.typeDetails?.typeOfRepair);
-                    setInitialData({
-                        fields: fieldsDataForUpdate,
-                        values: getObjKeysWithValues(data, fieldsDataForUpdate),
-                    });
-                }).catch((error) => {
-                    toastConfig.setToastConfig(error);
+                let data;
+                if (isOffline) {
+                    data = await findOne(objectStore.deliveryTicket, deliveryTicketId)
+                }
+                else {
+                    const response = await axiosInstance().get(`${deliveryTicketApi}/${deliveryTicketId}`)
+                    data = response?.data?.data
+                }
+                setDeliveryTicketData(data)
+                setDisableOwnerSelection(deliveryTicketId && user.user._id !== data?.owner?.optionValue);
+                fieldsDataForUpdate = updateFieldProperty(fieldsDataForUpdate, data?.type, data?.ticketType, data?.typeDetails?.transferType, data?.typeDetails?.typeOfRepair);
+                setInitialData({
+                    fields: fieldsDataForUpdate,
+                    values: getObjKeysWithValues(data, fieldsDataForUpdate),
                 });
             }
             else {
@@ -322,11 +342,11 @@ const ManageDeliveryTicket = (props) => {
                     values: tempInitialData,
                 });
             }
-        })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-            });
-    }, [deliveryTicketId, refrenceData]);
+        }
+        catch (error) {
+            toastConfig.setToastConfig(error);
+        }
+    }
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
         setOwnerData(
@@ -340,45 +360,88 @@ const ManageDeliveryTicket = (props) => {
         );
     };
 
-    const handleSubmit = (values) => {
-        if (deliveryTicketId) {
+    const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
+        const obj = { ...dataObj };
+        fields.forEach(field => {
+            if (field.type === "dropDown" && field.lookup) {
+                let filter: any = field?.option?.filter((e) => e.optionValue === dataObj[field.fieldName]);
+                if (filter.length) {
+                    obj[field.fieldName] = {
+                        optionLabel: filter[0].optionLabel,
+                        optionValue: filter[0].optionValue
+                    }
+                }
+            }
+            else if (field.type === "multiSelect") {
+                if (dataObj[field.fieldName] && dataObj[field.fieldName].length) {
+                    let option = []
+                    dataObj[field.fieldName].forEach((e: any) => {
+                        option.push({
+                            optionLabel: e,
+                            optionValue: e
+                        })
+                    })
+                    obj[field.fieldName] = option;
+                }
+            }
+            else if (field.type === "date") {
+                obj[field.fieldName] = moment(dataObj[field.fieldName]).format("YYYY-MM-DD")
+            }
+            else {
+                obj[field.fieldName] = dataObj[field.fieldName]
+            }
+        })
+        return obj;
+    };
+
+    const handleSubmit = async (values) => {
+        if (isOffline) {
             setSubmitting(true);
-            values._id = deliveryTicketId
-            axiosInstance().put(`${deliveryTicketApi}`, values).then(({ data }) => {
-                setLoading(false);
-                onSuccess()
-                setSubmitting(false);
-                toastConfig.setToastConfig({
-                    open: true,
-                    type: "success",
-                    message: data.message,
-                });
-
-            }).catch((error) => {
-                setLoading(false);
-                setSubmitting(false);
-
-                toastConfig.setToastConfig(error);
-            });
+            const data: any = restoreObjKeysWithValues(values, initialData.fields)
+            const oridata = JSON.parse(JSON.stringify(values));
+            await createDeliveryTicketOffline(data, oridata)
+            onSuccess()
+            setSubmitting(false);
         }
         else {
-            setSubmitting(true);
-            let updatedValues = { ...values }
-            updatedValues["status"] = "New";
-            axiosInstance().post(`${deliveryTicketApi}`, updatedValues).then(({ data }) => {
-                setLoading(false);
-                onSuccess()
-                setSubmitting(false);
-                toastConfig.setToastConfig({
-                    open: true,
-                    type: "success",
-                    message: data.message,
+            if (deliveryTicketId) {
+                setSubmitting(true);
+                values._id = deliveryTicketId
+                axiosInstance().put(`${deliveryTicketApi}`, values).then(({ data }) => {
+                    setLoading(false);
+                    onSuccess()
+                    setSubmitting(false);
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: "success",
+                        message: data.message,
+                    });
+
+                }).catch((error) => {
+                    setLoading(false);
+                    setSubmitting(false);
+                    toastConfig.setToastConfig(error);
                 });
-            }).catch((error) => {
-                setLoading(false);
-                setSubmitting(false);
-                toastConfig.setToastConfig(error);
-            });
+            }
+            else {
+                setSubmitting(true);
+                let updatedValues = { ...values }
+                updatedValues["status"] = "New";
+                axiosInstance().post(`${deliveryTicketApi}`, updatedValues).then(({ data }) => {
+                    setLoading(false);
+                    onSuccess()
+                    setSubmitting(false);
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: "success",
+                        message: data.message,
+                    });
+                }).catch((error) => {
+                    setLoading(false);
+                    setSubmitting(false);
+                    toastConfig.setToastConfig(error);
+                });
+            }
         }
     };
 
@@ -424,7 +487,8 @@ const ManageDeliveryTicket = (props) => {
                                     onClose()
                                 }
                             }}
-                            title={`${deliveryTicketId ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ""}` : "Create Delivery Ticket"}`}
+                            title={`${deliveryTicketId ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ""}` 
+                            : `Create ${initialData.values?.ticketType} Ticket`}`}
                             isMinimized={!fullScreen}
                             onMinimizeMaximize={() => {
                                 setFullScreen(prevState => !prevState)
@@ -444,7 +508,7 @@ const ManageDeliveryTicket = (props) => {
                                                 <Box marginY={2}>
                                                     <Grid spacing={3} container>
                                                         {form.sectionFields.map((field, index2) => (
-                                                            ["repairJob", "transferAsset", "rentalJob"].includes(field.fieldName) ? null :
+                                                            ["repairJob", "transferAsset", "rentalJob", "type", "productInventory"].includes(field.fieldName) ? null :
                                                                 <Grid key={index2} item xs={12} sm={6} md={6}>
                                                                     {field.fieldName === "pick-UpDate" ? (
                                                                         <FormTypes
@@ -667,6 +731,7 @@ const ManageDeliveryTicket = (props) => {
                         {
                             showConfirmDialog ?
                                 <ConfirmCancelDialog
+                                    close={() => setShowConfirmDialog(false)}
                                     open={showConfirmDialog}
                                     onSave={() => {
                                         setShowConfirmDialog(false)

@@ -32,6 +32,7 @@ import {
 import getAzureAcessToken from "../../Azure/getAzureAccessToken";
 import { purchaseOrder, validations, rentalManagement } from "../../../constants/helpers";
 import DeleteIcon from "@material-ui/icons/Delete";
+import GetAppIcon from '@material-ui/icons/GetApp';
 import { GoArrowDown } from "react-icons/go";
 import emailStyles from "../../../pages/Activity/Email/email.module.scss";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -365,6 +366,16 @@ export const CreateEmail = ({
     );
   };
 
+  const handleDownloadFile = (file) => {
+
+    const linkSource = `data:${file.contentType};base64,${file.base64}`;
+    const link = document.createElement('a');
+    link.href = linkSource;
+    link.setAttribute('download', `${file.name}`);
+    document.body.appendChild(link);
+    link.click();
+  }
+
   const getFileIconSrc = (file) => {
     let extension = isQuoteBuilder
       ? file
@@ -400,12 +411,19 @@ export const CreateEmail = ({
                           ? attachment?.name
                           : "Quotation"}
                       </Typography>
-                      <IconButton className={emailStyles.text}>
-                        <DeleteIcon
-                          className={emailStyles.deleteIcon}
-                          onClick={() => handleDeleteQuoteBuilderOtherAttachment(attachment?.name)}
-                        />
-                      </IconButton>
+                      <div className={emailStyles.actionButton}>
+                        <IconButton >
+                          <GetAppIcon
+                            onClick={() => handleDownloadFile(attachment)}
+                          />
+                        </IconButton>
+                        <IconButton className={emailStyles.text}>
+                          <DeleteIcon
+                            className={emailStyles.deleteIcon}
+                            onClick={() => handleDeleteQuoteBuilderOtherAttachment(attachment?.name)}
+                          />
+                        </IconButton>
+                      </div>
                     </div>
                   </Paper>
                 </Grid>
@@ -443,12 +461,19 @@ export const CreateEmail = ({
                           ? attachment?.name
                           : "Quotation"}
                       </Typography>
-                      <IconButton className={emailStyles.text}>
-                        <DeleteIcon
-                          className={emailStyles.deleteIcon}
-                          onClick={() => handleDeleteQuoteBuilderAttachment(attachment)}
-                        />
-                      </IconButton>
+                      <div className={emailStyles.actionButton}>
+                        <IconButton  >
+                          <GetAppIcon
+                            onClick={() => handleDownloadFile(attachment)}
+                          />
+                        </IconButton>
+                        <IconButton className={emailStyles.text}>
+                          <DeleteIcon
+                            className={emailStyles.deleteIcon}
+                            onClick={() => handleDeleteQuoteBuilderAttachment(attachment)}
+                          />
+                        </IconButton>
+                      </div>
                     </div>
                   </Paper>
                 </Grid>
@@ -487,18 +512,25 @@ export const CreateEmail = ({
                           )
                           : "attachment"}
                       </Typography>
-                      <IconButton className={emailStyles.text}>
-                        {emailId ? (
-                          <a href={`${attachment} `} download={true}>
-                            <GoArrowDown color="white" size={21} />
-                          </a>
-                        ) : (
-                          <DeleteIcon
-                            className={emailStyles.deleteIcon}
-                            onClick={() => handleDeleteAttachment(attachment)}
+                      <div className={emailStyles.actionButton}>
+                        <IconButton >
+                          <GetAppIcon
+                            onClick={() => handleDownloadFile(attachment)}
                           />
-                        )}
-                      </IconButton>
+                        </IconButton>
+                        <IconButton className={emailStyles.text}>
+                          {emailId ? (
+                            <a href={`${attachment} `} download={true}>
+                              <GoArrowDown color="white" size={21} />
+                            </a>
+                          ) : (
+                            <DeleteIcon
+                              className={emailStyles.deleteIcon}
+                              onClick={() => handleDeleteAttachment(attachment)}
+                            />
+                          )}
+                        </IconButton>
+                      </div>
                     </div>
 
                   </Paper>
@@ -909,6 +941,7 @@ export const CreateEmail = ({
                 {
                   showConfirmDialog ?
                     <ConfirmCancelDialog
+                      close={() => setShowConfirmDialog(false)}
                       open={showConfirmDialog}
                       onSave={() => {
                         setShowConfirmDialog(false)

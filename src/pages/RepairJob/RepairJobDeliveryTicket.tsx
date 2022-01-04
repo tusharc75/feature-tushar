@@ -11,7 +11,7 @@ import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import { deliveryTicket, gridLoadingTimeout, rentalManagement, repairJob, repairJobStatus, sidebarResource } from "../../constants/helpers";
+import { deliveryTicket, gridLoadingTimeout, rentalManagement, repairJob, repairJobStatus, sidebarResource, INVENTORY_STATUS } from "../../constants/helpers";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import { groupBy } from 'lodash';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
@@ -78,7 +78,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
 
         dispatch({ type: "loading", loading: true });
         axiosInstance()
-          .get(`${repairJob.repairJobApi}/${repairJobData._id}/delivery-ticket`)
+          .get(`${routes.deliveryTicket.path}/typewise?refrenceType=Repair Job&refrenceId=${repairJobData._id}`)
           .then(({ data }) => {
 
             // let disableNextButtonIfNonDeliveredFound = true;
@@ -108,11 +108,17 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
               }
             })
 
+            tempProductInventory.forEach((d) => {
+              if (!d.hasOwnProperty("isDelivered")) {
+                d["isDelivered"] = false;
+              }
+            })
+
             setShowActions(!data.data.some(s => s["ticketType"] === "Receiving"));
 
             tempProductInventory.forEach((d) => {
               d["_id"] = d["id"];
-              d["hideSelection"] = d.status === "In-Transit"; // || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true) || d["repaired"];
+              d["hideSelection"] = d.status === INVENTORY_STATUS.indTransit; // || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true) || d["repaired"];
             })
 
             if (repairJobData["typeOfRepair"] === "Internal" && repairJobData["plant"]?.optionValue !== repairJobData["repairPlant"]?.optionValue && tempProductInventory.some(s => s["repaired"] === true)) {
@@ -295,7 +301,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
       {
         repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
         <IconButton
-          disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("isDelivered")) || selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")) || selectedRecords.some(f => f.repaired === true)}
+          disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId") === false) || selectedRecords.some(f => f.isDelivered === true)}
           onClick={() => {
             setShowRemoveAssetFromLoadingTicketDialog(true)
           }}

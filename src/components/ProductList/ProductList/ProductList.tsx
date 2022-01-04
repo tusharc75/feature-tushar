@@ -8,7 +8,7 @@ import CustomBreadCrumbs from '../../CustomBreadCrumbs';
 import axiosInstance from "../../../axios/axiosInstance";
 import routes from '../../Helpers/Routes';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { SET_CART_COUNT } from "../../../StateProvider/actionTypes"
+import { SET_CART } from "../../../StateProvider/actionTypes"
 import { useData } from "../../../StateProvider/Provider";
 
 const ProductList = ({ products, fetchData, count, loadMoreData, loading }) => {
@@ -26,7 +26,7 @@ const ProductList = ({ products, fetchData, count, loadMoreData, loading }) => {
             .get(`/user/cart`).then(({ data: { data } }) => {
 
                 if (data) {
-                    dispatch({ type: SET_CART_COUNT, payload: data.length });
+                    dispatch({ type: SET_CART, payload: [...data] });
                     setAddedCartItems(data)
                 }
             })

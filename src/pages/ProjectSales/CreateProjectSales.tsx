@@ -949,6 +949,7 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
               {
                 showConfirmDialog ?
                   <ConfirmCancelDialog
+                    close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false)

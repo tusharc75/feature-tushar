@@ -139,13 +139,12 @@
   align-items: center;
 
   .chat-listSubtitle {
-    flex: 0.8;
+    flex: 0.7;
     display: flex;
     overflow: hidden;
 
     .msg {
       font-size: 14px;
-      margin-left: 4px;
     }
     .who {
       font-weight: 500;
@@ -164,7 +163,7 @@
 
   .message-time {
     text-align: right;
-    flex: 0.2;
+    flex: 0.3;
     font-size: 12px;
     font-weight: 500;
   }

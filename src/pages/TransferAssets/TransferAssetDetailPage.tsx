@@ -75,7 +75,6 @@ const TransferAssetDetailPage = () => {
 
         } else {
           setLocationKeys((keys) => [location.key, ...keys])
-          console.log(tab)
           // Handle back event
           setTabValue(tab ? parseInt(tab) : 1)
 
@@ -218,8 +217,8 @@ const TransferAssetDetailPage = () => {
             data = [
               ...data?.map((d: any) => ({
                 ...d,
-                productDescription: d.product.optionLabel,
-                productId: d.product.optionValue
+                productDescription: d?.product?.optionLabel ?? "",
+                productId: d?.product?.optionValue ?? ""
               }))
             ];
             setExistingAssets(data);
@@ -312,12 +311,12 @@ const TransferAssetDetailPage = () => {
               </div>
             ) : (
               <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
-                {permissions?.transferAsset?.isUpdate && (
+                {permissions?.transferAsset?.isUpdate && !isTransferEnded && (
                   <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                     Edit
                   </Button>
                 )}
-                {permissions?.transferAsset?.isUpdate && (
+                {permissions?.transferAsset?.isUpdate && !isTransferEnded && (
                   <Button className="buttonStyleSmallScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                     <MdEdit size={24} />
                   </Button>
@@ -441,6 +440,7 @@ const TransferAssetDetailPage = () => {
                       updateTransferStatus={updateTransferStatus}
                       handleViewPdf={handleViewPdf}
                       fileDownloading={fileDownloading}
+                      isTransferEnded={isTransferEnded}
                     />
                   )}
                   {currentStep === 2 && (
@@ -457,6 +457,7 @@ const TransferAssetDetailPage = () => {
                       updateTransferStatus={updateTransferStatus}
                       handleViewPdf={handleViewPdf}
                       fileDownloading={fileDownloading}
+                      isTransferEnded={isTransferEnded}
                     />
                   )}
                 </Box>
