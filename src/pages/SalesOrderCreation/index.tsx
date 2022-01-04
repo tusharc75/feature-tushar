@@ -3,8 +3,6 @@ import { Link, useHistory } from 'react-router-dom';
 import { Chip, Grid, IconButton, Tooltip } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
-
-import ManageSalesOrderDialog from './ManageSalesOrder';
 import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, salesOrder, sidebarResource, prepareDataForGrid } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -24,6 +22,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
+import ManageSalesOrderDialog from './ManageSalesOrderDialog/ManageSalesOrderDialog';
 
 let salesOrderTimeout;
 const SalesOrderType = [

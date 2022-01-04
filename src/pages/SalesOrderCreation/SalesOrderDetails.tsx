@@ -27,7 +27,7 @@ import Invoice from './Invoice';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 
-const rentalProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
+const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -177,139 +177,147 @@ const SalesOrderDetails = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
-            <Paper>
-              {!salesOrderData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                    <Box marginX={1} />
-                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  </Box>
-                </div>
-              ) : (
-                <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
-                  {permissions?.salesOrder?.isUpdate && (
-                    <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                      Edit
-                    </Button>
-                  )}
-                  {permissions?.salesOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                </DetailsPageHeader>
-              )}
 
-              <Tabs
-                className="quote-tab"
-                value={tabValue}
-                onChange={handleMainTabChange}
-                textColor="primary"
-                TabIndicatorProps={{
-                  style: {
-                    display: 'none'
-                  }
-                }}
-              >
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 1 ? 'white' : '',
-                    color: tabValue === 1 ? '#163340' : '#163340'
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
+          <div>
+            <div>
+              <Paper>
+                {!salesOrderData ? (
+                  <div>
+                    <Skeleton variant="text" width="150px" height="40px" />
+                    <Box display="flex">
+                      <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                      <Box marginX={1} />
+                      <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                    </Box>
+                  </div>
+                ) : (
+                  <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
+                    {permissions?.salesOrder?.isUpdate && (
+                      <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                        Edit
+                      </Button>
+                    )}
+                    {permissions?.salesOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                  </DetailsPageHeader>
+                )}
+
+
+                <Tabs
+                  className="quote-tab"
+                  value={tabValue}
+                  onChange={handleMainTabChange}
+                  textColor="primary"
+                  TabIndicatorProps={{
+                    style: {
+                      display: 'none'
+                    }
                   }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                    </div>
-                  }
-                  {...a11yProps(0)}
-                />
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 2 ? 'white' : '',
-                    color: tabValue === 2 ? 'blue' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                    </div>
-                  }
-                  {...a11yProps(1)}
-                />
-                <div className={'uio'}> </div>
-
-              </Tabs>
-
-              <TabPanel value={tabValue} index={0}>
-                <Box>
-                  {loading || !salesOrderFields.length ? (
-                    <Grid container spacing={2} style={{ padding: '8px' }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
-                  ) : (
-                    <>
-                      <DetailsPage data={salesOrderData} fields={salesOrderFields} />
-                    </>
-                  )}
-                </Box>
-              </TabPanel>
-
-              <TabPanel value={tabValue} index={1}>
-                <Paper>
-                  <Steps
-                    isNextStep={false}
-                    nextStep={nextStep}
-                    steps={rentalProcessSteps}
-                    currentStep={currentStep}
-                    setCurrentStep={setCurrentStep}
+                >
+                  <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 1 ? 'white' : '',
+                      color: tabValue === 1 ? '#163340' : '#163340'
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                      </div>
+                    }
+                    {...a11yProps(0)}
                   />
-                  {currentStep === 0 && salesOrderData && (
-                    <Productpackage
-                      rentalManagementData={salesOrderData}
-                      setNextStep={setNextStep}
-                      currencySymbol={currencySymbol} />
-                  )}
-                  {currentStep === 1 && salesOrderData &&
-                    <AdditionalCost
-                      salesOrderData={salesOrderData}
-                      setNextStep={setNextStep} />}
-                  {currentStep === 2 && salesOrderData && (
-                    <SerializedAsset
-                      rentalManagementData={salesOrderData}
-                      setNextStep={setNextStep}
-                      isSmallScreen={isSmallScreen}
-                      isTabletScreen={isTabletScreen}
-                      showActivity={showActivity}
-                      currencySymbol={currencySymbol}
-                    />
-                  )}
-                  {currentStep === 3 && salesOrderData && (
-                    <LoadingTicket
-                      fetchRentalData={fetchSalesOrderData}
-                      rentalManagementData={salesOrderData}
+                  <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 2 ? 'white' : '',
+                      color: tabValue === 2 ? 'blue' : '#163340'
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                      </div>
+                    }
+                    {...a11yProps(1)}
+                  />
+                  <div className={'uio'}> </div>
+
+                </Tabs>
+
+                <TabPanel value={tabValue} index={0}>
+                  <Box>
+                    {loading || !salesOrderFields.length ? (
+                      <Grid container spacing={2} style={{ padding: '8px' }}>
+                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                      </Grid>
+                    ) : (
+                      <>
+                        <DetailsPage data={salesOrderData} fields={salesOrderFields} />
+                      </>
+                    )}
+                  </Box>
+                </TabPanel>
+
+                <TabPanel value={tabValue} index={1}>
+                  <Paper>
+                    <Steps
+                      isNextStep={false}
+                      nextStep={nextStep}
+                      steps={salesOrderProcessSteps}
                       currentStep={currentStep}
-                      setNextStep={setNextStep}
+                      setCurrentStep={setCurrentStep}
                     />
-                  )}
+                    {currentStep === 0 && salesOrderData && (
+                      <Productpackage
+                        rentalManagementData={salesOrderData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol} />
+                    )}
+                    {currentStep === 1 && salesOrderData &&
+                      <AdditionalCost
+                        salesOrderData={salesOrderData}
+                        setNextStep={setNextStep} />}
+                    {currentStep === 2 && salesOrderData && (
+                      <SerializedAsset
+                        rentalManagementData={salesOrderData}
+                        setNextStep={setNextStep}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        currencySymbol={currencySymbol}
+                      />
+                    )}
+                    {currentStep === 3 && salesOrderData && (
+                      <LoadingTicket
+                        fetchRentalData={fetchSalesOrderData}
+                        rentalManagementData={salesOrderData}
+                        currentStep={currentStep}
+                        setNextStep={setNextStep}
+                      />
+                    )}
 
-                  {(currentStep === 4) && salesOrderData && (
-                    <Invoice
-                      rentalManagementData={salesOrderData}
-                      setNextStep={setNextStep}
-                      fetchRentalData={fetchSalesOrderData}
-                      updateJobStatus={updateJobStatus}
-                      statusOptions={statusOptions}
-                    />
-                  )}
-                </Paper>
-              </TabPanel>
+                    {(currentStep === 4) && salesOrderData && (
+                      <Invoice
+                        rentalManagementData={salesOrderData}
+                        setNextStep={setNextStep}
+                        fetchRentalData={fetchSalesOrderData}
+                        updateJobStatus={updateJobStatus}
+                        statusOptions={statusOptions}
+                      />
+                    )}
+                  </Paper>
+                </TabPanel>
 
+              </Paper>
+            </div>
+            <Box my={1} />
+          </div>
 
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}></Grid>
-        </Grid>
+          <div className="position-relative">
+
+          </div>
+        </div>
+
       </Fragment>
       {showConfirmBox && (
         <ConfirmationDialog

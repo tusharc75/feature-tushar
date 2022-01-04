@@ -9,7 +9,10 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, customerAccount, customerContact, getCollaboratorDropdownDataSource, getObjKeys, getObjKeysWithValues, getOwnerDropdownDataSource, isFieldNotTouched, rentalManagement, setFieldsInAscendingOrder, yupSchema } from "../../../constants/helpers";
+import {
+    CustomDialogTransition, customerAccount, customerContact, getCollaboratorDropdownDataSource, getObjKeys,
+    getObjKeysWithValues, getOwnerDropdownDataSource, isFieldNotTouched, salesOrder, setFieldsInAscendingOrder, yupSchema
+} from "../../../constants/helpers";
 import axiosInstance from '../../../axios/axiosInstance'
 import Dialog from "@material-ui/core/Dialog";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
@@ -24,14 +27,14 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
 import ManageContactDialog from "../../Contact/ManageContact";
 
-const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManagementData = null, onClose, onSuccess, open }) => {
+const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, onClose, onSuccess, open }) => {
 
     const history = useHistory()
     const toastConfig = useContext(CustomToastContext);
     const { isOffline, offlineFieldsData, offlineGridData } = useContext(CustomOfflineContext);
 
     const [loading, setLoading] = useState(false);
-    const [rentalData, setRentalData] = useState({ fields: [], initialValues: {} });
+    const [salesData, setSalesData] = useState({ fields: [], initialValues: {} });
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [formsData, setFormsData] = useState([]);
@@ -55,7 +58,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     const [customerContactDataSource, setCustomerContactDataSource] = useState([]);
     const [newAddedAccountId, setNewAddedAccountId] = useState(null);
 
-    const [rentalDetails, setRentalDetails] = useState(null);
+    const [salesDetails, setSalesDetails] = useState(null);
 
     const [countryBillToDropDown, setCountryBillToDropDown] = useState([]);
     const [countrySellToDropDown, setCountrySellToDropDown] = useState([]);
@@ -63,7 +66,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     const [countrySellToMainData, setCountrySellToMainData] = useState([]);
 
     const updateAccountDropdown = (data) => {
-        const entityFields = rentalData.fields;
+        const entityFields = salesData.fields;
         const customerAccountNameFieldIndex = entityFields.findIndex(
             (d) => d.fieldName === "customerAccount"
         );
@@ -82,7 +85,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     };
 
     const updateContactDropdown = (data) => {
-        const entityFields = rentalData.fields;
+        const entityFields = salesData.fields;
         const customerContactNameFieldIndex = entityFields.findIndex(
             (d) => d.fieldName === "customerContact"
         );
@@ -106,7 +109,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     };
 
     useEffect(() => {
-        const ownerCollabOptions = rentalData.fields.filter(
+        const ownerCollabOptions = salesData.fields.filter(
             (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
         );
         if (ownerCollabOptions.length > 0) {
@@ -114,29 +117,29 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             setOwnerData(ownerCollabOptions[0].option);
             setCollaboratorData(ownerCollabOptions[0].option);
         }
-        let customerAccountOptions = rentalData.fields.find(
+        let customerAccountOptions = salesData.fields.find(
             (d) => d.fieldName === "customerAccount"
         );
         if (customerAccountOptions) {
             setAccountData(customerAccountOptions.option);
         }
-        let customerContactOptions = rentalData.fields.find(
+        let customerContactOptions = salesData.fields.find(
             (d) => d.fieldName === "customerContact"
         );
         if (customerContactOptions) {
             setContactData(customerContactOptions.option);
         }
-        const customerContactDropdownData = rentalData.fields.find(
+        const customerContactDropdownData = salesData.fields.find(
             (d) => d.fieldName === "customerContact"
         );
-        const countryBillToDropdownData = rentalData.fields.find(
+        const countryBillToDropdownData = salesData.fields.find(
             (d) => d.fieldName === "billingAddress"
         );
         if (countryBillToDropdownData) {
             setCountryBillToMainData(countryBillToDropdownData.option)
             setCountryBillToDropDown(countryBillToDropdownData.option)
         }
-        const countrySellToDropdownData = rentalData.fields.find(
+        const countrySellToDropdownData = salesData.fields.find(
             (d) => d.fieldName === "shippingAddress"
         );
         if (countryBillToDropdownData) {
@@ -145,17 +148,17 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         }
         if (customerContactDropdownData) {
             setCustomerContactMainDataSource(customerContactDropdownData.option);
-            if (rentalManagementId) {
+            if (salesOrderId) {
                 setCustomerContactDataSource(
                     customerContactDropdownData.option.filter(
                         (d) =>
-                            d.parentAccount === rentalManagementData?.customerAccount.optionValue
+                            d.parentAccount === salesOrderData?.customerAccount.optionValue
                     )
                 );
             }
         }
-        setFormsData(setFieldsInAscendingOrder(rentalData.fields));
-    }, [rentalData.fields]);
+        setFormsData(setFieldsInAscendingOrder(salesData.fields));
+    }, [salesData.fields]);
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
         setOwnerData(
@@ -180,47 +183,47 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     useEffect(() => {
         setLoading(true);
         fetchFields();
-    }, [rentalManagementId]);
+    }, [salesOrderId]);
 
     const fetchFields = async () => {
         try {
             let fieldData;
             if (navigator.onLine) {
-                const response: any = await axiosInstance().get("/field?resource=Rental Management");
+                const response: any = await axiosInstance().get("/field?resource=Sales Order");
                 fieldData = response?.data?.data;
             }
             else {
-                fieldData = offlineFieldsData?.rentalManagement || [];
+                fieldData = offlineFieldsData?.salesOrder || [];
             }
-            fieldData?.forEach((e: any) => {
-                if (e?.fieldData?.fieldName === "warehouse" && e?.fieldData?.option) {
-                    e.fieldData.option = e?.fieldData?.option?.filter((a) => a.entity?.includes(selectedEntity));
-                }
-            })
+            // fieldData?.forEach((e: any) => {
+            //     if (e?.fieldData?.fieldName === "warehouse" && e?.fieldData?.option) {
+            //         e.fieldData.option = e?.fieldData?.option?.filter((a) => a.entity?.includes(selectedEntity));
+            //     }
+            // })
             const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-            if (rentalManagementId) {
+            if (salesOrderId) {
                 try {
                     let data;
                     if (!isOffline) {
-                        const response: any = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/` + rentalManagementId);
+                        const response: any = await axiosInstance().get(`${salesOrder.salesOrderApi}/` + salesOrderId);
                         data = response?.data?.data;
                     } else {
-                        data = offlineGridData?.rentalManagement?.find(d => d._id === rentalManagementId)
+                        data = offlineGridData?.salesOrder?.find(d => d._id === salesOrderId)
                     }
                     if (isClone) {
-                        const { _id, brand, createdBy, entity, history, products, status, rentalJobName, updatedBy, ...rest } = data
+                        const { _id, brand, createdBy, entity, history, products, status, salesOrderNo, updatedBy, ...rest } = data
                         rest.status = "New"
-                        setRentalData({
+                        setSalesData({
                             fields: fieldsDataForCreate,
                             initialValues: getObjKeysWithValues(rest, fieldsDataForCreate),
                         });
                         setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate))
                         setLoading(false)
                     } else {
-                        setRentalDetails(data)
-                        setRentalData({
+                        setSalesDetails(data)
+                        setSalesData({
                             fields: fieldsDataForUpdate,
                             initialValues: getObjKeysWithValues(data, fieldsDataForUpdate),
                         });
@@ -233,8 +236,8 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                 }
             }
             else {
-                let initialData = { ...getObjKeys("", fieldsDataForCreate), estimateEndDate: "", actualEndDate: "", currency: user.user?.brandCurrency || "" };
-                setRentalData({
+                let initialData = { ...getObjKeys("", fieldsDataForCreate), currency: user.user?.brandCurrency || "" };
+                setSalesData({
                     fields: fieldsDataForCreate,
                     initialValues: initialData,
                 });
@@ -255,23 +258,23 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         setErrors
     ) => {
         if (Object.keys(errors).length) {
-            rentalData.fields.forEach((input) => {
+            salesData.fields.forEach((input) => {
                 if (input.required || values[input.fieldName]) {
                     setTouched(input.fieldName, true);
                 }
             });
             setErrors({ ...errors });
         } else {
-            handleUpdateRentalManagement(values)
+            handleUpdateSalesOrder(values)
         }
     };
 
-    const handleUpdateRentalManagement = (values) => {
+    const handleUpdateSalesOrder = (values) => {
         setLoading(true);
-        if (rentalManagementId && isClone === false) {
-            values._id = rentalManagementId
+        if (salesOrderId && isClone === false) {
+            values._id = salesOrderId
             if (!isOffline) {
-                axiosInstance().put(`${rentalManagement.rentalManagementApi}`, values).then(({ data }) => {
+                axiosInstance().put(`${salesOrder.salesOrderApi}`, values).then(({ data }) => {
                     setLoading(false);
                     onSuccess()
                     toastConfig.setToastConfig({
@@ -289,14 +292,14 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     storedData = JSON.parse(localStorage.getItem("offlineDataToSave"));
                 }
                 const dataToSave = {
-                    api: rentalManagement.rentalManagementApi,
+                    api: salesOrder.salesOrderApi,
                     method: "put",
                     values: values
                 };
-                if (!storedData["rentalManagement"]) {
-                    storedData["rentalManagement"] = [];
+                if (!storedData["salesOrder"]) {
+                    storedData["salesOrder"] = [];
                 }
-                storedData["rentalManagement"].push(dataToSave)
+                storedData["salesOrder"].push(dataToSave)
                 localStorage.setItem("offlineDataToSave", JSON.stringify(storedData));
                 setLoading(false);
                 toastConfig.setToastConfig({
@@ -309,8 +312,8 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         }
         else {
             if (!isOffline) {
-                axiosInstance().post(`${rentalManagement.rentalManagementApi}`, values).then(({ data: { data, message } }) => {
-                    history.push(`${routes.rentalManagementDetail.path}/${data}`)
+                axiosInstance().post(`${salesOrder.salesOrderApi}`, values).then(({ data: { data, message } }) => {
+                    history.push(`${routes.salesOrderDetail.path}/${data._id}`)
                     setLoading(false);
                     onSuccess(data)
                     toastConfig.setToastConfig({
@@ -329,14 +332,14 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     storedData = JSON.parse(localStorage.getItem("offlineDataToSave"));
                 }
                 const dataToSave = {
-                    api: rentalManagement.rentalManagementApi,
+                    api: salesOrder.salesOrderApi,
                     method: "post",
                     values: values
                 };
-                if (!storedData["rentalManagement"]) {
-                    storedData["rentalManagement"] = [];
+                if (!storedData["salesOrder"]) {
+                    storedData["salesOrder"] = [];
                 }
-                storedData["rentalManagement"].push(dataToSave)
+                storedData["salesOrder"].push(dataToSave)
                 localStorage.setItem("offlineDataToSave", JSON.stringify(storedData));
                 onSuccess();
             }
@@ -388,23 +391,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         }))
     }
 
-    function validate(values) {
-        const errors = {};
-        let estimateStartDate = moment(values?.estimateStartDate);
-        let estimateEndDate = moment(values?.estimateEndDate);
-        if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
-            errors['estimateEndDate'] = 'Please enter valid estimate end date';
-        }
-        let actualStartDate = moment(values?.actualStartDate);
-        let actualEndDate = moment(values?.actualEndDate);
-        if (actualStartDate.format("YYYY-MM-DD") !== actualEndDate.format("YYYY-MM-DD")) {
-            if (actualEndDate.diff(actualStartDate, 'days') <= 0) {
-                errors['actualEndDate'] = 'Please enter valid actual end date';
-            }
-        }
-        return errors;
-    }
-
     return (
         <>
             <Dialog
@@ -422,12 +408,12 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             >
                 <CustomDialogHeader
                     title={
-                        !rentalManagementId
-                            ? `Create ${routes.rentalManagement.title}`
-                            : `${isClone ? "Clone" : `Update ${rentalManagementData?.rentalJobName}`}`
+                        !salesOrderId
+                            ? `Create ${routes.salesOrder.title}`
+                            : `${isClone ? "Clone" : `Update ${salesOrderData?.salesOrderNo}`}`
                     }
                     onClose={(e, reason) => {
-                        if (isFieldNotTouched(rentalData, formValues)) onClose()
+                        if (isFieldNotTouched(salesData, formValues)) onClose()
                         else setShowConfirmDialog(true)
                     }}
                     isMinimized={!fullScreen}
@@ -436,7 +422,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     }}
                     showManimizeMaximize={true}
                 />
-                {!rentalData.fields.length ? (
+                {!salesData.fields.length ? (
                     <>
                         <CustomDialogContent>
                             <Skeleton width="100%" height="70px" />
@@ -460,10 +446,10 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     </>
                 ) : (
                     <Formik
-                        initialValues={rentalData.initialValues}
-                        validationSchema={yupSchema(rentalData.fields)}
-                        validateOnMount
-                        validate={validate}
+                        initialValues={salesData.initialValues}
+                        validationSchema={yupSchema(salesData.fields)}
+                        // validateOnMount
+                        // validate={validate}
                         onSubmit={() => { }}
                     >
                         {({
@@ -498,7 +484,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 >
                                                                                     <FormTypes
                                                                                         {...field}
-                                                                                        isNew={!rentalManagementId}
+                                                                                        isNew={!salesOrderId}
                                                                                         values={values}
                                                                                         errors={errors}
                                                                                         touched={touched}
@@ -506,7 +492,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                         name={field.fieldName}
                                                                                         type={field.type}
                                                                                         options={accountData}
-                                                                                        disabled={!isClone ? (rentalManagementId && field.disableOnEdit) : false}
+                                                                                        disabled={!isClone ? (salesOrderId && field.disableOnEdit) : false}
                                                                                         required={field.required}
                                                                                         fullWidth
                                                                                         isTooltip={
@@ -546,10 +532,10 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                                         true
                                                                                                     );
                                                                                                 }}
-                                                                                                disabled={!isClone ? (rentalManagementId && field.disableOnEdit) : false}
+                                                                                                disabled={!isClone ? (salesOrderId && field.disableOnEdit) : false}
                                                                                                 size="small"
                                                                                             >
-                                                                                                <AddIcon color={isClone ? "primary" : rentalManagementId && field.disableOnEdit ? "disabled" : "primary"} />
+                                                                                                <AddIcon color={isClone ? "primary" : salesOrderId && field.disableOnEdit ? "disabled" : "primary"} />
                                                                                             </IconButton>
                                                                                         </Tooltip>
                                                                                     </Grid>
@@ -574,7 +560,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 >
                                                                                     <FormTypes
                                                                                         {...field}
-                                                                                        isNew={!rentalManagementId}
+                                                                                        isNew={!salesOrderId}
                                                                                         values={values}
                                                                                         errors={errors}
                                                                                         touched={touched}
@@ -587,7 +573,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                             handleValuesChange({ [name]: value })
                                                                                             setFieldValue(name, value)
                                                                                         }}
-                                                                                        disabled={!isClone ? (rentalManagementId && field.disableOnEdit) : false}
+                                                                                        disabled={!isClone ? (salesOrderId && field.disableOnEdit) : false}
                                                                                         required={field.required}
                                                                                         fullWidth
                                                                                         isTooltip={false}
@@ -615,10 +601,10 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                                         true
                                                                                                     );
                                                                                                 }}
-                                                                                                disabled={!isClone ? (rentalManagementId && field.disableOnEdit) : false}
+                                                                                                disabled={!isClone ? (salesOrderId && field.disableOnEdit) : false}
                                                                                                 size="small"
                                                                                             >
-                                                                                                <AddIcon color={isClone ? "primary" : (rentalManagementId && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                                                                <AddIcon color={isClone ? "primary" : (salesOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
                                                                                             </IconButton>
                                                                                         </Tooltip>
                                                                                     </Grid>
@@ -638,7 +624,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                             </Grid>
                                                                         ) : field.fieldName === "owner" ? (
                                                                             <FormTypes
-                                                                                rentalManagementId={rentalManagementId}
+                                                                                salesOrderId={salesOrderId}
                                                                                 {...field}
                                                                                 values={values}
                                                                                 errors={errors}
@@ -692,7 +678,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 isTooltip={field?.isTooltip || false}
                                                                                 tooltipMessage={field?.tooltipMessage}
                                                                                 size="small"
-                                                                                disabled={(!rentalManagementId && field.disableOnEdit)}
+                                                                                disabled={(!salesOrderId && field.disableOnEdit)}
                                                                                 onOpen={() => {
                                                                                     onOwnerDropdownOpen(
                                                                                         values["collaborator"]
@@ -701,9 +687,9 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                             />
                                                                         ) : field.fieldName === "collaborator" ? (
                                                                             <FormTypes
-                                                                                rentalManagementId={rentalManagementId}
+                                                                                salesOrderId={salesOrderId}
                                                                                 {...field}
-                                                                                disabled={!rentalManagementId && field.disableOnEdit}
+                                                                                disabled={!salesOrderId && field.disableOnEdit}
                                                                                 values={values}
                                                                                 errors={errors}
                                                                                 touched={touched}
@@ -727,82 +713,10 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                     );
                                                                                 }}
                                                                             />
-                                                                        ) : field.fieldName === "estimateStartDate" ? (
-                                                                            <FormTypes
-                                                                                {...field}
-                                                                                values={values}
-                                                                                errors={errors}
-                                                                                touched={touched}
-                                                                                label={field.fieldLabel}
-                                                                                name={field.fieldName}
-                                                                                type={field.type}
-                                                                                options={field.option}
-                                                                                setFieldValue={(name, value) => {
-                                                                                    handleValuesChange({ [name]: value })
-                                                                                    setFieldValue(name, value)
-                                                                                    if (!rentalManagementId) {
-                                                                                        setFieldValue("actualStartDate", value)
-                                                                                    }
-                                                                                }}
-                                                                                required={field.required}
-                                                                                fullWidth
-                                                                                isTooltip={field?.isTooltip || false}
-                                                                                tooltipMessage={field?.tooltipMessage}
-                                                                                size="small"
-                                                                                minDate={new Date()}
-                                                                                maxDate={values["estimateEndDate"] ? moment(values["estimateEndDate"]).subtract(1, "day") : moment().add(5, "years")}
-                                                                            />
-                                                                        ) : field.fieldName === "estimateEndDate" ? (
-                                                                            <FormTypes
-                                                                                {...field}
-                                                                                values={values}
-                                                                                errors={errors}
-                                                                                touched={touched}
-                                                                                label={field.fieldLabel}
-                                                                                name={field.fieldName}
-                                                                                type={field.type}
-                                                                                options={field.option}
-                                                                                setFieldValue={(name, value) => {
-                                                                                    handleValuesChange({ [name]: value })
-                                                                                    setFieldValue(name, value)
-                                                                                    if (!rentalManagementId) {
-                                                                                        setFieldValue("actualEndDate", value)
-                                                                                    }
-                                                                                }}
-                                                                                required={field.required}
-                                                                                fullWidth
-                                                                                isTooltip={field?.isTooltip || false}
-                                                                                tooltipMessage={field?.tooltipMessage}
-                                                                                size="small"
-                                                                                minDate={moment(values["estimateStartDate"]).add(1, "day")}
-                                                                            />
-                                                                        ) : ["actualStartDate", "actualEndDate"].includes(field.fieldName) ? (
-                                                                            <FormTypes
-                                                                                {...field}
-                                                                                disabled={values["status"] === "Ready to Invoice" ? false : true}
-                                                                                fieldData={field}
-                                                                                values={values}
-                                                                                errors={errors}
-                                                                                touched={touched}
-                                                                                label={field.fieldLabel}
-                                                                                name={field.fieldName}
-                                                                                type={field.type}
-                                                                                options={field.option}
-                                                                                setFieldValue={(name, value) => {
-                                                                                    handleValuesChange({ [name]: value })
-                                                                                    setFieldValue(name, value)
-                                                                                }}
-                                                                                required={field.required}
-                                                                                fullWidth
-                                                                                isTooltip={field?.isTooltip || false}
-                                                                                tooltipMessage={field?.tooltipMessage}
-                                                                                size="small"
-                                                                            />
-                                                                        )
-                                                                            : field.fieldName === "billingAddress" ? (
+                                                                        ) : field.fieldName === "billingAddress" ? (
                                                                                 <FormTypes
                                                                                     {...field}
-                                                                                    disabled={Boolean(rentalManagementId) && field.disableOnEdit && !isClone}
+                                                                                    disabled={Boolean(salesOrderId) && field.disableOnEdit && !isClone}
                                                                                     values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
@@ -826,7 +740,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 field.fieldName === "shippingAddress" ? (
                                                                                     <FormTypes
                                                                                         {...field}
-                                                                                        disabled={Boolean(rentalManagementId) && field.disableOnEdit && !isClone}
+                                                                                        disabled={Boolean(salesOrderId) && field.disableOnEdit && !isClone}
                                                                                         values={values}
                                                                                         errors={errors}
                                                                                         touched={touched}
@@ -848,13 +762,13 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                     />)
                                                                                     : (
                                                                                         <FormTypes
-                                                                                            rentalManagementId={rentalManagementId}
+                                                                                            salesOrderId={salesOrderId}
                                                                                             {...field}
                                                                                             fieldData={field}
                                                                                             disabled={
-                                                                                                field.fieldName === "currency" ? rentalDetails && rentalDetails?.material?.length ? true : false :
-                                                                                                    field.fieldName === "warehouse" ? rentalDetails && rentalDetails?.productInventory?.length ? true : false :
-                                                                                                        (rentalManagementId && field.disableOnEdit && !isClone)}
+                                                                                                field.fieldName === "currency" ? salesDetails && salesDetails?.material?.length ? true : false :
+                                                                                                    // field.fieldName === "warehouse" ? salesDetails && salesDetails?.productInventory?.length ? true : false :
+                                                                                                        (salesOrderId && field.disableOnEdit && !isClone)}
                                                                                             values={values}
                                                                                             errors={errors}
                                                                                             touched={touched}
@@ -901,7 +815,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                         color="primary"
                                         size="small"
                                         onClick={() => {
-                                            if (isFieldNotTouched(rentalData, values)) onClose()
+                                            if (isFieldNotTouched(salesData, values)) onClose()
                                             else setShowConfirmDialog(true)
                                         }}
                                     >
@@ -914,7 +828,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                         disabled={
                                             // loading || Object.keys(errors).length > 0 ? true : false
                                             uploadingImageOrFileProgress > 0 ||
-                                            // isFieldNotTouched(rentalData, values) ||
+                                            // isFieldNotTouched(salesData, values) ||
                                             loading
                                         }
                                         onClick={(e) => {
@@ -1009,5 +923,5 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
 
 }
 
-export default ManageRentalManagementDialog;
+export default ManageSalesOrderDialog;
 
