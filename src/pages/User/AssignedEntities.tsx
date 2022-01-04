@@ -21,7 +21,9 @@ export default function AssignedEntities({
   permissions,
   userId,
   onSuccess,
-  loggedInUser
+  loggedInUser,
+  entityAccessIds = [],
+  roleAccessIds = [],
 }) {
   const {state: {selectedEntity, user: {user}}} = useData()
   const [currentEntity, setCurrentEntity] = useState(entities[0]);
@@ -141,6 +143,8 @@ export default function AssignedEntities({
             onSuccess={() => {
               onSuccess();
             }}
+            entityAccessIds={entityAccessIds}
+            roleAccessIds={roleAccessIds}
           />
         </Dialog>
       )}
