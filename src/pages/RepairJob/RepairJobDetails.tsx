@@ -259,7 +259,7 @@ const RepairJobDetails = () => {
 
         setDisableNextStep(data.length === 0
           ? true
-          : (repairJobData["typeOfRepair"] === "Internal" && repairJobData["plant"].optionValue === repairJobData["repairPlant"].optionValue && rows.some(s => !s.hasOwnProperty("repaired") || s["repaired"] === false)
+          : (repairJobData["typeOfRepair"] === "Internal" && repairJobData["plant"].optionValue === repairJobData["repairPlant"].optionValue && rows.filter(f => f.status !== "Lost").some(s => !s.hasOwnProperty("repaired") || s["repaired"] === false)
             ? true
             : foundBlankValue)
         );
@@ -312,7 +312,7 @@ const RepairJobDetails = () => {
     <div className="d-flex gap-1">
 
       {
-        params.data["typeOfRepair"] === "Internal" && params.data["plant"] === params.data["repairPlant"] &&
+        params.data["typeOfRepair"] === "Internal" && params.data["plant"] === params.data["repairPlant"] && params.data["status"] !== "Lost" &&
         !params.data.repaired && <HtmlTooltip title="Repair Asset">
           <IconButton
             size="small"
