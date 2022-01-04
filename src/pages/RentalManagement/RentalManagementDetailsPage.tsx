@@ -418,6 +418,7 @@ const RentalManagementDetailsPage = () => {
                     steps={rentalProcessSteps}
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
+                    isStepEnded={["Invoiced", "Closed"].includes(rentalManagementData?.status)}
                   />
                   {currentStep === 0 && rentalManagementData && (
                     <Productpackage

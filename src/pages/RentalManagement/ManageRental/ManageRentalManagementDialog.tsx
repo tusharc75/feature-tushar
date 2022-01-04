@@ -75,6 +75,8 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     optionLabel: data.accountName,
                     order: entityFields[customerAccountNameFieldIndex].option.length,
                     default: false,
+                    billingAddress: data.billingAddress,
+                    shippingAddress: data.shippingAddress,
                 },
             ];
             setAccountData(entityFields[customerAccountNameFieldIndex].option);
@@ -343,20 +345,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         }
     };
 
-    const handleScroll = (errors) => {
-        const err = Object.keys(errors);
-        if (err.length) {
-            const input = document.querySelector(
-                `input[name=${err[0]}]`,
-            );
-            input.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-                inline: 'start',
-            });
-        }
-    }
-
     const onCountrySellToDropDownOpen = (selectedAccount) => {
         let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.shippingAddress
         if (filterAddress) {
@@ -386,6 +374,20 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             ...prevState,
             ...data
         }))
+    }
+
+    const handleScroll = (errors) => {
+        const err = Object.keys(errors);
+        if (err.length) {
+            const input = document.querySelector(
+                `input[name=${err[0]}]`,
+            );
+            input.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'start',
+            });
+        }
     }
 
     function validate(values) {
@@ -971,6 +973,8 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
 
                                             setFieldValue("customerAccount", data._id);
                                             setFieldValue("customerContact", "");
+                                            setFieldValue("billingAddress", "");
+                                            setFieldValue("shippingAddress", "");
                                         }}
                                         isRedirectToDetailPage={false}
                                     />
@@ -983,8 +987,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                             if (obj) {
                                                 setShowAddCustomerContactDialog(false);
                                                 updateContactDropdown(obj.data.data);
-
-                                                setFieldValue("customerContact", obj.id);
+                                                setFieldValue("customerContact", obj.id); 
                                             }
                                         }}
                                         accountId={values["customerAccount"]}

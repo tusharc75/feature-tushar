@@ -85,7 +85,7 @@ export default function ManageAccount(props) {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false)
   const [addressType, setAddressType] = useState(null);
-  const [isShippingSameAsBilling, setIsShippingSameAsBilling] =useState(false)
+  const [isShippingSameAsBilling, setIsShippingSameAsBilling] = useState(false)
   useEffect(() => {
     if (isNew) {
       const processSteps = accountData.fields.find(
@@ -166,6 +166,9 @@ export default function ManageAccount(props) {
     );
     if (accountId && addressDataDropdown) {
       setAddressDataSource(addressDataDropdown.option.filter(d => accountData?.initialValues?.billingAddress?.includes(d.optionValue) || accountData?.initialValues?.shippingAddress?.includes(d.optionValue)))
+    }
+    else if (addressDataDropdown) {
+      setAddressDataSource(addressDataDropdown.option)
     }
 
     return () => {
@@ -259,16 +262,16 @@ export default function ManageAccount(props) {
   }
 
   const isFieldNotTouched = (accountData, values) => {
-    if(formikRef.current) {
+    if (formikRef.current) {
       return Object.values(
         simplifyValues(
           accountData.initialValues,
           accountData.fields
-          )
-          ).toString() ===
-          Object.values(
-        simplifyValues(formikRef.current.values, accountData.fields)
-      ).toString()
+        )
+      ).toString() ===
+        Object.values(
+          simplifyValues(formikRef.current.values, accountData.fields)
+        ).toString()
     }
   }
 
@@ -352,7 +355,7 @@ export default function ManageAccount(props) {
               validationSchema={yupSchema(accountData.fields)}
               validateOnMount
               innerRef={(ref) => {
-                if(ref) {
+                if (ref) {
                   formikRef.current = ref
                 }
               }}
@@ -550,14 +553,14 @@ export default function ManageAccount(props) {
                                             field.fieldName,
                                             e.target.checked
                                           );
-                                          if(isShippingSameAsBilling === false){
+                                          if (isShippingSameAsBilling === false) {
                                             setIsShippingSameAsBilling(true)
-                                          }else{
+                                          } else {
                                             setIsShippingSameAsBilling(false)
-                                            setFieldValue("shippingAddress",[]);
+                                            setFieldValue("shippingAddress", []);
                                           }
-                                         
-                                            
+
+
                                           if (
                                             e.target.checked &&
                                             values.billingAddress
@@ -1039,15 +1042,15 @@ export default function ManageAccount(props) {
                               order: addressDataSource.length + 1,
                             }]);
                             setFieldValue(addressType.address, [...values[`${addressType.address}`], obj._id]);
-                            if(isShippingSameAsBilling === true){
-                              if(addressType.address === "billingAddress"){
+                            if (isShippingSameAsBilling === true) {
+                              if (addressType.address === "billingAddress") {
                                 setFieldValue("shippingAddress", [...values[`${addressType.address}`], obj._id]);
-                              }else{
+                              } else {
                                 setFieldValue("billingAddress", [...values[`${addressType.address}`], obj._id]);
                               }
-                             
+
                             }
-                            
+
                           }
                         }}
                       />

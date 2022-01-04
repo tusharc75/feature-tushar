@@ -1,5 +1,5 @@
 
-import { objectStore, insertUpdate, findOne, findAll } from '../../constants/indexdbhelper';
+import { objectStore, insertUpdate, findOne, findAll, clearAll } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
 import { rentalManagement } from '../../constants/helpers';
 
@@ -10,6 +10,8 @@ export const rentalJobOfflineUpdate = async (ids) => {
             rentalManagement?.forEach(e => {
                 ids.push(e?._id)
             })
+            await clearAll(objectStore.rentalManagement)
+            await clearAll(objectStore.deliveryTicket)
         }
         await axiosInstance().post(`${rentalManagement.rentalManagementApi}/get-all-offline-data`, { ids: ids }).then(({ data: { data } }) => {
             data?.rentalManagement?.forEach(element => {
