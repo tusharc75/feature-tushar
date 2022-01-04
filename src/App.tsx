@@ -251,7 +251,7 @@ function App() {
       // </Suspense>
       <Redirect
         to={{
-          pathname: redirectToAnotherScreen ? redirectToAnotherScreen : '/',
+          pathname: redirectToAnotherScreen ? redirectToAnotherScreen.includes('?') ?  redirectToAnotherScreen.split('?')[0] : redirectToAnotherScreen : '/',
           state: { from: location }
         }}
       />
