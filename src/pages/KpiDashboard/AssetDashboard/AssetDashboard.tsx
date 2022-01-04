@@ -157,7 +157,7 @@ const AssetDashboard = ({ salesFilter }) => {
             <AssetChart loading={loading || loadingChartData} data={assetUtilizationData} />
           </Grid>
         </Grid>
-        <AssetStats/>
+        <AssetStats filter={filter}/>
       </Box>
     </div>
   );
