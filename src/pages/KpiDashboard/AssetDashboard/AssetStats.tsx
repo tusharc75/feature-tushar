@@ -25,7 +25,7 @@ const AssetStats = (props: FilterProps) => {
 
   const lastOptionObserver = new IntersectionObserver((entries) => {
     const lastOption = entries[0];
-    if (!lastOption.isIntersecting && loadingAssets) return;
+    if (!lastOption.isIntersecting && loadingAssets && filter.productDescription.length > 0) return;
     setPage(prevState => prevState + 1)
     // console.log("Load More")
   }, {});
