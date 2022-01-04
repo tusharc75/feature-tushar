@@ -19,6 +19,7 @@ import {
 import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
 import { Menu as MenuIcon, MoreVert as MoreIcon, Clear as ClearIcon, Notifications, HelpOutline, ExpandMore, Brightness1 } from '@material-ui/icons';
+import SyncIcon from '@material-ui/icons/Sync';
 import io, { Socket } from 'socket.io-client';
 import { useHistory, Link, useLocation } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
@@ -197,7 +198,7 @@ const Header = ({ toggleDrawer }) => {
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
   const toastConfig = useContext(CustomToastContext);
-  const { isOffline } = useContext(CustomOfflineContext);
+  const { isOffline, isSynch } = useContext(CustomOfflineContext);
 
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [notificationList, setNotificationList] = useState([]);
@@ -1087,7 +1088,13 @@ const Header = ({ toggleDrawer }) => {
                   </Tooltip>
                 </IconButton>
               )}
-
+              {isSynch && (
+                <IconButton color="inherit">
+                  <Tooltip title="Synchronizing offline data">
+                    <SyncIcon className="rotate" />
+                  </Tooltip>
+                </IconButton>
+              )}
               {
                 permissions?.eCommerce?.isRead && <IconButton
                   id="shoppingCartButton"
