@@ -1,7 +1,7 @@
 
 import { objectStore, insertUpdate, findOne, findAll } from '../../constants/indexdbhelper';
 import { updateRentalAssetStatus } from '../RentalManagement/rentalOfflineHelper';
-import { INVENTORY_STATUS, DELIVERY_TICKET_STATUS } from "../../constants/helpers";
+import { getObjKeysWithValues, INVENTORY_STATUS, DELIVERY_TICKET_STATUS } from "../../constants/helpers";
 
 export const createDeliveryTicketOffline = async (data, values) => {
     try {
@@ -13,7 +13,11 @@ export const createDeliveryTicketOffline = async (data, values) => {
             values.signatures = []
         }
         await insertUpdate(objectStore.deliveryTicket, _id, { ...data, _id });
-        await insertUpdate(objectStore.offlineDataSync, _id, { type: "deliveryTicket", data: { ...values, _id } });
+        const offlineStatusLog = [{
+            status: "New",
+            date: new Date()
+        }]
+        await insertUpdate(objectStore.offlineDataSync, _id, { type: "deliveryTicket", data: { ...values, _id, offlineStatusLog } });
         await updateRentalAssetStatus(data?.rentalJob?.optionValue,
             INVENTORY_STATUS.readyToShip, data?.productInventory?.map((e) => e.optionValue))
         return true;
@@ -62,8 +66,20 @@ export const updateSignatureOffline = async (id, signatures) => {
 export const updateofflineDataSync = async (id, data) => {
     try {
         var offlineDataSync = await findOne(objectStore.offlineDataSync, id);
-        offlineDataSync.data = { ...offlineDataSync.data, ...data }
-        await insertUpdate(objectStore.offlineDataSync, id, offlineDataSync);
+        if (offlineDataSync) {
+            offlineDataSync?.data?.offlineStatusLog.push({ status: data.status, date: new Date() })
+            offlineDataSync.data = { ...offlineDataSync.data, ...data }
+            await insertUpdate(objectStore.offlineDataSync, id, offlineDataSync);
+        }
+        else {
+            let fields = await findOne(objectStore.resource, objectStore.deliveryTicket)
+            fields = fields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+            const deliveryTicket = await findOne(objectStore.deliveryTicket, id)
+            const newData: any = getObjKeysWithValues(deliveryTicket, fields)
+            newData.offlineStatusLog = [];
+            newData.offlineStatusLog.push({ status: data.status, date: new Date() })
+            await insertUpdate(objectStore.offlineDataSync, id, { type: "deliveryTicket", data: { _id: id, ...newData, ...data } });
+        }
         return true;
     }
     catch (e) {
