@@ -90,7 +90,7 @@ const AssetFilters = (props: FilterProps) => {
               loadingText={'Loading...'}
               multiple={true}
               value={filter.productCategory}
-              options={allProducts}
+              options={allProductCategories}
               disableCloseOnSelect
               limitTags={2}
               onChange={(_, newVal) => setFilter({ ...filter, productCategory: newVal })}
@@ -107,7 +107,7 @@ const AssetFilters = (props: FilterProps) => {
                   {option.title}
                 </React.Fragment>
               )}
-              renderInput={(params) => <TextField {...params} variant="outlined" label="Product" size="small" />}
+              renderInput={(params) => <TextField {...params} variant="outlined" label="Product Category" size="small" />}
             />
           </Box>
           <Box mb={1} width={200}>
@@ -118,7 +118,7 @@ const AssetFilters = (props: FilterProps) => {
               loading={loadingProduct}
               loadingText={'Loading...'}
               value={filter.productDescription}
-              options={allProductCategories}
+              options={allProducts}
               getOptionLabel={(option) => option.title}
               disableCloseOnSelect
               limitTags={2}
@@ -135,7 +135,7 @@ const AssetFilters = (props: FilterProps) => {
                   {option.title}
                 </React.Fragment>
               )}
-              renderInput={(params) => <TextField {...params} variant="outlined" label="Product Category" size="small" />}
+              renderInput={(params) => <TextField {...params} variant="outlined" label="Product" size="small" />}
             />
           </Box>
           <Box mb={1}>
