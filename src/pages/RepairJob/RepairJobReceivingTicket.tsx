@@ -32,6 +32,7 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 import { FaSuitcase } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
 import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
+import AssetScrapRepairDialog from "../../components/AssetScrapRepairDialog/AssetScrapRepairDialog";
 
 const renderedFrom = "repairJob_receiving_ticket"
 
@@ -127,51 +128,14 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                             dispatch({ type: "loading", loading: false });
                         }, gridLoadingTimeout);
 
-                        // data.data.map(obj => {
-                        //     tempProductInventory.map((d, index) => {
-                        //         if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                        //             tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
-                        //             tempProductInventory[index]["deliveryTicketId"] = obj?._id
-                        //         }
-                        //     })
-                        // })
-                        // axiosInstance()
-                        //     .get(`${repairJob.repairJobApi}/${repairJobData._id}/receiving-ticket`)
-                        //     .then(({ data }) => {
-                        //         data.data.map(obj => {
-                        //             tempProductInventory.map((d, index) => {
-                        //                 if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                        //                     tempProductInventory[index]["receivingTicket"] = obj?.receivingJobName
-                        //                     tempProductInventory[index]["receivingTicketId"] = obj?._id
-                        //                     tempProductInventory[index]["isDelivered"] = obj?.status === "Delivered";
-                        //                 }
-                        //             })
-                        //         })
-
-                        //         tempProductInventory.forEach((d) => {
-                        //             d["_id"] = d["id"];
-                        //             d["hideSelection"] = d.status === "In-Transit" || d.status === "Lost" || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true);
-                        //         })
-
-                        //         setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
-                        //         setPreviousButtonDisabled(tempProductInventory.some(s => s["receivingTicketId"]));
-
-                        //         dispatch({
-                        //             type: "initialize", data: tempProductInventory, count: tempProductInventory.length
-                        //         });
-                        //         setTimeout(() => {
-                        //             dispatch({ type: "loading", loading: false });
-                        //         }, gridLoadingTimeout);
-                        //     })
-                        //     .catch((err) => {
-                        //         toastConfig.setToastConfig(err);
-                        //     });
                     })
                     .catch((err) => {
                         toastConfig.setToastConfig(err);
                     });
             }).catch((error) => {
                 toastConfig.setToastConfig(error)
+            }).finally(() => {
+                setStatusToUpdate(prevState => ({ ...prevState, open: false }))
             });
     }
 
@@ -449,78 +413,18 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
         }
 
         {
-            statusToUpdate.open && <Dialog open
-                classes={{
-                    paper: classes.paper,
+            statusToUpdate.open && <AssetScrapRepairDialog
+                statusToUpdate={statusToUpdate}
+                setStatusToUpdate={setStatusToUpdate}
+                selectedRecords={selectedRecords}
+                id={repairJobData._id}
+                onClose={() => {
+                    setStatusToUpdate(prevState => ({ ...prevState, open: false }))
                 }}
-                onClose={() => setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false, open: false }))}
-            >
-                <CustomDialogHeader title="Are you sure ?"
-                    showRequiredLabel={false}
-                    onClose={() => setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false, open: false }))} />
-
-                <CustomDialogContent>
-                    <Box className="my-2">
-
-                        {
-                            statusToUpdate.status === "Repair" ? <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
-                                : <TextField
-                                    id="outlined-multiline-static"
-                                    label={`Please enter the reason for ${statusToUpdate.status}`}
-                                    multiline
-                                    fullWidth
-                                    rows={4}
-                                    value={statusToUpdate.message}
-                                    variant="outlined"
-                                    onChange={(e) => {
-                                        setStatusToUpdate(prevState => ({ ...prevState, message: e.target.value }))
-                                    }}
-                                />
-                        }
-
-                    </Box>
-                </CustomDialogContent>
-
-                <CustomDialogFooter>
-                    <Button
-                        size="small"
-                        variant="outlined" color="primary" onClick={() => setStatusToUpdate(prevState => ({ ...prevState, open: false }))}>
-                        Cancel
-                    </Button>
-                    <Button
-                        size="small"
-                        onClick={() => {
-                            setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
-                            axiosInstance().put(`${productInventoryHelperObject.api}/update-status`, {
-                                comment: statusToUpdate.message,
-                                assets: selectedRecords.map(m => m?._id ?? m?.id),
-                                status: statusToUpdate.status,
-                                reference: {
-                                    _id: repairJobData._id,
-                                    type: "Repair"
-                                }
-                            }).then(({ data }) => {
-                                toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
-                                setStatusToUpdate({ open: false, isUpdating: false, status: "", message: "" });
-                                fetchRecords();
-                            }).catch((error) => {
-                                setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false }));
-                                toastConfig.setToastConfig(error)
-                            })
-                        }}
-                        disabled={statusToUpdate.isUpdating}
-                        variant="contained"
-                        color="primary"
-                    >
-                        {
-                            statusToUpdate.isUpdating ? <CircularProgress
-                                style={{ marginRight: "8px" }}
-                                size={20} color="inherit" /> : null
-                        }
-                        Change Status
-                    </Button>
-                </CustomDialogFooter>
-            </Dialog>
+                onSuccess={() => {
+                    fetchRecords();
+                }}
+            />
         }
 
         {
