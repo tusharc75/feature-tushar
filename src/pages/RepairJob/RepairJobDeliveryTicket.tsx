@@ -6,7 +6,7 @@ import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCe
 import { Link } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, IconButton, Tooltip } from "@material-ui/core";
+import { Button, IconButton, Menu, MenuItem, Tooltip } from "@material-ui/core";
 import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -23,6 +23,8 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import InfoIcon from "@material-ui/icons/Info";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import AssetScrapRepairDialog from '../../components/AssetScrapRepairDialog/AssetScrapRepairDialog';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 
 const renderedFrom = "repairJob_delivery_ticket"
 
@@ -40,6 +42,17 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
   const [repairAssetDialog, setRepairAssetDialog] = useState({ open: false, assetId: null, assetName: null, assetIds: [] })
 
   const [showActions, setShowActions] = useState(repairJobData["typeOfRepair"] === "Internal" && repairJobData["plant"] !== repairJobData["repairPlant"])
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: "", message: "" })
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     // if (productInventory.length > 0) {
@@ -118,24 +131,19 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
 
             tempProductInventory.forEach((d) => {
               d["_id"] = d["id"];
-              d["hideSelection"] = d.status === INVENTORY_STATUS.indTransit; // || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true) || d["repaired"];
+              d["hideSelection"] = d.status === INVENTORY_STATUS.indTransit || d.status === INVENTORY_STATUS.lost; // || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true) || d["repaired"];
             })
 
             if (repairJobData["typeOfRepair"] === "Internal" && repairJobData["plant"]?.optionValue !== repairJobData["repairPlant"]?.optionValue && tempProductInventory.some(s => s["repaired"] === true)) {
               hideReceivingTicketStep(true);
 
               if (tempProductInventory.some(f => f["repaired"] === true)) {
-                setNextButtonDisabled(!tempProductInventory.every(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true && e.repaired === true));
+                setNextButtonDisabled(!tempProductInventory.filter(f => f.status !== "Lost").every(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true && e.repaired === true));
               }
 
-
-              // setNextButtonDisabled(!tempProductInventory.filter(f => f["repaired"] === false).every(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true));
             } else {
-              setNextButtonDisabled(!tempProductInventory.every(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true));
+              setNextButtonDisabled(!tempProductInventory.filter(f => f.status !== "Lost").every(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true));
             }
-
-            // setNextButtonDisabled(tempProductInventory.some(s => ["Repair", "Scrap", "Lost"].indexOf(s.status) === -1));
-            // setPreviousButtonDisabled(tempProductInventory.some(s => s["deliveryTicketId"]));
 
             dispatch({
               type: "initialize", data: [...tempProductInventory], count: tempProductInventory.length
@@ -282,9 +290,46 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
       }
 
       {
+        repairJobData && repairJobData["status"] !== repairJobStatus[2] && <Button variant="outlined" color="primary" aria-controls="simple-menu"
+          aria-haspopup="true"
+          disabled={selectedRecords.length === 0}
+          size="small"
+          onClick={handleClick}
+          endIcon={<ArrowDropDownIcon />}>
+          Change Status
+        </Button>
+      }
+
+      <Menu
+        id="simple-menu"
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={() => {
+          setAnchorEl(null)
+          setStatusToUpdate({ open: true, isUpdating: false, status: "Scrap", message: "" })
+        }}>Scrap</MenuItem>
+        <MenuItem onClick={() => {
+          setAnchorEl(null)
+          setStatusToUpdate({ open: true, isUpdating: false, status: "Lost", message: "" })
+        }}>Lost</MenuItem>
+      </Menu>
+
+      {
         repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
         <IconButton
-          disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")) || selectedRecords.some(f => f.repaired === true)}
+          disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")) || selectedRecords.some(f => f.repaired === true) || selectedRecords.some(f => f.status === "Lost")}
           onClick={() => {
             handleDeliveryTicketDialog(selectedRecords)
           }}
@@ -392,6 +437,12 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
             loading={loading}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
+            rowClassRules={{
+              "red-data-row":
+                function (params) {
+                  return ["Scrap", "Lost"].some(s => s === params.data.status);
+                },
+            }}
           />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
 
@@ -475,6 +526,20 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
       />
     }
 
+    {
+      statusToUpdate.open && <AssetScrapRepairDialog
+        statusToUpdate={statusToUpdate}
+        setStatusToUpdate={setStatusToUpdate}
+        selectedRecords={selectedRecords}
+        id={repairJobData._id}
+        onClose={() => {
+          setStatusToUpdate(prevState => ({ ...prevState, open: false }))
+        }}
+        onSuccess={() => {
+          fetchRecords();
+        }}
+      />
+    }
   </>
   );
 }
