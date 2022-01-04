@@ -510,7 +510,7 @@ const TopDashboard = (props) => {
                     <Grid item xs={12} className="pull-left">
                       {!loadingChart ? (
                         <Typography className={styles.price}>
-                          {`${salesRevenue?.totalValueMT.toFixed(2)}`}
+                          {`${Number(salesRevenue?.totalValueMT || 0).toFixed(2)}`}
                         </Typography>
                       ) : (
                         <Skeleton variant="text" width={100} height={40} />
