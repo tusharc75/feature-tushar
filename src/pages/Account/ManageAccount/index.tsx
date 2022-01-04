@@ -47,6 +47,7 @@ export default function ManageAccountDialog(props) {
   const [loading, setLoading] = useState(false);
   const [formValues, setFormValues] = useState({})
   const history = useHistory();
+  const [addressDataSource, setAddressDataSource] = useState([]);
 
   useEffect(() => {
     if (id) {
@@ -66,7 +67,7 @@ export default function ManageAccountDialog(props) {
                 dataToClone.data.accountName = "";
                 dataToClone.data.billingAddress = [];
                 dataToClone.data.shippingAddress = [];
-                
+
               }
               setAccountData({
                 fields: newFields,
@@ -158,7 +159,10 @@ export default function ManageAccountDialog(props) {
         .then(({ data }) => {
           const newId = data.data._id;
           onClose({ fetch: true, id: newId });
-          if (isGetAccountData) onGetAddedAccount(data);
+          if (isGetAccountData) {
+            data["addressDataSource"] = addressDataSource
+            onGetAddedAccount(data);
+          }
           toastConfig.setToastConfig({
             open: true,
             type: "success",
@@ -223,6 +227,8 @@ export default function ManageAccountDialog(props) {
       accountNameForClone={accountNameForClone}
       accountResource={accountResource}
       accountApi={accountApi}
+      addressDataSource={addressDataSource}
+      setAddressDataSource={setAddressDataSource}
     />
   );
 }

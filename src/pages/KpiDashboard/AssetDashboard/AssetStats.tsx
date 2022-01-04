@@ -4,9 +4,16 @@ import { Autocomplete, Skeleton } from '@material-ui/lab';
 import { startCase } from 'lodash';
 
 import axiosInstance from '../../../axios/axiosInstance';
+import { FilterType } from './AssetDashboard';
+import { productInventory } from '../../../constants/helpers';
 
-function AssetStats() {
+interface FilterProps {
+  filter: FilterType;
+}
+
+const AssetStats = (props: FilterProps) => {
   const inputRef = React.useRef(null)
+  const { filter } = props;
   const [assets, setAssets] = React.useState([]);
   const [selectedAssets, setSelectedAssets] = React.useState([]);
   const [assetStats, setAssetStats] = React.useState(null);
@@ -18,17 +25,17 @@ function AssetStats() {
 
   const lastOptionObserver = new IntersectionObserver((entries) => {
     const lastOption = entries[0];
-    if (!lastOption.isIntersecting && loadingAssets) return;
+    if (!lastOption.isIntersecting && loadingAssets && filter.productDescription.length > 0) return;
     setPage(prevState => prevState + 1)
     // console.log("Load More")
   }, {});
 
   React.useEffect(() => {
-    if(lastElement) {
+    if (lastElement) {
       lastOptionObserver.observe(lastElement);
     }
 
-  },[lastElement])
+  }, [lastElement])
   console.log(lastElement)
 
 
@@ -37,10 +44,17 @@ function AssetStats() {
   }, [page]);
 
   React.useEffect(() => {
-    if(selectedAssets.length > 0) {
+    if (selectedAssets.length > 0) {
       loadAssetsStats();
     }
   }, [selectedAssets]);
+
+  React.useEffect(() => {
+    if (filter.productDescription.length > 0) {
+      fetchAssets();
+    }
+  }, [filter.productDescription]);
+
 
   const loadAssetsStats = () => {
     setLoadingStats(true);
@@ -57,12 +71,34 @@ function AssetStats() {
       });
   };
 
+  const getQueryString = () => {
+    let deepFilter = `?limit=200&page=${page}`;
+
+    let filterById = [];
+    if (filter.productDescription.length > 0) {
+      filter.productDescription.forEach(d => {
+        filterById.push({ field: 'product', term: d.id });
+      })
+    }
+    if (filterById.length > 0) {
+      return `?filterById=${JSON.stringify(filterById)}`
+    }
+    return `${deepFilter}`;
+  };
+
+
   const fetchAssets = () => {
+    let queryString = getQueryString()
     setLoadingAssets(true);
     axiosInstance()
-      .get('product-inventory?limit=200&page=' + page)
+      .get(`${productInventory.api}${queryString}`)
       .then(({ data: { data } }) => {
-        setAssets([...assets, ...data.map((d) => ({ id: d._id, title: d.assetNumber }))]);
+        if (filter.productDescription.length > 0) {
+          setAssets(data.map((d) => ({ id: d._id, title: d.assetNumber })));
+        }
+        else {
+          setAssets([...assets, ...data.map((d) => ({ id: d._id, title: d.assetNumber }))]);
+        }
         setLoadingAssets(false);
       })
       .catch((err) => {
@@ -76,7 +112,7 @@ function AssetStats() {
         <Box my={1}>
           <Autocomplete
             ref={(ref) => {
-              if(ref) {
+              if (ref) {
                 inputRef.current = ref
               }
             }}
