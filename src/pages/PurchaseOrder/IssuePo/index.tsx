@@ -91,8 +91,11 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
             })
             productServiceData = [...productData, ...serviceData];
             let rows = productServiceData?.map((item) => {
+                let finalObject = prepareDataForGrid(item);
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
+                finalObject["allowedToEdit"] = true
                 let res: any = {
-                    ...prepareDataForGrid(item),
+                    ...finalObject,
                 };
                 return res;
             });
@@ -110,8 +113,11 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
             serviceData = data
             productServiceData = [...productData, ...serviceData];
             let rows = productServiceData?.map((item) => {
+                let finalObject = prepareDataForGrid(item);
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
+                finalObject["allowedToEdit"] = true
                 let res: any = {
-                    ...prepareDataForGrid(item),
+                    ...finalObject,
                 };
                 return res;
             });
@@ -252,10 +258,10 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns && frameWorkComponent ?
                 isMobile ? <CustomSwipableList
-                    allowSelection={true}
+                    allowSelection={false}
                     allowSwipe={true}
                     permissions={permissions}
-                    primaryField={columns?.find(d => d.field === "description")}
+                    primaryField={columns?.find(d => d.field === "type")}
                     onClick={() => {
                     }}
                     dataRows={dataRows}
@@ -272,6 +278,16 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         [{
                             label: `Product Description: `,
                             field: "productName",
+                            forceShow: true
+                        },
+                        {
+                            label: `Description: `,
+                            field: "description",
+                            forceShow: true
+                        },
+                        {
+                            label: `Quantity: `,
+                            field: "qty",
                             forceShow: true
                         }]
                     }

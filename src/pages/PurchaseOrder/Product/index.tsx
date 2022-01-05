@@ -90,8 +90,11 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === null)) {
                     setCurrentStepDisable(true)
                 }
+                let finalObject = prepareDataForGrid(item);
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
+                finalObject["allowedToEdit"] = true
                 let res: any = {
-                    ...prepareDataForGrid(item),
+                    ...finalObject,
                 };
                 res.productName = `${index + 1}- ${item.productDetail?.productName}`
                 res.productNumber = item.productDetail?.productNumber
@@ -311,8 +314,8 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     loading={loading}
                     chips={
                         [{
-                            label: `Product Description: `,
-                            field: "productName",
+                            label: `Quantity: `,
+                            field: "qty",
                             forceShow: true
                         }]
                     }
