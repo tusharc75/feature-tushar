@@ -7,7 +7,7 @@ import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder } from "../../../constants/helpers";
+import { purchaseOrder,CHILD_RESOURCE } from "../../../constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -48,7 +48,7 @@ const Product = ({ purchaseOrderData, id }) => {
     }, [id]);
 
     useEffect(() => {
-        axiosInstance().get("/field/child?resource=Purchase Order Service").then(({ data: { data } }) => {
+        axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderService}`).then(({ data: { data } }) => {
             const fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
             let rendererNames = [];
             genrateColoum(fields, columns, rendererNames, false);

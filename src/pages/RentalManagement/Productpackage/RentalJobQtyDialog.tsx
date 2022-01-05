@@ -8,7 +8,7 @@ import { groupBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, arrayToDropwdownOption } from "..//../../constants/helpers";
+import { CustomDialogTransition, arrayToDropwdownOption, CHILD_RESOURCE } from "..//../../constants/helpers";
 import { Formik, Form } from "formik";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomButton from '../../../components/Helpers/CustomButton'
@@ -61,7 +61,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   const ref = useRef(null);
 
   useEffect(() => {
-    axiosInstance().get("/field/child?resource=Rental Management Product").then(({ data: { data } }) => {
+    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`).then(({ data: { data } }) => {
       data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
       setAllFields(JSON.parse(JSON.stringify(data)))
       if (isBulkedit) {
@@ -561,7 +561,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
             {
               showConfirmDialog ?
                 <ConfirmCancelDialog
-                close={() => setShowConfirmDialog(false)}
+                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false)
