@@ -373,7 +373,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     fetchProduct()
                 }}
                 title="Create Asset"
-                productList={selectedRecords.filter(d => d.hasOwnProperty("productDetail") && (d.qty !== d.actualReceived))}
+                productList={selectedRecords.filter(d => (d.qty !== d.actualReceived))}
                 purchaseOrderData={purchaseOrderData}
                 handleUpdateData={handleUpdateData}
             />
