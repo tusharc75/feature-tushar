@@ -1241,8 +1241,11 @@ export const prepareDataForGrid = (data, user = {}) => {
           restProperties[`${key}Id`] = first["optionValue"];
           restProperties[`rest${key}`] = rest
         }
-        else if (typeof data[key][0] !== "object") {
+        else if (typeof data[key][0] !== "object" && key != "unit") {
           restProperties[key] = data[key].join(" , ")
+        }
+        else{
+          restProperties[key] = data[key]
         }
       }
       else {
