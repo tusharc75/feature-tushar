@@ -54,7 +54,7 @@ export const CustomOfflineProvider = ({ children }) => {
     const synchronizationData = async () => {
         if (!isOffline) {
             var data = await findAll(objectStore.offlineDataSync);
-            if (data.length) {
+            if (data?.length) {
                 setIsSynch(true)
                 var OrderBy = ["Loading", "Receiving"];
                 data = sortBy(data, function (item: any) {
