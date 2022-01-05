@@ -27,7 +27,7 @@ import ManageContactDialog from "../Contact/ManageContact";
 
 const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, productId = null, productCategory = null,
     productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null, warehouseId = null, currencyDisable = false
-    , deliveryDateMax = null }) => {
+    , deliveryDateMax = null, isFromSerializedAssetStepFromSalesOrder = false, salesOrderId = null }) => {
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
     const {
@@ -57,9 +57,16 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Purchase Order").then(({ data: { data } }) => {
-            const fieldsDataForCreate = data.filter((obj) => obj.isCreate)
+            let fieldsDataForCreate = data.filter((obj) => obj.isCreate)
                 .map((d: any) => d.fieldData);
-            const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+            let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+
+
+            if (salesOrderId) {
+                fieldsDataForCreate = fieldsDataForCreate.filter(f => f.fieldName !== "rentalJob");
+                fieldsDataForUpdate = fieldsDataForUpdate.filter(f => f.fieldName !== "rentalJob");
+            }
+
             if (purchaseOrderId) {
                 axiosInstance().get(`${purchaseOrder.api}/` + purchaseOrderId).then(({ data: { data } }) => {
                     setPurchaseOrderData(data)
@@ -96,6 +103,9 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                 if (rentalManagementId) {
                     createValues["rentalJob"] = rentalManagementId
                 }
+                // if (salesOrderId) {
+                //     createValues["salesOrder"] = salesOrderId
+                // }
                 if (warehouseId) {
                     createValues["warehouse"] = warehouseId
                 }
@@ -167,7 +177,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
             });
         }
         else {
-            if (isFromSerializedAssetStepFromRental) {
+            if (isFromSerializedAssetStepFromRental || isFromSerializedAssetStepFromSalesOrder) {
                 axiosInstance().post(`${purchaseOrder.api}/create-po-with-asset`, { purchaseOrder: values, products: productsToSave }).then(({ data: { data } }) => {
                     onSuccess();
                     setLoading(false);

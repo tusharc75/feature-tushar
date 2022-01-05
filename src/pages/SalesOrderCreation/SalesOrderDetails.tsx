@@ -115,7 +115,7 @@ const SalesOrderDetails = () => {
         })
         setSalesOrderFields(response?.data?.data);
       } else {
-        const response: any = await findOne(objectStore.resource, objectStore.rentalManagement)
+        const response: any = await findOne(objectStore.resource, objectStore.salesOrder)
         setSalesOrderFields(response);
       }
     } catch (error) {
@@ -303,7 +303,7 @@ const SalesOrderDetails = () => {
                         setNextStep={setNextStep} />}
                     {currentStep === 2 && salesOrderData && (
                       <SerializedAsset
-                        rentalManagementData={salesOrderData}
+                        salesOrderData={salesOrderData}
                         setNextStep={setNextStep}
                         isSmallScreen={isSmallScreen}
                         isTabletScreen={isTabletScreen}
@@ -313,8 +313,8 @@ const SalesOrderDetails = () => {
                     )}
                     {currentStep === 3 && salesOrderData && (
                       <LoadingTicket
-                        fetchRentalData={fetchSalesOrderData}
-                        rentalManagementData={salesOrderData}
+                        fetchSalesOrderData={fetchSalesOrderData}
+                        salesOrderData={salesOrderData}
                         currentStep={currentStep}
                         setNextStep={setNextStep}
                       />

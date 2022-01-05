@@ -14,7 +14,7 @@ import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
   deliveryTicket,
   gridLoadingTimeout,
-  rentalManagement,
+  salesOrder,
   sidebarResource
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -26,12 +26,12 @@ import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
-import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
+import { getSalesOrderProductAssets, getSalesOrderDeliveryTicket } from '../salesOrderOfflineHelper';
 
 
-const renderedFrom = "rentalManagementDetailsPageDeliveryTicket"
+const renderedFrom = "salesOrderPageDeliveryTicket"
 
-const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
+const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNextStep }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -64,17 +64,17 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       var deliveryTicketList: any = []
       dispatch({ type: "loading", loading: true });
       if (isOffline) {
-        productAssets = await getRentalProductAssets(rentalManagementData._id)
+        productAssets = await getSalesOrderProductAssets(salesOrderData._id)
         productAssets = productAssets?.map(u => ({ ...u, productName: u?.product?.optionLabel }))
-        deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id)
+        deliveryTicketList = await getSalesOrderDeliveryTicket(salesOrderData._id)
       }
       else {
-        const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
+        const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/${salesOrderData._id}/inventory`)
         setAssignedSerializedAsset(response?.data?.data)
         productAssets = response?.data?.data
         productAssets = productAssets.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
 
-        const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=Rental Job&refrenceId=${rentalManagementData._id}`)
+        const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=Sales Order&refrenceId=${salesOrderData._id}`)
         deliveryTicketList = result?.data?.data
       }
       deliveryTicketList.map(obj => {
@@ -141,7 +141,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
-  const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageDeliveryTicket"));
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
     columns.forEach((item) => {
       columnState.forEach((d) => {
@@ -162,7 +162,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       <Button
         onClick={() => {
           setDownlodingFile(true);
-          axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
+          axiosInstance().get(`/${salesOrder.salesOrderApi}/${salesOrderData._id}/pdf`)
             .then(({ data }) => {
               axiosInstance()
                 .get(`user/download?fileName=${data.data.fileName}`, {
@@ -280,11 +280,11 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     {showDeliveryTicketDialog && (
       <ManageDeliveryTicket
         ticketType="Loading"
-        refrenceType="Rental Job"
-        refrenceData={rentalManagementData}
+        refrenceType="Sales Order"
+        refrenceData={salesOrderData}
         onClose={() => setShowDeliveryTicketDialog(false)}
         productInventory={productInventoryForDeliveryTicket}
-        warehouseId={rentalManagementData?.warehouse}
+        warehouseId={salesOrderData?.warehouse}
         onSuccess={() => {
           setShowDeliveryTicketDialog(false);
           fetchRecords();

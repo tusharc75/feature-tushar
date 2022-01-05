@@ -1,17 +1,17 @@
 
 import { objectStore, insertUpdate, findOne, findAll } from '../../constants/indexdbhelper';
 
-export const getRentalProductAssets = async (id) => {
-    const rentalManagement = await findOne(objectStore.rentalManagement, id);
-    return rentalManagement?.productInventory?.map(u => ({ ...u.inventoryDetail }))
+export const getSalesOrderProductAssets = async (id) => {
+    const salesOrder = await findOne(objectStore.salesOrder, id);
+    return salesOrder?.productInventory?.map(u => ({ ...u.inventoryDetail }))
 };
 
-export const getRentalDeliveryTicket = async (id) => {
+export const getSalesOrderDeliveryTicket = async (id) => {
     try {
         const deliveryTicket = await findAll(objectStore.deliveryTicket);
         const result: any = []
         deliveryTicket.forEach(e => {
-            if (e?.rentalJob?.optionValue === id) {
+            if (e?.salesOrderNo?.optionValue === id) {
                 result.push(e)
             }
         })
@@ -22,15 +22,15 @@ export const getRentalDeliveryTicket = async (id) => {
     }
 };
 
-export const updateRentalAssetStatus = async (id, status) => {
+export const updateSalesOrderAssetStatus = async (id, status) => {
     try {
-        const rentalManagement = await findOne(objectStore.rentalManagement, id);
-        rentalManagement?.productInventory?.forEach(element => {
+        const salesOrder = await findOne(objectStore.salesOrder, id);
+        salesOrder?.productInventory?.forEach(element => {
             if (element?.inventoryDetail) {
                 element.inventoryDetail.status = status;
             }
         });
-        await insertUpdate(objectStore.rentalManagement, id, rentalManagement);
+        await insertUpdate(objectStore.salesOrder, id, salesOrder);
         return true;
     }
     catch (e) {

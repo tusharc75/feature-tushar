@@ -5,7 +5,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from "../../../axios/axiosInstance";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
-import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, isFieldNotTouched } from "../../../constants/helpers";
 import { Formik, Form } from "formik";
@@ -34,7 +34,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
   const ref = useRef(null);
 
   useEffect(() => {
-    axiosInstance().get("/field/child?resource=Rental Management Cost").then(({ data: { data } }) => {
+    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.salesOrderCost}`).then(({ data: { data } }) => {
       const poFields = CURReplaceByCurrencySingle(data, currency);
       if (costData) {
         setInitialData({

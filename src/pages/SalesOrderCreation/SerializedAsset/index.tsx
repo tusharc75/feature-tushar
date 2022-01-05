@@ -9,7 +9,7 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, productInventory } from "../../../constants/helpers";
+import { dateFormat, formatAmountWithCurrency, salesOrder, sidebarResource, treeToFlatArray, productInventory } from "../../../constants/helpers";
 import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
@@ -22,7 +22,7 @@ import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { useHistory } from "react-router-dom";
 import InfoIcon from '@material-ui/icons/Info';
 
-const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
+const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -48,13 +48,13 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const fetchFields = async () => {
     var data = []
     if (isOffline) {
-      data = await findOne(objectStore.resource, "rentalManagementProduct")
+      data = await findOne(objectStore.resource, "salesOrderProduct")
     }
     else {
-      const response = await axiosInstance().get(`/field/child?resource=Rental Management Product`)
+      const response = await axiosInstance().get(`/field/child?resource=Sales Order Product`)
       data = response?.data?.data
     }
-    data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
+    data = CURReplaceByCurrencySingle(data, salesOrderData.currency)
     const coloum: any = [{
       accessor: 'detail',
       Header: 'Detail',
@@ -119,7 +119,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                 accessor: fieldName,
                 Header: fieldLabel,
                 Cell: ({ row }) => (
-                  row.original[fieldName] ? <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
+                  row.original[fieldName] ? <p>{formatAmountWithCurrency(salesOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
                 )
               })
             })
@@ -133,7 +133,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               accessor: fieldName,
               Header: fieldLabel,
               Cell: ({ row }) => (
-                row.original[fieldName] ? <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
+                row.original[fieldName] ? <p>{formatAmountWithCurrency(salesOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
               )
             })
           })
@@ -164,7 +164,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       else if (element.accessor.includes("finalPrice")) {
         element["Footer"] = (info) => {
           const total = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
-          return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
+          return <>{currencySymbol} {formatAmountWithCurrency(salesOrderData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
         }
       }
     });
@@ -178,11 +178,11 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     try {
       var data: any = []
       if (isOffline) {
-        data = await findOne(objectStore.rentalManagement, rentalManagementData._id)
+        data = await findOne(objectStore.salesOrder, salesOrderData._id)
         data.inventory = data.productInventory;
       }
       else {
-        const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`)
+        const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`)
         data = response?.data?.data
       }
       const rows = data.material.filter((e) => e.parentId === null)
@@ -292,7 +292,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     // })
     if (data.length) {
       setAdding(true)
-      axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`, { "products": data })
+      axiosInstance().post(`${salesOrder.salesOrderApi}/${salesOrderData._id}/inventory`, { "products": data })
         .then(({ data }) => {
           setAddSerializedAssetDialog(false)
           fetchProductInventory()
@@ -315,7 +315,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const handleRemoveInventory = () => {
     if (deleteData.length >= 1) {
       setDeleting(true)
-      axiosInstance().put(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory/remove`, { products: deleteData })
+      axiosInstance().put(`${salesOrder.salesOrderApi}/${salesOrderData._id}/inventory/remove`, { products: deleteData })
         .then(() => {
           setDeleting(false)
           fetchProductInventory()
@@ -403,7 +403,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
               <IconButton size="small" onClick={() => {
                 history.push(routes.purchaseOrder.path, {
-                  rental: rentalManagementData,
+                  salesOrder: salesOrderData,
                 })
               }}>
                 <InfoIcon color="disabled" />
@@ -462,7 +462,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         }}
         isAdding={isAdding}
         selectedProducts={assetAssignedProduct}
-        filterByPlant={rentalManagementData?.warehouse?.optionValue ? rentalManagementData?.warehouse?.optionValue : null}
+        filterByPlant={salesOrderData?.warehouse?.optionValue ? salesOrderData?.warehouse?.optionValue : null}
       />
     }
     {showConfirmBox && (
@@ -494,11 +494,11 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           });
         }}
         productsToSave={[...showManagePurchaseOrderDialog.products]}
-        isFromSerializedAssetStepFromRental={true}
-        currency={rentalManagementData.currencyCode}
-        rentalManagementId={rentalManagementData._id}
-        warehouseId={rentalManagementData?.warehouse?.optionValue}
-        deliveryDateMax={rentalManagementData.estimateStartDate}
+        isFromSerializedAssetStepFromSalesOrder={true}
+        currency={salesOrderData.currencyCode}
+        salesOrderId={salesOrderData._id}
+        warehouseId={salesOrderData?.warehouse?.optionValue}
+        deliveryDateMax={salesOrderData.estimateStartDate}
       />
     }
   </Fragment>

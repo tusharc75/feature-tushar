@@ -19,7 +19,7 @@ import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
-import { prepareDataForGrid } from "../../../constants/helpers";
+import { prepareDataForGrid, CHILD_RESOURCE } from "../../../constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
 import { GrBusinessService } from "react-icons/all";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
@@ -50,7 +50,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep }) => {
             data = await findOne(objectStore.resource, "salesOrderCost")
         }
         else {
-            const response = await axiosInstance().get(`/field/child?resource=Sales Order`)
+            const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.salesOrderCost}`)
             data = response?.data?.data
         }
         const fields = CURReplaceByCurrencySingle(data, salesOrderData.currency)
