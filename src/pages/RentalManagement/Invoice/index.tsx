@@ -318,7 +318,6 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             setFullScreen(false);
           }}
           id={rentalManagementData._id}
-          showESign={true}
           isQuoteBuilder={true}
           options={userEmails?.to}
           cc={userEmails?.cc ?? []}
