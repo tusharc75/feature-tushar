@@ -380,7 +380,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     {showRemoveAssetFromReceivingTicketDialog && (
       <ConfirmationDialog
         open={showRemoveAssetFromReceivingTicketDialog}
-        message={`Are you sure you want to remove selected records from ${sidebarResource.receivingTicket}(s) ?`}
+        message={`Are you sure you want to remove selected records from Receiving Ticket?`}
         onClose={() => {
           setShowRemoveAssetFromReceivingTicketDialog(false);
         }}
