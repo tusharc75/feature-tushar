@@ -124,7 +124,7 @@ const Top2Dashboard = (props) => {
           chartObj = {
             type: 'line',
             label: entitySale[0].entity,
-            borderColor: `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`,
+            borderColor: `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`,
             borderWidth: 2,
             data: dataset
           };
