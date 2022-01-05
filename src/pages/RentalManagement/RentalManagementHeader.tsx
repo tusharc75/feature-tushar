@@ -21,7 +21,7 @@ import { MdAdd } from "react-icons/all";
 import { objectStore, insertUpdate, clearAll } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { sidebarResource } from '../../constants/helpers';
+import { sidebarResource, CHILD_RESOURCE } from '../../constants/helpers';
 import { useData } from "../../StateProvider/Provider";
 import { rentalJobOfflineUpdate } from "./rentalOfflineHelper";
 
@@ -71,10 +71,10 @@ function RentalManagementHeader(props) {
     });
     await rentalJobOfflineUpdate(data)
     closeActions()
-    axiosInstance().get("/field/child?resource=Rental Management Product").then(({ data: { data } }) => {
+    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`).then(({ data: { data } }) => {
       insertUpdate(objectStore.resource, "rentalManagementProduct", data);
     })
-    axiosInstance().get("/field/child?resource=Rental Management Cost").then(({ data: { data } }) => {
+    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`).then(({ data: { data } }) => {
       insertUpdate(objectStore.resource, "rentalManagementCost", data);
     })
     axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}&showHiddenFields=true`).then(({ data: { data } }) => {

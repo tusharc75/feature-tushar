@@ -218,7 +218,15 @@ export const RESOURCE_LABEL = {
   address: 'Addresses',
 };
 
-
+export const CHILD_RESOURCE = {
+  rentalManagementProduct: 'Rental Management Product',
+  rentalManagementCost: 'Rental Management Cost',
+  purchaseOrderProduct: 'Purchase Order Product',
+  purchaseOrderService: 'Purchase Order Service',
+  repairJobAsset: 'Repair Job Asset',
+  salesOrderProduct: 'Sales Order Product',
+  salesOrderCost: 'Sales Order Cost',
+};
 
 
 export const sidebarResourceObjectFromValues = () => {

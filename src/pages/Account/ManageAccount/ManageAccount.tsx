@@ -48,11 +48,10 @@ export default function ManageAccount(props) {
     accountNameForClone,
     accountResource,
     accountApi,
-    addressDataSource,
-    setAddressDataSource
+    handleAddressDataSource = null
   } = props;
 
- 
+
   const {
     state: { user, permissions },
   }: any = useData();
@@ -78,7 +77,7 @@ export default function ManageAccount(props) {
   const [additionalFieldName, setAdditionalFieldName] = useState("")
 
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
-
+  const [addressDataSource, setAddressDataSource] = useState([]);
   const [showAddAddresstDialog, setShowAddAddresstDialog] = useState(false);
   const [showAddMarketSegmentDialog, setShowAddMarketSegmentDialog] = useState(false);
   const [mainMarketSegmentDataSource, setMainMarketSegmentDataSource] = useState([]);
@@ -169,7 +168,7 @@ export default function ManageAccount(props) {
       (d) => d.fieldName === "billingAddress"
     );
 
-   
+
 
     if (addressDataDropdown) {
       setAddressDataSource(addressDataDropdown.option.filter(d => accountData?.initialValues?.billingAddress?.includes(d.optionValue) || accountData?.initialValues?.shippingAddress?.includes(d.optionValue)))
@@ -184,6 +183,10 @@ export default function ManageAccount(props) {
       setCollaboratorDataSource([]);
     };
   }, [accountData.fields]);
+
+  useEffect(() => {
+    handleAddressDataSource(addressDataSource)
+  }, [addressDataSource]);
 
   const onOwnerDropdownOpen = (selectedCollaborator, selectedEntity) => {
     if (selectedEntity?.length > 0) {
@@ -709,7 +712,7 @@ export default function ManageAccount(props) {
                                                 options={addressDataSource}
                                                 setFieldValue={(name, value) => {
                                                   handleValuesChange({ [name]: value })
-                                                  setFieldValue(field.fieldName, value )
+                                                  setFieldValue(field.fieldName, value)
                                                 }}
                                                 required={field.required}
                                                 fullWidth
