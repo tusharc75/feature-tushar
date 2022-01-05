@@ -395,7 +395,6 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     }}
                     fetchData={onSendEmailSuccess}
                     id={purchaseOrderData._id}
-                    showESign={true}
                     isQuoteBuilder={true}
                     options={userEmails?.to}
                     cc={userEmails?.cc ?? []}
