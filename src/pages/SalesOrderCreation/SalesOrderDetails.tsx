@@ -11,7 +11,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { salesOrder, defaultActivityShow } from '../../constants/helpers';
+import { salesOrder, defaultActivityShow, salesOrderProcessSteps, getUniqueCurrencies } from '../../constants/helpers';
 import ManageSalesOrder from './ManageSalesOrder';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
@@ -26,8 +26,6 @@ import LoadingTicket from './LoadingTicket';
 import Invoice from './Invoice';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-
-const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -59,6 +57,7 @@ const SalesOrderDetails = () => {
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [statusOptions, setStatusOptions] = useState([])
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -72,22 +71,40 @@ const SalesOrderDetails = () => {
     };
   }
 
+  // useEffect(() => {
+  //   if (id) {
+  //   }
+  //   // eslint-disable-next-line
+  // }, [id]);
+
   useEffect(() => {
     if (id) {
+      getRessourceFields();
       fetchSalesOrderData();
     }
-    // eslint-disable-next-line
   }, [id]);
 
-  const handleMainPoints = (data) => {
-    let mainPoint = {};
-    mainPoint['Sales Order No.'] = data?.salesOrderNo || '';
-    setMainPoints(mainPoint);
-  };
+  useEffect(() => {
+    if (!isOffline && currentStep !== null && currentStep >= 0 && currentStep <= 5) {
+      updateProcessStatus(salesOrderProcessSteps[currentStep])
+    }
+  }, [currentStep]);
+
+  const updateProcessStatus = (processStatus) => {
+    axiosInstance().put(`${salesOrder.salesOrderApi}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
+  // const handleMainPoints = (data) => {
+  //   let mainPoint = {};
+  //   mainPoint['Sales Order No.'] = data?.salesOrderNo || '';
+  //   setMainPoints(mainPoint);
+  // };
 
   const getRessourceFields = async () => {
     try {
-      setLoading(true);
       if (!isOffline) {
         const response: any = await axiosInstance().get('/field?resource=Sales Order');
         response?.data?.data.some(o => {
@@ -96,7 +113,6 @@ const SalesOrderDetails = () => {
             return true
           }
         })
-        setLoading(false);
         setSalesOrderFields(response?.data?.data);
       } else {
         const response: any = await findOne(objectStore.resource, objectStore.rentalManagement)
@@ -104,37 +120,43 @@ const SalesOrderDetails = () => {
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
-      setLoading(false);
     }
-
-
-    // axiosInstance()
-    //   .get('/field?resource=Sales Order')
-    //   .then(({ data: { data } }) => {
-    //     setSalesOrderFields(data);
-    //     setLoading(false);
-    //   })
-    //   .catch((err) => {
-    //     toastConfig.setToastConfig(err);
-    //     setLoading(false);
-    //   });
   };
 
-  const fetchSalesOrderData = () => {
+  const fetchSalesOrderData = async () => {
     setLoading(true);
-    axiosInstance()
-      .get(`${routes.salesOrder.path}/${id}`)
-      .then(({ data: { data } }) => {
-        setSalesOrderData(data);
-        handleMainPoints(data);
-        setHeadingLabel(data.salesOrderNo);
-        setCustomizedRoutes([routes.salesOrder, { title: data.salesOrderNo }]);
-        getRessourceFields();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setLoading(false);
-      });
+
+    try {
+      let data;
+      if (!isOffline) {
+        const response: any = await axiosInstance().get(`${salesOrder.salesOrderApi}/${id}`);
+        data = response?.data?.data;
+      } else {
+        data = await findOne(objectStore.salesOrder, id)
+      }
+
+      setCurrentStep(salesOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? salesOrderProcessSteps.indexOf(data?.processStatus) : 0);
+      setHeadingLabel(data.salesOrderNo);
+      setCustomizedRoutes([routes.salesOrder, { title: `${data.salesOrderNo}` }]);
+      setSalesOrderData(data);
+
+      setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
+      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+
+      setAllowedToEdit(isAllowedToEdit);
+
+      if (isAllowedToEdit && openEdit === 'true') {
+        setOpenUpdateDialog(true);
+        const params = new URLSearchParams();
+        params.delete('openEdit');
+        history.push({ search: params.toString() });
+      }
+      setLoading(false);
+
+    } catch (error) {
+      setLoading(false);
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleOpenUpdateDialog = () => {
@@ -192,12 +214,14 @@ const SalesOrderDetails = () => {
                     </Box>
                   </div>
                 ) : (
-                  <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
-                    {permissions?.salesOrder?.isUpdate && (
-                      <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                  <DetailsPageHeader heading={headingLabel} mainPoints={[]} showHeading={true}>
+
+                    {(permissions?.salesOrder?.isUpdate && allowedToEdit && !isOffline) && (
+                      <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                         Edit
                       </Button>
                     )}
+
                     {permissions?.salesOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                   </DetailsPageHeader>
                 )}
@@ -269,7 +293,7 @@ const SalesOrderDetails = () => {
                     />
                     {currentStep === 0 && salesOrderData && (
                       <Productpackage
-                        rentalManagementData={salesOrderData}
+                        salesOrderData={salesOrderData}
                         setNextStep={setNextStep}
                         currencySymbol={currencySymbol} />
                     )}

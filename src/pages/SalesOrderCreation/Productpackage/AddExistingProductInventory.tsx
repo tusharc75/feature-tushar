@@ -23,7 +23,7 @@ import { getColumnData, getFrameworkComponents, getStaticFields } from "../../..
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, rentalManagementData }) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, salesOrderData }) => {
 
     const toastConfig = useContext(CustomToastContext)
     const {
@@ -62,7 +62,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(`${type === "product" ? `/rental-management/product-with-inventory` : packages.packageApi}${queryString}`).then(({ data: { data, count } }) => {
+        axiosInstance().get(`${type === "product" ? `/sales-order/product-with-inventory` : packages.packageApi}${queryString}`).then(({ data: { data, count } }) => {
             setMaterialList(JSON.parse(JSON.stringify(data)));
             let rows = data.map((u) => {
                 let finalObject = prepareDataForGrid(u);
@@ -85,7 +85,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     };
 
     const getQueryString = () => {
-        let deepFilter = type === "product" ? `?warehouse=${rentalManagementData?.warehouse?.optionValue}&page=${page}&limit=${limit}` : `?page=${page}&limit=${limit}`;
+        let deepFilter = type === "product" ? `?warehouse=${salesOrderData?.warehouse?.optionValue ?? salesOrderData?.plant?.optionValue}&page=${page}&limit=${limit}` : `?page=${page}&limit=${limit}`;
 
         if (type !== "product") {
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'packageType', term: 'product' }]))}&filterType=and`

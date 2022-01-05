@@ -45,6 +45,8 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const repairJobProcessSteps = ["Serialized Assets", "Loading Ticket", "Receiving Ticket", "End"];
 export const repairJobStatus = ["New", "In Progress", "Completed"];
 
+export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
+
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
 

@@ -16,17 +16,17 @@ import NoDataCell from "../../../components/Helpers/NoDataCell";
 import Add from "@material-ui/icons/Add";
 import moment from "moment";
 import {
-    getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow,
+    getUniqueCurrencies, gridLoadingTimeout, salesOrder, defaultActivityShow,
     dateFormat, pricingCondition, generateUniqueId, treeToFlatArray, formatAmountWithCurrency
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
-import RentalJobQtyDialog from './RentalJobQtyDialog'
+import SalesOrderQtyDialog from './SalesOrderQtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
 import InfoIcon from "@material-ui/icons/Info";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 
-const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) => {
+const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -60,13 +60,13 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
     const fetchFields = async () => {
         var data = []
         if (isOffline) {
-            data = await findOne(objectStore.resource, "rentalManagementProduct")
+            data = await findOne(objectStore.resource, "salesOrderProduct")
         }
         else {
-            const response = await axiosInstance().get(`/field/child?resource=Rental Management Product`)
+            const response = await axiosInstance().get(`/field/child?resource=Sales Order Product`)
             data = response?.data?.data
         }
-        data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
+        data = CURReplaceByCurrencySingle(data, salesOrderData.currency)
         setAllFields(JSON.parse(JSON.stringify(data)))
         const coloum: any = [{
             accessor: 'detail',
@@ -144,7 +144,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                                 accessor: fieldName,
                                 Header: fieldLabel,
                                 Cell: ({ row }) => (
-                                    row.original[fieldName] ? <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
+                                    row.original[fieldName] ? <p>{formatAmountWithCurrency(salesOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
                                 )
                             })
                         })
@@ -158,7 +158,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                             accessor: fieldName,
                             Header: fieldLabel,
                             Cell: ({ row }) => (
-                                row.original[fieldName] ? <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
+                                row.original[fieldName] ? <p>{formatAmountWithCurrency(salesOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
                             )
                         })
                     })
@@ -192,7 +192,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             else if (element.accessor.includes("finalPrice")) {
                 element["Footer"] = (info) => {
                     const total = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
-                    return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
+                    return <>{currencySymbol} {formatAmountWithCurrency(salesOrderData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
                 }
             }
         });
@@ -205,11 +205,11 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
         var data: any = []
         var inventory: any = []
         if (isOffline) {
-            data = await findOne(objectStore.rentalManagement, rentalManagementData._id)
+            data = await findOne(objectStore.salesOrder, salesOrderData._id)
             inventory = data.productInventory;
         }
         else {
-            const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`)
+            const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`)
             data = response?.data?.data
             setMaterial(JSON.parse(JSON.stringify(data.material)))
             inventory = data.inventory;
@@ -218,7 +218,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
         rows.forEach((parent, i) => {
             parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
             parent.qtyDisplay = parent.qty;
-            parent.isValid = parent["finalPrice_" + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+            parent.isValid = parent["finalPrice_" + salesOrderData?.currency?.toLowerCase()] ? true : false;
             parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
             parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
             if (parent.type === "package") {
@@ -226,7 +226,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                 subRows.forEach((_subRow, j) => {
                     _subRow.detail = (i + 1) + "." + (j + 1) + " - " + _subRow.productDetail?.productName
                     _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`
-                    _subRow.isValid = _subRow["finalPrice_" + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+                    _subRow.isValid = _subRow["finalPrice_" + salesOrderData?.currency?.toLowerCase()] ? true : false;
                     _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
                     _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
                 })
@@ -256,10 +256,10 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             element.unit = d.unit && d.unit.length ? d.unit[0] : "";
             element.pricingMethod = d.pricingMethod && d.pricingMethod.length ? d.pricingMethod[0] : "";
             element.qty = d.qty ? parseFloat(d.qty) : 1;
-            element.estimateStartDate = rentalManagementData ? rentalManagementData?.estimateStartDate : new Date();
-            element.estimateEndDate = rentalManagementData ? rentalManagementData?.estimateEndDate : new Date();
-            element.actualStartDate = rentalManagementData ? rentalManagementData?.actualStartDate : new Date();
-            element.actualEndDate = rentalManagementData ? rentalManagementData?.actualEndDate : new Date();
+            element.estimateStartDate = salesOrderData ? salesOrderData?.estimateStartDate : new Date();
+            element.estimateEndDate = salesOrderData ? salesOrderData?.estimateEndDate : new Date();
+            element.actualStartDate = salesOrderData ? salesOrderData?.actualStartDate : new Date();
+            element.actualEndDate = salesOrderData ? salesOrderData?.actualEndDate : new Date();
             element.parentId = addExistingProductDialog.parentId;
             const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields)
             element.tenure = 1;
@@ -274,14 +274,14 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             const rateResult = priceData?.filter((e) => e.materialId === element.materialId &&
                 e.materialType === element.type && e.unit === element.unit && e.pricingMethod === element.pricingMethod)
             if (rateResult.length && rateResult[0].mrp) {
-                const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`
+                const priceFieldName = `price_${salesOrderData?.currency?.toLowerCase()}`
                 element[priceFieldName] = rateResult[0].mrp;
                 const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields)
                 Object.assign(element, calValues);
             }
         })
 
-        axiosInstance().post(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`, { material })
+        axiosInstance().post(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`, { material })
             .then(() => {
                 setAddExistingProductDialog({ open: false, type: "", parentId: null })
                 fetchProductInventory()
@@ -305,7 +305,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             delete element.subRows
         });
         setUpdating(true);
-        axiosInstance().put(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`, { material: rows }).then(() => {
+        axiosInstance().put(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`, { material: rows }).then(() => {
             setUpdating(false)
             setIsProductEdit({ open: false, isBulkedit: false })
             fetchProductInventory()
@@ -317,7 +317,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
 
     const handleDelete = (rows) => {
         setDeleting(true)
-        axiosInstance().put(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData?._id}/delete`, { ids: rows })
+        axiosInstance().put(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData?._id}/delete`, { ids: rows })
             .then(() => {
                 setDeleting(false)
                 fetchProductInventory()
@@ -337,7 +337,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
     const calculatePrice = (arr: any[]) => {
         //materialType can be =["product","packages","productCategory"]
         //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
-        if (rentalManagementData) {
+        if (salesOrderData) {
             const data: any = {}
             data.conditionType = ["Rent"]
             data.material = arr.map(ele => ({
@@ -346,11 +346,11 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                 qty: ele?.qty,
                 pricingMethod: ele?.pricingMethod,
                 unit: ele?.unit,
-                currency: rentalManagementData?.currency
+                currency: salesOrderData?.currency
             }))
             data.supplier = [];
-            data.customer = [rentalManagementData?.customerAccount?.optionValue];
-            data.warehouse = [rentalManagementData?.warehouse?.optionValue];
+            data.customer = [salesOrderData?.customerAccount?.optionValue];
+            data.warehouse = [salesOrderData?.warehouse?.optionValue];
             return new Promise((resolve, reject) => {
                 axiosInstance().post(pricingCondition.api + `/calculatePrice`, data)
                     .then(({ data: { data } }) => {
@@ -465,7 +465,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
             okBtnLoading={isDeleting}
         />}
         {isProductEdit.open &&
-            <RentalJobQtyDialog
+            <SalesOrderQtyDialog
                 calculatePrice={calculatePrice}
                 onClose={() => {
                     setIsProductEdit({ open: false, isBulkedit: false })
@@ -473,7 +473,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                 }}
                 isBulkedit={isProductEdit.isBulkedit}
                 handleSaveData={handleSaveData}
-                rentalManagementData={rentalManagementData}
+                salesOrderData={salesOrderData}
                 rowData={recordToUpdate}
                 material={material}
                 selectedProducts={selectedProducts}
@@ -486,7 +486,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol }) =
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
                 productInventory={[]}
                 type={addExistingProductDialog.type}
-                rentalManagementData={rentalManagementData}
+                salesOrderData={salesOrderData}
             />
         }
     </Fragment>

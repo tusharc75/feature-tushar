@@ -29,7 +29,7 @@ function findCommonElements(inArrays) {
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
-  rentalManagementData: any;
+  salesOrderData: any;
   rowData?: object | any;
   calculatePrice?: VoidFunction | any;
   material: any[]
@@ -39,12 +39,12 @@ interface EditDialogProps {
 
 const rateChangeFields = ["unit", "pricingMethod"]
 
-const RentalJobQtyDialog: FC<EditDialogProps> = (
+const SalesOrderQtyDialog: FC<EditDialogProps> = (
   {
     calculatePrice,
     onClose,
     handleSaveData,
-    rentalManagementData,
+    salesOrderData,
     rowData,
     material,
     selectedProducts,
@@ -62,7 +62,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
 
   useEffect(() => {
     axiosInstance().get("/field/child?resource=Rental Management Product").then(({ data: { data } }) => {
-      data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
+      data = CURReplaceByCurrencySingle(data, salesOrderData.currency)
       setAllFields(JSON.parse(JSON.stringify(data)))
       if (isBulkedit) {
         let unitArray: any = []
@@ -259,7 +259,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           e.materialType === element.type && e.unit === (values["unit"] || element.unit) && e.pricingMethod === (values["pricingMethod"] || element.pricingMethod))
 
         if (rateResult.length && rateResult[0].mrp) {
-          const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`
+          const priceFieldName = `price_${salesOrderData?.currency?.toLowerCase()}`
           values[priceFieldName] = rateResult[0].mrp;
         }
 
@@ -463,7 +463,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                         const value = val && val.optionValue ? val.optionValue : '';
                                         getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
                                           if (price) {
-                                            let priceFieldName = "price_" + rentalManagementData?.currency?.toLowerCase()
+                                            let priceFieldName = "price_" + salesOrderData?.currency?.toLowerCase()
                                             const result = autoCalculateSpecificFields({ [priceFieldName]: price, [field.fieldName]: value }, values, initialData.fields)
                                             if (Object.keys(result).length >= 1) {
                                               for (var x in result) {
@@ -582,4 +582,4 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   </Dialog>);
 };
 
-export default RentalJobQtyDialog;
+export default SalesOrderQtyDialog;
