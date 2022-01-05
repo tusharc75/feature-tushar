@@ -24,7 +24,7 @@ import { startCase } from 'lodash';
 import axiosInstance from "../../../axios/axiosInstance";
 import { groupBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, isFieldNotTouched } from "../../../constants/helpers";
 import { Formik, Form } from "formik";
@@ -53,7 +53,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
   const [allFields, setAllFields] = useState([]);
 
   useEffect(() => {
-    axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
+    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
       const poFields = CURReplaceByCurrencySingle(data, currency);
       setAllFields(JSON.parse(JSON.stringify(poFields)))
       if (bulkEdit) {
