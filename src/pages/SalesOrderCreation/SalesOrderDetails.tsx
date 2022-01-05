@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tabs, Tab, useMediaQuery } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Tabs, Tab, useMediaQuery, Menu, MenuItem } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -26,6 +26,9 @@ import LoadingTicket from './LoadingTicket';
 import Invoice from './Invoice';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { isMobile } from "react-device-detect";
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import { GrStatusInfo } from "react-icons/all";
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -49,7 +52,6 @@ const SalesOrderDetails = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [salesOrderFields, setSalesOrderFields] = useState([]);
-  const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [nextStep, setNextStep] = useState(true);
@@ -58,6 +60,7 @@ const SalesOrderDetails = () => {
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [statusOptions, setStatusOptions] = useState([])
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -76,6 +79,20 @@ const SalesOrderDetails = () => {
   //   }
   //   // eslint-disable-next-line
   // }, [id]);
+
+  const handleStatusChange = o => {
+    if (o.optionValue && salesOrderData?.status !== o.optionValue) {
+      updateJobStatus(o.optionValue)
+    }
+  }
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     if (id) {
@@ -177,20 +194,20 @@ const SalesOrderDetails = () => {
   };
 
   const updateJobStatus = (status) => {
-    //  need to change the api
-    // axiosInstance().patch(`${rentalManagement.rentalManagementApi}/status/${rentalManagementData._id}`, { status: status }).then(({ data: { data } }) => {
-    //   fetchRentalManagementData();
-    //   if (status === "Invoiced") {
-    //     setCurrentStep(4)
-    //   }
-    //   toastConfig.setToastConfig({
-    //     open: true,
-    //     type: 'success',
-    //     message: `Status changed to ${status}`
-    //   });
-    // }).catch((error) => {
-    //   toastConfig.setToastConfig(error);
-    // });
+    // need to change the api
+    axiosInstance().patch(`${salesOrder.salesOrderApi}/status/${salesOrderData._id}`, { status: status }).then(({ data: { data } }) => {
+      fetchSalesOrderData();
+      if (status === "Invoiced") {
+        setCurrentStep(4)
+      }
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: `Status changed to ${status}`
+      });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   }
 
   return (
@@ -223,6 +240,42 @@ const SalesOrderDetails = () => {
                     )}
 
                     {permissions?.salesOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+
+                    {permissions?.salesOrder?.isUpdate && (["Ready to Invoice", "Invoiced"].includes(salesOrderData?.status)) && (
+                      <>
+                        <Button
+                          variant="outlined"
+                          color="default"
+                          size="small"
+                          onClick={openActions}
+                          aria-controls="action-menu"
+                          endIcon={isMobile ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
+                        >
+                          {isMobile ? <GrStatusInfo size={20} /> : "Change Status"}
+                        </Button>
+                        <Menu
+                          anchorEl={anchorEl}
+                          keepMounted
+                          getContentAnchorEl={null}
+                          anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left'
+                          }}
+                          id="action-menu"
+                          open={Boolean(anchorEl)}
+                          onClose={closeActions}>
+                          {statusOptions?.map((o, index) => {
+                            return <MenuItem
+                              disabled={index <= statusOptions.findIndex(d => d.optionLabel === salesOrderData?.status)}
+                              onClick={() => {
+                                closeActions()
+                                handleStatusChange(o)
+                              }}
+                              value={o}>{o?.optionLabel}</MenuItem>
+                          })}
+                        </Menu>
+                      </>
+                    )}
                   </DetailsPageHeader>
                 )}
 
@@ -322,9 +375,9 @@ const SalesOrderDetails = () => {
 
                     {(currentStep === 4) && salesOrderData && (
                       <Invoice
-                        rentalManagementData={salesOrderData}
+                        salesOrderData={salesOrderData}
                         setNextStep={setNextStep}
-                        fetchRentalData={fetchSalesOrderData}
+                        fetchSalesOrderData={fetchSalesOrderData}
                         updateJobStatus={updateJobStatus}
                         statusOptions={statusOptions}
                       />

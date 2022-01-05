@@ -84,6 +84,8 @@ const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNe
               productAssets[index]["type"] = obj?.type
               productAssets[index]["deliveryTicket"] = obj?.ticketName
               productAssets[index]["deliveryTicketId"] = obj?._id
+
+              productAssets[index]["isDelivered"] = obj?.status === "Delivered";
             }
           })
         }
@@ -91,7 +93,7 @@ const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNe
       productAssets.forEach((d) => {
         d["hideSelection"] = ["In-Use", "In-Transit", "Repair", "Scrap", "Lost", "Under Review"].includes(d.status);
       })
-      if (productAssets.filter((e) => ["In-Use", "Repair", "Scrap", "Lost", "In-Transit", "Under Review", "Ready to ship"].includes(e.status)).length === productAssets.length) {
+      if (productAssets.filter((e) => ["In-Use", "Repair", "Scrap", "Lost", "In-Transit", "Under Review", "Ready to ship", "Sold"].includes(e.status)).length === productAssets.length) {
         setNextStep(true)
       }
       dispatch({ type: "initialize", data: productAssets, count: productAssets.length });
@@ -159,7 +161,7 @@ const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNe
 
   return (<>
     <Box display="flex" justifyContent="flex-end" p="4px">
-      <Button
+      {/* <Button
         onClick={() => {
           setDownlodingFile(true);
           axiosInstance().get(`/${salesOrder.salesOrderApi}/${salesOrderData._id}/pdf`)
@@ -194,7 +196,7 @@ const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNe
       >
         {downlodingFile ? "Please wait..." : "Preview"}
       </Button>
-      <Box mx={1} />
+      <Box mx={1} /> */}
       <IconButton
         disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
         onClick={() => {
@@ -210,7 +212,7 @@ const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNe
       </IconButton>
       <Box mx={1} />
       <IconButton
-        disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
+        disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId"))) || selectedRecords.some(s => s.isDelivered === true)}
         onClick={() => {
           setShowRemoveAssetFromLoadingTicketDialog(true)
         }}
@@ -284,7 +286,7 @@ const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNe
         refrenceData={salesOrderData}
         onClose={() => setShowDeliveryTicketDialog(false)}
         productInventory={productInventoryForDeliveryTicket}
-        warehouseId={salesOrderData?.warehouse}
+        warehouseId={salesOrderData?.warehouse ?? salesOrderData?.plant}
         onSuccess={() => {
           setShowDeliveryTicketDialog(false);
           fetchRecords();

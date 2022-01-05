@@ -7,7 +7,7 @@ import { CommonRenderer, DateRenderer, } from "../../../components/AgGridCompone
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, Dialog, IconButton } from "@material-ui/core";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, rentalManagement, sidebarResource } from "../../../constants/helpers";
+import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, salesOrder, sidebarResource } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
@@ -25,7 +25,7 @@ import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 
 
-const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJobStatus, statusOptions }) => {
+const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobStatus, statusOptions }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
@@ -59,7 +59,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
   );
 
   useEffect(() => {
-    if (statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice") > statusOptions.findIndex(d => d.optionLabel === rentalManagementData?.status)) {
+    if (statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice") > statusOptions.findIndex(d => d.optionLabel === salesOrderData?.status)) {
       if (!isOffline) {
         updateJobStatus("Ready to Invoice")
       }
@@ -74,16 +74,16 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
     try {
       let fields = []
       if (isOffline) {
-        const resultProduct = await findOne(objectStore.resource, "rentalManagementProduct")
-        fields = CURReplaceByCurrencySingle(resultProduct, rentalManagementData.currency)
-        const resultCost = await findOne(objectStore.resource, "rentalManagementCost")
-        fields = [...fields, ...CURReplaceByCurrencySingle(resultCost, rentalManagementData.currency)]
+        const resultProduct = await findOne(objectStore.resource, "salesOrderProduct")
+        fields = CURReplaceByCurrencySingle(resultProduct, salesOrderData.currency)
+        const resultCost = await findOne(objectStore.resource, "salesOrderCost")
+        fields = [...fields, ...CURReplaceByCurrencySingle(resultCost, salesOrderData.currency)]
       }
       else {
-        const resultProduct = await axiosInstance().get("/field/child?resource=Rental Management Product")
-        fields = CURReplaceByCurrencySingle(resultProduct?.data?.data, rentalManagementData.currency)
-        const resultCost = await axiosInstance().get("/field/child?resource=Rental Management Cost")
-        fields = [...fields, ...CURReplaceByCurrencySingle(resultCost?.data?.data, rentalManagementData.currency)]
+        const resultProduct = await axiosInstance().get("/field/child?resource=Sales Order Product")
+        fields = CURReplaceByCurrencySingle(resultProduct?.data?.data, salesOrderData.currency)
+        const resultCost = await axiosInstance().get("/field/child?resource=Sales Order Cost")
+        fields = [...fields, ...CURReplaceByCurrencySingle(resultCost?.data?.data, salesOrderData.currency)]
       }
       let rendererNames = [];
       genrateColoum(fields, columns, rendererNames, false);
@@ -108,14 +108,14 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
     let additionalcost: any = []
     try {
       if (isOffline) {
-        const result= await findOne(objectStore.rentalManagement, rentalManagementData._id);
+        const result= await findOne(objectStore.salesOrder, salesOrderData._id);
         material = result?.material;
         additionalcost = result?.additionalCost;
       }
       else {
-        const resultMaterial = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`)
+        const resultMaterial = await axiosInstance().get(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`)
         material = resultMaterial?.data?.data?.material;
-        const resultCost = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`)
+        const resultCost = await axiosInstance().get(`${salesOrder.salesOrderApi}/additionalcost/${salesOrderData._id}`)
         additionalcost = resultCost?.data?.data;
       }
       material?.forEach((item) => {
@@ -146,7 +146,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
 
   const handlePDF = (type) => {
     setDownlodingFile(type);
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/pdf`).then(({ data }) => {
+    axiosInstance().get(`${salesOrder.salesOrderApi}/${salesOrderData._id}/pdf`).then(({ data }) => {
       axiosInstance().get(`user/download?fileName=${data.data.fileName}`, {
         responseType: "blob",
       })
@@ -155,7 +155,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `Rental-${rentalManagementData.rentalJobName}.pdf`);
+            link.setAttribute('download', `Sales-Order-${salesOrderData.salesOrderNo}.pdf`);
             document.body.appendChild(link);
             link.click();
             setDownlodingFile(null);
@@ -197,7 +197,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         const attachments = [{
           base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
           contentType: base64data.split(';')[0].split(':')[1],
-          name: `Rental-${rentalManagementData.rentalJobName}`
+          name: `Sales-Order-${salesOrderData.salesOrderNo}`
         }];
         setEmailAttachments(attachments)
         setSendEmail(true)
@@ -207,22 +207,22 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
 
   const fetchEmailsData = () => {
     let ownerCollaboratorEmails = [];
-    if (rentalManagementData?.collaborator && rentalManagementData.collaborator.length) {
-      ownerCollaboratorEmails = rentalManagementData.collaborator.filter((o) => o?.email).map((o) => o?.email);
+    if (salesOrderData?.collaborator && salesOrderData.collaborator.length) {
+      ownerCollaboratorEmails = salesOrderData.collaborator.filter((o) => o?.email).map((o) => o?.email);
     }
-    if (rentalManagementData?.owner?.email) {
-      ownerCollaboratorEmails.push(rentalManagementData.owner.email);
+    if (salesOrderData?.owner?.email) {
+      ownerCollaboratorEmails.push(salesOrderData.owner.email);
     }
     let toEmails = [];
-    if (rentalManagementData?.customerAccount?.email) {
-      toEmails.push(rentalManagementData.customerAccount.email);
+    if (salesOrderData?.customerAccount?.email) {
+      toEmails.push(salesOrderData.customerAccount.email);
     }
     setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
   }
 
   return (<>
     <Box display="flex" justifyContent="space-between" m={1}>
-      <Box display="flex" alignItems="center">
+      {/* <Box display="flex" alignItems="center">
         {permissions?.rentalManagement?.isRead && (
           <Button
             variant="outlined"
@@ -263,7 +263,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         >
           {isMobile ? <MdEmail size={22} /> : downlodingFile === "Email" ? "Please wait..." : `Send Email`}
         </Button>}
-      </Box>
+      </Box> */}
     </Box>
     <Grid item xs={12} md={12} sm={12} className="mt-3">
       {columns && frameWorkComponent ?
@@ -281,12 +281,12 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           loading={loading}
           allowSelection={false}
           isClientSideGrid={true}
-          renderedFrom="rentalManagmentInvoicePage"
+          renderedFrom="SalesOrderInvoicePage"
           refreshGrid={fetchData}
           fromPurchaseOrderGrid={true}
           onCellValueChanged={(row) => {
           }}
-          currency={rentalManagementData?.currency?.toLowerCase()}
+          currency={salesOrderData?.currency?.toLowerCase()}
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
       }
@@ -317,21 +317,21 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             setDownlodingFile(null);
             setFullScreen(false);
           }}
-          id={rentalManagementData._id}
+          id={salesOrderData._id}
           showESign={true}
           isQuoteBuilder={true}
           options={userEmails?.to}
           cc={userEmails?.cc ?? []}
           emailId={null}
           qouteBuilderAttachments={emailAttachments}
-          subject={`${user?.user?.brandName ?? 'Brand'} Invoice - ${rentalManagementData?.rentalJobName ?? ''}`}
+          subject={`${user?.user?.brandName ?? 'Brand'} Invoice - ${salesOrderData?.salesOrderNo ?? ''}`}
           fromQuote={true}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
             setFullScreen((prevState) => !prevState);
           }}
           showManimizeMaximize={true}
-          refrenceType="rentalJob"
+          refrenceType="salesOrder"
         />
       </Dialog>
     )}
