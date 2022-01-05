@@ -487,8 +487,8 @@ const ManageDeliveryTicket = (props) => {
                                     onClose()
                                 }
                             }}
-                            title={`${deliveryTicketId ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ""}` 
-                            : `Create ${initialData.values?.ticketType} Ticket`}`}
+                            title={`${deliveryTicketId ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ""}`
+                                : `Create ${initialData.values?.ticketType} Ticket`}`}
                             isMinimized={!fullScreen}
                             onMinimizeMaximize={() => {
                                 setFullScreen(prevState => !prevState)
@@ -508,7 +508,7 @@ const ManageDeliveryTicket = (props) => {
                                                 <Box marginY={2}>
                                                     <Grid spacing={3} container>
                                                         {form.sectionFields.map((field, index2) => (
-                                                            ["repairJob", "transferAsset", "rentalJob", "type", "productInventory"].includes(field.fieldName) ? null :
+                                                            ["repairJob", "transferAsset", "rentalJob", "salesOrder", "type", "productInventory"].includes(field.fieldName) ? null :
                                                                 <Grid key={index2} item xs={12} sm={6} md={6}>
                                                                     {field.fieldName === "pick-UpDate" ? (
                                                                         <FormTypes

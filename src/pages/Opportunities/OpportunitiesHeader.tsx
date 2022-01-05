@@ -14,24 +14,28 @@ import {
   styled, 
   alpha,
   Dialog,
-  DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Slide,
   Divider,
   Radio,
   RadioGroup,
   FormControl,
-  FormControlLabel
+  FormControlLabel,
+  List,
+  ListItemIcon,
+  ListItemText,
+  withStyles,
+  makeStyles
 } from "@material-ui/core";
+import MuiListItem from "@material-ui/core/ListItem";
 import { TransitionProps } from '@material-ui/core/transitions';
 import { ExpandMore } from "@material-ui/icons";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
 import { isMobile } from "react-device-detect";
-import {IoFilterCircle, MdAdd, MdFilterList, MdSort} from "react-icons/all";
+import {FaUserTie, IoFilterCircle, MdAccountBalanceWallet, MdAdd, MdFilterList, MdSort, FaCalendarDay, RiTicketFill, RiArrowUpDownFill, RiArrowUpDownLine, BsArrowUpShort, BsArrowUp, BsArrowDown} from "react-icons/all";
 
 const StyledMenu = styled((props: MenuProps) => (
   <Menu
@@ -46,7 +50,44 @@ const StyledMenu = styled((props: MenuProps) => (
     }}
     {...props}
   />
-))
+));
+
+
+const ListItem = withStyles({
+  root: {
+    borderLeft:"3px solid white",
+    "& .MuiListItemIcon-root": {
+      minWidth:"36px !important",
+      fontSize:"16px",
+    },
+    "&$selected": {
+      borderLeft: "3px solid #43AEAA",
+      color: "#43AEAA !important",
+      backgroundColor:"white !important",
+      "& .MuiListItemIcon-root": {
+        color: "#43AEAA"
+      },
+      "& .MuiListItemText-primary":{
+          fontWeight:600
+      }
+    },
+    // "&$selected:hover": {
+    //   backgroundColor: "purple",
+    //   color: "white",
+    //   "& .MuiListItemIcon-root": {
+    //     color: "white"
+    //   }
+    // },
+    // "&:hover": {
+    //   backgroundColor: "blue",
+    //   color: "white",
+    //   "& .MuiListItemIcon-root": {
+    //     color: "white"
+    //   }
+    // }
+  },
+  selected: {}
+})(MuiListItem);
 
 
 const Transition = React.forwardRef(function Transition(
@@ -65,6 +106,11 @@ function OpportunitiesHeader(props) {
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
+  const [clicked, setClicked] = useState(false);
+
+  const handleListIconClick = (id) => {
+    setClicked(true)
+  }
 
   const [isOpenDialog, setisOpenDialog] = useState(false)
 
@@ -99,6 +145,16 @@ function OpportunitiesHeader(props) {
   };
   const [show, setShow] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+
+  // Sort 
+
+  const [selectedIndex, setSelectedIndex] = React.useState(1);
+
+  const handleListItemClick = (event, index) => {
+    setSelectedIndex(index);
+  };
+
 
   useEffect(() => {
     const checkIfClickedOutside = e => {
@@ -192,24 +248,70 @@ function OpportunitiesHeader(props) {
         <div className={styles.mobile_filter_content}>
         <DialogTitle className={styles.sort_title}>{"Sort By"}</DialogTitle>
         <Divider/>
-        <DialogContent >
-        <FormControl component="fieldset">
-       <RadioGroup
-        aria-label="sort"
-        name="radio-buttons-group"
-        className={styles.radio_label}
-      >
-        <FormControlLabel  value="Owner" control={<Radio />} label={<h5 style={{paddingBottom:"1px" , color:"#5F5F5F"}}>Owner/Collaborater</h5>}  />
-        <FormControlLabel value="Date by" control={<Radio />} label={<h5 style={{paddingBottom:"1px" , color:"#5F5F5F"}}>Date By</h5>} />
-        <FormControlLabel value="Customer Account" control={<Radio />} label={<h5 style={{paddingBottom:"1px" , color:"#5F5F5F"}}>Account</h5>}/>
-        <FormControlLabel value="Status" control={<Radio />} label={<h5 style={{paddingBottom:"1px" , color:"#5F5F5F"}}>Status</h5>} />
-      </RadioGroup>
-    </FormControl>     
-                 
+        <DialogContent className={styles.inner_content_sort}>
+        <List component="nav" aria-label="main mailbox folders" >
+        <ListItem
+          button
+          selected={selectedIndex === 0 }
+          
+          onClick={(event) => handleListItemClick(event, 0)}
+        >
+          <ListItemIcon>
+              <FaUserTie/ >
+          </ListItemIcon>
+          <ListItemText primary="Owner/collaborater" />
+        </ListItem>
+        <ListItem
+          button
+          selected={selectedIndex === 1}
+          onClick={(event) => handleListItemClick(event, 1)}
+          
+        >
+          <ListItemIcon>
+             <MdAccountBalanceWallet size={18}/>
+          </ListItemIcon>
+          <ListItemText primary="Account" />
+
+          <ListItemIcon onClick={() => handleListIconClick(0)}>
+            {selectedIndex === 1 ? clicked ? <BsArrowUp/> : <RiArrowUpDownLine/> : null}
+          </ListItemIcon>
+        </ListItem>
+
+
+        <ListItem
+          button
+          selected={selectedIndex === 2}
+          onClick={(event) => handleListItemClick(event, 2)}
+          
+        >
+          <ListItemIcon>
+             <FaCalendarDay />
+          </ListItemIcon>
+          <ListItemText primary="Date" />
+        </ListItem>
+
+        <ListItem
+          button
+          selected={selectedIndex === 3}
+          onClick={(event) => handleListItemClick(event, 3)}
+          
+        >
+          <ListItemIcon>
+             <RiTicketFill />
+          </ListItemIcon>
+          <ListItemText primary="Status" />
+        </ListItem>
+
+
+
+      </List>
+
+      
    
         </DialogContent>
         </div>
       </Dialog>
+       
 
         <Button
         id="demo-customized-button"

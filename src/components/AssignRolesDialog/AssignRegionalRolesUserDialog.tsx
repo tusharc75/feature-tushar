@@ -45,7 +45,8 @@ const AssignRegionalRolesUserDialog = ({
     onSuccess,
     handleCloseDialog,
     ids,
-    assignedUsers
+    assignedUsers,
+    entityAccessIds = [],
 }) => {
     const toastConfig = useContext(CustomToastContext);
     const [entity, setEntity] = useState([]);
@@ -86,8 +87,8 @@ const AssignRegionalRolesUserDialog = ({
         axiosInstance()
             .get(`/entity`)
             .then(({ data: { data } }) => {
-                setEntity(data.map(obj => ({ ...obj, isChecked: false })));
-                setEntityConst(data.map(obj => ({ ...obj, isChecked: false })));
+                setEntity(data.filter((item) => entityAccessIds.includes(item._id)).map(obj => ({ ...obj, isChecked: false })));
+                setEntityConst(data.filter((item) => entityAccessIds.includes(item._id)).map(obj => ({ ...obj, isChecked: false })));
                 setLoadingData(false);
             })
             .catch((error) => {

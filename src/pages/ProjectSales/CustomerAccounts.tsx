@@ -33,6 +33,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import PropTypes from 'prop-types';
 import { MdDelete } from "react-icons/md";
+import { AiFillCaretLeft, AiFillCaretRight } from "react-icons/ai";
 
 
 function TabPanel(props) {
@@ -123,25 +124,58 @@ const useStyles = makeStyles((theme) => ({
     color: "#43ADAA"
   },
   tabProject:{
+    // position:"static",
     // borderRadius:"40px !important",
-    // backgroundColor:"#F5F5F5 !important",
+    backgroundColor:"#efefef !important",
+    rippleVisible: {
+      animation: "none !important"
+    },
     "&.Mui-selected":{
       backgroundColor: "#43AEAA !important",
       color:"#ffff !important",
         borderBottom:"0px solid #808080 !important",
-      borderTop:"0px solid #808080 !important"
+      borderTop:"0px solid #808080 !important",
+      "&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child":{
+        display:"flex",
+        marginBottom:"0px",
+        position:"absolute",
+        left:"92.5%",
+    },
+  //   "&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child":{
+  //     display:"flex",
+  //     marginBottom:"0px",
+  //     position:"absolute",
+  //     left:"244px",
+  //     color:"#43AEAA"
+  // },
 
     },
+    "& span.MuiTab-wrapper" :{
+         display:"flex",
+         flexDirection:"row-reverse",
+        //  position:"static"
+    },
+    
+    "&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child":{
+        display:"none",
+        
+    },
+    
+    "&.MuiTab-labelIcon .MuiTab-wrapper > *:after":{
+      position:"relative",
+      left:"30%"
+  },
+    
     margin:"0 -1px",
     borderBottom:"0px solid #808080 !important",
       borderTop:"0px solid #808080 !important",
     tab:{
        "&.MuiTabPanel-root":{
       flex: 1
-  }	
-    }
+      
   },
-  
+    },
+  },
 
 }));
 
@@ -182,6 +216,8 @@ const CustomerAccounts = (props) => {
   const [isRemoving, setRemoving] = useState(false);
   const [accountDeleteRec, setAccountDeleteRec] = useState(null);
   const [contactDeleteRec, setContactDeleteRec] = useState(null);
+
+  const [selected, setSelected] = React.useState(0);
 
   const [value, setValue] = React.useState(0);
 
@@ -623,9 +659,13 @@ const CustomerAccounts = (props) => {
                         id={`vertical-tab-${i}`}
                         className={classes.tabProject}
                         style={{borderRight:"5px" , borderColor:"green" , marginRight:"-1px" }}
+                        icon={<AiFillCaretLeft size={18}/>}
+                        // icon={<AiFillCaretRight size={18}/>}
+
                       />
                     ))}
                   </Tabs>
+                  
 
                   {/* <Box component="span" mx={1} /> */}
 

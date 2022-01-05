@@ -23,7 +23,7 @@ import { groupBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, isFieldNotTouched } from "../../../constants/helpers";
+import { CustomDialogTransition, isFieldNotTouched, CHILD_RESOURCE } from "../../../constants/helpers";
 import { Formik, Form } from "formik";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomButton from '../../../components/Helpers/CustomButton'
@@ -48,7 +48,7 @@ const ServiceDialog: FC<ServiceDialogProps> = ({ onClose, currency, handleAddSer
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    axiosInstance().get("/field/child?resource=Purchase Order Service").then(({ data: { data } }) => {
+    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderService}`).then(({ data: { data } }) => {
       const poFields = CURReplaceByCurrencySingle(data, currency);
       if (serviceData) {
         setInitialData({
@@ -112,7 +112,7 @@ const ServiceDialog: FC<ServiceDialogProps> = ({ onClose, currency, handleAddSer
         }) => (
           <Fragment>
             <CustomDialogHeader
-              title={serviceData ? `Edit ${serviceData?.description || "Service"}` : `Add Service`}
+              title={serviceData ? `Edit ${serviceData?.description || "Service"}` : `Ad hoc Charges`}
               onClose={() => {
                 onClose()
               }}

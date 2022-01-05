@@ -657,11 +657,11 @@ body::-webkit-scrollbar-thumb {
 }
 
 
-// .fixedRightPanel {
-//   position: fixed;
-//   height: calc(100vh - 107px);
-//   width: 31.5%;
-// }
+.fixedRightPanel {
+  position: fixed;
+  // height: calc(100vh - 107px);
+  width: 90%;
+}
 
 .badge-date {
   background: #ebf9ff;
@@ -738,10 +738,14 @@ body::-webkit-scrollbar-thumb {
 
 }
 .dynamic-vertical-tab{
-  border: 2px solid #43AEAA;
+  // border: 2px solid #43AEAA;
+  // border-radius: 10px 0 0 10px;
+  // padding:15px 0 ;
+  margin-right: 0.5px ;
   border-radius: 10px 0 0 10px;
-  padding:15px 0 ;
-  margin-right: -1px ;
+  border: 2px solid #d6d6d6;
+  border-right: 0px;
+ 
  
 }
 .mobile_button_layout{
@@ -1308,7 +1312,7 @@ body::-webkit-scrollbar-thumb {
 .tabpanel_layout{
   flex:1;
   padding: 0 10px;
-  border: 2px solid #43AEAA ;
+  border: 2px solid #d6d6d6 ;
   border-radius: 0 10px 10px 0;
   margin-left: -0.4px;
 

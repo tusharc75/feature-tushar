@@ -110,6 +110,8 @@ const UserDetailsPage = () => {
   const [supplierContactRelatedData, setSupplierContactRelatedData] = useState(null);
   const [userPermissions, setUserPermissions] = useState(null);
   const [unionRoleData, setUnionRoleData] = useState(null);
+  const [entityAccess, setEntityAccess] = useState([]);
+  const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
 
   // const [isChangingPermission, setIsChangingPermission] = useState(false);
   const [hasPermissionToUpdateApprovalProcess] = useState(permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin);
@@ -169,6 +171,8 @@ const UserDetailsPage = () => {
 
   useEffect(() => {
     fetchAllUsers()
+    fetchLoggedInUserEntities()
+    fetchLoggedInUserRole()
   }, [])
 
   useEffect(() => {
@@ -216,6 +220,30 @@ const UserDetailsPage = () => {
   useEffect(() => {
     userTimeTracker()
   }, [trackingTime])
+
+  const fetchLoggedInUserRole = async () => {
+    let roleIds = [];
+    await axiosInstance().get(`/user/${user.user?._id}`).then(({ data: { data } }) => {
+      data.entities.map((item) => {
+        item.role.forEach((role) => {
+          if(roleIds.includes(role?._id)){
+
+          }else{
+            roleIds.push(role?._id)
+          }
+        })
+        
+      })
+      setRoleAccessOfLoggedInUser(roleIds)
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  }
+
+  const fetchLoggedInUserEntities = async () => {
+    const entityIds = user.entity?.map((e) => e._id);
+    setEntityAccess(entityIds)
+  }
 
   const fetchAllUsers = () => {
     axiosInstance()
@@ -1046,7 +1074,8 @@ const UserDetailsPage = () => {
                           onSuccess={() => {
                             fetchUserData();
                           }}
-
+                          entityAccessIds = {entityAccess}
+                          roleAccessIds = {roleAccessOfLoggedInUser}
                         />
 
 
@@ -1193,7 +1222,7 @@ const UserDetailsPage = () => {
                 <IoIosArrowDropleft className="icon" />
               </span>} */}
 
-            <Paper className="fixedRightPanel">
+            <Paper className={`${!isSmallScreen ? 'fixedRightPanel' : null}`}>
               {!isSmallScreen && <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
                 {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
               </span>}

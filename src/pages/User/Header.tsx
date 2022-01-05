@@ -173,7 +173,7 @@ const Header = (props) => {
                       closeActions();
                     }}
                   >
-                    Assign Roles
+                    Assign Entities - Roles
                   </MenuItem>
                 }
 

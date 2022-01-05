@@ -220,7 +220,15 @@ export const RESOURCE_LABEL = {
   address: 'Addresses',
 };
 
-
+export const CHILD_RESOURCE = {
+  rentalManagementProduct: 'Rental Management Product',
+  rentalManagementCost: 'Rental Management Cost',
+  purchaseOrderProduct: 'Purchase Order Product',
+  purchaseOrderService: 'Purchase Order Service',
+  repairJobAsset: 'Repair Job Asset',
+  salesOrderProduct: 'Sales Order Product',
+  salesOrderCost: 'Sales Order Cost',
+};
 
 
 export const sidebarResourceObjectFromValues = () => {
@@ -1361,4 +1369,13 @@ export const DELIVERY_TICKET_STATUS = {
   new: 'New',
   indTransit: 'In-Transit',
   delivered: 'Delivered',
+};
+
+export const asyncForEach = async (
+  array: any[],
+  callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>
+) => {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
 };

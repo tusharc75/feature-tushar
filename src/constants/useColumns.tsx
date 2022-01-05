@@ -13,7 +13,7 @@ import {
     CheckboxRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
-import {sidebarResourceObjectFromValues} from './helpers';
+import {sidebarResourceObjectFromValues, supplierContact} from './helpers';
 import {useData} from '../StateProvider/Provider';
 
 
@@ -40,6 +40,8 @@ export const detailPagePath = {
     deliveryPerson: routes?.userDetail?.path,
     pDFTemplate: routes?.quotePdfTemplateDetail?.path,
     subMarketSegment: routes?.marketSegment?.path,
+    customerContact: routes?.customerContactDetail?.path,
+    supplierContact: routes?.supplierContactDetail?.path,
 }
 export const hasDetailPageAsPopup = {
     subMarketSegment: routes?.marketSegment?.path,
