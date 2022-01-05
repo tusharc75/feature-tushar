@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.34.0](https://github.com/vebholic/oms_frontend/compare/v2.33.0...v2.34.0) (2022-01-05)
+
+
+### Features
+
+* - Repair job changes done ([16d9be9](https://github.com/vebholic/oms_frontend/commit/16d9be940983a821ecc02ca1b641d6ebdd13ed29))
+* dashboard new pie chart kpi ([c1163dd](https://github.com/vebholic/oms_frontend/commit/c1163dd546e193d0b368d691caccbe51df9f0a94))
+* yarn run commit -m "- Same plant and internal changes done in repair jo ([7cd3141](https://github.com/vebholic/oms_frontend/commit/7cd3141fb1a5874ba4250187742757519946a6d0))
+
+
+### Bug Fixes
+
+* bug fix ([ea34c31](https://github.com/vebholic/oms_frontend/commit/ea34c31bf605455eef72961ead35a6bff16cb04e))
+* bug fix ([19abb11](https://github.com/vebholic/oms_frontend/commit/19abb11e09a3d6607cb0254327b7c05e4c9df3a0))
+* dashboard changes ([17516a0](https://github.com/vebholic/oms_frontend/commit/17516a04ff379a0312ff1bcbce95494a45d03623))
+* dashboard changes ([f1801d1](https://github.com/vebholic/oms_frontend/commit/f1801d1dc688629e1800c90778474e1250f7285b))
+* **existing billing and shipping address not showing when clone:** existing billing/shippingclone ([b093269](https://github.com/vebholic/oms_frontend/commit/b093269b0c36a9f6a22a8b00e8abb877f6c5a1df))
+* **login with query params issue:** login with query params issue ([b39a97b](https://github.com/vebholic/oms_frontend/commit/b39a97bd8c462fd2ca960ae6b968e3ed6768112d))
+
 ## [2.33.0](https://github.com/vebholic/oms_frontend/compare/v2.32.1...v2.33.0) (2022-01-04)
 
 

@@ -9,7 +9,7 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, productInventory, INVENTORY_STATUS } from "../../../constants/helpers";
+import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, productInventory, INVENTORY_STATUS, CHILD_RESOURCE } from "../../../constants/helpers";
 import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
@@ -51,7 +51,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       data = await findOne(objectStore.resource, "rentalManagementProduct")
     }
     else {
-      const response = await axiosInstance().get(`/field/child?resource=Rental Management Product`)
+      const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`)
       data = response?.data?.data
     }
     data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)

@@ -300,7 +300,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       showRemoveAssetFromLoadingTicketDialog && (
         <ConfirmationDialog
           open={showRemoveAssetFromLoadingTicketDialog}
-          message={`Are you sure you want to remove selected records from ${sidebarResource.deliveryTicket}(s) ?`}
+          message={`Are you sure you want to remove selected records from Loading Ticket?`}
           onClose={() => {
             setShowRemoveAssetFromLoadingTicketDialog(false);
           }}

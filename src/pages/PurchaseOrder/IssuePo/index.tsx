@@ -7,7 +7,7 @@ import { CommonRenderer, DateRenderer, } from "../../../components/AgGridCompone
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, Dialog, IconButton } from "@material-ui/core";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, rentalManagement, sidebarResource } from "../../../constants/helpers";
+import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, rentalManagement, CHILD_RESOURCE } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
@@ -58,9 +58,9 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
     );
 
     useEffect(() => {
-        axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
+        axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
             let fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
-            axiosInstance().get("/field/child?resource=Purchase Order Service").then(({ data: { data } }) => {
+            axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderService}`).then(({ data: { data } }) => {
                 fields = [...fields, ...CURReplaceByCurrencySingle(data, purchaseOrderData.currency)]
                 let rendererNames = [];
                 genrateColoum(fields, columns, rendererNames, false);
