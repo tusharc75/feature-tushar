@@ -70,8 +70,11 @@ const Product = ({ purchaseOrderData, id }) => {
         }
         axiosInstance().get(`${purchaseOrder.api}/service/${id}`).then(({ data: { data } }) => {
             let rows = data?.map((item) => {
+                let finalObject = prepareDataForGrid(item);
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
+                finalObject["allowedToEdit"] = true
                 let res: any = {
-                    ...prepareDataForGrid(item),
+                    ...finalObject,
                 };
                 return res;
             });
@@ -226,8 +229,8 @@ const Product = ({ purchaseOrderData, id }) => {
                     loading={loading}
                     chips={
                         [{
-                            label: `Description: `,
-                            field: "description",
+                            label: `Quantity: `,
+                            field: "qty",
                             forceShow: true
                         }]
                     }

@@ -7,7 +7,7 @@ import { Button, Chip, Dialog, IconButton, makeStyles, useMediaQuery } from "@ma
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
-import { CustomDialogTransition, dateFormat, defaultActivityShow, gridLoadingTimeout, productInventory, purchaseOrder, rentalManagement, CHILD_RESOURCE } from "../../../constants/helpers";
+import { CustomDialogTransition, dateFormat, defaultActivityShow, gridLoadingTimeout, productInventory, purchaseOrder, rentalManagement, CHILD_RESOURCE, prepareDataForGrid } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import moment from "moment";
 import { startCase } from "lodash";
@@ -131,8 +131,11 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
         dispatch({ type: "loading", loading: true });
         axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`).then(({ data: { data } }) => {
             let rows = data?.map((item) => {
+                let finalObject = prepareDataForGrid(item);
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
+                finalObject["allowedToEdit"] = true
                 let res: any = {
-                    ...item,
+                    ...finalObject,
                     productDescription: item?.productDetail?.productName,
                     productId: item?.productDetail?._id,
                 };
@@ -301,7 +304,8 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             allowSwipe={true}
                             permissions={permissions}
                             primaryField={columns?.find(d => d.field === "productDescription")}
-                            onClick={() => {
+                            onClick={(data) => {
+                                history.push(`${routes.purchaseOrderDetail.path}/${data.productId}`)
                             }}
                             dataRows={dataRows}
                             selectedRecords={selectedRecords}
@@ -316,8 +320,8 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             loading={loading}
                             chips={
                                 [{
-                                    label: `Product Description: `,
-                                    field: "productName",
+                                    label: `Quantity: `,
+                                    field: "qty",
                                     forceShow: true
                                 }]
                             }
@@ -369,7 +373,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     fetchProduct()
                 }}
                 title="Create Asset"
-                productList={selectedRecords.filter(d => d.hasOwnProperty("productDetail") && (d.qty !== d.actualReceived))}
+                productList={selectedRecords.filter(d => (d.qty !== d.actualReceived))}
                 purchaseOrderData={purchaseOrderData}
                 handleUpdateData={handleUpdateData}
             />
@@ -395,7 +399,6 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     }}
                     fetchData={onSendEmailSuccess}
                     id={purchaseOrderData._id}
-                    showESign={true}
                     isQuoteBuilder={true}
                     options={userEmails?.to}
                     cc={userEmails?.cc ?? []}

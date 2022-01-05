@@ -227,8 +227,7 @@ export default function ManageAccountDialog(props) {
       accountNameForClone={accountNameForClone}
       accountResource={accountResource}
       accountApi={accountApi}
-      addressDataSource={addressDataSource}
-      setAddressDataSource={setAddressDataSource}
+      handleAddressDataSource={(value) => setAddressDataSource(value)}
     />
   );
 }
