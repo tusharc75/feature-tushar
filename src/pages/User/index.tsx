@@ -76,6 +76,8 @@ const User: FC = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteUser, setDeleteUser] = useState<any>({})
   const [allUsers, setAllUsers] = useState([])
+  const [entityAccess, setEntityAccess] = useState([])
+  const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([])
   const columns = [
     {
       field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
@@ -327,7 +329,33 @@ const User: FC = () => {
 
   useEffect(() => {
     fetchAllUsers()
+    fetchLoggedInUserEntities()
+    fetchLoggedInUserRole()
   }, [])
+  const fetchLoggedInUserRole = async () => {
+    let roleIds = [];
+    await axiosInstance().get(`/user/${user.user?._id}`).then(({ data: { data } }) => {
+      data.entities.map((item) => {
+        item.role.forEach((role) => {
+          if(roleIds.includes(role?._id)){
+
+          }else{
+            roleIds.push(role?._id)
+          }
+        })
+        
+      })
+      setRoleAccessOfLoggedInUser(roleIds)
+      console.log(roleIds)
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  }
+
+  const fetchLoggedInUserEntities = async () => {
+    const entityIds = user.entity?.map((e) => e._id);
+    setEntityAccess(entityIds)
+  }
 
   const fetchAllUsers = () => {
     axiosInstance()
@@ -650,6 +678,8 @@ const User: FC = () => {
               handleRegionalRolesCloseDialog();
               fetchUsers();
             }}
+            entityAccessIds = {entityAccess}
+            roleAccessIds = {roleAccessOfLoggedInUser}
           />
         </Dialog>
       )}

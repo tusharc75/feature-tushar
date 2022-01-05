@@ -31,6 +31,7 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 import CustomTimeline from "../../components/CustomTimeline";
 import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
 import { MdEdit } from "react-icons/md";
+import { startCase } from "lodash";
 
 
 
@@ -178,11 +179,9 @@ const ProductInventoryDetailsPage = () => {
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
-    mainPoint['Number Of Days After Repair'] = data?.noOfDaysAfterRepair;
-    mainPoint['Number Of Job From Last Repair'] = data?.noOfJobFromLastRepair;
-    mainPoint['Total Number Of Rental Job'] = data?.totalNoOfRentalJob;
-    mainPoint['Use Time From Last Repair'] = data?.useTimeFromLastRepair;
-    mainPoint['Total Repair'] = data?.totalRepair;
+    Object.keys(data).map((stat: any) => (
+      mainPoint[startCase(stat)] = data[stat] ?? 0
+    ))
     setMainPoints(mainPoint);
   };
 

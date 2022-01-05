@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useReducer } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, IconButton } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Tab, Tabs, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -37,6 +37,8 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import InfoIcon from "@material-ui/icons/Info";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import AssetScrapRepairDialog from '../../components/AssetScrapRepairDialog/AssetScrapRepairDialog';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 
 const renderedFrom = "repairJobDetails"
 const step1RenderedFrom = `${renderedFrom}_assets`
@@ -105,6 +107,17 @@ const RepairJobDetails = () => {
   const [repairAssetDialog, setRepairAssetDialog] = useState({ open: false, assetId: null, assetName: null, assetIds: [] })
 
   const [locationKeys, setLocationKeys] = useState([])
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: "", message: "" })
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     return history.listen(location => {
@@ -197,6 +210,8 @@ const RepairJobDetails = () => {
           u["plant"] = u["typeOfRepair"] === "Internal" ? repairJobData["plant"]?.optionValue : "";
           u["repairPlant"] = u["typeOfRepair"] === "Internal" ? repairJobData["repairPlant"]?.optionValue : "";
 
+          u["hideSelection"] = u.status === INVENTORY_STATUS.lost;
+
           return prepareDataForGrid(u, user);
         });
 
@@ -244,7 +259,7 @@ const RepairJobDetails = () => {
 
         setDisableNextStep(data.length === 0
           ? true
-          : (repairJobData["typeOfRepair"] === "Internal" && repairJobData["plant"].optionValue === repairJobData["repairPlant"].optionValue && rows.some(s => !s.hasOwnProperty("repaired") || s["repaired"] === false)
+          : (repairJobData["typeOfRepair"] === "Internal" && repairJobData["plant"].optionValue === repairJobData["repairPlant"].optionValue && rows.filter(f => f.status !== "Lost").some(s => !s.hasOwnProperty("repaired") || s["repaired"] === false)
             ? true
             : foundBlankValue)
         );
@@ -260,6 +275,8 @@ const RepairJobDetails = () => {
         setAddSerializedAssetDialog(false)
         setIsAdding(false)
         toastConfig.setToastConfig(error)
+      }).finally(() => {
+        setStatusToUpdate(prevState => ({ ...prevState, open: false }))
       });
   }
 
@@ -295,7 +312,7 @@ const RepairJobDetails = () => {
     <div className="d-flex gap-1">
 
       {
-        params.data["typeOfRepair"] === "Internal" && params.data["plant"] === params.data["repairPlant"] &&
+        params.data["typeOfRepair"] === "Internal" && params.data["plant"] === params.data["repairPlant"] && params.data["status"] !== "Lost" &&
         !params.data.repaired && <HtmlTooltip title="Repair Asset">
           <IconButton
             size="small"
@@ -383,6 +400,10 @@ const RepairJobDetails = () => {
 
         if (data["typeOfRepair"] === "Internal" && data["plant"].optionValue === data["repairPlant"].optionValue) {
           setSteps([...repairJobProcessSteps.filter(f => f === "Serialized Assets")])
+        } else if (data["typeOfRepair"] === "Internal" && data["plant"].optionValue !== data["repairPlant"].optionValue && step1DataRows.some(s => s["repaired"] === true)) {
+          setSteps([...repairJobProcessSteps.filter(f => f === "Serialized Assets" || f === "Loading Ticket")])
+        } else {
+          setSteps([...repairJobProcessSteps.filter(f => f !== "End")])
         }
 
         // if (data.processStatus) {
@@ -640,6 +661,43 @@ const RepairJobDetails = () => {
                                     </Button>
                                   }
 
+                                  {
+                                    repairJobData && repairJobData["status"] !== repairJobStatus[2] && <Button variant="outlined" color="primary" aria-controls="simple-menu"
+                                      aria-haspopup="true"
+                                      disabled={step1SelectedRecords.length === 0}
+                                      size="small"
+                                      onClick={handleClick}
+                                      endIcon={<ArrowDropDownIcon />}>
+                                      Change Status
+                                    </Button>
+                                  }
+
+                                  <Menu
+                                    id="simple-menu"
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleClose}
+                                    getContentAnchorEl={null}
+                                    anchorOrigin={{
+                                      vertical: 'bottom',
+                                      horizontal: 'right',
+                                    }}
+                                    transformOrigin={{
+                                      vertical: 'top',
+                                      horizontal: 'right',
+                                    }}
+                                  >
+                                    <MenuItem onClick={() => {
+                                      setAnchorEl(null)
+                                      setStatusToUpdate({ open: true, isUpdating: false, status: "Scrap", message: "" })
+                                    }}>Scrap</MenuItem>
+                                    <MenuItem onClick={() => {
+                                      setAnchorEl(null)
+                                      setStatusToUpdate({ open: true, isUpdating: false, status: "Lost", message: "" })
+                                    }}>Lost</MenuItem>
+                                  </Menu>
+
                                   <Button
                                     variant="contained"
                                     color="primary"
@@ -670,7 +728,7 @@ const RepairJobDetails = () => {
 
                               <Grid item xs={12} md={12} sm={12} className="mt-3">
 
-                                {step1Columns && step1FrameworkComponent ?
+                                {step1Columns && Object.keys(step1FrameworkComponent).length > 0 ?
                                   isMobile ?
                                     <CustomSwipableList
                                       allowSelection={true}
@@ -728,6 +786,12 @@ const RepairJobDetails = () => {
                                       allowSelection={repairJobData && repairJobData["status"] === completedStatus ? false : true}
                                       renderedFrom={step1RenderedFrom}
                                       isClientSideGrid={true}
+                                      rowClassRules={{
+                                        "red-data-row":
+                                          function (params) {
+                                            return ["Scrap", "Lost"].some(s => s === params.data.status);
+                                          },
+                                      }}
                                     />
                                   : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                                 }
@@ -927,6 +991,21 @@ const RepairJobDetails = () => {
             }}
           />
         )
+      }
+
+      {
+        statusToUpdate.open && <AssetScrapRepairDialog
+          statusToUpdate={statusToUpdate}
+          setStatusToUpdate={setStatusToUpdate}
+          selectedRecords={step1SelectedRecords}
+          id={repairJobData._id}
+          onClose={() => {
+            setStatusToUpdate(prevState => ({ ...prevState, open: false }))
+          }}
+          onSuccess={() => {
+            fetchAssignedSerializedAssets();
+          }}
+        />
       }
 
     </>
