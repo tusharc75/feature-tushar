@@ -16,7 +16,8 @@ import {
   gridLoadingTimeout,
   rentalManagement,
   sidebarResource,
-  INVENTORY_STATUS
+  INVENTORY_STATUS,
+  DELIVERY_TICKET_STATUS
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { useHistory } from "react-router-dom";
@@ -85,6 +86,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
               productAssets[index]["type"] = obj?.type
               productAssets[index]["deliveryTicket"] = obj?.ticketName
               productAssets[index]["deliveryTicketId"] = obj?._id
+              productAssets[index]["deliveryTicketStatus"] = obj?.status
             }
           })
         }
@@ -94,10 +96,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         d["hideSelection"] = [INVENTORY_STATUS.inUse, INVENTORY_STATUS.indTransit, INVENTORY_STATUS.repair,
         INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(d.status);
       })
-      if (productAssets.filter((e) => [INVENTORY_STATUS.inUse, INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap,
-      INVENTORY_STATUS.lost, INVENTORY_STATUS.indTransit, INVENTORY_STATUS.underReview, INVENTORY_STATUS.readyToShip].includes(e.status)
-        || productAssets?.deliveryTicketId
-      ).length === productAssets.length) {
+      if (productAssets.filter((e) => e.deliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
         setNextStep(true)
       }
       dispatch({ type: "initialize", data: productAssets, count: productAssets.length });
