@@ -61,7 +61,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
   const ref = useRef(null);
 
   useEffect(() => {
-    axiosInstance().get("/field/child?resource=Rental Management Product").then(({ data: { data } }) => {
+    axiosInstance().get("/field/child?resource=Sales Order Product").then(({ data: { data } }) => {
       data = CURReplaceByCurrencySingle(data, salesOrderData.currency)
       setAllFields(JSON.parse(JSON.stringify(data)))
       if (isBulkedit) {
