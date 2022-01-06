@@ -59,8 +59,10 @@ export default function ProductDetails() {
   const [indexOfProductInCart, setIndexOfProductInCart] = useState(-1);
   const [rateCurrency, setRateCurrency] = useState({ rate: "", mrp: "", rateWithCurrency: "", unit: "", pricingMethod: "", isRateMrpSame: false })
   const [deleteProductFromCartConfirmationDialog, setDeleteProductFromCartConfirmationDialog] = useState({ show: false, okBtnLoading: false })
-
+  const [selectedUnit, setSelectedUnit] = useState('');
+  const [selectedPricingMethod, setSelectedPricingMethod] = useState('');
   const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
+  const [hasError,setHasError] = useState(false);
 
   const history = useHistory();
   let { id } = useParams();
@@ -88,7 +90,7 @@ export default function ProductDetails() {
   const changeRateCurrency = (data, unit, pricingMethod) => {
 
     if (unit && pricingMethod) {
-      const record = data.priceCalculation.find(d => d.pricingMethod === pricingMethod && d.unit === unit);
+      const record = data.find(d => d.pricingMethod === pricingMethod && d.unit === unit);
       if (record) {
         setRateCurrency({ unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
       }
@@ -132,7 +134,7 @@ export default function ProductDetails() {
 
   const fetchCart = () => {
     axiosInstance()
-      .get(`/user/cart`).then(({ data: { data } }) => {
+      .get(`/ecommerce/cart`).then(({ data: { data } }) => {
 
         if (data) {
           dispatch({ type: SET_CART, payload: [...data] });          
@@ -155,12 +157,25 @@ export default function ProductDetails() {
 
   const onAddToCartItem = (item) => {
     axiosInstance()
-      .post(`/user/cart`, {
-        products: [{
-          quantity: "1",
-          productId: item._id
+      .post(`/ecommerce/cart`, 
+        [{
+          qty: 1,
+          type:'product',
+          materialId: item._id,
+          mrp:Number(item.mrp),
+          rate:10,
+          unit:selectedUnit,
+          pricingMethod:selectedPricingMethod,
+          orderType:'rent'
+
         }]
-      }).then(({ data }) => {
+      ).then(({ data }) => {
+        setAddToCartBtnLoading(false)
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: "Added To Cart Successfully",
+        });
         fetchCart()
       }).catch((error) => {
         toastConfig.setToastConfig(error);
@@ -379,14 +394,16 @@ export default function ProductDetails() {
                 </div>
 
                 {
-                  productDetails.unit && <FormControl variant="outlined" fullWidth>
+                  productDetails.unit && <FormControl variant="outlined" fullWidth error={hasError && selectedUnit?.length === 0}>
                     <InputLabel id="unit-label">Unit</InputLabel>
                     <Select
                       labelId="unit-label"
                       id="unit"
-                      value={rateCurrency.unit}
+                      value={selectedUnit}
                       onChange={(e) => {
                         changeRateCurrency(productDetails, e.target.value, rateCurrency.pricingMethod)
+                        setSelectedUnit(`${e.target.value}`)
+                       
                       }}
                       label="Unit"
                     >
@@ -396,18 +413,21 @@ export default function ProductDetails() {
                         ))
                       }
                     </Select>
+                    {hasError && selectedUnit?.length === 0 && <FormHelperText>This is required!</FormHelperText>}
                   </FormControl>
                 }
 
                 {
-                  productDetails.pricingMethod && <FormControl className="mt-3" variant="outlined" fullWidth>
+                  productDetails.pricingMethod && <FormControl className="mt-3" variant="outlined" fullWidth error={hasError && selectedPricingMethod?.length === 0}>
                     <InputLabel id="pricing-method-label">Pricing Method</InputLabel>
                     <Select
                       labelId="pricing-method-label"
                       id="pricing-method"
-                      value={rateCurrency.pricingMethod}
+                      value={selectedPricingMethod}
                       onChange={(e) => {
                         changeRateCurrency(productDetails, rateCurrency.unit, e.target.value)
+                        setSelectedPricingMethod(`${e.target.value}`)
+                       
                       }}
                       label="Pricing Method"
                     >
@@ -417,6 +437,7 @@ export default function ProductDetails() {
                         ))
                       }
                     </Select>
+                    {hasError && selectedPricingMethod?.length === 0 && <FormHelperText>This is required!</FormHelperText>}
                   </FormControl>
                 }
 
@@ -486,8 +507,15 @@ export default function ProductDetails() {
                         loading={addToCartBtnLoading}
                         startIcon={addToCartBtnLoading ? null : <AddShoppingCartIcon />}
                         onClick={() => {
+                         if(selectedUnit?.length > 0 && selectedPricingMethod?.length > 0){
                           setAddToCartBtnLoading(true)
                           onAddToCartItem(productDetails)
+                        
+                         }else{
+                          setHasError(true) 
+
+                         } 
+                         
                         }}
                       >
                         Add to cart
