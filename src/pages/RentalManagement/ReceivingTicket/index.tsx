@@ -119,6 +119,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
       })
       productAssets.forEach((d) => {
+        d["isChecked"] = false;
         d["hideSelection"] = d.status === INVENTORY_STATUS.indTransit;
       })
       if (productAssets.filter((e) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(e.status)).length === productAssets.length) {
@@ -199,8 +200,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   };
 
   return (<>
-
-    <Box display="flex" justifyContent="flex-end">
+    <Box display="flex" justifyContent="flex-end" pt={1}>
       <Button
         onClick={() => {
           setDownlodingFile(true);
@@ -328,6 +328,10 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             additionalDetails={[
             ]}
             chips={[
+              {
+                label: "Status : ",
+                field: "status",
+              },
               {
                 label: "Receiving Ticket : ",
                 field: "receivingTicket",

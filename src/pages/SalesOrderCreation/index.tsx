@@ -3,9 +3,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { Chip, Grid, IconButton, Tooltip } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
-
-import ManageSalesOrderDialog from './ManageSalesOrder';
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, salesOrder } from '../../constants/helpers';
+import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, salesOrder, sidebarResource, prepareDataForGrid } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -21,6 +19,10 @@ import SalesOrderHeader from './SalesOrderHeader';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
+import ManageSalesOrderDialog from './ManageSalesOrderDialog/ManageSalesOrderDialog';
 
 let salesOrderTimeout;
 const SalesOrderType = [
@@ -53,6 +55,7 @@ const SalesOrder = () => {
     show: false,
     salesOrderName: ''
   });
+  const { salesOrderResource } = salesOrder;
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
@@ -62,34 +65,106 @@ const SalesOrder = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  const columns = [
-    {
-      field: 'salesOrderNo',
-      headerName: 'Sales Order No.',
-      show: true,
-      disabled: true,
-      cellRenderer: 'salesOrderNoRenderer'
-    },
-    {
-      field: 'createdBy',
-      headerName: 'Created By',
-      show: true,
-      cellRenderer: 'createdByRenderer'
-    },
-    {
-      field: 'updatedBy',
-      headerName: 'Updated By',
-      show: true,
-      cellRenderer: 'updatedByRenderer'
-    },
-    {
-      field: 'owner',
-      headerName: 'Sales Order Owner',
-      show: true,
-      cellRenderer: 'OwnerRenderer'
-    }
-  ];
+  const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
+  const { getColumnData } = useColumns();
+  const [frameworkComponent, setFrameworkComponent] = useState({});
+  const [columns, setColumns] = useState([]);
+
+  // const columns = [
+  //   {
+  //     field: 'salesOrderNo',
+  //     headerName: 'Sales Order No.',
+  //     show: true,
+  //     disabled: true,
+  //     cellRenderer: 'salesOrderNoRenderer'
+  //   },
+  //   {
+  //     field: 'createdBy',
+  //     headerName: 'Created By',
+  //     show: true,
+  //     cellRenderer: 'createdByRenderer'
+  //   },
+  //   {
+  //     field: 'updatedBy',
+  //     headerName: 'Updated By',
+  //     show: true,
+  //     cellRenderer: 'updatedByRenderer'
+  //   },
+  //   {
+  //     field: 'owner',
+  //     headerName: 'Sales Order Owner',
+  //     show: true,
+  //     cellRenderer: 'OwnerRenderer'
+  //   }
+  // ];
   //  Grid Variables - End
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  const fetchGridColumns = async () => {
+    let data;
+    if (isOffline) {
+      data = offlineFieldsData[salesOrderResource] ?? [];
+    } else {
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource[salesOrderResource]}`);
+
+      data = response?.data?.data;
+      try {
+        updateFieldsData(salesOrderResource, data);
+      } catch (ex) {
+        console.error(`Sales order: Error while storing data for Offline context. Error: ${ex.message}`);
+      }
+    }
+
+    let columns = [];
+    let rendererNames = [];
+
+    data.forEach((o) => {
+      // if (['accountName'].indexOf(o?.fieldData?.fieldName) === 0) {
+      if (o?.fieldData?.primaryField === true) {
+        columns = [
+          ...columns,
+          {
+            pivotIndex: 0,
+            field: o?.fieldData?.fieldName,
+            headerName: o?.fieldData?.fieldLabel,
+            show: true,
+            disabled: true,
+            cellRenderer: "salesOrderNoRenderer"
+          }
+        ];
+      } else {
+        let currentColumn = getColumnData(salesOrderResource, o?.fieldData, routes.salesOrderDetail.path);
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData];
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName);
+          }
+        }
+      }
+      return o?.fieldData;
+    });
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      salesOrderNoRenderer: SalesOrderNoRenderer,
+      actionsRenderer: ActionsRenderer
+    };
+    setFrameworkComponent({ ...tempFrameworkComponent });
+
+    let staticFields = getStaticFields();
+    staticFields.forEach((field) => {
+      columns.push(checkStaticField(routes.projectSales.title, field));
+    });
+    setColumns([...columns]);
+
+    if (JSON.parse(sessionStorage.getItem('filters')) !== null) {
+      let savedFilter = JSON.parse(sessionStorage.getItem('filters'));
+      dispatch({ type: 'filter', filters: savedFilter });
+    }
+  };
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -176,7 +251,7 @@ const SalesOrder = () => {
 
       <GridDeleteIcon
         hasDeletePermission={permissions.salesOrder.isDelete}
-        ownerId={params.data.ownerId}
+        ownerId={user?.user?._id}
         userId={user?.user?._id}
         onDelete={() =>
           setSingleSalesOrderDelete({
@@ -190,15 +265,15 @@ const SalesOrder = () => {
     </>
   );
 
-  const frameworkComponents = {
-    salesOrderNoRenderer: SalesOrderNoRenderer,
-    ownerRenderer: OwnerRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer
-  };
+  // const frameworkComponents = {
+  //   salesOrderNoRenderer: SalesOrderNoRenderer,
+  //   ownerRenderer: OwnerRenderer,
+  //   createdByRenderer: CreatedByRenderer,
+  //   updatedByRenderer: UpdatedByRenderer,
+  //   actionsRenderer: ActionsRenderer,
+  //   commonRenderer: CommonRenderer,
+  //   dateRenderer: DateRenderer
+  // };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -287,20 +362,39 @@ const SalesOrder = () => {
     axiosInstance()
       .get(`${salesOrder.salesOrderApi}${queryString}`)
       .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, customerAccount, ...restProperties } = u;
 
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
           let res = {
-            ...restProperties,
-            id: u._id,
-            ownerId: u.createdBy?.user?._id,
-            createdBy: u.createdBy?.user?.concatedName,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
+            ...finalObject,
+            // canDelete: u.owner?.optionValue === user?.user._id,
+            // allowedToEdit: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
+            // lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
+            // leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
+            // leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
+            // approved: u.staticData?.approved,
+            // isChecked: false,
+
+            // masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
+            // masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : ''
           };
           return res;
         });
+
+        // let rows = data.map((u) => {
+        //   const { owner, collaborator, createdBy, updatedBy, customerAccount, ...restProperties } = u;
+
+        //   let res = {
+        //     ...restProperties,
+        //     id: u._id,
+        //     ownerId: u.createdBy?.user?._id,
+        //     createdBy: u.createdBy?.user?.concatedName,
+        //     createdByDate: u.createdBy?.date,
+        //     updatedBy: u.updatedBy?.user?.concatedName,
+        //     updatedByDate: u.updatedBy?.date
+        //   };
+        //   return res;
+        // });
 
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
@@ -443,21 +537,23 @@ const SalesOrder = () => {
           </SalesOrderHeader>
         </div>
 
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={100}
-          loading={loading}
-          renderedFrom={'salesOrderPage'}
-          refreshGrid={fetchSalesOrder}
-        />
+        {Object.keys(frameworkComponent).length > 0 && (
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponent}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={100}
+            loading={loading}
+            renderedFrom={'salesOrderPage'}
+            refreshGrid={fetchSalesOrder}
+          />
+        )}
 
         {showDeleteWarningConfirmBox ? (
           <MessageDialog

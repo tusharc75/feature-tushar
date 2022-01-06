@@ -197,7 +197,7 @@ export default function DeliveryTicketDetail(props) {
           return true
         })
       }
-      else if (ticket?.type === "Rental Job") {
+      else if (ticket?.type === "Rental Job" || ticket?.type === "Sales Order") {
         data = data.filter((fields: any) => {
           if (ticket.ticketType === "Loading") {
             if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Receiving Plant")) {
@@ -892,6 +892,7 @@ export default function DeliveryTicketDetail(props) {
             rentalId={deliveryTicketData?.type === "Rental Job" ? deliveryTicketData?.rentalJob?.optionValue : ""}
             repairJobId={deliveryTicketData?.type === "Repair Job" ? deliveryTicketData?.repairJob?.optionValue : ""}
             transferAssetId={deliveryTicketData?.type === "Transfer Asset" ? deliveryTicketData?.transferAsset?.optionValue : ""}
+            salesOrderId={deliveryTicketData?.type === "Sales Order" ? deliveryTicketData?.salesOrder?.optionValue : ""}
             notIn={deliveryTicketData.ticketType}
           />
         }
