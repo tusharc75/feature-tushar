@@ -3,7 +3,7 @@ import { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import {
@@ -32,6 +32,7 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 import { FaSuitcase } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
 import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
+import AssetScrapRepairDialog from "../../components/AssetScrapRepairDialog/AssetScrapRepairDialog";
 
 const renderedFrom = "repairJob_receiving_ticket"
 
@@ -47,10 +48,12 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPreviousButtonDisabled }) => {
+const RepairJobReceivingTicket = (props) => {
+    const { repairJobData, setNextButtonDisabled, setPreviousButtonDisabled,isRepairEnded, setRepairEnded } = props
+
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
-
+    const history = useHistory()
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
@@ -80,6 +83,22 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
         // eslint-disable-next-line
     }, []);
 
+    useEffect(() => {
+        if(repairJobData && repairJobData.typeOfRepair === "External" && dataRows.length > 0) {
+            const repairedAssets = dataRows.filter((asset:any) => asset?.repaired);
+            const assetsWithReceivingTicket = dataRows.filter((asset:any) => asset?.isDelivered);
+            const lostAssets = dataRows.filter((asset:any) => asset?.status === "Lost");
+
+            let repairedAssetsLength = dataRows.length - lostAssets.length
+
+            if(repairJobData && repairJobData.status === repairJobStatus[2]) {
+                setRepairEnded(true)
+            } else if(repairedAssets.length === repairedAssetsLength && assetsWithReceivingTicket.length === repairedAssetsLength) {
+                setRepairEnded(true)
+            } 
+        }
+    }, [repairJobData, dataRows])
+
     const fetchRecords = () => {
         if (gridApi) {
             gridApi.deselectAll();
@@ -92,7 +111,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                 let tempProductInventory = data.data.map(u => ({ ...u, _id: u?.id, productName: u?.product?.optionLabel }))
                 dispatch({ type: "loading", loading: true });
                 axiosInstance()
-                    .get(`${repairJob.repairJobApi}/${repairJobData._id}/delivery-ticket`)
+                    .get(`${routes.deliveryTicket.path}/typewise?refrenceType=Repair Job&refrenceId=${repairJobData._id}`)
                     .then(({ data }) => {
 
                         data.data.map(obj => {
@@ -127,51 +146,14 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                             dispatch({ type: "loading", loading: false });
                         }, gridLoadingTimeout);
 
-                        // data.data.map(obj => {
-                        //     tempProductInventory.map((d, index) => {
-                        //         if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                        //             tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
-                        //             tempProductInventory[index]["deliveryTicketId"] = obj?._id
-                        //         }
-                        //     })
-                        // })
-                        // axiosInstance()
-                        //     .get(`${repairJob.repairJobApi}/${repairJobData._id}/receiving-ticket`)
-                        //     .then(({ data }) => {
-                        //         data.data.map(obj => {
-                        //             tempProductInventory.map((d, index) => {
-                        //                 if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-                        //                     tempProductInventory[index]["receivingTicket"] = obj?.receivingJobName
-                        //                     tempProductInventory[index]["receivingTicketId"] = obj?._id
-                        //                     tempProductInventory[index]["isDelivered"] = obj?.status === "Delivered";
-                        //                 }
-                        //             })
-                        //         })
-
-                        //         tempProductInventory.forEach((d) => {
-                        //             d["_id"] = d["id"];
-                        //             d["hideSelection"] = d.status === "In-Transit" || d.status === "Lost" || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true);
-                        //         })
-
-                        //         setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
-                        //         setPreviousButtonDisabled(tempProductInventory.some(s => s["receivingTicketId"]));
-
-                        //         dispatch({
-                        //             type: "initialize", data: tempProductInventory, count: tempProductInventory.length
-                        //         });
-                        //         setTimeout(() => {
-                        //             dispatch({ type: "loading", loading: false });
-                        //         }, gridLoadingTimeout);
-                        //     })
-                        //     .catch((err) => {
-                        //         toastConfig.setToastConfig(err);
-                        //     });
                     })
                     .catch((err) => {
                         toastConfig.setToastConfig(err);
                     });
             }).catch((error) => {
                 toastConfig.setToastConfig(error)
+            }).finally(() => {
+                setStatusToUpdate(prevState => ({ ...prevState, open: false }))
             });
     }
 
@@ -279,7 +261,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
             </Button>
 
             {
-                repairJobData && repairJobData["status"] !== repairJobStatus[2] && <Button variant="outlined" color="primary" aria-controls="simple-menu"
+               repairJobData && repairJobData["status"] !== repairJobStatus[2] && <Button variant="outlined" color="primary" aria-controls="simple-menu"
                     aria-haspopup="true"
                     disabled={selectedRecords.length === 0}
                     size="small"
@@ -315,7 +297,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                 }}>Lost</MenuItem>
             </Menu>
             {
-                repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
+               repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
                 <IconButton
                     disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("receivingTicketId"))}
                     onClick={() => {
@@ -332,7 +314,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
             }
 
             {
-                repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
+               repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
                 <IconButton
                     disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId"))}
                     onClick={() => {
@@ -377,7 +359,17 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                         {
                             label: "Status: ",
                             field: "status",
-                        }
+                        },
+                        {
+                            label: "Receiving Ticket : ",
+                            field: "receivingTicket",
+                            onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.receivingTicketId}`)
+                          },
+                          {
+                            label: "Loading Ticket : ",
+                            field: "deliveryTicket",
+                            onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
+                          },
                     ]}
                     additionalDetails={[
 
@@ -449,78 +441,18 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
         }
 
         {
-            statusToUpdate.open && <Dialog open
-                classes={{
-                    paper: classes.paper,
+            statusToUpdate.open && <AssetScrapRepairDialog
+                statusToUpdate={statusToUpdate}
+                setStatusToUpdate={setStatusToUpdate}
+                selectedRecords={selectedRecords}
+                id={repairJobData._id}
+                onClose={() => {
+                    setStatusToUpdate(prevState => ({ ...prevState, open: false }))
                 }}
-                onClose={() => setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false, open: false }))}
-            >
-                <CustomDialogHeader title="Are you sure ?"
-                    showRequiredLabel={false}
-                    onClose={() => setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false, open: false }))} />
-
-                <CustomDialogContent>
-                    <Box className="my-2">
-
-                        {
-                            statusToUpdate.status === "Repair" ? <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
-                                : <TextField
-                                    id="outlined-multiline-static"
-                                    label={`Please enter the reason for ${statusToUpdate.status}`}
-                                    multiline
-                                    fullWidth
-                                    rows={4}
-                                    value={statusToUpdate.message}
-                                    variant="outlined"
-                                    onChange={(e) => {
-                                        setStatusToUpdate(prevState => ({ ...prevState, message: e.target.value }))
-                                    }}
-                                />
-                        }
-
-                    </Box>
-                </CustomDialogContent>
-
-                <CustomDialogFooter>
-                    <Button
-                        size="small"
-                        variant="outlined" color="primary" onClick={() => setStatusToUpdate(prevState => ({ ...prevState, open: false }))}>
-                        Cancel
-                    </Button>
-                    <Button
-                        size="small"
-                        onClick={() => {
-                            setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
-                            axiosInstance().put(`${productInventoryHelperObject.api}/update-status`, {
-                                comment: statusToUpdate.message,
-                                assets: selectedRecords.map(m => m?._id ?? m?.id),
-                                status: statusToUpdate.status,
-                                reference: {
-                                    _id: repairJobData._id,
-                                    type: "Repair"
-                                }
-                            }).then(({ data }) => {
-                                toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
-                                setStatusToUpdate({ open: false, isUpdating: false, status: "", message: "" });
-                                fetchRecords();
-                            }).catch((error) => {
-                                setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false }));
-                                toastConfig.setToastConfig(error)
-                            })
-                        }}
-                        disabled={statusToUpdate.isUpdating}
-                        variant="contained"
-                        color="primary"
-                    >
-                        {
-                            statusToUpdate.isUpdating ? <CircularProgress
-                                style={{ marginRight: "8px" }}
-                                size={20} color="inherit" /> : null
-                        }
-                        Change Status
-                    </Button>
-                </CustomDialogFooter>
-            </Dialog>
+                onSuccess={() => {
+                    fetchRecords();
+                }}
+            />
         }
 
         {

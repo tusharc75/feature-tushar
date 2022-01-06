@@ -119,6 +119,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
       })
       productAssets.forEach((d) => {
+        d["isChecked"] = false;
         d["hideSelection"] = d.status === INVENTORY_STATUS.indTransit;
       })
       if (productAssets.filter((e) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(e.status)).length === productAssets.length) {
@@ -199,8 +200,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   };
 
   return (<>
-
-    <Box display="flex" justifyContent="flex-end">
+    <Box display="flex" justifyContent="flex-end" pt={1}>
       <Button
         onClick={() => {
           setDownlodingFile(true);
@@ -329,8 +329,18 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             ]}
             chips={[
               {
-                label: "Asset number : ",
-                field: "assetNumber",
+                label: "Status : ",
+                field: "status",
+              },
+              {
+                label: "Receiving Ticket : ",
+                field: "receivingTicket",
+                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.receivingTicketId}`)
+              },
+              {
+                label: "Loading Ticket : ",
+                field: "deliveryTicket",
+                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
               }
             ]}
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
@@ -380,7 +390,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     {showRemoveAssetFromReceivingTicketDialog && (
       <ConfirmationDialog
         open={showRemoveAssetFromReceivingTicketDialog}
-        message={`Are you sure you want to remove selected records from ${sidebarResource.receivingTicket}(s) ?`}
+        message={`Are you sure you want to remove selected records from Receiving Ticket?`}
         onClose={() => {
           setShowRemoveAssetFromReceivingTicketDialog(false);
         }}

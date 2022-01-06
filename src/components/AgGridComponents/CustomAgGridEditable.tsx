@@ -226,7 +226,7 @@ export default function CustomAgGridEditable({
     dataRows.forEach((data) => {
       let obj = {}
       Object.entries(data).forEach(([k, v]) => {
-        if (fromPurchaseOrderGrid && typeof v === "number") {
+        if ((fromPurchaseOrderGrid || isFooter) && typeof v === "number") {
           obj[k] = v
         }
         else if (typeof v === "number" && k.includes(currency && currency.toLowerCase())) {

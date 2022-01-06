@@ -2,6 +2,56 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.34.1](https://github.com/vebholic/oms_frontend/compare/v2.34.0...v2.34.1) (2022-01-06)
+
+
+### Bug Fixes
+
+* bug fix ([b04074c](https://github.com/vebholic/oms_frontend/commit/b04074cd8aa30979463ce432963be553b764f220))
+* **dashboard:** changes and new chart ([98c6fbd](https://github.com/vebholic/oms_frontend/commit/98c6fbda51aea2f92757fe8b94a92a881df30cf3))
+* mobile ui for PO ([3172ce7](https://github.com/vebholic/oms_frontend/commit/3172ce72802f0b78d080226159c49faf7b129476))
+* pO mobile ([7b47c02](https://github.com/vebholic/oms_frontend/commit/7b47c0273ec881ddacc7310d359204ef4e522279))
+* pO-826 ([b788471](https://github.com/vebholic/oms_frontend/commit/b788471bdb610ca68f54b7dce3ffcd5d449fa7bd))
+
+## [2.34.0](https://github.com/vebholic/oms_frontend/compare/v2.33.0...v2.34.0) (2022-01-05)
+
+
+### Features
+
+* - Repair job changes done ([16d9be9](https://github.com/vebholic/oms_frontend/commit/16d9be940983a821ecc02ca1b641d6ebdd13ed29))
+* dashboard new pie chart kpi ([c1163dd](https://github.com/vebholic/oms_frontend/commit/c1163dd546e193d0b368d691caccbe51df9f0a94))
+* yarn run commit -m "- Same plant and internal changes done in repair jo ([7cd3141](https://github.com/vebholic/oms_frontend/commit/7cd3141fb1a5874ba4250187742757519946a6d0))
+
+
+### Bug Fixes
+
+* bug fix ([ea34c31](https://github.com/vebholic/oms_frontend/commit/ea34c31bf605455eef72961ead35a6bff16cb04e))
+* bug fix ([19abb11](https://github.com/vebholic/oms_frontend/commit/19abb11e09a3d6607cb0254327b7c05e4c9df3a0))
+* dashboard changes ([17516a0](https://github.com/vebholic/oms_frontend/commit/17516a04ff379a0312ff1bcbce95494a45d03623))
+* dashboard changes ([f1801d1](https://github.com/vebholic/oms_frontend/commit/f1801d1dc688629e1800c90778474e1250f7285b))
+* **existing billing and shipping address not showing when clone:** existing billing/shippingclone ([b093269](https://github.com/vebholic/oms_frontend/commit/b093269b0c36a9f6a22a8b00e8abb877f6c5a1df))
+* **login with query params issue:** login with query params issue ([b39a97b](https://github.com/vebholic/oms_frontend/commit/b39a97bd8c462fd2ca960ae6b968e3ed6768112d))
+
+## [2.33.0](https://github.com/vebholic/oms_frontend/compare/v2.32.1...v2.33.0) (2022-01-04)
+
+
+### Features
+
+* - Repair job delivery tickets api changed, suggested by romit ([3badadb](https://github.com/vebholic/oms_frontend/commit/3badadb7c1bf78d2ca2b6129990817622498c0f9))
+
+
+### Bug Fixes
+
+* bug fix ([3a8391e](https://github.com/vebholic/oms_frontend/commit/3a8391e5eae523b5cc4b4bd48c1dfef80cc28bce))
+* **chatter:** chat not showing ([f221ab1](https://github.com/vebholic/oms_frontend/commit/f221ab16e4eb97e4b4ff9ac47fcbdfa742b51810))
+* **plants:** address update ([6c6138e](https://github.com/vebholic/oms_frontend/commit/6c6138e529328a27f60202c0a3078a1befa528df))
+* **plants:** fix dialog title ([4170e0e](https://github.com/vebholic/oms_frontend/commit/4170e0e31f062eb67d924dbe59c26a15cf975234))
+* pO-736 , 756 ([33275f0](https://github.com/vebholic/oms_frontend/commit/33275f059354d25c6d566a3ad3899cb368faae06))
+* **renaljob:** grid fix ([96f46b9](https://github.com/vebholic/oms_frontend/commit/96f46b95901f54d156a115cda6bb0c52c5f1bbb6))
+* rental bug fix ([fc93b13](https://github.com/vebholic/oms_frontend/commit/fc93b1306bbbfabec406e64b6b953adae26b7d96))
+* **signature:** dialog label fix ([4c4eef3](https://github.com/vebholic/oms_frontend/commit/4c4eef3611ecd0a94a26eca33d5be24d53729e2c))
+* **transferasset:** hide buttons ([afdf5d2](https://github.com/vebholic/oms_frontend/commit/afdf5d256cacfdd91720f005c5492ccadf96bb04))
+
 ### [2.32.1](https://github.com/vebholic/oms_frontend/compare/v2.32.0...v2.32.1) (2022-01-02)
 
 ## [2.32.0](https://github.com/vebholic/oms_frontend/compare/v2.31.0...v2.32.0) (2022-01-01)

@@ -17,7 +17,7 @@ import routes from "../../../components/Helpers/Routes";
 import { BiPurchaseTagAlt, MdEmail } from "react-icons/all";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
-import { prepareDataForGrid } from "../../../constants/helpers";
+import { prepareDataForGrid, CHILD_RESOURCE } from "../../../constants/helpers";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import { Link } from "react-router-dom";
 import { startCase } from "lodash";
@@ -80,9 +80,9 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         fields = [...fields, ...CURReplaceByCurrencySingle(resultCost, rentalManagementData.currency)]
       }
       else {
-        const resultProduct = await axiosInstance().get("/field/child?resource=Rental Management Product")
+        const resultProduct = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`)
         fields = CURReplaceByCurrencySingle(resultProduct?.data?.data, rentalManagementData.currency)
-        const resultCost = await axiosInstance().get("/field/child?resource=Rental Management Cost")
+        const resultCost = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`)
         fields = [...fields, ...CURReplaceByCurrencySingle(resultCost?.data?.data, rentalManagementData.currency)]
       }
       let rendererNames = [];
@@ -108,7 +108,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
     let additionalcost: any = []
     try {
       if (isOffline) {
-        const result= await findOne(objectStore.rentalManagement, rentalManagementData._id);
+        const result = await findOne(objectStore.rentalManagement, rentalManagementData._id);
         material = result?.material;
         additionalcost = result?.additionalCost;
       }
@@ -126,7 +126,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         }
       });
       additionalcost?.forEach((e) => {
-        e.type = "Service";
+        e.type = "Ad-hoc Charge";
       })
       combinedData = [...combinedData, ...additionalcost];
       let rows = combinedData?.map((item) => {
@@ -318,7 +318,6 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             setFullScreen(false);
           }}
           id={rentalManagementData._id}
-          showESign={true}
           isQuoteBuilder={true}
           options={userEmails?.to}
           cc={userEmails?.cc ?? []}

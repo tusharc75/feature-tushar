@@ -31,6 +31,7 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 import CustomTimeline from "../../components/CustomTimeline";
 import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
 import { MdEdit } from "react-icons/md";
+import { startCase } from "lodash";
 
 
 
@@ -75,18 +76,12 @@ const ProductInventoryDetailsPage = () => {
   const [manualStatus, setManualStatus] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [productId, setProductId] = useState(null);
+  const [status, setStatus] = useState("");
   const [statusOptions, setStatusOptions] = useState([])
   const [showReasonDialog, setShowReasonDialog] = useState(false)
   const [updateLoading, setUpdateLoading] = useState(false)
   const [loadingBOMData, setLoadingBOMData] = useState(false)
-  const [customField, setCustomField] = useState({
-    fieldData: {
-      fieldLabel: "Scraping Reason",
-      fieldName: "scrapingReason",
-      type: "singleLine",
-      sectionName: "Product Inventory"
-    }
-  })
+  const [customField, setCustomField] = useState(null)
   const [productInventoryHistoryData, setProductInventoryHistoryData] = useState(null)
   const [BOMData, setBOMData] = useState([])
   const [gridApi, setGridApi] = useState(null);
@@ -130,11 +125,11 @@ const ProductInventoryDetailsPage = () => {
                 <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
                   {params.value}
                 </Link>
-                :  params.data.type.toLowerCase().includes("purchase") ? 
-                <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
-                {params.value}
-              </Link>
-                : params.value
+                : params.data.type.toLowerCase().includes("purchase") ?
+                  <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
+                    {params.value}
+                  </Link>
+                  : params.value
       ) : (
         <NoDataCell />
       )
@@ -172,17 +167,15 @@ const ProductInventoryDetailsPage = () => {
     getProductInventoryFields();
     fetchProductInventoryData();
     fetchProductInventoryHistory();
-    
+
   }
 
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
-    mainPoint['Number Of Days After Repair'] = data?.noOfDaysAfterRepair;
-    mainPoint['Number Of Job From Last Repair'] = data?.noOfJobFromLastRepair;
-    mainPoint['Total Number Of Rental Job'] = data?.totalNoOfRentalJob;
-    mainPoint['Use Time From Last Repair'] = data?.useTimeFromLastRepair;
-    mainPoint['Total Repair'] = data?.totalRepair;
+    Object.keys(data).map((stat: any) => (
+      mainPoint[startCase(stat)] = data[stat] ?? 0
+    ))
     setMainPoints(mainPoint);
   };
 
@@ -233,6 +226,27 @@ const ProductInventoryDetailsPage = () => {
       { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
       setProductId(data?.product?.optionValue)
       setProductInventoryData(data);
+      if (data.status === "Scrap") {
+        setCustomField({
+          fieldData: {
+            fieldLabel: "Scraping Reason",
+            fieldName: "scrapingReason",
+            type: "singleLine",
+            sectionName: "Product Inventory"
+          }
+        })
+      }
+      else if (data.status === "Lost") {
+        setCustomField({
+          fieldData: {
+            fieldLabel: "Lost Reason",
+            fieldName: "lostReason",
+            type: "singleLine",
+            sectionName: "Product Inventory"
+          }
+        })
+      }
+
       setLoadingProductInventory(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -301,7 +315,8 @@ const ProductInventoryDetailsPage = () => {
     setAnchorEl(null);
   };
   const handleStatusChange = o => {
-    if (o.optionValue === "Scrap") {
+    if (o.optionValue === "Scrap" || o.optionValue === "Lost") {
+      setStatus(o.optionValue)
       setShowReasonDialog(true)
     }
     else {
@@ -315,11 +330,12 @@ const ProductInventoryDetailsPage = () => {
       const fieldsDataForUpdate = productInventoryFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       let values = getObjKeysWithValues(productInventoryData, fieldsDataForUpdate)
       values["status"] = obj.status
-      if (obj.reason) values["scrapingReason"] = obj.reason
+      if (obj.reason) values[status === "Scrap" ? "scrapingReason" : "lostReason"] = obj.reason
       values["_id"] = productInventoryData._id
       axiosInstance().put(`${productInventory.api}`, values).then(({ data: { data } }) => {
         setUpdateLoading(false)
         fetchProductInventoryData()
+        fetchProductInventoryHistory()
       }).catch((error) => {
         setUpdateLoading(false)
         toastConfig.setToastConfig(error);
@@ -329,8 +345,7 @@ const ProductInventoryDetailsPage = () => {
 
 
   useEffect(() => {
-    let statuses = ["Available", "Repair", "Scrap", "Lost"]
-
+    let statuses = ["Available", "Scrap", "Lost"]
     if (productInventoryData) {
       if (productInventoryData.status === "Lost" || productInventoryData.status === "Repair") {
         setManualStatus(statuses)
@@ -447,7 +462,7 @@ const ProductInventoryDetailsPage = () => {
                   <>
                     <DetailsPage data={productInventoryData}
                       fields={productInventoryData?.status &&
-                        productInventoryData?.status === "Scrap" ?
+                        (productInventoryData?.status === "Scrap" || productInventoryData?.status === "Lost") ?
                         [...productInventoryFields, customField] :
                         productInventoryFields} />
                   </>
@@ -728,8 +743,9 @@ const ProductInventoryDetailsPage = () => {
         showReasonDialog ?
           <ReasonDialog
             onClose={() => setShowReasonDialog(false)}
+            status={status}
             onAddReason={(reason) => {
-              handleUpdateData({ status: "Scrap", reason: reason })
+              handleUpdateData({ status: status, reason: reason })
               setShowReasonDialog(false)
             }}
           /> : null

@@ -30,6 +30,7 @@ interface LoadingGridProps {
   updateTransferStatus?: any;
   handleViewPdf?: any;
   fileDownloading?: boolean;
+  isTransferEnded: boolean;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
@@ -44,7 +45,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     setTransferIsEnded,
     updateTransferStatus,
     handleViewPdf,
-    fileDownloading
+    fileDownloading,
+    isTransferEnded
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -62,10 +64,10 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const columns = [
     { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'deliveryTicket', headerName: 'Loading Ticket', show: true, disabled: true, cellRenderer: 'ticketRenderer' },
+    { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, disabled: true, cellRenderer: 'ticketRenderer' },
     { field: 'productDescription', headerName: 'Product Description', show: true, cellRenderer: 'productRenderer' },
     { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'deliveryTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'loadingTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
   ];
 
   const AssetRenderer = (params) =>
@@ -79,7 +81,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   const TicketRenderer = (params) =>
     params.value ? (
-      <Link className="link cursor-pointer" to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
+      <Link className="link cursor-pointer" to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
         <p title={params.value}>{params.value}</p>
       </Link>
     ) : (
@@ -123,9 +125,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       for (let i = 0; i < ticketData.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
           if (ticketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
-            assetData[j].deliveryTicket = ticketData[i].ticketName;
-            assetData[j].deliveryTicketId = ticketData[i]._id;
-            assetData[j].deliveryTicketStatus = ticketData[i].status;
+            assetData[j].loadingTicket = ticketData[i].ticketName;
+            assetData[j].loadingTicketId = ticketData[i]._id;
+            assetData[j].loadingTicketStatus = ticketData[i].status;
           }
         }
       }
@@ -148,7 +150,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const fetchLoadingTickets = () =>
     new Promise((resolve, reject) => {
       axiosInstance()
-        .get(`${routes.deliveryTicket.path}/typewise?refrenceType=${routes.transferAsset.title}&refrenceId=${transferAssetId}`)
+        .get(`${routes.deliveryTicket.path}/typewise?refrenceType=Transfer Asset&refrenceId=${transferAssetId}`)
         .then(({ data: { data } }) => {
           resolve(data);
           setTickets(data);
@@ -160,16 +162,16 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   useEffect(() => {
     if (selectedRecords.length > 0) {
-      const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty('deliveryTicket'));
-      const selectedInventoryIntransit = selectedRecords.filter((asset: any) => asset['deliveryTicketStatus'] === 'In-Transit');
-      const selectedInventoryDelivered = selectedRecords.filter((asset: any) => asset['deliveryTicketStatus'] === 'Delivered');
+      const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty('loadingTicket'));
+      const selectedInventoryIntransit = selectedRecords.filter((asset: any) => asset['loadingTicketStatus'] === 'In-Transit');
+      const selectedInventoryDelivered = selectedRecords.filter((asset: any) => asset['loadingTicketStatus'] === 'Delivered');
       setAssetsDelivered(selectedInventoryDelivered);
       setAssetsIntransit(selectedInventoryIntransit);
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
 
     if (dataRows.length) {
-      const inventoryDelivered = dataRows.filter((asset: any) => asset['deliveryTicketStatus'] === 'Delivered');
+      const inventoryDelivered = dataRows.filter((asset: any) => asset['loadingTicketStatus'] === 'Delivered');
       const inventoryLost = dataRows.filter((asset: any) => asset?.status === 'Lost');
 
       if (inventoryDelivered.length > 0) {
@@ -191,7 +193,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   const handleRemoveTicket = () => {
     setRemovingTicket(true);
-    const groupByCalls = groupBy(selectedRecords, 'deliveryTicketId');
+    const groupByCalls = groupBy(selectedRecords, 'loadingTicketId');
     let apiCalls = [];
 
     Object.keys(groupByCalls).forEach((key) => {
@@ -253,7 +255,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             </Button>
           )}
         </Box>
-        <Box marginTop={isMobile ? 2 : 0}>
+        {!isTransferEnded &&  <Box marginTop={isMobile ? 2 : 0}>
           {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isCreate && (
             <Button
               variant="contained"
@@ -261,7 +263,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               color="primary"
               disabled={
                 selectedRecords.length === 0 ||
-                selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0 ||
+                selectedRecords.filter((asset) => asset?.hasOwnProperty('loadingTicket')).length > 0 ||
                 selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0
               }
               onClick={() => setOpenLoadingTicketDialog(true)}
@@ -278,15 +280,15 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               disabled={
                 assetsDelivered.length > 0 ||
                 assetsIntransit.length > 0 ||
-                selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length === 0 ||
-                selectedRecords.filter((asset) => !asset?.hasOwnProperty('deliveryTicket')).length > 0
+                selectedRecords.filter((asset) => asset?.hasOwnProperty('loadingTicket')).length === 0 ||
+                selectedRecords.filter((asset) => !asset?.hasOwnProperty('loadingTicket')).length > 0
               }
               onClick={() => setShowConfirmBox(true)}
             >
               Remove Loading Ticket
             </Button>
           )}
-        </Box>
+        </Box>}
       </Box>
 
       <Box mt={1}>
@@ -312,8 +314,13 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             loading={loading}
             chips={[
               {
-                label: 'Delivery Ticket : ',
-                field: 'deliveryTicket'
+                label: "Status: ",
+                field: "status",
+              },
+              {
+                label: 'Loading Ticket : ',
+                field: 'loadingTicket',
+                onClick: (data:any) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`),
               }
             ]}
             additionalDetails={[]}

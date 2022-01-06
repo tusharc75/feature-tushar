@@ -90,6 +90,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         }
       })
       productAssets.forEach((d) => {
+        d["isChecked"] = false;
         d["hideSelection"] = [INVENTORY_STATUS.inUse, INVENTORY_STATUS.indTransit, INVENTORY_STATUS.repair,
         INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(d.status);
       })
@@ -146,7 +147,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
-  const columnState = JSON.parse(localStorage.getItem("rentalManagementDetailsPageDeliveryTicket"));
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
     columns.forEach((item) => {
       columnState.forEach((d) => {
@@ -163,7 +164,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   };
 
   return (<>
-    <Box display="flex" justifyContent="flex-end" p="4px">
+    <Box display="flex" justifyContent="flex-end" pt={1}>
       <Button
         onClick={() => {
           setDownlodingFile(true);
@@ -238,7 +239,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             permissions={true}
             primaryField={columns?.find(d => d.field)}
             onClick={(data) => {
-              history.push(`${routes.deliveryTicketDetail.path}/${data._id}`)
+              history.push(`${routes.productInventoryDetail.path}/${data._id}`)
             }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}
@@ -253,8 +254,13 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             ]}
             chips={[
               {
-                label: "Asset Number : ",
-                field: "assetNumber",
+                label: "Status : ",
+                field: "status",
+              },
+              {
+                label: "Loading Ticket : ",
+                field: "deliveryTicket",
+                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
               }
             ]}
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
@@ -300,7 +306,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       showRemoveAssetFromLoadingTicketDialog && (
         <ConfirmationDialog
           open={showRemoveAssetFromLoadingTicketDialog}
-          message={`Are you sure you want to remove selected records from ${sidebarResource.deliveryTicket}(s) ?`}
+          message={`Are you sure you want to remove selected records from Loading Ticket?`}
           onClose={() => {
             setShowRemoveAssetFromLoadingTicketDialog(false);
           }}

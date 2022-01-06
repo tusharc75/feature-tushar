@@ -21,7 +21,7 @@ import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
-import { prepareDataForGrid } from "../../../constants/helpers";
+import { prepareDataForGrid, CHILD_RESOURCE } from "../../../constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -59,7 +59,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     }, [id]);
 
     useEffect(() => {
-        axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
+        axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
             const fields = CURReplaceByCurrencySingle(data, purchaseOrderData?.currency)
             let rendererNames = [];
             genrateColoum(fields, columns, rendererNames, false);
@@ -90,8 +90,11 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === null)) {
                     setCurrentStepDisable(true)
                 }
+                let finalObject = prepareDataForGrid(item);
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
+                finalObject["allowedToEdit"] = true
                 let res: any = {
-                    ...prepareDataForGrid(item),
+                    ...finalObject,
                 };
                 res.productName = `${index + 1}- ${item.productDetail?.productName}`
                 res.productNumber = item.productDetail?.productNumber
@@ -311,8 +314,8 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     loading={loading}
                     chips={
                         [{
-                            label: `Product Description: `,
-                            field: "productName",
+                            label: `Quantity: `,
+                            field: "qty",
                             forceShow: true
                         }]
                     }
