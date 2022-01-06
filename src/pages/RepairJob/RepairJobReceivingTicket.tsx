@@ -48,7 +48,9 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPreviousButtonDisabled }) => {
+const RepairJobReceivingTicket = (props) => {
+    const { repairJobData, setNextButtonDisabled, setPreviousButtonDisabled,isRepairEnded, setRepairEnded } = props
+
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory()
@@ -80,6 +82,22 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
         fetchRecords();
         // eslint-disable-next-line
     }, []);
+
+    useEffect(() => {
+        if(repairJobData && repairJobData.typeOfRepair === "External" && dataRows.length > 0) {
+            const repairedAssets = dataRows.filter((asset:any) => asset?.repaired);
+            const assetsWithReceivingTicket = dataRows.filter((asset:any) => asset?.isDelivered);
+            const lostAssets = dataRows.filter((asset:any) => asset?.status === "Lost");
+
+            let repairedAssetsLength = dataRows.length - lostAssets.length
+
+            if(repairJobData && repairJobData.status === repairJobStatus[2]) {
+                setRepairEnded(true)
+            } else if(repairedAssets.length === repairedAssetsLength && assetsWithReceivingTicket.length === repairedAssetsLength) {
+                setRepairEnded(true)
+            } 
+        }
+    }, [repairJobData, dataRows])
 
     const fetchRecords = () => {
         if (gridApi) {
@@ -243,7 +261,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
             </Button>
 
             {
-                repairJobData && repairJobData["status"] !== repairJobStatus[2] && <Button variant="outlined" color="primary" aria-controls="simple-menu"
+               repairJobData && repairJobData["status"] !== repairJobStatus[2] && <Button variant="outlined" color="primary" aria-controls="simple-menu"
                     aria-haspopup="true"
                     disabled={selectedRecords.length === 0}
                     size="small"
@@ -279,7 +297,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                 }}>Lost</MenuItem>
             </Menu>
             {
-                repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
+               repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
                 <IconButton
                     disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("receivingTicketId"))}
                     onClick={() => {
@@ -296,7 +314,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
             }
 
             {
-                repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
+               repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
                 <IconButton
                     disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId"))}
                     onClick={() => {
