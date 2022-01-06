@@ -407,9 +407,9 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
             loading={loading}
             chips={[
               {
-                label: "Product Desc. : ",
-                field: "productName",
-              },
+                label: "Status: ",
+                field: "status",
+            },
               {
                 label: "Loading Ticket : ",
                 field: "deliveryTicket",

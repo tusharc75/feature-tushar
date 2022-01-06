@@ -336,6 +336,10 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             loading={loading}
             chips={[
               {
+                label: "Status: ",
+                field: "status",
+              },
+              {
                 label: 'Loading Ticket : ',
                 field: 'loadingTicket',
                 onClick: (data:any) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`),
