@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axiosInstance from "../../axios/axiosInstance";
-import { deliveryTicket, sidebarResource } from "../../constants/helpers";
+import { deliveryTicket, sidebarResource, asyncForEach } from "../../constants/helpers";
 import { CustomToastContext } from "../CustomToastContext/CustomToastContext";
 import { objectStore, findAll, deleteOne } from "../../constants/indexdbhelper";
 import { rentalJobOfflineUpdate } from "../../pages/RentalManagement/rentalOfflineHelper";
+import { sortBy } from 'lodash';
 
 export const CustomOfflineContext = createContext(null);
 const limit = 500;
@@ -51,27 +52,31 @@ export const CustomOfflineProvider = ({ children }) => {
     });
 
     const synchronizationData = async () => {
-        // if (!isOffline) {
-        //     const data = await findAll(objectStore.offlineDataSync);
-        //     if (data.length) {
-        //         setIsSynch(true)
-        //         await data.forEach(async (d: any) => {
-        //             if (d.type === "deliveryTicket") {
-        //                 await axiosInstance().post(`${deliveryTicket.deliveryTicketApi}/offlinedatasync`, d.data)
-        //                     .then(({ data: { data } }) => {
-        //                         deleteOne(objectStore.offlineDataSync, d.data._id)
-        //                         deleteOne(objectStore.deliveryTicket, d.data._id)
-        //                     })
-        //                     .catch((error) => {
-        //                     });
-        //             }
-        //         });
-        //         await rentalJobOfflineUpdate([])
-        //     }
-        //     else {
-        //         setIsSynch(false)
-        //     }
-        // }
+        if (!isOffline) {
+            var data = await findAll(objectStore.offlineDataSync);
+            if (data?.length) {
+                setIsSynch(true)
+                var OrderBy = ["Loading", "Receiving"];
+                data = sortBy(data, function (item: any) {
+                    return OrderBy.indexOf(item?.data?.ticketType);
+                });
+                await asyncForEach(data, async (d: any) => {
+                    await axiosInstance().post(`${deliveryTicket.deliveryTicketApi}/offlinedatasync`, d.data)
+                        .then(({ data: { data } }) => {
+                            deleteOne(objectStore.offlineDataSync, d.data._id)
+                            deleteOne(objectStore.deliveryTicket, d.data._id)
+                        })
+                        .catch((error) => {
+                        });
+                    await new Promise(resolve => setTimeout(resolve, 2000))
+                })
+                await rentalJobOfflineUpdate([])
+                setIsSynch(false)
+            }
+            else {
+                setIsSynch(false)
+            }
+        }
     }
 
     const passDataToSave = () => {

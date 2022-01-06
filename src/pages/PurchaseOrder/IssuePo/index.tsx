@@ -7,7 +7,7 @@ import { CommonRenderer, DateRenderer, } from "../../../components/AgGridCompone
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, Dialog, IconButton } from "@material-ui/core";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, rentalManagement, sidebarResource } from "../../../constants/helpers";
+import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, rentalManagement, CHILD_RESOURCE } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
@@ -58,9 +58,9 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
     );
 
     useEffect(() => {
-        axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
+        axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
             let fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
-            axiosInstance().get("/field/child?resource=Purchase Order Service").then(({ data: { data } }) => {
+            axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderService}`).then(({ data: { data } }) => {
                 fields = [...fields, ...CURReplaceByCurrencySingle(data, purchaseOrderData.currency)]
                 let rendererNames = [];
                 genrateColoum(fields, columns, rendererNames, false);
@@ -91,8 +91,11 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
             })
             productServiceData = [...productData, ...serviceData];
             let rows = productServiceData?.map((item) => {
+                let finalObject = prepareDataForGrid(item);
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
+                finalObject["allowedToEdit"] = true
                 let res: any = {
-                    ...prepareDataForGrid(item),
+                    ...finalObject,
                 };
                 return res;
             });
@@ -110,8 +113,11 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
             serviceData = data
             productServiceData = [...productData, ...serviceData];
             let rows = productServiceData?.map((item) => {
+                let finalObject = prepareDataForGrid(item);
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
+                finalObject["allowedToEdit"] = true
                 let res: any = {
-                    ...prepareDataForGrid(item),
+                    ...finalObject,
                 };
                 return res;
             });
@@ -252,10 +258,10 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns && frameWorkComponent ?
                 isMobile ? <CustomSwipableList
-                    allowSelection={true}
+                    allowSelection={false}
                     allowSwipe={true}
                     permissions={permissions}
-                    primaryField={columns?.find(d => d.field === "description")}
+                    primaryField={columns?.find(d => d.field === "type")}
                     onClick={() => {
                     }}
                     dataRows={dataRows}
@@ -272,6 +278,16 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         [{
                             label: `Product Description: `,
                             field: "productName",
+                            forceShow: true
+                        },
+                        {
+                            label: `Description: `,
+                            field: "description",
+                            forceShow: true
+                        },
+                        {
+                            label: `Quantity: `,
+                            field: "qty",
                             forceShow: true
                         }]
                     }
@@ -325,7 +341,6 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                     }}
                     fetchData={onSendEmailSuccess}
                     id={purchaseOrderData._id}
-                    showESign={true}
                     isQuoteBuilder={true}
                     options={userEmails?.to}
                     cc={userEmails?.cc ?? []}

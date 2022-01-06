@@ -46,10 +46,12 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   const history = useHistory();
 
   useEffect(() => {
-    if (transferAssetData) {
-      fetchGridColumns()
+    if(currentStep === 0) {
+      if (transferAssetData) {
+        fetchGridColumns()
+      }
     }
-  }, [transferAssetData])
+  }, [transferAssetData, currentStep])
   const fetchGridColumns = () => {
     axiosInstance()
       .get("/field?resource=Product Inventory")
@@ -97,11 +99,14 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   );
 
   useEffect(() => {
-    if (transferAssetData) {
-      fetchAssetsData(true);
+    if(currentStep === 0) {
+
+      if (transferAssetData) {
+        fetchAssetsData(true);
+      }
     }
     // eslint-disable-next-line
-  }, [transferAssetData])
+  }, [currentStep, transferAssetData])
 
   const fetchLoadingTickets = () =>
     new Promise((resolve, reject) => {
@@ -186,12 +191,14 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   }
 
   useEffect(() => {
-    if (dataRows.length > 0) {
-      setNextStep(true)
-    } else {
-      setNextStep(false)
+    if(currentStep === 0) {
+      if (dataRows.length > 0 ) {
+        setNextStep(true)
+      } else {
+        setNextStep(false)
+      }
     }
-  }, [dataRows])
+  }, [dataRows, currentStep])
 
   return (
     <Fragment>

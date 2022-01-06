@@ -16,13 +16,11 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import { prepareDataForGrid } from "../../../constants/helpers"
 
-
-
 const addSerializedAssetsRenderedFrom = "addSerializedAssets";
 const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
 
 const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts,
-    rentalId = null, repairJobId = null, transferAssetId = null, notIn = null, queryString = null, filterByPlant = null }) => {
+    rentalId = null, repairJobId = null, transferAssetId = null, salesOrderId = null, notIn = null, queryString = null, filterByPlant = null }) => {
 
     const toastConfig = useContext(CustomToastContext)
     const [serializedProducts, setSerializedProducts] = useState([]);
@@ -180,6 +178,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             deepFilter = `${deepFilter}&repairJobId=${repairJobId}&notIn=${notIn}`;
         } else if (transferAssetId) {
             deepFilter = `${deepFilter}&transferAssetId=${transferAssetId}&notIn=${notIn}`;
+        } else if (salesOrderId) {
+            deepFilter = `${deepFilter}&salesOrder=${salesOrderId}&notIn=${notIn}`;
         } else {
             if (filterByPlant == null) {
                 deepFilter = `${deepFilter}&entityWise=1`;

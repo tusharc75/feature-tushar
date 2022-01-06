@@ -11,6 +11,11 @@ import { DragBox } from './DragBox';
 import { DropMaster } from './DropMaster';
 import { CustomField } from './CustomField/index';
 import styles from './Form.module.scss';
+import { CHILD_RESOURCE } from "../../constants/helpers";
+
+const subForms = [CHILD_RESOURCE.rentalManagementProduct, CHILD_RESOURCE.rentalManagementCost,
+CHILD_RESOURCE.salesOrderProduct, CHILD_RESOURCE.salesOrderCost, CHILD_RESOURCE.purchaseOrderProduct, CHILD_RESOURCE.purchaseOrderService,
+CHILD_RESOURCE.repairJobAsset]
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -72,7 +77,7 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
   if (module === 'pdf-template') {
     filterFieldType = ['SINGLELINE', 'MULTILINE', 'IMAGEUPLOAD'];
   }
-  if (["Rental Management Product", "Rental Management Cost", "Purchase Order Product", "Purchase Order Service"].includes(resource)) {
+  if (subForms.includes(resource)) {
     filterFieldType = []
     module = "form-builder-extra"
   }

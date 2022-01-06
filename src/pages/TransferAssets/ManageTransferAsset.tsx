@@ -280,9 +280,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                               setFieldValue={(name, value) => {
                                                 // handleValuesChange({ [name]: value })
                                                 setFieldValue(name, value);
-
                                                 const address = field.option?.find((_d: any) => _d?.optionValue === value)?.address ?? '';
-                                                setPlantShipToOptions((prevState => prevState.filter((option: any) => option.optionValue === address)))
                                                 setFieldValue('plantShipTo', address);
                                               }}
                                               required={values?.transferType.includes('Internal')}
@@ -316,7 +314,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                           label={field.fieldLabel}
                                           name={field.fieldName}
                                           type={field.type}
-                                          options={plantShipToOptions ?? []}
+                                          options={plantShipToOptions.filter(plant => plant?.optionValue === plantsToCategoryOptions.find(p => p.optionValue === values?.transfertoPlant)?.address) ?? []}
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
@@ -584,11 +582,11 @@ const ManageTransferAsset: FC<Props> = (props) => {
                             open={transferToPlantOpen?.open}
                             close={() => setTransferToPlantOpen({ open: false, isClone: false })}
                             isClone={transferToPlantOpen?.isClone}
-                            onSuccess={({ data }) => {
-                              console.log("TRANSFER TO", JSON.stringify(data))
+                            onSuccess={async ({ data }) => {
                               setTransferToPlantOpen({ open: false, isClone: false });
-
                               setFieldValue('transfertoPlant', data._id);
+                              const {data: {data: addressData} } = await axiosInstance().get(`warehouse/${data._id}`)
+                              setPlantShipToOptions(prevState => [{...addressData?.address, default: false, order: prevState.length}, ...prevState])
                               setFieldValue('plantShipTo', data.address);
                               setPlantsToCategoryOptions((prevState) => {
                                 return [
@@ -615,7 +613,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
                             close={() => setPlantsOpen({ open: false, isClone: false })}
                             isClone={plantsOpen?.isClone}
                             onSuccess={({ data }) => {
-                              console.log("TRANSFER FROM", JSON.stringify(data))
                               setPlantsOpen({ open: false, isClone: false });
                               setFieldValue('transferFromPlant', data._id);
 

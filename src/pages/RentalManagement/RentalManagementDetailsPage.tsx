@@ -39,7 +39,7 @@ import LoadingTicket from './LoadingTicket';
 import ReceivingTicket from './ReceivingTicket';
 import Invoice from './Invoice';
 
-const rentalProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Ready To Invoice'];
+const rentalProcessSteps = ['Add Products', 'Ad-hoc Charges', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Ready To Invoice'];
 
 const RentalManagementDetailsPage = () => {
 
@@ -418,6 +418,7 @@ const RentalManagementDetailsPage = () => {
                     steps={rentalProcessSteps}
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
+                    isStepEnded={["Invoiced", "Closed"].includes(rentalManagementData?.status)}
                   />
                   {currentStep === 0 && rentalManagementData && (
                     <Productpackage

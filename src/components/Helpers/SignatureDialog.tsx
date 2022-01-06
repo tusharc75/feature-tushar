@@ -28,12 +28,12 @@ export default function SignatureDialog(props) {
         if (!isEmpty) {
             let signedData: any = {};
 
-            if (label === "Sign-off - Dispatch") {
+            if (label.includes("Dispatch")) {
                 signedData = {
                     type: activeStep === 0 ? "supervisor" : "deliveryPerson",
                     sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")
                 }
-            } else if (label === "Sign-off - Delivery") {
+            } else if (label.includes("Delivery")) {
                 signedData = {
                     type: activeStep === 0 ? "deliveryPerson" : "receiver",
                     sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")
@@ -64,7 +64,7 @@ export default function SignatureDialog(props) {
             TransitionComponent={CustomDialogTransition}
         >
             <CustomDialogHeader
-                title="Signature"
+                title={label}
                 onClose={() => {
                     onClose(false);
                 }}

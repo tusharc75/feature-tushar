@@ -109,7 +109,7 @@ const ManageDeliveryTicket = (props) => {
                         }
                     }
                 }
-                if (type === "Rental Job") {
+                if (type === "Rental Job" || type === "Sales Order") {
                     if (ticket_type === "Loading") {
                         if (formData.name.includes("Supplier") || formData.name.includes("Receiving Plant")) {
                             return false
@@ -129,7 +129,7 @@ const ManageDeliveryTicket = (props) => {
 
     const updateFieldProperty = (fields, _type, _ticketType, _transferType, _typeOfRepair) => {
         fields.forEach((element: any) => {
-            if (_type === "Rental Job") {
+            if (_type === "Rental Job" || _type === "Sales Order") {
                 if (_ticketType === "Loading" && (element.sectionName?.includes("Pickup Plant") || element.sectionName?.includes("Customer"))) {
                     element.required = true;
                 }
@@ -204,17 +204,28 @@ const ManageDeliveryTicket = (props) => {
             else {
                 fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, refrenceType, ticketType, refrenceData?.transferType, refrenceData?.typeOfRepair);
                 const tempInitialData = getObjKeys("", fieldsDataForCreate)
-                if (productInventory && refrenceType === "Rental Job" && refrenceData) {
-                    tempInitialData["ticketName"] = `${refrenceData?.rentalJobName}_${generateUniqueIdOnly()}`
+                if (productInventory && refrenceData && (refrenceType === "Rental Job" || refrenceType === "Sales Order")) {
+
+                    if (refrenceType === "Rental Job") {
+                        tempInitialData["ticketName"] = `${refrenceData?.rentalJobName}_${generateUniqueIdOnly()}`
+                        tempInitialData["rentalJob"] = refrenceData?._id
+                    } else if (refrenceType === "Sales Order") {
+                        tempInitialData["ticketName"] = `${refrenceData?.salesOrderNo}_${generateUniqueIdOnly()}`
+                        tempInitialData["salesOrder"] = refrenceData?._id
+                    }
+
                     tempInitialData["type"] = refrenceType;
                     tempInitialData["ticketType"] = ticketType;
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
-                    tempInitialData["rentalJob"] = refrenceData?._id
+
+                    const warehouse = refrenceData?.warehouse?.optionValue ? refrenceData?.warehouse?.optionValue : (refrenceData?.plant?.optionValue ?? "")
+
+
                     if (ticketType === "Loading") {
-                        tempInitialData["pickupPlant"] = refrenceData?.warehouse?.optionValue ? refrenceData?.warehouse?.optionValue : ""
+                        tempInitialData["pickupPlant"] = warehouse
                         fieldsDataForCreate?.forEach((e) => {
                             if (e.fieldName === "pickupPlant") {
-                                const plantAddress = e?.option?.filter((e) => e.optionValue === refrenceData?.warehouse?.optionValue)
+                                const plantAddress = e?.option?.filter((e) => e.optionValue === warehouse)
                                 if (plantAddress.length) {
                                     tempInitialData["pickupPlantAddress"] = plantAddress[0].address
                                 }
@@ -222,10 +233,10 @@ const ManageDeliveryTicket = (props) => {
                         })
                     }
                     else if (ticketType === "Receiving") {
-                        tempInitialData["receivingPlant"] = refrenceData?.warehouse?.optionValue ? refrenceData?.warehouse?.optionValue : ""
+                        tempInitialData["receivingPlant"] = warehouse
                         fieldsDataForCreate?.forEach((e) => {
                             if (e.fieldName === "pickupPlant") {
-                                const plantAddress = e?.option?.filter((e) => e.optionValue === refrenceData?.warehouse?.optionValue)
+                                const plantAddress = e?.option?.filter((e) => e.optionValue === warehouse)
                                 if (plantAddress.length) {
                                     tempInitialData["receivingPlantAddress"] = plantAddress[0].address
                                 }
@@ -487,8 +498,8 @@ const ManageDeliveryTicket = (props) => {
                                     onClose()
                                 }
                             }}
-                            title={`${deliveryTicketId ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ""}` 
-                            : `Create ${initialData.values?.ticketType} Ticket`}`}
+                            title={`${deliveryTicketId ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ""}`
+                                : `Create ${initialData.values?.ticketType} Ticket`}`}
                             isMinimized={!fullScreen}
                             onMinimizeMaximize={() => {
                                 setFullScreen(prevState => !prevState)
@@ -508,7 +519,7 @@ const ManageDeliveryTicket = (props) => {
                                                 <Box marginY={2}>
                                                     <Grid spacing={3} container>
                                                         {form.sectionFields.map((field, index2) => (
-                                                            ["repairJob", "transferAsset", "rentalJob", "type", "productInventory"].includes(field.fieldName) ? null :
+                                                            ["repairJob", "transferAsset", "rentalJob", "salesOrder", "type", "productInventory"].includes(field.fieldName) ? null :
                                                                 <Grid key={index2} item xs={12} sm={6} md={6}>
                                                                     {field.fieldName === "pick-UpDate" ? (
                                                                         <FormTypes
@@ -534,7 +545,7 @@ const ManageDeliveryTicket = (props) => {
                                                                             minDate={new Date()}
                                                                             //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
                                                                             maxDate={
-                                                                                refrenceType === "Rental Job" ? refrenceData.estimateStartDate ? moment(refrenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
+                                                                                refrenceType === "Rental Job" || refrenceType === "Sales Order" ? refrenceData.estimateStartDate ? moment(refrenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
                                                                                     : refrenceType === "Transfer Asset" ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
                                                                         />
                                                                     ) : field.fieldName === "deliveryDate" ? (
@@ -560,7 +571,7 @@ const ManageDeliveryTicket = (props) => {
                                                                             size="small"
                                                                             minDate={moment(values["pick-UpDate"])} // Please, whoever changing this ask Gagan before any change 
                                                                             //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
-                                                                            maxDate={refrenceType === "Rental Job" ? refrenceData.estimateStartDate ? moment(refrenceData?.estimateStartDate) : moment().add(1, 'years').calendar() :
+                                                                            maxDate={refrenceType === "Rental Job" || refrenceType === "Sales Order" ? refrenceData.estimateStartDate ? moment(refrenceData?.estimateStartDate) : moment().add(1, 'years').calendar() :
                                                                                 refrenceType === "Transfer Asset" ? moment().add(1, 'years').calendar() : moment().add(1, 'years').calendar()}
                                                                         />
                                                                     ) : field.fieldName === "owner" ? (

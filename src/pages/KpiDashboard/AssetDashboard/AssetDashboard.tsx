@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Box, useMediaQuery, useTheme, CircularProgress, Typography, TextField, Paper, Card, CardContent } from '@material-ui/core';
+import { Grid, Box, useMediaQuery, useTheme, CircularProgress, Typography, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 
 import axiosInstance from '../../../axios/axiosInstance';
@@ -8,6 +8,10 @@ import AssetFilters from './AssetFilters';
 import AssetChart from './AssetChart';
 import { useData } from '../../../StateProvider/Provider';
 import AssetStats from './AssetStats';
+
+import routes from '../../../components/Helpers/Routes';
+import AssetStatusChart from './AssetStatusChart';
+import RentalChart from './RentalChart';
 
 export type FilterType = {
   productCategory: { id: string; title: string }[];
@@ -34,6 +38,8 @@ const AssetDashboard = ({ salesFilter }) => {
     productDescription: [],
     country: {}
   });
+  const [allProductCategories, setAllProductCategories] = React.useState([]);
+  const [loadingProductCategory, setLoadingProductCategory] = React.useState(false);
 
   React.useEffect(() => {
     setLoading(true);
@@ -76,10 +82,27 @@ const AssetDashboard = ({ salesFilter }) => {
   };
 
   React.useEffect(() => {
-    if(selectedEntity && from && to && limit) {
+    if (selectedEntity) {
       fetchAssetsData();
     }
   }, [from, to, selectedEntity, limit]);
+
+  React.useEffect(() => {
+    fetchProductCategory();
+  }, []);
+
+  const fetchProductCategory = () => {
+    setLoadingProductCategory(true);
+    axiosInstance()
+      .get(`${routes.productCategory.path}?limit=0`)
+      .then(({ data: { data } }) => {
+        setAllProductCategories(data.map((d) => ({ id: d._id, title: d.name })));
+        setLoadingProductCategory(false);
+      })
+      .catch((err) => {
+        setLoadingProductCategory(false);
+      });
+  };
 
   const fetchAssetsData = () => {
     let params = {
@@ -111,13 +134,16 @@ const AssetDashboard = ({ salesFilter }) => {
       });
   };
 
-
-
- 
   return (
     <div>
       <Box mb={1} display="flex" justifyContent="space-between" alignItems={'center'} height={50}>
-        <AssetFilters filter={filter} setFilter={setFilter} loading={loading} />
+        <AssetFilters
+          filter={filter}
+          setFilter={setFilter}
+          loading={loading}
+          productCategories={allProductCategories}
+          loadingProductCategory={loadingProductCategory}
+        />
         <Box>
           <Autocomplete
             options={['10', '20', '50', '100', '200']}
@@ -154,10 +180,23 @@ const AssetDashboard = ({ salesFilter }) => {
             <MapView smallScreen={smallScreen} data={assetLocationData} loading={loading} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <AssetChart loading={loading || loadingChartData} data={assetUtilizationData} />
+            <AssetChart loading={loading || loadingChartData || loadingProductCategory} data={assetUtilizationData} />
           </Grid>
         </Grid>
-        <AssetStats/>
+        <Box>
+          <AssetStatusChart productCategories={allProductCategories} loadingProductCategory={loadingProductCategory} />
+        </Box>
+        <Box my={2}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <RentalChart />
+            </Grid>
+            <Grid item xs={12} sm={6}></Grid>
+          </Grid>
+        </Box>
+        <Box my={2}>
+          <AssetStats filter={filter} />
+        </Box>
       </Box>
     </div>
   );
