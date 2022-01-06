@@ -201,7 +201,7 @@ const PurchaseOrderDetailsPage = () => {
     }
 
     const handleUpdateData = (obj) => {
-        if (obj.status && purchaseOrderData?.status !== obj.status) {
+        if (obj.status && purchaseOrderData?.status !== obj.status && purchaseOrderFields.length > 0) {
             const fieldsDataForUpdate = purchaseOrderFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             let values = getObjKeysWithValues(purchaseOrderData, fieldsDataForUpdate)
             values["status"] = obj.status
@@ -440,7 +440,7 @@ const PurchaseOrderDetailsPage = () => {
                             </TabPanel>
                             <TabPanel value={tabValue} index={1}>
                                 <Grid item xs={12} sm={12} md={12} lg={12} >
-                                    {!purchaseOrderData ? (
+                                    {!purchaseOrderData || !purchaseOrderFields.length ? (
                                         <Grid container spacing={2} style={{ padding: "8px" }}>
                                             <CommonSkeleton lenArray={[...Array(7).keys()]} />
                                         </Grid>
