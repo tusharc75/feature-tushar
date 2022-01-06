@@ -253,8 +253,9 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             ]}
             chips={[
               {
-                label: "Asset Number : ",
-                field: "assetNumber",
+                label: "Loading Ticket : ",
+                field: "deliveryTicket",
+                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
               }
             ]}
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"

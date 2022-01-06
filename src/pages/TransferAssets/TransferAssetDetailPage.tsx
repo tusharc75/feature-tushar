@@ -218,7 +218,8 @@ const TransferAssetDetailPage = () => {
               ...data?.map((d: any) => ({
                 ...d,
                 productDescription: d?.product?.optionLabel ?? "",
-                productId: d?.product?.optionValue ?? ""
+                productId: d?.product?.optionValue ?? "",
+                isChecked: false
               }))
             ];
             setExistingAssets(data);

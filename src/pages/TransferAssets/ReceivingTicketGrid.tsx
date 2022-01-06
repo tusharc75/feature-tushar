@@ -63,11 +63,11 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const columns = [
     { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'deliveryTicket', headerName: 'Loading Ticket', show: true, disabled: true, cellRenderer: 'ticketRenderer' },
+    { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, disabled: true, cellRenderer: 'ticketRenderer' },
     { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, disabled: true, cellRenderer: 'receivingRenderer' },
     { field: 'receivingTicketStatus', headerName: 'Receiving Ticket Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'deliveryTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'loadingTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
   ];
 
   const history = useHistory();
@@ -83,7 +83,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   const LoadingTicketRenderer = (params) =>
     params.value ? (
-      <Link className="link cursor-pointer" to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
+      <Link className="link cursor-pointer" to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
         <p title={params.value}>{params.value}</p>
       </Link>
     ) : (
@@ -150,9 +150,9 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           if (
             loadingTicket[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))
           ) {
-            assetData[j].deliveryTicket = loadingTicket[i].ticketName;
-            assetData[j].deliveryTicketId = loadingTicket[i]._id;
-            assetData[j].deliveryTicketStatus = loadingTicket[i].status;
+            assetData[j].loadingTicket = loadingTicket[i].ticketName;
+            assetData[j].loadingTicketId = loadingTicket[i]._id;
+            assetData[j].loadingTicketStatus = loadingTicket[i].status;
           }
         }
       }
@@ -185,9 +185,9 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   useEffect(() => {
     if (selectedRecords.length > 0) {
       const inventoryWithNoTicket = selectedRecords.filter(
-        (asset: any) => !asset?.hasOwnProperty('receivingTicket') && asset?.deliveryTicketStatus === 'Delivered'
+        (asset: any) => !asset?.hasOwnProperty('receivingTicket') && asset?.loadingTicketStatus === 'Delivered'
       );
-      const loadingTicketsNotDelivered = selectedRecords.filter((asset: any) => asset?.deliveryTicketStatus !== 'Delivered');
+      const loadingTicketsNotDelivered = selectedRecords.filter((asset: any) => asset?.loadingTicketStatus !== 'Delivered');
       const selectedInventoryDelivered = selectedRecords.filter(
         (asset: any) => asset?.receivingTicketStatus === 'Delivered' || asset?.receivingTicketStatus === 'In-Transit'
       );
@@ -336,8 +336,14 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             loading={loading}
             chips={[
               {
-                label: 'Status : ',
-                field: 'status'
+                label: 'Loading Ticket : ',
+                field: 'loadingTicket',
+                onClick: (data:any) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`),
+              },
+              {
+                label: 'Receiving Ticket : ',
+                field: 'receivingTicket',
+                onClick: (data:any) => history.push(`${routes.deliveryTicketDetail.path}/${data.receivingTicketId}`),
               }
             ]}
             additionalDetails={[]}
