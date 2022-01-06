@@ -5,7 +5,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory, Link } from 'react-router-dom';
-import { currencyCodeToSymbol } from '../../../constants/helpers';
+import { currencyCodeToSymbol, displayDate } from '../../../constants/helpers';
 import Typography from '@material-ui/core/Typography';
 import { BsFillInfoCircleFill } from 'react-icons/bs';
 import { AiOutlineSafetyCertificate } from 'react-icons/ai';
@@ -64,7 +64,7 @@ function MyOwnCart() {
   const [totalCount, setTotalCount] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [checkoutLabel, setCheckoutLabel] = useState('Checkout');
-  const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
+  const [openPlaceOrderDialog, setOpenPlaceOrderDialog] = useState({ open: false, okBtnLoading: false })
   const [cart, setCart] = useState([]);
   const [cartProducts, setCartProducts] = useState([]);
   const [cartProductsLoading, setCartProductsLoading] = useState(false);
@@ -73,9 +73,9 @@ function MyOwnCart() {
   const deleteCartItem = (cartId) => {
     if (cartId) {
       axiosInstance()
-        .put(`/eCommerce/cart/remove`,{ids:[cartId]})
-        .then(({data}) => {
-          setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState,show: false, okBtnLoading: false, recordToRemove: null }  })
+        .put(`/ecommerce/cart/remove`, { ids: [cartId] })
+        .then(({ data }) => {
+          setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, show: false, okBtnLoading: false, recordToRemove: null } })
           toastConfig.setToastConfig({
             open: true,
             type: "success",
@@ -109,12 +109,25 @@ function MyOwnCart() {
             tempTotalPrice = (d?.mrp ? parseInt(d?.mrp) : 0) + tempTotalPrice;
           });
           setCart(data);
-          setCartProducts(data.map((d) => { return { ...d.product, cartId: d._id, productId: d.materialId, quantity: d.qty,productName: d.productDetail?.productName, mrp:d.mrp } }));
+          setCartProducts(data.map((d) => {
+            return {
+              ...d.product,
+              cartId: d._id,
+              productId: d.materialId,
+              qty: d.qty,
+              productName: d.productDetail?.productName,
+              mrp: d.mrp,
+              startDate: d?.startDate ? displayDate(d.startDate) : '',
+              endDate: d?.endDate ? displayDate(d.endDate) : '',
+              pricingMethod: d?.pricingMethod,
+              unit: d?.unit,
+            }
+          }));
           setTotalPrice(tempTotalPrice);
           setTotalCount(data.length);
         }
         if (data && data.length >= 1) {
-          setCheckoutLabel('Create Quote');
+          setCheckoutLabel('Place Order');
         }
         setCartProductsLoading(false);
         setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false, recordToRemove: null })
@@ -122,13 +135,13 @@ function MyOwnCart() {
   };
 
   const onCheckout = () => {
-    if (checkoutLabel === 'Create Quote') {
-      setshowCreateQuoteDialog(true);
+    if (checkoutLabel === 'Place Order') {
+      setOpenPlaceOrderDialog(prevState => { return { ...prevState, open: true } });
     }
   };
 
   const onSuccess = () => {
-    setshowCreateQuoteDialog(false);
+    setOpenPlaceOrderDialog(prevState => { return { ...prevState, open: false } });
   };
 
   const handleCreateQuote = (values) => {
@@ -196,7 +209,7 @@ function MyOwnCart() {
 
                         </div>
                         <div className={styles.card_body}>
-                          <div className={styles.card_body_layout}>
+                          <div className={`${styles.card_body_layout} my-3`}>
                             <div className={styles.card_product_name_and_price}>
                               <div className={styles.card_seller}>
                                 <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}`}>{item.productName}</Link>
@@ -217,23 +230,48 @@ function MyOwnCart() {
                             </div>
                           </div>
 
-                          <PlusMinusTextboxComponent
-                            inputTextLabel="Quantity"
-                            value={item.quantity}
-                            isRequired={true}
-                            onChange={(value) => {
-                              let items = [...cartProducts];
-                              items[index].quantity = parseInt(items[index].quantity) - 1;
-                              setCartProducts([...items]);
+                          <Grid container>
+                            <Grid item xs={6}>
+                              <b>Start Date:</b> {item.startDate}
+                            </Grid>
 
-                              axiosInstance().put(`/eCommerce/cart/${item.cartId}`, { quantity: value?.toString() }).then(() => {
+                            <Grid item xs={6}>
+                              <b>End Date:</b> {item.endDate}
+                            </Grid>
+                          </Grid>
 
-                              }).catch((error) => {
-                                toastConfig.setToastConfig(error);
-                                dispatch({ type: SET_CART, payload: [...items] });
-                              })
-                            }}
-                          />
+                          <Grid container>
+                            <Grid item xs={6}>
+                              <b>Pricing Method:</b> {item.pricingMethod}
+                            </Grid>
+
+                            <Grid item xs={6}>
+                              <b>Unit:</b> {item.unit}
+                            </Grid>
+                          </Grid>
+
+                          <Grid container className="my-3">
+                            <Grid item xs={6}>
+                              <PlusMinusTextboxComponent
+                                inputTextLabel="Quantity"
+                                value={item.qty}
+                                isRequired={true}
+                                onChange={(value) => {
+                                  let items = [...cartProducts];
+                                  const indexOfProduct = items.findIndex(s => s._id === item.cartId);
+
+                                  axiosInstance().put(`/ecommerce/cart`, { _id: item.cartId, qty: parseInt(value) }).then(() => {
+                                    items[indexOfProduct].qty = value;
+                                    setCartProducts([...items]);
+                                  }).catch((error) => {
+                                    toastConfig.setToastConfig(error);
+                                    dispatch({ type: SET_CART, payload: [...items] });
+                                  })
+
+                                }}
+                              />
+                            </Grid>
+                          </Grid>
 
                           {/* <Grid container spacing={1} alignItems="flex-end">
                             <Grid item>
@@ -268,7 +306,6 @@ function MyOwnCart() {
                               variant="outlined"
                               color="primary"
                               onClick={() => {
-                                
                                 setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, show: true, recordToRemove: item } })
                                 // deleteCartItem(item.cartId)
                               }}
@@ -334,6 +371,13 @@ function MyOwnCart() {
                           <h3>Total Amount</h3>
                           <h3 className={styles.price_card_price}> ${totalPrice}</h3>
                         </div>
+
+                        {/* <Grid container>
+                          <Grid item xs={12}>
+                            
+                          </Grid>
+                        </Grid> */}
+
                         <div className={styles.price_card_checkout_button}>
                           <Button variant="contained" color="secondary" onClick={onCheckout} className={styles.price_card_checkout_button_layout}>
                             {checkoutLabel}
@@ -352,27 +396,48 @@ function MyOwnCart() {
           </div>
         </div>
 
-        {showCreateQuoteDialog && (
-          <ManageQuoteDialog
-            open={showCreateQuoteDialog}
-            onSuccess={onSuccess}
-            onClose={() => {
-              setshowCreateQuoteDialog(false);
+        {openPlaceOrderDialog.open && (
+          <ConfirmationDialog
+            open={true}
+            message={`You want to place order ?`}
+            onClose={() =>
+              setOpenPlaceOrderDialog(prevState => { return { ...prevState, open: false } })
+            }
+            okBtnLoading={openPlaceOrderDialog.okBtnLoading}
+            onOk={() => {
+              setOpenPlaceOrderDialog(prevState => { return { ...prevState, okBtnLoading: true } })
+
+              axiosInstance().post("/ecommerce/checkout", { cart: [], shippingAddress: "", billingAddress: "" }).then(() => {
+
+              }).catch((error) => {
+                toastConfig.setToastConfig(error);
+              })
+
+
+              // setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, okBtnLoading: true } })
+              // onDeleteCartItem(deleteProductFromCartConfirmationDialog.recordToRemove)
             }}
-            isNew={true}
-            dataToUpdate={null}
-            isClone={false}
-            resource={null}
-            isRedirectTodetailPage={true}
-            contactId={null}
-            opportunityId={null}
-            disableOwnerDropDown={true}
-            contacts={null}
-            doaCollaboratorResources={user?.user?.doa.map((obj) => obj.user)}
-            isRenderedFromOpportunity={false}
-            isCreateQuoteFromCart={true}
-            onHandleSubmit={handleCreateQuote}
           />
+          // <ManageQuoteDialog
+          //   open={openPlaceOrderDialog}
+          //   onSuccess={onSuccess}
+          //   onClose={() => {
+          //     setOpenPlaceOrderDialog(false);
+          //   }}
+          //   isNew={true}
+          //   dataToUpdate={null}
+          //   isClone={false}
+          //   resource={null}
+          //   isRedirectTodetailPage={true}
+          //   contactId={null}
+          //   opportunityId={null}
+          //   disableOwnerDropDown={true}
+          //   contacts={null}
+          //   doaCollaboratorResources={user?.user?.doa.map((obj) => obj.user)}
+          //   isRenderedFromOpportunity={false}
+          //   isCreateQuoteFromCart={true}
+          //   onHandleSubmit={handleCreateQuote}
+          // />
         )}
 
         {

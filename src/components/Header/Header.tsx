@@ -221,7 +221,7 @@ const Header = ({ toggleDrawer }) => {
 
   const fetchCart = () => {
     axiosInstance()
-      .get(`/user/cart`)
+      .get(`/ecommerce/cart`)
       .then(({ data: { data } }) => {
         if (data) {
           dispatch({ type: SET_CART, payload: [...data] });
