@@ -3,7 +3,7 @@ import { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import {
@@ -51,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
 const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPreviousButtonDisabled }) => {
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
-
+    const history = useHistory()
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
@@ -341,7 +341,17 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                         {
                             label: "Status: ",
                             field: "status",
-                        }
+                        },
+                        {
+                            label: "Receiving Ticket : ",
+                            field: "receivingTicket",
+                            onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.receivingTicketId}`)
+                          },
+                          {
+                            label: "Loading Ticket : ",
+                            field: "deliveryTicket",
+                            onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
+                          },
                     ]}
                     additionalDetails={[
 
