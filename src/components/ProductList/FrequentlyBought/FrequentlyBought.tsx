@@ -39,7 +39,7 @@ function FrequentlyBought({ id }) {
   const fetchCart = () => {
     setLoading(true)
     axiosInstance()
-      .get(`/user/cart`).then(({ data: { data } }) => {
+      .get(`/ecommerce/cart`).then(({ data: { data } }) => {
         let tempMappedQuantity = {}
         if (data && data.length) {
           data.forEach(o => {
@@ -54,7 +54,7 @@ function FrequentlyBought({ id }) {
           }
         })
         axiosInstance()
-          .post(`/user/cart`, {
+          .post(`/ecommerce/cart`, {
             products: [...cartItems]
           })
           .then(({ data }) => {
