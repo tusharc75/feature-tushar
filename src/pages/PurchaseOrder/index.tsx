@@ -110,7 +110,6 @@ const PurchaseOrder = () => {
                 const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
 
                 let finalObject = prepareDataForGrid(u);
-                finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
                 finalObject["allowedToEdit"] = (
                     [...(u.collaborator ?? []), u.owner].some(

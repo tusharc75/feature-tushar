@@ -17,7 +17,7 @@ import Add from "@material-ui/icons/Add";
 import moment from "moment";
 import {
     getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow,
-    dateFormat, pricingCondition, generateUniqueId, treeToFlatArray, formatAmountWithCurrency
+    dateFormat, pricingCondition, generateUniqueId, treeToFlatArray, formatAmountWithCurrency,CHILD_RESOURCE
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import RentalJobQtyDialog from './RentalJobQtyDialog'
@@ -60,7 +60,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
             data = await findOne(objectStore.resource, "rentalManagementProduct")
         }
         else {
-            const response = await axiosInstance().get(`/field/child?resource=Rental Management Product`)
+            const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`)
             data = response?.data?.data
         }
         data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)

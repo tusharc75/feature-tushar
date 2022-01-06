@@ -36,8 +36,6 @@ const AssetStats = (props: FilterProps) => {
     }
 
   }, [lastElement])
-  console.log(lastElement)
-
 
   React.useEffect(() => {
     fetchAssets();
@@ -108,7 +106,7 @@ const AssetStats = (props: FilterProps) => {
 
   return (
     <div>
-      <Box my={2} bgcolor={'#f5f5f5'} px={1}>
+      <Box my={2} bgcolor={'#f5f5f5'} p={1}>
         <Box my={1}>
           <Autocomplete
             ref={(ref) => {
@@ -123,6 +121,7 @@ const AssetStats = (props: FilterProps) => {
             loading={loadingAssets}
             onChange={(_, val) => setSelectedAssets(val)}
             fullWidth
+            size='small'
             getOptionSelected={(option, val) => option.id === val.id}
             getOptionLabel={(option) => option.title}
             renderInput={(params) => (
@@ -130,7 +129,6 @@ const AssetStats = (props: FilterProps) => {
                 {...params}
                 variant="outlined"
                 label="Select Assets"
-                size="medium"
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (
@@ -145,8 +143,8 @@ const AssetStats = (props: FilterProps) => {
           />
         </Box>
         {selectedAssets.length === 0 && (
-          <Box width={'100%'} textAlign="center" py={2}>
-            <Typography variant="h4" color="textSecondary">
+          <Box width={'100%'} py={2}>
+            <Typography >
               Select assets to see their stats
             </Typography>
           </Box>

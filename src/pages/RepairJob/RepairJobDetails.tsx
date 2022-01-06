@@ -15,7 +15,8 @@ import {
   gridLoadingTimeout, prepareDataForGrid, repairJob, sidebarResource,
   repairJobProcessSteps,
   repairJobStatus,
-  INVENTORY_STATUS
+  INVENTORY_STATUS,
+  CHILD_RESOURCE
 } from '../../constants/helpers';
 import ManageRepairJob from './ManageRepairJob';
 import queryString from "query-string";
@@ -159,7 +160,7 @@ const RepairJobDetails = () => {
   const fetchAssignedSerializedAssetsFields = () => {
     step1Dispatch({ type: "loading", loading: true });
 
-    axiosInstance().get(`/field/child?resource=Repair Job Asset`).then(({ data: { data } }) => {
+    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`).then(({ data: { data } }) => {
 
       const columns = [...commonStep1Columns];
 
