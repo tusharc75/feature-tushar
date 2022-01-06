@@ -336,7 +336,7 @@ const PurchaseOrder = () => {
                             <Chip
                                 className="ml-3"
                                 color="primary"
-                                label={`Product : ${fromRental?.rentalJobName}`}
+                                label={`Rental Job : ${fromRental?.rentalJobName}`}
                                 onDelete={() => {
                                     setFromRental(null);
                                 }}
@@ -346,7 +346,7 @@ const PurchaseOrder = () => {
                             <Chip
                                 className="ml-3"
                                 color="primary"
-                                label={`Product : ${fromSalesOrder?.salesOrderNo}`}
+                                label={`Sales Order : ${fromSalesOrder?.salesOrderNo}`}
                                 onDelete={() => {
                                     setFromSalesOrder(null);
                                 }}
