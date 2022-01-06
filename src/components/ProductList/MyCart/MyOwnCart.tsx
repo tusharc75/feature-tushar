@@ -73,8 +73,14 @@ function MyOwnCart() {
   const deleteCartItem = (cartId) => {
     if (cartId) {
       axiosInstance()
-        .delete(`/user/cart/${cartId}`)
-        .then(() => {
+        .put(`/eCommerce/cart/remove`,{ids:[cartId]})
+        .then(({data}) => {
+          setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState,show: false, okBtnLoading: false, recordToRemove: null }  })
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
           fetchCart();
         });
     }
@@ -83,8 +89,8 @@ function MyOwnCart() {
   const onDeleteCartItem = (item) => {
     let cartId;
     cart.some((o) => {
-      if (o.productId === item._id) {
-        cartId = o.id;
+      if (o._id === item.cartId) {
+        cartId = o._id;
         return true;
       }
     });
@@ -95,15 +101,15 @@ function MyOwnCart() {
     let tempTotalPrice = 0;
     setCartProductsLoading(true);
     axiosInstance()
-      .get(`/user/cart`)
+      .get(`/ecommerce/cart`)
       .then(({ data: { data } }) => {
         if (data) {
           dispatch({ type: SET_CART, payload: [...data] });
           data.map((d) => {
-            tempTotalPrice = (d.product?.mrp ? parseInt(d.product?.mrp) : 0) + tempTotalPrice;
+            tempTotalPrice = (d?.mrp ? parseInt(d?.mrp) : 0) + tempTotalPrice;
           });
           setCart(data);
-          setCartProducts(data.map((d) => { return { ...d.product, cartId: d.id, productId: d.productId, quantity: d.quantity } }));
+          setCartProducts(data.map((d) => { return { ...d.product, cartId: d._id, productId: d.materialId, quantity: d.qty,productName: d.productDetail?.productName, mrp:d.mrp } }));
           setTotalPrice(tempTotalPrice);
           setTotalCount(data.length);
         }
@@ -220,7 +226,7 @@ function MyOwnCart() {
                               items[index].quantity = parseInt(items[index].quantity) - 1;
                               setCartProducts([...items]);
 
-                              axiosInstance().put(`/user/cart/${item.cartId}`, { quantity: value?.toString() }).then(() => {
+                              axiosInstance().put(`/eCommerce/cart/${item.cartId}`, { quantity: value?.toString() }).then(() => {
 
                               }).catch((error) => {
                                 toastConfig.setToastConfig(error);
@@ -262,7 +268,9 @@ function MyOwnCart() {
                               variant="outlined"
                               color="primary"
                               onClick={() => {
+                                
                                 setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, show: true, recordToRemove: item } })
+                                // deleteCartItem(item.cartId)
                               }}
                               className={styles.remove_product}
                             >
