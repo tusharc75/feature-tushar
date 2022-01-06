@@ -164,7 +164,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   };
 
   return (<>
-    <Box display="flex" justifyContent="flex-end" p="4px">
+    <Box display="flex" justifyContent="flex-end" pt={1}>
       <Button
         onClick={() => {
           setDownlodingFile(true);
@@ -254,8 +254,13 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             ]}
             chips={[
               {
-                label: "Asset Number : ",
-                field: "assetNumber",
+                label: "Loading Ticket : ",
+                field: "deliveryTicket",
+                onClick: (data) => { history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`) }
+              },
+              {
+                label: "Status : ",
+                field: "status",
               }
             ]}
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
