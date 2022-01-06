@@ -71,6 +71,7 @@ const RepairJobDetails = () => {
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [showRepairJobCompleteConfirmationDialog, setShowRepairJobCompleteConfirmationDialog] = useState(false);
+  const [isRepairEnded, setRepairEnded] = useState(false);
 
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
 
@@ -156,6 +157,28 @@ const RepairJobDetails = () => {
       fetchAssignedSerializedAssetsFields();
     }
   }, [repairJobData]);
+
+  useEffect(() => {
+    if(repairJobData?.typeOfRepair === "Internal" && step1DataRows.length > 0) {
+      const repairedAssets = step1DataRows.filter((asset:any) => asset?.repaired);
+      const lostAssets = step1DataRows.filter((asset:any) => asset?.status === "Lost");
+      let repairedAssetsLength = step1DataRows.length - lostAssets.length
+
+      if(repairJobData && repairJobData.status === completedStatus) {
+        setRepairEnded(true);
+      } else if (repairedAssets.length === repairedAssetsLength) {
+        setRepairEnded(true)
+      } 
+    }
+  },[repairJobData, step1DataRows])
+
+  useEffect(() => {
+    if(repairJobData && repairJobData.status !== completedStatus) {
+      if(isRepairEnded) {
+        onNextButtonClick(repairJobProcessSteps.length - 2, repairJobProcessSteps.length - 1, false)
+      }
+    }
+  },[isRepairEnded, repairJobData])
 
   const fetchAssignedSerializedAssetsFields = () => {
     step1Dispatch({ type: "loading", loading: true });
@@ -531,8 +554,8 @@ const RepairJobDetails = () => {
               </div>
             ) : (
               <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
-                {permissions?.repairJob?.isUpdate && (
-                  <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                {permissions?.repairJob?.isUpdate && repairJobData?.status !== completedStatus && (
+                  <Button disabled={showLoading} variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                     Edit
                   </Button>
                 )}
@@ -618,14 +641,14 @@ const RepairJobDetails = () => {
                   <>
                     <Paper>
                       <CustomCommonSteps
-                        disableNextStep={disableNextStep}
-                        disablePreviousStep={false}
+                        disableNextStep={disableNextStep || isRepairEnded}
+                        disablePreviousStep={isRepairEnded}
                         steps={steps}
-                        currentStep={currentStep}
+                        currentStep={repairJobData?.status === completedStatus ? steps.length + 1 : currentStep}
                         setCurrentStep={setCurrentStep}
                         onNextButtonClick={onNextButtonClick}
                         onPreviousButtonClick={onPreviousButtonClick}
-                        forViewOnly={repairJobData && repairJobData["status"] === completedStatus}
+                        forViewOnly={isRepairEnded}
                       />
 
                       <Grid container spacing={2}>
@@ -635,6 +658,7 @@ const RepairJobDetails = () => {
                               {
                                 repairJobData && repairJobData["status"] !== completedStatus && <Box display="flex" mt={2} mb={2} pr={1} justifyContent="flex-end" alignItems="center" className="gap-2">
                                   <Button
+                                    disabled={showLoading}
                                     variant="contained"
                                     color="primary"
                                     type="button"
@@ -653,7 +677,7 @@ const RepairJobDetails = () => {
                                       color="primary"
                                       type="button"
                                       size="small"
-                                      disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.repaired === true)}
+                                      disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.repaired === true) || showLoading}
                                       onClick={() => {
                                         setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...step1SelectedRecords.map(m => m._id)] })
                                       }}
@@ -665,7 +689,7 @@ const RepairJobDetails = () => {
                                   {
                                     repairJobData && repairJobData["status"] !== repairJobStatus[2] && <Button variant="outlined" color="primary" aria-controls="simple-menu"
                                       aria-haspopup="true"
-                                      disabled={step1SelectedRecords.length === 0}
+                                      disabled={step1SelectedRecords.length === 0 || showLoading}
                                       size="small"
                                       onClick={handleClick}
                                       endIcon={<ArrowDropDownIcon />}>
@@ -699,31 +723,31 @@ const RepairJobDetails = () => {
                                     }}>Lost</MenuItem>
                                   </Menu>
 
-                                  <Button
+                                 {!isRepairEnded && <Button
                                     variant="contained"
                                     color="primary"
                                     type="button"
                                     size="small"
-                                    disabled={step1SelectedRecords.length === 0}
+                                    disabled={step1SelectedRecords.length === 0 || showLoading}
                                     onClick={() => {
                                       setShowEditAssetDialog({ open: true, asset: null, selectedRecords: step1SelectedRecords })
                                     }}
                                   >
                                     Bulk Edit
-                                  </Button>
+                                  </Button>}
 
-                                  <Button
+                                 {!isRepairEnded && <Button
                                     variant="contained"
                                     color="primary"
                                     type="button"
                                     size="small"
-                                    disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.status !== INVENTORY_STATUS.reserved)}
+                                    disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.status !== INVENTORY_STATUS.reserved) || showLoading}
                                     onClick={() => {
                                       setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: step1SelectedRecords.map(m => m._id ?? m.id) });
                                     }}
                                   >
                                     Delete
-                                  </Button>
+                                  </Button>}
                                 </Box>
                               }
 
@@ -815,6 +839,8 @@ const RepairJobDetails = () => {
 
                           {(currentStep === 2 || currentStep === 3) && (
                             <RepairJobReceivingTicket
+                              isRepairEnded={isRepairEnded}
+                              setRepairEnded={setRepairEnded}
                               repairJobData={repairJobData}
                               setNextButtonDisabled={setDisableNextStep}
                               setPreviousButtonDisabled={setDisablePreviousStep}

@@ -100,7 +100,7 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
                         }) => (
                             <Fragment>
                                 <CustomDialogHeader
-                                    title={asset ? `Edit - ${asset.index} - ${asset.assetNumber}` : ("Edit Assets " + "(" + selectedRecords.length + ")")}
+                                    title={asset ? `Edit - ${asset.index} - ${asset.assetNumber}` : ("Bulk Edit " + "(" + selectedRecords.length + ")")}
                                     onClose={() => {
                                         onClose()
                                     }}
