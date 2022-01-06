@@ -21,6 +21,7 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { useHistory } from "react-router-dom";
 import InfoIcon from '@material-ui/icons/Info';
+import { isMobile } from "react-device-detect";
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
 
@@ -372,9 +373,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     <Grid container spacing={2}>
       <Grid item xs={12} sm={12} md={12} lg={12}>
         <Box display="flex" mt={2} justifyContent="space-between" alignItems="center" padding={"4px"}>
-          <h3 className="form-label-style" title={"Products and Packages"}>
+          {!isMobile && <h3 className="form-label-style" title={"Products and Packages"}>
             {"Products and Packages"}
-          </h3>
+          </h3>}
           <div>
             <Button
               variant="contained"

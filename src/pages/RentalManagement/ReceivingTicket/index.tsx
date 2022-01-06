@@ -119,6 +119,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
       })
       productAssets.forEach((d) => {
+        d["isChecked"] = false;
         d["hideSelection"] = d.status === INVENTORY_STATUS.indTransit;
       })
       if (productAssets.filter((e) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(e.status)).length === productAssets.length) {
