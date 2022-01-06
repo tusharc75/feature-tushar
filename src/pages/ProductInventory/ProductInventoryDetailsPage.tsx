@@ -76,18 +76,12 @@ const ProductInventoryDetailsPage = () => {
   const [manualStatus, setManualStatus] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [productId, setProductId] = useState(null);
+  const [status, setStatus] = useState("");
   const [statusOptions, setStatusOptions] = useState([])
   const [showReasonDialog, setShowReasonDialog] = useState(false)
   const [updateLoading, setUpdateLoading] = useState(false)
   const [loadingBOMData, setLoadingBOMData] = useState(false)
-  const [customField, setCustomField] = useState({
-    fieldData: {
-      fieldLabel: "Scraping Reason",
-      fieldName: "scrapingReason",
-      type: "singleLine",
-      sectionName: "Product Inventory"
-    }
-  })
+  const [customField, setCustomField] = useState(null)
   const [productInventoryHistoryData, setProductInventoryHistoryData] = useState(null)
   const [BOMData, setBOMData] = useState([])
   const [gridApi, setGridApi] = useState(null);
@@ -232,6 +226,27 @@ const ProductInventoryDetailsPage = () => {
       { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
       setProductId(data?.product?.optionValue)
       setProductInventoryData(data);
+      if (data.status === "Scrap") {
+        setCustomField({
+          fieldData: {
+            fieldLabel: "Scraping Reason",
+            fieldName: "scrapingReason",
+            type: "singleLine",
+            sectionName: "Product Inventory"
+          }
+        })
+      }
+      else if (data.status === "Lost") {
+        setCustomField({
+          fieldData: {
+            fieldLabel: "Lost Reason",
+            fieldName: "lostReason",
+            type: "singleLine",
+            sectionName: "Product Inventory"
+          }
+        })
+      }
+
       setLoadingProductInventory(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -300,7 +315,8 @@ const ProductInventoryDetailsPage = () => {
     setAnchorEl(null);
   };
   const handleStatusChange = o => {
-    if (o.optionValue === "Scrap") {
+    if (o.optionValue === "Scrap" || o.optionValue === "Lost") {
+      setStatus(o.optionValue)
       setShowReasonDialog(true)
     }
     else {
@@ -314,11 +330,12 @@ const ProductInventoryDetailsPage = () => {
       const fieldsDataForUpdate = productInventoryFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       let values = getObjKeysWithValues(productInventoryData, fieldsDataForUpdate)
       values["status"] = obj.status
-      if (obj.reason) values["scrapingReason"] = obj.reason
+      if (obj.reason) values[status === "Scrap" ? "scrapingReason" : "lostReason"] = obj.reason
       values["_id"] = productInventoryData._id
       axiosInstance().put(`${productInventory.api}`, values).then(({ data: { data } }) => {
         setUpdateLoading(false)
         fetchProductInventoryData()
+        fetchProductInventoryHistory()
       }).catch((error) => {
         setUpdateLoading(false)
         toastConfig.setToastConfig(error);
@@ -445,7 +462,7 @@ const ProductInventoryDetailsPage = () => {
                   <>
                     <DetailsPage data={productInventoryData}
                       fields={productInventoryData?.status &&
-                        productInventoryData?.status === "Scrap" ?
+                        (productInventoryData?.status === "Scrap" || productInventoryData?.status === "Lost") ?
                         [...productInventoryFields, customField] :
                         productInventoryFields} />
                   </>
@@ -726,8 +743,9 @@ const ProductInventoryDetailsPage = () => {
         showReasonDialog ?
           <ReasonDialog
             onClose={() => setShowReasonDialog(false)}
+            status={status}
             onAddReason={(reason) => {
-              handleUpdateData({ status: "Scrap", reason: reason })
+              handleUpdateData({ status: status, reason: reason })
               setShowReasonDialog(false)
             }}
           /> : null
