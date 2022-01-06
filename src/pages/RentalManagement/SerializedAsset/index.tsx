@@ -9,7 +9,10 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, productInventory, INVENTORY_STATUS, CHILD_RESOURCE } from "../../../constants/helpers";
+import {
+  dateFormat, formatAmountWithCurrency, rentalManagement, purchaseOrder,
+  sidebarResource, treeToFlatArray, productInventory, INVENTORY_STATUS, CHILD_RESOURCE
+} from "../../../constants/helpers";
 import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
@@ -21,6 +24,7 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { useHistory } from "react-router-dom";
 import InfoIcon from '@material-ui/icons/Info';
+import { isMobile } from "react-device-detect";
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
 
@@ -39,10 +43,15 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, products: [] });
+  const [poCount, setPoCount] = useState(0);
+
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchFields()
+    if (!isOffline) {
+      fetchPurchaseOrder()
+    }
   }, []);
 
   const fetchFields = async () => {
@@ -246,6 +255,16 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     }
   };
 
+  const fetchPurchaseOrder = async () => {
+    let filterById = [];
+    filterById.push({ field: "rentalJob", term: rentalManagementData?._id });
+    const queryString = `?filterById=${JSON.stringify(filterById)}`
+    axiosInstance().get(`${purchaseOrder.api}${queryString}`).then(({ data: { data } }) => {
+      setPoCount(data.length)
+    }).catch((error) => {
+    });
+  }
+
   const getAssetAssignedValues = (row) => {
     if (row.original?.type === "product") {
       if (row.subRows && row.subRows?.length > 0) {
@@ -372,9 +391,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     <Grid container spacing={2}>
       <Grid item xs={12} sm={12} md={12} lg={12}>
         <Box display="flex" mt={2} justifyContent="space-between" alignItems="center" padding={"4px"}>
-          <h3 className="form-label-style" title={"Products and Packages"}>
+          {!isMobile && <h3 className="form-label-style" title={"Products and Packages"}>
             {"Products and Packages"}
-          </h3>
+          </h3>}
           <div>
             <Button
               variant="contained"
@@ -401,15 +420,15 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             >
               {`Create ${routes.purchaseOrder.title}`}
             </Button>
-            <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
+            {poCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
               <IconButton size="small" onClick={() => {
                 history.push(routes.purchaseOrder.path, {
                   rental: rentalManagementData,
                 })
               }}>
-                <InfoIcon color="disabled" />
+                <InfoIcon color={"primary"} />
               </IconButton>
-            </HtmlTooltip>
+            </HtmlTooltip>}
             <Box mx={1} component="span" />
             <Button
               variant="contained"
@@ -488,6 +507,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setShowManagePurchaseOrderDialog(({ open: false, products: [] }))
           setSelectedProducts([])
           fetchProductInventory()
+          fetchPurchaseOrder()
           toastConfig.setToastConfig({
             open: true,
             type: "success",

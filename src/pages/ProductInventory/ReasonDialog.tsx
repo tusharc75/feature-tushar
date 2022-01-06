@@ -10,7 +10,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { values } from "lodash";
 
-export default function ReasonDialog({ onClose, onAddReason, ...rest }) {
+export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) {
     const [value, setValue] = React.useState("");
 
     const handleChange = (event) => {
@@ -30,7 +30,7 @@ export default function ReasonDialog({ onClose, onAddReason, ...rest }) {
         >
             <CustomDialogHeader
                 onClose={onClose}
-                title="Scrapping Reason"></CustomDialogHeader>
+                title={status === "Scrap" ? "Scrapping Reason" : "Lost Reason"}></CustomDialogHeader>
             <CustomDialogContent>
                 <Box>
                     <Box pt={3} pb={3}>
@@ -39,7 +39,7 @@ export default function ReasonDialog({ onClose, onAddReason, ...rest }) {
                                 <TextField
                                     id="outlined-multiline-static"
                                     label="Reason"
-                                    placeholder="Add a scrapping reason"
+                                    placeholder={`Add a ${status === "Scrap" ? "scrapping" : "lost"} reason`}
                                     fullWidth
                                     value={value}
                                     onChange={handleChange}

@@ -46,7 +46,7 @@ import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDia
 import RoleEngine from "../../components/Shared/RoleEngine";
 import NewStepper from "../../components/Helpers/NewStepper";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
-import { displayDate, isObjectEmpty, userType, defaultActivityShow, dateFormatForInputControl } from "../../constants/helpers";
+import { displayDate, isObjectEmpty, userType, defaultActivityShow, dateFormatForInputControl, opportunity, lead, customerAccount, supplierAccount, customerContact, supplierContact } from "../../constants/helpers";
 import OpportunityAccordionInUserDetail from "./OpportunityAccordionInUserDetail";
 import LeadAccordionInUserDetailPage from "./LeadAccordionInUserDetailPage";
 import AccountAccordionDetail from "./AccountAccordionInDetail";
@@ -67,9 +67,9 @@ import DateFnsUtils from "@date-io/date-fns";
 import { Line } from 'react-chartjs-2';
 import ResourceTransferDialog from "../../components/ResourceTransferDialog";
 import accountClass from "../Account/account.module.scss";
-import {BiReset} from "react-icons/all";
-import {BiEdit} from "react-icons/bi";
-import {MdDelete} from "react-icons/md";
+import { BiReset } from "react-icons/all";
+import { BiEdit } from "react-icons/bi";
+import { MdDelete } from "react-icons/md";
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -226,13 +226,13 @@ const UserDetailsPage = () => {
     await axiosInstance().get(`/user/${user.user?._id}`).then(({ data: { data } }) => {
       data.entities.map((item) => {
         item.role.forEach((role) => {
-          if(roleIds.includes(role?._id)){
+          if (roleIds.includes(role?._id)) {
 
-          }else{
+          } else {
             roleIds.push(role?._id)
           }
         })
-        
+
       })
       setRoleAccessOfLoggedInUser(roleIds)
     }).catch((error) => {
@@ -676,35 +676,35 @@ const UserDetailsPage = () => {
                   {
                     isLoggedInUserBrandAdmin && (
                       <Button
-                          variant={isMobile ? "text" : "contained"}
-                          color="primary"
+                        variant={isMobile ? "text" : "contained"}
+                        color="primary"
                         size="small"
                         onClick={handleResetPassword}
-                          className={isMobile ? accountClass.mobile_button_layout : ""}
-                          style={isMobile ? {color:"var(--warning-darken)"} : {}}
+                        className={isMobile ? accountClass.mobile_button_layout : ""}
+                        style={isMobile ? { color: "var(--warning-darken)" } : {}}
                       >
-                        {isMobile ? <BiReset size={20}/> : "Reset Password"}
+                        {isMobile ? <BiReset size={20} /> : "Reset Password"}
 
                       </Button>
                     )
                   }
                   {permissions.user.isUpdate ? (
                     <Button
-                        variant={isMobile ? "text" : "contained"}
+                      variant={isMobile ? "text" : "contained"}
                       color="primary"
                       size="small"
                       onClick={handleOpenUpdateDialog}
                       disabled={!isLoggedInUserBrandAdmin && userData?.userType}
-                        className={isMobile ? accountClass.mobile_button_layout : ""}
-                        style={isMobile ? {color:"#43aeaa"} : {}}
+                      className={isMobile ? accountClass.mobile_button_layout : ""}
+                      style={isMobile ? { color: "#43aeaa" } : {}}
                     >
-                      {isMobile ? <BiEdit size={20}/> : "Edit"}
+                      {isMobile ? <BiEdit size={20} /> : "Edit"}
 
                     </Button>
                   ) : null}
                   {permissions.user.isDelete ? (
                     <DeleteButton
-                        text={isMobile ? <MdDelete size={20}/> : "Delete"}
+                      text={isMobile ? <MdDelete size={20} /> : "Delete"}
                       disabled={user?.user?._id === id || userData?.userType === userType.brandAdmin}
                       onClick={() => handleDeleteUser(true)}
                       className={isMobile ? accountClass.mobile_button_layout : ""}
@@ -1074,8 +1074,8 @@ const UserDetailsPage = () => {
                           onSuccess={() => {
                             fetchUserData();
                           }}
-                          entityAccessIds = {entityAccess}
-                          roleAccessIds = {roleAccessOfLoggedInUser}
+                          entityAccessIds={entityAccess}
+                          roleAccessIds={roleAccessOfLoggedInUser}
                         />
 
 
@@ -1091,17 +1091,18 @@ const UserDetailsPage = () => {
               </Grid>
 
               <div className="p-3">
-                <OpportunityAccordionInUserDetail
-                  opportunities={[...opportunityRelatedData?.Owner ?? [], ...opportunityRelatedData?.Collaborator ?? []]}
-                  recordsPerLine={3}
-                  expanded={false}
-                  userId={id}
-                  onSuccess={() => {
-                    fetchUserRelatedDetail()
-                  }}
-                  isAllowedToEdit={permissions.user.isUpdate}
-                />
-                <LeadAccordionInUserDetailPage
+                {permissions[opportunity.opportunityResource]?.isRead &&
+                  <OpportunityAccordionInUserDetail
+                    opportunities={[...opportunityRelatedData?.Owner ?? [], ...opportunityRelatedData?.Collaborator ?? []]}
+                    recordsPerLine={3}
+                    expanded={false}
+                    userId={id}
+                    onSuccess={() => {
+                      fetchUserRelatedDetail()
+                    }}
+                    isAllowedToEdit={permissions.user.isUpdate}
+                  />}
+                {permissions[lead.leadResource]?.isRead && <LeadAccordionInUserDetailPage
                   leads={[...leadsRelatedData?.Owner ?? [], ...leadsRelatedData?.Collaborator ?? []]}
                   recordsPerLine={3}
                   expanded={false}
@@ -1110,18 +1111,21 @@ const UserDetailsPage = () => {
                     fetchUserRelatedDetail()
                   }}
                   isAllowedToEdit={permissions.user.isUpdate}
-                />
-                <AccountAccordionDetail
-                  type="customer"
-                  accounts={[...customerAccountRelatedData?.Owner ?? [], ...customerAccountRelatedData?.Collaborator ?? []]}
-                  recordsPerLine={3}
-                  expanded={false}
-                  userId={id}
-                  onSuccess={() => {
-                    fetchUserRelatedDetail()
-                  }}
-                  isAllowedToEdit={permissions.user.isUpdate}
-                />
+                />}
+                {permissions[customerAccount.accountResource]?.isRead &&
+                  <AccountAccordionDetail
+                    type="customer"
+                    accounts={[...customerAccountRelatedData?.Owner ?? [], ...customerAccountRelatedData?.Collaborator ?? []]}
+                    recordsPerLine={3}
+                    expanded={false}
+                    userId={id}
+                    onSuccess={() => {
+                      fetchUserRelatedDetail()
+                    }}
+                    isAllowedToEdit={permissions.user.isUpdate}
+                  />
+                }
+                {permissions[supplierAccount.accountResource]?.isRead && 
                 <AccountAccordionDetail
                   type="supplier"
                   accounts={[...supplierAccountRelatedData?.Owner ?? [], ...supplierAccountRelatedData?.Collaborator ?? []]}
@@ -1132,7 +1136,8 @@ const UserDetailsPage = () => {
                     fetchUserRelatedDetail()
                   }}
                   isAllowedToEdit={permissions.user.isUpdate}
-                />
+                />}
+                {permissions[customerContact.contactResource]?.isRead && 
                 <ContactAccordionInDetailPage
                   type="customer"
                   contacts={[...customerContactRelatedData?.Owner ?? [], ...customerContactRelatedData?.Collaborator ?? []]}
@@ -1143,7 +1148,8 @@ const UserDetailsPage = () => {
                     fetchUserRelatedDetail()
                   }}
                   isAllowedToEdit={permissions.user.isUpdate}
-                />
+                />}
+                {permissions[supplierContact.contactResource]?.isRead && 
                 <ContactAccordionInDetailPage
                   type="supplier"
                   contacts={[...supplierContactRelatedData?.Owner ?? [], ...supplierContactRelatedData?.Collaborator ?? []]}
@@ -1154,7 +1160,7 @@ const UserDetailsPage = () => {
                     fetchUserRelatedDetail()
                   }}
                   isAllowedToEdit={permissions.user.isUpdate}
-                />
+                />}
               </div>
             </Paper>
           </div>
@@ -1346,8 +1352,8 @@ const UserDetailsPage = () => {
           fetchUsers={() => fetchUsers()}
           userList={userList}
           selectedRecords={[{ ...userData }]}
-          isRoleSetUpPermission = {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate}
-          isApprovalProcess = {isLoggedInUserBrandAdmin}
+          isRoleSetUpPermission={permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate}
+          isApprovalProcess={isLoggedInUserBrandAdmin}
         />
       }
       {

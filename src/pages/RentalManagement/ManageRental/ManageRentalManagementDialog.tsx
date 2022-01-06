@@ -9,7 +9,10 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, customerAccount, customerContact, getCollaboratorDropdownDataSource, getObjKeys, getObjKeysWithValues, getOwnerDropdownDataSource, isFieldNotTouched, rentalManagement, setFieldsInAscendingOrder, yupSchema } from "../../../constants/helpers";
+import {
+    CustomDialogTransition, customerAccount, customerContact, getCollaboratorDropdownDataSource, getObjKeys, getObjKeysWithValues,
+    getOwnerDropdownDataSource, isFieldNotTouched, rentalManagement, setFieldsInAscendingOrder, yupSchema, generateUniqueIdOnly
+} from "../../../constants/helpers";
 import axiosInstance from '../../../axios/axiosInstance'
 import Dialog from "@material-ui/core/Dialog";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
@@ -214,6 +217,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     if (isClone) {
                         const { _id, brand, createdBy, entity, history, products, status, rentalJobName, updatedBy, ...rest } = data
                         rest.status = "New"
+                        rest['rentalJobName'] = `RJ_${generateUniqueIdOnly()}`
                         setRentalData({
                             fields: fieldsDataForCreate,
                             initialValues: getObjKeysWithValues(rest, fieldsDataForCreate),
@@ -235,7 +239,10 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                 }
             }
             else {
-                let initialData = { ...getObjKeys("", fieldsDataForCreate), estimateEndDate: "", actualEndDate: "", currency: user.user?.brandCurrency || "" };
+                let initialData = {
+                    ...getObjKeys("", fieldsDataForCreate),
+                    estimateEndDate: "", actualEndDate: "", currency: user.user?.brandCurrency || "", rentalJobName: `RJ_${generateUniqueIdOnly()}`
+                };
                 setRentalData({
                     fields: fieldsDataForCreate,
                     initialValues: initialData,
@@ -243,7 +250,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                 setFormValues(initialData)
                 setLoading(false)
             }
-
         } catch (error) {
             toastConfig.setToastConfig(error);
         }
@@ -987,7 +993,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                             if (obj) {
                                                 setShowAddCustomerContactDialog(false);
                                                 updateContactDropdown(obj.data.data);
-                                                setFieldValue("customerContact", obj.id); 
+                                                setFieldValue("customerContact", obj.id);
                                             }
                                         }}
                                         accountId={values["customerAccount"]}
