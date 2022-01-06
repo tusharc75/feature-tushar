@@ -86,7 +86,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     };
 
     const getQueryString = () => {
-        let deepFilter = type === "product" ? `?warehouse=${rentalManagementData?.warehouse?.optionValue}&page=${page}&limit=${limit}` : `?page=${page}&limit=${limit}`;
+        let deepFilter = type === "product" ? `?warehouse=${rentalManagementData?.warehouse?.optionValue}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'serializedProduct', term: 'yes' }]))}&page=${page}&limit=${limit}` : `?page=${page}&limit=${limit}`;
 
         if (type !== "product") {
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'packageType', term: 'product' }]))}&filterType=and`
