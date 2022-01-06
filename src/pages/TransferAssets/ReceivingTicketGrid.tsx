@@ -52,7 +52,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const [openReceivingTicketDialog, setOpenReceivingTicketDialog] = useState(false);
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [assetsDelivered, setAssetsDelivered] = useState([]);
-  const [loadingTicketsNotDelivered, setLoadingTicketsDelivered] = useState([]);
+  const [loadingTicketsNotDelivered, setLoadingTicketsNotDelivered] = useState([]);
 
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -192,7 +192,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         (asset: any) => asset?.receivingTicketStatus === 'Delivered' || asset?.receivingTicketStatus === 'In-Transit'
       );
 
-      setLoadingTicketsDelivered(loadingTicketsNotDelivered);
+      setLoadingTicketsNotDelivered(loadingTicketsNotDelivered);
       setAssetsDelivered(selectedInventoryDelivered);
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
@@ -291,7 +291,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
                 selectedRecords.length === 0 ||
                 assetWithNoTicket.length === 0 ||
                 loadingTicketsNotDelivered.length > 0 ||
-                selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0
+                selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0 ||
+                selectedRecords.filter((asset: any) => asset.hasOwnProperty('receivingTicket')).length > 0
               }
               onClick={() => setOpenReceivingTicketDialog(true)}
             >
@@ -304,7 +305,10 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               variant="contained"
               size="small"
               color="primary"
-              disabled={assetsDelivered.length > 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('receivingTicket')).length === 0}
+              disabled={assetsDelivered.length > 0 
+                || selectedRecords.filter((asset) => asset?.hasOwnProperty('receivingTicket')).length === 0
+                || selectedRecords.filter((asset) => !asset?.hasOwnProperty('receivingTicket')).length > 0
+              }
               onClick={() => setShowConfirmBox(true)}
             >
               Remove Receiving Ticket
@@ -335,6 +339,10 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             page={page}
             loading={loading}
             chips={[
+              {
+                label: "Status: ",
+                field: "status",
+              },
               {
                 label: 'Loading Ticket : ',
                 field: 'loadingTicket',
