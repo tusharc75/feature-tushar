@@ -7,7 +7,7 @@ import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { rentalManagement } from "../../../constants/helpers";
+import { salesOrder } from "../../../constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -25,7 +25,7 @@ import { GrBusinessService } from "react-icons/all";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 
-const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
+const AdditionalCost = ({ salesOrderData, setNextStep }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -47,13 +47,13 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
     const fetchFields = async () => {
         var data = []
         if (isOffline) {
-            data = await findOne(objectStore.resource, "rentalManagementCost")
+            data = await findOne(objectStore.resource, "salesOrderCost")
         }
         else {
-            const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`)
+            const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.salesOrderCost}`)
             data = response?.data?.data
         }
-        const fields = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
+        const fields = CURReplaceByCurrencySingle(data, salesOrderData.currency)
         let rendererNames = [];
         genrateColoum(fields, columns, rendererNames, false);
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
@@ -75,11 +75,11 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
             }
             var data: any = []
             if (isOffline) {
-                data = await findOne(objectStore.rentalManagement, rentalManagementData._id)
+                data = await findOne(objectStore.salesOrder, salesOrderData._id)
                 data = data?.additionalCost
             }
             else {
-                const response = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`)
+                const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/additionalcost/${salesOrderData._id}`)
                 data = response?.data?.data
             }
             let rows = data?.map((item) => {
@@ -113,19 +113,19 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                 </IconButton>
             </HtmlTooltip>
             <GridDeleteIcon
-                hasDeletePermission={permissions?.rentalManagement?.isUpdate}
+                hasDeletePermission={permissions?.salesOrder?.isUpdate}
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
                 onDelete={() => {
                     handleDeleteCost([params.data._id])
                 }}
-                entity="rentalManagement"
+                entity="salesOrder"
             />
         </Fragment>
     );
 
     const handleAddCost = (rows) => {
-        axiosInstance().post(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/add`, { additionalCost: rows })
+        axiosInstance().post(`${salesOrder.salesOrderApi}/additionalcost/${salesOrderData._id}/add`, { additionalCost: rows })
             .then(() => {
                 fetchAdditionalCost()
                 setShowCostDialog(false)
@@ -135,7 +135,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
     }
 
     const handleUpdateCost = (rows) => {
-        axiosInstance().put(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/update`, { additionalCost: rows })
+        axiosInstance().put(`${salesOrder.salesOrderApi}/additionalcost/${salesOrderData._id}/update`, { additionalCost: rows })
             .then(() => {
                 fetchAdditionalCost()
                 setShowCostDialog(false)
@@ -145,7 +145,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
     }
 
     const handleDeleteCost = (ids) => {
-        axiosInstance().post(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/delete`, { ids })
+        axiosInstance().post(`${salesOrder.salesOrderApi}/additionalcost/${salesOrderData._id}/delete`, { ids })
             .then(() => {
                 fetchAdditionalCost()
             }).catch((error) => {
@@ -158,7 +158,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex">
                     <Button
-                        variant={"contained"}
+                        variant={isMobile ? "outlined" : "contained"}
                         color="primary"
                         size="small"
                         disabled={isOffline}
@@ -167,7 +167,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                             setSelectedCostData(null)
                         }}
                     >
-                        {"Add Ad-hoc Charge"}
+                        {isMobile ? <GrBusinessService size={20} /> : "Add Cost"}
                     </Button>
                 </Box>
             </Box>
@@ -205,7 +205,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                     onCreate={null}
                     showClone={false}
                     fullHeight={true}
-                    renderedFrom={routes.rentalManagement.title}
+                    renderedFrom={routes.salesOrder.title}
                     onClone={() => { }}
                 />
                 :
@@ -227,10 +227,8 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                     onCellValueChanged={(row) => {
                         //handleUpdateOrderProduct(row.data)
                     }}
-                    renderedFrom="rentalmanagmentadditionalcost"
+                    renderedFrom="salesorderadditionalcost"
                     refreshGrid={fetchAdditionalCost}
-                    isFooter={true}
-                    currency={rentalManagementData?.currency?.toLowerCase()}
                 />
                 : <Box
                     p={2}
@@ -247,7 +245,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                     }}
                     handleAddCost={handleAddCost}
                     handleUpdateCost={handleUpdateCost}
-                    currency={rentalManagementData?.currency}
+                    currency={salesOrderData?.currency}
                     costData={selectedCostData}
                 />
             }

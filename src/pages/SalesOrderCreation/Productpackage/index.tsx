@@ -14,25 +14,26 @@ import CustomReactTable from "../../../components/CustomReactTable/CustomReactTa
 import { camelCase, startCase, orderBy, sum } from "lodash";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import Add from "@material-ui/icons/Add";
-import DeleteIcon from "@material-ui/icons/Delete";
-
 import moment from "moment";
 import {
-    getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow,
-    dateFormat, pricingCondition, generateUniqueId, treeToFlatArray, formatAmountWithCurrency, CHILD_RESOURCE
+    getUniqueCurrencies, gridLoadingTimeout, salesOrder, defaultActivityShow,
+    dateFormat, pricingCondition, generateUniqueId, treeToFlatArray, formatAmountWithCurrency
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
-import RentalJobQtyDialog from './RentalJobQtyDialog'
+import SalesOrderQtyDialog from './SalesOrderQtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
 import InfoIcon from "@material-ui/icons/Info";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 
-const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity }) => {
+const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
 
+    const isSmallScreen = useMediaQuery('(max-width:1300px)');
+    const isTabletScreen = useMediaQuery('(max-width:960px)');
+    const [showActivity, setActivityShow] = useState(defaultActivityShow);
     const [isUpdating, setUpdating] = useState(false);
 
     const [selectedProducts, setSelectedProducts] = useState([])
@@ -59,20 +60,19 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     const fetchFields = async () => {
         var data = []
         if (isOffline) {
-            data = await findOne(objectStore.resource, "rentalManagementProduct")
+            data = await findOne(objectStore.resource, "salesOrderProduct")
         }
         else {
-            const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`)
+            const response = await axiosInstance().get(`/field/child?resource=Sales Order Product`)
             data = response?.data?.data
         }
-        data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
+        data = CURReplaceByCurrencySingle(data, salesOrderData.currency)
         setAllFields(JSON.parse(JSON.stringify(data)))
         const coloum: any = [{
             accessor: 'detail',
             Header: 'Detail',
             minWidth: 300,
             width: 300,
-            sticky: "left",
             Cell: ({ row }) => (
                 <div style={{ display: "flex", alignItems: 'center' }}>
                     {isOffline ? <p> {row.original.detail}</p>
@@ -144,7 +144,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                                 accessor: fieldName,
                                 Header: fieldLabel,
                                 Cell: ({ row }) => (
-                                    row.original[fieldName] ? <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
+                                    row.original[fieldName] ? <p>{formatAmountWithCurrency(salesOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
                                 )
                             })
                         })
@@ -158,7 +158,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                             accessor: fieldName,
                             Header: fieldLabel,
                             Cell: ({ row }) => (
-                                row.original[fieldName] ? <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
+                                row.original[fieldName] ? <p>{formatAmountWithCurrency(salesOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
                             )
                         })
                     })
@@ -177,31 +177,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 })
             }
         });
-        coloum.push({
-            accessor: 'action',
-            Header: '',
-            minWidth: 50,
-            width: 50,
-            sticky: "right",
-            Cell: ({ row }) => (
-                !row.original.hideSelection &&
-                <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                        const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                        if (row.original?.type === 'package' && row.original?.subRows?.length) {
-                            row.original?.subRows.forEach(element => {
-                                obj.push({ id: element._id, type: element.type, materialId: element.materialId })
-                            });
-                        }
-                        setDeleteData(obj)
-                    }}
-                >
-                    <DeleteIcon fontSize="small" color="error" />
-                </IconButton >
-            )
-        })
         coloum.forEach(element => {
             if (element.accessor.includes("detail")) {
                 element["Footer"] = () => {
@@ -217,7 +192,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
             else if (element.accessor.includes("finalPrice")) {
                 element["Footer"] = (info) => {
                     const total = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
-                    return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
+                    return <>{currencySymbol} {formatAmountWithCurrency(salesOrderData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
                 }
             }
         });
@@ -230,11 +205,11 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
         var data: any = []
         var inventory: any = []
         if (isOffline) {
-            data = await findOne(objectStore.rentalManagement, rentalManagementData._id)
+            data = await findOne(objectStore.salesOrder, salesOrderData._id)
             inventory = data.productInventory;
         }
         else {
-            const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`)
+            const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`)
             data = response?.data?.data
             setMaterial(JSON.parse(JSON.stringify(data.material)))
             inventory = data.inventory;
@@ -243,7 +218,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
         rows.forEach((parent, i) => {
             parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
             parent.qtyDisplay = parent.qty;
-            parent.isValid = parent["finalPrice_" + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+            parent.isValid = parent["finalPrice_" + salesOrderData?.currency?.toLowerCase()] ? true : false;
             parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
             parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
             if (parent.type === "package") {
@@ -251,7 +226,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 subRows.forEach((_subRow, j) => {
                     _subRow.detail = (i + 1) + "." + (j + 1) + " - " + _subRow.productDetail?.productName
                     _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`
-                    _subRow.isValid = _subRow["finalPrice_" + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+                    _subRow.isValid = _subRow["finalPrice_" + salesOrderData?.currency?.toLowerCase()] ? true : false;
                     _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
                     _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
                 })
@@ -281,10 +256,10 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
             element.unit = d.unit && d.unit.length ? d.unit[0] : "";
             element.pricingMethod = d.pricingMethod && d.pricingMethod.length ? d.pricingMethod[0] : "";
             element.qty = d.qty ? parseFloat(d.qty) : 1;
-            element.estimateStartDate = rentalManagementData ? rentalManagementData?.estimateStartDate : new Date();
-            element.estimateEndDate = rentalManagementData ? rentalManagementData?.estimateEndDate : new Date();
-            element.actualStartDate = rentalManagementData ? rentalManagementData?.actualStartDate : new Date();
-            element.actualEndDate = rentalManagementData ? rentalManagementData?.actualEndDate : new Date();
+            element.estimateStartDate = salesOrderData ? salesOrderData?.estimateStartDate : new Date();
+            element.estimateEndDate = salesOrderData ? salesOrderData?.estimateEndDate : new Date();
+            element.actualStartDate = salesOrderData ? salesOrderData?.actualStartDate : new Date();
+            element.actualEndDate = salesOrderData ? salesOrderData?.actualEndDate : new Date();
             element.parentId = addExistingProductDialog.parentId;
             const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields)
             element.tenure = 1;
@@ -299,14 +274,14 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
             const rateResult = priceData?.filter((e) => e.materialId === element.materialId &&
                 e.materialType === element.type && e.unit === element.unit && e.pricingMethod === element.pricingMethod)
             if (rateResult.length && rateResult[0].mrp) {
-                const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`
+                const priceFieldName = `price_${salesOrderData?.currency?.toLowerCase()}`
                 element[priceFieldName] = rateResult[0].mrp;
                 const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields)
                 Object.assign(element, calValues);
             }
         })
 
-        axiosInstance().post(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`, { material })
+        axiosInstance().post(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`, { material })
             .then(() => {
                 setAddExistingProductDialog({ open: false, type: "", parentId: null })
                 fetchProductInventory()
@@ -330,7 +305,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
             delete element.subRows
         });
         setUpdating(true);
-        axiosInstance().put(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`, { material: rows }).then(() => {
+        axiosInstance().put(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`, { material: rows }).then(() => {
             setUpdating(false)
             setIsProductEdit({ open: false, isBulkedit: false })
             fetchProductInventory()
@@ -342,7 +317,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
 
     const handleDelete = (rows) => {
         setDeleting(true)
-        axiosInstance().put(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData?._id}/delete`, { ids: rows })
+        axiosInstance().put(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData?._id}/delete`, { ids: rows })
             .then(() => {
                 setDeleting(false)
                 fetchProductInventory()
@@ -362,7 +337,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     const calculatePrice = (arr: any[]) => {
         //materialType can be =["product","packages","productCategory"]
         //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
-        if (rentalManagementData) {
+        if (salesOrderData) {
             const data: any = {}
             data.conditionType = ["Rent"]
             data.material = arr.map(ele => ({
@@ -371,11 +346,11 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 qty: ele?.qty,
                 pricingMethod: ele?.pricingMethod,
                 unit: ele?.unit,
-                currency: rentalManagementData?.currency
+                currency: salesOrderData?.currency
             }))
             data.supplier = [];
-            data.customer = [rentalManagementData?.customerAccount?.optionValue];
-            data.warehouse = [rentalManagementData?.warehouse?.optionValue];
+            data.customer = [salesOrderData?.customerAccount?.optionValue];
+            data.warehouse = [salesOrderData?.warehouse?.optionValue];
             return new Promise((resolve, reject) => {
                 axiosInstance().post(pricingCondition.api + `/calculatePrice`, data)
                     .then(({ data: { data } }) => {
@@ -388,103 +363,100 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     };
 
     return (<Fragment>
-        <Grid container spacing={2} >
-            <Grid item xs={12} md={12} sm={12} >
-                <Box display="flex" justifyContent="space-between" m={1}>
-                    <Box display="flex">
+        <Box display="flex" justifyContent="space-between" m={1}>
+            <Box display="flex" alignItems="center">
+                <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    disabled={isOffline}
+                    onClick={() => {
+                        setAddExistingProductDialog({ open: true, type: "product", parentId: null });
+                    }}
+                >
+                    {`Add ${routes.product.title}`}
+                </Button>
+                <Box mx={1} />
+                <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    disabled={isOffline}
+                    onClick={() => {
+                        setAddExistingProductDialog({ open: true, type: "package", parentId: null });
+                    }}
+                >
+                    {`Add ${routes.packages.title}`}
+                </Button>
+            </Box>
+            <Box display="flex">
+                <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
+                    <span>
                         <Button
                             variant="contained"
                             color="primary"
                             size="small"
-                            disabled={isOffline}
-                            onClick={() => {
-                                setAddExistingProductDialog({ open: true, type: "product", parentId: null });
-                            }}
+                            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+                            onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
                         >
-                            {`Add ${routes.product.title}`}
+                            Bulk Edit
                         </Button>
-                        <Box mx={1} />
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            disabled={isOffline}
-                            onClick={() => {
-                                setAddExistingProductDialog({ open: true, type: "package", parentId: null });
-                            }}
-                        >
-                            {`Add ${routes.packages.title}`}
-                        </Button>
-                    </Box>
-                    <Box display="flex">
-                        <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
-                            <span>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    size="small"
-                                    disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                                    onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
-                                >
-                                    Bulk Edit
-                                </Button>
-                            </span>
-                        </HtmlTooltip>
-                        <Box mx={1} />
-                        <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                size="small"
-                                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-                                onClick={() => {
-                                    const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection).map((rec: any) => {
-                                        const obj: any = {};
-                                        obj.id = rec._id;
-                                        obj.type = rec?.type;
-                                        obj.materialId = rec?.materialId;
-                                        return obj
-                                    })
-                                    setDeleteData(dataToDelete)
-                                }}
-                                endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
-                            >
-                                Delete
-                            </Button>
-                        </HtmlTooltip>
-                    </Box>
-                </Box>
-            </Grid>
-            <Grid item xs={12} md={12} sm={12} >
-                {columns && rowsData ?
-                    <Box
-                        zIndex={5}
-                        width={
-                            isTabletScreen
-                                ? "calc(100vw - 20px)"
-                                : isSmallScreen
-                                    ? "calc(100vw - 78px)"
-                                    : showActivity ? "100%" : "calc(100vw - 103px)"
-                        }
-                        height="calc(100vh - 350px)"
+                    </span>
+                </HtmlTooltip>
+                <Box mx={1} />
+                <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+                        onClick={() => {
+                            const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection).map((rec: any) => {
+                                const obj: any = {};
+                                obj.id = rec._id;
+                                obj.type = rec?.type;
+                                obj.materialId = rec?.materialId;
+                                return obj
+                            })
+                            setDeleteData(dataToDelete)
+                        }}
+                        endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
                     >
-                        <CustomReactTable
-                            height="calc(100vh - 345px)"
-                            columns={columns}
-                            data={rowsData}
-                            isInValidCheck={(rowData) => !rowData.isValid}
-                            onSelect={setSelectedProducts}
-                            childrenProperty="subRows"
-                            uniqueKey="_id"
-                            hideSelection={isOffline}
-                        />
-                    </Box>
-                    : <Box p={2} height={500} bgcolor="white">
-                        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                    </Box>
-                }
-            </Grid>
-        </Grid>
+                        Delete
+                    </Button>
+                </HtmlTooltip>
+            </Box>
+        </Box>
+        {columns && rowsData ?
+            <>
+                <Box
+                    p="6px"
+                    zIndex={5}
+                    width={
+                        isTabletScreen
+                            ? "calc(100vw - 20px)"
+                            : isSmallScreen
+                                ? "calc(100vw - 78px)"
+                                : showActivity ? "100%" : "calc(100vw - 100px)"
+                    }
+                    height="calc(100vh - 330px)"
+                >
+                    <CustomReactTable
+                        height="calc(100vh - 345px)"
+                        columns={columns}
+                        data={rowsData}
+                        isInValidCheck={(rowData) => !rowData.isValid}
+                        onSelect={setSelectedProducts}
+                        childrenProperty="subRows"
+                        uniqueKey="_id"
+                        hideSelection={isOffline}
+                    />
+                </Box>
+            </>
+            : <Box p={2} height={500} bgcolor="white">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+        }
         {deleteData && <ConfirmationDialog
             open={true}
             message={`Are you sure you want to delete the record(s)?`}
@@ -493,7 +465,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
             okBtnLoading={isDeleting}
         />}
         {isProductEdit.open &&
-            <RentalJobQtyDialog
+            <SalesOrderQtyDialog
                 calculatePrice={calculatePrice}
                 onClose={() => {
                     setIsProductEdit({ open: false, isBulkedit: false })
@@ -501,7 +473,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 }}
                 isBulkedit={isProductEdit.isBulkedit}
                 handleSaveData={handleSaveData}
-                rentalManagementData={rentalManagementData}
+                salesOrderData={salesOrderData}
                 rowData={recordToUpdate}
                 material={material}
                 selectedProducts={selectedProducts}
@@ -514,7 +486,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
                 productInventory={[]}
                 type={addExistingProductDialog.type}
-                rentalManagementData={rentalManagementData}
+                salesOrderData={salesOrderData}
             />
         }
     </Fragment>

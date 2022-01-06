@@ -14,9 +14,8 @@ import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
   deliveryTicket,
   gridLoadingTimeout,
-  rentalManagement,
-  sidebarResource,
-  INVENTORY_STATUS
+  salesOrder,
+  sidebarResource
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { useHistory } from "react-router-dom";
@@ -27,12 +26,12 @@ import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
-import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
+import { getSalesOrderProductAssets, getSalesOrderDeliveryTicket } from '../salesOrderOfflineHelper';
 
 
-const renderedFrom = "rentalManagementDetailsPageDeliveryTicket"
+const renderedFrom = "salesOrderPageDeliveryTicket"
 
-const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
+const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNextStep }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -65,17 +64,17 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       var deliveryTicketList: any = []
       dispatch({ type: "loading", loading: true });
       if (isOffline) {
-        productAssets = await getRentalProductAssets(rentalManagementData._id)
+        productAssets = await getSalesOrderProductAssets(salesOrderData._id)
         productAssets = productAssets?.map(u => ({ ...u, productName: u?.product?.optionLabel }))
-        deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id)
+        deliveryTicketList = await getSalesOrderDeliveryTicket(salesOrderData._id)
       }
       else {
-        const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
+        const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/${salesOrderData._id}/inventory`)
         setAssignedSerializedAsset(response?.data?.data)
         productAssets = response?.data?.data
         productAssets = productAssets.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
 
-        const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=Rental Job&refrenceId=${rentalManagementData._id}`)
+        const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=Sales Order&refrenceId=${salesOrderData._id}`)
         deliveryTicketList = result?.data?.data
       }
       deliveryTicketList.map(obj => {
@@ -85,19 +84,16 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
               productAssets[index]["type"] = obj?.type
               productAssets[index]["deliveryTicket"] = obj?.ticketName
               productAssets[index]["deliveryTicketId"] = obj?._id
+
+              productAssets[index]["isDelivered"] = obj?.status === "Delivered";
             }
           })
         }
       })
       productAssets.forEach((d) => {
-        d["isChecked"] = false;
-        d["hideSelection"] = [INVENTORY_STATUS.inUse, INVENTORY_STATUS.indTransit, INVENTORY_STATUS.repair,
-        INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(d.status);
+        d["hideSelection"] = ["In-Use", "In-Transit", "Repair", "Scrap", "Lost", "Under Review"].includes(d.status);
       })
-      if (productAssets.filter((e) => [INVENTORY_STATUS.inUse, INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap,
-      INVENTORY_STATUS.lost, INVENTORY_STATUS.indTransit, INVENTORY_STATUS.underReview, INVENTORY_STATUS.readyToShip].includes(e.status)
-        || productAssets?.deliveryTicketId
-      ).length === productAssets.length) {
+      if (productAssets.filter((e) => ["In-Use", "Repair", "Scrap", "Lost", "In-Transit", "Under Review", "Ready to ship", "Sold"].includes(e.status)).length === productAssets.length) {
         setNextStep(true)
       }
       dispatch({ type: "initialize", data: productAssets, count: productAssets.length });
@@ -164,11 +160,11 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   };
 
   return (<>
-    <Box display="flex" justifyContent="flex-end" pt={1}>
-      <Button
+    <Box display="flex" justifyContent="flex-end" p="4px">
+      {/* <Button
         onClick={() => {
           setDownlodingFile(true);
-          axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
+          axiosInstance().get(`/${salesOrder.salesOrderApi}/${salesOrderData._id}/pdf`)
             .then(({ data }) => {
               axiosInstance()
                 .get(`user/download?fileName=${data.data.fileName}`, {
@@ -200,7 +196,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       >
         {downlodingFile ? "Please wait..." : "Preview"}
       </Button>
-      <Box mx={1} />
+      <Box mx={1} /> */}
       <IconButton
         disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
         onClick={() => {
@@ -216,7 +212,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       </IconButton>
       <Box mx={1} />
       <IconButton
-        disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
+        disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId"))) || selectedRecords.some(s => s.isDelivered === true)}
         onClick={() => {
           setShowRemoveAssetFromLoadingTicketDialog(true)
         }}
@@ -239,7 +235,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             permissions={true}
             primaryField={columns?.find(d => d.field)}
             onClick={(data) => {
-              history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+              history.push(`${routes.deliveryTicketDetail.path}/${data._id}`)
             }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}
@@ -254,13 +250,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             ]}
             chips={[
               {
-                label: "Status : ",
-                field: "status",
-              },
-              {
-                label: "Loading Ticket : ",
-                field: "deliveryTicket",
-                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
+                label: "Asset Number : ",
+                field: "assetNumber",
               }
             ]}
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
@@ -291,11 +282,11 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     {showDeliveryTicketDialog && (
       <ManageDeliveryTicket
         ticketType="Loading"
-        refrenceType="Rental Job"
-        refrenceData={rentalManagementData}
+        refrenceType="Sales Order"
+        refrenceData={salesOrderData}
         onClose={() => setShowDeliveryTicketDialog(false)}
         productInventory={productInventoryForDeliveryTicket}
-        warehouseId={rentalManagementData?.warehouse}
+        warehouseId={salesOrderData?.warehouse ?? salesOrderData?.plant}
         onSuccess={() => {
           setShowDeliveryTicketDialog(false);
           fetchRecords();
@@ -306,7 +297,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       showRemoveAssetFromLoadingTicketDialog && (
         <ConfirmationDialog
           open={showRemoveAssetFromLoadingTicketDialog}
-          message={`Are you sure you want to remove selected records from Loading Ticket?`}
+          message={`Are you sure you want to remove selected records from ${sidebarResource.deliveryTicket}(s) ?`}
           onClose={() => {
             setShowRemoveAssetFromLoadingTicketDialog(false);
           }}

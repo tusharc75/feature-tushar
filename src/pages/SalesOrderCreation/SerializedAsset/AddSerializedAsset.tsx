@@ -7,7 +7,7 @@ import { Box, CircularProgress } from "@material-ui/core";
 import SearchBox from '../../../components/Helpers/SearchBox'
 import routes from "../../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData, INVENTORY_STATUS } from '../../../constants/helpers';
+import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { useData } from "../../../StateProvider/Provider";
 import Dialog from "@material-ui/core/Dialog/Dialog";
@@ -15,6 +15,8 @@ import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import { prepareDataForGrid } from "../../../constants/helpers"
+
+
 
 const addSerializedAssetsRenderedFrom = "addSerializedAssets";
 const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
@@ -179,7 +181,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         } else if (transferAssetId) {
             deepFilter = `${deepFilter}&transferAssetId=${transferAssetId}&notIn=${notIn}`;
         } else if (salesOrderId) {
-            deepFilter = `${deepFilter}&salesOrder=${salesOrderId}&notIn=${notIn}`;
+            deepFilter = `${deepFilter}&salesOrderId=${salesOrderId}&notIn=${notIn}`;
         } else {
             if (filterByPlant == null) {
                 deepFilter = `${deepFilter}&entityWise=1`;
@@ -213,7 +215,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     };
 
     const getRowStyleScheduled = (params) => {
-        if ([INVENTORY_STATUS.available, INVENTORY_STATUS.new].indexOf(params?.data?.status) >= 0) {
+        if (["Available", "New"].indexOf(params?.data?.status) >= 0) {
             return {
                 'background-color': "#d3ffe0",
             }

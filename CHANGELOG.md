@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.34.1](https://github.com/vebholic/oms_frontend/compare/v2.34.0...v2.34.1) (2022-01-06)
+
+
+### Bug Fixes
+
+* bug fix ([b04074c](https://github.com/vebholic/oms_frontend/commit/b04074cd8aa30979463ce432963be553b764f220))
+* **dashboard:** changes and new chart ([98c6fbd](https://github.com/vebholic/oms_frontend/commit/98c6fbda51aea2f92757fe8b94a92a881df30cf3))
+* mobile ui for PO ([3172ce7](https://github.com/vebholic/oms_frontend/commit/3172ce72802f0b78d080226159c49faf7b129476))
+* pO mobile ([7b47c02](https://github.com/vebholic/oms_frontend/commit/7b47c0273ec881ddacc7310d359204ef4e522279))
+* pO-826 ([b788471](https://github.com/vebholic/oms_frontend/commit/b788471bdb610ca68f54b7dce3ffcd5d449fa7bd))
+
 ## [2.34.0](https://github.com/vebholic/oms_frontend/compare/v2.33.0...v2.34.0) (2022-01-05)
 
 
