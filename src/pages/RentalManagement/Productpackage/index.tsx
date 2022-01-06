@@ -14,10 +14,12 @@ import CustomReactTable from "../../../components/CustomReactTable/CustomReactTa
 import { camelCase, startCase, orderBy, sum } from "lodash";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import Add from "@material-ui/icons/Add";
+import DeleteIcon from "@material-ui/icons/Delete";
+
 import moment from "moment";
 import {
     getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow,
-    dateFormat, pricingCondition, generateUniqueId, treeToFlatArray, formatAmountWithCurrency,CHILD_RESOURCE
+    dateFormat, pricingCondition, generateUniqueId, treeToFlatArray, formatAmountWithCurrency, CHILD_RESOURCE
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import RentalJobQtyDialog from './RentalJobQtyDialog'
@@ -175,6 +177,31 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 })
             }
         });
+        coloum.push({
+            accessor: 'action',
+            Header: '',
+            minWidth: 50,
+            width: 50,
+            sticky: "right",
+            Cell: ({ row }) => (
+                !row.original.hideSelection &&
+                <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                        const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                        if (row.original?.type === 'package' && row.original?.subRows?.length) {
+                            row.original?.subRows.forEach(element => {
+                                obj.push({ id: element._id, type: element.type, materialId: element.materialId })
+                            });
+                        }
+                        setDeleteData(obj)
+                    }}
+                >
+                    <DeleteIcon fontSize="small" color="error" />
+                </IconButton >
+            )
+        })
         coloum.forEach(element => {
             if (element.accessor.includes("detail")) {
                 element["Footer"] = () => {
