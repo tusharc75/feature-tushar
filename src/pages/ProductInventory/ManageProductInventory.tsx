@@ -510,7 +510,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
                                     <FormTypes
                                       isNew={Boolean(productInventoryId)}
                                       {...field}
-                                      disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                      disabled={(Boolean(productInventoryId)  && field.disableOnEdit && !isClone) || (field.fieldName === 'assetNumber' && field.isUneditable)}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
