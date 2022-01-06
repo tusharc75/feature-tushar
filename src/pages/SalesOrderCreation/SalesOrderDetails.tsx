@@ -12,7 +12,7 @@ import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { salesOrder, defaultActivityShow, salesOrderProcessSteps, getUniqueCurrencies } from '../../constants/helpers';
-import ManageSalesOrder from './ManageSalesOrder';
+import ManageSalesOrderDialog from './ManageSalesOrderDialog/ManageSalesOrderDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
@@ -29,6 +29,9 @@ import { CustomOfflineContext } from '../../StateProvider/OfflineContext/Offline
 import { isMobile } from "react-device-detect";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { GrStatusInfo } from "react-icons/all";
+import HideWhenOffline from '../../components/HideWhenOffline';
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import Activity from '../../components/Activity';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -79,6 +82,10 @@ const SalesOrderDetails = () => {
   //   }
   //   // eslint-disable-next-line
   // }, [id]);
+
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity);
+  };
 
   const handleStatusChange = o => {
     if (o.optionValue && salesOrderData?.status !== o.optionValue) {
@@ -160,7 +167,7 @@ const SalesOrderDetails = () => {
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
 
-      setAllowedToEdit(isAllowedToEdit);
+      setAllowedToEdit(isAllowedToEdit && ["Invoiced", "Closed"].indexOf(data.status) === -1);
 
       if (isAllowedToEdit && openEdit === 'true') {
         setOpenUpdateDialog(true);
@@ -239,7 +246,7 @@ const SalesOrderDetails = () => {
                       </Button>
                     )}
 
-                    {permissions?.salesOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                    {permissions?.salesOrder?.isDelete && ["Invoiced", "Closed"].indexOf(salesOrderData?.status) === -1 && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
 
                     {permissions?.salesOrder?.isUpdate && (["Ready to Invoice", "Invoiced"].includes(salesOrderData?.status)) && (
                       <>
@@ -343,6 +350,7 @@ const SalesOrderDetails = () => {
                       steps={salesOrderProcessSteps}
                       currentStep={currentStep}
                       setCurrentStep={setCurrentStep}
+                      isStepEnded={["Invoiced", "Closed"].includes(salesOrderData?.status)}
                     />
                     {currentStep === 0 && salesOrderData && (
                       <Productpackage
@@ -391,7 +399,80 @@ const SalesOrderDetails = () => {
           </div>
 
           <div className="position-relative">
-
+            <HideWhenOffline>
+              {/* {showActivity ?
+                <Paper>
+                  {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
+                    <IoIosArrowDropright className="icon" />
+                  </span>}
+                  <Grid container>
+                    <Grid item xs={12}>
+                      {rentalManagementData && (
+                        <div>
+                          <Activity
+                            resourceId={rentalManagementData._id}
+                            resource={rentalManagement.resource}
+                            restrictedAddActivities={
+                              permissions &&
+                                permissions["rentalManagement"] &&
+                                permissions["rentalManagement"].isUpdate
+                                ? []
+                                : ["Attachment", "Case"]
+                            }
+                            relatedTo={[
+                              {
+                                type: rentalManagement,
+                                referenceId: rentalManagementData._id,
+                                access: true,
+                              },
+                            ]}
+                            handleActivityRefresh={() => { }}
+                            emails={[]}
+                          />
+                        </div>
+                      )}
+                    </Grid>
+                  </Grid>
+                </Paper> :
+                !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
+                  <IoIosArrowDropleft className="icon" />
+                </span>} */}
+              <Paper>
+                {!isSmallScreen && (
+                  <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                    {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+                  </span>
+                )}
+                <div style={{ display: showActivity ? 'block' : 'none' }}>
+                  <Grid container>
+                    <Grid item xs={12}>
+                      {salesOrderData && (
+                        <div>
+                          <Activity
+                            resourceId={salesOrderData._id}
+                            resource={salesOrder.resource}
+                            restrictedAddActivities={
+                              permissions && permissions['salesOrder'] && permissions['salesOrder'].isUpdate
+                                ? []
+                                : ['Attachment', 'Case']
+                            }
+                            relatedTo={[
+                              {
+                                type: salesOrder,
+                                referenceId: salesOrderData._id,
+                                access: true
+                              }
+                            ]}
+                            handleActivityRefresh={() => { }}
+                            emails={[]}
+                          />
+                        </div>
+                      )}
+                    </Grid>
+                  </Grid>
+                </div>
+              </Paper>
+            </HideWhenOffline>
           </div>
         </div>
 
@@ -407,10 +488,11 @@ const SalesOrderDetails = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageSalesOrder
-          open={openUpdateDialog}
+        <ManageSalesOrderDialog
           isClone={false}
+          open={openUpdateDialog}
           salesOrderId={id}
+          salesOrderData={salesOrderData}
           onClose={() => {
             setOpenUpdateDialog(false);
           }}

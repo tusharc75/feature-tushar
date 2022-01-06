@@ -195,11 +195,11 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
             else {
                 fieldData = offlineFieldsData?.salesOrder || [];
             }
-            // fieldData?.forEach((e: any) => {
-            //     if (e?.fieldData?.fieldName === "warehouse" && e?.fieldData?.option) {
-            //         e.fieldData.option = e?.fieldData?.option?.filter((a) => a.entity?.includes(selectedEntity));
-            //     }
-            // })
+            fieldData?.forEach((e: any) => {
+                if (e?.fieldData?.fieldName === "warehouse" && e?.fieldData?.option) {
+                    e.fieldData.option = e?.fieldData?.option?.filter((a) => a.entity?.includes(selectedEntity));
+                }
+            })
             const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
@@ -714,6 +714,30 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                                                                                 }}
                                                                             />
                                                                         ) : field.fieldName === "billingAddress" ? (
+                                                                            <FormTypes
+                                                                                {...field}
+                                                                                disabled={Boolean(salesOrderId) && field.disableOnEdit && !isClone}
+                                                                                values={values}
+                                                                                errors={errors}
+                                                                                touched={touched}
+                                                                                label={field.fieldLabel}
+                                                                                name={field.fieldName}
+                                                                                type={field.type}
+                                                                                options={countryBillToDropDown}
+                                                                                setFieldValue={(name, value) => {
+                                                                                    setFieldValue(name, value)
+                                                                                }}
+                                                                                required={field.required}
+                                                                                fullWidth
+                                                                                isTooltip={field?.isTooltip || false}
+                                                                                tooltipMessage={field?.tooltipMessage}
+                                                                                size="small"
+                                                                                onOpen={() =>
+                                                                                    onCountryBillToDropDownOpen(values["customerAccount"])
+                                                                                }
+                                                                            />)
+                                                                            :
+                                                                            field.fieldName === "shippingAddress" ? (
                                                                                 <FormTypes
                                                                                     {...field}
                                                                                     disabled={Boolean(salesOrderId) && field.disableOnEdit && !isClone}
@@ -723,7 +747,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                                                                                     label={field.fieldLabel}
                                                                                     name={field.fieldName}
                                                                                     type={field.type}
-                                                                                    options={countryBillToDropDown}
+                                                                                    options={countrySellToDropDown}
                                                                                     setFieldValue={(name, value) => {
                                                                                         setFieldValue(name, value)
                                                                                     }}
@@ -733,22 +757,27 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
                                                                                     onOpen={() =>
-                                                                                        onCountryBillToDropDownOpen(values["customerAccount"])
+                                                                                        onCountrySellToDropDownOpen(values["customerAccount"])
                                                                                     }
                                                                                 />)
-                                                                                :
-                                                                                field.fieldName === "shippingAddress" ? (
+                                                                                : (
                                                                                     <FormTypes
+                                                                                        salesOrderId={salesOrderId}
                                                                                         {...field}
-                                                                                        disabled={Boolean(salesOrderId) && field.disableOnEdit && !isClone}
+                                                                                        fieldData={field}
+                                                                                        disabled={
+                                                                                            field.fieldName === "currency" ? (salesDetails && salesDetails?.material?.length ? true : false) :
+                                                                                                field.fieldName === "warehouse" ? (salesDetails && salesDetails?.productInventory?.length ? true : false) :
+                                                                                                    (salesOrderId && field.disableOnEdit && !isClone)}
                                                                                         values={values}
                                                                                         errors={errors}
                                                                                         touched={touched}
                                                                                         label={field.fieldLabel}
                                                                                         name={field.fieldName}
                                                                                         type={field.type}
-                                                                                        options={countrySellToDropDown}
+                                                                                        options={field.option}
                                                                                         setFieldValue={(name, value) => {
+                                                                                            handleValuesChange({ [name]: value })
                                                                                             setFieldValue(name, value)
                                                                                         }}
                                                                                         required={field.required}
@@ -756,48 +785,19 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                                                                                         isTooltip={field?.isTooltip || false}
                                                                                         tooltipMessage={field?.tooltipMessage}
                                                                                         size="small"
-                                                                                        onOpen={() =>
-                                                                                            onCountrySellToDropDownOpen(values["customerAccount"])
+                                                                                        imageOrFileUploadCompletePercentage={
+                                                                                            ["imageUpload", "fileUpload"].some(
+                                                                                                (s) => s === field.type
+                                                                                            )
+                                                                                                ? (completePercentage) => {
+                                                                                                    setUploadingImageOrFileProgress(
+                                                                                                        completePercentage
+                                                                                                    );
+                                                                                                }
+                                                                                                : null
                                                                                         }
-                                                                                    />)
-                                                                                    : (
-                                                                                        <FormTypes
-                                                                                            salesOrderId={salesOrderId}
-                                                                                            {...field}
-                                                                                            fieldData={field}
-                                                                                            disabled={
-                                                                                                field.fieldName === "currency" ? salesDetails && salesDetails?.material?.length ? true : false :
-                                                                                                    // field.fieldName === "warehouse" ? salesDetails && salesDetails?.productInventory?.length ? true : false :
-                                                                                                        (salesOrderId && field.disableOnEdit && !isClone)}
-                                                                                            values={values}
-                                                                                            errors={errors}
-                                                                                            touched={touched}
-                                                                                            label={field.fieldLabel}
-                                                                                            name={field.fieldName}
-                                                                                            type={field.type}
-                                                                                            options={field.option}
-                                                                                            setFieldValue={(name, value) => {
-                                                                                                handleValuesChange({ [name]: value })
-                                                                                                setFieldValue(name, value)
-                                                                                            }}
-                                                                                            required={field.required}
-                                                                                            fullWidth
-                                                                                            isTooltip={field?.isTooltip || false}
-                                                                                            tooltipMessage={field?.tooltipMessage}
-                                                                                            size="small"
-                                                                                            imageOrFileUploadCompletePercentage={
-                                                                                                ["imageUpload", "fileUpload"].some(
-                                                                                                    (s) => s === field.type
-                                                                                                )
-                                                                                                    ? (completePercentage) => {
-                                                                                                        setUploadingImageOrFileProgress(
-                                                                                                            completePercentage
-                                                                                                        );
-                                                                                                    }
-                                                                                                    : null
-                                                                                            }
-                                                                                        />
-                                                                                    )}
+                                                                                    />
+                                                                                )}
                                                                     </Grid>
                                                                 ))}
                                                             </Grid>

@@ -295,7 +295,8 @@ export const repairJob = {
 
 export const salesOrder = {
   salesOrderResource: 'salesOrder',
-  salesOrderApi: '/sales-order'
+  salesOrderApi: '/sales-order',
+  resource: "sales-order"
 };
 
 export const packages = {
