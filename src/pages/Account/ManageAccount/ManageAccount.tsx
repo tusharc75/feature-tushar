@@ -170,10 +170,10 @@ export default function ManageAccount(props) {
 
 
 
-    if (addressDataDropdown) {
-      setAddressDataSource(addressDataDropdown.option.filter(d => accountData?.initialValues?.billingAddress?.includes(d.optionValue) || accountData?.initialValues?.shippingAddress?.includes(d.optionValue)))
-    }
-    else if (addressDataDropdown) {
+    // if (addressDataDropdown) {
+    //   setAddressDataSource(addressDataDropdown.option.filter(d => accountData?.initialValues?.billingAddress?.includes(d.optionValue) || accountData?.initialValues?.shippingAddress?.includes(d.optionValue)))
+    // }
+     if (addressDataDropdown) {
       setAddressDataSource(addressDataDropdown.option)
     }
 
