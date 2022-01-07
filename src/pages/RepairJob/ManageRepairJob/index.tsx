@@ -17,7 +17,8 @@ import {
   setFieldsInAscendingOrder,
   yupSchema,
   repairJobProcessSteps,
-  repairJobStatus
+  repairJobStatus,
+  generateUniqueIdOnly
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -94,6 +95,8 @@ const ManageRepairJob = (props) => {
                 setTitle('Clone')
                 setDisablePlantIfAssetAdded(false);
 
+                rest.repairJobName = `RJ_${generateUniqueIdOnly()}`;
+
                 setRepairJobData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                   initialValues: { ...getObjKeysWithValues(rest, fieldsDataForCreate), status: repairJobStatus[0] }
@@ -169,7 +172,7 @@ const ManageRepairJob = (props) => {
         } else {
           setTitle('Create Repair Job')
           setDisablePlantIfAssetAdded(false);
-          let initialData = { ...getObjKeys('', fieldsDataForCreate), expectedCompletionDate: "" };
+          let initialData = { ...getObjKeys('', fieldsDataForCreate), expectedCompletionDate: "", repairJobName: `RJ_${generateUniqueIdOnly()}`};
           setDisableFields(false);
           setAllFields(fieldsDataForCreate);
           setRepairJobData({
@@ -701,7 +704,7 @@ const ManageRepairJob = (props) => {
                                                   /> : <FormTypes
                                                     repairJobId={repairJobId}
                                                     {...field}
-                                                    disabled={(!repairJobId && field.disableOnEdit)}
+                                                    disabled={(!repairJobId && field.disableOnEdit) || (field.fieldName === "repairJobName")}
                                                     values={values}
                                                     errors={errors}
                                                     touched={touched}
