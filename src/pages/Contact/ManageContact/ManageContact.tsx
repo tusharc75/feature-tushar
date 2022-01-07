@@ -80,7 +80,7 @@ export default function ManageContact(props) {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showContactDialog, setShowContactDialog] = useState(false);
   const [addressOpen, setAddressOpen] = useState({ open: false, isClone: false })
-  const [addressDataSource, setAddressDataSource] = useState([]);
+  const [addressDataSource, setAddressDataSource] = useState(null);
 
   useEffect(() => {
     if (contactData.fields.length > 0) {
@@ -95,9 +95,7 @@ export default function ManageContact(props) {
         }
       }
 
-      const addressDataDropdown = contactData.fields.find(
-        (d) => d.fieldName === "mailingAddress"
-      );
+      const addressDataDropdown = contactData.fields.find((d) => d.fieldName === "mailingAddress");
       if (accountId && addressDataDropdown) {
         setAddressDataSource(addressDataDropdown?.option?.filter(d => contactData?.initialValues?.mailingAddress?.includes(d.optionValue)) ?? [])
       }
@@ -371,19 +369,13 @@ export default function ManageContact(props) {
                                                 label={field.fieldLabel}
                                                 name={field.fieldName}
                                                 type={field.type}
-                                                setFieldValue={(name, value) => {
-                                                  // handleValuesChange(name, value)
-                                                  setFieldValue(name, value);
-                                                }}
+                                                options={addressDataSource ?? field.option}
+                                                setFieldValue={setFieldValue}
                                                 required={field.required}
                                                 fullWidth
                                                 isTooltip={field?.isTooltip || false}
                                                 tooltipMessage={field?.tooltipMessage}
                                                 size="small"
-                                                onChange={(e) => {
-                                                  // handleValuesChange(field.fieldName, e.target.checked)
-                                                  setFieldValue(field.fieldName, e.target.checked);
-                                                }}
                                               />
                                             </Grid>
 

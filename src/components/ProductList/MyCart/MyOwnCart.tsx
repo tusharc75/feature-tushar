@@ -1,23 +1,17 @@
 import { useEffect, useState, Fragment, useContext } from 'react';
-import ManageQuoteDialog from '../../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
-import { Button, Box, Grid } from '@material-ui/core';
+import { Button, Box, Grid, FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory, Link } from 'react-router-dom';
-import { currencyCodeToSymbol, displayDate } from '../../../constants/helpers';
+import { displayDate, formatAmountWithCurrency } from '../../../constants/helpers';
 import Typography from '@material-ui/core/Typography';
 import { BsFillInfoCircleFill } from 'react-icons/bs';
 import { AiOutlineSafetyCertificate } from 'react-icons/ai';
 import { SET_CART } from '../../../StateProvider/actionTypes';
 import { BsImage } from "react-icons/bs";
-import IconButton from '@material-ui/core/IconButton';
-import TextField from '@material-ui/core/TextField';
 import { makeStyles } from '@material-ui/core/styles';
-import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
-import RemoveCircleOutlineOutlinedIcon from '@material-ui/icons/RemoveCircleOutlineOutlined';
 import Carousel from "react-material-ui-carousel";
-
 import styles from './my-cart.module.scss';
 import PlusMinusTextboxComponent from '../../PlusMinusTextboxComponent/PlusMinusTextboxComponent';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -51,24 +45,35 @@ function MyOwnCart() {
   const classes = useStyles();
   const { dispatch }: any = useData();
 
-  useEffect(() => {
-    fetchCart();
-  }, []);
-
-  const {
-    state: { user }
-  }: any = useData();
-
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext)
   const [totalCount, setTotalCount] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0);
+  const [totalPrice, setTotalPrice] = useState("");
   const [checkoutLabel, setCheckoutLabel] = useState('Checkout');
   const [openPlaceOrderDialog, setOpenPlaceOrderDialog] = useState({ open: false, okBtnLoading: false })
   const [cart, setCart] = useState([]);
   const [cartProducts, setCartProducts] = useState([]);
   const [cartProductsLoading, setCartProductsLoading] = useState(false);
   const [deleteProductFromCartConfirmationDialog, setDeleteProductFromCartConfirmationDialog] = useState({ show: false, okBtnLoading: false, recordToRemove: null })
+
+  const [selectedBillingAddress, setSelectedBillingAddress] = useState(null)
+  const [selectedShippingAddress, setSelectedShippingAddress] = useState(null)
+  const [addressOptions, setAddressOptions] = useState([])
+
+  const {
+    state: { user }
+  }: any = useData();
+
+  useEffect(() => {
+    fetchCart();
+    fetchAddresses();
+  }, []);
+
+  const fetchAddresses = () => {
+    axiosInstance().get("/sa-formbuilder/lookup?lookupResource=Address").then(({ data: { data } }) => {
+      setAddressOptions(data.Address)
+    })
+  }
 
   const deleteCartItem = (cartId) => {
     if (cartId) {
@@ -121,9 +126,16 @@ function MyOwnCart() {
               endDate: d?.endDate ? displayDate(d.endDate) : '',
               pricingMethod: d?.pricingMethod,
               unit: d?.unit,
+              currency: d?.currency,
+              orderType: d?.orderType,
+              currencyWithFormat: formatAmountWithCurrency(d?.currency, d.mrp)?.fullFormatAmount
             }
           }));
-          setTotalPrice(tempTotalPrice);
+
+          if (data.length > 0) {
+            setTotalPrice(formatAmountWithCurrency(data[0].currency, tempTotalPrice)?.fullFormatAmount);
+          }
+
           setTotalCount(data.length);
         }
         if (data && data.length >= 1) {
@@ -212,12 +224,10 @@ function MyOwnCart() {
                           <div className={`${styles.card_body_layout} my-3`}>
                             <div className={styles.card_product_name_and_price}>
                               <div className={styles.card_seller}>
-                                <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}`}>{item.productName}</Link>
+                                <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}`}><b><u>{item?.orderType}</u></b> - {item.productName}</Link>
                               </div>
                               <div className={styles.card_price}>
-                                {/* Price:{'  '} */}
-                                {item?.currency ? currencyCodeToSymbol(item?.currency) : ''}
-                                {item?.mrp || 0}
+                                {item?.currencyWithFormat}
                               </div>
                             </div>
 
@@ -231,19 +241,23 @@ function MyOwnCart() {
                           </div>
 
                           <Grid container>
-                            <Grid item xs={6}>
-                              <b>Start Date:</b> {item.startDate}
-                            </Grid>
+                            {
+                              item.startDate && <Grid item xs={6}>
+                                <b>Start Date:</b> {item.startDate}
+                              </Grid>
+                            }
 
-                            <Grid item xs={6}>
-                              <b>End Date:</b> {item.endDate}
-                            </Grid>
-                          </Grid>
+                            {
+                              item.endDate && <Grid item xs={6}>
+                                <b>End Date:</b> {item.endDate}
+                              </Grid>
+                            }
 
-                          <Grid container>
-                            <Grid item xs={6}>
-                              <b>Pricing Method:</b> {item.pricingMethod}
-                            </Grid>
+                            {
+                              item.pricingMethod && <Grid item xs={6}>
+                                <b>Pricing Method:</b> {item.pricingMethod}
+                              </Grid>
+                            }
 
                             <Grid item xs={6}>
                               <b>Unit:</b> {item.unit}
@@ -355,7 +369,7 @@ function MyOwnCart() {
                             {' '}
                             Sub-Total <span> ({totalCount} items) </span>{' '}
                           </p>
-                          <h3 className={styles.price_card_price}> ${totalPrice}</h3>
+                          <h3 className={styles.price_card_price}>{totalPrice}</h3>
                         </div>
                         <div className={styles.price_card_summary_pickup}>
                           <p>Pickup</p>
@@ -369,17 +383,59 @@ function MyOwnCart() {
                       <div>
                         <div className={styles.price_card_total}>
                           <h3>Total Amount</h3>
-                          <h3 className={styles.price_card_price}> ${totalPrice}</h3>
+                          <h3 className={styles.price_card_price}>{totalPrice}</h3>
                         </div>
 
-                        {/* <Grid container>
+                        <Grid container className="px-3">
                           <Grid item xs={12}>
-                            
+                            <FormControl variant="outlined" margin="dense" fullWidth disabled={cartProducts.length === 0}>
+                              <InputLabel id="shipping-address">Shipping Address</InputLabel>
+                              <Select
+                                required
+                                labelId="shipping-address"
+                                id="shipping-address"
+                                value={selectedShippingAddress}
+                                onChange={(e) => {
+                                  setSelectedShippingAddress(e.target.value)
+                                }}
+                                label="Shipping Address"
+                              >
+                                {
+                                  addressOptions.map(m => (
+                                    <MenuItem key={m.optionValue} value={m.optionValue}>{m.optionLabel}</MenuItem>
+                                  ))
+                                }
+                              </Select>
+                            </FormControl>
                           </Grid>
-                        </Grid> */}
+                        </Grid>
+
+                        <Grid container className="px-3">
+                          <Grid item xs={12}>
+                            <FormControl variant="outlined" margin="dense" fullWidth disabled={cartProducts.length === 0}>
+                              <InputLabel id="billing-address">Billing Address</InputLabel>
+                              <Select
+                                required
+                                labelId="billing-address"
+                                id="billing-address"
+                                value={selectedBillingAddress}
+                                onChange={(e) => {
+                                  setSelectedBillingAddress(e.target.value)
+                                }}
+                                label="Billing Address"
+                              >
+                                {
+                                  addressOptions.map(m => (
+                                    <MenuItem key={m.optionValue} value={m.optionValue}>{m.optionLabel}</MenuItem>
+                                  ))
+                                }
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                        </Grid>
 
                         <div className={styles.price_card_checkout_button}>
-                          <Button variant="contained" color="secondary" onClick={onCheckout} className={styles.price_card_checkout_button_layout}>
+                          <Button disabled={!selectedShippingAddress || !selectedBillingAddress} variant="contained" color="primary" fullWidth onClick={onCheckout}>
                             {checkoutLabel}
                           </Button>
                           <div className={styles.secure_payment}>
@@ -407,8 +463,14 @@ function MyOwnCart() {
             onOk={() => {
               setOpenPlaceOrderDialog(prevState => { return { ...prevState, okBtnLoading: true } })
 
-              axiosInstance().post("/ecommerce/checkout", { cart: [], shippingAddress: "", billingAddress: "" }).then(() => {
+              axiosInstance().post("/ecommerce/checkout", { cart: cartProducts.map(m => m.cartId), shippingAddress: selectedShippingAddress, billingAddress: selectedBillingAddress }).then(({ data }) => {
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: "success",
+                  message: data.message,
+                });
 
+                history.push(routes.rentalManagement.path);
               }).catch((error) => {
                 toastConfig.setToastConfig(error);
               })
