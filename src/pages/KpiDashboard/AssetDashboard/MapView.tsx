@@ -97,8 +97,8 @@ const MapView = (props: MapViewProps) => {
                       fontSize: '14px'
                     }}
                     onClick={() => {
-                      fetchLocationData(asset._id, asset);
                       setCenter(new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude));
+                      fetchLocationData(asset._id, asset);
                     }}
                     position={new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude)}
                     clusterer={clusterer}
