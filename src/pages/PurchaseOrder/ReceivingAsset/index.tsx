@@ -80,9 +80,9 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                 {params.value}
             </Link>
             <Box padding={1}></Box>
-            <HtmlTooltip title="Serialized Asset">
-                {
-                    (params.data.actualReceived !== 0 || params.data.actualReceived !== undefined) &&
+            {
+                (params.data.actualReceived !== 0 && params.data.actualReceived !== undefined) &&
+                <HtmlTooltip title="Serialized Asset">
                     <span className="d-flex align-items-center gap-2">
                         <Chip label="Asset"
                             size="small"
@@ -95,8 +95,8 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             })}
                         />
                     </span>
-                }
-            </HtmlTooltip>
+                </HtmlTooltip>
+            }
 
         </>
     );
@@ -148,9 +148,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     setCurrentStep(4)
                 }
             }
-            dispatch({
-                type: "initialize", data: rows, count: rows.length
-            });
+            dispatch({ type: "initialize", data: rows, count: rows.length });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
@@ -370,6 +368,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                 onClose={() => setShowCreateAssetDialog(false)}
                 onSuccess={() => {
                     setShowCreateAssetDialog(false)
+                    dispatch({ type: "initialize", data: [], count: 0 });
                     fetchProduct()
                 }}
                 title="Create Asset"
