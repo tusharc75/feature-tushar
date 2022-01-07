@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, CircularProgress } from '@material-ui/core';
-import { GoogleMap, Marker, MarkerClusterer, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, Marker, MarkerClusterer, InfoWindow } from '@react-google-maps/api';
 import axiosInstance from '../../../axios/axiosInstance';
 
 type locationType = {
@@ -21,30 +21,10 @@ interface MapViewProps {
 
 const MapView = (props: MapViewProps) => {
   const { data, smallScreen } = props;
-
-  const { isLoaded: isMapsLoaded, loadError: isMapsError } = useJsApiLoader({
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_API_KEY,
-    libraries: ['geometry', 'visualization', 'places']
-  });
   const [isFetching, setFetching] = React.useState(false);
-  const [map, setMap] = React.useState(null);
+  const [center, setCenter] = React.useState(null);
   const [selectedAsset, setSelectedAsset] = React.useState([]);
   const [selectedBase, setSelectedBase] = React.useState(null);
-
-  const onLoad = React.useCallback(function callback(map) {
-    const bounds = new window.google.maps.LatLngBounds();
-    map.fitBounds(bounds);
-    setMap(map);
-  }, []);
-
-  const onUnmount = React.useCallback(() => {
-    setMap(null);
-  }, []);
-
-  const center = {
-    lat: 37.09,
-    lng: -95.713
-  };
 
   const containerStyle = {
     minHeight: smallScreen ? '500px' : '700px',
@@ -53,8 +33,9 @@ const MapView = (props: MapViewProps) => {
     minWidth: '100%'
   };
 
-  const fetchLocationData = async (id: string, assetData: locationType) => {
+  const fetchLocationData = React.useCallback(async (id: string, assetData: locationType) => {
     setSelectedBase(assetData);
+    setSelectedAsset([]);
     setFetching(true);
     try {
       const {
@@ -67,16 +48,14 @@ const MapView = (props: MapViewProps) => {
     } catch (error) {
       setFetching(false);
     }
-  };
+  }, []);
 
-  if (isMapsError) return <div>Google Maps error, please refresh page!</div>;
-  if (!isMapsLoaded) return <div>Loading Maps...</div>;
+  if(!window.google || typeof window.google !== 'object') return <div>Loading...</div>
 
   return (
     <Box height={smallScreen ? '500px' : '700px'} borderRadius={8} overflow="hidden">
       <GoogleMap
         options={{
-          zoom: 4,
           mapTypeId: google.maps.MapTypeId.ROADMAP,
           mapTypeControlOptions: {
             style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
@@ -101,9 +80,8 @@ const MapView = (props: MapViewProps) => {
           ]
         }}
         mapContainerStyle={containerStyle}
-        onLoad={onLoad}
-        onUnmount={onUnmount}
-        center={center}
+        center={center || { lat: 37.09, lng: -95.713 }}
+        zoom={4}
       >
         <MarkerClusterer>
           {(clusterer) =>
@@ -118,7 +96,10 @@ const MapView = (props: MapViewProps) => {
                       color: 'white',
                       fontSize: '14px'
                     }}
-                    onClick={() => fetchLocationData(asset._id, asset)}
+                    onClick={() => {
+                      setCenter(new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude));
+                      fetchLocationData(asset._id, asset);
+                    }}
                     position={new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude)}
                     clusterer={clusterer}
                   />
@@ -131,6 +112,7 @@ const MapView = (props: MapViewProps) => {
           <InfoWindow
             position={new google.maps.LatLng(selectedBase?.location.latitude, selectedBase?.location.longitude)}
             onCloseClick={() => {
+              if (isFetching) return;
               setSelectedBase(null);
               setSelectedAsset([]);
             }}
@@ -146,7 +128,7 @@ const MapView = (props: MapViewProps) => {
                   {selectedBase?.count}
                 </Typography>
                 {selectedAsset.map((d: { count: number; status: string }) => (
-                  <Typography color="textPrimary" variant="body2">
+                  <Typography key={d.status} color="textPrimary" variant="body2">
                     <strong>{`${d.status}: `}</strong>
                     {d.count}
                   </Typography>

@@ -78,7 +78,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
           element.isMulitFormula = false;
         })
         setInitialData({
-          fields: poFields,
+          fields: poFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit),
           values: { ...getObjKeys("", poFields), expectedDelivery: "" },
         });
       }
