@@ -72,7 +72,7 @@
   &_seller {
     text-transform: uppercase !important;
     font-weight: bolder !important;
-    font-style: oblique;
+    // font-style: oblique;
     text-transform: capitalize;
     color: var(--colorContact);
     font-size: 1rem;
@@ -191,7 +191,7 @@
 
 .price_card {
   justify-content: center;
-  text-align: center;
+  // text-align: center;
   // background: var(--theme-text);
   align-items: center;
   border-radius: 6px;

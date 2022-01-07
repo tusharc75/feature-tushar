@@ -99,7 +99,7 @@ export default function ProductDetails() {
   const { state: { user, cartItems }, dispatch }: any = useData();
   const [wishlist, setWishlist] = useState({ loading: false, disabled: false });
   // const [indexOfProductInCart, setIndexOfProductInCart] = useState(-1);
-  const [rateCurrency, setRateCurrency] = useState({ rate: "", mrp: "", rateWithCurrency: "", unit: "", pricingMethod: "", isRateMrpSame: false })
+  const [rateCurrency, setRateCurrency] = useState({ currency: "", rate: "", mrp: "", rateWithCurrency: "", unit: "", pricingMethod: "", isRateMrpSame: false })
   const [deleteProductFromCartConfirmationDialog, setDeleteProductFromCartConfirmationDialog] = useState({ show: false, okBtnLoading: false })
   // const [selectedUnit, setSelectedUnit] = useState("");
   // const [selectedPricingMethod, setSelectedPricingMethod] = useState("");
@@ -156,17 +156,17 @@ export default function ProductDetails() {
     if (unit && pricingMethod) {
       const record = productData.priceCalculation.find(d => d.pricingMethod === pricingMethod && d.unit === unit);
       if (record) {
-        setRateCurrency({ unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
+        setRateCurrency({ currency: record.currency, unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
       }
     } else if (unit) {
       const record = productData.priceCalculation.find(d => d.unit === unit);
       if (record) {
-        setRateCurrency({ unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: false })
+        setRateCurrency({ currency: record.currency, unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: false })
       }
     } else if (pricingMethod) {
       const record = productData.priceCalculation.find(d => d.pricingMethod === pricingMethod);
       if (record) {
-        setRateCurrency({ unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: false })
+        setRateCurrency({ currency: record.currency, unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: false })
       }
     }
 
@@ -238,7 +238,8 @@ export default function ProductDetails() {
           pricingMethod: data.selectedPricingMethod,
           orderType: 'rent',
           startDate: data.startDate,
-          endDate: data.endDate
+          endDate: data.endDate,
+          currency: rateCurrency.currency
         }]
       ).then(({ data }) => {
         setAddToCartBtnLoading(false)
@@ -297,7 +298,8 @@ export default function ProductDetails() {
       unit: unit,
       pricingMethod: pricingMethod,
       startDate: startDate,
-      endDate: endDate
+      endDate: endDate,
+      currency: rateCurrency.currency
     }).then(() => {
 
     }).catch((error) => {
