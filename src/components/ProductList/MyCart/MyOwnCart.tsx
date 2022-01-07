@@ -131,7 +131,7 @@ function MyOwnCart() {
             }
           }));
 
-          if (setCartProducts.length > 0) {
+          if (data.length > 0) {
             setTotalPrice(formatAmountWithCurrency(data[0].currency, tempTotalPrice)?.fullFormatAmount);
           }
 
