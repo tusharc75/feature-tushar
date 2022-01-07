@@ -127,6 +127,7 @@ function MyOwnCart() {
               pricingMethod: d?.pricingMethod,
               unit: d?.unit,
               currency: d?.currency,
+              orderType: d?.orderType,
               currencyWithFormat: formatAmountWithCurrency(d?.currency, d.mrp)?.fullFormatAmount
             }
           }));
@@ -223,7 +224,7 @@ function MyOwnCart() {
                           <div className={`${styles.card_body_layout} my-3`}>
                             <div className={styles.card_product_name_and_price}>
                               <div className={styles.card_seller}>
-                                <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}`}>{item.productName}</Link>
+                                <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}`}><b><u>{item?.orderType}</u></b> - {item.productName}</Link>
                               </div>
                               <div className={styles.card_price}>
                                 {item?.currencyWithFormat}
@@ -240,19 +241,23 @@ function MyOwnCart() {
                           </div>
 
                           <Grid container>
-                            <Grid item xs={6}>
-                              <b>Start Date:</b> {item.startDate}
-                            </Grid>
+                            {
+                              item.startDate && <Grid item xs={6}>
+                                <b>Start Date:</b> {item.startDate}
+                              </Grid>
+                            }
 
-                            <Grid item xs={6}>
-                              <b>End Date:</b> {item.endDate}
-                            </Grid>
-                          </Grid>
+                            {
+                              item.endDate && <Grid item xs={6}>
+                                <b>End Date:</b> {item.endDate}
+                              </Grid>
+                            }
 
-                          <Grid container>
-                            <Grid item xs={6}>
-                              <b>Pricing Method:</b> {item.pricingMethod}
-                            </Grid>
+                            {
+                              item.pricingMethod && <Grid item xs={6}>
+                                <b>Pricing Method:</b> {item.pricingMethod}
+                              </Grid>
+                            }
 
                             <Grid item xs={6}>
                               <b>Unit:</b> {item.unit}
