@@ -755,7 +755,6 @@ const ManageRepairJob = (props) => {
                             });
                             setFieldValue("plant", data._id);
                           }
-
                         }}
                       />}
                   </Form>

@@ -183,8 +183,10 @@ const ProductInventory = () => {
         if (redirectProduct?.id) {
             filterById.push({ field: "product", term: redirectProduct?.id });
         }
-        if (fromPurchaseOrder?.pOId && fromPurchaseOrder?.productId) {
+        if (fromPurchaseOrder?.pOId) {
             filterById.push({ field: "pONumber", term: fromPurchaseOrder.pOId });
+        }
+        if (fromPurchaseOrder?.productId) {
             filterById.push({ field: "product", term: fromPurchaseOrder.productId });
         }
         if (productCategory && productCategory !== "") {
@@ -345,14 +347,16 @@ const ProductInventory = () => {
                         )}
                         {fromPurchaseOrder?.pOId ? (
                             <>
-                                <Chip
-                                    className="ml-3"
-                                    color="primary"
-                                    label={`Product : ${fromPurchaseOrder.productName}`}
-                                    onDelete={() => {
-                                        setFromPurchaseOrder(null);
-                                    }}
-                                />
+                                {fromPurchaseOrder?.productId && (
+                                    <Chip
+                                        className="ml-3"
+                                        color="primary"
+                                        label={`Product : ${fromPurchaseOrder.productName}`}
+                                        onDelete={() => {
+                                            setFromPurchaseOrder(null);
+                                        }}
+                                    />
+                                )}
                                 <Chip
                                     className="ml-3"
                                     color="primary"
