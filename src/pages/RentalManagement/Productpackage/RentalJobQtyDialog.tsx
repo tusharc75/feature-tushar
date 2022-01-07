@@ -20,11 +20,7 @@ import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 import moment from "moment";
 
-function findCommonElements(inArrays) {
-  if (typeof inArrays === "undefined") return undefined;
-  if (typeof inArrays[0] === "undefined") return undefined;
-  return intersection.apply(this, inArrays);
-}
+
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -98,6 +94,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           element.isFormula = false;
           element.isMulitFormula = false;
         })
+        data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
         setInitialData({
           fields: data,
           values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", tenure: "" },

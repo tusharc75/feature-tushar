@@ -31,7 +31,7 @@ export default function PlusMinusTextboxComponent({ inputTextLabel, value, minVa
     }, [inputNumberRef]);
 
     return (
-        <Grid container spacing={1} alignItems="flex-end">
+        <Grid container spacing={1} alignItems="flex-end" className="flex-no-wrap">
             <Grid item>
                 <IconButton
                     color="primary"
@@ -44,8 +44,9 @@ export default function PlusMinusTextboxComponent({ inputTextLabel, value, minVa
                     <RemoveCircleOutlineOutlinedIcon />
                 </IconButton>
             </Grid>
-            <Grid item>
+            <Grid item xs={10}>
                 <TextField
+                    fullWidth
                     id={uniqueId}
                     name={uniqueId}
                     label={inputTextLabel}

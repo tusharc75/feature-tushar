@@ -236,10 +236,11 @@ const RentalManagementDetailsPage = () => {
 
   const updateJobStatus = (status) => {
     axiosInstance().patch(`${rentalManagement.rentalManagementApi}/status/${rentalManagementData._id}`, { status: status }).then(({ data: { data } }) => {
-      fetchRentalManagementData();
-      if (status === "Invoiced") {
+      if (status === "Invoiced" || status === "Closed") {
+        updateProcessStatus(rentalProcessSteps[5])
         setCurrentStep(5)
       }
+      fetchRentalManagementData();
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
@@ -270,7 +271,7 @@ const RentalManagementDetailsPage = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true}>
-                  {(permissions?.rentalManagement?.isUpdate && allowedToEdit && !isOffline) && (
+                  {(permissions?.rentalManagement?.isUpdate && allowedToEdit && !isOffline && rentalManagementData?.status !== "Closed") && (
                     <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                       Edit
                     </Button>

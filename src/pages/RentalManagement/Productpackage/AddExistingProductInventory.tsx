@@ -23,6 +23,11 @@ import { getColumnData, getFrameworkComponents, getStaticFields } from "../../..
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 
+
+const renderedFrom = "rentalJobManagementAddProducts";
+const localStorageSelectedRecords = `${renderedFrom}_selected`
+
+
 const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, rentalManagementData }) => {
 
     const toastConfig = useContext(CustomToastContext)
@@ -36,7 +41,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-    const [columns, setColumns] = useState([]);
+    const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [materialList, setMaterialList] = useState([]);
 
@@ -67,6 +72,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             setMaterialList(JSON.parse(JSON.stringify(data)));
             let rows = data.map((u) => {
                 let finalObject = prepareDataForGrid(u);
+                finalObject["isChecked"] = false;
                 finalObject["id"] = u._id;
                 finalObject["type"] = type;
                 finalObject["qty"] = 0;
@@ -86,10 +92,15 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     };
 
     const getQueryString = () => {
-        let deepFilter = type === "product" ? `?warehouse=${rentalManagementData?.warehouse?.optionValue}&page=${page}&limit=${limit}` : `?page=${page}&limit=${limit}`;
+        let deepFilter = type === "product" ? `?warehouse=${rentalManagementData?.warehouse?.optionValue}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'serializedProduct', term: 'yes' }]))}&page=${page}&limit=${limit}` : `?page=${page}&limit=${limit}`;
 
         if (type !== "product") {
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'packageType', term: 'product' }]))}&filterType=and`
+        }
+
+        if (showFilteredRecordsOnly) {
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
         }
 
         if (!isObjectEmpty(filters)) {
@@ -137,7 +148,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 }
                 setFrameWorkComponent({ ...tempFrameworkComponent })
                 columns = [...columns, ...getStaticFields()]
-                // setColumns([...columns])
                 setColumns([...columns, ...defaultColumns])
             })
     }
@@ -240,9 +250,11 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                         page={page}
                         allowAction={false}
                         loading={loading}
+                        allowSelection={true}
                         onCellValueChanged={onCellValueChanged}
                         showOnlyShowFilteredRecordSwitch={true}
-                        renderedFrom={"rentalJobManagementAddProducts"}
+                        refreshGrid={fetchMaterial}
+                        renderedFrom={renderedFrom}
                     />
                     : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
             </div>

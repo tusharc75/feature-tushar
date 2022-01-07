@@ -23,7 +23,7 @@ const ProductList = ({ products, fetchData, count, loadMoreData, loading }) => {
 
     const fetchCart = () => {
         axiosInstance()
-            .get(`/user/cart`).then(({ data: { data } }) => {
+            .get(`/ecommerce/cart`).then(({ data: { data } }) => {
 
                 if (data) {
                     dispatch({ type: SET_CART, payload: [...data] });
@@ -42,7 +42,7 @@ const ProductList = ({ products, fetchData, count, loadMoreData, loading }) => {
         })
 
         axiosInstance()
-            .post(`/user/cart`, {
+            .post(`/ecommerce/cart`, {
                 products: [{
                     quantity: `${tempQuantity}`,
                     productId: item._id
