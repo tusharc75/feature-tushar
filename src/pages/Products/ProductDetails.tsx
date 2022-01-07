@@ -588,7 +588,11 @@ export default function ProductDetails() {
                 }
 
                 <Box className="my-3 d-flex gap-4 align-items-baseline">
-                  <Typography variant="h4">{rateCurrency.rateWithCurrency}</Typography>
+                  {
+                    rateCurrency.rateWithCurrency ? <Typography variant="h4">{rateCurrency.rateWithCurrency}</Typography>
+                      : <Typography variant="h6" className="text-error">Price calculation not available</Typography>
+                  }
+
                   {
                     rateCurrency.isRateMrpSame === false && <Typography variant="h5" className="custom-strike">{rateCurrency.mrp}</Typography>
                   }
