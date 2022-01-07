@@ -261,10 +261,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           horizontal: 'right',
         }}
       >
-        {/* <MenuItem onClick={() => {
-          setAnchorEl(null)
-          setStatusToUpdate({ open: true, isUpdating: false, status: "Repair", message: "" })
-        }}>Repair</MenuItem> */}
         <MenuItem onClick={() => {
           setAnchorEl(null)
           setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
