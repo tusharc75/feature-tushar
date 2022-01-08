@@ -138,7 +138,7 @@ const RepairJobReceivingTicket = (props) => {
                         })
 
                         setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
-                        setPreviousButtonDisabled(tempProductInventory.some(s => s["receivingTicketId"]));
+                        // setPreviousButtonDisabled(tempProductInventory.some(s => s["receivingTicketId"]));
 
                         dispatch({
                             type: "initialize", data: tempProductInventory, count: tempProductInventory.length
