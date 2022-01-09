@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.37.0](https://github.com/vebholic/oms_frontend/compare/v2.36.0...v2.37.0) (2022-01-09)
+
+
+### Features
+
+* - Search functionality added in billing and shipping address in cart ([f6f317a](https://github.com/vebholic/oms_frontend/commit/f6f317a8a8d0d5b6b137a655fedef749f299e68d))
+
 ## [2.36.0](https://github.com/vebholic/oms_frontend/compare/v2.35.0...v2.36.0) (2022-01-08)
 
 
