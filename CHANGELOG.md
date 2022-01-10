@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.37.1](https://github.com/vebholic/oms_frontend/compare/v2.37.0...v2.37.1) (2022-01-10)
+
+## [2.37.0](https://github.com/vebholic/oms_frontend/compare/v2.36.0...v2.37.0) (2022-01-09)
+
+
+### Features
+
+* - Search functionality added in billing and shipping address in cart ([f6f317a](https://github.com/vebholic/oms_frontend/commit/f6f317a8a8d0d5b6b137a655fedef749f299e68d))
+
+## [2.36.0](https://github.com/vebholic/oms_frontend/compare/v2.35.0...v2.36.0) (2022-01-08)
+
+
+### Features
+
+* - cart changes done ([e33d1f1](https://github.com/vebholic/oms_frontend/commit/e33d1f13cfadf800c56ff2e3a7796d14c32e7de9))
+* - Cart changes done ([1cbfe4e](https://github.com/vebholic/oms_frontend/commit/1cbfe4e7c45e1ddc3073516a1175d61e65573251))
+* - Order type changes done ([da3e288](https://github.com/vebholic/oms_frontend/commit/da3e288227de74c50e68f2e950c25706d6c989f7))
+* - PO-890 - Repair job changes done ([2aeea8a](https://github.com/vebholic/oms_frontend/commit/2aeea8a56943a62d24a48118f18ce138e7250442))
+* **repairjob:** auto generate name ([53d7732](https://github.com/vebholic/oms_frontend/commit/53d7732f2a7d8a9e1c1b9cda6f906fb3858c462d))
+
+
+### Bug Fixes
+
+* bug fix ([2d01729](https://github.com/vebholic/oms_frontend/commit/2d017296ec38a50f6f078557d756ab56850e5196))
+* bug fix ([378c0ee](https://github.com/vebholic/oms_frontend/commit/378c0ee8afb0cd683e356be0fea5ee0df8915e30))
+* bug fix ([c2b4684](https://github.com/vebholic/oms_frontend/commit/c2b4684fab7f2ec35aba6dfd68d940c823ab3b37))
+* **contacts:** address fix ([006f848](https://github.com/vebholic/oms_frontend/commit/006f84843d6f406648440f9d7c57820954eed7de))
+* **map&address:** add map for lat lng ([3d54e7c](https://github.com/vebholic/oms_frontend/commit/3d54e7ca1444903f492dcd8b7220efdf59ab94e8))
+* **map:** minor fix ([f803176](https://github.com/vebholic/oms_frontend/commit/f8031766d215601583b6f9dc95ec8b6f1070a277))
+* pO-888 ([56efeb6](https://github.com/vebholic/oms_frontend/commit/56efeb6a85ac825ae98315a1f9af2039c9414a34))
+* pO-897 ([f790876](https://github.com/vebholic/oms_frontend/commit/f7908761820346ac4a2f0996bda47ac56f71bb78))
+* pO-907 ([f23449e](https://github.com/vebholic/oms_frontend/commit/f23449e9c14f21e40130c62f84f3be80de304b21))
+
 ## [2.35.0](https://github.com/vebholic/oms_frontend/compare/v2.34.1...v2.35.0) (2022-01-07)
 
 
