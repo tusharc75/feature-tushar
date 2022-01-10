@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
-import { Box, Button, Menu, MenuItem, Grid } from '@material-ui/core';
+import { Box, Button, Menu, MenuItem, Grid, Dialog } from '@material-ui/core';
 import { useData } from '../../StateProvider/Provider';
 import { Link, useLocation } from 'react-router-dom';
 import {AddOutlined, ExpandMore} from '@material-ui/icons';
@@ -43,6 +43,7 @@ import { MdEmail } from 'react-icons/md';
 import queryString from 'query-string';
 import {MdAdd} from "react-icons/all";
 import {IoFilterCircle,  MdFilterList, MdSort} from "react-icons/all";
+import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 
 const ContactTypes = [
   {
@@ -116,6 +117,10 @@ export default function Contact(props) {
   const columnState = JSON.parse(localStorage.getItem(contactResource));
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([])
+  const [disablePortalAccess, setDisablePortalAccess] = useState(false);
+  const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
+  const [entityAccess, setEntityAccess] = useState([])
+  const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([])
   const localStorageSelectedRecords = `${contactResource}_selected`;
 
   useEffect(() => {
@@ -171,6 +176,8 @@ export default function Contact(props) {
       dispatch({ type: 'pageChange', page: savedPage });
     }
     fetchGridColumns();
+    fetchLoggedInUserEntities()
+    fetchLoggedInUserRole()
   }, []);
 
   const fetchGridColumns = async () => {
@@ -351,6 +358,36 @@ export default function Contact(props) {
     const entityList = user.entity?.map((entity) => entity._id);
     return entityList.includes(id);
   };
+
+  const handleAccessToPortal = () => {
+    setShowAssignEntityDialog(true)
+  };
+
+  const fetchLoggedInUserRole = async () => {
+    let roleIds = [];
+    await axiosInstance().get(`/user/${user.user?._id}`).then(({ data: { data } }) => {
+      data.entities.map((item) => {
+        item.role.forEach((role) => {
+          if(roleIds.includes(role?._id)){
+
+          }else{
+            roleIds.push(role?._id)
+          }
+        })
+        
+      })
+      setRoleAccessOfLoggedInUser(roleIds)
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  }
+
+  const fetchLoggedInUserEntities = async () => {
+    const entityIds = user.entity?.map((e) => e._id);
+    setEntityAccess(entityIds)
+  }
+
+  
 
   const RelatedLeadRenderer = (params) =>
     params.value ? (
@@ -857,6 +894,13 @@ export default function Contact(props) {
                         Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
                       </MenuItem>
                     )}
+                    {/* <MenuItem
+                      disabled={selectedRecords.length === 0}
+                      onClick={handleAccessToPortal}
+
+                    >
+                      Give Access to Portal
+                    </MenuItem> */}
                   </Menu>
                 </>
                 </Grid>
@@ -918,6 +962,33 @@ export default function Contact(props) {
               isClone={showCreateContactDialog?.isClone}
             />
           )}
+          {
+        showAssignEntityDialog && 
+        <Dialog
+          fullWidth
+          maxWidth="xs"
+          open={showAssignEntityDialog}
+          onClose={() => setShowAssignEntityDialog(false)}
+          aria-labelledby="assign-roles-dialog"
+        >
+        <AssignEntityDialog
+          entitiesDialogOpen={showAssignEntityDialog}
+          onSuccess={() => {
+            setShowAssignEntityDialog(false)
+            getContacts()
+          }}
+          handleCloseDialog={() => setShowAssignEntityDialog(false)}
+          assignedEntity={[]}
+          ids={selectedRecords.map((record) => record._id || record.id)}
+          isRenderedFromContact={true}
+          regionalRole={false}
+          type="entity"
+          entityAccessIds={entityAccess}
+          roleAccessIds={roleAccessOfLoggedInUser}
+          contactResource={contactResource}
+        />
+        </Dialog>
+      }
 
           {singleContactDelete.show ? (
             <ConfirmationDialog
