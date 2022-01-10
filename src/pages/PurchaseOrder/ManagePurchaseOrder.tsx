@@ -368,6 +368,8 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                             : ""
                                                                                     );
                                                                                     setFieldValue("supplierContact", "");
+                                                                                    setFieldValue("countrySellTo", []);
+                                                                                    setFieldValue("countryBillTo", []);
                                                                                 }}
                                                                             />
                                                                         </Grid>
@@ -721,21 +723,27 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                         ];
                                     });
                                     if (addressDataSource) {
-                                        setCountryBillToMainData((prevState) => {
-                                            return [
-                                                ...prevState,
-                                                ...addressDataSource
-                                            ];
-                                        });
-                                        setCountrySellToMainData((prevState) => {
-                                            return [
-                                                ...prevState,
-                                                ...addressDataSource
-                                            ];
-                                        });
+                                        if (!countryBillToMainData.some(d => data?.billingAddress?.includes(d?.optionValue))) {
+                                            setCountryBillToMainData((prevState) => {
+                                                return [
+                                                    ...prevState,
+                                                    ...addressDataSource.filter(d => data?.billingAddress?.includes(d?.optionValue))
+                                                ];
+                                            });
+                                        }
+                                        if (!countrySellToMainData.some(d => data?.shippingAddress?.includes(d?.optionValue))) {
+                                            setCountrySellToMainData((prevState) => {
+                                                return [
+                                                    ...prevState,
+                                                    ...addressDataSource.filter(d => data?.shippingAddress.includes(d.optionValue))
+                                                ];
+                                            });
+                                        }
                                     }
                                     setFieldValue("supplier", data._id);
                                     setFieldValue("supplierContact", "");
+                                    setFieldValue("countrySellTo", []);
+                                    setFieldValue("countryBillTo", []);
                                 }}
                                 isRedirectToDetailPage={false}
                             />
