@@ -54,6 +54,7 @@ const AssignEntityDialog = ({
   isRenderedFromContact = false,
   entityAccessIds = [],
   roleAccessIds = [],
+  contactResource = '',
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState([]);
@@ -122,22 +123,24 @@ const AssignEntityDialog = ({
   }, []);
 
   const handleAccessPortal = () => {
+    let payLoad = {
+      [contactResource] : ids,
+      entities: selectedData,
+      roles: selectedRole
+    }
     axiosInstance()
-      .put('/user/create-user-from-contact', {
-        "customerContact": ids,
-        "entities": selectedData,
-        "roles": selectedRole
-
-      })
-      .then(({ data }) => {
+      .put('/user/create-user-from-contact', payLoad)
+      .then(({data}) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         })
+        onSuccess()
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        handleCloseDialog();
       })
   }
 
