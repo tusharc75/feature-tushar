@@ -597,6 +597,7 @@ const ProductCategory = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
+                      disabled={!(productCategoryPermissions?.isDelete && !selectedRecords?.some((record) => record.createdById !== user?.user?._id))}
                       onClick={() => {
                         closeActions();
                         {

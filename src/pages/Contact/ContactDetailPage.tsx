@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List, useMediaQuery } from '@material-ui/core';
+import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List, useMediaQuery, Dialog } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { Skeleton } from '@material-ui/lab';
@@ -46,6 +46,7 @@ import queryString from 'query-string';
 import AddReportsToContact from './AddReportsToContact';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import accountClass from '../Account/account.module.scss';
+import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -96,6 +97,9 @@ const ContactDetailsPage = (props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [showAddContact, setShowAddContact] = useState(false);
+  const [showEntityRoleDialog, setShowEntityRoleDialog] = useState(false);
+  const [entityAccess, setEntityAccess] = useState([])
+  const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([])
 
   let { id } = useParams();
 
@@ -115,6 +119,8 @@ const ContactDetailsPage = (props) => {
     if (id) {
       fetchContactData();
       fetchRelatedData();
+      fetchLoggedInUserRole();
+      fetchLoggedInUserEntities();
     }
   }, [id]);
 
@@ -148,6 +154,30 @@ const ContactDetailsPage = (props) => {
       }
     }
   }, [tour]);
+
+  const fetchLoggedInUserRole = async () => {
+    let roleIds = [];
+    await axiosInstance().get(`/user/${user.user?._id}`).then(({ data: { data } }) => {
+      data.entities.map((item) => {
+        item.role.forEach((role) => {
+          if (roleIds.includes(role?._id)) {
+
+          } else {
+            roleIds.push(role?._id)
+          }
+        })
+
+      })
+      setRoleAccessOfLoggedInUser(roleIds)
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  }
+
+  const fetchLoggedInUserEntities = async () => {
+    const entityIds = user.entity?.map((e) => e._id);
+    setEntityAccess(entityIds)
+  }
 
   const fetchContactData = async () => {
     setLoading(true);
@@ -582,6 +612,10 @@ const ContactDetailsPage = (props) => {
     return entityList.includes(id);
   };
 
+  const handlePortalAccess = () => {
+    setShowEntityRoleDialog(true)
+  }
+
   let filteredContactFields = contactFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
 
   const tourPaths = ['/customer-contact/detail', '/supplier-contact/detail'];
@@ -631,7 +665,7 @@ const ContactDetailsPage = (props) => {
           // contactResource={contactResource}
           accountResource={accountResource}
           contactResource={contactResource}
-          // contactApi={contactApi}
+        // contactApi={contactApi}
         />
       ) : openUpdateDialog ? (
         <ManageContact
@@ -656,7 +690,7 @@ const ContactDetailsPage = (props) => {
           // contactResource={contactResource}
           accountResource={accountResource}
           contactResource={contactResource}
-          // contactApi={contactApi}
+        // contactApi={contactApi}
         />
       ) : null}
 
@@ -678,6 +712,17 @@ const ContactDetailsPage = (props) => {
               // style={{ marginTop: "150px", minHeight: "200px" }}
               showHeading={true}
             >
+              {/* {
+                !Boolean('isUserExist' in contactData && contactData.isUserExist) &&
+                <Button
+                  color="primary"
+                  size="small"
+                  variant={isMobile ? "text" : "contained"}
+                  onClick={handlePortalAccess}
+                >
+                  Give Portal Access
+                </Button>
+              } */}
               {contactPermissions.isUpdate && canEdit ? (
                 <Button
                   id="detailEditButton"
@@ -693,9 +738,9 @@ const ContactDetailsPage = (props) => {
               ) : null}
 
               {contactPermissions.isDelete &&
-              contactData?.owner?.optionValue &&
-              user?.user?._id &&
-              contactData.owner.optionValue === user.user._id ? (
+                contactData?.owner?.optionValue &&
+                user?.user?._id &&
+                contactData.owner.optionValue === user.user._id ? (
                 <DeleteButton
                   id="detailDeleteButton"
                   text={isMobile ? <MdDelete size={20} /> : 'Delete'}
@@ -949,7 +994,7 @@ const ContactDetailsPage = (props) => {
                         access: true
                       }
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={[contactData?.email ?? '']}
                   />
                 </div>
@@ -1066,7 +1111,33 @@ const ContactDetailsPage = (props) => {
           />
         </FullScreenDialog>
       )}
-
+      {
+        showEntityRoleDialog &&
+        <Dialog
+          fullWidth
+          maxWidth="xs"
+          open={showEntityRoleDialog}
+          onClose={() => setShowEntityRoleDialog(false)}
+          aria-labelledby="assign-roles-dialog"
+        >
+          <AssignEntityDialog
+            entitiesDialogOpen={showEntityRoleDialog}
+            onSuccess={() => {
+              setShowEntityRoleDialog(false)
+              fetchContactData()
+            }}
+            handleCloseDialog={() => setShowEntityRoleDialog(false)}
+            assignedEntity={[]}
+            ids={[id]}
+            isRenderedFromContact={true}
+            regionalRole={false}
+            type="entity"
+            entityAccessIds={entityAccess}
+            roleAccessIds={roleAccessOfLoggedInUser}
+            contactResource={contactResource}
+          />
+        </Dialog>
+      }
       {openAdditionalDialog && (
         // <Dialog
         //   disableBackdropClick={true}
