@@ -139,11 +139,11 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
               hideReceivingTicketStep(true);
 
               if (tempProductInventory.some(f => f["repaired"] === true)) {
-                setNextButtonDisabled(!tempProductInventory.filter(f => f.status !== "Lost").every(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true && e.repaired === true));
+                setNextButtonDisabled(!tempProductInventory.filter(f => f.status !== "Lost").some(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true && e.repaired === true));
               }
 
             } else {
-              setNextButtonDisabled(!tempProductInventory.filter(f => f.status !== "Lost").every(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true));
+              setNextButtonDisabled(!tempProductInventory.filter(f => f.status !== "Lost").some(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true));
             }
 
             dispatch({

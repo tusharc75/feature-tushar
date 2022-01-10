@@ -32,7 +32,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
     const [headerLabel, setHeaderLabel] = useState("");
 
     //["Price", "Rent", "Discount", "Charge", "Tax"]
-    const [conditionType, setConditionType] = useState(["Rent"]);
+    const [conditionType, setConditionType] = useState(["Rent", "Price"]);
     const [currency, setCurrency] = useState([detailData.currency]);
     const [unit, setUnits] = useState([]);
     const [pricingMethod, setPricingMethod] = useState([]);
@@ -695,7 +695,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                         {
                             showConfirmDialog ?
                                 <ConfirmCancelDialog
-                                close={() => setShowConfirmDialog(false)}
+                                    close={() => setShowConfirmDialog(false)}
                                     open={showConfirmDialog}
                                     onSave={() => {
                                         setShowConfirmDialog(false)

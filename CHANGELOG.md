@@ -2,6 +2,70 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.37.1](https://github.com/vebholic/oms_frontend/compare/v2.37.0...v2.37.1) (2022-01-10)
+
+## [2.37.0](https://github.com/vebholic/oms_frontend/compare/v2.36.0...v2.37.0) (2022-01-09)
+
+
+### Features
+
+* - Search functionality added in billing and shipping address in cart ([f6f317a](https://github.com/vebholic/oms_frontend/commit/f6f317a8a8d0d5b6b137a655fedef749f299e68d))
+
+## [2.36.0](https://github.com/vebholic/oms_frontend/compare/v2.35.0...v2.36.0) (2022-01-08)
+
+
+### Features
+
+* - cart changes done ([e33d1f1](https://github.com/vebholic/oms_frontend/commit/e33d1f13cfadf800c56ff2e3a7796d14c32e7de9))
+* - Cart changes done ([1cbfe4e](https://github.com/vebholic/oms_frontend/commit/1cbfe4e7c45e1ddc3073516a1175d61e65573251))
+* - Order type changes done ([da3e288](https://github.com/vebholic/oms_frontend/commit/da3e288227de74c50e68f2e950c25706d6c989f7))
+* - PO-890 - Repair job changes done ([2aeea8a](https://github.com/vebholic/oms_frontend/commit/2aeea8a56943a62d24a48118f18ce138e7250442))
+* **repairjob:** auto generate name ([53d7732](https://github.com/vebholic/oms_frontend/commit/53d7732f2a7d8a9e1c1b9cda6f906fb3858c462d))
+
+
+### Bug Fixes
+
+* bug fix ([2d01729](https://github.com/vebholic/oms_frontend/commit/2d017296ec38a50f6f078557d756ab56850e5196))
+* bug fix ([378c0ee](https://github.com/vebholic/oms_frontend/commit/378c0ee8afb0cd683e356be0fea5ee0df8915e30))
+* bug fix ([c2b4684](https://github.com/vebholic/oms_frontend/commit/c2b4684fab7f2ec35aba6dfd68d940c823ab3b37))
+* **contacts:** address fix ([006f848](https://github.com/vebholic/oms_frontend/commit/006f84843d6f406648440f9d7c57820954eed7de))
+* **map&address:** add map for lat lng ([3d54e7c](https://github.com/vebholic/oms_frontend/commit/3d54e7ca1444903f492dcd8b7220efdf59ab94e8))
+* **map:** minor fix ([f803176](https://github.com/vebholic/oms_frontend/commit/f8031766d215601583b6f9dc95ec8b6f1070a277))
+* pO-888 ([56efeb6](https://github.com/vebholic/oms_frontend/commit/56efeb6a85ac825ae98315a1f9af2039c9414a34))
+* pO-897 ([f790876](https://github.com/vebholic/oms_frontend/commit/f7908761820346ac4a2f0996bda47ac56f71bb78))
+* pO-907 ([f23449e](https://github.com/vebholic/oms_frontend/commit/f23449e9c14f21e40130c62f84f3be80de304b21))
+
+## [2.35.0](https://github.com/vebholic/oms_frontend/compare/v2.34.1...v2.35.0) (2022-01-07)
+
+
+### Features
+
+* - Cart changes done ([a8fd863](https://github.com/vebholic/oms_frontend/commit/a8fd8638b2b08e3608dc289fefcd651ebeda614f))
+* - Sales order changes ([954b8a1](https://github.com/vebholic/oms_frontend/commit/954b8a1b6e66620d92b11be273d77327a0af799a))
+* - Sales order changes ([a37b550](https://github.com/vebholic/oms_frontend/commit/a37b55052752eac532ca4fa1cb88e62a02414b0f))
+* - Sales order changes ([2744ca7](https://github.com/vebholic/oms_frontend/commit/2744ca71439cdfb028e5016ed8197c7449ae194b))
+* - Sales order changes ([5b0c2d5](https://github.com/vebholic/oms_frontend/commit/5b0c2d5633b53d1fb97cfc8f92193371aadc0add))
+* - Sales order changes ([e9ca5a1](https://github.com/vebholic/oms_frontend/commit/e9ca5a18899d6c9097866e4bece145ccfe3e22a5))
+* - Sales order changes done ([88930b9](https://github.com/vebholic/oms_frontend/commit/88930b9868c3de0af3158b5eff51377b0ae890c7))
+* - Sales order changes done ([841a5c2](https://github.com/vebholic/oms_frontend/commit/841a5c2b5c583cab680e02132eb0b9359c27b1ca))
+* **ecommerce/ cart:** ecommerce/ cart ([ec7577d](https://github.com/vebholic/oms_frontend/commit/ec7577d9b925f1c9d237814f1204d4e2246fc352))
+
+
+### Bug Fixes
+
+* bu fix ([5245534](https://github.com/vebholic/oms_frontend/commit/5245534a94166f0a57d2ea20d81b5413b5b4f762))
+* bug fix ([7df569c](https://github.com/vebholic/oms_frontend/commit/7df569cdc5b52dc9d8fe8d20c0096cd2090dae93))
+* bug fix ([ebfdfab](https://github.com/vebholic/oms_frontend/commit/ebfdfab6b6a2a45be23020891e336d5e958b418c))
+* bug fix ([3a91d49](https://github.com/vebholic/oms_frontend/commit/3a91d495dde3a6464c5617a85086faadd77e5a8a))
+* pO-851,854,884 ([eceece7](https://github.com/vebholic/oms_frontend/commit/eceece742523f1b98f1a2749e78dd3dcd00c4b23))
+* pO-870 & 872 ([8c63ce7](https://github.com/vebholic/oms_frontend/commit/8c63ce7894d1927e2873b4e4a99c2f01d3c0ca3c))
+* **rental:** conflict fix ([3f9afb0](https://github.com/vebholic/oms_frontend/commit/3f9afb0fb73f8bdee21c1518d3ca28e37e0c304b))
+* **repairjob:** auto complete ([6560acb](https://github.com/vebholic/oms_frontend/commit/6560acb692a717541b55e054bf217bed0de6c80d))
+* **rom:** mobile issue ([e45261f](https://github.com/vebholic/oms_frontend/commit/e45261f5fc46ea1f04584d9f545e090f1009ea62))
+* **ta:** fix ([6e39834](https://github.com/vebholic/oms_frontend/commit/6e39834389f7d7c1858e18a3bac6df6c0158bd98))
+* **transferasset:** mobile issue ([389380f](https://github.com/vebholic/oms_frontend/commit/389380f4e119c1ba03d73e412fc3824be3ad22c8))
+* **transferasset:** plant bug fix ([80f9299](https://github.com/vebholic/oms_frontend/commit/80f9299fe61d89230241c9b5f691e5ac389f4a5e))
+
 ### [2.34.1](https://github.com/vebholic/oms_frontend/compare/v2.34.0...v2.34.1) (2022-01-06)
 
 

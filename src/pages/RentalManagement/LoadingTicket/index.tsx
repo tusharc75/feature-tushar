@@ -6,7 +6,7 @@ import { CommonRenderer } from "../../../components/AgGridComponents/CustomAgGri
 import { Link } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, IconButton, Tooltip } from "@material-ui/core";
+import { Button, IconButton, Tooltip, Menu, MenuItem, Dialog, TextField, CircularProgress } from "@material-ui/core";
 import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -16,7 +16,9 @@ import {
   gridLoadingTimeout,
   rentalManagement,
   sidebarResource,
-  INVENTORY_STATUS
+  INVENTORY_STATUS,
+  DELIVERY_TICKET_STATUS,
+  productInventory
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { useHistory } from "react-router-dom";
@@ -28,14 +30,32 @@ import CustomSwipableList from "../../../components/SwipableListComponents/Custo
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
-
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
+import { makeStyles } from '@material-ui/core/styles';
 
 const renderedFrom = "rentalManagementDetailsPageDeliveryTicket"
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: theme.palette.background.paper,
+  },
+  paper: {
+    width: '80%',
+    maxHeight: 435,
+  },
+}));
 
 const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
+  const classes = useStyles();
+
   const [gridApi, setGridApi] = useState(null);
   const [warehouse, setWarehouse] = useState(null);
   const [assignedSerializedAsset, setAssignedSerializedAsset] = useState([]);
@@ -45,6 +65,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false)
   const [okBtnLoading, setOkBtnLoading] = useState(false)
 
+  const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: "", message: "" })
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
@@ -85,6 +107,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
               productAssets[index]["type"] = obj?.type
               productAssets[index]["deliveryTicket"] = obj?.ticketName
               productAssets[index]["deliveryTicketId"] = obj?._id
+              productAssets[index]["deliveryTicketStatus"] = obj?.status
             }
           })
         }
@@ -92,12 +115,10 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       productAssets.forEach((d) => {
         d["isChecked"] = false;
         d["hideSelection"] = [INVENTORY_STATUS.inUse, INVENTORY_STATUS.indTransit, INVENTORY_STATUS.repair,
-        INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(d.status);
+        INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(d.status)
+          || d.deliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered
       })
-      if (productAssets.filter((e) => [INVENTORY_STATUS.inUse, INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap,
-      INVENTORY_STATUS.lost, INVENTORY_STATUS.indTransit, INVENTORY_STATUS.underReview, INVENTORY_STATUS.readyToShip].includes(e.status)
-        || productAssets?.deliveryTicketId
-      ).length === productAssets.length) {
+      if (productAssets.filter((e) => e.deliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
         setNextStep(true)
       }
       dispatch({ type: "initialize", data: productAssets, count: productAssets.length });
@@ -163,6 +184,15 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     setShowDeliveryTicketDialog(true);
   };
 
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
       <Button
@@ -201,8 +231,42 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         {downlodingFile ? "Please wait..." : "Preview"}
       </Button>
       <Box mx={1} />
+      <Button variant="outlined" color="primary" aria-controls="simple-menu"
+        aria-haspopup="true"
+        disabled={selectedRecords.length === 0 || isOffline}
+        size="small"
+        onClick={handleClick}
+        endIcon={<ArrowDropDownIcon />}>
+        Change Status
+      </Button>
+      <Menu
+        id="simple-menu"
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={() => {
+          setAnchorEl(null)
+          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
+        }}>Scrap</MenuItem>
+        <MenuItem onClick={() => {
+          setAnchorEl(null)
+          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
+        }}>Lost</MenuItem>
+      </Menu>
+      <Box mx={1} />
       <IconButton
-        disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
+        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
         onClick={() => {
           handleDeliveryTicketDialog(selectedRecords, warehouse)
         }}
@@ -281,7 +345,14 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             page={page}
             allowAction={false}
             loading={loading}
+            isClientSideGrid={true}
             allowSelection={true}
+            rowClassRules={{
+              "red-data-row":
+                function (params) {
+                  return [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some(s => s === params.data.status);
+                },
+            }}
             renderedFrom={renderedFrom}
             refreshGrid={fetchRecords}
           />
@@ -334,6 +405,77 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           okBtnLoading={okBtnLoading}
         />
       )
+    }
+    {
+      statusToUpdate.open && <Dialog open
+        classes={{
+          paper: classes.paper,
+        }}
+        onClose={() => setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false, open: false }))}
+      >
+        <CustomDialogHeader title="Are you sure ?"
+          showRequiredLabel={false}
+          onClose={() => setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false, open: false }))} />
+
+        <CustomDialogContent>
+          <Box className="my-2">
+            {
+              statusToUpdate.status === "Repair" ? <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
+                : <TextField
+                  id="outlined-multiline-static"
+                  label={`Please enter the reason for ${statusToUpdate.status}`}
+                  multiline
+                  fullWidth
+                  rows={4}
+                  value={statusToUpdate.message}
+                  variant="outlined"
+                  onChange={(e) => {
+                    setStatusToUpdate(prevState => ({ ...prevState, message: e.target.value }))
+                  }}
+                />
+            }
+          </Box>
+        </CustomDialogContent>
+        <CustomDialogFooter>
+          <Button
+            size="small"
+            variant="outlined" color="primary" onClick={() => setStatusToUpdate(prevState => ({ ...prevState, open: false }))}>
+            Cancel
+          </Button>
+          <Button
+            size="small"
+            onClick={() => {
+              setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
+              axiosInstance().put(`${productInventory.api}/update-status`, {
+                comment: statusToUpdate.message,
+                assets: selectedRecords.map(m => m?._id ?? m?.id),
+                status: statusToUpdate.status,
+                reference: {
+                  _id: rentalManagementData._id,
+                  type: "Rental"
+                }
+              }).then(({ data }) => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
+                setStatusToUpdate({ open: false, isUpdating: false, status: "", message: "" });
+                fetchRecords();
+              }).catch((error) => {
+                setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false }));
+                toastConfig.setToastConfig(error)
+              })
+            }}
+            disabled={statusToUpdate.isUpdating}
+            variant="contained"
+            color="primary"
+          >
+            {
+              statusToUpdate.isUpdating ? <CircularProgress
+                style={{ marginRight: "8px" }}
+                size={20} color="inherit" /> : null
+            }
+            Change Status
+          </Button>
+        </CustomDialogFooter>
+      </Dialog>
     }
   </>
   );

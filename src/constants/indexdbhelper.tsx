@@ -6,6 +6,7 @@ export const objectStore = {
     salesOrder: 'salesOrder',
     deliveryTicket: 'deliveryTicket',
     resource: 'resource',
+    repairJob: "Repair Job",
     offlineDataSync: 'offlineDataSync'
 };
 

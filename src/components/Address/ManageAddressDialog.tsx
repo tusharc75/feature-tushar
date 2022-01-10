@@ -1,6 +1,7 @@
 import { useState, useEffect, Fragment, useContext, useCallback } from 'react';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
+import { GoogleMap, Marker } from '@react-google-maps/api';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -25,11 +26,11 @@ const ManageAddressDialog = (props) => {
   const [formsData, setFormsData] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [addressData, setAddressData] = useState(null)
+  const [addressData, setAddressData] = useState(null);
 
   const formikRef = {
     current: null
-  }
+  };
 
   useEffect(() => {
     if (initialData.fields.length > 0) {
@@ -43,26 +44,26 @@ const ManageAddressDialog = (props) => {
       .then(({ data: { data } }) => {
         const fieldsCreateData = data.filter((d) => d.isCreate).map((d: any) => d.fieldData);
         const fieldsEditData = data.filter((d) => d.isUpdate).map((d: any) => d.fieldData);
-        let dataAddress: any = {}
+        let dataAddress: any = {};
         if ((isEdit || isClone) && oldData) {
           dataAddress = {
-            fullAddress: oldData.fullAddress ?? "",
-            streetAddress: oldData.streetAddress ?? "",
-            additionalComments: oldData.additionalComments ?? "",
-            city: oldData.city ?? "",
-            country: oldData.country ?? "",
-            ["state/Province"]: oldData["state/Province"] ?? "",
-            ["zipCode/PostalCode"]: oldData["zipCode/PostalCode"] ?? "",
-            longitude: oldData.longitude ?? "",
-            latitude: oldData.latitude ?? "",
-          }
+            fullAddress: oldData.fullAddress ?? '',
+            streetAddress: oldData.streetAddress ?? '',
+            additionalComments: oldData.additionalComments ?? '',
+            city: oldData.city ?? '',
+            country: oldData.country ?? '',
+            ['state/Province']: oldData['state/Province'] ?? '',
+            ['zipCode/PostalCode']: oldData['zipCode/PostalCode'] ?? '',
+            longitude: oldData.longitude ?? '',
+            latitude: oldData.latitude ?? ''
+          };
         }
 
         if (isEdit) {
           setInitialData({
             fields: fieldsEditData,
             values: getObjKeysWithValues(dataAddress, fieldsEditData)
-          })
+          });
         } else if (isClone) {
           setInitialData({
             fields: fieldsCreateData,
@@ -107,7 +108,7 @@ const ManageAddressDialog = (props) => {
         };
 
         const addressess = results.address_components;
-        let fullAddress: any = {}
+        let fullAddress: any = {};
 
         addressess.forEach((address: addressType) => {
           const type = address.types[0];
@@ -135,55 +136,60 @@ const ManageAddressDialog = (props) => {
 
         fullAddress.latitude = results.geometry.location.lat().toLocaleString();
         fullAddress.longitude = results.geometry.location.lng().toLocaleString();
-        fullAddress.streetAddress = results.formatted_address
+        fullAddress.streetAddress = results.formatted_address;
 
-        setAddressData(fullAddress)
+        setAddressData(fullAddress);
       });
-
     }
-
   };
 
   useEffect(() => {
     if (formikRef.current && addressData) {
-      const setFieldValue = formikRef.current.setFieldValue
+      const setFieldValue = formikRef.current.setFieldValue;
       if (addressData?.streetAddress) {
-        setFieldValue("streetAddress", addressData.streetAddress)
+        setFieldValue('streetAddress', addressData.streetAddress);
       } else {
-        setFieldValue("city", "")
+        setFieldValue('city', '');
       }
       if (addressData?.city) {
-        setFieldValue("city", addressData.city)
+        setFieldValue('city', addressData.city);
       } else {
-        setFieldValue("city", "")
+        setFieldValue('city', '');
       }
       if (addressData['state/Province']) {
-        setFieldValue("state/Province", addressData['state/Province'])
+        setFieldValue('state/Province', addressData['state/Province']);
       } else {
-        setFieldValue("state/Province", '')
+        setFieldValue('state/Province', '');
       }
       if (addressData?.country) {
-        setFieldValue("country", addressData.country)
+        setFieldValue('country', addressData.country);
       } else {
-        setFieldValue("country", '')
+        setFieldValue('country', '');
       }
       if (addressData['zipCode/PostalCode']) {
-        setFieldValue("zipCode/PostalCode", addressData['zipCode/PostalCode'])
+        setFieldValue('zipCode/PostalCode', addressData['zipCode/PostalCode']);
       } else {
-        setFieldValue("zipCode/PostalCode", '')
+        setFieldValue('zipCode/PostalCode', '');
       }
       if (addressData?.latitude) {
-        setFieldValue("latitude", addressData.latitude)
+        setFieldValue('latitude', addressData.latitude);
       } else {
-        setFieldValue("latitude", '')
+        setFieldValue('latitude', '');
       }
       if (addressData?.longitude) {
-        setFieldValue("longitude", addressData.longitude)
+        setFieldValue('longitude', addressData.longitude);
       } else {
-        setFieldValue("longitude", '')
+        setFieldValue('longitude', '');
       }
     }
-  }, [addressData])
+  }, [addressData]);
+
+  const onCordChange = (position: google.maps.MapMouseEvent) => {
+    if (!formikRef.current) return;
+    const setFieldValue = formikRef.current.setFieldValue;
+    setFieldValue('latitude', position.latLng.lat().toLocaleString());
+    setFieldValue('longitude', position.latLng.lng().toLocaleString());
+  };
 
   return (
     <Dialog
@@ -203,7 +209,7 @@ const ManageAddressDialog = (props) => {
         <Formik
           innerRef={(ref) => {
             if (ref) {
-              formikRef.current = ref
+              formikRef.current = ref;
             }
           }}
           enableReinitialize={true}
@@ -215,7 +221,7 @@ const ManageAddressDialog = (props) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={title ? title : "Add Address"}
+                title={title ? title : 'Add Address'}
                 onClose={() => {
                   if (
                     isFieldNotTouched(
@@ -225,8 +231,11 @@ const ManageAddressDialog = (props) => {
                       },
                       values
                     )
-                  ) { onClose(); }
-                  else { setShowConfirmDialog(true); }
+                  ) {
+                    onClose();
+                  } else {
+                    setShowConfirmDialog(true);
+                  }
                 }}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -265,17 +274,18 @@ const ManageAddressDialog = (props) => {
                                       tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                       imageOrFileUploadCompletePercentage={null}
-                                      onChange={(_, val) => {
-                                        if (field.fieldName === 'fullAddress' && typeof val === 'object') {
-                                          const placeId = val?.place_id ?? null;
-                                          getFullAddress(placeId);
-                                          if (!placeId) {
-                                            setAddressData(null)
-                                          }
-                                        } else {
-                                          setFieldValue(field.fieldName, val)
-                                        }
-                                      }}
+                                      onChange={
+                                        field.fieldName === 'fullAddress'
+                                          ? (_, val) => {
+                                              if (typeof val !== 'object') return;
+                                              const placeId = val?.place_id ?? null;
+                                              getFullAddress(placeId);
+                                              if (!placeId) {
+                                                setAddressData(null);
+                                              }
+                                            }
+                                          : null
+                                      }
                                     />
                                   }
                                 </Grid>
@@ -306,6 +316,62 @@ const ManageAddressDialog = (props) => {
                       );
                     })}
                 </Form>
+                <div>
+                    <p>Drag or click to select new coordinates</p>
+                  <Box height={400} width={'100%'} borderRadius={4} overflow="hidden">
+                    <GoogleMap
+                      onClick={(position) => onCordChange(position)}
+                      options={{
+                        disableDefaultUI: true,
+                        mapTypeId: google.maps.MapTypeId.ROADMAP,
+                        mapTypeControlOptions: {
+                          style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+                        },
+                        styles: [
+                          {
+                            featureType: 'water',
+                            stylers: [{ color: '#46bcec' }, { visibility: 'on' }]
+                          },
+                          { featureType: 'landscape', stylers: [{ color: '#f2f2f2' }] },
+                          {
+                            featureType: 'road',
+                            stylers: [{ saturation: -100 }, { lightness: 45 }]
+                          },
+                          {
+                            featureType: 'road.highway',
+                            stylers: [{ visibility: 'simplified' }]
+                          },
+
+                          { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+                          { featureType: 'poi', stylers: [{ visibility: 'off' }] }
+                        ],
+                        gestureHandling: 'cooperative'
+                      }}
+                      mapContainerStyle={{
+                        minHeight: '500px',
+                        height: '100%',
+                        maxWidth: '600px',
+                        minWidth: '100%'
+                      }}
+                      // onLoad={onLoad}
+                      // onUnmount={onUnmount}
+                      center={
+                        values.latitude && values.longitude
+                          ? new google.maps.LatLng(values?.latitude, values?.longitude)
+                          : new google.maps.LatLng(37.09, -95.713)
+                      }
+                      zoom={4}
+                    >
+                      {values.latitude && values.longitude && (
+                        <Marker
+                          draggable
+                          onDragEnd={(position) => onCordChange(position)}
+                          position={new google.maps.LatLng(values?.latitude, values?.longitude)}
+                        />
+                      )}
+                    </GoogleMap>
+                  </Box>
+                </div>
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button
@@ -320,8 +386,11 @@ const ManageAddressDialog = (props) => {
                         },
                         values
                       )
-                    ) { onClose(); }
-                    else { setShowConfirmDialog(true); }
+                    ) {
+                      onClose();
+                    } else {
+                      setShowConfirmDialog(true);
+                    }
                   }}
                 >
                   Cancel
@@ -333,7 +402,7 @@ const ManageAddressDialog = (props) => {
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                close={() => setShowConfirmDialog(false)}
+                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

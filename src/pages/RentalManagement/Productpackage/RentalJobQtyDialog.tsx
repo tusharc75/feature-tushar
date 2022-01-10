@@ -20,11 +20,7 @@ import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 import moment from "moment";
 
-function findCommonElements(inArrays) {
-  if (typeof inArrays === "undefined") return undefined;
-  if (typeof inArrays[0] === "undefined") return undefined;
-  return intersection.apply(this, inArrays);
-}
+
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -98,6 +94,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           element.isFormula = false;
           element.isMulitFormula = false;
         })
+        data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
         setInitialData({
           fields: data,
           values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", tenure: "" },
@@ -490,32 +487,62 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                   </Box>
                                 </Box>
                               </Grid>
-                              : <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                <Box display="flex" >
-                                  <Box flexGrow={1}  >
-                                    <FormTypes
-                                      {...field}
-                                      fields={initialData.fields}
-                                      fieldData={field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value)
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field.isTooltip}
-                                      tooltipMessage={field.tooltipMessage}
-                                      size="small"
-                                    />
+                              :
+                              ["estimateStartDate", "estimateEndDate"].includes(field.fieldName) ?
+                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Box display="flex" >
+                                    <Box flexGrow={1}  >
+                                      <FormTypes
+                                        {...field}
+                                        fields={initialData.fields}
+                                        fieldData={field}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value)
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field.isTooltip}
+                                        tooltipMessage={field.tooltipMessage}
+                                        size="small"
+                                        minDate={rentalManagementData?.estimateStartDate}
+                                        maxDate={rentalManagementData?.estimateEndDate}
+                                      />
+                                    </Box>
                                   </Box>
-                                </Box>
-                              </Grid>
+                                </Grid>
+                                : <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Box display="flex" >
+                                    <Box flexGrow={1}  >
+                                      <FormTypes
+                                        {...field}
+                                        fields={initialData.fields}
+                                        fieldData={field}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value)
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field.isTooltip}
+                                        tooltipMessage={field.tooltipMessage}
+                                        size="small"
+                                      />
+                                    </Box>
+                                  </Box>
+                                </Grid>
                         ))}
                       </Grid>
                     </Box>

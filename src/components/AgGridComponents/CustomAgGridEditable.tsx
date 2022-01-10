@@ -11,7 +11,7 @@ import {
 import CustomGridHeaderOptions from "./CustomGridHeaderOptions";
 import { CustomLoadingOverlay, CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomFloatingFilter from "../../components/AgGridComponents/CustomAgGridFilter";
-import { orderBy } from "lodash";
+import { orderBy, uniqBy } from "lodash";
 import NumericEditor from "./NumericEditor";
 import DateEditor from "./DateEditor";
 
@@ -149,6 +149,7 @@ export default function CustomAgGridEditable({
   forProductBuilder = false,
   fromProductGrid = false,
   currency = null,
+  onSelection = null,
   renderedFrom = null,
   customGridOptions = null,
   selectedRecords = [],
@@ -157,6 +158,7 @@ export default function CustomAgGridEditable({
   showOnlyShowFilteredRecordSwitch = false,
   priceTemplateField = [],
   fromPurchaseOrderGrid = false,
+  idProperty = "_id",
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -172,7 +174,20 @@ export default function CustomAgGridEditable({
         );
       });
     }
-
+    if (!isClientSideGrid && currentGridApi) {
+      try {
+        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
+        if (oldSelectedRecords.length > 0) {
+          currentGridApi.forEachNode(function (node) {
+            node.setSelected(
+              oldSelectedRecords.some((o) => o[idProperty] === node.data[idProperty])
+            );
+          });
+        }
+      } catch (ex) {
+        console.error("Error in getting selected records from local storage")
+      }
+    }
   }, [currentGridApi, selectedRecords])
 
   //  If you want to do something once grid binding done
@@ -181,6 +196,21 @@ export default function CustomAgGridEditable({
     setColumnApi(params.columnApi);
     setCurrentGridApi(params.api);
     if (handleGridReady) handleGridReady(params);
+    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+    if (!isClientSideGrid) {
+      try {
+        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
+        if (oldSelectedRecords.length > 0) {
+          params.api.forEachNode(function (node) {
+            node.setSelected(
+              oldSelectedRecords.some((o) => o[idProperty] === node.data[idProperty])
+            );
+          });
+        }
+      } catch (ex) {
+        console.error("Error in getting selected records from local storage")
+      }
+    }
   };
 
   const onFirstDataRendered = (e) => {
@@ -448,10 +478,24 @@ export default function CustomAgGridEditable({
               suppressRowClickSelection={true}
               rowSelection={"multiple"}
               onSelectionChanged={(event: any) => {
+                if (onSelection) onSelection(event.api.getSelectedRows());
                 dispatch({
-                  type: "selection",
-                  selectedRecords: event.api.getSelectedRows(),
+                  type: 'selection',
+                  selectedRecords: event.api.getSelectedRows()
                 });
+                if (renderedFrom) {
+                  try {
+                    let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
+                    if (oldSelectedRecords.length > 0) {
+                      const uniqueRecords = uniqBy([...oldSelectedRecords, ...event.api.getSelectedRows()], idProperty)
+                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(uniqueRecords));
+                    } else {
+                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(event.api.getSelectedRows()))
+                    }
+                  } catch (ex) {
+                    console.error("Error in getting / storing selected records")
+                  }
+                }
               }}
               onRowDragEnd={(event: any) => {
                 if (onRowDragEnd) {
@@ -460,6 +504,27 @@ export default function CustomAgGridEditable({
                     "rowIndex",
                     ["asc"]
                   ).map((d) => d.data));
+                }
+              }}
+              onRowSelected={(event) => {
+                if (event.rowIndex !== null && !isClientSideGrid) {
+
+                  try {
+                    let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : []
+
+                    if (event.node.isSelected() === true && !oldSelectedRecords.some(s => s[idProperty] === event.node.data[idProperty])) {
+                      oldSelectedRecords = [...oldSelectedRecords, event.node.data];
+                      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
+                    }
+                    else if (event.node.isSelected() === false) {
+
+                      if (oldSelectedRecords.length > 0) {
+                        localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords.filter(f => f[idProperty] !== event.data[idProperty])));
+                      }
+                    }
+                  } catch (ex) {
+                    console.error("Error in getting / storing selected records")
+                  }
                 }
               }}
               immutableData={true}

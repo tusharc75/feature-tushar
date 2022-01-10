@@ -155,12 +155,12 @@ const GreenSwitch = withStyles({
   track: {}
 })(Switch);
 
-const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen }) => {
+const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, name, handleChange }) => {
   //const [values, setValues] = React.useState([]);
   const [inputVal, setInputVal] = React.useState("")
   const [error, setError] = React.useState(null)
 
-  const handleChange = (val) => {
+  const handleChangeText = (val) => {
     val = val.trimStart()
     setInputVal(val)
 
@@ -181,6 +181,7 @@ const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen }) => {
       const newOption = { order: order, default: false, optionLabel: inputVal, optionValue: inputVal }
       addFieldOption([newOption])
       setOptions([...options, newOption])
+      handleChange(name, inputVal);
       setOpen(false)
     }
   }
@@ -188,13 +189,13 @@ const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen }) => {
   return (
     <div>
       <Dialog fullWidth maxWidth="sm" open keepMounted onClose={() => setOpen(false)}>
-        <CustomDialogHeader onClose={() => setOpen(false)} title="Add New Option" />
+        <CustomDialogHeader onClose={() => setOpen(false)} title={"Add New " + label} />
         <CustomDialogContent>
           <TextField
             size="small"
             fullWidth
             value={inputVal}
-            onChange={(event) => handleChange(event.target.value)}
+            onChange={(event) => handleChangeText(event.target.value)}
             variant="outlined"
             label="Options"
             style={{ whiteSpace: 'nowrap' }}
@@ -1013,9 +1014,6 @@ const FormTypes = (props) => {
                 error={touched[name] && Boolean(errors[name])}
                 helperText={touched[name] && errors[name]}
                 required={required}
-
-
-
               />
             )}
           />
@@ -1026,7 +1024,7 @@ const FormTypes = (props) => {
               <AddCircleIcon />
             </IconButton>
 
-            {optionSaveDialog && <AddOptionDialog addFieldOption={addFieldOption} options={option} setOptions={setOptionsList} setOpen={setOptionSaveDialog} />}
+            {optionSaveDialog && <AddOptionDialog handleChange={handleChange} name={name} label={label} addFieldOption={addFieldOption} options={option} setOptions={setOptionsList} setOpen={setOptionSaveDialog} />}
           </Grid>
         )}
       </Grid>
@@ -1603,7 +1601,7 @@ const FormTypes = (props) => {
             <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
               <AddCircleIcon />
             </IconButton>
-            {optionSaveDialog && <AddOptionDialog addFieldOption={addFieldOption} options={option} setOptions={setOptionsList} setOpen={setOptionSaveDialog} />}
+            {optionSaveDialog && <AddOptionDialog handleChange={handleChange} name={name} label={label} addFieldOption={addFieldOption} options={option} setOptions={setOptionsList} setOpen={setOptionSaveDialog} />}
           </Grid>
         )}
       </Grid>
