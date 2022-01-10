@@ -394,10 +394,10 @@ export default function Attachment() {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={isMobile ? 12 : 6} className="d-flex align-items-center gap-1">
+            <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
               <AiOutlinePaperClip className="headerLogo" /> <span className="listingHeader">{routes.attachment.title} ({rowCount})</span>
             </Grid>
-            <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side}>
+            <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
               <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
                   <Grid style={{width:"100%" , display:"flex"}}>
                   <SearchFilter
@@ -411,26 +411,26 @@ export default function Attachment() {
 
                 <Grid style={{display: "flex" , gap:"5px"}}>
                     {<Button
-                        variant={isMobile ? "text" : "contained"}
+                        variant={isMobile && !isTablet ? "text" : "contained"}
                       color="primary"
                       size="small"
                       onClick={() => setOpen(true)}
-                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                        startIcon={isMobile ? null : <AddOutlined />}
+                        className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                     >
-                      {isMobile ? <MdAdd size={23}/> : "Add"}
+                      {isMobile && !isTablet ? <MdAdd size={23}/> : "Add"}
                     </Button>
                     }
                     <Button
-                        variant={isMobile ? "text" : "contained"}
+                        variant={isMobile && !isTablet ? "text" : "outlined"}
                       color="default"
                       size="small"
                       onClick={openActions}
                       aria-controls="action-menu"
                       disabled={selectedRecords.length > 0 ? false : true}
-                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                        className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
                     >
-                      {isMobile ? "" :  "Actions" } <ExpandMore/>
+                      {isMobile && !isTablet ? "" :  "Actions" } <ExpandMore/>
                     </Button>
                     <Menu
                       anchorEl={anchorEl}
@@ -461,7 +461,7 @@ export default function Attachment() {
           </Grid>
         </div>
         {
-          isMobile ? <CustomSwipableList
+          isMobile  && !isTablet ? <CustomSwipableList
             allowSelection={true}
             allowSwipe={true}
             permissions={permissions.attachment}
