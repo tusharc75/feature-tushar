@@ -14,7 +14,7 @@ import { SearchActivity } from "../../../axios/activity";
 import { useData } from "../../../StateProvider/Provider";
 import { resActivityColors } from "../Helpers/utils";
 import ActivityModelHandler from "../ActivityModelHandler";
-import {isMobile} from "react-device-detect";
+import {isMobile, isTablet} from "react-device-detect";
 
 export const capitalize = (string) => {
   return string && typeof string === "string"
@@ -119,7 +119,7 @@ export const SearchFilter = ({
           ))
         }
         renderInput={(params) => (
-            isMobile ?           <TextField
+            isMobile && !isTablet ?    <TextField
                     {...params}
                     size="small"
                     variant="standard"

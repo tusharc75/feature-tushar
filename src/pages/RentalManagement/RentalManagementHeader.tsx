@@ -16,8 +16,8 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
 import HideWhenOffline from "../../components/HideWhenOffline";
 import routes from "../../components/Helpers/Routes";
-import { isMobile } from 'react-device-detect';
-import { MdAdd } from "react-icons/all";
+import { isMobile, isTablet } from 'react-device-detect';
+import { MdAdd, MdFilterList, MdSort } from "react-icons/md";
 import { objectStore, insertUpdate, clearAll } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -93,9 +93,49 @@ function RentalManagementHeader(props) {
 
   return (
     <Grid container className={styles.rental_header_layout}>
-      <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+      <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet">
+        <Grid >
         {icon} <span className="listingHeader">{heading}</span>
+        </Grid>
+                {isMobile && (
+                  <>
+                  <Grid style={{display:"inline-flex"}}>
+                    <Button
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      color="secondary"
+                      variant="text"
+                      disableElevation
+                      startIcon={<MdSort />}
+                      className={'sort-filter-tablet'}
+                      style={isTablet ? { marginLeft: '50px' } : {}}
+                    >
+                      Sort
+                    </Button>
+
+                    <Button
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      variant="text"
+                      color="secondary"
+                      disableElevation
+                      className={'sort-filter-tablet'}
+                      startIcon={<MdFilterList />}
+                    >
+                      Filter
+                    </Button>
+                    </Grid>
+                  </>
+                )}
+                
+
+
         <HideWhenOffline>
+        <div className={`align-items-center gap-1 layout-for-mobile `}>
           {options && (
             <ToggleButtonGroup
               size="small"
@@ -113,36 +153,37 @@ function RentalManagementHeader(props) {
               })}
             </ToggleButtonGroup>
           )}
+          </div>
         </HideWhenOffline>
         {children}
       </Grid>
-      <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
+      <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <Grid style={{ display: "flex", flex: 1 }}>
+          <Grid style={{ display: "flex", flex: 1, gap:"5px" }} className={isMobile ? styles.content_box : ""}>
             <HideWhenOffline>
               <SearchBox
                 onSearch={onSearch}
-                searchbox={styles.search_box_input}
+                searchbox={isMobile ? styles.search_box_input : ""}
                 value={searchVal}
                 size="small"
                 placeholder={`Search ${routes.rentalManagement.title}`}
                 style={isMobile ? { flex: 1 } : {}}
+                
               />
             </HideWhenOffline>
-          </Grid>
-          <Grid style={{ display: "flex", gap: "5px" }}>
+            <Grid style={{ display: "flex", gap: "5px" }}>
             <HideWhenOffline>
               {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && (
                 <Button
-                  variant={isMobile ? "text" : "contained"}
+                  variant={isMobile && !isTablet ? "text" : "contained"}
                   color="primary"
                   size="small"
                   // className={styles.add_submit_btn}
                   onClick={onCreate}
-                  className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                  startIcon={isMobile ? null : <AddOutlined />}
+                  className={isMobile  && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                  startIcon={isMobile  && !isTablet ? null : <AddOutlined />}
                 >
-                  {isMobile ? <MdAdd size={23} /> : "Add"}
+                  {isMobile  && !isTablet ? <MdAdd size={23} /> : "Add"}
                 </Button>
               )}
               {
@@ -150,15 +191,15 @@ function RentalManagementHeader(props) {
                   <>
                     <Button
                       //disabled={canDelete}
-                      variant={isMobile ? "text" : "outlined"}
+                      variant={isMobile  && !isTablet ? "text" : "outlined"}
                       color="default"
                       size="small"
-                      className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                      className={isMobile  && !isTablet ? "mobile_button" : styles.action_submit_btn}
                       onClick={openActions}
                       // className={styles.action_submit_btn}
                       aria-controls="action-menu"
                     >
-                      {isMobile ? "" : "Actions"} <ExpandMore />
+                      {isMobile  && !isTablet ? "" : "Actions"} <ExpandMore />
                     </Button>
                     <Menu
                       anchorEl={anchorEl}
@@ -206,6 +247,8 @@ function RentalManagementHeader(props) {
               }
             </HideWhenOffline>
           </Grid>
+          </Grid>
+         
         </Box>
       </Grid>
     </Grid>

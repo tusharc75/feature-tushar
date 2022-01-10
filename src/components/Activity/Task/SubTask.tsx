@@ -1,12 +1,16 @@
 import React, { useContext, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Button, Grid, Chip, IconButton, TextField, CircularProgress } from '@material-ui/core';
+import { Typography, Button, Grid, Chip, IconButton, TextField, CircularProgress, Avatar } from '@material-ui/core';
 import { DeleteOutline } from '@material-ui/icons';
 
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
+import { BsDot } from 'react-icons/bs';
+import { MdDelete } from 'react-icons/md';
+import { resCaseColors } from '../Helpers/utils';
+
 
 const useStyles = makeStyles(() => ({
   marginLeft: {
@@ -19,6 +23,10 @@ const useStyles = makeStyles(() => ({
     position: 'absolute',
     top: '-16px',
     right: '0'
+  },
+  childChipLayout:{
+     fontSize: '10px',
+    minWidth:"70px !important"
   }
 }));
 
@@ -108,17 +116,24 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
               mb={1}
               boxShadow={1}
               borderRadius={4}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: 'pointer', padding: '6px', marginBottom: '0', boxShadow: 'none'  }}
             >
-              <Grid container spacing={1}>
-                <Grid item xs={6}>
+              <Grid container spacing={1} >
+                <Grid item xs={12} className='d-flex justify-content-space-between' >
+                <Grid style={{ display: 'flex', gap: '15px' }}>
+                  <Typography variant="body1" color="primary" style={{ paddingLeft: '10px', display:"flex", justifyContent:"center" , alignItems:"center" , color:"#a3a0a0" }}>
+                    <BsDot/>
+                  </Typography>
                   <Typography variant="body1" color="primary">
                     {element.name}
                   </Typography>
                 </Grid>
-                <Grid item xs={6} container justify="flex-end" alignItems="center">
-                  <Chip size="small" label={element.status} color="primary" />
-                  <Box mr={1} />
+                <Grid style={{ display: 'flex', gap: '15px' }}>
+                  <Avatar style={{width:"24px",height:"24px"}}>M</Avatar>
+                  <Chip size="small" label={element.status} color="primary" className={classes.childChipLayout} style={{
+                    backgroundColor: resCaseColors[element.status],
+                    color: "white",
+                  }}  id="check"/>
                   {/* <IconButton
                     size="small"
                     color="default"
@@ -132,6 +147,8 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
                     <DeleteOutline color="error" />
                   </IconButton> */}
                 </Grid>
+                </Grid>
+                
               </Grid>
             </Box>
           ))}
@@ -157,17 +174,31 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
               mb={1}
               boxShadow={1}
               borderRadius={4}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: 'pointer', padding: '6px', marginBottom: '0', boxShadow: 'none' }}
             >
               <Grid container spacing={1}>
-                <Grid item xs={6}>
-                  <Typography variant="body1" color="primary">
-                    {element.name}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6} container justify="flex-end" alignItems="center">
-                  <Chip size="small" label={element.status} color="primary" />
-                  <Box mr={1} />
+                <Grid item xs={12} className="d-flex justify-content-space-between">
+                  <Grid style={{ display: 'flex', gap: '15px' }}>
+                    <Typography
+                      variant="body1"
+                      color="primary"
+                      style={{ paddingLeft: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#a3a0a0' }}
+                    >
+                      <BsDot />
+                    </Typography>
+
+                    <Typography variant="body1" color="primary">
+                      {element.name}
+                    </Typography>
+                  </Grid>
+
+                  <Grid style={{ display: 'flex', gap: '15px' }}>
+                  <Avatar style={{ width: '24px', height: '24px' }}>M</Avatar>
+                  <Chip size="small" label={element.status} color="primary" className={classes.childChipLayout} style={{
+                    backgroundColor: resCaseColors[element.status],
+                    color: "white",
+                  }}/>
+                 
                   <IconButton
                     size="small"
                     color="default"
@@ -177,10 +208,14 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
                       e.stopPropagation();
                       // deleteTask(e, element._id)
                     }}
+                    style={{ color: 'var(--error)' }}
                   >
-                    <DeleteOutline color="error" />
+                    <MdDelete />
                   </IconButton>
                 </Grid>
+                </Grid>
+
+                
               </Grid>
             </Box>
           ))}

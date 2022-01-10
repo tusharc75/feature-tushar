@@ -14,6 +14,7 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageOpportunityDialog from './ManageOpportunityDialog/ManageOpportunityDialog';
 import { cloneDeep } from 'lodash';
+import CustomMobileStepperOpportunities from "../../components/CustomMobileStepperOpportunities"
 import {
   customerAccount,
   supplierAccount,
@@ -613,13 +614,13 @@ function OpportunityDetailsPage() {
                 ) : null}
               </DetailsPageHeader>
             )}
-
             <ProcessFlow
               disableBackNext={allowedToEdit ? false : true}
               steps={steps}
               activeStep={activeStep}
               handleMarkAsCompleted={handleMarkAsCompleted}
             />
+           
 
             {loading ? (
               <Grid container spacing={2}>
@@ -712,7 +713,7 @@ function OpportunityDetailsPage() {
             </div>
           </Paper>
         </div>
-        <div className="position-relative">
+        <div className={isMobile ? "position-relative mb-5" : "position-relative"}>
           {/* {showActivity ?
             <Paper>
               {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>

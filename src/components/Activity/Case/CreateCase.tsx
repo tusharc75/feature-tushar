@@ -11,6 +11,7 @@ import {
   FormControl,
   TextField,
   Divider,
+  Link,
   CircularProgress
 } from '@material-ui/core';
 import { UserDropdown } from '../Helpers/userDropdown';
@@ -128,6 +129,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
     }));
   };
 
+
   return (
     <>
       <CustomDialogHeader
@@ -146,19 +148,20 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
             <>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <h2 className="form-label-style" style={{ borderBottom: 'none' }}>
+                  {/* <h2 className="form-label-style" style={{ borderBottom: 'none' }}>
                     * Required Fields
-                  </h2>
+                  </h2> */}
                   <MuiPickersUtilsProvider utils={MomentUtils}>
                     <Box padding={1}>
                       <Box mb={2}>
-                        <Breadcrumbs separator="/" aria-label="breadcrumb">
+                        <Breadcrumbs separator=">" aria-label="breadcrumb">
                           {initialValues.parent &&
                             initialValues.parent.map((_p, index) => {
                               return (
-                                <Button key={index} size="small" className="cursor-pointer" onClick={() => setId(_p._id)} color="primary">
+                                
+                                <Link key={index} className="cursor-pointer uppercase" onClick={() => setId(_p._id)} >
                                   {_p.name}
-                                </Button>
+                                </Link>
                               );
                             })}
                         </Breadcrumbs>

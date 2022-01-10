@@ -28,7 +28,7 @@ import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { MdAccountCircle } from "react-icons/md";
 import { AiFillCrown, MdAdd } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from "react-router-dom";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
@@ -337,11 +337,12 @@ const PurchaseOrder = () => {
                             />
                         )}
                     </Grid>
-                    <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
+                    <Grid xs={12} sm={12} md={6} container className={styles.filter_side} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
-                            <Grid style={{ display: "flex", flex: 1 }}>
+                            <Grid style={{ display: "flex", flex: 1, gap:"5px" }} className={styles.content_box }>
                                 <SearchBox
                                     onSearch={handleSearch}
+                                    searchbox={isMobile ? styles.search_box_input : ""}
                                     width="242px"
                                     size="small"
                                     value={search}
@@ -354,8 +355,8 @@ const PurchaseOrder = () => {
                                 {permissions?.purchaseOrder?.isCreate &&
                                     <Button onClick={() => {
                                         setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null })
-                                    }} variant={isMobile ? "text" : "contained"} size="small" color="primary" className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                                        startIcon={isMobile ? null : <AddOutlined />}> {isMobile ? <MdAdd size={23} /> : "Add"}</Button>
+                                    }} variant={isMobile && !isTablet ? "text" : "contained"} size="small" color="primary" className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}> {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}</Button>
                                 }
 
                                 {/* <HtmlTooltip title="Please select some purchase orders">
@@ -398,7 +399,7 @@ const PurchaseOrder = () => {
             </div>
             {columns ?
                 Object.keys(frameWorkComponent).length > 0 ?
-                    isMobile ?
+                    isMobile && !isTablet ?
                         <CustomSwipableList
                             allowSelection={true}
                             allowSwipe={true}

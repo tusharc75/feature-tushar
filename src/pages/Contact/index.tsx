@@ -2,7 +2,7 @@ import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
 import { Box, Button, Menu, MenuItem, Grid } from '@material-ui/core';
 import { useData } from '../../StateProvider/Provider';
 import { Link, useLocation } from 'react-router-dom';
-import {AddOutlined, ExpandMore} from '@material-ui/icons';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
 import ManageContactDialog from './ManageContact/index';
@@ -35,14 +35,14 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import { MdAccountCircle } from "react-icons/md";
-import { AiFillPhone } from "react-icons/ai";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { isMobile } from 'react-device-detect';
+import { MdAccountCircle } from 'react-icons/md';
+import { AiFillPhone } from 'react-icons/ai';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { isMobile, isTablet } from 'react-device-detect';
 import { MdEmail } from 'react-icons/md';
 import queryString from 'query-string';
-import {MdAdd} from "react-icons/all";
-import {IoFilterCircle,  MdFilterList, MdSort} from "react-icons/all";
+import { MdAdd } from 'react-icons/all';
+import { IoFilterCircle, MdFilterList, MdSort } from 'react-icons/all';
 
 const ContactTypes = [
   {
@@ -115,7 +115,7 @@ export default function Contact(props) {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const columnState = JSON.parse(localStorage.getItem(contactResource));
   const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([])
+  const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = `${contactResource}_selected`;
 
   useEffect(() => {
@@ -142,7 +142,7 @@ export default function Contact(props) {
           ? `?page=${page}&search=${querySearch}`
           : `?page=${page}`
       );
-    }else{
+    } else {
       history.replace(
         queryType && querySearch && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
@@ -160,7 +160,6 @@ export default function Contact(props) {
           ? `?page=${page}&search=${querySearch}`
           : `?page=${page}`
       );
-
     }
   }, [page, queryPage]);
 
@@ -187,7 +186,7 @@ export default function Contact(props) {
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
           rendererNames.push(currentColumn?.rendererName);
         }
-        return o?.fieldData
+        return o?.fieldData;
       }
       return o?.fieldData;
     });
@@ -528,23 +527,21 @@ export default function Contact(props) {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
-          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-          finalObject["allowedToEdit"] = (
-            [...(u.collaborator ?? []), u.owner].some(
-              (d) => d?.optionValue === user?.user?._id
-            )
-          );
+          finalObject['canDelete'] = u.owner?.optionValue === user?.user._id;
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
 
-          finalObject["owerCollaboratorInitialsOrImages"] = [];
-          if (finalObject["owner"])
-            finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
+          finalObject['owerCollaboratorInitialsOrImages'] = [];
+          if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
 
-          finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
+          finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
             if (f.initials) {
-              f.initials = f.initials.split(" ").map((i) => i[0]).join("");
+              f.initials = f.initials
+                .split(' ')
+                .map((i) => i[0])
+                .join('');
             }
-          })
+          });
 
           return {
             ...finalObject,
@@ -556,31 +553,35 @@ export default function Contact(props) {
           };
         });
         setIsAllChecked(false);
-        setClonedData(data)
+        setClonedData(data);
         if (appendRows) {
           dispatch({
-            type: "initialize", data: [...dataRows, ...rows],
-            count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count,
+            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
-            type: "initialize", data: rows, count: count,
-            selectedRecords: rows.filter(f => f.isChecked === true)
+            type: 'initialize',
+            data: rows,
+            count: count,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
 
         if (gridApi) {
           try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
+              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
+              : [];
             if (oldSelectedRecords.length > 0) {
               gridApi.forEachNode(function (node) {
-                node.setSelected(
-                  oldSelectedRecords.some((o) => o === node.data._id)
-                );
+                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
               });
             }
           } catch (ex) {
-            console.error("Error in getting selected records from local storage")
+            console.error('Error in getting selected records from local storage');
           }
         }
 
@@ -692,46 +693,62 @@ export default function Contact(props) {
       <CustomContainer>
         <div className={`${contactClass['contact_header_inner_container']}`}>
           <Grid container className="header-panel" justify="space-between" alignContent="center">
-            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
+            <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center gap-1">
               <Grid container className="gap-1">
-                <Grid className="d-flex align-items-center gap-1">
-                  <MdContacts className="headerLogo" />
-                  <span id="resourceHeader" className="listingHeader">
-                    {routes[contactResource].title}
-                  </span>
-                  {isMobile && <>
-        <Button
-        id="demo-customized-button"
-        aria-controls="demo-customized-menu"
-        aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-        color="secondary"
-        variant="text"
-        disableElevation
-        startIcon={<MdSort />}
-        style={{marginLeft:"40px"}}
-      >
-        Sort 
-        </Button>
+                <Grid className="d-flex align-items-center gap-1 align-tablet">
+                  <Grid>
+                    <MdContacts className="headerLogo" />
+                    <span id="resourceHeader" className="listingHeader">
+                      {routes[contactResource].title}
+                    </span>
+                  </Grid>
 
-        <Button
-        id="demo-customized-button"
-        aria-controls="demo-customized-menu"
-        aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-        variant="text"
-        color="secondary"
-        disableElevation
-        startIcon={<MdFilterList />}
-      >
-        Filter 
-        </Button>
-        </>}
-        
-                </Grid>
-                <Grid>
+                  {isMobile && (
+                    <>
+                      <Grid style={{ display: 'inline-flex' }}>
+                        <Button
+                          id="demo-customized-button"
+                          aria-controls="demo-customized-menu"
+                          aria-haspopup="true"
+                          aria-expanded={open ? 'true' : undefined}
+                          color="secondary"
+                          variant="text"
+                          disableElevation
+                          startIcon={<MdSort />}
+                          style={{ marginLeft: '40px' }}
+                          className={'sort-filter-tablet'}
+                        >
+                          Sort
+                        </Button>
+
+                        <Button
+                          id="demo-customized-button"
+                          aria-controls="demo-customized-menu"
+                          aria-haspopup="true"
+                          aria-expanded={open ? 'true' : undefined}
+                          variant="text"
+                          color="secondary"
+                          disableElevation
+                          startIcon={<MdFilterList />}
+                          className={'sort-filter-tablet'}
+                        >
+                          Filter
+                        </Button>
+                      </Grid>
+                    </>
+                  )}
+
+
+<Grid className='align-toggle-button'>
                   {ContactTypes && (
-                    <ToggleButtonGroup id="resourceTypeSelector" size="small" className="ml-8" value={filter} exclusive onChange={handleFilter}>
+                    <ToggleButtonGroup
+                      id="resourceTypeSelector"
+                      size="small"
+                      className="ml-8 layout-for-mobile"
+                      value={filter}
+                      exclusive
+                      onChange={handleFilter}
+                    >
                       {ContactTypes.map((k, index) => {
                         return (
                           <ToggleButton value={k.key} key={index}>
@@ -741,8 +758,8 @@ export default function Contact(props) {
                       })}
                     </ToggleButtonGroup>
                   )}
-                </Grid>
-                <Grid className={styles.Related_Account}>
+
+<Grid className={styles.Related_Account}>
                   {accountDetails.accountId && (
                     <Chip
                       className="ml-3"
@@ -754,111 +771,116 @@ export default function Contact(props) {
                       }}
                     />
                   )}
+
                 </Grid>
+                </Grid>
+                
+                </Grid>
+                
+                
               </Grid>
             </Grid>
-            <Grid item md={6} sm={6} xs={12} className={styles.filter_side}>
+            <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
               <Box id="resourceOperations" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{display: "flex", flex:1}}>
+                <Grid style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
                     onSearch={handleSearch}
                     searchbox={styles.search_box_input}
                     value={search}
                     size="small"
-                    width={isMobile ? "200px" : "242px"}
-                    style={isMobile ? {flex:1} : {}}
+                    width={isMobile ? '200px' : '242px'}
+                    style={isMobile ? { flex: 1 } : {}}
                   />
                 </Grid>
 
-                <Grid style={{display: "flex" , gap:"5px"}}>
-                {contactPermissions.isCreate && (
+                <Grid style={{ display: 'flex', gap: '5px' }}>
+                  {contactPermissions.isCreate && (
+                    <>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        color="primary"
+                        size="small"
+                        onClick={clickCreateNew}
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                        startIcon={isMobile && !isTablet ? "" : <AddOutlined />}
+                      >
+                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                      </Button>
+                    </>
+                  )}
+
                   <>
                     <Button
-                        variant={isMobile ? "text" : "contained"}
-                      color="primary"
+                      // disabled={Boolean(!selectedBrand)}
+                      disabled={selectedRecords.length === 0}
+                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                      color="default"
                       size="small"
-                      onClick={clickCreateNew}
-                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                        startIcon={isMobile ? null : <AddOutlined />}
+                      onClick={openActions}
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      aria-controls="action-menu"
                     >
-                      {isMobile ? <MdAdd size={23}/> : "Add"}
+                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
                     </Button>
-                  </>
-                )}
-
-                <>
-                  <Button
-                    // disabled={Boolean(!selectedBrand)}
-                    disabled={selectedRecords.length === 0}
-                    variant={isMobile ? "text" : "contained"}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    className={isMobile ? "mobile_button" : styles.action_submit_btn}
-                    aria-controls="action-menu"
-                  >
-                    {isMobile ? "" :  "Actions" } <ExpandMore/>
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    {contactPermissions.isDelete && (
-                      <MenuItem
-                        disabled={selectedRecords.length === 0}
-                        onClick={() => {
-                          if (selectedRecords.some((d) => d.canDelete === false)) {
-                            closeActions();
-                            setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
-                          } else {
-                            closeActions();
-                            setShowDeleteConfirmBox(true);
-                          }
-                        }}
-                      >
-                        Delete
-                      </MenuItem>
-                    )}
-                    {contactPermissions.isUpdate && (
-                      <MenuItem
-                        disabled={selectedRecords.length === 0}
-                        onClick={() => {
-                          if (selectedRecords.some((d) => d.isUpdate === false)) {
-                            closeActions();
-                            setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
-                          } else {
-                            closeActions();
-                            if (selectedRecords.length) {
-                              let entities = [];
-                              selectedRecords.map((current) => {
-                                if (current?.entityId) {
-                                  entities = [...entities, current?.entityId];
-                                }
-                                if (current?.restentity) {
-                                  let restEntities = current?.restentity.map((o) => o?.optionValue);
-                                  entities = [...entities, ...restEntities];
-                                }
-                              });
-                              setEntities([...entities]);
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      {contactPermissions.isDelete && (
+                        <MenuItem
+                          disabled={selectedRecords.length === 0}
+                          onClick={() => {
+                            if (selectedRecords.some((d) => d.canDelete === false)) {
+                              closeActions();
+                              setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
+                            } else {
+                              closeActions();
+                              setShowDeleteConfirmBox(true);
                             }
-                            setShowEntityDialog(true);
-                          }
-                        }}
-                     
-                      >
-                        Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
-                      </MenuItem>
-                    )}
-                  </Menu>
-                </>
+                          }}
+                        >
+                          Delete
+                        </MenuItem>
+                      )}
+                      {contactPermissions.isUpdate && (
+                        <MenuItem
+                          disabled={selectedRecords.length === 0}
+                          onClick={() => {
+                            if (selectedRecords.some((d) => d.isUpdate === false)) {
+                              closeActions();
+                              setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                            } else {
+                              closeActions();
+                              if (selectedRecords.length) {
+                                let entities = [];
+                                selectedRecords.map((current) => {
+                                  if (current?.entityId) {
+                                    entities = [...entities, current?.entityId];
+                                  }
+                                  if (current?.restentity) {
+                                    let restEntities = current?.restentity.map((o) => o?.optionValue);
+                                    entities = [...entities, ...restEntities];
+                                  }
+                                });
+                                setEntities([...entities]);
+                              }
+                              setShowEntityDialog(true);
+                            }
+                          }}
+                        >
+                          Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+                        </MenuItem>
+                      )}
+                    </Menu>
+                  </>
                 </Grid>
               </Box>
             </Grid>

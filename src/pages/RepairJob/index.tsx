@@ -540,7 +540,7 @@ const RepairJob = () => {
             )}
           </RepairJobHeader>
         </div>
-        {isMobile ?
+        {isMobile && !isTablet ?
           <CustomSwipableList
             allowSelection={true}
             allowSwipe={true}
@@ -569,7 +569,7 @@ const RepairJob = () => {
                 field: "status",
               },
               {
-                label: "Status: ",
+                label: "Type: ",
                 field: "typeOfRepair",
               }
             ]}
