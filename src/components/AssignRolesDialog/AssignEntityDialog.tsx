@@ -26,6 +26,7 @@ import StepLabel from "@material-ui/core/StepLabel";
 import StepContent from "@material-ui/core/StepContent";
 import { roleTypes } from "../../constants/helpers";
 import SearchBox from "../Helpers/SearchBox";
+import { useData } from "../../StateProvider/Provider";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -80,23 +81,24 @@ const AssignEntityDialog = ({
 
   useEffect(() => {
     setLoadingData(true);
-    axiosInstance()
-      .get(`/${type}`)
-      .then(({ data: { data } }) => {
-        if (type == "user") {
+    if (type == "user") {
+      axiosInstance()
+        .get(`/${type}`)
+        .then(({ data: { data } }) => {
           setData(data.filter(user => !assignedEntity.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
           setDataConst(data.filter(user => !assignedEntity.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
-        }
-        else {
-          setData(data.filter((item) => entityAccessIds.includes(item._id)).filter(user => !assignedEntity.some(item => item?.entity._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
-          setDataConst(data.filter((item) => entityAccessIds.includes(item._id)).filter(user => !assignedEntity.some(item => item?.entity._id === user?._id)).map(obj => ({ ...obj, isChecked: false, show: true })));
-        }
-        setLoadingData(false);
-      })
-      .catch((error) => {
-        setLoadingData(false);
-        toastConfig.setToastConfig(error);
-      });
+          setLoadingData(false);
+        })
+        .catch((error) => {
+          setLoadingData(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+    else {
+      setLoadingData(false);
+      setData(JSON.parse(localStorage.getItem("mappedEntities")).map(obj => ({ ...obj, entityName: obj.optionLabel, _id: obj.optionValue, isChecked: false, show: true })));
+      setDataConst(JSON.parse(localStorage.getItem("mappedEntities")).map(obj => ({ ...obj, entityName: obj.optionLabel, _id: obj.optionValue, isChecked: false, show: true })));
+    }
 
     axiosInstance()
       .get(`/role?type=${roleTypes.find((d) => d.key === "Regional")?.value}`)
@@ -127,11 +129,11 @@ const AssignEntityDialog = ({
         "roles": selectedRole
 
       })
-      .then(({data}) => {
+      .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message:data.message
+          message: data.message
         })
       })
       .catch((error) => {
