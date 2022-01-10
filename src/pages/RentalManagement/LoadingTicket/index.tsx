@@ -345,7 +345,14 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             page={page}
             allowAction={false}
             loading={loading}
+            isClientSideGrid={true}
             allowSelection={true}
+            rowClassRules={{
+              "red-data-row":
+                function (params) {
+                  return [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some(s => s === params.data.status);
+                },
+            }}
             renderedFrom={renderedFrom}
             refreshGrid={fetchRecords}
           />
