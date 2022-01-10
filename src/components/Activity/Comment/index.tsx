@@ -102,8 +102,7 @@ export const Comment = ({ referenceId }) => {
             <TextField
               id="outlined-multiline-static"
               label="Comment"
-              placeholder="Add a comment..."
-              multiline
+              placeholder="Add a comment..."              
               fullWidth
               rows={2}
               value={value}

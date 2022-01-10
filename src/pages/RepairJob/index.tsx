@@ -708,7 +708,7 @@ const RepairJob = () => {
 
         {
           Object.keys(frameworkComponents).length > 0 ?
-            isMobile ?
+            isMobile && !isTablet ?
               <CustomSwipableList
                 allowSelection={true}
                 allowSwipe={true}

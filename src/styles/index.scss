@@ -574,6 +574,7 @@ body::-webkit-scrollbar-thumb {
   color: var(--secondary);
   padding-right: 10px;
   margin-left: 2px;
+  padding-top: 2px;
 
   &.single {
     padding: 2px;
@@ -756,6 +757,12 @@ body::-webkit-scrollbar-thumb {
   .MuiTab-textColorPrimary.Mui-selected{
     border-top: 0px !important
   }
+}
+.MobileStep-next-back-button{
+  color: var(--secondary) !important;
+}
+.one{
+  background-color: yellow !important;
 }
 
 
@@ -1321,6 +1328,16 @@ body::-webkit-scrollbar-thumb {
   border: 2px solid #43ADAA;
   border-radius: 10px;
 }
+.sort-filter-tablet{
+  display: none !important;
+}
+.layout-for-mobile{
+  display: flex !important;
+}
+.align-tablet{
+  
+}
+
 
 
 @media only screen and (max-height: 1030px){
@@ -1330,6 +1347,10 @@ body::-webkit-scrollbar-thumb {
     color: var(--secondary);
     margin-left: 2px;
   }
+
+ 
+  
+  
 }
 @media only screen and (max-height: 700px){
   .product-builder-edit-grid {
@@ -1344,6 +1365,23 @@ body::-webkit-scrollbar-thumb {
   .all-check-box{
     padding-left: 21px !important;
   }
+  .sort-filter-tablet{
+    display: flex !important;
+  }
+  .layout-for-tablet{
+    justify-content: space-between;
+  }
+  .layout-for-mobile{
+    display: none !important;
+  }
+  .align-tablet{
+    width:100%;
+    justify-content: space-between;
+}
+.align-toggle-button{
+  display: none;
+}
+ 
 }
 @media only screen and (max-width: 560px) {
   .grid-without-activity {
@@ -1410,10 +1448,25 @@ body::-webkit-scrollbar-thumb {
   }
 
 }
+
+
 @media only screen and (max-width: 830px) {
   .redQuoteBox {
     display: none;
   }
+  .listingHeader{
+    // min-width: 130px;
+  }
+  
+ 
+  .header-panel {
+    & .MuiButton-outlinedSizeSmall {
+
+      padding: 4px 6px ;
+    }
+  }
+
+
 }
 
 .actio-pos-quote {
@@ -1469,4 +1522,37 @@ body::-webkit-scrollbar-thumb {
 //regarding tiny mce
 .tox-tinymce .tox-statusbar {
   display: none !important;
+  }
+
+  @media only screen and (max-width: 1030px) {
+    .listingHeader {
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: var(--secondary);
+      margin-left: 2px;
+    }
+    .header-panel {
+
+      
+  
+      & .MuiButton-outlinedSizeSmall {
+ 
+        padding: 2px 6px !important;
+      }
+    
+      & .MuiToggleButton-sizeSmall {
+        padding: 4px 8px !important;
+        font-size: 0.8rem !important;
+        
+      }
+    }
+    .accountActions{
+      .MuiButton-outlinedSizeSmall{
+        font-size: 10px !important;
+        padding: 1px 6px !important;
+      }
+      
+    }
+
+    
   }
