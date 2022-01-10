@@ -27,7 +27,7 @@ import { MdAdd, MdDelete } from 'react-icons/md';
 import {BsDot} from "react-icons/bs"
 import { classNames } from 'react-easy-crop/helpers';
 import { type } from 'os';
-import { resCaseColors } from '../Helpers/utils';
+import { SubCaseColors } from '../Helpers/utils';
 
 const useStyles = makeStyles((theme) => ({
   marginLeft: {
@@ -150,7 +150,7 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
                   <Avatar style={{width:"24px",height:"24px"}}>M</Avatar>
 
                  <Chip size="small" label={element.status} color="primary" className={classes.childChipLayout} style={{
-                    backgroundColor: resCaseColors[element.status],
+                    backgroundColor: SubCaseColors[element.status],
                     color: "white",
                   }} id="check"/>
                   <IconButton size="small" style={{ color:"var(--error)"}} onClick={(e) => deleteCase(e, element._id)}>

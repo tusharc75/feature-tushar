@@ -18,7 +18,7 @@ export const resActivityColors = {
   attachment: "#990033",
 };
 
-export const resCaseColors = {
+export const SubCaseColors = {
   "To Do": "var(--danger-light)",
   "In Progress": "#F57C00",
   "Done": "green"

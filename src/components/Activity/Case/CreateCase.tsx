@@ -159,9 +159,9 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                             initialValues.parent.map((_p, index) => {
                               return (
                                 
-                                <Link key={index} className="cursor-pointer uppercase" onClick={() => setId(_p._id)} >
+                                <Button variant='text' key={index} className="cursor-pointer uppercase" onClick={() => setId(_p._id)} >
                                   {_p.name}
-                                </Link>
+                                </Button>
                               );
                             })}
                         </Breadcrumbs>

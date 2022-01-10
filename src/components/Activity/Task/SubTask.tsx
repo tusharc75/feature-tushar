@@ -9,7 +9,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import { BsDot } from 'react-icons/bs';
 import { MdDelete } from 'react-icons/md';
-import { resCaseColors } from '../Helpers/utils';
+import { SubCaseColors } from '../Helpers/utils';
 
 
 const useStyles = makeStyles(() => ({
@@ -131,7 +131,7 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
                 <Grid style={{ display: 'flex', gap: '15px' }}>
                   <Avatar style={{width:"24px",height:"24px"}}>M</Avatar>
                   <Chip size="small" label={element.status} color="primary" className={classes.childChipLayout} style={{
-                    backgroundColor: resCaseColors[element.status],
+                    backgroundColor: SubCaseColors[element.status],
                     color: "white",
                   }}  id="check"/>
                   {/* <IconButton
@@ -195,7 +195,7 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
                   <Grid style={{ display: 'flex', gap: '15px' }}>
                   <Avatar style={{ width: '24px', height: '24px' }}>M</Avatar>
                   <Chip size="small" label={element.status} color="primary" className={classes.childChipLayout} style={{
-                    backgroundColor: resCaseColors[element.status],
+                    backgroundColor: SubCaseColors[element.status],
                     color: "white",
                   }}/>
                  
