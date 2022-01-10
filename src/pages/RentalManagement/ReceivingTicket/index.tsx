@@ -16,7 +16,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
   gridLoadingTimeout, deliveryTicket, rentalManagement,
-  sidebarResource, productInventory as productInventoryHelperObject, INVENTORY_STATUS
+  sidebarResource, productInventory as productInventoryHelperObject, INVENTORY_STATUS, DELIVERY_TICKET_STATUS
 } from "../../../constants/helpers";
 import { groupBy } from "lodash";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -113,13 +113,15 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             if (obj.ticketType === "Receiving") {
               productAssets[index]["receivingTicket"] = obj?.ticketName
               productAssets[index]["receivingTicketId"] = obj?._id
+              productAssets[index]["receivingTicketStatus"] = obj?.status
             }
           }
         })
 
       })
       productAssets.forEach((d) => {
-        d["hideSelection"] = d.status === INVENTORY_STATUS.indTransit;
+        d["isChecked"] = false;
+        d["hideSelection"] = [INVENTORY_STATUS.indTransit, INVENTORY_STATUS.lost].includes(d.status);
       })
       if (productAssets.filter((e) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(e.status)).length === productAssets.length) {
         setNextStep(true)
@@ -199,8 +201,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   };
 
   return (<>
-
-    <Box display="flex" justifyContent="flex-end">
+    <Box display="flex" justifyContent="flex-end" pt={1}>
       <Button
         onClick={() => {
           setDownlodingFile(true);
@@ -261,10 +262,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           horizontal: 'right',
         }}
       >
-        {/* <MenuItem onClick={() => {
-          setAnchorEl(null)
-          setStatusToUpdate({ open: true, isUpdating: false, status: "Repair", message: "" })
-        }}>Repair</MenuItem> */}
         <MenuItem onClick={() => {
           setAnchorEl(null)
           setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
@@ -291,7 +288,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       </IconButton>
       <Box mx={1} />
       <IconButton
-        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)))}
+        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
+          || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered))}
         onClick={() => {
           setShowRemoveAssetFromReceivingTicketDialog(true)
         }}
@@ -329,8 +327,18 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             ]}
             chips={[
               {
-                label: "Asset number : ",
-                field: "assetNumber",
+                label: "Status : ",
+                field: "status",
+              },
+              {
+                label: "Receiving Ticket : ",
+                field: "receivingTicket",
+                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.receivingTicketId}`)
+              },
+              {
+                label: "Loading Ticket : ",
+                field: "deliveryTicket",
+                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
               }
             ]}
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
@@ -351,11 +359,12 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             page={page}
             allowAction={false}
             loading={loading}
+            isClientSideGrid={true}
             renderedFrom={renderedFrom}
             rowClassRules={{
               "red-data-row":
                 function (params) {
-                  return ["Scrap", "Lost"].some(s => s === params.data.status);
+                  return [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some(s => s === params.data.status);
                 },
             }}
             refreshGrid={fetchRecords}
@@ -380,7 +389,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     {showRemoveAssetFromReceivingTicketDialog && (
       <ConfirmationDialog
         open={showRemoveAssetFromReceivingTicketDialog}
-        message={`Are you sure you want to remove selected records from ${sidebarResource.receivingTicket}(s) ?`}
+        message={`Are you sure you want to remove selected records from Receiving Ticket?`}
         onClose={() => {
           setShowRemoveAssetFromReceivingTicketDialog(false);
         }}

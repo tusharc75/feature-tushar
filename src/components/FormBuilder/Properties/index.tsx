@@ -649,6 +649,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   {(values['type'] === 'currencyAmount' ||
                     values['type'] === 'decimal' ||
                     values['type'] === 'percent' ||
+                    values['type'] === 'date' ||
                     values['type'] === 'converter') &&
                     module !== 'form-builder' && (
                       <>

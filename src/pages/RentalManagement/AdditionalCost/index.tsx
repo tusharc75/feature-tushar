@@ -19,7 +19,7 @@ import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
-import { prepareDataForGrid } from "../../../constants/helpers";
+import { prepareDataForGrid, CHILD_RESOURCE } from "../../../constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
 import { GrBusinessService } from "react-icons/all";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
@@ -50,7 +50,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
             data = await findOne(objectStore.resource, "rentalManagementCost")
         }
         else {
-            const response = await axiosInstance().get(`/field/child?resource=Rental Management Cost`)
+            const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`)
             data = response?.data?.data
         }
         const fields = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
@@ -158,7 +158,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex">
                     <Button
-                        variant={isMobile ? "outlined" : "contained"}
+                        variant={"contained"}
                         color="primary"
                         size="small"
                         disabled={isOffline}
@@ -167,7 +167,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                             setSelectedCostData(null)
                         }}
                     >
-                        {isMobile ? <GrBusinessService size={20} /> : "Add Ad-hoc Charge"}
+                        {"Add Ad-hoc Charge"}
                     </Button>
                 </Box>
             </Box>

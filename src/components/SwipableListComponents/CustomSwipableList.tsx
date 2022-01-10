@@ -127,7 +127,7 @@ export default function CustomSwipableList({
                         dataRows.map((d, index) => (
                             <Grid key={d._id} container className={`py-2 border-bottom card-shadow mt-2 mb-2 ${index === 0 ? "mt-1 mb-1" : ""} ${checkError && checkError(d) ? "red-data-row" : ""}`}>
                                 {
-                                    allowSelection && <Grid item xs={1} sm={1}>
+                                    allowSelection && !d.hideSelection && <Grid item xs={1} sm={1}>
                                         <Checkbox
                                             className="pt-0"
                                             color="primary"
@@ -227,7 +227,7 @@ export default function CustomSwipableList({
                                             {
                                                 d[owerCollaboratorInitialsOrImages].length > 5 && <span className="font-weight-bold bold mt-2 ml-1">+{d[owerCollaboratorInitialsOrImages].length - 5} more</span>
                                             }
-                                          
+
                                         </div>
                                     }
 

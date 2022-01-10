@@ -45,6 +45,8 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const repairJobProcessSteps = ["Serialized Assets", "Loading Ticket", "Receiving Ticket", "End"];
 export const repairJobStatus = ["New", "In Progress", "Completed"];
 
+export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
+
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
 
@@ -218,7 +220,15 @@ export const RESOURCE_LABEL = {
   address: 'Addresses',
 };
 
-
+export const CHILD_RESOURCE = {
+  rentalManagementProduct: 'Rental Management Product',
+  rentalManagementCost: 'Rental Management Cost',
+  purchaseOrderProduct: 'Purchase Order Product',
+  purchaseOrderService: 'Purchase Order Service',
+  repairJobAsset: 'Repair Job Asset',
+  salesOrderProduct: 'Sales Order Product',
+  salesOrderCost: 'Sales Order Cost',
+};
 
 
 export const sidebarResourceObjectFromValues = () => {
@@ -285,7 +295,8 @@ export const repairJob = {
 
 export const salesOrder = {
   salesOrderResource: 'salesOrder',
-  salesOrderApi: '/sales-order'
+  salesOrderApi: '/sales-order',
+  resource: "sales-order"
 };
 
 export const packages = {
@@ -985,6 +996,49 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   };
 };
 
+export const determineLightOrDark = (color:any) => {
+  let r:number, g:number, b:number, hsp:number;
+  // Check the format of the color, HEX or RGB?
+  if (color.match(/^rgb/)) {
+
+    // If HEX --> store the red, green, blue values in separate variables
+    color = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/);
+
+    r = color[1];
+    g = color[2];
+    b = color[3];
+  } 
+  else {
+
+    // If RGB then Convert it to HEX
+    color = +("0x" + color.slice(1).replace( 
+      color.length < 5 && /./g, '$&$&'
+    )
+             );
+
+    r = color >> 16;
+    g = color >> 8 & 255;
+    b = color & 255;
+  }
+
+  // HSP (Highly Sensitive Poo) equation from http://alienryderflex.com/hsp.html
+  hsp = Math.sqrt(
+    0.299 * (r * r) +
+    0.587 * (g * g) +
+    0.114 * (b * b)
+  );
+
+  // Using the HSP value, determine whether the color is light or dark
+  if (hsp>127.5) {
+
+    return 'light';
+  } 
+  else {
+
+    return 'dark';
+  }
+}
+
 //  Currencies Short Form Symbols
 // const SI_SYMBOL = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"];
 
@@ -1233,8 +1287,11 @@ export const prepareDataForGrid = (data, user = {}) => {
           restProperties[`${key}Id`] = first["optionValue"];
           restProperties[`rest${key}`] = rest
         }
-        else if (typeof data[key][0] !== "object") {
+        else if (typeof data[key][0] !== "object" && key != "unit") {
           restProperties[key] = data[key].join(" , ")
+        }
+        else{
+          restProperties[key] = data[key]
         }
       }
       else {
@@ -1359,4 +1416,13 @@ export const DELIVERY_TICKET_STATUS = {
   new: 'New',
   indTransit: 'In-Transit',
   delivered: 'Delivered',
+};
+
+export const asyncForEach = async (
+  array: any[],
+  callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>
+) => {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
 };

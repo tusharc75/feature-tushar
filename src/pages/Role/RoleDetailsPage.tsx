@@ -65,10 +65,12 @@ const RoleDetailsPage = () => {
 
   const showRecordsBeforeViewAll = 2;
   const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
+  const [entityAccess, setEntityAccess] = useState([]);
 
   useEffect(() => {
     if (id) {
       fetchRoleData();
+      fetchLoggedInUserEntities();
     }
     // eslint-disable-next-line
   }, [id]);
@@ -88,6 +90,11 @@ const RoleDetailsPage = () => {
     };
     setUpdatedData(JSON.stringify(data));
   }, [values, field, resource]);
+
+  const fetchLoggedInUserEntities = async () => {
+    const entityIds = user.entity?.map((e) => e._id);
+    setEntityAccess(entityIds)
+  }
 
   const fetchRoleData = async () => {
     setLoading(true);
@@ -292,6 +299,7 @@ const RoleDetailsPage = () => {
               fetchRoleData();
               userDialogClose();
             }}
+            entityAccessIds={entityAccess}
           />
 
       )}

@@ -3,7 +3,7 @@ import { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, IconButton, Menu, MenuItem, Tooltip } from "@material-ui/core";
@@ -31,6 +31,7 @@ const renderedFrom = "repairJob_delivery_ticket"
 const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPreviousButtonDisabled, hideReceivingTicketStep }) => {
   const toastConfig = useContext(CustomToastContext);
 
+  const history = useHistory()
   const [gridApi, setGridApi] = useState(null);
   const [assignedSerializedAsset, setAssignedSerializedAsset] = useState([]);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -138,11 +139,11 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
               hideReceivingTicketStep(true);
 
               if (tempProductInventory.some(f => f["repaired"] === true)) {
-                setNextButtonDisabled(!tempProductInventory.filter(f => f.status !== "Lost").every(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true && e.repaired === true));
+                setNextButtonDisabled(!tempProductInventory.filter(f => f.status !== "Lost").some(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true && e.repaired === true));
               }
 
             } else {
-              setNextButtonDisabled(!tempProductInventory.filter(f => f.status !== "Lost").every(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true));
+              setNextButtonDisabled(!tempProductInventory.filter(f => f.status !== "Lost").some(e => e.hasOwnProperty("isDelivered") && e.isDelivered === true));
             }
 
             dispatch({
@@ -406,9 +407,14 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
             loading={loading}
             chips={[
               {
-                label: "Product Desc. : ",
-                field: "productName",
-              }
+                label: "Status: ",
+                field: "status",
+            },
+              {
+                label: "Loading Ticket : ",
+                field: "deliveryTicket",
+                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
+              },
             ]}
             additionalDetails={[
               // {

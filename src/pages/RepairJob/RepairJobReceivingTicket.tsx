@@ -3,7 +3,7 @@ import { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import routes from "../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import {
@@ -48,10 +48,12 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPreviousButtonDisabled }) => {
+const RepairJobReceivingTicket = (props) => {
+    const { repairJobData, setNextButtonDisabled, setPreviousButtonDisabled, isRepairEnded, setRepairEnded } = props
+
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
-
+    const history = useHistory()
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
@@ -81,6 +83,22 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
         // eslint-disable-next-line
     }, []);
 
+    useEffect(() => {
+        if (repairJobData && repairJobData.typeOfRepair === "External" && dataRows.length > 0) {
+            const repairedAssets = dataRows.filter((asset: any) => asset?.repaired);
+            const assetsWithReceivingTicket = dataRows.filter((asset: any) => asset?.isDelivered);
+            const lostAssets = dataRows.filter((asset: any) => asset?.status === "Lost");
+
+            let repairedAssetsLength = dataRows.length - lostAssets.length
+
+            if (repairJobData && repairJobData.status === repairJobStatus[2]) {
+                setRepairEnded(true)
+            } else if (repairedAssets.length === repairedAssetsLength && assetsWithReceivingTicket.length === repairedAssetsLength) {
+                setRepairEnded(true)
+            }
+        }
+    }, [repairJobData, dataRows])
+
     const fetchRecords = () => {
         if (gridApi) {
             gridApi.deselectAll();
@@ -102,7 +120,8 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                                     tempProductInventory[index]["type"] = obj?.type
                                     if (obj.ticketType === "Loading") {
                                         tempProductInventory[index]["deliveryTicket"] = obj?.ticketName
-                                        tempProductInventory[index]["deliveryTicketId"] = obj?._id
+                                        tempProductInventory[index]["deliveryTicketId"] = obj?._id;
+                                        tempProductInventory[index]["isDeliveryTicketDelivered"] = obj?.status === "Delivered";
                                     }
                                     if (obj.ticketType === "Receiving") {
                                         tempProductInventory[index]["receivingTicket"] = obj?.ticketName
@@ -119,7 +138,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                         })
 
                         setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
-                        setPreviousButtonDisabled(tempProductInventory.some(s => s["receivingTicketId"]));
+                        // setPreviousButtonDisabled(tempProductInventory.some(s => s["receivingTicketId"]));
 
                         dispatch({
                             type: "initialize", data: tempProductInventory, count: tempProductInventory.length
@@ -281,7 +300,7 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
             {
                 repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
                 <IconButton
-                    disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("receivingTicketId"))}
+                    disabled={selectedRecords.length === 0 || !selectedRecords.every(f => f.deliveryTicketId && f.isDeliveryTicketDelivered) || selectedRecords.some(f => f.hasOwnProperty("receivingTicketId"))}
                     onClick={() => {
                         handleReceivingTicketDialog(selectedRecords)
                     }}
@@ -341,7 +360,17 @@ const RepairJobReceivingTicket = ({ repairJobData, setNextButtonDisabled, setPre
                         {
                             label: "Status: ",
                             field: "status",
-                        }
+                        },
+                        {
+                            label: "Receiving Ticket : ",
+                            field: "receivingTicket",
+                            onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.receivingTicketId}`)
+                        },
+                        {
+                            label: "Loading Ticket : ",
+                            field: "deliveryTicket",
+                            onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
+                        },
                     ]}
                     additionalDetails={[
 

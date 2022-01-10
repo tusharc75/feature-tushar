@@ -7,7 +7,7 @@ import { Button, Chip, Dialog, IconButton, makeStyles, useMediaQuery } from "@ma
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
-import { CustomDialogTransition, dateFormat, defaultActivityShow, gridLoadingTimeout, productInventory, purchaseOrder, rentalManagement, translateDataToTree } from "../../../constants/helpers";
+import { CustomDialogTransition, dateFormat, defaultActivityShow, gridLoadingTimeout, productInventory, purchaseOrder, rentalManagement, CHILD_RESOURCE, prepareDataForGrid } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import moment from "moment";
 import { startCase } from "lodash";
@@ -80,9 +80,9 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                 {params.value}
             </Link>
             <Box padding={1}></Box>
-            <HtmlTooltip title="Serialized Asset">
-                {
-                    (params.data.actualReceived !== 0 || params.data.actualReceived !== undefined) &&
+            {
+                (params.data._id && params.data.actualReceived !== 0 && params.data.actualReceived !== undefined) &&
+                <HtmlTooltip title="Serialized Asset">
                     <span className="d-flex align-items-center gap-2">
                         <Chip label="Asset"
                             size="small"
@@ -95,8 +95,8 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             })}
                         />
                     </span>
-                }
-            </HtmlTooltip>
+                </HtmlTooltip>
+            }
 
         </>
     );
@@ -109,21 +109,18 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
 
     const fetchColumns = () => {
         setLoadingColumns(true)
-        axiosInstance().get("/field/child?resource=Purchase Order Product").then(({ data: { data } }) => {
+        axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
             let fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
-            axiosInstance().get("/field/child?resource=Purchase Order Service").then(({ data: { data } }) => {
-                fields = [...fields, ...CURReplaceByCurrencySingle(data, purchaseOrderData.currency)]
-                let rendererNames = [];
-                genrateColoum(fields, columns, rendererNames, false);
-                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-                tempFrameworkComponent = {
-                    nameRenderer: NameRenderer,
-                    ...tempFrameworkComponent,
-                }
-                setFrameWorkComponent({ ...tempFrameworkComponent })
-                setColumns([...columns])
-                setLoadingColumns(false)
-            })
+            let rendererNames = [];
+            genrateColoum(fields, columns, rendererNames, false);
+            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+            tempFrameworkComponent = {
+                nameRenderer: NameRenderer,
+                ...tempFrameworkComponent,
+            }
+            setFrameWorkComponent({ ...tempFrameworkComponent })
+            setColumns([...columns])
+            setLoadingColumns(false)
         })
     }
 
@@ -131,8 +128,11 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
         dispatch({ type: "loading", loading: true });
         axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`).then(({ data: { data } }) => {
             let rows = data?.map((item) => {
+                let finalObject = prepareDataForGrid(item);
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
+                finalObject["allowedToEdit"] = true
                 let res: any = {
-                    ...item,
+                    ...finalObject,
                     productDescription: item?.productDetail?.productName,
                     productId: item?.productDetail?._id,
                 };
@@ -145,9 +145,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     setCurrentStep(4)
                 }
             }
-            dispatch({
-                type: "initialize", data: rows, count: rows.length
-            });
+            dispatch({ type: "initialize", data: rows, count: rows.length });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
@@ -301,7 +299,8 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             allowSwipe={true}
                             permissions={permissions}
                             primaryField={columns?.find(d => d.field === "productDescription")}
-                            onClick={() => {
+                            onClick={(data) => {
+                                history.push(`${routes.purchaseOrderDetail.path}/${data.productId}`)
                             }}
                             dataRows={dataRows}
                             selectedRecords={selectedRecords}
@@ -316,8 +315,8 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             loading={loading}
                             chips={
                                 [{
-                                    label: `Product Description: `,
-                                    field: "productName",
+                                    label: `Quantity: `,
+                                    field: "qty",
                                     forceShow: true
                                 }]
                             }
@@ -366,10 +365,11 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                 onClose={() => setShowCreateAssetDialog(false)}
                 onSuccess={() => {
                     setShowCreateAssetDialog(false)
+                    dispatch({ type: "initialize", data: [], count: 0 });
                     fetchProduct()
                 }}
                 title="Create Asset"
-                productList={selectedRecords.filter(d => d.hasOwnProperty("productDetail") && (d.qty !== d.actualReceived))}
+                productList={selectedRecords.filter(d => (d.qty !== d.actualReceived))}
                 purchaseOrderData={purchaseOrderData}
                 handleUpdateData={handleUpdateData}
             />
@@ -395,7 +395,6 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     }}
                     fetchData={onSendEmailSuccess}
                     id={purchaseOrderData._id}
-                    showESign={true}
                     isQuoteBuilder={true}
                     options={userEmails?.to}
                     cc={userEmails?.cc ?? []}

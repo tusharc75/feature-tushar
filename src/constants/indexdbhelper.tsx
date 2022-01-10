@@ -3,8 +3,10 @@ const DB_NAME = "OMS";
 
 export const objectStore = {
     rentalManagement: 'rentalManagement',
+    salesOrder: 'salesOrder',
     deliveryTicket: 'deliveryTicket',
     resource: 'resource',
+    repairJob: "Repair Job",
     offlineDataSync: 'offlineDataSync'
 };
 

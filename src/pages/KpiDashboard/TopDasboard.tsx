@@ -510,7 +510,7 @@ const TopDashboard = (props) => {
                     <Grid item xs={12} className="pull-left">
                       {!loadingChart ? (
                         <Typography className={styles.price}>
-                          {`${salesRevenue?.totalValueMT.toFixed(2)}`}
+                          {`${Number(salesRevenue?.totalValueMT || 0).toFixed(2)}`}
                         </Typography>
                       ) : (
                         <Skeleton variant="text" width={100} height={40} />
@@ -550,7 +550,7 @@ const TopDashboard = (props) => {
             <Box textAlign="center" mb={2}>
               <Typography variant="h5">Total offered value in {filterCurrency || currency} vs Budget</Typography>
             </Box>
-            {!loadingChart ? (
+            {!loadingChart ?  tableDataRaw.length === 0 ? <Box height={400}>No Data</Box> : (
               <Box>
                 {!tableView ? (
                   <Chart

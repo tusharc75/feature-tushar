@@ -183,8 +183,10 @@ const ProductInventory = () => {
         if (redirectProduct?.id) {
             filterById.push({ field: "product", term: redirectProduct?.id });
         }
-        if (fromPurchaseOrder?.pOId && fromPurchaseOrder?.productId) {
+        if (fromPurchaseOrder?.pOId) {
             filterById.push({ field: "pONumber", term: fromPurchaseOrder.pOId });
+        }
+        if (fromPurchaseOrder?.productId) {
             filterById.push({ field: "product", term: fromPurchaseOrder.productId });
         }
         if (productCategory && productCategory !== "") {
@@ -343,16 +345,18 @@ const ProductInventory = () => {
                                 }}
                             />
                         )}
-                        {fromPurchaseOrder?.pOId && (
+                        {fromPurchaseOrder?.pOId ? (
                             <>
-                                <Chip
-                                    className="ml-3"
-                                    color="primary"
-                                    label={`Product : ${fromPurchaseOrder.productName}`}
-                                    onDelete={() => {
-                                        setFromPurchaseOrder(null);
-                                    }}
-                                />
+                                {fromPurchaseOrder?.productId && (
+                                    <Chip
+                                        className="ml-3"
+                                        color="primary"
+                                        label={`Product : ${fromPurchaseOrder.productName}`}
+                                        onDelete={() => {
+                                            setFromPurchaseOrder(null);
+                                        }}
+                                    />
+                                )}
                                 <Chip
                                     className="ml-3"
                                     color="primary"
@@ -362,72 +366,77 @@ const ProductInventory = () => {
                                     }}
                                 />
                             </>
-                        )
+                        ) :
+                            (
+                                <>
+                                    <Autocomplete
+                                        style={{ width: "250px" }}
+                                        options={productCategoryList}
+                                        getOptionLabel={(option: any) => option ? option.name : ""}
+                                        getOptionSelected={(option: any, val) =>
+                                            option._id === val
+                                        }
+                                        value={productCategoryList.filter((data) => data._id === productCategory).length
+                                            ? productCategoryList.filter((data) => data._id === productCategory)[0]
+                                            : ""
+                                        }
+                                        onChange={(e, val) => {
+                                            setProductCategory(val && val._id ? val._id : "")
+                                        }}
+                                        renderInput={(params) => (
+
+                                            isMobile ?
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="productCategory"
+                                                    placeholder="Product Category"
+                                                    variant="standard"
+                                                    fullWidth
+                                                    className={isMobile ? "serchBox" : ""}
+
+
+                                                /> :
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="productCategory"
+                                                    label="Product Category"
+                                                    variant="outlined"
+                                                    fullWidth
+                                                />
+                                        )}
+                                    />
+                                    {productCategory &&
+                                        <Autocomplete
+                                            style={{ width: "250px" }}
+                                            options={productFilterList}
+                                            getOptionLabel={(option: any) => option ? option.productName : ""}
+                                            getOptionSelected={(option: any, val) =>
+                                                option._id === val
+                                            }
+                                            value={productFilterList.filter((data) => data._id === productFilter).length
+                                                ? productFilterList.filter((data) => data._id === productFilter)[0]
+                                                : ""
+                                            }
+                                            onChange={(e, val) => {
+                                                setProductFilter(val && val._id ? val._id : "")
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="product"
+                                                    label="Product"
+                                                    variant="outlined"
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
+                                </>
+                            )
                         }
-                        <Autocomplete
-                            style={{ width: "250px" }}
-                            options={productCategoryList}
-                            getOptionLabel={(option: any) => option ? option.name : ""}
-                            getOptionSelected={(option: any, val) =>
-                                option._id === val
-                            }
-                            value={productCategoryList.filter((data) => data._id === productCategory).length
-                                ? productCategoryList.filter((data) => data._id === productCategory)[0]
-                                : ""
-                            }
-                            onChange={(e, val) => {
-                                setProductCategory(val && val._id ? val._id : "")
-                            }}
-                            renderInput={(params) => (
 
-                                isMobile ?
-                                    <TextField
-                                        {...params}
-                                        margin="dense"
-                                        name="productCategory"
-                                        placeholder="Product Category"
-                                        variant="standard"
-                                        fullWidth
-                                        className={isMobile ? "serchBox" : ""}
-
-
-                                    /> :
-                                    <TextField
-                                        {...params}
-                                        margin="dense"
-                                        name="productCategory"
-                                        label="Product Category"
-                                        variant="outlined"
-                                        fullWidth
-                                    />
-                            )}
-                        />
-                        {productCategory &&
-                            <Autocomplete
-                                style={{ width: "250px" }}
-                                options={productFilterList}
-                                getOptionLabel={(option: any) => option ? option.productName : ""}
-                                getOptionSelected={(option: any, val) =>
-                                    option._id === val
-                                }
-                                value={productFilterList.filter((data) => data._id === productFilter).length
-                                    ? productFilterList.filter((data) => data._id === productFilter)[0]
-                                    : ""
-                                }
-                                onChange={(e, val) => {
-                                    setProductFilter(val && val._id ? val._id : "")
-                                }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        margin="dense"
-                                        name="product"
-                                        label="Product"
-                                        variant="outlined"
-                                        fullWidth
-                                    />
-                                )}
-                            />}
                     </Grid>
                     <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >

@@ -93,11 +93,11 @@ export default function ManageContact(props) {
             }
           });
         }
+        const addressDataDropdown = contactData.fields.find((d) => d.fieldName === "mailingAddress")?.option ?? [];
+        setAddressDataSource(addressDataDropdown)  
       }
 
-      const addressDataDropdown = contactData.fields.find(
-        (d) => d.fieldName === "mailingAddress"
-      );
+      const addressDataDropdown = contactData.fields.find((d) => d.fieldName === "mailingAddress");
       if (accountId && addressDataDropdown) {
         setAddressDataSource(addressDataDropdown?.option?.filter(d => contactData?.initialValues?.mailingAddress?.includes(d.optionValue)) ?? [])
       }
@@ -371,19 +371,13 @@ export default function ManageContact(props) {
                                                 label={field.fieldLabel}
                                                 name={field.fieldName}
                                                 type={field.type}
-                                                setFieldValue={(name, value) => {
-                                                  // handleValuesChange(name, value)
-                                                  setFieldValue(name, value);
-                                                }}
+                                                options={addressDataSource ?? field.option}
+                                                setFieldValue={setFieldValue}
                                                 required={field.required}
                                                 fullWidth
                                                 isTooltip={field?.isTooltip || false}
                                                 tooltipMessage={field?.tooltipMessage}
                                                 size="small"
-                                                onChange={(e) => {
-                                                  // handleValuesChange(field.fieldName, e.target.checked)
-                                                  setFieldValue(field.fieldName, e.target.checked);
-                                                }}
                                               />
                                             </Grid>
 
@@ -627,7 +621,7 @@ export default function ManageContact(props) {
                         onSuccess={(data) => {
 
                           setAddressOpen({ open: false, isClone: false })
-                          setFieldValue("mailingAddress", data.fullAddress)
+                          setFieldValue("mailingAddress", [data._id, ...values.mailingAddress ])
                           setAddressDataSource((prevState) => [...prevState,
                           {
                             default: false,

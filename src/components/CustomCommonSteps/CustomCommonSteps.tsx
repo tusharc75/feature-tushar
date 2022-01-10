@@ -235,18 +235,20 @@ const CustomCommonSteps = (props) => {
                                         <div>
                                             {(
                                                 <div>
-                                                    <IconButton
-                                                        disabled={currentStep === 0 || disablePreviousStep}
-                                                        onClick={() => {
-                                                            setCurrentStep(currentStep - 1)
-                                                            if (!forViewOnly) {
-                                                                onPreviousButtonClick(currentStep, currentStep - 1)
-                                                            }
-                                                        }}
-                                                        className="stepperButton"
-                                                    >
-                                                        <TiArrowBack size={30} />
-                                                    </IconButton>
+                                                    {
+                                                        !forViewOnly && <IconButton
+                                                            disabled={currentStep === 0 || disablePreviousStep}
+                                                            onClick={() => {
+                                                                setCurrentStep(currentStep - 1)
+                                                                if (!forViewOnly) {
+                                                                    onPreviousButtonClick(currentStep, currentStep - 1)
+                                                                }
+                                                            }}
+                                                            className="stepperButton"
+                                                        >
+                                                            <TiArrowBack size={30} />
+                                                        </IconButton>
+                                                    }
                                                 </div>
                                             )}
                                         </div>

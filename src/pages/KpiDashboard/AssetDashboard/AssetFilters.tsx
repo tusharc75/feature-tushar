@@ -14,35 +14,35 @@ interface FilterProps {
   loading: boolean;
   fetchData?: VoidFunction;
   enableSubmit?: boolean;
+  loadingProductCategory?: boolean;
+  productCategories: any[];
 }
 
 const AssetFilters = (props: FilterProps) => {
-  const { filter, setFilter, loading } = props;
+  const { filter, setFilter, loading, productCategories, loadingProductCategory } = props;
   const [loadingProduct, setLoadingProduct] = React.useState(false);
-  const [loadingProductCategory, setLoadingProductCategory] = React.useState(false);
-  const [allProductCategories, setAllProductCategories] = React.useState([]);
   const [allProducts, setAllProducts] = React.useState([]);
 
   const [filterAnchor, setFilterAnchor] = React.useState(null);
   const [openFilter, setOpenFilter] = React.useState(false);
 
   React.useEffect(() => {
-    fetchProductCategory();
+    // fetchProductCategory();
     fetchProduct();
   }, []);
 
-  const fetchProductCategory = () => {
-    setLoadingProductCategory(true);
-    axiosInstance()
-      .get(`${routes.productCategory.path}?limit=0`)
-      .then(({ data: { data } }) => {
-        setAllProductCategories(data.map((d) => ({ id: d._id, title: d.name })));
-        setLoadingProductCategory(false);
-      })
-      .catch((err) => {
-        setLoadingProductCategory(false);
-      });
-  };
+  // const fetchProductCategory = () => {
+  //   setLoadingProductCategory(true);
+  //   axiosInstance()
+  //     .get(`${routes.productCategory.path}?limit=0`)
+  //     .then(({ data: { data } }) => {
+  //       setProductCategories(data.map((d) => ({ id: d._id, title: d.name })))
+  //       setLoadingProductCategory(false);
+  //     })
+  //     .catch((err) => {
+  //       setLoadingProductCategory(false);
+  //     });
+  // };
 
   const fetchProduct = () => {
     setLoadingProduct(true);
@@ -82,43 +82,14 @@ const AssetFilters = (props: FilterProps) => {
       >
         <Box p={1}>
           <Box width={200} mb={1}>
-            <Autocomplete
-              disabled={loading}
-              fullWidth
-              disableListWrap
-              loading={loadingProductCategory}
-              loadingText={'Loading...'}
-              multiple={true}
-              value={filter.productCategory}
-              options={allProductCategories}
-              disableCloseOnSelect
-              limitTags={2}
-              onChange={(_, newVal) => setFilter({ ...filter, productCategory: newVal })}
-              getOptionSelected={(option, value) => option.id === value.id}
-              getOptionLabel={(option) => option.title}
-              renderOption={(option, { selected }) => (
-                <React.Fragment>
-                  <Checkbox
-                    icon={<CheckBoxOutlineBlank fontSize="small" />}
-                    checkedIcon={<CheckBox fontSize="small" />}
-                    style={{ marginRight: 8 }}
-                    checked={selected}
-                  />
-                  {option.title}
-                </React.Fragment>
-              )}
-              renderInput={(params) => <TextField {...params} variant="outlined" label="Product Category" size="small" />}
-            />
-          </Box>
-          <Box mb={1} width={200}>
-            <Autocomplete
+          <Autocomplete
               disabled={loading}
               fullWidth
               multiple={true}
               loading={loadingProduct}
               loadingText={'Loading...'}
               value={filter.productDescription}
-              options={allProducts}
+              options={productCategories}
               getOptionLabel={(option) => option.title}
               disableCloseOnSelect
               limitTags={2}
@@ -135,7 +106,36 @@ const AssetFilters = (props: FilterProps) => {
                   {option.title}
                 </React.Fragment>
               )}
-              renderInput={(params) => <TextField {...params} variant="outlined" label="Product" size="small" />}
+              renderInput={(params) => <TextField {...params} variant="outlined" label="Product Category" size="small" />}
+            />
+          </Box>
+          <Box mb={1} width={200}>
+          <Autocomplete
+              disabled={loading}
+              fullWidth
+              disableListWrap
+              loading={loadingProductCategory}
+              loadingText={'Loading...'}
+              multiple={true}
+              value={filter.productCategory}
+              options={allProducts}
+              disableCloseOnSelect
+              limitTags={2}
+              onChange={(_, newVal) => setFilter({ ...filter, productCategory: newVal })}
+              getOptionSelected={(option, value) => option.id === value.id}
+              getOptionLabel={(option) => option.title}
+              renderOption={(option, { selected }) => (
+                <React.Fragment>
+                  <Checkbox
+                    icon={<CheckBoxOutlineBlank fontSize="small" />}
+                    checkedIcon={<CheckBox fontSize="small" />}
+                    style={{ marginRight: 8 }}
+                    checked={selected}
+                  />
+                  {option.title}
+                </React.Fragment>
+              )}
+              renderInput={(params) => <TextField {...params} variant="outlined" label="Product Master" size="small" />}
             />
           </Box>
           <Box mb={1}>

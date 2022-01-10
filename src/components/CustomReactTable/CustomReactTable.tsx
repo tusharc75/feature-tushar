@@ -172,7 +172,7 @@ export default function CustomReactTable({
             onSelect,
             initialState: {
                 autoResetExpanded: true,
-                hiddenColumns: hideSelection ? ["selection"] : []
+                hiddenColumns: hideSelection ? ["selection", "action"] : []
             },
             defaultColumn
         },

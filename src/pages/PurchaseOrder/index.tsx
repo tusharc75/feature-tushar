@@ -52,6 +52,8 @@ const PurchaseOrder = () => {
     const localStorageSelectedRecords = `${routes.purchaseOrder?.title}_selected`;
 
     const [fromRental, setFromRental] = useState(history.location?.state?.rental);
+    const [fromSalesOrder, setFromSalesOrder] = useState(history.location?.state?.salesOrder);
+
     const {
         state: { user, permissions, selectedEntity },
     }: any = useData();
@@ -63,7 +65,7 @@ const PurchaseOrder = () => {
 
     useEffect(() => {
         fetchPurchaseOrder()
-    }, [page, limit, filters, sorting, search, selectedEntity, fromRental]);
+    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, fromSalesOrder]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -110,7 +112,6 @@ const PurchaseOrder = () => {
                 const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
 
                 let finalObject = prepareDataForGrid(u);
-                finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
                 finalObject["allowedToEdit"] = (
                     [...(u.collaborator ?? []), u.owner].some(
@@ -180,6 +181,11 @@ const PurchaseOrder = () => {
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
         }
+
+        if (fromSalesOrder) {
+            filterById.push({ field: "salesOrder", term: fromSalesOrder?._id });
+        }
+
         if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
         }
@@ -330,9 +336,19 @@ const PurchaseOrder = () => {
                             <Chip
                                 className="ml-3"
                                 color="primary"
-                                label={`Product : ${fromRental?.rentalJobName}`}
+                                label={`Rental Job : ${fromRental?.rentalJobName}`}
                                 onDelete={() => {
                                     setFromRental(null);
+                                }}
+                            />
+                        )}
+                        {fromSalesOrder && (
+                            <Chip
+                                className="ml-3"
+                                color="primary"
+                                label={`Sales Order : ${fromSalesOrder?.salesOrderNo}`}
+                                onDelete={() => {
+                                    setFromSalesOrder(null);
                                 }}
                             />
                         )}
