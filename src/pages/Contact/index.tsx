@@ -41,8 +41,8 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdEmail } from 'react-icons/md';
 import queryString from 'query-string';
-import {MdAdd} from "react-icons/all";
-import {IoFilterCircle,  MdFilterList, MdSort} from "react-icons/all";
+import { MdAdd } from "react-icons/all";
+import { IoFilterCircle, MdFilterList, MdSort } from "react-icons/all";
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 
 const ContactTypes = [
@@ -134,36 +134,36 @@ export default function Contact(props) {
         queryType && querySearch && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
           : queryType && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-          : queryType && querySearch
-          ? `?page=${page}&type=${queryType}&search=${querySearch}`
-          : queryColFilter && querySearch
-          ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
-          : queryType
-          ? `?page=${page}&type=${queryType}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}`
-          : querySearch
-          ? `?page=${page}&search=${querySearch}`
-          : `?page=${page}`
+            ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+            : queryType && querySearch
+              ? `?page=${page}&type=${queryType}&search=${querySearch}`
+              : queryColFilter && querySearch
+                ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+                : queryType
+                  ? `?page=${page}&type=${queryType}`
+                  : queryColFilter
+                    ? `?page=${page}&colFilter=${queryColFilter}`
+                    : querySearch
+                      ? `?page=${page}&search=${querySearch}`
+                      : `?page=${page}`
       );
     } else {
       history.replace(
         queryType && querySearch && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
           : queryType && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-          : queryType && querySearch
-          ? `?page=${page}&type=${queryType}&search=${querySearch}`
-          : queryColFilter && querySearch
-          ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
-          : queryType
-          ? `?page=${page}&type=${queryType}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}`
-          : querySearch
-          ? `?page=${page}&search=${querySearch}`
-          : `?page=${page}`
+            ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+            : queryType && querySearch
+              ? `?page=${page}&type=${queryType}&search=${querySearch}`
+              : queryColFilter && querySearch
+                ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+                : queryType
+                  ? `?page=${page}&type=${queryType}`
+                  : queryColFilter
+                    ? `?page=${page}&colFilter=${queryColFilter}`
+                    : querySearch
+                      ? `?page=${page}&search=${querySearch}`
+                      : `?page=${page}`
       );
     }
   }, [page, queryPage]);
@@ -237,10 +237,10 @@ export default function Contact(props) {
         querySearch && queryColFilter
           ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}&search=${search}`
           : queryColFilter
-          ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
-          : querySearch
-          ? `?page=${page}&type=${newFilter}&search=${search}`
-          : `?page=${page}&type=${newFilter}`
+            ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
+            : querySearch
+              ? `?page=${page}&type=${newFilter}&search=${search}`
+              : `?page=${page}&type=${newFilter}`
       );
     }
   };
@@ -285,20 +285,20 @@ export default function Contact(props) {
         queryType && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${search}`
           : queryType
-          ? `?page=${page}&type=${queryType}&search=${search}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
-          : `?page=${page}&search=${search}`
+            ? `?page=${page}&type=${queryType}&search=${search}`
+            : queryColFilter
+              ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
+              : `?page=${page}&search=${search}`
       );
     } else {
       history.replace(
         queryType && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
           : queryType
-          ? `?page=${page}&type=${queryType}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}`
-          : `?page=${page}`
+            ? `?page=${page}&type=${queryType}`
+            : queryColFilter
+              ? `?page=${page}&colFilter=${queryColFilter}`
+              : `?page=${page}`
       );
     }
   }, [search]);
@@ -326,10 +326,10 @@ export default function Contact(props) {
         queryType && querySearch
           ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]&search=${querySearch}`
           : queryType
-          ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
-          : querySearch
-          ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-          : `?page=${page}&colFilter=[${serialize(filters)}]`
+            ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
+            : querySearch
+              ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+              : `?page=${page}&colFilter=[${serialize(filters)}]`
       );
     }
 
@@ -338,10 +338,10 @@ export default function Contact(props) {
         queryType && querySearch
           ? `?page=${page}&type=${queryType}&search=${querySearch}`
           : queryType
-          ? `?page=${page}&type=${queryType}`
-          : querySearch
-          ? `?page=${page}&search=${querySearch}`
-          : `?page=${page}`
+            ? `?page=${page}&type=${queryType}`
+            : querySearch
+              ? `?page=${page}&search=${querySearch}`
+              : `?page=${page}`
       );
     }
     if (Object.keys(filters).length === 0 && queryColFilter === undefined) {
@@ -367,13 +367,13 @@ export default function Contact(props) {
     await axiosInstance().get(`/user/${user.user?._id}`).then(({ data: { data } }) => {
       data.entities.map((item) => {
         item.role.forEach((role) => {
-          if(roleIds.includes(role?._id)){
+          if (roleIds.includes(role?._id)) {
 
-          }else{
+          } else {
             roleIds.push(role?._id)
           }
         })
-        
+
       })
       setRoleAccessOfLoggedInUser(roleIds)
     }).catch((error) => {
@@ -386,7 +386,7 @@ export default function Contact(props) {
     setEntityAccess(entityIds)
   }
 
-  
+
 
   const RelatedLeadRenderer = (params) =>
     params.value ? (
@@ -776,45 +776,45 @@ export default function Contact(props) {
                   )}
 
 
-<Grid className='align-toggle-button'>
-                  {ContactTypes && (
-                    <ToggleButtonGroup
-                      id="resourceTypeSelector"
-                      size="small"
-                      className="ml-8 layout-for-mobile"
-                      value={filter}
-                      exclusive
-                      onChange={handleFilter}
-                    >
-                      {ContactTypes.map((k, index) => {
-                        return (
-                          <ToggleButton value={k.key} key={index}>
-                            {k.key}
-                          </ToggleButton>
-                        );
-                      })}
-                    </ToggleButtonGroup>
-                  )}
+                  <Grid className='align-toggle-button'>
+                    {ContactTypes && (
+                      <ToggleButtonGroup
+                        id="resourceTypeSelector"
+                        size="small"
+                        className="ml-8 layout-for-mobile"
+                        value={filter}
+                        exclusive
+                        onChange={handleFilter}
+                      >
+                        {ContactTypes.map((k, index) => {
+                          return (
+                            <ToggleButton value={k.key} key={index}>
+                              {k.key}
+                            </ToggleButton>
+                          );
+                        })}
+                      </ToggleButtonGroup>
+                    )}
 
-<Grid className={styles.Related_Account}>
-                  {accountDetails.accountId && (
-                    <Chip
-                      className="ml-3"
-                      color="primary"
-                      label={`Account: ${accountDetails.accountName}`}
-                      onDelete={() => {
-                        setAccountDetails({ accountId: null, accountName: null });
-                        // getContacts();
-                      }}
-                    />
-                  )}
+                    <Grid className={styles.Related_Account}>
+                      {accountDetails.accountId && (
+                        <Chip
+                          className="ml-3"
+                          color="primary"
+                          label={`Account: ${accountDetails.accountName}`}
+                          onDelete={() => {
+                            setAccountDetails({ accountId: null, accountName: null });
+                            // getContacts();
+                          }}
+                        />
+                      )}
+
+                    </Grid>
+                  </Grid>
 
                 </Grid>
-                </Grid>
-                
-                </Grid>
-                
-                
+
+
               </Grid>
             </Grid>
             <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
@@ -887,6 +887,12 @@ export default function Contact(props) {
                           Delete
                         </MenuItem>
                       )}
+                      {/* <MenuItem
+                        disabled={selectedRecords.length === 0}
+                        onClick={handleAccessToPortal}
+                      >
+                        Give Access to Portal
+                      </MenuItem> */}
                       {contactPermissions.isUpdate && (
                         <MenuItem
                           disabled={selectedRecords.length === 0}
@@ -916,7 +922,7 @@ export default function Contact(props) {
                           Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
                         </MenuItem>
                       )}
-                      
+
                     </Menu>
                   </>
                 </Grid>
@@ -979,32 +985,32 @@ export default function Contact(props) {
             />
           )}
           {
-        showAssignEntityDialog && 
-        <Dialog
-          fullWidth
-          maxWidth="xs"
-          open={showAssignEntityDialog}
-          onClose={() => setShowAssignEntityDialog(false)}
-          aria-labelledby="assign-roles-dialog"
-        >
-        <AssignEntityDialog
-          entitiesDialogOpen={showAssignEntityDialog}
-          onSuccess={() => {
-            setShowAssignEntityDialog(false)
-            getContacts()
-          }}
-          handleCloseDialog={() => setShowAssignEntityDialog(false)}
-          assignedEntity={[]}
-          ids={selectedRecords.map((record) => record._id || record.id)}
-          isRenderedFromContact={true}
-          regionalRole={false}
-          type="entity"
-          entityAccessIds={entityAccess}
-          roleAccessIds={roleAccessOfLoggedInUser}
-          contactResource={contactResource}
-        />
-        </Dialog>
-      }
+            showAssignEntityDialog &&
+            <Dialog
+              fullWidth
+              maxWidth="xs"
+              open={showAssignEntityDialog}
+              onClose={() => setShowAssignEntityDialog(false)}
+              aria-labelledby="assign-roles-dialog"
+            >
+              <AssignEntityDialog
+                entitiesDialogOpen={showAssignEntityDialog}
+                onSuccess={() => {
+                  setShowAssignEntityDialog(false)
+                  getContacts()
+                }}
+                handleCloseDialog={() => setShowAssignEntityDialog(false)}
+                assignedEntity={[]}
+                ids={selectedRecords.map((record) => record._id || record.id)}
+                isRenderedFromContact={true}
+                regionalRole={false}
+                type="entity"
+                entityAccessIds={entityAccess}
+                roleAccessIds={roleAccessOfLoggedInUser}
+                contactResource={contactResource}
+              />
+            </Dialog>
+          }
 
           {singleContactDelete.show ? (
             <ConfirmationDialog
