@@ -81,7 +81,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
             </Link>
             <Box padding={1}></Box>
             {
-                (params.data.actualReceived !== 0 && params.data.actualReceived !== undefined) &&
+                (params.data._id && params.data.actualReceived !== 0 && params.data.actualReceived !== undefined) &&
                 <HtmlTooltip title="Serialized Asset">
                     <span className="d-flex align-items-center gap-2">
                         <Chip label="Asset"
@@ -111,19 +111,16 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
         setLoadingColumns(true)
         axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
             let fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
-            axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderService}`).then(({ data: { data } }) => {
-                fields = [...fields, ...CURReplaceByCurrencySingle(data, purchaseOrderData.currency)]
-                let rendererNames = [];
-                genrateColoum(fields, columns, rendererNames, false);
-                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-                tempFrameworkComponent = {
-                    nameRenderer: NameRenderer,
-                    ...tempFrameworkComponent,
-                }
-                setFrameWorkComponent({ ...tempFrameworkComponent })
-                setColumns([...columns])
-                setLoadingColumns(false)
-            })
+            let rendererNames = [];
+            genrateColoum(fields, columns, rendererNames, false);
+            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+            tempFrameworkComponent = {
+                nameRenderer: NameRenderer,
+                ...tempFrameworkComponent,
+            }
+            setFrameWorkComponent({ ...tempFrameworkComponent })
+            setColumns([...columns])
+            setLoadingColumns(false)
         })
     }
 
