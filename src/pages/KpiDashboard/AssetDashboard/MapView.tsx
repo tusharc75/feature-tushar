@@ -78,7 +78,7 @@ const MapView = (props: MapViewProps) => {
             { featureType: 'transit', stylers: [{ visibility: 'off' }] },
             { featureType: 'poi', stylers: [{ visibility: 'off' }] }
           ],
-          gestureHandling: 'cooperative'
+           gestureHandling: 'cooperative'
         }}
         mapContainerStyle={containerStyle}
         center={center || { lat: 37.09, lng: -95.713 }}
