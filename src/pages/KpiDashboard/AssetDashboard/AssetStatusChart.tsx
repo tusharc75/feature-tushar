@@ -13,9 +13,9 @@ const AssetStatusChart = ({productCategories, loadingProductCategory}) => {
 
 
   React.useEffect(() => {
-    if (selectedProductCategories.length > 0) {
+   
       productWithStatus()
-    }
+   
   }, [selectedProductCategories]);
 
   const getSum = (array, column) => {

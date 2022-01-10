@@ -550,7 +550,7 @@ const TopDashboard = (props) => {
             <Box textAlign="center" mb={2}>
               <Typography variant="h5">Total offered value in {filterCurrency || currency} vs Budget</Typography>
             </Box>
-            {!loadingChart ? (
+            {!loadingChart ?  tableDataRaw.length === 0 ? <Box height={400}>No Data</Box> : (
               <Box>
                 {!tableView ? (
                   <Chart
