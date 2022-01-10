@@ -28,8 +28,7 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const ProductCard = (props: { product: any, onAddItem: any }) => {
-  const { product, onAddItem } = props;
+const ProductCard = ({ product, onAddItem, selectedOrderType }) => {
   const classes = useStyles();
   const history = useHistory();
   const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
@@ -43,9 +42,9 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
       )}
       <div className={styles.title}>
         <h4
-          className={"cursor-pointer"}
+          className="cursor-pointer"
           onClick={() => {
-            history.push(`${routes.eCommerceDetail.path}/${product._id}`);
+            history.push(`${routes.eCommerceDetail.path}/${product._id}/${selectedOrderType}`);
           }}
         >{`${product.productName}, ${product.productCategory.optionLabel} `}</h4>
 
@@ -141,14 +140,14 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
               <div key={i} className={classes.imageContainer}>
                 <img className={classes.img} src={image}
                   onClick={() => {
-                    history.push(`${routes.eCommerceDetail.path}/${product._id}`);
+                    history.push(`${routes.eCommerceDetail.path}/${product._id}/${selectedOrderType}`);
                   }}
                 />
               </div>
             ))}
           </Carousel>
           : <BsImage className={`${styles.no_image} cursor-pointer`} onClick={() => {
-            history.push(`${routes.eCommerceDetail.path}/${product._id}`);
+            history.push(`${routes.eCommerceDetail.path}/${product._id}/${selectedOrderType}`);
           }} />}
       </Box>
 
@@ -189,11 +188,6 @@ const ProductCard = (props: { product: any, onAddItem: any }) => {
       </div>
     </div>
   );
-};
-
-ProductCard.propTypes = {
-  product: PropTypes.object,
-  onAddItem: PropTypes.func
 };
 
 export default ProductCard;

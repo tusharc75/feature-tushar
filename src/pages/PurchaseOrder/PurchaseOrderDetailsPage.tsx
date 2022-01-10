@@ -327,7 +327,7 @@ const PurchaseOrderDetailsPage = () => {
                                             </Button>
                                         </>
                                     )}
-                                    {permissions?.purchaseOrder?.isUpdate && (purchaseOrderData?.status === "Ready to Invoice" || purchaseOrderData?.status === "Invoiced" || purchaseOrderData?.status === "Closed") && (
+                                    {permissions?.purchaseOrder?.isUpdate && (purchaseOrderData?.status === "Ready to Invoice" || purchaseOrderData?.status === "Invoiced") && (
                                         <>
                                             <Button
                                                 variant={isMobile ? "text" : "contained"}

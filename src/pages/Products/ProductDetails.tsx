@@ -87,7 +87,6 @@ export default function ProductDetails() {
   const [data, dispatchData] = useReducer(reducer, initialData);
 
   const classes = useStyles();
-  const [reviews, setReviews] = useState([])
   const [productDetails, setProductDetails] = useState(null);
   const [similarItems, setSimilarItems] = useState([]);
   const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
@@ -98,20 +97,13 @@ export default function ProductDetails() {
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, cartItems }, dispatch }: any = useData();
   const [wishlist, setWishlist] = useState({ loading: false, disabled: false });
-  // const [indexOfProductInCart, setIndexOfProductInCart] = useState(-1);
   const [rateCurrency, setRateCurrency] = useState({ currency: "", rate: "", mrp: "", rateWithCurrency: "", unit: "", pricingMethod: "", isRateMrpSame: false })
   const [deleteProductFromCartConfirmationDialog, setDeleteProductFromCartConfirmationDialog] = useState({ show: false, okBtnLoading: false })
-  // const [selectedUnit, setSelectedUnit] = useState("");
-  // const [selectedPricingMethod, setSelectedPricingMethod] = useState("");
   const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
   const [hasError, setHasError] = useState(false);
-  // const [timePeriod, setTimePeriod] = useState({
-  //   startDate: new Date(),
-  //   endDate: new Date(),
-  // });
 
   const history = useHistory();
-  let { id } = useParams();
+  let { id, orderType } = useParams();
 
   useEffect(() => {
     fetchCart()
@@ -153,41 +145,24 @@ export default function ProductDetails() {
 
     dispatchData({ type: TYPES.unitAndPricingMethod, payload: { selectedUnit: unit, selectedPricingMethod: pricingMethod } })
 
+    let record = null;
+
     if (unit && pricingMethod) {
-      const record = productData.priceCalculation.find(d => d.pricingMethod === pricingMethod && d.unit === unit);
-      if (record) {
-        setRateCurrency({ currency: record.currency, unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
-      }
+      record = productData.priceCalculation.find(d => d.pricingMethod === pricingMethod && d.unit === unit);
     } else if (unit) {
-      const record = productData.priceCalculation.find(d => d.unit === unit);
-      if (record) {
-        setRateCurrency({ currency: record.currency, unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: false })
-      }
+      record = productData.priceCalculation.find(d => d.unit === unit);
     } else if (pricingMethod) {
-      const record = productData.priceCalculation.find(d => d.pricingMethod === pricingMethod);
-      if (record) {
-        setRateCurrency({ currency: record.currency, unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: false })
-      }
+      record = productData.priceCalculation.find(d => d.pricingMethod === pricingMethod);
+    }
+
+    if (record) {
+      setRateCurrency({ currency: record.currency, unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
     }
 
     if (data.indexOfProductInCart !== -1) {
       updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), unit, pricingMethod, data.startDate, data.endDate);
     }
-
   }
-
-  // const fetchReviews = () => {
-  //   axiosInstance()
-  //     .get(`${review.reviewsApi}/${id}`)
-  //     .then(({ data: { data } }) => {
-  //       if (data.review) {
-  //         setReviews(data.review)
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       toastConfig.setToastConfig(error);
-  //     });
-  // }
 
   const fetchProducts = () => {
     axiosInstance()
@@ -226,21 +201,27 @@ export default function ProductDetails() {
   }
 
   const onAddToCartItem = (item) => {
+
+    let product = {
+      qty: 1,
+      type: 'product',
+      materialId: item._id,
+      mrp: Number(item.mrp),
+      rate: 10,
+      unit: data.selectedUnit,
+      orderType: 'rent',
+      currency: rateCurrency.currency
+    }
+
+    if (orderType === "rent") {
+      product["pricingMethod"] = data.selectedPricingMethod;
+      product["startDate"] = data.startDate;
+      product["endDate"] = data.endDate;
+    }
+
     axiosInstance()
       .post(`/ecommerce/cart`,
-        [{
-          qty: 1,
-          type: 'product',
-          materialId: item._id,
-          mrp: Number(item.mrp),
-          rate: 10,
-          unit: data.selectedUnit,
-          pricingMethod: data.selectedPricingMethod,
-          orderType: 'rent',
-          startDate: data.startDate,
-          endDate: data.endDate,
-          currency: rateCurrency.currency
-        }]
+        [product]
       ).then(({ data }) => {
         setAddToCartBtnLoading(false)
         toastConfig.setToastConfig({
@@ -467,6 +448,7 @@ export default function ProductDetails() {
                         productDetails.unit && <FormControl variant="outlined" margin="dense" fullWidth error={hasError && !data.selectedUnit}>
                           <InputLabel id="unit-label">Unit</InputLabel>
                           <Select
+                            required
                             labelId="unit-label"
                             id="unit"
                             value={data.selectedUnit}
@@ -487,9 +469,10 @@ export default function ProductDetails() {
                     </Grid>
                     <Grid item xs={productDetails.unit ? 6 : 12}>
                       {
-                        productDetails.pricingMethod && <FormControl variant="outlined" margin="dense" fullWidth error={hasError && !data.selectedPricingMethod}>
+                        orderType === "rent" && productDetails.pricingMethod && <FormControl variant="outlined" margin="dense" fullWidth error={hasError && !data.selectedPricingMethod}>
                           <InputLabel id="pricing-method-label">Pricing Method</InputLabel>
                           <Select
+                            required={orderType === "rent"}
                             labelId="pricing-method-label"
                             id="pricing-method"
                             value={data.selectedPricingMethod}
@@ -511,61 +494,64 @@ export default function ProductDetails() {
                   </Grid> : ""
                 }
 
-                <Grid item xs={12} sm={12} md={12}>
-                  <MuiPickersUtilsProvider utils={DateUtils}>
-                    <Grid container spacing={2}>
+                {
+                  orderType === "rent" && <Grid item xs={12} sm={12} md={12}>
+                    <MuiPickersUtilsProvider utils={DateUtils}>
+                      <Grid container spacing={2}>
 
-                      <Grid item xs={6} sm={6}>
-                        <KeyboardDatePicker
-                          inputVariant="outlined"
-                          variant="inline"
-                          fullWidth
-                          autoOk
-                          size="small"
-                          openTo="date"
-                          format={dateFormatForInputControl}
-                          maxDate={data.endDate}
-                          label="Start Date"
-                          views={['year', 'month', 'date']}
-                          value={data.startDate}
-                          onChange={(date) => {
-                            dispatchData({ type: TYPES.startDate, payload: date });
+                        <Grid item xs={6} sm={6}>
+                          <KeyboardDatePicker
+                            required={orderType === "rent"}
+                            inputVariant="outlined"
+                            variant="inline"
+                            fullWidth
+                            autoOk
+                            size="small"
+                            openTo="date"
+                            format={dateFormatForInputControl}
+                            maxDate={data.endDate}
+                            label="Start Date"
+                            views={['year', 'month', 'date']}
+                            value={data.startDate}
+                            onChange={(date) => {
+                              dispatchData({ type: TYPES.startDate, payload: date });
 
-                            if (data.indexOfProductInCart !== -1) {
-                              updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, date, data.endDate);
-                            }
-                          }}
-                        />
+                              if (data.indexOfProductInCart !== -1) {
+                                updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, date, data.endDate);
+                              }
+                            }}
+                          />
 
+                        </Grid>
+                        <Grid item xs={6} sm={6}>
+                          <KeyboardDatePicker
+                            required={orderType === "rent"}
+                            inputVariant="outlined"
+                            variant="inline"
+                            fullWidth
+                            autoOk
+                            size="small"
+                            minDate={data.startDate}
+                            openTo="date"
+                            format={dateFormatForInputControl}
+                            label="End Date"
+                            views={['year', 'month', 'date']}
+                            value={data.endDate}
+                            onChange={(date) => {
 
+                              dispatchData({ type: TYPES.endDate, payload: date })
+
+                              if (data.indexOfProductInCart !== -1) {
+                                updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, data.startDate, date);
+                              }
+
+                            }}
+                          />
+                        </Grid>
                       </Grid>
-                      <Grid item xs={6} sm={6}>
-                        <KeyboardDatePicker
-                          inputVariant="outlined"
-                          variant="inline"
-                          fullWidth
-                          autoOk
-                          size="small"
-                          minDate={data.startDate}
-                          openTo="date"
-                          format={dateFormatForInputControl}
-                          label="End Date"
-                          views={['year', 'month', 'date']}
-                          value={data.endDate}
-                          onChange={(date) => {
-
-                            dispatchData({ type: TYPES.endDate, payload: date })
-
-                            if (data.indexOfProductInCart !== -1) {
-                              updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, data.startDate, date);
-                            }
-
-                          }}
-                        />
-                      </Grid>
-                    </Grid>
-                  </MuiPickersUtilsProvider>
-                </Grid>
+                    </MuiPickersUtilsProvider>
+                  </Grid>
+                }
 
                 {
                   productDetails && data.indexOfProductInCart > -1 && cartItems.length > 0 && cartItems.some(s => s.productDetail?._id === productDetails?._id)
@@ -585,7 +571,7 @@ export default function ProductDetails() {
                       className="mt-2"
                       color="primary"
                       variant="outlined"
-                      disabled={addToCartBtnLoading}
+                      disabled={addToCartBtnLoading || (orderType === "rent" ? !(data.startDate && data.endDate && data.selectedUnit && data.selectedPricingMethod) : !data.selectedUnit)}
                       loading={addToCartBtnLoading}
                       startIcon={addToCartBtnLoading ? null : <AddShoppingCartIcon />}
                       onClick={() => {
@@ -602,7 +588,11 @@ export default function ProductDetails() {
                 }
 
                 <Box className="my-3 d-flex gap-4 align-items-baseline">
-                  <Typography variant="h4">{rateCurrency.rateWithCurrency}</Typography>
+                  {
+                    rateCurrency.rateWithCurrency ? <Typography variant="h4">{rateCurrency.rateWithCurrency}</Typography>
+                      : <Typography variant="h6" className="text-error">Price calculation not available</Typography>
+                  }
+
                   {
                     rateCurrency.isRateMrpSame === false && <Typography variant="h5" className="custom-strike">{rateCurrency.mrp}</Typography>
                   }

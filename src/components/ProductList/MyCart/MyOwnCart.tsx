@@ -1,5 +1,6 @@
 import { useEffect, useState, Fragment, useContext } from 'react';
-import { Button, Box, Grid, FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
+import { Button, Box, Grid, FormControl, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import axiosInstance from '../../../axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
@@ -127,6 +128,7 @@ function MyOwnCart() {
               pricingMethod: d?.pricingMethod,
               unit: d?.unit,
               currency: d?.currency,
+              orderType: d?.orderType,
               currencyWithFormat: formatAmountWithCurrency(d?.currency, d.mrp)?.fullFormatAmount
             }
           }));
@@ -223,7 +225,7 @@ function MyOwnCart() {
                           <div className={`${styles.card_body_layout} my-3`}>
                             <div className={styles.card_product_name_and_price}>
                               <div className={styles.card_seller}>
-                                <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}`}>{item.productName}</Link>
+                                <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}`}><b><u>{item?.orderType}</u></b> - {item.productName}</Link>
                               </div>
                               <div className={styles.card_price}>
                                 {item?.currencyWithFormat}
@@ -240,19 +242,23 @@ function MyOwnCart() {
                           </div>
 
                           <Grid container>
-                            <Grid item xs={6}>
-                              <b>Start Date:</b> {item.startDate}
-                            </Grid>
+                            {
+                              item.startDate && <Grid item xs={6}>
+                                <b>Start Date:</b> {item.startDate}
+                              </Grid>
+                            }
 
-                            <Grid item xs={6}>
-                              <b>End Date:</b> {item.endDate}
-                            </Grid>
-                          </Grid>
+                            {
+                              item.endDate && <Grid item xs={6}>
+                                <b>End Date:</b> {item.endDate}
+                              </Grid>
+                            }
 
-                          <Grid container>
-                            <Grid item xs={6}>
-                              <b>Pricing Method:</b> {item.pricingMethod}
-                            </Grid>
+                            {
+                              item.pricingMethod && <Grid item xs={6}>
+                                <b>Pricing Method:</b> {item.pricingMethod}
+                              </Grid>
+                            }
 
                             <Grid item xs={6}>
                               <b>Unit:</b> {item.unit}
@@ -383,49 +389,31 @@ function MyOwnCart() {
 
                         <Grid container className="px-3">
                           <Grid item xs={12}>
-                            <FormControl variant="outlined" margin="dense" fullWidth disabled={cartProducts.length === 0}>
-                              <InputLabel id="shipping-address">Shipping Address</InputLabel>
-                              <Select
-                                required
-                                labelId="shipping-address"
-                                id="shipping-address"
-                                value={selectedShippingAddress}
-                                onChange={(e) => {
-                                  setSelectedShippingAddress(e.target.value)
-                                }}
-                                label="Shipping Address"
-                              >
-                                {
-                                  addressOptions.map(m => (
-                                    <MenuItem key={m.optionValue} value={m.optionValue}>{m.optionLabel}</MenuItem>
-                                  ))
-                                }
-                              </Select>
-                            </FormControl>
+                            <Autocomplete
+                              fullWidth
+                              id="shipping-address"
+                              options={addressOptions}
+                              getOptionLabel={(option) => option.optionLabel}
+                              onChange={(_, newValue) => {
+                                setSelectedShippingAddress(newValue?.optionValue ?? "")
+                              }}
+                              renderInput={(params) => <TextField {...params} label="Shipping Address" margin="dense" variant="outlined" />}
+                            />
                           </Grid>
                         </Grid>
 
                         <Grid container className="px-3">
                           <Grid item xs={12}>
-                            <FormControl variant="outlined" margin="dense" fullWidth disabled={cartProducts.length === 0}>
-                              <InputLabel id="billing-address">Billing Address</InputLabel>
-                              <Select
-                                required
-                                labelId="billing-address"
-                                id="billing-address"
-                                value={selectedBillingAddress}
-                                onChange={(e) => {
-                                  setSelectedBillingAddress(e.target.value)
-                                }}
-                                label="Billing Address"
-                              >
-                                {
-                                  addressOptions.map(m => (
-                                    <MenuItem key={m.optionValue} value={m.optionValue}>{m.optionLabel}</MenuItem>
-                                  ))
-                                }
-                              </Select>
-                            </FormControl>
+                            <Autocomplete
+                              fullWidth
+                              id="billing-address"
+                              options={addressOptions}
+                              getOptionLabel={(option) => option.optionLabel}
+                              onChange={(_, newValue) => {
+                                setSelectedBillingAddress(newValue?.optionValue ?? "")
+                              }}
+                              renderInput={(params) => <TextField {...params} label="Billing Address" margin="dense" variant="outlined" />}
+                            />
                           </Grid>
                         </Grid>
 
@@ -469,32 +457,8 @@ function MyOwnCart() {
               }).catch((error) => {
                 toastConfig.setToastConfig(error);
               })
-
-
-              // setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, okBtnLoading: true } })
-              // onDeleteCartItem(deleteProductFromCartConfirmationDialog.recordToRemove)
             }}
           />
-          // <ManageQuoteDialog
-          //   open={openPlaceOrderDialog}
-          //   onSuccess={onSuccess}
-          //   onClose={() => {
-          //     setOpenPlaceOrderDialog(false);
-          //   }}
-          //   isNew={true}
-          //   dataToUpdate={null}
-          //   isClone={false}
-          //   resource={null}
-          //   isRedirectTodetailPage={true}
-          //   contactId={null}
-          //   opportunityId={null}
-          //   disableOwnerDropDown={true}
-          //   contacts={null}
-          //   doaCollaboratorResources={user?.user?.doa.map((obj) => obj.user)}
-          //   isRenderedFromOpportunity={false}
-          //   isCreateQuoteFromCart={true}
-          //   onHandleSubmit={handleCreateQuote}
-          // />
         )}
 
         {

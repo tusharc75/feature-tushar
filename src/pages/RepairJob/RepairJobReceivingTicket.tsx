@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const RepairJobReceivingTicket = (props) => {
-    const { repairJobData, setNextButtonDisabled, setPreviousButtonDisabled,isRepairEnded, setRepairEnded } = props
+    const { repairJobData, setNextButtonDisabled, setPreviousButtonDisabled, isRepairEnded, setRepairEnded } = props
 
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
@@ -84,18 +84,18 @@ const RepairJobReceivingTicket = (props) => {
     }, []);
 
     useEffect(() => {
-        if(repairJobData && repairJobData.typeOfRepair === "External" && dataRows.length > 0) {
-            const repairedAssets = dataRows.filter((asset:any) => asset?.repaired);
-            const assetsWithReceivingTicket = dataRows.filter((asset:any) => asset?.isDelivered);
-            const lostAssets = dataRows.filter((asset:any) => asset?.status === "Lost");
+        if (repairJobData && repairJobData.typeOfRepair === "External" && dataRows.length > 0) {
+            const repairedAssets = dataRows.filter((asset: any) => asset?.repaired);
+            const assetsWithReceivingTicket = dataRows.filter((asset: any) => asset?.isDelivered);
+            const lostAssets = dataRows.filter((asset: any) => asset?.status === "Lost");
 
             let repairedAssetsLength = dataRows.length - lostAssets.length
 
-            if(repairJobData && repairJobData.status === repairJobStatus[2]) {
+            if (repairJobData && repairJobData.status === repairJobStatus[2]) {
                 setRepairEnded(true)
-            } else if(repairedAssets.length === repairedAssetsLength && assetsWithReceivingTicket.length === repairedAssetsLength) {
+            } else if (repairedAssets.length === repairedAssetsLength && assetsWithReceivingTicket.length === repairedAssetsLength) {
                 setRepairEnded(true)
-            } 
+            }
         }
     }, [repairJobData, dataRows])
 
@@ -120,7 +120,8 @@ const RepairJobReceivingTicket = (props) => {
                                     tempProductInventory[index]["type"] = obj?.type
                                     if (obj.ticketType === "Loading") {
                                         tempProductInventory[index]["deliveryTicket"] = obj?.ticketName
-                                        tempProductInventory[index]["deliveryTicketId"] = obj?._id
+                                        tempProductInventory[index]["deliveryTicketId"] = obj?._id;
+                                        tempProductInventory[index]["isDeliveryTicketDelivered"] = obj?.status === "Delivered";
                                     }
                                     if (obj.ticketType === "Receiving") {
                                         tempProductInventory[index]["receivingTicket"] = obj?.ticketName
@@ -137,7 +138,7 @@ const RepairJobReceivingTicket = (props) => {
                         })
 
                         setNextButtonDisabled(!tempProductInventory.every(s => { return ["Available", "Scrap", "Lost"].findIndex(d => d === s.status) > -1 }))
-                        setPreviousButtonDisabled(tempProductInventory.some(s => s["receivingTicketId"]));
+                        // setPreviousButtonDisabled(tempProductInventory.some(s => s["receivingTicketId"]));
 
                         dispatch({
                             type: "initialize", data: tempProductInventory, count: tempProductInventory.length
@@ -261,7 +262,7 @@ const RepairJobReceivingTicket = (props) => {
             </Button>
 
             {
-               repairJobData && repairJobData["status"] !== repairJobStatus[2] && <Button variant="outlined" color="primary" aria-controls="simple-menu"
+                repairJobData && repairJobData["status"] !== repairJobStatus[2] && <Button variant="outlined" color="primary" aria-controls="simple-menu"
                     aria-haspopup="true"
                     disabled={selectedRecords.length === 0}
                     size="small"
@@ -297,9 +298,9 @@ const RepairJobReceivingTicket = (props) => {
                 }}>Lost</MenuItem>
             </Menu>
             {
-               repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
+                repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
                 <IconButton
-                    disabled={selectedRecords.length === 0 || selectedRecords.some(f => f.hasOwnProperty("receivingTicketId"))}
+                    disabled={selectedRecords.length === 0 || !selectedRecords.every(f => f.deliveryTicketId && f.isDeliveryTicketDelivered) || selectedRecords.some(f => f.hasOwnProperty("receivingTicketId"))}
                     onClick={() => {
                         handleReceivingTicketDialog(selectedRecords)
                     }}
@@ -314,7 +315,7 @@ const RepairJobReceivingTicket = (props) => {
             }
 
             {
-               repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
+                repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
                 <IconButton
                     disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId"))}
                     onClick={() => {
@@ -364,12 +365,12 @@ const RepairJobReceivingTicket = (props) => {
                             label: "Receiving Ticket : ",
                             field: "receivingTicket",
                             onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.receivingTicketId}`)
-                          },
-                          {
+                        },
+                        {
                             label: "Loading Ticket : ",
                             field: "deliveryTicket",
                             onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
-                          },
+                        },
                     ]}
                     additionalDetails={[
 

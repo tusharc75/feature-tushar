@@ -5,7 +5,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
 import queryString from 'query-string';
 import ManageRepairJobDialog from './ManageRepairJob';
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairJob } from '../../constants/helpers';
+import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairJob, prepareDataForGrid } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -24,6 +24,10 @@ import axiosInstance from '../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import AddIcon from "@material-ui/icons/Add"
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
+import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
+import { camelCase } from 'lodash'
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 
 let repairJobTimeout;
 const RepairJobType = [
@@ -66,62 +70,180 @@ const RepairJob = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
-  const columns = [
-    {
-      field: 'repairJobName',
-      headerName: 'Repair Job Name',
-      show: true,
-      disabled: true,
-      cellRenderer: 'repairJobNameRenderer',
-      primaryField: 'true'
-    },
-    {
-      field: 'status',
-      headerName: 'Status',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer'
-    },
-    {
-      field: 'productInventory',
-      headerName: 'Product Inventory',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer'
-    },
-    {
-      field: 'repairPerson',
-      headerName: 'Repair Person',
-      show: true,
-      disabled: false,
-      cellRenderer: 'repairPersonRenderer'
-    },
-    {
-      field: 'typeOfRepair',
-      headerName: 'Type Of Repair',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer'
-    },
-    {
-      field: 'createdBy',
-      headerName: 'Created By',
-      show: true,
-      cellRenderer: 'createdByRenderer'
-    },
-    {
-      field: 'updatedBy',
-      headerName: 'Updated By',
-      show: true,
-      cellRenderer: 'updatedByRenderer'
-    },
-    {
-      field: 'owner',
-      headerName: 'Repair Job Owner',
-      show: true,
-      cellRenderer: 'OwnerRenderer'
+  const [frameworkComponents, setFrameworkComponents] = useState({});
+  const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
+  const [columns, setColumns] = useState([]);
+  const pageTitle = camelCase(`${routes.repairJob.title}`)
+
+  const { getColumnData } = useColumns();
+
+  // const columns = [
+  //   {
+  //     field: 'repairJobName',
+  //     headerName: 'Repair Job Name',
+  //     show: true,
+  //     disabled: true,
+  //     cellRenderer: 'repairJobNameRenderer',
+  //     primaryField: 'true'
+  //   },
+  //   {
+  //     field: 'status',
+  //     headerName: 'Status',
+  //     show: true,
+  //     disabled: false,
+  //     cellRenderer: 'commonRenderer'
+  //   },
+  //   {
+  //     field: 'productInventory',
+  //     headerName: 'Product Inventory',
+  //     show: true,
+  //     disabled: false,
+  //     cellRenderer: 'commonRenderer'
+  //   },
+  //   {
+  //     field: 'repairPerson',
+  //     headerName: 'Repair Person',
+  //     show: true,
+  //     disabled: false,
+  //     cellRenderer: 'repairPersonRenderer'
+  //   },
+  //   {
+  //     field: 'typeOfRepair',
+  //     headerName: 'Type Of Repair',
+  //     show: true,
+  //     disabled: false,
+  //     cellRenderer: 'commonRenderer'
+  //   },
+  //   {
+  //     field: 'createdBy',
+  //     headerName: 'Created By',
+  //     show: true,
+  //     cellRenderer: 'createdByRenderer'
+  //   },
+  //   {
+  //     field: 'updatedBy',
+  //     headerName: 'Updated By',
+  //     show: true,
+  //     cellRenderer: 'updatedByRenderer'
+  //   },
+  //   {
+  //     field: 'owner',
+  //     headerName: 'Repair Job Owner',
+  //     show: true,
+  //     cellRenderer: 'OwnerRenderer'
+  //   }
+  // ];
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  const fetchGridColumns = async () => {
+    let data
+    if (isOffline) {
+      data = await findOne(objectStore.resource, objectStore.repairJob)
     }
-  ];
+    else {
+      const response = await axiosInstance().get(`/field?resource=Repair Job`)
+      data = response?.data?.data
+      try {
+        insertUpdate(objectStore.resource, objectStore.repairJob, data);
+      } catch (ex) {
+        console.error(`Repair Job: Error while storing data for Offline context. Error: ${ex.message}`)
+      }
+    }
+    let columns = []
+    let rendererNames = []
+    data.forEach(o => {
+      let currentColumn = getColumnData(pageTitle, o?.fieldData, routes.repairJobDetail.path)
+      if (currentColumn !== null) {
+        if (isOffline) {
+          currentColumn.columnData["filter"] = false
+          currentColumn.columnData["sortable"] = false
+        }
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
+        }
+      }
+      return o?.fieldData
+    })
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      repairJobNameRenderer: RepairJobNameRenderer,
+      actionsRenderer: ActionsRenderer
+    }
+    setFrameworkComponents({ ...tempFrameworkComponent })
+    let staticFields = getStaticFields()
+    staticFields.forEach(field => {
+      columns.push(checkStaticField(pageTitle, field))
+    })
+    setColumns([...columns])
+
+    // let data;
+    // if (isOffline) {
+    //   data = offlineFieldsData[accountResource] ?? [];
+    // } else {
+    //   const response = await axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`);
+
+    //   data = response?.data?.data;
+    //   try {
+    //     updateFieldsData(accountResource, data);
+    //   } catch (ex) {
+    //     console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`);
+    //   }
+    // }
+
+    // let columns = [];
+    // let rendererNames = [];
+
+    // data.forEach((o) => {
+    //   if (['repairJobName'].indexOf(o?.fieldData?.fieldName) === 0) {
+    //     columns = [
+    //       ...columns,
+    //       {
+    //         pivotIndex: 0,
+    //         field: 'repairJobName',
+    //         headerName: 'Repair Job Name',
+    //         show: true,
+    //         disabled: true,
+    //         cellRenderer: 'repairJobNameRenderer'
+    //       }
+    //     ];
+    //   } else {
+    //     let currentColumn = getColumnData(accountResource, o?.fieldData, `/${accountRoute}/detail`);
+    //     if (currentColumn !== null) {
+    //       columns = [...columns, currentColumn?.columnData];
+    //       if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+    //         rendererNames.push(currentColumn?.rendererName);
+    //       }
+    //     }
+    //   }
+    //   return o?.fieldData;
+    // });
+    // let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+    // tempFrameworkComponent = {
+    //   ...tempFrameworkComponent,
+    //   repairJobNameRenderer: RepairJobNameRenderer,
+    //   actionsRenderer: ActionsRenderer
+    // };
+    // setFrameworkComponents({ ...tempFrameworkComponent });
+
+    // let staticFields = getStaticFields();
+    // staticFields.forEach((field) => {
+    //   columns.push(checkStaticField(routes.projectSales.title, field));
+    // });
+    // setColumns([...columns]);
+
+    // if (JSON.parse(sessionStorage.getItem('filters')) !== null) {
+    //   let savedFilter = JSON.parse(sessionStorage.getItem('filters'));
+    //   dispatch({ type: 'filter', filters: savedFilter });
+    // }
+  };
+
+
+
   //  Grid Variables - End
   const [locationKeys, setLocationKeys] = useState([])
   useEffect(() => {
@@ -270,17 +392,17 @@ const RepairJob = () => {
     </>
   );
 
-  const frameworkComponents = {
-    repairJobNameRenderer: RepairJobNameRenderer,
-    repairPersonRenderer: RepairPersonRenderer,
-    // productInventoryRenderer: ProductInventoryRenderer,
-    ownerRenderer: OwnerRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer
-  };
+  // const frameworkComponents = {
+  //   repairJobNameRenderer: RepairJobNameRenderer,
+  //   repairPersonRenderer: RepairPersonRenderer,
+  //   // productInventoryRenderer: ProductInventoryRenderer,
+  //   ownerRenderer: OwnerRenderer,
+  //   createdByRenderer: CreatedByRenderer,
+  //   updatedByRenderer: UpdatedByRenderer,
+  //   actionsRenderer: ActionsRenderer,
+  //   commonRenderer: CommonRenderer,
+  //   dateRenderer: DateRenderer
+  // };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -366,46 +488,89 @@ const RepairJob = () => {
       gridApi.setRowData([]);
     }
 
-    axiosInstance()
-      .get(`${repairJob.repairJobApi}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, customerAccount, ...restProperties } = u;
+    try {
+      let data: any = [], count;
+      if (!isOffline) {
+        const response: any = await axiosInstance().get(`${repairJob.repairJobApi}${queryString}`);
+        data = response?.data?.data;
+        count = response?.data?.count;
+      }
+      else {
+        data = await findAll(objectStore.repairJob);
+        count = data?.length || 0;
+      }
+      let rows = data.map((u) => {
+        let finalObject = prepareDataForGrid(u, user);
 
-          let res = {
-            ...restProperties,
-            id: u._id,
-            productInventory: u.productInventory?.map((p) => p.optionLabel).join(', '),
-            repairPerson: u.repairPerson?.optionLabel,
-            repairPersonId: u.repairPerson?.optionValue,
-            owner: u.createdBy?.user?.concatedName,
-            ownerId: u.createdBy?.user?._id,
-            createdBy: u.createdBy?.user?.concatedName,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date,
-
-            canDelete: u.createdBy?.user?._id === user?.user._id,
-            isChecked: false,
-            allowedToEdit: permissions?.repairJob?.isUpdate
-          };
-          return res;
-        });
-
-        if (appendRows) {
-          dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
-        } else {
-          dispatch({ type: "initialize", data: rows, count: count });
-        }
-
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
-        toastConfig.setToastConfig(error);
+        finalObject["isChecked"] = false;
+        finalObject["allowedToEdit"] = permissions?.repairJob?.isUpdate;
+        finalObject["owerCollaboratorInitialsOrImages"] = [];
+        if (finalObject["owner"])
+          finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] }); finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
+            if (f.initials) {
+              f.initials = f.initials.split(" ").map((i) => i[0]).join("");
+            }
+          })
+        return finalObject;
       });
+      if (appendRows) {
+        dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+      } else {
+        dispatch({ type: "initialize", data: rows, count: count });
+      }
+      setTimeout(() => {
+        dispatch({ type: "loading", loading: false });
+      }, gridLoadingTimeout);
+    } catch (error) {
+      dispatch({ type: "loading", loading: false });
+      toastConfig.setToastConfig(error);
+    }
+
+
+    // axiosInstance()
+    //   .get(`${repairJob.repairJobApi}${queryString}`)
+    //   .then(({ data: { data, count } }) => {
+
+    //     let rows = data.map((u) => {
+    //       const { owner, collaborator, createdBy, updatedBy, customerAccount, ...restProperties } = u;
+
+    //       let res = {
+    //         ...restProperties,
+    //         id: u._id,
+    //         productInventory: u.productInventory?.map((p) => p.optionLabel).join(', '),
+    //         repairPerson: u.repairPerson?.optionLabel,
+    //         repairPersonId: u.repairPerson?.optionValue,
+    //         owner: u.createdBy?.user?.concatedName,
+    //         ownerId: u.createdBy?.user?._id,
+    //         createdBy: u.createdBy?.user?.concatedName,
+    //         createdByDate: u.createdBy?.date,
+    //         updatedBy: u.updatedBy?.user?.concatedName,
+    //         updatedByDate: u.updatedBy?.date,
+
+    //         canDelete: u.createdBy?.user?._id === user?.user._id,
+    //         isChecked: false,
+    //         allowedToEdit: permissions?.repairJob?.isUpdate
+    //       };
+    //       return res;
+    //     });
+
+    //     if (appendRows) {
+    //       dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+    //     } else {
+    //       dispatch({ type: "initialize", data: rows, count: count });
+    //     }
+
+    //     setTimeout(() => {
+    //       dispatch({ type: 'loading', loading: false });
+    //     }, gridLoadingTimeout);
+    //   })
+    //   .catch((error) => {
+    //     dispatch({ type: 'loading', loading: false });
+    //     toastConfig.setToastConfig(error);
+    //   });
+
+
+
   };
 
   const handleSearch = (e) => {
@@ -540,59 +705,62 @@ const RepairJob = () => {
             )}
           </RepairJobHeader>
         </div>
-        {isMobile ?
-          <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={permissions.repairJob}
-            primaryField={columns?.find(d => d.primaryField)}
-            onClick={(data) => {
-              history.push(`${routes.repairJobDetail.path}/${data._id}`)
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(data) => {
-              history.push(`${routes.repairJobDetail.path}/${data._id}?openEdit=true`)
-            }}
-            extraParamsToCheckDelete={true}
-            onDelete={(data) => {
-              setDeleteRecord(data._id);
-              setIsConformDialogVisible(true);
-            }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            chips={[
-              {
-                label: "Status: ",
-                field: "status",
-              },
-              {
-                label: "Status: ",
-                field: "typeOfRepair",
-              }
-            ]}
-            onCreate={false}
-            showClone={false}
-            onClone={() => { }}
-            renderedFrom='repairJobPage'
-          /> :
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={100}
-            loading={loading}
-            renderedFrom='repairJobPage'
-            refreshGrid={fetchRepairJobs}
-          />
+
+        {
+          Object.keys(frameworkComponents).length > 0 ?
+            isMobile ?
+              <CustomSwipableList
+                allowSelection={true}
+                allowSwipe={true}
+                permissions={permissions.repairJob}
+                primaryField={columns?.find(d => d.primaryField)}
+                onClick={(data) => {
+                  history.push(`${routes.repairJobDetail.path}/${data._id}`)
+                }}
+                dataRows={dataRows}
+                selectedRecords={selectedRecords}
+                dispatch={dispatch}
+                onEdit={(data) => {
+                  history.push(`${routes.repairJobDetail.path}/${data._id}?openEdit=true`)
+                }}
+                extraParamsToCheckDelete={true}
+                onDelete={(data) => {
+                  setDeleteRecord(data._id);
+                  setIsConformDialogVisible(true);
+                }}
+                rowCount={rowCount}
+                page={page}
+                loading={loading}
+                chips={[
+                  {
+                    label: "Status: ",
+                    field: "status",
+                  },
+                  {
+                    label: "Status: ",
+                    field: "typeOfRepair",
+                  }
+                ]}
+                onCreate={false}
+                showClone={false}
+                onClone={() => { }}
+                renderedFrom='repairJobPage'
+              /> :
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameworkComponents}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                actionWidth={100}
+                loading={loading}
+                renderedFrom='repairJobPage'
+                refreshGrid={fetchRepairJobs}
+              /> : null
         }
 
         {showDeleteWarningConfirmBox ? (
