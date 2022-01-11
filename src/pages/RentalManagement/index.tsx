@@ -507,7 +507,7 @@ const RentalManagement = () => {
 
           {
             Object.keys(frameWorkComponent).length > 0 ?
-              isMobile ?
+              isMobile  && !isTablet ?
                 <CustomSwipableList
                   allowSelection={true}
                   allowSwipe={true}

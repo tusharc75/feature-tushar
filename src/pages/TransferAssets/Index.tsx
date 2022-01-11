@@ -26,7 +26,7 @@ import useColumns, { getStaticFields, getFrameworkComponents } from '../../const
 import { prepareDataForGrid } from '../../constants/helpers';
 import ManageTransferAsset from './ManageTransferAsset';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { FaSuitcase } from 'react-icons/fa';
 import { MdAdd } from 'react-icons/all';
@@ -274,34 +274,35 @@ const TransferAsset = () => {
               <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
               <span className="listingHeader">{routes.transferAsset?.title} </span>
             </Grid>
-            <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side}>
+            <Grid xs={12} sm={12} md={6} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1 }}>
+                <Grid style={{ display: 'flex', flex: 1 , gap: "5px" }} className={isMobile ? styles.content_box : ""}>
                   <SearchBox
                     onSearch={handleSearch}
                     searchbox={styles.search_box_input}
                     width="242px"
-                    style={isMobile ? { flex: 1 } : {}}
+                    style={isMobile && !isTablet ? { flex: 1 } : {}}
                     size="small"
                     value={search}
                   />
-                </Grid>
-
-                <Grid style={{ display: 'flex', gap: '5px' }}>
+                  <Grid style={{ display: 'flex', gap: '5px' }}>
                   {permissions?.transferAsset?.isCreate && (
                     <Button
                       onClick={() => {
                         setShowManageTransferAssetDialog({ open: true, isClone: false, idToClone: null });
                       }}
-                      variant={isMobile ? 'text' : 'contained'}
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
                       size="small"
                       color="primary"
-                      className={isMobile ? 'mobile_button' : styles.add_submit_btn}
-                      startIcon={isMobile ? null : <AddIcon />}
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                      startIcon={isMobile && !isTablet ? null : <AddIcon />}
                     >
-                      {isMobile ? <MdAdd size={23} /> : 'Add'}
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
+                </Grid>
+
+                
 
                   {/* <HtmlTooltip title={selectedRecords.length > 0 ? '' : 'Please select some records'}>
                     <span>
@@ -348,7 +349,7 @@ const TransferAsset = () => {
         </div>
         {columns ? (
           Object.keys(frameWorkComponent).length > 0 ? (
-            isMobile ? (
+            isMobile && !isTablet ? (
               <CustomSwipableList
                 allowSelection={true}
                 allowSwipe={true}

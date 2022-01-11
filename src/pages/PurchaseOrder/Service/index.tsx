@@ -7,7 +7,7 @@ import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder,CHILD_RESOURCE } from "../../../constants/helpers";
+import { purchaseOrder, CHILD_RESOURCE } from "../../../constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -165,7 +165,7 @@ const Product = ({ purchaseOrderData, id }) => {
                             setSelectedServiceData(null)
                         }}
                     >
-                        {isMobile ? <GrBusinessService size={20} /> : "Add Service"}
+                        {isMobile ? <GrBusinessService size={20} /> : "Ad hoc Charges"}
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">

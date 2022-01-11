@@ -80,7 +80,7 @@ export default function ManageContact(props) {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showContactDialog, setShowContactDialog] = useState(false);
   const [addressOpen, setAddressOpen] = useState({ open: false, isClone: false })
-  const [addressDataSource, setAddressDataSource] = useState(null);
+  const [addressDataSource, setAddressDataSource] = useState([]);
 
   useEffect(() => {
     if (contactData.fields.length > 0) {
@@ -93,6 +93,8 @@ export default function ManageContact(props) {
             }
           });
         }
+        const addressDataDropdown = contactData.fields.find((d) => d.fieldName === "mailingAddress")?.option ?? [];
+        setAddressDataSource(addressDataDropdown)  
       }
 
       const addressDataDropdown = contactData.fields.find((d) => d.fieldName === "mailingAddress");
@@ -619,7 +621,7 @@ export default function ManageContact(props) {
                         onSuccess={(data) => {
 
                           setAddressOpen({ open: false, isClone: false })
-                          setFieldValue("mailingAddress", data.fullAddress)
+                          setFieldValue("mailingAddress", [data._id, ...values.mailingAddress ])
                           setAddressDataSource((prevState) => [...prevState,
                           {
                             default: false,

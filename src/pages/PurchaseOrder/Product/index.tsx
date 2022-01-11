@@ -116,7 +116,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
         }}>
             <CustomRenderCell value={params.value} />
         </span>
-        <HtmlTooltip title="Details">
+        {params.data.productId && <HtmlTooltip title="Details">
             <IconButton
                 size="small"
                 aria-label="Details"
@@ -126,7 +126,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
             >
                 <InfoIcon fontSize="small" />
             </IconButton>
-        </HtmlTooltip>
+        </HtmlTooltip>}
     </span >
 
     const ActionsRenderer = (params) => (

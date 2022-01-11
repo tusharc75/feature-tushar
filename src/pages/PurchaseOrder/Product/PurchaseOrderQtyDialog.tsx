@@ -54,7 +54,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
 
   useEffect(() => {
     axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
-      const poFields = CURReplaceByCurrencySingle(data, currency);
+      let poFields = CURReplaceByCurrencySingle(data, currency);
       setAllFields(JSON.parse(JSON.stringify(poFields)))
       if (bulkEdit) {
         let unitArray: any = []
@@ -77,8 +77,9 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
           element.isFormula = false;
           element.isMulitFormula = false;
         })
+        poFields = poFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
         setInitialData({
-          fields: poFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit),
+          fields: poFields,
           values: { ...getObjKeys("", poFields), expectedDelivery: "" },
         });
       }

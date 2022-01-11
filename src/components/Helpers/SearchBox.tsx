@@ -2,11 +2,11 @@ import React, { memo } from 'react'
 import { TextField, InputAdornment } from '@material-ui/core'
 import { Search } from '@material-ui/icons'
 import PropTypes from 'prop-types'
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 
 
 function SearchBox({ onSearch, value, size, width, placeholder, style, searchbox }) {
-    return isMobile ? <TextField
+    return isMobile && !isTablet ? <TextField
         style={{ width: width || "242px", ...style }}
         variant= "standard"
         placeholder={placeholder || "Search"}

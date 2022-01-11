@@ -24,6 +24,9 @@ const useStyles = makeStyles((theme) => ({
   activityMainBlock: {
     height: 'calc(100vh - 32vh)',
     overflow: 'auto'
+  },
+  ".MuiGrid-spacing-xs-1":{
+      width:"calc(100vw + 14px)"
   }
 }));
 
@@ -201,7 +204,7 @@ const Board = ({ type, filter }) => {
           }}
           size="small"
           renderInput={(params) =>
-            isMobile ? (
+            isMobile && !isTablet ? (
               <TextField {...params} label="Select Resource" variant="standard" className={isMobile ? 'serchBox' : ''} />
             ) : (
               <TextField {...params} label="Select Resource" variant="outlined" />
@@ -226,7 +229,7 @@ const Board = ({ type, filter }) => {
         )}
       </Box>
       <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-        <Grid container spacing={1} className={classes.activityMainBlock}>
+        <Grid container spacing={2} className={classes.activityMainBlock}>
           {statusList.map((data, index) => (
             <Grid item md={3} xs={12} sm={4} key={index}>
               <div className={classes.block}>

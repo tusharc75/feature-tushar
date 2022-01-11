@@ -82,6 +82,7 @@ export default function CustomSteps({ steps, active }) {
                         stepProps.completed = false;
                     }
                     return (
+                        
                         <Step
                             key={index} {...stepProps}
                             style={isMobile ? { width: "50%" } : { width: `${100 / steps.length}%` }}

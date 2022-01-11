@@ -639,6 +639,7 @@ const UserDetailsPage = () => {
               fetchUserData();
               entityDialogClose();
             }}
+            roleAccessIds={roleAccessOfLoggedInUser}
           />
         </Dialog>
       )}
