@@ -15,7 +15,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import styles from '../../Leads/Header.module.scss';
 import { AiOutlinePaperClip } from 'react-icons/ai';
 import { AddOutlined } from '@material-ui/icons';
-import { Button, Tooltip, IconButton, MenuItem, Menu, TextField } from '@material-ui/core';
+import { Button, Tooltip, IconButton, MenuItem, Menu, TextField, Chip } from '@material-ui/core';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, getApi, getData, gridLoadingTimeout, resourceOptions } from '../../../constants/helpers';
@@ -30,6 +30,7 @@ import CustomSwipableList from '../../../components/SwipableListComponents/Custo
 import { MdAdd } from "react-icons/all";
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -149,6 +150,7 @@ export default function Attachment() {
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [columns, setColumns] = useState([
     { field: 'name', headerName: 'Name', primaryField: true, show: true, disabled: true, cellRenderer: 'nameRenderer' },
+    { field: 'relatedTo', headerName: 'Related To', show: true, disabled: true, primaryField: true, cellRenderer: 'referenceRenderer' },
     {
       field: 'createdAt',
       headerName: 'Created At',
@@ -187,7 +189,7 @@ export default function Attachment() {
 
   useEffect(() => {
     fetchAttachments();
-  }, [page, limit, filter, filters, sorting, selectedResourceData]);
+  }, [page, limit, filter, filters, sorting]);
 
   useEffect(() => {
     if (!resource) return;
@@ -216,6 +218,24 @@ export default function Attachment() {
     <a className={permissions?.attachment?.isUpdate ? "link cursor-pointer" : ""} onClick={() => handleActivityOpen(params.data)}>
       {params.data.name}
     </a >
+  );
+
+  const ReferenceRenderer = (params) => (
+    <>{params.value && params.value?.length > 0 ? params.value.map(d => {
+      return (
+        <>
+          <span >{d.name}</span>
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`${d.type}`}
+          />
+        </>
+      )
+    })
+      : <NoDataCell />
+    }
+    </>
   );
   const downloadFile = (file) => {
     const fileUrl = file.map(f => f.url)
@@ -288,6 +308,7 @@ export default function Attachment() {
 
   const frameworkComponents = {
     nameRenderer: NameRenderer,
+    referenceRenderer: ReferenceRenderer,
     commonRenderer: CommonRenderer,
     commonRendererWithCopy: CommonRendererWithCopy,
     createdByRenderer: CreatedByRenderer,
@@ -316,9 +337,6 @@ export default function Attachment() {
 
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
-    }
-    if (resource && camelCase(resource) !== "" && selectedResourceData?.id) {
-      deepFilter = `${deepFilter}&"resource"="${camelCase(resource)}"&resourceId="${selectedResourceData.id}"`
     }
     return deepFilter;
   };
@@ -453,6 +471,12 @@ export default function Attachment() {
                   value={selectedResourceData}
                   onChange={(event, newValue) => {
                     setSelectedResourceData(newValue);
+                    if (newValue?.id) {
+                      setFilter((prevState) => ([...prevState, { _id: newValue.id, type: camelCase(resource), name: newValue.name }]))
+                    }
+                    else {
+                      setFilter([])
+                    }
                   }}
                   size="small"
                   renderInput={(params) => <TextField {...params} label={`Select ${resource}`} variant="outlined" />}
