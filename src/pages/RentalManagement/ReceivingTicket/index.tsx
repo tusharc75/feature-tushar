@@ -283,7 +283,15 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       >
         <Tooltip
           title="Create Receiving Ticket">
-          <AddBoxRoundedIcon />
+          <Button
+            variant="outlined"
+            color="primary"
+            size="small"
+            disabled={(selectedRecords.length === 0)
+              || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
+          >
+            Create Receiving Ticket
+          </Button>
         </Tooltip>
       </IconButton>
       <Box mx={1} />
@@ -298,7 +306,15 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       >
         <Tooltip
           title="Remove Assets From Receiving Ticket(s)">
-          <RemoveCircleRoundedIcon />
+          <Button
+            variant="outlined"
+            color="primary"
+            size="small"
+            disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
+            || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered))}
+          >
+            Remove Assets
+          </Button>        
         </Tooltip>
       </IconButton>
       <Box mx={1} />

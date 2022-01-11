@@ -68,8 +68,13 @@ const TopDashboard = (props) => {
     spend: 0,
     profit: 0,
     profitValue: 0,
-    totalValueMT: 0
   });
+
+  const [totalValueMT, setTotalValueMT] = useState({
+    qty: 0,
+    unit: "MT"
+  });
+
 
   const [salesData, setSalesData] = useState({
     labels: [],
@@ -200,7 +205,7 @@ const TopDashboard = (props) => {
   useEffect(() => {
     axiosInstance().get("dashboard/total-weight-sold")
       .then(({ data }) => {
-        setSalesRevenue({ ...salesRevenue, totalValueMT: data?.data.qty })
+        setTotalValueMT({ qty: data?.data?.qty, unit: data?.data?.unit })
       })
       .catch((err) => {
 
@@ -510,13 +515,13 @@ const TopDashboard = (props) => {
                     <Grid item xs={12} className="pull-left">
                       {!loadingChart ? (
                         <Typography className={styles.price}>
-                          {`${Number(salesRevenue?.totalValueMT || 0).toFixed(2)}`}
+                          {`${Number(totalValueMT?.qty || 0).toFixed(2)}`}
                         </Typography>
                       ) : (
                         <Skeleton variant="text" width={100} height={40} />
                       )}
                       <Typography variant="h6" className={styles.title}>
-                        Total Offered Volume in MT
+                        {`Total Offered Volume in ${totalValueMT?.unit ?? "MT"}`}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -550,7 +555,7 @@ const TopDashboard = (props) => {
             <Box textAlign="center" mb={2}>
               <Typography variant="h5">Total offered value in {filterCurrency || currency} vs Budget</Typography>
             </Box>
-            {!loadingChart ?  tableDataRaw.length === 0 ? <Box height={400}>No Data</Box> : (
+            {!loadingChart ? tableDataRaw.length === 0 ? <Box height={400}>No Data</Box> : (
               <Box>
                 {!tableView ? (
                   <Chart

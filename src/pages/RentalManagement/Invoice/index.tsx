@@ -287,6 +287,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           onCellValueChanged={(row) => {
           }}
           currency={rentalManagementData?.currency?.toLowerCase()}
+          footerIgnoreFields={["tenure"]}
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
       }

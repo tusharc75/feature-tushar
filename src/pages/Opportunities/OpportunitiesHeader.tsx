@@ -1,6 +1,7 @@
 import React ,{ useState, useRef, useEffect } from "react";
 import SearchBox from "../../components/Helpers/SearchBox";
 import MobileFilterDialog from "../../components/MobileFilterDialog";
+import MobileSortDialog from "../../components/MobileSortDialog";
 import {
   AddOutlined,
 } from "@material-ui/icons";
@@ -132,6 +133,7 @@ function OpportunitiesHeader(props) {
 
   const handleClickClose = () => {
     setOpen(false);
+
   };
 
 
@@ -154,6 +156,8 @@ function OpportunitiesHeader(props) {
   const handleListItemClick = (event, index) => {
     setSelectedIndex(index);
   };
+
+  
 
 
   useEffect(() => {
@@ -196,8 +200,13 @@ function OpportunitiesHeader(props) {
     icon,
     heading,
     children,
-    showTransferEntityDialog
+    showTransferEntityDialog,
+    columns,
+    dispatch
   } = props;
+
+
+
 
 
   let toggleInner = options && (
@@ -238,81 +247,17 @@ function OpportunitiesHeader(props) {
       >
         Sort 
         </Button>
-        <Dialog
-        open={open}
-        TransitionComponent={Transition}
-        keepMounted
-        onClose={handleClickClose}
-        aria-describedby="alert-dialog-slide-description"
-        className="mobile-filter-root"
-      >
-        <div className={styles.mobile_filter_content}>
-        <DialogTitle className={styles.sort_title}>{"Sort By"}</DialogTitle>
-        <Divider/>
-        <DialogContent className={styles.inner_content_sort}>
-        <List component="nav" aria-label="main mailbox folders" >
-        <ListItem
-          button
-          selected={selectedIndex === 0 }
-          
-          onClick={(event) => handleListItemClick(event, 0)}
-        >
-          <ListItemIcon>
-              <FaUserTie/ >
-          </ListItemIcon>
-          <ListItemText primary="Owner/collaborater" />
-        </ListItem>
-        <ListItem
-          button
-          selected={selectedIndex === 1}
-          onClick={(event) => handleListItemClick(event, 1)}
-          
-        >
-          <ListItemIcon>
-             <MdAccountBalanceWallet size={18}/>
-          </ListItemIcon>
-          <ListItemText primary="Account" />
 
-          <ListItemIcon onClick={() => handleListIconClick(0)}>
-            {selectedIndex === 1 ? clicked ? <BsArrowUp/> : <RiArrowUpDownLine/> : null}
-          </ListItemIcon>
-        </ListItem>
+        <MobileSortDialog
+        isOpen={open}
+        handleClose={handleClickClose}
+        contentPart={toggleInner}
+        secHeading={["Sort Opportunities"]}
+        columns={columns}
+        dispatch={dispatch}
+        />
 
 
-        <ListItem
-          button
-          selected={selectedIndex === 2}
-          onClick={(event) => handleListItemClick(event, 2)}
-          
-        >
-          <ListItemIcon>
-             <FaCalendarDay />
-          </ListItemIcon>
-          <ListItemText primary="Date" />
-        </ListItem>
-
-        <ListItem
-          button
-          selected={selectedIndex === 3}
-          onClick={(event) => handleListItemClick(event, 3)}
-          
-        >
-          <ListItemIcon>
-             <RiTicketFill />
-          </ListItemIcon>
-          <ListItemText primary="Status" />
-        </ListItem>
-
-
-
-      </List>
-
-      
-   
-        </DialogContent>
-        </div>
-      </Dialog>
-       
 
         <Button
         id="demo-customized-button"
@@ -333,7 +278,9 @@ function OpportunitiesHeader(props) {
         isOpen={isOpenDialog}
         handleClose={handleClose}
         contentPart={toggleInner}
-        secHeading={["Select Opportunities"]}
+        secHeading={["Filter Opportunities"]}
+        columns={columns}
+        dispatch={dispatch}
         />
 
 
