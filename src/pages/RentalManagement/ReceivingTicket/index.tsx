@@ -16,7 +16,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
   gridLoadingTimeout, deliveryTicket, rentalManagement,
-  sidebarResource, productInventory as productInventoryHelperObject, INVENTORY_STATUS
+  sidebarResource, productInventory as productInventoryHelperObject, INVENTORY_STATUS, DELIVERY_TICKET_STATUS
 } from "../../../constants/helpers";
 import { groupBy } from "lodash";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -113,6 +113,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             if (obj.ticketType === "Receiving") {
               productAssets[index]["receivingTicket"] = obj?.ticketName
               productAssets[index]["receivingTicketId"] = obj?._id
+              productAssets[index]["receivingTicketStatus"] = obj?.status
             }
           }
         })
@@ -120,7 +121,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       })
       productAssets.forEach((d) => {
         d["isChecked"] = false;
-        d["hideSelection"] = d.status === INVENTORY_STATUS.indTransit;
+        d["hideSelection"] = [INVENTORY_STATUS.indTransit, INVENTORY_STATUS.lost].includes(d.status);
       })
       if (productAssets.filter((e) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(e.status)).length === productAssets.length) {
         setNextStep(true)
@@ -282,12 +283,21 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       >
         <Tooltip
           title="Create Receiving Ticket">
-          <AddBoxRoundedIcon />
+          <Button
+            variant="outlined"
+            color="primary"
+            size="small"
+            disabled={(selectedRecords.length === 0)
+              || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
+          >
+            Create Receiving Ticket
+          </Button>
         </Tooltip>
       </IconButton>
       <Box mx={1} />
       <IconButton
-        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)))}
+        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
+          || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered))}
         onClick={() => {
           setShowRemoveAssetFromReceivingTicketDialog(true)
         }}
@@ -296,7 +306,15 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       >
         <Tooltip
           title="Remove Assets From Receiving Ticket(s)">
-          <RemoveCircleRoundedIcon />
+          <Button
+            variant="outlined"
+            color="primary"
+            size="small"
+            disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
+            || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered))}
+          >
+            Remove Assets
+          </Button>        
         </Tooltip>
       </IconButton>
       <Box mx={1} />
@@ -357,11 +375,12 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             page={page}
             allowAction={false}
             loading={loading}
+            isClientSideGrid={true}
             renderedFrom={renderedFrom}
             rowClassRules={{
               "red-data-row":
                 function (params) {
-                  return ["Scrap", "Lost"].some(s => s === params.data.status);
+                  return [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some(s => s === params.data.status);
                 },
             }}
             refreshGrid={fetchRecords}

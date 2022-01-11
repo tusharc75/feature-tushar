@@ -11,7 +11,7 @@ import { gridLoadingTimeout, gridPageSizes } from "../../constants/helpers";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import routes from "../../components/Helpers/Routes";
 import { useHistory } from 'react-router-dom'
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 const DOARequest = () => {
@@ -165,7 +165,7 @@ const DOARequest = () => {
             </Grid>
           </Grid>
         </div>
-        {isMobile
+        {isMobile && !isTablet
           ? <CustomSwipableList
             allowSelection={false}
             allowSwipe={false}

@@ -31,7 +31,7 @@ import { prepareDataForGrid } from '../../constants/helpers';
 import { MdAccountCircle } from 'react-icons/md';
 import { AiFillCrown, MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { FaSuitcase } from 'react-icons/fa';
 
@@ -542,7 +542,7 @@ const ProductCategory = () => {
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
               <FaThemeisle size={20} style={{ paddingBottom: '3px' }} /> <span className="listingHeader">{routes.productCategory.title}</span>
             </Grid>
-            <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
+            <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ width: '100%', display: 'flex' }}>
                   <SearchBox
@@ -558,30 +558,30 @@ const ProductCategory = () => {
                 <Grid style={{ display: 'flex', gap: '5px' }}>
                   {productCategoryPermissions.isCreate && (
                     <Button
-                      className={isMobile ? 'mobile_button' : styles.add_submit_btn}
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
                         setProductCategoryId(null);
                         setOpen({ open: true, isClone: false });
                       }}
-                      variant={isMobile ? 'text' : 'contained'}
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
                       size="small"
                       color="primary"
-                      startIcon={isMobile ? null : <AddOutlined />}
+                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                     >
-                      {isMobile ? <MdAdd size={23} /> : 'Add'}
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
                   {productCategoryPermissions.isDelete && (
                     <Button
-                      variant={isMobile ? 'text' : 'contained'}
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="default"
                       size="small"
                       onClick={openActions}
                       disabled={selectedRecords.length ? false : true}
                       aria-controls="action-menu"
-                      className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                     >
-                      {isMobile ? '' : 'Actions'} <ExpandMore />
+                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
                     </Button>
                   )}
                   <Menu
@@ -597,6 +597,7 @@ const ProductCategory = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
+                      disabled={!(productCategoryPermissions?.isDelete && !selectedRecords?.some((record) => record.createdById !== user?.user?._id))}
                       onClick={() => {
                         closeActions();
                         {
@@ -615,7 +616,7 @@ const ProductCategory = () => {
         </div>
 
         {Object.keys(frameWorkComponent).length > 0 ? (
-          isMobile ? (
+          isMobile && !isTablet ? (
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}

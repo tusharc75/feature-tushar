@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.38.0](https://github.com/vebholic/oms_frontend/compare/v2.37.1...v2.38.0) (2022-01-11)
+
+
+### Features
+
+* - PO-913 - Back button is removed from steps if repair job is completed ([7e5773f](https://github.com/vebholic/oms_frontend/commit/7e5773fd5353ded4d4f825c98dda6b9465f100aa))
+* **Contact:** Give access to portal ([2a0a149](https://github.com/vebholic/oms_frontend/commit/2a0a1491def107e1851248183713811916010c86))
+* **Contact:** Poratal Access feature ([cc24d2c](https://github.com/vebholic/oms_frontend/commit/cc24d2cfad9218b1943e75e57fb44b1c0e427732))
+
+
+### Bug Fixes
+
+* 10 jan bugs ([995106c](https://github.com/vebholic/oms_frontend/commit/995106cdca16e5c0fa87f95544a3f7cfe9978b74))
+* 7 jan PO bugs ([4afc2d9](https://github.com/vebholic/oms_frontend/commit/4afc2d9cf332b78dd247c023bb4495645394aacd))
+* **address:** address fix in contact ([1ac94fa](https://github.com/vebholic/oms_frontend/commit/1ac94fa1186ce9cfadcad4f4a304c722e754d296))
+* assign entity in user details page loggin user enity wise option issue ([5904a6e](https://github.com/vebholic/oms_frontend/commit/5904a6e940df7904acc11bbbdc310a9d9cfbf095))
+* bug fix ([ae33862](https://github.com/vebholic/oms_frontend/commit/ae33862f089cd01e64a0055ae3a3ba2f5c1dc2a7))
+* **dashboard:** bug fix ([e101ae1](https://github.com/vebholic/oms_frontend/commit/e101ae15a6db2ec576f6ef7675071eea5fe374d7))
+* po-919 924 ([b2112e9](https://github.com/vebholic/oms_frontend/commit/b2112e94f57eaf5a634ec8281ff1f2fd61a53056))
+* **ProductCategory:** Delete logic handled in Action floating button ([1233415](https://github.com/vebholic/oms_frontend/commit/123341511ba9b0436b4a91b20cdb0fc2463a63f3))
+* **ProductCategory:** fixed main point issue ([3cb60a7](https://github.com/vebholic/oms_frontend/commit/3cb60a75a40b6ac2d7c1c8c414a8e9bd6395e0bf))
+* top dashboard totalvalue ([a1376ea](https://github.com/vebholic/oms_frontend/commit/a1376eaf4b2d9f1111e5ea94326c93c4ada42ec0))
+
 ### [2.37.1](https://github.com/vebholic/oms_frontend/compare/v2.37.0...v2.37.1) (2022-01-10)
 
 ## [2.37.0](https://github.com/vebholic/oms_frontend/compare/v2.36.0...v2.37.0) (2022-01-09)
