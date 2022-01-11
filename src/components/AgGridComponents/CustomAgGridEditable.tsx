@@ -154,6 +154,7 @@ export default function CustomAgGridEditable({
   customGridOptions = null,
   selectedRecords = [],
   isFooter = false,
+  footerIgnoreFields = [],
   saveColumnOptions = false,
   showOnlyShowFilteredRecordSwitch = false,
   priceTemplateField = [],
@@ -256,7 +257,7 @@ export default function CustomAgGridEditable({
     dataRows.forEach((data) => {
       let obj = {}
       Object.entries(data).forEach(([k, v]) => {
-        if ((fromPurchaseOrderGrid || isFooter) && typeof v === "number") {
+        if ((fromPurchaseOrderGrid || isFooter) && !footerIgnoreFields.includes(k)  && typeof v === "number") {
           obj[k] = v
         }
         else if (typeof v === "number" && k.includes(currency && currency.toLowerCase())) {
