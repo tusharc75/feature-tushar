@@ -19,6 +19,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../CustomBreadCrumbs';
 import CloseIcon from '@material-ui/icons/Close';
+import { Skeleton } from "@material-ui/lab";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -142,9 +143,11 @@ function MyOwnCart() {
 
           setTotalCount(data.length);
         }
+
         if (data && data.length >= 1) {
           setCheckoutLabel('Place Order');
         }
+
         setCartProductsLoading(false);
         setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false, recordToRemove: null })
       });
@@ -194,136 +197,173 @@ function MyOwnCart() {
 
             <hr className="mt-3 mb-2" style={{ border: "0.5px solid #e9eaee" }} />
 
-            {cartProductsLoading ? (
-              <Grid container spacing={3}>
-                <Grid item xs={12} className={styles.loadingContainer}>
-                  <Typography> ...Loading</Typography>
+            {
+              cartProductsLoading ? (
+                <Grid container spacing={3}>
+                  <Grid item xs={12}>
+                    {
+                      [1, 2, 3, 4, 5].map((item) => {
+                        return (
+                          <div key={item} className={styles.checkout_items}>
+                            <div className={styles.card}>
+                              <div className={`d-flex justify-content-center`}>
+                                <Skeleton width={200} height={200} />
+                              </div>
+
+                              <div className={styles.card_body}>
+                                <div className={`${styles.card_body_layout} my-3`}>
+                                  <div className={styles.card_product_name_and_price}>
+
+                                    <div className={`${styles.card_seller} w-100 d-flex justify-content-space-between`}>
+                                      <div className="d-flex gap-3 align-items-center">
+                                        <Skeleton width={200} height={35} />
+                                        <Skeleton width={50} height={35} />
+                                      </div>
+
+                                      <Skeleton width={35} height={35} />
+                                    </div>
+                                  </div>
+
+                                  <div className={styles.card_price}>
+                                    <Skeleton width={100} height={35} />
+                                  </div>
+
+                                  <div className={styles.card_vendor}>
+                                    <Skeleton width={60} height={35} />
+                                  </div>
+                                </div>
+                              </div>
+
+                            </div>
+                          </div>
+                        )
+                      })
+                    }
+                  </Grid>
                 </Grid>
-              </Grid>
-            ) : cartProducts.length ? (
-              cartProducts.map((item) => {
-                return (
-                  <div key={item.id} className={styles.checkout_items}>
-                    <div className={styles.card}>
-                      <div className={`${styles.products_image_layout} d-flex justify-content-center`}>
+              ) : cartProducts.length ? (
+                cartProducts.map((item) => {
+                  return (
+                    <div key={item.id} className={styles.checkout_items}>
+                      <div className={styles.card}>
+                        <div className={`${styles.products_image_layout} d-flex justify-content-center`}>
 
-                        {item?.sliderImage && item?.sliderImage.length > 0 ? (
-                          <Carousel
-                            strictIndexing
-                            animation="slide"
-                            autoPlay={false}
-                            navButtonsAlwaysVisible
-                            indicators={item?.sliderImage.length > 1}
-                            // indicators={false}
-                            cycleNavigation={false}
-                            timeout={150}
-                            navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
-                              style: {
-                                opacity: 0.4,
-                                padding: 5,
-                                borderRadius: "50%"
-                              }
-                            }}
-                          >
-                            {item?.sliderImage.map((image: any, i) => (
-                              <div key={i} className={classes.imageContainer}>
-                                <img className={classes.img} src={image} />
-                              </div>
-                            ))}
-                          </Carousel>
-                        ) : (
-                          <BsImage className={styles.no_image} />
-                        )}
-
-                      </div>
-                      <div className={styles.card_body}>
-                        <div className={`${styles.card_body_layout} my-3`}>
-                          <div className={styles.card_product_name_and_price}>
-                            <div className={`${styles.card_seller} w-100 d-flex justify-content-space-between`}>
-                              <div className="d-flex gap-3 align-items-center">
-                                <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}/${item?.orderType}`}>{item.productName}</Link>
-                                <Chip label={ORDER_TYPES[item?.orderType]?.key} color="primary" />
-                              </div>
-
-                              <IconButton aria-label="delete" onClick={() => {
-                                setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, show: true, recordToRemove: item } })
-                              }}>
-                                <CloseIcon fontSize="small" />
-                              </IconButton>
-
-                            </div>
-                            <div className={styles.card_price}>
-                              {item?.currencyWithFormat}
-                            </div>
-                          </div>
-
-                          <div className={styles.card_vendor}>
-                            <span>Sold by:</span> {user?.user?.brandName}
-                          </div>
-                        </div>
-
-                        <Grid container>
-                          {
-                            item.startDate && <Grid item xs={6}>
-                              <b>Start Date:</b> {item.startDate}
-                            </Grid>
-                          }
-
-                          {
-                            item.endDate && <Grid item xs={6}>
-                              <b>End Date:</b> {item.endDate}
-                            </Grid>
-                          }
-
-                          {
-                            item.pricingMethod && <Grid item xs={6}>
-                              <b>Pricing Method:</b> {item.pricingMethod}
-                            </Grid>
-                          }
-
-                          <Grid item xs={6}>
-                            <b>Unit:</b> {item.unit}
-                          </Grid>
-                        </Grid>
-
-                        <Grid container className="my-3">
-                          <Grid item xs={6}>
-                            <PlusMinusTextboxComponent
-                              inputTextLabel="Quantity"
-                              value={item.qty}
-                              isRequired={true}
-                              onChange={(value) => {
-                                let items = [...cartProducts];
-                                const indexOfProduct = items.findIndex(s => s._id === item.cartId);
-
-                                axiosInstance().put(`/ecommerce/cart`, { _id: item.cartId, qty: parseInt(value) }).then(() => {
-                                  items[indexOfProduct].qty = value;
-                                  setCartProducts([...items]);
-                                }).catch((error) => {
-                                  toastConfig.setToastConfig(error);
-                                  dispatch({ type: SET_CART, payload: [...items] });
-                                })
-
+                          {item?.sliderImage && item?.sliderImage.length > 0 ? (
+                            <Carousel
+                              strictIndexing
+                              animation="slide"
+                              autoPlay={false}
+                              navButtonsAlwaysVisible
+                              indicators={item?.sliderImage.length > 1}
+                              cycleNavigation={false}
+                              timeout={150}
+                              navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
+                                style: {
+                                  opacity: 0.4,
+                                  padding: 5,
+                                  borderRadius: "50%"
+                                }
                               }}
-                            />
-                          </Grid>
-                        </Grid>
+                            >
+                              {item?.sliderImage.map((image: any, i) => (
+                                <div key={i} className={classes.imageContainer}>
+                                  <img className={classes.img} src={image} />
+                                </div>
+                              ))}
+                            </Carousel>
+                          ) : (
+                            <BsImage className={styles.no_image} />
+                          )}
 
+                        </div>
+                        <div className={styles.card_body}>
+                          <div className={`${styles.card_body_layout} my-3`}>
+                            <div className={styles.card_product_name_and_price}>
+                              <div className={`${styles.card_seller} w-100 d-flex justify-content-space-between`}>
+                                <div className="d-flex gap-3 align-items-center">
+                                  <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}/${item?.orderType}`}>{item.productName}</Link>
+                                  <Chip label={ORDER_TYPES[item?.orderType]?.key} color="primary" />
+                                </div>
+
+                                <IconButton aria-label="delete" onClick={() => {
+                                  setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, show: true, recordToRemove: item } })
+                                }}>
+                                  <CloseIcon fontSize="small" />
+                                </IconButton>
+
+                              </div>
+                              <div className={styles.card_price}>
+                                {item?.currencyWithFormat}
+                              </div>
+                            </div>
+
+                            <div className={styles.card_vendor}>
+                              <span>Sold by:</span> {user?.user?.brandName}
+                            </div>
+                          </div>
+
+                          <Grid container>
+                            {
+                              item.startDate && <Grid item xs={6}>
+                                <b>Start Date:</b> {item.startDate}
+                              </Grid>
+                            }
+
+                            {
+                              item.endDate && <Grid item xs={6}>
+                                <b>End Date:</b> {item.endDate}
+                              </Grid>
+                            }
+
+                            {
+                              item.pricingMethod && <Grid item xs={6}>
+                                <b>Pricing Method:</b> {item.pricingMethod}
+                              </Grid>
+                            }
+
+                            <Grid item xs={6}>
+                              <b>Unit:</b> {item.unit}
+                            </Grid>
+                          </Grid>
+
+                          <Grid container className="my-3">
+                            <Grid item xs={6}>
+                              <PlusMinusTextboxComponent
+                                inputTextLabel="Quantity"
+                                value={item.qty}
+                                isRequired={true}
+                                onChange={(value) => {
+                                  let items = [...cartProducts];
+                                  const indexOfProduct = items.findIndex(s => s._id === item.cartId);
+
+                                  axiosInstance().put(`/ecommerce/cart`, { _id: item.cartId, qty: parseInt(value) }).then(() => {
+                                    items[indexOfProduct].qty = value;
+                                    setCartProducts([...items]);
+                                  }).catch((error) => {
+                                    toastConfig.setToastConfig(error);
+                                    dispatch({ type: SET_CART, payload: [...items] });
+                                  })
+
+                                }}
+                              />
+                            </Grid>
+                          </Grid>
+
+                        </div>
+                      </div>
+                      <div className={styles.middle_line}>
+                        <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
                       </div>
                     </div>
-                    <div className={styles.middle_line}>
-                      <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <Grid container spacing={3}>
-                <Grid item xs={12} className={styles.loadingContainer}>
-                  <Typography> No items added to cart</Typography>
+                  );
+                })
+              ) : (
+                <Grid container spacing={3}>
+                  <Grid item xs={12} className={styles.loadingContainer}>
+                    <Typography> No items added to cart</Typography>
+                  </Grid>
                 </Grid>
-              </Grid>
-            )}
+              )}
 
 
 
@@ -333,18 +373,19 @@ function MyOwnCart() {
 
             <div className="px-4 py-2">
 
-              <h2 className="mb-3">Order Summary</h2>
+              <h2>Order Summary</h2>
 
               <div className="d-flex justify-content-space-between flex-column" style={{ height: 600 }}>
 
                 <div>
+
+                  <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
 
                   <p className="d-flex align-items-center gap-2">
                     <h4>Subtotal <span>({totalCount} items) </span></h4>
                     <h4>{totalPrice ?? "-"}</h4>
                   </p>
 
-                  <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
                 </div>
 
                 <div>

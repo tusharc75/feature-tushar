@@ -29,6 +29,7 @@ import PlusMinusTextboxComponent from "../../components/PlusMinusTextboxComponen
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
+import { Skeleton } from "@material-ui/lab";
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -633,10 +634,64 @@ export default function ProductDetails() {
 
             </Grid>
 
+          </Grid> : <Grid container className="py-4 px-2" spacing={2}>
 
-          </Grid> : <div style={{ height: 300 }} className="d-flex align-items-center justify-content-center p-5">
-            Loading.....
-          </div>
+            <Grid item xs={4} className="d-flex flex-column align-items-center">
+              <Box display="flex" justifyContent="center" alignItems="center">
+                <Skeleton width={200} height={200} />
+              </Box>
+
+              <Skeleton width={120} height={50} />
+            </Grid>
+
+            <Grid item xs={8}>
+
+              <Skeleton width={70} height={50} />
+
+              <Skeleton width={100} height={50} />
+
+              <Skeleton width={120} height={50} />
+
+              <Skeleton width={150} height={50} />
+
+              <Grid container className="mt-4">
+                <Grid item xs={12} md={6} className="d-flex flex-column gap-3">
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Skeleton width="100%" height={70} />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Skeleton width="100%" height={70} />
+                    </Grid>
+                  </Grid>
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Skeleton width="100%" height={70} />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Skeleton width="100%" height={70} />
+                    </Grid>
+                  </Grid>
+
+                  <Box className="my-3 d-flex gap-4 align-items-baseline">
+                    {
+                      <div className="d-flex align-items-center gap-2">
+                        <Skeleton width={100} height={50} />
+                        <Skeleton width={100} height={50} />
+                      </div>
+                    }
+                  </Box>
+
+                  <Skeleton width={150} height={70} />
+
+                </Grid>
+              </Grid>
+
+            </Grid>
+
+          </Grid>
         }
 
       </Box>
