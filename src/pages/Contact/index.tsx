@@ -17,7 +17,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import { isObjectEmpty, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, userType } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { Chip } from '@material-ui/core';
@@ -887,12 +887,15 @@ export default function Contact(props) {
                           Delete
                         </MenuItem>
                       )}
-                      {/* <MenuItem
-                        disabled={selectedRecords.length === 0}
+                      {
+                        user.user?.userType === userType.brandAdmin &&
+                        <MenuItem
+                        disabled={selectedRecords.length === 0 || selectedRecords.some((record) => record?.isUserExist)}
                         onClick={handleAccessToPortal}
                       >
                         Give Access to Portal
-                      </MenuItem> */}
+                      </MenuItem>
+                      }
                       {contactPermissions.isUpdate && (
                         <MenuItem
                           disabled={selectedRecords.length === 0}
