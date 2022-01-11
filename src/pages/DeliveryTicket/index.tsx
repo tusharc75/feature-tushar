@@ -20,7 +20,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import ManageDeliveryTicket from './ManageDeliveryTicket';
 import { sidebarResource, prepareDataForGrid } from '../../constants/helpers';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
@@ -305,17 +305,22 @@ const DeliveryTicket = () => {
         {/* Tables Begins Here */}
         <CustomContainer>
           <div className="header-panel">
-            <Grid container className={styles.filter_side_container}>
-              <Grid item xs={6} className="d-flex align-items-center gap-1">
+            <Grid container className={isMobile ? styles.mobile_filter_side_container_delivery_ticket : styles.filter_side_container_delivery_ticket}>
+              <Grid item xs={isMobile && !isTablet ? 12 : 6}  className="d-flex align-items-center gap-1">
+                <Grid>
                 <GiAbstract055 className="headerLogo" />
                 <span className="listingHeader">{routes.deliveryTicket.title} </span>
+                </Grid>
+
+
+
               </Grid>
-              <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side}>
-                <Box className={styles.filter_side_header} component="div">
-                  <Grid style={{ display: 'flex', flex: 1 }}>
+              <Grid item xs={isMobile && !isTablet ? 12 : 6} container className={isMobile ? styles.filter_side : styles.filter_side_deck}>
+                <Box className={isMobile && !isTablet ? styles.mobile_filter_side_header :  styles.filter_side_header} component="div">
+                  <Grid style={{ display: 'flex', flex: 1, gap:"5px" }} className={isMobile && !isTablet ? styles.content_box : ""}>
                     <SearchBox
                       onSearch={handleSearch}
-                      searchbox={styles.search_box_input}
+                      searchbox={isMobile ? styles.search_box_input : ""}
                       width="242px"
                       size="small"
                       value={search}
@@ -361,7 +366,7 @@ const DeliveryTicket = () => {
             </Grid>
           </div>
 
-          {isMobile ? (
+          {isMobile && !isTablet ? (
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}

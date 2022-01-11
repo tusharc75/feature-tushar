@@ -144,9 +144,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
             <>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <h2 className="form-label-style" style={{ borderBottom: 'none' }}>
-                    * Required Fields
-                  </h2>
+
                   <Box padding={1}>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                       <Box mb={2}>
@@ -197,6 +195,46 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                             />
                           </Box>
                           <Box pt={1}>
+                          <Button
+                                  variant="contained"
+                                  size="small"
+                                  disableElevation
+                                  onClick={() => setOpenAddSub(true)}
+                                  startIcon={<TableChartIcon />}
+                                >
+                                  Add a child Task
+                                </Button>
+                                </Box>
+                                <Box mt={2}>
+                                <SubTask
+                                  openAddSub={openAddSub}
+                                  setOpenAddSub={setOpenAddSub}
+                                  data={initialValues}
+                                  fetchTaskDetail={fetchTaskDetail}
+                                  setId={setId}
+                                />
+                              </Box>
+                              {
+                        id &&
+                        (<Box mt={2}>
+                          <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                        </Box>)
+                      }
+                      {id && (
+                        <Box mt={2}>
+                          <Divider />
+                          <Box mt={1}>
+                            <Comment referenceId={id} />
+                          </Box>
+                        </Box>
+                      )}
+                         
+                        </Grid>
+                        <Grid item xs={12} md={5} sm={6}>
+                          {id && (
+                            <Fragment>
+                              <Box mt={1}>
+                              <Box >
                             <FormControl variant="outlined" fullWidth>
                               <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
                               <Field
@@ -217,7 +255,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                           </Box>
                           <Box pt={1}>
                             <Grid container spacing={1}>
-                              <Grid item xs={12} sm={6} md={6}>
+                              <Grid item xs={12} sm={12} md={12}>
                                 <UserDropdown
                                   name="assignee"
                                   label="Assignee"
@@ -232,7 +270,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                   value={values['assignee']}
                                 />
                               </Grid>
-                              <Grid item xs={12} sm={6} md={6}>
+                              <Grid item xs={12} sm={12} md={12}>
                                 <UserDropdown
                                   name="reporter"
                                   label="Reporter"
@@ -251,7 +289,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                           </Box>
                           <Box pt={1}>
                             <Grid container spacing={1}>
-                              <Grid item xs={12} sm={6} md={6}>
+                              <Grid item xs={12} sm={12} md={12}>
                                 <Field
                                   component={KeyboardDatePicker}
                                   label="Start Date"
@@ -270,7 +308,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                   maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                                 />
                               </Grid>
-                              <Grid item xs={12} sm={6} md={6}>
+                              <Grid item xs={12} sm={12} md={12}>
                                 <Field
                                   component={KeyboardDatePicker}
                                   label="Due Date"
@@ -284,12 +322,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                   maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                                   format={dateFormat}
                                 />
-                              </Grid>
-                            </Grid>
-                          </Box>
-                          {id && (
-                            <Fragment>
-                              {initialValues.createdBy && initialValues.createdBy.date && (
+                                 {initialValues.createdBy && initialValues.createdBy.date && (
                                 <Box mt={1} color="text.secondary">
                                   <Typography variant="body2">Created {moment(initialValues.createdBy.date).format(dateFormat)}</Typography>
                                 </Box>
@@ -299,50 +332,18 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                   <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format(dateFormat)}</Typography>
                                 </Box>
                               )}
-                            </Fragment>
-                          )}
-                        </Grid>
-                        <Grid item xs={12} md={5} sm={6}>
-                          {id && (
-                            <Fragment>
-                              <Box mt={1}>
-                                <Button
-                                  variant="contained"
-                                  size="small"
-                                  disableElevation
-                                  onClick={() => setOpenAddSub(true)}
-                                  startIcon={<TableChartIcon />}
-                                >
-                                  Add a child Task
-                                </Button>
+                              </Grid>
+                              
+                            </Grid>
+                          </Box>
+                               
                               </Box>
-                              <Box mt={2}>
-                                <SubTask
-                                  openAddSub={openAddSub}
-                                  setOpenAddSub={setOpenAddSub}
-                                  data={initialValues}
-                                  fetchTaskDetail={fetchTaskDetail}
-                                  setId={setId}
-                                />
-                              </Box>
+                             
                             </Fragment>
                           )}
                         </Grid>
                       </Grid>
-                      {
-                        id &&
-                        (<Box mt={2}>
-                          <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                        </Box>)
-                      }
-                      {id && (
-                        <Box mt={2}>
-                          <Divider />
-                          <Box mt={1}>
-                            <Comment referenceId={id} />
-                          </Box>
-                        </Box>
-                      )}
+                     
                     </MuiPickersUtilsProvider>
                   </Box>
                 </Form>

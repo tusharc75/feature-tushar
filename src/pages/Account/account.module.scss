@@ -59,7 +59,7 @@
 
 .account_header {
   display: flex;
-  justify-content: flex-end;
+  // justify-content: flex-end;
   gap: 0.25rem;
   -webkit-gap: 0.25rem;
 }
@@ -183,13 +183,34 @@
     //margin-top: 15px;
   }
 }
+@media only screen and (max-width: 960px) {
+  .mobile_filter_side_header{
+    width: 100%
+}
+  .search_box_input{
+  flex:none !important;
+  width:300px !important;
+  }
+
+}
+
+
+@media only screen and (max-width: 830px) {
+ 
+
+}
+
+
 @media only screen and (max-width: 768px) {
   .account_header {
-    display: block;
+    display: flex !important;
     grid-gap: 8px;
-    flex-direction: column;
     margin-top: 0;
   }
+  .search_box_input {
+    width: 100% !important;
+  }
+  
 
   .account_header_add_btn_action_btn_group {
     margin-top: 2px;
@@ -313,6 +334,15 @@
 @media only screen and (max-width: 599px) {
   .account_activities_div {
     width: 100%;
+  }
+  .account_header {
+    display: block ;
+    grid-gap: 8px;
+    margin-top: 0;
+  }
+  .account_header-mobile{
+    flex: 1;
+    justify-content: space-between !important;
   }
 
 }

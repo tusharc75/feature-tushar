@@ -26,12 +26,15 @@ import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { prepareDataForGrid } from "../../constants/helpers"
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
-import { MdAccountCircle } from "react-icons/md";
+import { MdAccountCircle, MdAdd } from "react-icons/md";
 import { AiFillCrown } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 import { FaSuitcase } from 'react-icons/fa';
 import useColumns from '../../constants/useColumns';
+import { classNames } from 'react-easy-crop/helpers';
+
+
 
 let opportunityTimeout;
 const OpportunityTypes = [
@@ -536,6 +539,7 @@ const Opportunities = () => {
             icon={<GiHiveMind className="headerLogo" />}
             heading={routes.opportunity.title}
             showTransferEntityDialog={handleTransferEntityDialog}
+            columns={columns}
           >
             {accountDetails.accountId && (
               <Chip
@@ -553,7 +557,10 @@ const Opportunities = () => {
 
         {
           Object.keys(frameWorkComponent).length > 0 ?
-            isMobile ? <CustomSwipableList
+            isMobile ? 
+              
+            
+              <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions[opportunityResource]}
@@ -588,12 +595,16 @@ const Opportunities = () => {
               ]}
               chips={[
                 {
+                  icon: <MdAdd/>,
                   label: "Probability :",
-                  field: "probability",
+                  field: "probability"
+                  
+                 
+                  
                 },
                 {
                   label:"Market:",
-                  field:"marketSegment"
+                  field:"marketSegment",
                 },
                 {
                   label:"Sub-Market:",
@@ -606,7 +617,8 @@ const Opportunities = () => {
               showClone={true}
               onClone={(data) => {  setShowCreateOpportunityDialog({ open: true, isClone: true, idToClone: data._id })}}
               renderedFrom={opportunityResource}
-            /> :
+            />
+              :
               <CustomAgGrid
                 columns={columns}
                 dataRows={dataRows}

@@ -349,7 +349,7 @@ const Email = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} sm={6} md={6} className="d-flex align-items-center gap-1">
+            <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1">
               <HiOutlineMail className="headerLogo" /> <span className="listingHeader">{routes.activityEmail.title}</span>
               {/* <ToggleButtonGroup size="small" className="ml-8" value={currentTab} exclusive onChange={handleTab}>
                 {Object.keys(tabs).map((k, index) => (
@@ -359,7 +359,7 @@ const Email = () => {
                 ))}
               </ToggleButtonGroup> */}
             </Grid>
-            <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side}>
+            <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
               <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
                 <Grid style={{ width: '100%', display: 'flex' }}>
                   <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'large' }} activityName="email" />
@@ -367,29 +367,29 @@ const Email = () => {
                 <Grid style={{ display: 'flex', gap: '5px' }}>
                   {
                     <Button
-                      variant={isMobile ? 'text' : 'contained'}
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
                       size="small"
                       onClick={() => {
                         setOpen(true);
                       }}
-                      className={isMobile ? 'mobile_button' : styles.add_submit_btn}
-                      startIcon={isMobile ? null : <AddOutlined />}
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                     >
-                      {isMobile ? <MdAdd size={23} /> : 'Add'}
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   }
                   {/* </Box> */}
                   <Button
-                    variant={isMobile ? 'text' : 'contained'}
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="default"
                     size="small"
                     onClick={openActions}
                     aria-controls="action-menu"
                     disabled={selectedRecords.length > 0 ? false : true}
-                    className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                   >
-                    {isMobile ? '' : 'Actions'} <ExpandMore />
+                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -417,7 +417,7 @@ const Email = () => {
             </Grid>
           </Grid>
         </div>
-        {isMobile ? (
+        {isMobile && !isTablet ? (
           <CustomSwipableList
             allowSelection={true}
             allowSwipe={true}
@@ -427,7 +427,7 @@ const Email = () => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={(data) => {}}
+            onEdit={false}
             extraParamsToCheckDelete={true}
             onDelete={(data) => {
               showConfirmBox(data);
@@ -437,9 +437,9 @@ const Email = () => {
             loading={loading}
             onCreate={false}
             showClone={false}
-            onClone={() => {}}
+            onClone={false}
             renderedFrom={'emailPage'}
-            chips={undefined}
+            chips={false}
           />
         ) : (
           <CustomAgGrid

@@ -275,7 +275,14 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       >
         <Tooltip
           title="Create Loading Ticket">
-          <AddBoxRoundedIcon />
+          <Button
+            variant="outlined"
+            color="primary"
+            size="small"
+            disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
+          >
+            Create Loading Ticket
+          </Button>
         </Tooltip>
       </IconButton>
       <Box mx={1} />
@@ -289,7 +296,14 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       >
         <Tooltip
           title="Remove Assets From Loading Ticket(s)">
-          <RemoveCircleRoundedIcon />
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
+            >
+              Remove Assets
+            </Button>
         </Tooltip>
       </IconButton>
       <Box mx={1} />

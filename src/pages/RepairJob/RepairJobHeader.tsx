@@ -6,8 +6,8 @@ import { ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
-import { isMobile } from 'react-device-detect';
-import { MdAdd } from "react-icons/all";
+import { isMobile, isTablet } from 'react-device-detect';
+import { MdAdd , MdSort, MdFilterList } from "react-icons/md";
 
 function RepairJobHeader(props) {
   const {
@@ -49,10 +49,53 @@ function RepairJobHeader(props) {
 
   return (
     <Grid className={styles.filter_side_container} container>
-      <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+      <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet">
+      <Grid >
         {icon} <span className="listingHeader">{heading}</span>
+        </Grid>
+        
+
+        {isMobile && (
+                  <>
+                  <Grid style={{display:"inline-flex"}}>
+                    <Button
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      color="secondary"
+                      variant="text"
+                      disableElevation
+                      startIcon={<MdSort />}
+                      className={'sort-filter-tablet'}
+                      style={isTablet ? { marginLeft: '50px' } : {}}
+                    >
+                      Sort
+                    </Button>
+
+                    <Button
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      variant="text"
+                      color="secondary"
+                      disableElevation
+                      className={'sort-filter-tablet'}
+                      startIcon={<MdFilterList />}
+                    >
+                      Filter
+                    </Button>
+                    </Grid>
+                  </>
+                )}
+
+
+
+
+
         {options && (
-          <ToggleButtonGroup size="small" className="ml-2" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
+          <ToggleButtonGroup size="small" className="ml-2 align-items-center gap-1 layout-for-mobile " value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
             {options.map((k, index) => {
               return (
                 <ToggleButton value={k.key} key={index}>
@@ -64,7 +107,7 @@ function RepairJobHeader(props) {
         )}
         {children}
       </Grid>
-      <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
+      <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
 
           <Grid style={{ display: "flex", flex: 1 }}>
@@ -82,15 +125,15 @@ function RepairJobHeader(props) {
           <Grid style={{ display: "flex", gap: "5px" }}>
             {RepairJobPermissions?.isCreate && RepairJobPermissions?.isUpdate && (
               <Button
-                variant={isMobile ? "text" : "contained"}
+                variant={isMobile && !isTablet ? "text" : "contained"}
                 color="primary"
                 size="small"
                 // className={styles.add_submit_btn}
                 onClick={onCreate}
-                className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                startIcon={isMobile ? null : <AddOutlined />}
+                className={isMobile  && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                startIcon={isMobile  && !isTablet ? null : <AddOutlined />}
               >
-                {isMobile ? <MdAdd size={23} /> : "Add"}
+                {isMobile  && !isTablet ? <MdAdd size={23} /> : "Add"}
               </Button>
             )}
             {/* {RepairJobPermissions?.isDelete && (
