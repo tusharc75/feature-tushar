@@ -168,8 +168,10 @@ export const GetReferenceName = async (referenceType, referenceId) => {
     return data;
 };
 
-export const GetNotes = async (filter) => {
-    const { data } = await api().get(`/activity/notes?filter=${filter}`);
+export const GetNotes = async (filter, params = null) => {
+    let apiUrl = `/activity/notes?filter=${filter}`
+    if (params) apiUrl = `${apiUrl}${params}`
+    const { data } = await api().get(apiUrl);
     return data;
 };
 

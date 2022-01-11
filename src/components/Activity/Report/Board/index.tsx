@@ -13,6 +13,7 @@ import { GetBoard } from '../../../../axios/activity';
 
 import { BoardList } from './BoardList';
 import axiosInstance from '../../../../axios/axiosInstance';
+import { getApi, getData, resourceOptions } from '../../../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   block: {
@@ -25,8 +26,8 @@ const useStyles = makeStyles((theme) => ({
     height: 'calc(100vh - 32vh)',
     overflow: 'auto'
   },
-  ".MuiGrid-spacing-xs-1":{
-      width:"calc(100vw + 14px)"
+  ".MuiGrid-spacing-xs-1": {
+    width: "calc(100vw + 14px)"
   }
 }));
 
@@ -104,92 +105,15 @@ const Board = ({ type, filter }) => {
   const updateStatus = (id: string, updatedData: any) => {
     axiosInstance()
       .put(`${type}/${id}`, { status: updatedData.status })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((err) => {
         fetchBoard();
       });
   };
 
-  const resourceOptions = [
-    'Customer Account',
-    'Customer Contact',
-    'Supplier Account',
-    'Supplier Contact',
-    'Lead',
-    'Opportunity',
-    'Quote',
-    'Rental Management',
-    'Loading Ticket',
-    'Project Sales'
-  ];
 
-  const getApi = (resource: string) => {
-    switch (kebabCase(resource)) {
-      case 'loading-ticket':
-        return 'delivery-ticket';
-      case 'quote':
-        return 'quote-builder';
-      default:
-        return kebabCase(resource);
-    }
-  };
 
-  const getData = (resource: string, data: any) => {
-    switch (kebabCase(resource)) {
-      case 'lead':
-        return {
-          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-          id: data._id
-        };
-      case 'opportunity':
-        return {
-          name: `${data.opportunityName}`,
-          id: data._id
-        };
-      case 'customer-account':
-        return {
-          name: `${data.accountName}`,
-          id: data._id
-        };
-      case 'supplier-account':
-        return {
-          name: `${data.accountName}`,
-          id: data._id
-        };
-      case 'customer-contact':
-        return {
-          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-          id: data._id
-        };
-      case 'supplier-contact':
-        return {
-          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-          id: data._id
-        };
-      case 'loading-ticket':
-        return {
-          name: `${data.ticketName}`,
-          id: data._id
-        };
-      case 'quote':
-        return {
-          name: `${data.quoteName}`,
-          id: data._id
-        };
-      case 'rental-management':
-        return {
-          name: `${data.rentalJobName}`,
-          id: data._id
-        };
-      case 'project-sales':
-        return {
-          name: `${data.projectName}`,
-          id: data._id
-        };
-      default:
-        break;
-    }
-  };
+
 
   return (
     <>
@@ -197,7 +121,7 @@ const Board = ({ type, filter }) => {
         <Autocomplete
           options={resourceOptions}
           getOptionLabel={(option) => option}
-          style={{ width: '100%' }}
+          style={{ width: '50%' }}
           value={resource}
           onChange={(event, newValue) => {
             setResource(newValue);
@@ -218,7 +142,7 @@ const Board = ({ type, filter }) => {
             options={resourceData}
             getOptionLabel={(option: any) => option.name}
             getOptionSelected={(option: any, value: any) => option.name === value.name}
-            style={{ width: 250 }}
+            style={{ width: '50%' }}
             value={selectedResourceData}
             onChange={(event, newValue) => {
               setSelectedResourceData(newValue);

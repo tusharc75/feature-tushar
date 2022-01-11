@@ -229,7 +229,7 @@ const RoleEngine = (props) => {
   };
 
   return (
-    <TableContainer style={{ height: 440 }}>
+    <TableContainer style={{ height: 350 }}>
       <Table
         stickyHeader
         aria-label="roles"

@@ -15,7 +15,7 @@ import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
 import { useData } from "../../StateProvider/Provider";
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import {MdAdd} from "react-icons/all";
 
 function QuoteHeader(props) {
@@ -61,7 +61,7 @@ function QuoteHeader(props) {
   } = props;
   return (
     <Grid className={styles.filter_side_container} container>
-      <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+      <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
         {icon} <span className="listingHeader">{heading}</span>
         {options && (
           <ToggleButtonGroup
@@ -82,7 +82,7 @@ function QuoteHeader(props) {
         )}
         {children}
       </Grid>
-      <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
+      <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
             <Grid style={{display: "flex", flex:1}}>
             <SearchBox
@@ -91,8 +91,8 @@ function QuoteHeader(props) {
               value={searchVal}
               size="small"
               placeholder="Search Quotes"
-              width={isMobile ? "200px" : "242px"}
-              style={isMobile ? {flex:1} : {}}
+              width={isMobile && !isTablet ? "200px" : "242px"}
+              style={isMobile && !isTablet ? {flex:1} : {}}
             />
             </Grid>
 
@@ -101,28 +101,28 @@ function QuoteHeader(props) {
               <Grid style={{display: "flex" , gap:"5px"}}>
               {QuotePermissions.isCreate && (
                 <Button
-                    variant={isMobile ? "text" : "contained"}
+                    variant={isMobile && !isTablet ? "text" : "contained"}
                   color="primary"
                   size="small"
                   onClick={onCreate}
-                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                    startIcon={isMobile ? null : <AddOutlined />}
+                    className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                 >
-                  {isMobile ? <MdAdd size={23}/> : "Add"}
+                  {isMobile && !isTablet ? <MdAdd size={23}/> : "Add"}
                 </Button>
               )}
               <>
                 <Button
                   disabled={canDelete}
-                  variant={isMobile ? "text" : "contained"}
+                  variant={isMobile && !isTablet ? "text" : "contained"}
                   color="default"
                   size="small"
                   onClick={openActions}
                   fullWidth={true}
-                  className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                  className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
                   aria-controls="action-menu"
                 >
-                  {isMobile ? "" :  "Actions" } <ExpandMore/>
+                  {isMobile && !isTablet ? "" :  "Actions" } <ExpandMore/>
                 </Button>
                 <Menu
                   anchorEl={anchorEl}

@@ -30,7 +30,7 @@ import { prepareDataForGrid } from "../../constants/helpers"
 import { MdAccountCircle } from "react-icons/md";
 import { AiFillCrown } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 
 let packagesTimeout;
 
@@ -500,7 +500,7 @@ const PackageList = () => {
                     </div>
 
                     {Object.keys(frameWorkComponent).length > 0 ? (
-                        isMobile ? <CustomSwipableList
+                        isMobile && !isTablet ? <CustomSwipableList
                             allowSelection={true}
                             allowSwipe={true}
                             permissions={permissions?.packages}
