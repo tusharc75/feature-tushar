@@ -31,7 +31,7 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import {AddOutlined, ExpandMore} from "@material-ui/icons";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import {MdAdd} from "react-icons/all";
 
@@ -308,17 +308,17 @@ const QuotePdfTemplate: FC = () => {
             <CustomContainer>
                 <div className="header-panel">
                     <Grid container className={styles.filter_side_container}>
-                        <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
+                        <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center gap-1">
                             <GiAbstract055 /> <span className="listingHeader">{routes.quotePdfTemplate.title}</span>
                         </Grid>
-                        <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
+                        <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
                             <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
                                 <Grid style={{display: "flex", flex:1}}>
                                 <SearchBox
                                     onSearch={handleSearch}
                                     searchbox={styles.search_box_input}
-                                    width={isMobile ? "200px" : "242px"}
-                                    style={isMobile ? {flex:1} : {}}
+                                    width={isMobile && !isTablet ? "200px" : "242px"}
+                                    style={isMobile && !isTablet ? {flex:1} : {}}
                                     value={search}
                                 />
                                 </Grid>
@@ -327,27 +327,27 @@ const QuotePdfTemplate: FC = () => {
                                 {permissions.quotePdfTemplate.isCreate &&
                                     <Button
                                         onClick={() => CreateNew("0", false)}
-                                        variant={isMobile ? "text" : "contained"}
+                                        variant={isMobile && !isTablet ? "text" : "contained"}
                                         size="small"
                                         color="primary"
-                                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                                        startIcon={isMobile ? null : <AddOutlined />}
+                                        className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                                     >
-                                        {isMobile ? <MdAdd size={23}/> : "Add"}
+                                        {isMobile && !isTablet ? <MdAdd size={23}/> : "Add"}
 
                                     </Button>
                                 }
                                 {permissions.quotePdfTemplate.isDelete &&
                                     <Button
-                                        className={isMobile ? "mobile_button" : styles.action_submit_btn}
-                                        variant={isMobile ? "text" : "contained"}
+                                        className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                                        variant={isMobile && !isTablet ? "text" : "contained"}
                                         color="default"
                                         size="small"
                                         onClick={openActions}
                                         disabled={selectedRecords.length ? false : true}
                                         aria-controls="action-menu"
                                     >
-                                        {isMobile ? "" :  "Actions" } <ExpandMore/>
+                                        {isMobile && !isTablet ? "" :  "Actions" } <ExpandMore/>
                                     </Button>
                                 }
                                 <Menu
@@ -370,7 +370,7 @@ const QuotePdfTemplate: FC = () => {
                     </Grid>
                 </div>
 
-                {isMobile ? <CustomSwipableList
+                {isMobile && !isTablet ? <CustomSwipableList
                     allowSelection={true}
                     allowSwipe={true}
                     permissions={permissions.quotePdfTemplate}

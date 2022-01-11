@@ -27,7 +27,7 @@ import useColumns, {getStaticFields, getFrameworkComponents } from "../../consta
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import { FcProcess } from "react-icons/fc";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const LeadTypes = [
   {
@@ -616,7 +616,7 @@ const Leads = () => {
 
         {
           Object.keys(frameWorkComponent).length > 0 ?
-            isMobile ? <CustomSwipableList
+            isMobile && !isTablet ? <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions[leadResource]}

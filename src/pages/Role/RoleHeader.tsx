@@ -11,7 +11,7 @@ import styles from "../Leads/Header.module.scss";
 import { useData } from "../../StateProvider/Provider";
 import { localStorageKeys } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
-import {isMobile} from "react-device-detect";
+import {isMobile, isTablet} from "react-device-detect";
 import {MdAdd} from "react-icons/all";
 
 const RoleHeader = (props) => {
@@ -71,7 +71,7 @@ const RoleHeader = (props) => {
           </ToggleButtonGroup>
         )} */}
       </Grid>
-      <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side}>
+      <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
         <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header}>
           <Grid style={{display: "flex", flex:1}}>
           <SearchBox
@@ -80,22 +80,22 @@ const RoleHeader = (props) => {
             value={searchVal}
             size="small"
             placeholder="Search Role"
-            width={isMobile ? "200px" : "242px"}
-            style={isMobile ? {flex:1} : {}}
+            width={isMobile && !isTablet ? "200px" : "242px"}
+            style={isMobile && !isTablet ? {flex:1} : {}}
           />
           </Grid>
 
           <Grid style={{display: "flex" , gap:"5px"}}>
           {rolePermissions.isCreate && (filter === "Global" || (filter === "Regional" && selectedEntity)) && (
             <Button
-                variant={isMobile ? "text" : "contained"}
+                variant={isMobile && !isTablet ? "text" : "contained"}
               color="primary"
               size="small"
               onClick={onCreate}
-              className={isMobile ? "mobile_button" : styles.add_submit_btn}
-              startIcon={isMobile ? null : <AddOutlined />}
+              className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+              startIcon={isMobile && !isTablet ? null : <AddOutlined />}
             >
-              {isMobile ? <MdAdd size={23}/> : "Add"}
+              {isMobile && !isTablet ? <MdAdd size={23}/> : "Add"}
             </Button>
           )}
 
@@ -103,14 +103,14 @@ const RoleHeader = (props) => {
             <>
               <Button
                 disabled={selectedRecords.length === 0}
-                className={isMobile ? "mobile_button" : styles.action_submit_btn}
-                variant={isMobile ? "text" : "contained"}
+                className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                variant={isMobile && !isTablet ? "text" : "contained"}
                 color="default"
                 size="small"
                 onClick={openActions}
                 aria-controls="action-menu"
               >
-                {isMobile ? "" :  "Actions" } <ExpandMore/>
+                {isMobile && !isTablet ? "" :  "Actions" } <ExpandMore/>
               </Button>
               <Menu
                 anchorEl={anchorEl}

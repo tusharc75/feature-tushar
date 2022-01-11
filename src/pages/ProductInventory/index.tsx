@@ -29,7 +29,7 @@ import { prepareDataForGrid } from "../../constants/helpers"
 import { MdAccountCircle } from "react-icons/md";
 import { AiFillCrown, MdAdd } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from "@material-ui/lab";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
@@ -322,7 +322,7 @@ const ProductInventory = () => {
         <div className="main-container">
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={6} className="d-flex align-items-center gap-1">
+                    <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1">
                         <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
                         <span className="listingHeader">{routes.productInventory?.title} </span>
                         {warehouse && (
@@ -385,7 +385,7 @@ const ProductInventory = () => {
                                         }}
                                         renderInput={(params) => (
 
-                                            isMobile ?
+                                            isMobile && !isTablet ?
                                                 <TextField
                                                     {...params}
                                                     margin="dense"
@@ -438,7 +438,7 @@ const ProductInventory = () => {
                         }
 
                     </Grid>
-                    <Grid xs={isMobile ? 12 : 6} container className={styles.filter_side} >
+                    <Grid md={6} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
 
                             <Grid style={{ display: "flex", flex: 1 }}>
@@ -458,28 +458,28 @@ const ProductInventory = () => {
                                         onClick={() => {
                                             setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null })
                                         }}
-                                        variant={isMobile ? "text" : "contained"}
+                                        variant={isMobile && !isTablet ? "text" : "contained"}
                                         size="small"
                                         color="primary"
-                                        className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                                        startIcon={isMobile ? null : <AddOutlined />}
+                                        className={isMobile && !isTablet  ? "mobile_button" : styles.add_submit_btn}
+                                        startIcon={isMobile && !isTablet  ? null : <AddOutlined />}
                                     >
-                                        {isMobile ? <MdAdd size={23} /> : "Add"}
+                                        {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
                                     </Button>
                                 }
 
                                 <HtmlTooltip title="Please select some inventories">
                                     <span>
                                         <Button
-                                            className={isMobile ? "mobile_button" : styles.action_submit_btn}
-                                            variant={isMobile ? "text" : "contained"}
+                                            className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                                            variant={isMobile && !isTablet ? "text" : "contained"}
                                             color="default"
                                             size="small"
                                             onClick={openActions}
                                             disabled={selectedRecords.length ? false : true}
                                             aria-controls="action-menu"
                                         >
-                                            {isMobile ? "" : "Actions"} <ExpandMore />
+                                            {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
                                         </Button>
                                     </span>
                                 </HtmlTooltip>
@@ -509,7 +509,7 @@ const ProductInventory = () => {
                     </Grid>
                 </Grid>
             </div>
-            {columns ? isMobile ? <CustomSwipableList
+            {columns ? isMobile && !isTablet ? <CustomSwipableList
                 allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions?.productInventory}

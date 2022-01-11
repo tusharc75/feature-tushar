@@ -23,7 +23,7 @@ import { prepareDataForGrid } from "../../constants/helpers"
 import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ResourceTransferDialog from "../../components/ResourceTransferDialog"
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom'
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
@@ -340,7 +340,7 @@ const Entity: FC = () => {
           />
         </div>
 
-        {isMobile ?
+        {isMobile && !isTablet ?
           <CustomSwipableList
             allowSelection={true}
             allowSwipe={true}
