@@ -12,10 +12,10 @@ import CustomContainer from '../../../components/CustomContainer';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { GoNote } from 'react-icons/go';
 import { ExpandMore } from '@material-ui/icons';
-import { Button, Dialog, Menu, MenuItem } from '@material-ui/core';
+import { Button, Dialog, Menu, MenuItem, TextField } from '@material-ui/core';
 import { AddOutlined } from '@material-ui/icons';
 import { CreateNote } from '../../../components/Activity/Note/CreateNote';
-import { CustomDialogTransition, gridLoadingTimeout } from '../../../constants/helpers';
+import { camelCase, CustomDialogTransition, getApi, getData, gridLoadingTimeout, isObjectEmpty, resourceOptions } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import styles from '../../Leads/Header.module.scss';
@@ -26,7 +26,8 @@ import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
-import {MdAdd} from "react-icons/all";
+import { MdAdd } from "react-icons/all";
+import { Autocomplete } from '@material-ui/lab';
 
 const Note = () => {
   const {
@@ -51,11 +52,14 @@ const Note = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords, appendRows } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([])
   const localStorageSelectedRecords = "notesPage";
-
+  const [resource, setResource] = useState('');
+  const [resourceData, setResourceData] = useState(null);
+  const [loadingResources, setLoadingResources] = useState(false);
+  const [selectedResourceData, setSelectedResourceData] = useState(null);
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('notesPage'));
 
@@ -89,7 +93,7 @@ const Note = () => {
 
   useEffect(() => {
     fetchNotes();
-  }, [filter]);
+  }, [page, limit, filter, filters, sorting, selectedResourceData]);
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -144,16 +148,68 @@ const Note = () => {
     actionsRenderer: ActionsRenderer
   };
 
+  const getQueryString = () => {
+    let deepFilter = `&page=${page}&limit=${limit}`;
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).forEach((field) => {
+        updatedFilters.push({
+          field: field,
+          term: filters[field].filter
+        });
+      });
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+    if (resource && camelCase(resource) !== "" && selectedResourceData?.id) {
+      deepFilter = `${deepFilter}&"resource"="${camelCase(resource)}"&resourceId="${selectedResourceData.id}"`
+    }
+    return deepFilter;
+  };
+
+  useEffect(() => {
+    if (!resource) return;
+    setLoadingResources(true);
+    axiosInstance()
+      .get(`${getApi(resource)}?limit=100`)
+      .then(({ data: { data } }) => {
+        if (data.length) {
+          const mappedData = data.map((_d) => getData(resource, _d));
+          setResourceData(mappedData || []);
+        }
+        setLoadingResources(false);
+      })
+      .catch((error) => {
+        setLoadingResources(false);
+      });
+
+    return () => {
+      setSelectedResourceData(null);
+      setResourceData(null);
+    };
+    // eslint-disable-next-line
+  }, [resource]);
+
+
   const fetchNotes = async () => {
     // setLoading(true)
-
+    const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
 
     if (gridApi) {
       gridApi.setRowData([]);
     }
 
-    await GetNotes(JSON.stringify(filter))
+    await GetNotes(JSON.stringify(filter), queryString)
       .then(({ data }) => {
         let rows = data.map((u) => {
           const { createdBy, updatedBy, relatedTo, ...restProperties } = u;
@@ -277,17 +333,49 @@ const Note = () => {
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={6} md={6} sm={12} className="d-flex align-items-center gap-1">
               <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title} ({dataRows.length})</span>
+              <Autocomplete
+                options={resourceOptions}
+                getOptionLabel={(option) => option}
+                style={{ width: "250px" }}
+                value={resource}
+                onChange={(event, newValue) => {
+                  setResource(newValue);
+                }}
+                size="small"
+                renderInput={(params) =>
+                  isMobile && !isTablet ? (
+                    <TextField {...params} label="Select Resource" variant="standard" className={isMobile ? 'serchBox' : ''} />
+                  ) : (
+                    <TextField {...params} label="Select Resource" variant="outlined" />
+                  )
+                }
+              />
+              {Boolean(resource) && resourceData && (
+                <Autocomplete
+                  disabled={loadingResources}
+                  options={resourceData}
+                  getOptionLabel={(option: any) => option.name}
+                  getOptionSelected={(option: any, value: any) => option.name === value.name}
+                  style={{ width: "250px" }}
+                  value={selectedResourceData}
+                  onChange={(event, newValue) => {
+                    setSelectedResourceData(newValue);
+                  }}
+                  size="small"
+                  renderInput={(params) => <TextField {...params} label={`Select ${resource}`} variant="outlined" />}
+                />
+              )}
             </Grid>
             <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
               <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
 
-                <Grid style={{width:"100%" , display:"flex"}}>
-                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
+                <Grid style={{ width: "100%", display: "flex" }}>
+                  <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
                 </Grid>
 
-                <Grid style={{display: "flex" , gap:"5px"}}>
+                <Grid style={{ display: "flex", gap: "5px" }}>
                   {<Button
-                      variant={isMobile && !isTablet ? "text" : "contained"}
+                    variant={isMobile && !isTablet ? "text" : "contained"}
                     color="primary"
                     size="small"
                     onClick={() => {
@@ -297,21 +385,21 @@ const Note = () => {
                     className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
                     startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                   >
-                    {isMobile && !isTablet ? <MdAdd size={23}/> : "Add"}
+                    {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
                   </Button>
                   }
                   <div className="d-flex gap-2">
                     {/* </Box> */}
                     <Button
-                        variant={isMobile && !isTablet ? "text" : "outlined"}
+                      variant={isMobile && !isTablet ? "text" : "outlined"}
                       color="default"
                       size="small"
                       onClick={openActions}
                       aria-controls="action-menu"
                       disabled={selectedRecords.length > 0 ? false : true}
-                        className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                      className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
                     >
-                      {isMobile && !isTablet ? "" :  "Actions" } <ExpandMore/>
+                      {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
                     </Button>
                     <Menu
                       anchorEl={anchorEl}
@@ -334,7 +422,7 @@ const Note = () => {
                         Delete
                       </MenuItem>
                     </Menu>
-                </div>
+                  </div>
                 </Grid>
               </Box>
             </Grid>
@@ -352,7 +440,7 @@ const Note = () => {
             selectedRecords={selectedRecords}
             dispatch={dispatch}
             onEdit={(data) => {
-             
+
             }}
             extraParamsToCheckDelete={true}
             onDelete={(data) => {
@@ -386,7 +474,7 @@ const Note = () => {
             allowAction={true}
             allowSelection={true}
             actionWidth={100}
-            isClientSideGrid={true}
+            isClientSideGrid={false}
             loading={loading}
             renderedFrom="notesPage"
             refreshGrid={fetchNotes}

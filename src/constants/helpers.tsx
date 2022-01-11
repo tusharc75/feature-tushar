@@ -21,7 +21,7 @@ import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
-import { orderBy, uniqBy } from 'lodash';
+import { kebabCase, orderBy, uniqBy } from 'lodash';
 
 export const ORDER_TYPES =
 {
@@ -1436,5 +1436,90 @@ export const asyncForEach = async (
 ) => {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
+  }
+};
+
+export const resourceOptions = [
+  RESOURCE_LABEL.customerAccount,
+  RESOURCE_LABEL.customerContact,
+  RESOURCE_LABEL.account,
+  RESOURCE_LABEL.contact,
+  RESOURCE_LABEL.lead,
+  RESOURCE_LABEL.opportunity,
+  RESOURCE_LABEL.quoteBuilder,
+  RESOURCE_LABEL.rentalManagement,
+  RESOURCE_LABEL.projectStrategy,
+  RESOURCE_LABEL.repairJob,
+  RESOURCE_LABEL.purchaseOrder,
+  RESOURCE_LABEL.deliveryTicket,
+  RESOURCE_LABEL.receivingTicket,
+  RESOURCE_LABEL.transferAsset
+].filter(d => d);
+
+export const getApi = (resource: string) => {
+  switch (kebabCase(resource)) {
+    case 'loading-ticket':
+      return 'delivery-ticket';
+    case 'quote':
+      return 'quote-builder';
+    default:
+      return kebabCase(resource);
+  }
+};
+
+export const getData = (resource: string, data: any) => {
+  switch (kebabCase(resource)) {
+    case 'lead':
+      return {
+        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+        id: data._id
+      };
+    case 'opportunity':
+      return {
+        name: `${data.opportunityName}`,
+        id: data._id
+      };
+    case 'customer-account':
+      return {
+        name: `${data.accountName}`,
+        id: data._id
+      };
+    case 'supplier-account':
+      return {
+        name: `${data.accountName}`,
+        id: data._id
+      };
+    case 'customer-contact':
+      return {
+        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+        id: data._id
+      };
+    case 'supplier-contact':
+      return {
+        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+        id: data._id
+      };
+    case 'loading-ticket':
+      return {
+        name: `${data.ticketName}`,
+        id: data._id
+      };
+    case 'quote':
+      return {
+        name: `${data.quoteName}`,
+        id: data._id
+      };
+    case 'rental-management':
+      return {
+        name: `${data.rentalJobName}`,
+        id: data._id
+      };
+    case 'project-sales':
+      return {
+        name: `${data.projectName}`,
+        id: data._id
+      };
+    default:
+      break;
   }
 };
