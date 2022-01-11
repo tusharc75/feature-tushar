@@ -308,6 +308,14 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
     background-color: var(--white) !important;
 }
 
+.bg-grey {
+    background: var(--lightgrey) !important;
+}
+
+.grey {
+    color: var(--lightgrey) !important;
+}
+
 .pull-right {
     text-align: right !important;
 }
