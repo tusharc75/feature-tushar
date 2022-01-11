@@ -31,7 +31,7 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import {AddOutlined, ExpandMore} from "@material-ui/icons";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import {MdAdd} from "react-icons/all";
 
 let priceTemplateTimeout;
@@ -285,17 +285,17 @@ const PriceTemplate: FC = () => {
             <CustomContainer>
                 <div className="header-panel">
                     <Grid container className={styles.filter_side_container}>
-                        <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
+                        <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center gap-1">
                             <CgTemplate size={22} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.priceTemplate.title}</span>
                         </Grid>
-                        <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
+                        <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
                             <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
                                 <Grid style={{display: "flex", flex:1}}>
                                     <SearchBox
                                         onSearch={handleSearch}
                                         searchbox={styles.search_box_input}
-                                        width={isMobile ? "200px" : "242px"}
-                                        style={isMobile ? {flex:1} : {}}
+                                        width={isMobile && !isTablet ? "200px" : "242px"}
+                                        style={isMobile && !isTablet ? {flex:1} : {}}
                                         value={search}
                                     />
                                 </Grid>
@@ -304,26 +304,26 @@ const PriceTemplate: FC = () => {
                                         {priceTemplatePermissions.isCreate &&
                                             <Button
                                                 onClick={() => CreateNew("0", false)}
-                                                variant={isMobile ? "text" : "contained"}
+                                                variant={isMobile && !isTablet ? "text" : "contained"}
                                                 size="small"
                                                 color="primary"
-                                                className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                                                startIcon={isMobile ? null : <AddOutlined />}
+                                                className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                                                startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                                             >
-                                                {isMobile ? <MdAdd size={23}/> : "Add"}
+                                                {isMobile && !isTablet ? <MdAdd size={23}/> : "Add"}
                                             </Button>
                                         }
                                         {priceTemplatePermissions.isDelete &&
                                             <Button
-                                                variant={isMobile ? "text" : "contained"}
+                                                variant={isMobile && !isTablet ? "text" : "contained"}
                                                 color="default"
                                                 size="small"
                                                 onClick={openActions}
                                                 disabled={selectedRecords.length ? false : true}
                                                 aria-controls="action-menu"
-                                                className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                                                className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
                                             >
-                                                {isMobile ? "" :  "Actions" } <ExpandMore/>
+                                                {isMobile && !isTablet ? "" :  "Actions" } <ExpandMore/>
                                             </Button>
                                         }
                                         <Menu
@@ -345,7 +345,7 @@ const PriceTemplate: FC = () => {
                         </Grid>
                     </Grid>
                 </div>
-                {isMobile ? <CustomSwipableList
+                {isMobile && !isTablet ? <CustomSwipableList
                     allowSelection={true}
                     allowSwipe={true}
                     permissions={priceTemplatePermissions}

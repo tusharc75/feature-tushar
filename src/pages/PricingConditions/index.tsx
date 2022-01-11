@@ -18,7 +18,7 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { Link, useHistory } from 'react-router-dom';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd } from 'react-icons/all';
 import PricingConditionsDialog from './PricingConditionsDialog';
 import useColumns, { getFrameworkComponents, getStaticFields } from '../../constants/useColumns';
@@ -250,11 +250,11 @@ const PricingConditions = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid className={styles.filter_side_container} container justify="space-between">
-            <Grid item className="d-flex align-items-center gap-1">
+            <Grid item className="d-flex align-items-center gap-1" md={6} sm={12} xs={12}>
               <MdContacts className="headerLogo" />
               <span className="listingHeader">{routes.pricingCondition.title}</span>
             </Grid>
-            <Grid className={styles.filter_side} item xs={isMobile ? 12 : 6}>
+            <Grid className={styles.filter_side} item md={6} sm={12} xs={12}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
@@ -269,28 +269,28 @@ const PricingConditions = () => {
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
                   <Button
-                    variant={isMobile ? 'text' : 'contained'}
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
                     size="small"
-                    className={isMobile ? 'mobile_button' : styles.add_submit_btn}
-                    startIcon={isMobile ? null : <AddOutlined />}
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                     onClick={() => {
                       setPricingConditionId(null);
                       setOpen({ open: true, isClone: false });
                     }}
                   >
-                    {isMobile ? <MdAdd size={23} /> : 'Add'}
+                    {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                   </Button>
                   <Button
-                    variant={isMobile ? 'text' : 'contained'}
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="default"
                     size="small"
-                    className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                     onClick={openActions}
                     disabled={selectedRecords.length ? false : true}
                     aria-controls="action-menu"
                   >
-                    {isMobile ? '' : 'Actions'} <ExpandMore />
+                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
                   </Button>
                   <Menu
                     anchorEl={anchorEl}

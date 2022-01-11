@@ -21,6 +21,10 @@
 .mobile_filter_content{
   height: 400px;
 }
+.mobile_panel{
+  display: flex;
+  align-items: center;
+}
 
 
 
@@ -45,11 +49,7 @@
 .rental_header_layout{
   row-gap: 5px;
 }
-.mobile_panel{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+
 .font_size_header_mobile{
   padding-top: 2px;
   font-size: 12px;
@@ -172,5 +172,10 @@
   }
   .mobile_filter_side_container_delivery_ticket{
 
+  }
+  .mobile_panel{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 }
