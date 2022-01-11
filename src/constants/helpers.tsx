@@ -23,6 +23,18 @@ import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
 import { orderBy, uniqBy } from 'lodash';
 
+export const ORDER_TYPES =
+{
+  rent: {
+    key: 'Rent',  //  Just to display in UI
+    value: "Rent"
+  },
+  sale: {
+    key: 'Buy',  //  Just to display in UI
+    value: "Sale"
+  }
+};
+
 export const defaultActivityShow = false;
 
 export const vapidKey = 'BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4';
@@ -996,8 +1008,8 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   };
 };
 
-export const determineLightOrDark = (color:any) => {
-  let r:number, g:number, b:number, hsp:number;
+export const determineLightOrDark = (color: any) => {
+  let r: number, g: number, b: number, hsp: number;
   // Check the format of the color, HEX or RGB?
   if (color.match(/^rgb/)) {
 
@@ -1007,14 +1019,14 @@ export const determineLightOrDark = (color:any) => {
     r = color[1];
     g = color[2];
     b = color[3];
-  } 
+  }
   else {
 
     // If RGB then Convert it to HEX
-    color = +("0x" + color.slice(1).replace( 
+    color = +("0x" + color.slice(1).replace(
       color.length < 5 && /./g, '$&$&'
     )
-             );
+    );
 
     r = color >> 16;
     g = color >> 8 & 255;
@@ -1029,10 +1041,10 @@ export const determineLightOrDark = (color:any) => {
   );
 
   // Using the HSP value, determine whether the color is light or dark
-  if (hsp>127.5) {
+  if (hsp > 127.5) {
 
     return 'light';
-  } 
+  }
   else {
 
     return 'dark';
@@ -1290,7 +1302,7 @@ export const prepareDataForGrid = (data, user = {}) => {
         else if (typeof data[key][0] !== "object" && key != "unit") {
           restProperties[key] = data[key].join(" , ")
         }
-        else{
+        else {
           restProperties[key] = data[key]
         }
       }
