@@ -3,56 +3,28 @@ import { Grid, Box, Typography, TextField, Card, CardContent, CircularProgress }
 import { Autocomplete, Skeleton } from '@material-ui/lab';
 import { startCase } from 'lodash';
 
+
 import axiosInstance from '../../../axios/axiosInstance';
 import { FilterType } from './AssetDashboard';
-import { productInventory } from '../../../constants/helpers';
+import VirtualizedList from '../../../components/VirtualizedList';
 
 interface FilterProps {
   filter: FilterType;
+  assets: any[];
+  loading: boolean;
 }
 
 const AssetStats = (props: FilterProps) => {
-  const inputRef = React.useRef(null)
-  const { filter } = props;
-  const [assets, setAssets] = React.useState([]);
+  const { assets, loading } = props;
   const [selectedAssets, setSelectedAssets] = React.useState([]);
   const [assetStats, setAssetStats] = React.useState(null);
   const [loadingStats, setLoadingStats] = React.useState(false);
-  const [loadingAssets, setLoadingAssets] = React.useState(false);
-  const [page, setPage] = React.useState(1)
-
-  const lastElement = document.querySelector('.MuiAutocomplete-option:last-child');
-
-  const lastOptionObserver = new IntersectionObserver((entries) => {
-    const lastOption = entries[0];
-    if (!lastOption.isIntersecting && loadingAssets && filter.productDescription.length > 0) return;
-    setPage(prevState => prevState + 1)
-    // console.log("Load More")
-  }, {});
-
-  React.useEffect(() => {
-    if (lastElement) {
-      lastOptionObserver.observe(lastElement);
-    }
-
-  }, [lastElement])
-
-  React.useEffect(() => {
-    fetchAssets();
-  }, [page]);
 
   React.useEffect(() => {
     if (selectedAssets.length > 0) {
       loadAssetsStats();
     }
   }, [selectedAssets]);
-
-  React.useEffect(() => {
-    if (filter.productDescription.length > 0) {
-      fetchAssets();
-    }
-  }, [filter.productDescription]);
-
 
   const loadAssetsStats = () => {
     setLoadingStats(true);
@@ -69,61 +41,23 @@ const AssetStats = (props: FilterProps) => {
       });
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?limit=200&page=${page}`;
-
-    let filterById = [];
-    if (filter.productDescription.length > 0) {
-      filter.productDescription.forEach(d => {
-        filterById.push({ field: 'product', term: d.id });
-      })
-    }
-    if (filterById.length > 0) {
-      return `?filterById=${JSON.stringify(filterById)}`
-    }
-    return `${deepFilter}`;
-  };
-
-
-  const fetchAssets = () => {
-    let queryString = getQueryString()
-    setLoadingAssets(true);
-    axiosInstance()
-      .get(`${productInventory.api}${queryString}`)
-      .then(({ data: { data } }) => {
-        if (filter.productDescription.length > 0) {
-          setAssets(data.map((d) => ({ id: d._id, title: d.assetNumber })));
-        }
-        else {
-          setAssets([...assets, ...data.map((d) => ({ id: d._id, title: d.assetNumber }))]);
-        }
-        setLoadingAssets(false);
-      })
-      .catch((err) => {
-        setLoadingAssets(false);
-      });
-  };
-
   return (
     <div>
       <Box my={2} bgcolor={'#f5f5f5'} p={1}>
         <Box my={1}>
           <Autocomplete
-            ref={(ref) => {
-              if (ref) {
-                inputRef.current = ref
-              }
-            }}
+            ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
             options={assets}
-            limitTags={5}
+            disableListWrap
             multiple={true}
             value={selectedAssets}
-            loading={loadingAssets}
+            loading={loading}
             onChange={(_, val) => setSelectedAssets(val)}
             fullWidth
-            size='small'
+            size="small"
             getOptionSelected={(option, val) => option.id === val.id}
             getOptionLabel={(option) => option.title}
+            renderOption={(option) => <Typography noWrap>{option.title}</Typography>}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -133,7 +67,7 @@ const AssetStats = (props: FilterProps) => {
                   ...params.InputProps,
                   endAdornment: (
                     <React.Fragment>
-                      {loadingAssets ? <CircularProgress color="inherit" size={20} /> : null}
+                      {loading ? <CircularProgress color="inherit" size={20} /> : null}
                       {params.InputProps.endAdornment}
                     </React.Fragment>
                   )
@@ -144,9 +78,7 @@ const AssetStats = (props: FilterProps) => {
         </Box>
         {selectedAssets.length === 0 && (
           <Box width={'100%'} py={2}>
-            <Typography >
-              Select assets to see their stats
-            </Typography>
+            <Typography>Select assets to see their stats</Typography>
           </Box>
         )}
         <Grid container spacing={2}>
@@ -183,6 +115,6 @@ const AssetStats = (props: FilterProps) => {
       </Box>
     </div>
   );
-}
+};
 
 export default AssetStats;

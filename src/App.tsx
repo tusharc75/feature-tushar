@@ -107,6 +107,7 @@ import Address from "./pages/Address";
 import AddressDetailPage from './pages/Address/AddressDetailPage'
 import Logout from './pages/Auth/Logout';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
+import Report from './pages/Report';
 
 var notificationInterval: any = null;
 
@@ -562,6 +563,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.addressDetail.path}/:id`}>
               <AddressDetailPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={`/:resource/report`}>
+              <Report />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
