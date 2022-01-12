@@ -1409,19 +1409,19 @@ export const arrayToDropwdownOption = (array) => {
 }
 
 export const INVENTORY_STATUS = {
-  customer: 'With Customer',
-  supplier: 'With Supplier',
+  new: 'New',
+  available: 'Available',
   reserved: 'Reserved',
   inSale: 'In Sale',
   inUse: 'In-Use',
   indTransit: 'In-Transit',
   underReview: 'Under Review',
-  repair: 'Repair',
-  available: 'Available',
+  repair: 'Repair', 
   readyToShip: 'Ready to ship',
-  new: 'New',
   scrap: 'Scrap',
   lost: 'Lost',
+  customer: 'With Customer',
+  supplier: 'With Supplier',
 };
 
 export const DELIVERY_TICKET_STATUS = {
