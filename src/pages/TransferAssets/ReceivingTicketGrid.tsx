@@ -6,7 +6,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import { receivingTicket, sidebarResource } from '../../constants/helpers';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { groupBy } from 'lodash';
 import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
@@ -318,7 +318,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       </Box>
 
       <Box mt={1}>
-        {isMobile ? (
+        {isMobile && !isTablet ? (
           <CustomSwipableList
             allowSelection={true}
             allowSwipe={true}

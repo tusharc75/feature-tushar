@@ -1380,6 +1380,8 @@ export default function QuoteProcess(props) {
           />
         </div>
       </Paper>
+
+
       <div className={`pt-1 subDetailModule ${classes.detailBox}`}>
         {!loading && quoteData ? (
           <Grid container className="position-relative">
@@ -1398,7 +1400,7 @@ export default function QuoteProcess(props) {
                         setIsAddNewProduct(true);
                       }}
                     >
-                      {isMobile ? '' : 'Add New Product'}
+                      {isMobile && !isTablet ? '' : 'Add New Product'}
                     </Button>
                   </Tooltip>
                   <Tooltip title="Add Existing Product">
@@ -1411,7 +1413,7 @@ export default function QuoteProcess(props) {
                         setIsAddExistingProduct(true);
                       }}
                     >
-                      {isMobile ? '' : 'Add Existing Product'}
+                      {isMobile && !isTablet ? '' : 'Add Existing Product'}
                     </Button>
                   </Tooltip>
                 </span>
@@ -1431,7 +1433,7 @@ export default function QuoteProcess(props) {
                       size="small"
                       color="primary"
                     >
-                      {isMobile ? '' : `${buttonMessage}`}
+                      {isMobile && !isTablet ? '' : `${buttonMessage}`}
                     </Button>
                   )}
                 </div>
@@ -1448,11 +1450,11 @@ export default function QuoteProcess(props) {
                     disabled={viewDownloadLoading || updatingVersion}
                     size="small"
                     className="mr-1 setIconForMobile"
-                    startIcon={isMobile ? '' : <AiOutlineEye />}
+                    startIcon={isMobile && !isTablet ? '' : <AiOutlineEye />}
                     color="primary"
                   >
-                    {isMobile ? <AiOutlineEye size={20} /> : ''}
-                    {isMobile ? '' : 'View'}
+                    {isMobile && !isTablet ? <AiOutlineEye size={20} /> : ''}
+                    {isMobile && !isTablet ? '' : 'View'}
                   </Button>
                 </Tooltip>
                 <Tooltip title="Download">
@@ -1465,11 +1467,11 @@ export default function QuoteProcess(props) {
                     variant="outlined"
                     size="small"
                     className="mr-1 setIconForMobile"
-                    startIcon={isMobile ? '' : <FiDownloadCloud />}
+                    startIcon={isMobile && !isTablet ? '' : <FiDownloadCloud />}
                     color="primary"
                   >
-                    {isMobile ? <FiDownloadCloud size={20} /> : ''}
-                    {isMobile ? '' : 'Download'}
+                    {isMobile && !isTablet ? <FiDownloadCloud size={20} /> : ''}
+                    {isMobile && !isTablet ? '' : 'Download'}
                   </Button>
                 </Tooltip>
                 {permissions[qbResource]?.isUpdate &&
@@ -1487,11 +1489,11 @@ export default function QuoteProcess(props) {
                         variant="outlined"
                         size="small"
                         className="mr-1"
-                        startIcon={isMobile ? '' : <AiFillEdit />}
+                        startIcon={isMobile && !isTablet ? '' : <AiFillEdit />}
                         color="primary"
                       >
-                        {isMobile ? <AiFillEdit size={20} /> : ''}
-                        {isMobile ? '' : 'Quote Template'}
+                        {isMobile && !isTablet ? <AiFillEdit size={20} /> : ''}
+                        {isMobile && !isTablet ? '' : 'Quote Template'}
                       </Button>
                     </Tooltip>
                   )}
@@ -1506,7 +1508,7 @@ export default function QuoteProcess(props) {
                       setShowAiDialog(true);
                     }}
                   >
-                    {isMobile ? '' : 'AI Suggestion'}
+                    {isMobile && !isTablet ? '' : 'AI Suggestion'}
                   </Button>
                 </Tooltip>
                 {ProcessStatus === 'Quote Builder' && (
@@ -1521,7 +1523,7 @@ export default function QuoteProcess(props) {
                         setShowPDFArrangeColumns(true);
                       }}
                     >
-                      {isMobile ? '' : 'PDF Columns'}
+                      {isMobile && !isTablet ? '' : 'PDF Columns'}
                     </Button>
                   </Tooltip>
                 )}
@@ -1537,7 +1539,7 @@ export default function QuoteProcess(props) {
                         setShowExcelArrangeColumns(true);
                       }}
                     >
-                      {isMobile ? '' : 'Excel Columns'}
+                      {isMobile && !isTablet ? '' : 'Excel Columns'}
                     </Button>
                   </Tooltip>
                 )}

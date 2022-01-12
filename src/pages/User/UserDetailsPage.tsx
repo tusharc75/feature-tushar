@@ -677,38 +677,38 @@ const UserDetailsPage = () => {
                   {
                     isLoggedInUserBrandAdmin && (
                       <Button
-                        variant={isMobile ? "text" : "contained"}
+                        variant={isMobile && !isTablet ? "text" : "contained"}
                         color="primary"
                         size="small"
                         onClick={handleResetPassword}
-                        className={isMobile ? accountClass.mobile_button_layout : ""}
-                        style={isMobile ? { color: "var(--warning-darken)" } : {}}
+                        className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                        style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
                       >
-                        {isMobile ? <BiReset size={20} /> : "Reset Password"}
+                        {isMobile && !isTablet ? <BiReset size={20} /> : "Reset Password"}
 
                       </Button>
                     )
                   }
                   {permissions.user.isUpdate ? (
                     <Button
-                      variant={isMobile ? "text" : "contained"}
+                      variant={isMobile && !isTablet ? "text" : "contained"}
                       color="primary"
                       size="small"
                       onClick={handleOpenUpdateDialog}
                       disabled={!isLoggedInUserBrandAdmin && userData?.userType}
-                      className={isMobile ? accountClass.mobile_button_layout : ""}
-                      style={isMobile ? { color: "#43aeaa" } : {}}
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                      style={isMobile && !isTablet ? { color: "#43aeaa" } : {}}
                     >
-                      {isMobile ? <BiEdit size={20} /> : "Edit"}
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
 
                     </Button>
                   ) : null}
                   {permissions.user.isDelete ? (
                     <DeleteButton
-                      text={isMobile ? <MdDelete size={20} /> : "Delete"}
+                      text={isMobile && !isTablet ? <MdDelete size={20} /> : "Delete"}
                       disabled={user?.user?._id === id || userData?.userType === userType.brandAdmin}
                       onClick={() => handleDeleteUser(true)}
-                      className={isMobile ? accountClass.mobile_button_layout : ""}
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
 
                     />
                   ) : null}

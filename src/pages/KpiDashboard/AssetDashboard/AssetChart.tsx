@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box, Grid, Button, Menu, MenuItem } from '@material-ui/core';
-import { ImportExport } from '@material-ui/icons';
+import { Box, Grid, Button, Menu, MenuItem, Table, TableBody, TableContainer, TableRow, TableCell, TableHead, Typography } from '@material-ui/core';
+import { ImportExport, TableChart, Timeline } from '@material-ui/icons';
 import Chart from 'react-chartjs-2';
 import PptxGenJs from 'pptxgenjs';
 import jsPDF from 'jspdf';
@@ -13,19 +13,31 @@ import { ChartData } from 'chart.js';
 interface ChartProps {
   loading: boolean;
   data: any[];
+  smallScreen?: boolean;
 }
 
 const AssetChart = (props: ChartProps) => {
-  const { loading, data } = props;
+  const { loading, data, smallScreen } = props;
   const [barData, setBarData] = React.useState<ChartData>(null);
   const [pieData, setPieData] = React.useState<ChartData>(null);
+  const [tableView, setTableView] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [anchorPieEl, setAnchorPieEl] = React.useState(null);
   const [tableDataRaw, setTableDataRaw] = React.useState([]);
 
   const msToH = (msTime: number) => {
-    if (!msTime && msTime === 0) return 0;
-    return msTime / (1000 * 60 * 60);
+    if (!msTime || msTime === 0) return 0;
+    msTime = msTime / (1000 * 60 * 60);
+
+    if (msTime > 60 * 24) msTime = msTime / (60 * 24);
+
+    return msTime;
+  };
+
+  const msToPercent = (inUseTime: number, total: number) => {
+    if (!inUseTime || inUseTime === 0) return 0;
+    if (!total || total === 0) return 0;
+
+    return (inUseTime / total) * 100;
   };
 
   React.useEffect(() => {
@@ -37,10 +49,18 @@ const AssetChart = (props: ChartProps) => {
       const labels = data.map((_d) => _d?.assetNumber);
       const dataSet = data.map((_d) => msToH(_d?.useTime));
 
-      setTableDataRaw(data.map((_d) => ({
-        ["Asset Number"]: _d?.assetNumber,
-        ["Time (in hours)"]: msToH(_d?.useTime).toFixed(2),
-      })))
+      setTableDataRaw(
+        data.map((_d) => {
+          let totalTime = _d?.totalTime > 60 * 24 ? Math.floor(msToH(_d?.totalTime)) : msToH(_d?.totalTime).toFixed(2);
+          let useTime = _d?.totalTime > 60 * 24 ? Math.floor(msToH(_d?.useTime)) : msToH(_d?.useTime).toFixed(2);
+          return {
+            ['Asset Number']: _d?.assetNumber,
+            ['In Use (%)']: msToPercent(_d?.inUsePercentage, _d?.totalTime),
+            [`Time (${_d?.totalTime > 60 * 24 ? 'In Days' : 'In Hours'})`]: useTime,
+            [`Total Time (${_d?.totalTime > 60 * 24 ? 'In Days' : 'In Hours'})`]: totalTime
+          };
+        })
+      );
 
       setPieData({
         labels: [`In Use (${total} %)`, 'Total Utilization (%)'],
@@ -67,30 +87,40 @@ const AssetChart = (props: ChartProps) => {
     }
   }, [data]);
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleCloseBar = (exportType) => () => {
+  const handleClose = (exportType: string) => () => {
     switch (exportType) {
       case 'ppt': {
-        const canvas = document.getElementById('utilization-chart') as HTMLCanvasElement;
-        const dataUrl = canvas.toDataURL('image/png');
+        const canvas1 = document.getElementById('utilization-pie-chart') as HTMLCanvasElement;
+        const canvas2 = document.getElementById('utilization-chart') as HTMLCanvasElement;
+        const dataUrl1 = canvas1.toDataURL('image/png');
+        const dataUrl2 = canvas2.toDataURL('image/png');
         const pptx = new PptxGenJs();
         const slide = pptx.addSlide();
-        slide.addImage({ data: dataUrl, w: '80%', h: '80%', x: '10%', y: '15%' });
-        pptx.writeFile({ fileName: 'All Entity Sales Chart.pptx' });
+        slide.addText('Total Utilization', {
+          fontSize: 15,
+          color: '363636',
+          x: '12%',
+          y: '2%',
+          fill: { color: 'F1F1F1' },
+          align: pptx.AlignH.center
+        });
+        slide.addImage({ data: dataUrl1, w: '45%', h: '40%', x: '27.5%', y: '5%' });
+        slide.addImage({ data: dataUrl2, w: '60%', h: '50%', x: '20%', y: '47%' });
+        pptx.writeFile({ fileName: 'Total Utilization.pptx' });
         break;
       }
 
       case 'pdf': {
-        const canvas = document.getElementById('utilization-chart') as HTMLCanvasElement;
-        const dataUrl = canvas.toDataURL('image/png', 1.0);
+        const canvas1 = document.getElementById('utilization-pie-chart') as HTMLCanvasElement;
+        const canvas2 = document.getElementById('utilization-chart') as HTMLCanvasElement;
+        const dataUrl1 = canvas1.toDataURL('image/png', 1.0);
+        const dataUrl2 = canvas2.toDataURL('image/png', 1.0);
         const doc = new jsPDF('portrait');
         doc.setFontSize(20);
-        doc.text(`Total utilization Time`, 60, 15);
-        doc.addImage(dataUrl, 'JPEG', 10, 20, 190, 100);
-        doc.save('Total Utilization Time.pdf');
+        doc.text(`Total Utilization`, 80, 10, { baseline: 'ideographic' });
+        doc.addImage(dataUrl1, 'JPEG', 10, 20, 190, 88);
+        doc.addImage(dataUrl2, 'JPEG', 8, 130, 190, 100);
+        doc.save('Total Utilization.pdf');
         break;
       }
 
@@ -108,13 +138,13 @@ const AssetChart = (props: ChartProps) => {
         };
         const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
         const data = new Blob([excelBuffer], { type: fileType });
-        saveAs(data, 'Total Utilization Time' + fileExtension);
+        saveAs(data, 'Total Utilization' + fileExtension);
         break;
       }
 
       case 'json': {
         let blob = new Blob([JSON.stringify(tableDataRaw)], { type: 'text/plain;charset=utf-8' });
-        saveAs(blob, 'Total Utilization Time.json');
+        saveAs(blob, 'Total Utilization.json');
         break;
       }
       default:
@@ -124,112 +154,92 @@ const AssetChart = (props: ChartProps) => {
     setAnchorEl(null);
   };
 
-
-  const handleClickPie = (event) => {
-    setAnchorPieEl(event.currentTarget);
-  };
-
-  const handleClosePie = (exportType) => () => {
-    switch (exportType) {
-      case 'ppt': {
-        const canvas = document.getElementById('utilization-pie-chart') as HTMLCanvasElement;
-        const dataUrl = canvas.toDataURL('image/png');
-        const pptx = new PptxGenJs();
-        const slide = pptx.addSlide();
-        slide.addImage({ data: dataUrl, w: '80%', h: '80%', x: '10%', y: '15%' });
-        pptx.writeFile({ fileName: 'Total Utilization.pptx' });
-        break;
-      }
-
-      case 'pdf': {
-        const canvas = document.getElementById('utilization-pie-chart') as HTMLCanvasElement;
-        const dataUrl = canvas.toDataURL('image/png', 1.0);
-        const doc = new jsPDF('portrait');
-        doc.setFontSize(20);
-        doc.text(`Total utilization`, 60, 15);
-        doc.addImage(dataUrl, 'JPEG', 10, 20, 190, 100);
-        doc.save('Total Utilization.pdf');
-        break;
-      }
-
-      // case 'excel': {
-      //   // const canvas = document.getElementById('utilization-pie-chart') as HTMLCanvasElement;
-      //   // const dataUrl = canvas.toDataURL('image/png', 1.0);
-      //   const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-      //   const fileExtension = '.xlsx';
-      //   const ws = utils.json_to_sheet(tableDataRaw);
-      //   const wb = {
-      //     Sheets: {
-      //       data: ws
-      //     },
-      //     SheetNames: ['data']
-      //   };
-      //   const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
-      //   const data = new Blob([excelBuffer], { type: fileType });
-      //   saveAs(data, 'Total Utilization' + fileExtension);
-      //   break;
-      // }
-
-      // case 'json': {
-      //   let blob = new Blob([JSON.stringify(tableDataRaw)], { type: 'text/plain;charset=utf-8' });
-      //   saveAs(blob, 'Total Utilization.json');
-      //   break;
-      // }
-      default:
-        break;
-    }
-
-    setAnchorPieEl(null);
-  };
-
   if (loading || !pieData || !barData) return <Loader noLoader minHeight={'100%'} text={'Loading chart data...'} />;
 
   if (!barData) return <Loader noLoader minHeight={'100%'} text={'No data available'} />;
 
   return (
     <React.Fragment>
-      <Grid container spacing={2} alignItems="flex-end">
-        <Grid item xs={12} sm={6} md={12}>
-          <Box height={300}>
-          <Button onClick={handleClickPie} startIcon={<ImportExport />}>
-              Export to
-            </Button>
-            <Menu id="export-menu-pie" anchorEl={anchorPieEl} keepMounted open={Boolean(anchorPieEl)} onClose={handleClosePie('')}>
-              <MenuItem onClick={handleClosePie('ppt')}>Powerpoint</MenuItem>
-              <MenuItem onClick={handleClosePie('pdf')}>PDF</MenuItem>
-              {/* <MenuItem onClick={handleCloseBar('excel')}>Excel</MenuItem>
-              <MenuItem onClick={handleCloseBar('json')}>Raw JSON</MenuItem> */}
-            </Menu>
-            <Chart
-             id="utilization-pie-chart"
-              options={{
-                maintainAspectRatio: false
-              }}
-              type="pie"
-              data={pieData}
-            />
+      <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
+        <div>
+          <Button onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
+            Export to
+          </Button>
+          <Menu id="export-menu-pie" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
+            <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
+            <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
+            <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
+            <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
+          </Menu>
+        </div>
+        <Button onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
+          {!tableView ? 'Table' : 'Chart'} View
+        </Button>
+      </Box>
+      <Grid container spacing={2} justifyContent="space-between" alignItems="flex-end">
+        <Grid item xs={12} sm={tableView && smallScreen ? 12 : 6} md={12}>
+          <Box height={smallScreen && tableView ? 450 : 320}>
+            {tableDataRaw.length > 0 ? (
+              tableView ? (
+                <>
+                  <Box textAlign={'center'} mb={smallScreen ? 2 : 5}>
+                    <Typography variant="h5">Total Utilization</Typography>
+                  </Box>
+                  <TableContainer style={{ height: smallScreen ? '400px' : '600px' }}>
+                    <Table stickyHeader aria-label="caption table">
+                      <TableHead>
+                        <TableRow>
+                          {Object.keys(tableDataRaw[0]).map((label, i) => (
+                            <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                              {label}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {tableDataRaw.map((data, index) => (
+                          <TableRow key={index}>
+                            {Object.keys(data).map((label, i) => (
+                              <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                                {data[label].toLocaleString()}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </>
+              ) : (
+                <Box height={300}>
+                  <Chart
+                    id="utilization-pie-chart"
+                    options={{
+                      maintainAspectRatio: false
+                    }}
+                    type="pie"
+                    data={pieData}
+                  />
+                </Box>
+              )
+            ) : (
+              <div>No Data</div>
+            )}
           </Box>
         </Grid>
-        <Grid item xs={12} sm={6} md={12}>
-          <Box height={400}>
-            <Button onClick={handleClick} startIcon={<ImportExport />}>
-              Export to
-            </Button>
-            <Menu id="export-menu-bar" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseBar('')}>
-              <MenuItem onClick={handleCloseBar('ppt')}>Powerpoint</MenuItem>
-              <MenuItem onClick={handleCloseBar('pdf')}>PDF</MenuItem>
-              <MenuItem onClick={handleCloseBar('excel')}>Excel</MenuItem>
-              <MenuItem onClick={handleCloseBar('json')}>Raw JSON</MenuItem>
-            </Menu>
-            <Chart
-              id="utilization-chart"
-              options={{
-                maintainAspectRatio: false
-              }}
-              type="bar"
-              data={barData}
-            />
-          </Box>
+        <Grid item xs={12} sm={tableView ? 12 : 6} md={12}>
+          {!tableView && (
+            <Box height={330}>
+              <Chart
+                id="utilization-chart"
+                options={{
+                  maintainAspectRatio: false
+                }}
+                type="bar"
+                data={barData}
+              />
+            </Box>
+          )}
         </Grid>
       </Grid>
     </React.Fragment>

@@ -7,7 +7,7 @@ import SearchBox from "../../components/Helpers/SearchBox";
 import { BiNetworkChart } from "react-icons/bi";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import routes from "../../components/Helpers/Routes";
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import {MdAdd} from "react-icons/all";
 
 const ProjectStrategyHeader = (props) => {
@@ -43,9 +43,11 @@ const ProjectStrategyHeader = (props) => {
 
   return (
     <Grid container className={styles.filter_side_container}>
-      <Grid item xs={12} sm={6} md={6} className="d-flex align-items-center gap-1">
+      <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1">
+        <Grid className="d-flex align-item-center">
         <BiNetworkChart className="headerLogo" />
         <span className="listingHeader">{routes.projectSales.title}</span>
+        </Grid>
         <ToggleButtonGroup
           size="small"
           className="ml-8"
@@ -57,7 +59,7 @@ const ProjectStrategyHeader = (props) => {
           <ToggleButton value={2}>My Projects</ToggleButton>
         </ToggleButtonGroup>
       </Grid>
-      <Grid item xs={isMobile ? 12 : 6} className={styles.filter_side}>
+      <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
         <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header}>
             <Grid style={{display: "flex", flex:1}}>
             <SearchBox
@@ -66,34 +68,34 @@ const ProjectStrategyHeader = (props) => {
               searchbox={styles.search_box_input}
               size="small"
               placeholder="Search Project Sales"
-              width={isMobile ? "200px" : "242px"}
-              style={isMobile ? {flex:1} : {}}
+              width={isMobile && !isTablet ? "200px" : "242px"}
+              style={isMobile && !isTablet ? {flex:1} : {}}
             />
             </Grid>
           <Grid style={{display: "flex" , gap:"5px"}}>
               {permissions?.isCreate && permissions?.isUpdate && (
                 <Button
-                    variant={isMobile ? "text" : "contained"}
+                    variant={isMobile && !isTablet ? "text" : "contained"}
                   color="primary"
                   size="small"
                   onClick={onCreate}
-                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                    startIcon={isMobile ? null : <AddOutlined />}
+                    className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                 >
-                  {isMobile ? <MdAdd size={23}/> : "Add"}
+                  {isMobile && !isTablet ? <MdAdd size={23}/> : "Add"}
                 </Button>
               )}
 
               <>
                 <Button
-                    variant={isMobile ? "text" : "contained"}
+                    variant={isMobile && !isTablet ? "text" : "contained"}
                   color="default"
                   size="small"
                   onClick={openActions}
                   aria-controls="action-menu"
-                    className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                    className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
                 >
-                  {isMobile ? "" :  "Actions" } <ExpandMore/>
+                  {isMobile && !isTablet ? "" :  "Actions" } <ExpandMore/>
                 </Button>
 
                 <Menu

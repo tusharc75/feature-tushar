@@ -12,10 +12,10 @@ import CustomContainer from '../../../components/CustomContainer';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { GoNote } from 'react-icons/go';
 import { ExpandMore } from '@material-ui/icons';
-import { Button, Dialog, Menu, MenuItem } from '@material-ui/core';
+import { Button, Chip, Dialog, Menu, MenuItem, TextField } from '@material-ui/core';
 import { AddOutlined } from '@material-ui/icons';
 import { CreateNote } from '../../../components/Activity/Note/CreateNote';
-import { CustomDialogTransition, gridLoadingTimeout } from '../../../constants/helpers';
+import { camelCase, CustomDialogTransition, getApi, getData, gridLoadingTimeout, resourceOptions } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import styles from '../../Leads/Header.module.scss';
@@ -26,7 +26,8 @@ import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
-import {MdAdd} from "react-icons/all";
+import { MdAdd } from "react-icons/all";
+import { Autocomplete } from '@material-ui/lab';
 
 const Note = () => {
   const {
@@ -55,12 +56,16 @@ const Note = () => {
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([])
   const localStorageSelectedRecords = "notesPage";
-
+  const [resource, setResource] = useState('');
+  const [resourceData, setResourceData] = useState(null);
+  const [loadingResources, setLoadingResources] = useState(false);
+  const [selectedResourceData, setSelectedResourceData] = useState(null);
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('notesPage'));
 
   const columns = [
     { field: 'name', headerName: 'Title', show: true, disabled: true, primaryField: true, cellRenderer: 'nameRenderer' },
+    { field: 'relatedTo', headerName: 'Related To', show: true, disabled: true, primaryField: true, cellRenderer: 'referenceRenderer' },
     { field: 'createdByDate', headerName: 'Created At', filter: false, sortable: false, show: true, cellRenderer: 'createdAtDateRenderer' },
     { field: 'updatedByDate', headerName: 'Updated At', filter: false, sortable: false, show: true, cellRenderer: 'updatedAtDateRenderer' }
   ];
@@ -86,6 +91,29 @@ const Note = () => {
         });
     }
   }, [referenceId]);
+
+  useEffect(() => {
+    if (!resource) return;
+    setLoadingResources(true);
+    axiosInstance()
+      .get(`${getApi(resource)}?limit=100`)
+      .then(({ data: { data } }) => {
+        if (data.length) {
+          const mappedData = data.map((_d) => getData(resource, _d));
+          setResourceData(mappedData || []);
+        }
+        setLoadingResources(false);
+      })
+      .catch((error) => {
+        setLoadingResources(false);
+      });
+
+    return () => {
+      setSelectedResourceData(null);
+      setResourceData(null);
+    };
+    // eslint-disable-next-line
+  }, [resource]);
 
   useEffect(() => {
     fetchNotes();
@@ -121,6 +149,23 @@ const Note = () => {
     </span>
   );
 
+  const ReferenceRenderer = (params) => (
+    <>{params.value && params.value?.length > 0 ? params.value.map(d => {
+      return (
+        <>
+          <span >{d.name}</span>
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`${d.type}`}
+          />
+        </>
+      )
+    })
+      : <NoDataCell />
+    }
+    </>
+  );
   const CreatedAtDateRenderer = (params) => <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(params.value)}</span>;
 
   const UpdatedAtDateRenderer = (params) =>
@@ -139,6 +184,7 @@ const Note = () => {
   );
   const frameworkComponents = {
     nameRenderer: NameRenderer,
+    referenceRenderer: ReferenceRenderer,
     createdAtDateRenderer: CreatedAtDateRenderer,
     updatedAtDateRenderer: UpdatedAtDateRenderer,
     actionsRenderer: ActionsRenderer
@@ -156,7 +202,7 @@ const Note = () => {
     await GetNotes(JSON.stringify(filter))
       .then(({ data }) => {
         let rows = data.map((u) => {
-          const { createdBy, updatedBy, relatedTo, ...restProperties } = u;
+          const { createdBy, updatedBy, ...restProperties } = u;
 
           let res = {
             ...restProperties,
@@ -276,18 +322,56 @@ const Note = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={6} md={6} sm={12} className="d-flex align-items-center gap-1">
-              <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title} ({dataRows.length})</span>
+              <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title}</span>
+              <Autocomplete
+                options={resourceOptions}
+                getOptionLabel={(option) => option}
+                style={{ width: "200px" }}
+                value={resource}
+                onChange={(event, newValue) => {
+                  setResource(newValue);
+                }}
+                size="small"
+                renderInput={(params) =>
+                  isMobile && !isTablet ? (
+                    <TextField {...params} label="Select Resource" variant="standard" className={isMobile ? 'serchBox' : ''} />
+                  ) : (
+                    <TextField {...params} label="Select Resource" variant="outlined" />
+                  )
+                }
+              />
+              {Boolean(resource) && resourceData && (
+                <Autocomplete
+                  disabled={loadingResources}
+                  options={resourceData}
+                  getOptionLabel={(option: any) => option.name}
+                  getOptionSelected={(option: any, value: any) => option.name === value.name}
+                  style={{ width: "200px" }}
+                  value={selectedResourceData}
+                  onChange={(event, newValue) => {
+                    setSelectedResourceData(newValue);
+                    if (newValue?.id) {
+                      setFilter((prevState) => ([...prevState, { _id: newValue.id, type: camelCase(resource), name: newValue.name }]))
+                    }
+                    else {
+                      setFilter([])
+                    }
+                  }}
+                  size="small"
+                  renderInput={(params) => <TextField {...params} label={`Select ${resource}`} variant="outlined" />}
+                />
+              )}
             </Grid>
             <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
               <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
 
-                <Grid style={{width:"100%" , display:"flex"}}>
-                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
+                <Grid style={{ width: "100%", display: "flex" }}>
+                  <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
                 </Grid>
 
-                <Grid style={{display: "flex" , gap:"5px"}}>
+                <Grid style={{ display: "flex", gap: "5px" }}>
                   {<Button
-                      variant={isMobile && !isTablet ? "text" : "contained"}
+                    variant={isMobile && !isTablet ? "text" : "contained"}
                     color="primary"
                     size="small"
                     onClick={() => {
@@ -297,21 +381,21 @@ const Note = () => {
                     className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
                     startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                   >
-                    {isMobile && !isTablet ? <MdAdd size={23}/> : "Add"}
+                    {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
                   </Button>
                   }
                   <div className="d-flex gap-2">
                     {/* </Box> */}
                     <Button
-                        variant={isMobile && !isTablet ? "text" : "outlined"}
+                      variant={isMobile && !isTablet ? "text" : "outlined"}
                       color="default"
                       size="small"
                       onClick={openActions}
                       aria-controls="action-menu"
                       disabled={selectedRecords.length > 0 ? false : true}
-                        className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                      className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
                     >
-                      {isMobile && !isTablet ? "" :  "Actions" } <ExpandMore/>
+                      {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
                     </Button>
                     <Menu
                       anchorEl={anchorEl}
@@ -334,7 +418,7 @@ const Note = () => {
                         Delete
                       </MenuItem>
                     </Menu>
-                </div>
+                  </div>
                 </Grid>
               </Box>
             </Grid>
@@ -352,7 +436,7 @@ const Note = () => {
             selectedRecords={selectedRecords}
             dispatch={dispatch}
             onEdit={(data) => {
-             
+
             }}
             extraParamsToCheckDelete={true}
             onDelete={(data) => {

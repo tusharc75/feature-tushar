@@ -20,7 +20,7 @@ import Tooltip from "@material-ui/core/Tooltip"
 import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { sidebarResource, prepareDataForGrid } from "../../constants/helpers"
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { useHistory } from 'react-router-dom';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
@@ -534,7 +534,7 @@ const ProjectSales: FC = () => {
 
           {
             Object.keys(frameWorkComponent).length > 0 ?
-              isMobile ?
+              isMobile && !isTablet ?
                 <CustomSwipableList
                   allowSelection={true}
                   allowSwipe={true}

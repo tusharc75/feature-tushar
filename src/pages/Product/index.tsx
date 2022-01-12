@@ -39,7 +39,7 @@ import Tooltip from '@material-ui/core/Tooltip'
 import { MdAccountCircle } from "react-icons/md";
 import {AiFillCrown, MdAdd} from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { IoPricetagsSharp } from 'react-icons/io5';
 
 const ignoreField = ["qty", "priceTemplate"]
@@ -477,9 +477,9 @@ const Product = () => {
         <div className="main-container">
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={isMobile ? 12 : 6} className="d-flex align-items-center gap-1">
+                    <Grid item xs={isMobile ? 12 : 6} className="d-flex align-items-center gap-1 layout-for-tablet">
+                    <Grid style={{display:"flex" , justifyContent:"center"}}>
                         <RiShoppingBag3Fill size={22} style={{ paddingBottom: "3px" }} className="headerLogo" />
-                        <Grid xs={5}>
                         <span className="listingHeader">{routes.product.title} </span>
                         </Grid>
                         <Autocomplete
@@ -498,7 +498,7 @@ const Product = () => {
                             }}
                             renderInput={(params) => (
 
-                                isMobile ?
+                                isMobile && !isTablet ?
                                     <TextField
                                         {...params}
                                         margin="dense"
@@ -564,27 +564,27 @@ const Product = () => {
                                 <Grid style={{display: "flex" , gap:"5px"}}>
                                         {productPermissions.isCreate &&
                                             <Button onClick={() => OpenProduct(null)}
-                                                    variant={isMobile ? "text" : "contained"}
+                                                    variant={isMobile && !isTablet ? "text" : "contained"}
                                                     size="small"
                                                     color="primary"
-                                                    className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                                                    startIcon={isMobile ? null : <AddOutlined />}>
+                                                    className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                                                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}>
 
-                                                {isMobile ? <MdAdd size={23}/> : "Add"}
+                                                {isMobile && !isTablet  ? <MdAdd size={23}/> : "Add"}
                                             </Button>
                                         }
                                         {productPermissions.isDelete &&
                                             <Button
-                                                variant={isMobile ? "text" : "contained"}
+                                                variant={isMobile && !isTablet ? "text" : "contained"}
                                                 color="default"
                                                 size="small"
                                                 onClick={openActions}
                                                 disabled={selectedRecords.length ? false : true}
                                                 aria-controls="action-menu"
-                                                className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                                                className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
 
                                             >
-                                                {isMobile ? "" :  "Actions" } <ExpandMore/>
+                                                {isMobile && !isTablet ? "" :  "Actions" } <ExpandMore/>
                                             </Button>
                                         }
                                         <Menu
@@ -609,7 +609,7 @@ const Product = () => {
                 </Grid>
             </div>
             {columns && frameWorkComponent ?
-                isMobile ? <CustomSwipableList
+                isMobile && !isTablet ? <CustomSwipableList
                     allowSelection={true}
                     allowSwipe={true}
                     permissions={permissions.product}

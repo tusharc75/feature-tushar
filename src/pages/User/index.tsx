@@ -32,7 +32,7 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import UserSetupDialog from "./UserSetupDialog";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ResourceTransferDialog from "../../components/ResourceTransferDialog"
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 
@@ -754,7 +754,7 @@ const User: FC = () => {
             />
           </div>
 
-          {isMobile ? <CustomSwipableList
+          {isMobile && !isTablet ? <CustomSwipableList
             allowSelection={true}
             allowSwipe={true}
             permissions={permissions.user}
