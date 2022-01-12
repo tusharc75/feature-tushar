@@ -1,7 +1,14 @@
-import PropTypes from "prop-types";
-import { Container, CssBaseline } from "@material-ui/core";
+import { Container, ContainerProps, CssBaseline } from "@material-ui/core";
 
-const CustomContainer = (props) => {
+type CustomContainerProps = {
+  children: React.ReactNode,
+  styles?: React.CSSProperties,
+  maxWidth?: any | string,
+  minHeight?: any,
+  padding?: number | string,
+};
+
+const CustomContainer = (props:CustomContainerProps) => {
   const { children, styles, maxWidth, minHeight, padding } = props;
 
   return (
@@ -27,13 +34,7 @@ const CustomContainer = (props) => {
   );
 };
 
-CustomContainer.propTypes = {
-  children: PropTypes.node.isRequired,
-  styles: PropTypes.object,
-  maxWidth: PropTypes.string,
-  minHeight: PropTypes.any,
-  padding: PropTypes.any,
-};
+
 
 export default CustomContainer;
 

@@ -12,7 +12,6 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { useData } from '../../StateProvider/Provider';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-
 import styles from './product-detail-page.module.scss'
 
 const useStyles = makeStyles((theme) => ({
@@ -137,23 +136,25 @@ export default function Products() {
     }
 
     const onAddToCartItem = (item) => {
-        let tempQuantity = 1
-        addedCartItems.some(o => {
-            if (o.productId === item._id) {
-                tempQuantity = tempQuantity + 1
-                return true
-            }
-        })
+        debugger;
 
-        axiosInstance()
-            .post(`/ecommerce/cart`, {
-                products: [{
-                    quantity: `${tempQuantity}`,
-                    productId: item._id
-                }]
-            }).then(() => {
-                fetchCart()
-            })
+        // let tempQuantity = 1
+        // addedCartItems.some(o => {
+        //     if (o.productId === item._id) {
+        //         tempQuantity = tempQuantity + 1
+        //         return true
+        //     }
+        // })
+
+        // axiosInstance()
+        //     .post(`/ecommerce/cart`, {
+        //         products: [{
+        //             quantity: `${tempQuantity}`,
+        //             productId: item._id
+        //         }]
+        //     }).then(() => {
+        //         fetchCart()
+        //     })
     }
 
     const renderTree = (nodes) => (
@@ -179,17 +180,19 @@ export default function Products() {
                                 className="w-100"
                                 exclusive
                                 onChange={(e, value) => {
-                                    setSelectedOrderType(value)
-                                    setLoading(true);
+                                    if (value) {
+                                        setSelectedOrderType(value)
+                                        setLoading(true);
 
-                                    axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${value}`).then(({ data: { data, count } }) => {
-                                        setTotalCount(count);
-                                        setProducts([...data]);
-                                    }).catch((error) => {
-                                        toastConfig.setToastConfig(error);
-                                    }).finally(() => {
-                                        setLoading(false);
-                                    });
+                                        axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${value}`).then(({ data: { data, count } }) => {
+                                            setTotalCount(count);
+                                            setProducts([...data]);
+                                        }).catch((error) => {
+                                            toastConfig.setToastConfig(error);
+                                        }).finally(() => {
+                                            setLoading(false);
+                                        });
+                                    }
                                 }}
                             >
                                 {
@@ -283,16 +286,14 @@ export default function Products() {
                             products.length !== 0 ? <div className={`${styles.product_list_container}`}>
                                 {
                                     products.map((product, index: number) => (
-                                        <ProductCard key={index} product={product}
-                                            onAddItem={onAddToCartItem} selectedOrderType={selectedOrderType}
+                                        <ProductCard key={index} product={product} selectedOrderType={selectedOrderType}
                                         />
                                     ))
                                 }
                             </div> : <div className={`${styles.product_list_container}`}>
                                 {
                                     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((_, index: number) => (
-                                        <ProductCard key={index} product={null} showSkeleton={true}
-                                            onAddItem={onAddToCartItem} selectedOrderType={selectedOrderType}
+                                        <ProductCard key={index} product={null} showSkeleton={true} selectedOrderType={selectedOrderType}
                                         />
                                     ))
                                 }
@@ -303,6 +304,7 @@ export default function Products() {
                     </InfiniteScroll>
                 </div>
             </div>
+
         </>
     )
 }
