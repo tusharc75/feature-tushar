@@ -26,7 +26,7 @@ import moment from 'moment';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 import { FaFileSignature, FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
-import { prepareDataForGrid } from "../../constants/helpers"
+import { prepareDataForGrid, DELIVERY_TICKET_MAPPED_STATUS } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -59,10 +59,6 @@ function a11yProps(index: any) {
 
 const renderedFrom = "deliveryTicketDetailInventoryPage"
 
-const mappedStatus = {
-  "Sign-off - Dispatch": "In-Transit",
-  "Sign-off - Delivery": "Delivered"
-}
 
 export default function DeliveryTicketDetail(props) {
   const history = useHistory();
@@ -390,10 +386,10 @@ export default function DeliveryTicketDetail(props) {
   };
 
   const handleChangeStatus = (label) => {
-    if (mappedStatus[label]) {
+    if (DELIVERY_TICKET_MAPPED_STATUS[label]) {
       const fieldsDataForUpdate = deliveryTicketFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       let values = getObjKeysWithValues(deliveryTicketData, fieldsDataForUpdate)
-      values["status"] = mappedStatus[label]
+      values["status"] = DELIVERY_TICKET_MAPPED_STATUS[label]
       values["_id"] = deliveryTicketData._id
       axiosInstance().put(`${deliveryTicketApi}`, values).then(({ data: { data } }) => {
         fetchDeliveryTicketData()
@@ -542,13 +538,13 @@ export default function DeliveryTicketDetail(props) {
                     : null}
                   {(deliveryTicketData?.status === "In-Transit" || deliveryTicketData?.status === "Delivered") ?
                     <Button
-                      variant={isMobile ? "text" : "contained"}
+                      variant={isMobile && !isTablet ? "text" : "contained"}
                       color="primary"
                       size="small"
                       onClick={() => setOpenSigns(true)}
-                      style={isMobile ? { color: "var(--info-darken)" } : {}}
+                      style={isMobile && !isTablet ? { color: "var(--info-darken)" } : {}}
                     >
-                      {isMobile ? <FaFileSignature size={20} /> : "View Signatures"}
+                      {isMobile && !isTablet ? <FaFileSignature size={20} /> : "View Signatures"}
                     </Button> : null
                   }
                 </DetailsPageHeader>
@@ -670,11 +666,11 @@ export default function DeliveryTicketDetail(props) {
                             color="primary"
                             type="button"
                             size="small"
-                            startIcon={isMobile ? '' : <AiFillFilePdf />}
+                            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                             disabled={downlodingFile || isOffline}
                             onClick={() => { handleViewPdf(false) }}
                           >
-                            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
+                            {isMobile && !isTablet ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
                           </Button>
                         )}
                         {permissions?.deliveryTicket?.isRead && (
@@ -683,16 +679,16 @@ export default function DeliveryTicketDetail(props) {
                             color="primary"
                             type="button"
                             size="small"
-                            startIcon={isMobile ? '' : <AiFillFilePdf />}
+                            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                             disabled={downlodingFile || isOffline}
                             onClick={() => { handleViewPdf(true) }}
                           >
-                            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
+                            {isMobile && !isTablet ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
                           </Button>
                         )}
                       </Grid>
                       <Grid item xs={12}>
-                        {isMobile ? <CustomSwipableList
+                        {isMobile && !isTablet ? <CustomSwipableList
                           allowSelection={true}
                           allowSwipe={true}
                           permissions={permissions}

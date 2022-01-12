@@ -27,10 +27,9 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { makeStyles } from '@material-ui/core/styles';
-import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { FaSuitcase } from "react-icons/fa";
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import ManageDeliveryTicket from "../DeliveryTicket/ManageDeliveryTicket";
 import AssetScrapRepairDialog from "../../components/AssetScrapRepairDialog/AssetScrapRepairDialog";
 
@@ -335,7 +334,7 @@ const RepairJobReceivingTicket = (props) => {
         <Grid item xs={12} md={12} sm={12} className="mt-3">
 
             {columns ?
-                isMobile ? <CustomSwipableList
+                isMobile && !isTablet ? <CustomSwipableList
                     allowSelection={true}
                     allowSwipe={true}
                     permissions={true}

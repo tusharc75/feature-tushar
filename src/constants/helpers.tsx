@@ -132,7 +132,7 @@ export const sidebarResource = {
   opportunity: 'Opportunity',
   field: 'Field',
   productCategory: 'Product Category',
-  productInventory: 'Product Inventory',
+  productInventory: 'Serialized Asset',
   priceTemplate: 'Price Template',
   product: 'Product',
   productTemplate: 'Product Template',
@@ -158,7 +158,7 @@ export const sidebarResource = {
   budget: 'Budget',
   marketSegment: 'Market Segment',
   quotePdfTemplate: 'Quote Pdf Template',
-  warehouse: 'Warehouse',
+  warehouse: 'Plant',
   rentalManagement: 'Rental Management',
   deliveryTicket: 'Delivery Ticket',
   pricingCondition: 'Pricing Condition',
@@ -1430,6 +1430,36 @@ export const DELIVERY_TICKET_STATUS = {
   delivered: 'Delivered',
 };
 
+export const RENTAL_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  jobPartiallyStarted: 'Job Partially Started',
+  jobStarted: 'Job Started',
+  jobPartiallyEnded: 'Job Partially Ended',
+  jobEnded: 'Job Ended',
+  readyToInvoice: 'Ready To Invoice',
+  invoiced: 'Invoiced',
+  closed: 'Closed',
+};
+
+export const DELIVERY_TICKET_MAPPED_STATUS = {
+  "Sign-off - Dispatch": DELIVERY_TICKET_STATUS.indTransit,
+  "Sign-off - Delivery": DELIVERY_TICKET_STATUS.delivered
+}
+
+export const DELIVERY_TICKET_TYPE = {
+  loading: 'Loading',
+  receiving: 'Receiving',
+};
+
+export const DELIVERY_TICKET_REFRENCE_TYPE = {
+  rentalJob: 'Rental Job',
+  transferAsset: 'Transfer Asset',
+  repairJob: 'Repair Job',
+  salesOrder: 'Sales Order',
+};
+
+
 export const asyncForEach = async (
   array: any[],
   callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>
@@ -1440,21 +1470,17 @@ export const asyncForEach = async (
 };
 
 export const resourceOptions = [
-  RESOURCE_LABEL.customerAccount,
-  RESOURCE_LABEL.customerContact,
-  RESOURCE_LABEL.account,
-  RESOURCE_LABEL.contact,
-  RESOURCE_LABEL.lead,
-  RESOURCE_LABEL.opportunity,
-  RESOURCE_LABEL.quoteBuilder,
-  RESOURCE_LABEL.rentalManagement,
-  RESOURCE_LABEL.projectStrategy,
-  RESOURCE_LABEL.repairJob,
-  RESOURCE_LABEL.purchaseOrder,
-  RESOURCE_LABEL.deliveryTicket,
-  RESOURCE_LABEL.receivingTicket,
-  RESOURCE_LABEL.transferAsset
-].filter(d => d);
+  'Customer Account',
+  'Customer Contact',
+  'Supplier Account',
+  'Supplier Contact',
+  'Lead',
+  'Opportunity',
+  'Quote',
+  'Rental Management',
+  'Loading Ticket',
+  'Project Sales'
+];
 
 export const getApi = (resource: string) => {
   switch (kebabCase(resource)) {

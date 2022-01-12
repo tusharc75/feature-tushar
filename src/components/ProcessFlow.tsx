@@ -25,7 +25,7 @@ export default function ProcessFlow(props) {
   return (
     <>
       {steps.length > 0 && (
-        isMobile ? <CustomMobileStepperOpportunities stepName={((activeStep + 1) + "/" + steps.length) + " " + steps[activeStep]?.text} nextButton={(
+        isMobile && !isTablet ? <CustomMobileStepperOpportunities stepName={((activeStep + 1) + "/" + steps.length) + " " + steps[activeStep]?.text} nextButton={(
           isProcessing ? (
             <Button
               variant="outlined"
@@ -83,9 +83,8 @@ export default function ProcessFlow(props) {
           {disableBackNext ? null : (
             <div className="actionview">
               <div className="d-flex justify-content-space-between ">
-                {activeStep > 0 &&
-                activeStep <= steps.length &&
-                !hideBackButton ? (
+                {/* {activeStep > 0 &&
+                activeStep <= steps.length  ? (
                   <Button
                     variant={isMobile ? "text" : "contained"}
                     color="primary"
@@ -99,10 +98,23 @@ export default function ProcessFlow(props) {
                   >
                     {isMobile ? "" : "Back"}
                   </Button>
-                ) : null}
+                ) : null} */}
+                <Button
+                    variant={isMobile ? "text" : "contained"}
+                    color="primary"
+                    className="mr-1"
+                    onClick={() =>
+                      handleMarkAsCompleted({ isSetBackStep: true })
+                    }
+                    disabled={isProcessing || activeStep === 0}
+                    size="small"
+                    startIcon={<IoIosArrowDropleftCircle />}
+                  >
+                    {isMobile ? "" : "Back"}
+                  </Button>
 
 
-                {activeStep < steps.length - 1 ? (
+                {/* {activeStep < steps.length - 1 ? (
                   isProcessing ? (
                     <Button
                       variant="outlined"
@@ -132,7 +144,35 @@ export default function ProcessFlow(props) {
                   )
                 ) : (
                   ""
-                )}
+                )} */}
+
+{isProcessing ? (
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      disabled={true}
+                      onClick={() => {}}
+                    >
+                      Processing...
+                    </Button>
+                  ) : (
+                    <Button
+                      variant= {isMobile ? "text" : "contained"}
+                      color="primary"
+                      size="small"
+                      disabled={
+                        !steps[activeStep + 1]?.canCompleteManually ||
+                        isProcessing
+                          ? true
+                          : false
+                      }
+                      onClick={handleMarkAsCompleted}
+                      endIcon={<IoIosArrowDroprightCircle />}
+                    >
+
+                      {activeStep === steps.length - 2 ? isMobile ? "" : "Finish" : isMobile ? "" : "Next"}
+                    </Button>
+                  )}
               </div>
             </div>
           )}

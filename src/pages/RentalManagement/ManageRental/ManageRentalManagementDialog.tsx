@@ -221,8 +221,12 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     }
                     if (isClone) {
                         const { _id, brand, createdBy, entity, history, products, status, rentalJobName, updatedBy, ...rest } = data
-                        rest.status = "New"
+                        rest['status'] = "New"
                         rest['rentalJobName'] = `RJ_${generateUniqueIdOnly()}`
+                        rest['estimateStartDate'] = new Date();
+                        rest['actualStartDate'] = new Date();
+                        rest['estimateEndDate'] = "";
+                        rest['actualEndDate'] = "";
                         setRentalData({
                             fields: fieldsDataForCreate,
                             initialValues: getObjKeysWithValues(rest, fieldsDataForCreate),
@@ -753,7 +757,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 setFieldValue={(name, value) => {
                                                                                     handleValuesChange({ [name]: value })
                                                                                     setFieldValue(name, value)
-                                                                                    if (!rentalManagementId) {
+                                                                                    if (!rentalManagementId || isClone) {
                                                                                         setFieldValue("actualStartDate", value)
                                                                                     }
                                                                                 }}
@@ -778,7 +782,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 setFieldValue={(name, value) => {
                                                                                     handleValuesChange({ [name]: value })
                                                                                     setFieldValue(name, value)
-                                                                                    if (!rentalManagementId) {
+                                                                                    if (!rentalManagementId || isClone) {
                                                                                         setFieldValue("actualEndDate", value)
                                                                                     }
                                                                                 }}

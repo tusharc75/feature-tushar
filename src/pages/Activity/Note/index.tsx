@@ -12,10 +12,10 @@ import CustomContainer from '../../../components/CustomContainer';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { GoNote } from 'react-icons/go';
 import { ExpandMore } from '@material-ui/icons';
-import { Button, Dialog, Menu, MenuItem, TextField } from '@material-ui/core';
+import { Button, Chip, Dialog, Menu, MenuItem, TextField } from '@material-ui/core';
 import { AddOutlined } from '@material-ui/icons';
 import { CreateNote } from '../../../components/Activity/Note/CreateNote';
-import { camelCase, CustomDialogTransition, getApi, getData, gridLoadingTimeout, isObjectEmpty, resourceOptions } from '../../../constants/helpers';
+import { camelCase, CustomDialogTransition, getApi, getData, gridLoadingTimeout, resourceOptions } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import styles from '../../Leads/Header.module.scss';
@@ -52,7 +52,7 @@ const Note = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords, appendRows } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([])
   const localStorageSelectedRecords = "notesPage";
@@ -65,6 +65,7 @@ const Note = () => {
 
   const columns = [
     { field: 'name', headerName: 'Title', show: true, disabled: true, primaryField: true, cellRenderer: 'nameRenderer' },
+    { field: 'relatedTo', headerName: 'Related To', show: true, disabled: true, primaryField: true, cellRenderer: 'referenceRenderer' },
     { field: 'createdByDate', headerName: 'Created At', filter: false, sortable: false, show: true, cellRenderer: 'createdAtDateRenderer' },
     { field: 'updatedByDate', headerName: 'Updated At', filter: false, sortable: false, show: true, cellRenderer: 'updatedAtDateRenderer' }
   ];
@@ -92,8 +93,31 @@ const Note = () => {
   }, [referenceId]);
 
   useEffect(() => {
+    if (!resource) return;
+    setLoadingResources(true);
+    axiosInstance()
+      .get(`${getApi(resource)}?limit=100`)
+      .then(({ data: { data } }) => {
+        if (data.length) {
+          const mappedData = data.map((_d) => getData(resource, _d));
+          setResourceData(mappedData || []);
+        }
+        setLoadingResources(false);
+      })
+      .catch((error) => {
+        setLoadingResources(false);
+      });
+
+    return () => {
+      setSelectedResourceData(null);
+      setResourceData(null);
+    };
+    // eslint-disable-next-line
+  }, [resource]);
+
+  useEffect(() => {
     fetchNotes();
-  }, [page, limit, filter, filters, sorting, selectedResourceData]);
+  }, [filter]);
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -125,6 +149,23 @@ const Note = () => {
     </span>
   );
 
+  const ReferenceRenderer = (params) => (
+    <>{params.value && params.value?.length > 0 ? params.value.map(d => {
+      return (
+        <>
+          <span >{d.name}</span>
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`${d.type}`}
+          />
+        </>
+      )
+    })
+      : <NoDataCell />
+    }
+    </>
+  );
   const CreatedAtDateRenderer = (params) => <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(params.value)}</span>;
 
   const UpdatedAtDateRenderer = (params) =>
@@ -143,76 +184,25 @@ const Note = () => {
   );
   const frameworkComponents = {
     nameRenderer: NameRenderer,
+    referenceRenderer: ReferenceRenderer,
     createdAtDateRenderer: CreatedAtDateRenderer,
     updatedAtDateRenderer: UpdatedAtDateRenderer,
     actionsRenderer: ActionsRenderer
   };
 
-  const getQueryString = () => {
-    let deepFilter = `&page=${page}&limit=${limit}`;
-
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
-    }
-
-    if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-    }
-
-    if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
-    }
-    if (resource && camelCase(resource) !== "" && selectedResourceData?.id) {
-      deepFilter = `${deepFilter}&"resource"="${camelCase(resource)}"&resourceId="${selectedResourceData.id}"`
-    }
-    return deepFilter;
-  };
-
-  useEffect(() => {
-    if (!resource) return;
-    setLoadingResources(true);
-    axiosInstance()
-      .get(`${getApi(resource)}?limit=100`)
-      .then(({ data: { data } }) => {
-        if (data.length) {
-          const mappedData = data.map((_d) => getData(resource, _d));
-          setResourceData(mappedData || []);
-        }
-        setLoadingResources(false);
-      })
-      .catch((error) => {
-        setLoadingResources(false);
-      });
-
-    return () => {
-      setSelectedResourceData(null);
-      setResourceData(null);
-    };
-    // eslint-disable-next-line
-  }, [resource]);
-
-
   const fetchNotes = async () => {
     // setLoading(true)
-    const queryString = getQueryString();
+
     dispatch({ type: 'loading', loading: true });
 
     if (gridApi) {
       gridApi.setRowData([]);
     }
 
-    await GetNotes(JSON.stringify(filter), queryString)
+    await GetNotes(JSON.stringify(filter))
       .then(({ data }) => {
         let rows = data.map((u) => {
-          const { createdBy, updatedBy, relatedTo, ...restProperties } = u;
+          const { createdBy, updatedBy, ...restProperties } = u;
 
           let res = {
             ...restProperties,
@@ -332,11 +322,11 @@ const Note = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={6} md={6} sm={12} className="d-flex align-items-center gap-1">
-              <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title} ({dataRows.length})</span>
+              <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title}</span>
               <Autocomplete
                 options={resourceOptions}
                 getOptionLabel={(option) => option}
-                style={{ width: "250px" }}
+                style={{ width: "200px" }}
                 value={resource}
                 onChange={(event, newValue) => {
                   setResource(newValue);
@@ -356,10 +346,16 @@ const Note = () => {
                   options={resourceData}
                   getOptionLabel={(option: any) => option.name}
                   getOptionSelected={(option: any, value: any) => option.name === value.name}
-                  style={{ width: "250px" }}
+                  style={{ width: "200px" }}
                   value={selectedResourceData}
                   onChange={(event, newValue) => {
                     setSelectedResourceData(newValue);
+                    if (newValue?.id) {
+                      setFilter((prevState) => ([...prevState, { _id: newValue.id, type: camelCase(resource), name: newValue.name }]))
+                    }
+                    else {
+                      setFilter([])
+                    }
                   }}
                   size="small"
                   renderInput={(params) => <TextField {...params} label={`Select ${resource}`} variant="outlined" />}
@@ -474,7 +470,7 @@ const Note = () => {
             allowAction={true}
             allowSelection={true}
             actionWidth={100}
-            isClientSideGrid={false}
+            isClientSideGrid={true}
             loading={loading}
             renderedFrom="notesPage"
             refreshGrid={fetchNotes}

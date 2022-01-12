@@ -15,7 +15,7 @@ import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import AdditionalCostDialog from "./AdditionalCostDialog";
 import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
@@ -171,7 +171,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                     </Button>
                 </Box>
             </Box>
-            {columns && frameWorkComponent ? isMobile ?
+            {columns && frameWorkComponent ? isMobile && !isTablet ?
                 <CustomSwipableList
                     allowSelection={true}
                     allowSwipe={true}
