@@ -1,10 +1,10 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { Grid, Button, TextField, Box } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { List } from '@material-ui/icons';
 import { camelCase, startCase } from 'lodash';
-import axios from 'axios'
+import axios from 'axios';
 import styles from '../Leads/Header.module.scss';
 
 import routes from './../../components/Helpers/Routes';
@@ -38,6 +38,7 @@ const Report = () => {
     state: { permissions }
   } = useData();
   let { resource } = useParams();
+  let history = useHistory();
 
   const status = {
     rentalManagement: simplifyStatus(RENTAL_STATUS),
@@ -57,7 +58,7 @@ const Report = () => {
   const [columns, setColumns] = React.useState([]);
   const [gridApi, setGridApi] = React.useState(null);
   const [state, dispatch] = React.useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes} = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -120,7 +121,7 @@ const Report = () => {
    * @returns none if no data selected
    */
   const fetchResourceData = () => {
-    if (selectedData && Object.keys(selectedData).length === 0 || !selectedData) return;
+    if ((selectedData && Object.keys(selectedData).length === 0) || !selectedData) return;
     // if(axios.isCancel) {
     //   cancelTokenSource.cancel()
     // }
@@ -156,6 +157,12 @@ const Report = () => {
       .catch((err) => toastConfig.setToastConfig(err));
   };
 
+  const workingPage = ['productInventory', 'rentalManagement'];
+
+  if (!workingPage.includes(resourceCamelCase)) {
+    history.goBack();
+  }
+
   return (
     <div>
       <Grid container className="headerbox">
@@ -183,26 +190,27 @@ const Report = () => {
         </Grid>
       </Grid>
       <CustomContainer>
-        <div className="header-panel">
-          <div>
-            <Grid container className={styles.rental_header_layout} spacing={1}>
-              <Grid item xs={2} sm={2}>
-                <Autocomplete
-                  options={resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : sidebarResource[_r]))}
-                  limitTags={2}
-                  disableListWrap
-                  ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
-                  disableCloseOnSelect={false}
-                  multiple
-                  value={selectedResource ?? []}
-                  onChange={(_, val) => setSelectedResource(val)}
-                  fullWidth
-                  getOptionSelected={(option, val) => option === val}
-                  getOptionLabel={(option) => option}
-                  renderInput={(params) => <TextField {...params} variant="outlined" label="Select Resource" size="small" />}
-                />
-              </Grid>
-              {/* <Grid item xs={12} sm={2}>
+        {workingPage.includes(resourceCamelCase) && (
+          <>
+            <div className="header-panel">
+              <Grid container className={styles.rental_header_layout} spacing={1}>
+                <Grid item xs={2} sm={2}>
+                  <Autocomplete
+                    options={resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : sidebarResource[_r]))}
+                    limitTags={2}
+                    disableListWrap
+                    ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
+                    disableCloseOnSelect={false}
+                    multiple
+                    value={selectedResource ?? []}
+                    onChange={(_, val) => setSelectedResource(val)}
+                    fullWidth
+                    getOptionSelected={(option, val) => option === val}
+                    getOptionLabel={(option) => option}
+                    renderInput={(params) => <TextField {...params} variant="outlined" label="Select Resource" size="small" />}
+                  />
+                </Grid>
+                {/* <Grid item xs={12} sm={2}>
                 <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                   <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile ? styles.content_box : ''}>
                     <HideWhenOffline>
@@ -219,68 +227,69 @@ const Report = () => {
                   </Grid>
                 </Box>
               </Grid> */}
-              <Grid item xs={12} sm={8}>
-                <Grid container spacing={1}>
-                  {selectedResource &&
-                    selectedResource.length > 0 &&
-                    selectedResource.map((data: string) => {
-                      data = data === 'Plant' ? 'Warehouse' : data;
-                      const options = data === 'Status' ? status[resourceCamelCase] : dropdownList && dropdownList[data] ? dropdownList[data] : [];
+                <Grid item xs={12} sm={8}>
+                  <Grid container spacing={1}>
+                    {selectedResource &&
+                      selectedResource.length > 0 &&
+                      selectedResource.map((data: string) => {
+                        data = data === 'Plant' ? 'Warehouse' : data;
+                        const options = data === 'Status' ? status[resourceCamelCase] : dropdownList && dropdownList[data] ? dropdownList[data] : [];
 
-                      return (
-                        <Grid item xs={12} sm={4} md={3} key={data}>
-                          <Autocomplete
-                            options={options}
-                            limitTags={2}
-                            disableCloseOnSelect={false}
-                            multiple
-                            value={selectedData && selectedData[data] ? selectedData[data] : []}
-                            onChange={(_, val) => setSelectedData({ ...selectedData, [data]: val })}
-                            fullWidth
-                            getOptionSelected={(option, val) => (data === 'Status' ? option === val : option.optionValue === val.optionValue)}
-                            getOptionLabel={(option) => (data === 'Status' ? option : option.optionLabel)}
-                            renderInput={(params) => (
-                              <TextField {...params} variant="outlined" label={data === 'Warehouse' ? 'Plant' : data} size="small" />
-                            )}
-                          />
-                        </Grid>
-                      );
-                    })}
+                        return (
+                          <Grid item xs={12} sm={4} md={3} key={data}>
+                            <Autocomplete
+                              options={options}
+                              limitTags={2}
+                              disableCloseOnSelect={false}
+                              multiple
+                              value={selectedData && selectedData[data] ? selectedData[data] : []}
+                              onChange={(_, val) => setSelectedData({ ...selectedData, [data]: val })}
+                              fullWidth
+                              getOptionSelected={(option, val) => (data === 'Status' ? option === val : option.optionValue === val.optionValue)}
+                              getOptionLabel={(option) => (data === 'Status' ? option : option.optionLabel)}
+                              renderInput={(params) => (
+                                <TextField {...params} variant="outlined" label={data === 'Warehouse' ? 'Plant' : data} size="small" />
+                              )}
+                            />
+                          </Grid>
+                        );
+                      })}
+                  </Grid>
+                </Grid>
+                <Grid item xs={12} sm={3} md={2}>
+                  <Box display="flex" justifyContent="flex-end" alignItems="center">
+                    <Button onClick={fetchResourceData} startIcon={<List />} color="primary" variant="contained" size="small" disableElevation>
+                      Show
+                    </Button>
+                  </Box>
                 </Grid>
               </Grid>
-              <Grid item xs={12} sm={3} md={2}>
-                <Box display="flex" justifyContent="flex-end" alignItems="center">
-                  <Button onClick={fetchResourceData} startIcon={<List />} color="primary" variant="contained" size="small" disableElevation>
-                    Show
-                  </Button>
-                </Box>
-              </Grid>
-            </Grid>
-          </div>
-        </div>
-        <div>
-          {Object.keys(frameWorkComponent).length > 0 && (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={100}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              allowSelection={false}
-              isClientSideGrid={true}
-              allowAction={false}
-              refreshGrid={fetchResourceData}
-              showOnlyShowFilteredRecordSwitch={true}
-            />
-          )}
-        </div>
+            </div>
+            <div>
+              {Object.keys(frameWorkComponent).length > 0 && (
+                <CustomAgGrid
+                  columns={columns}
+                  dataRows={dataRows}
+                  frameworkComponents={frameWorkComponent}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={rowCount}
+                  limit={limit}
+                  pageSizes={pageSizes}
+                  page={page}
+                  actionWidth={100}
+                  loading={loading}
+                  renderedFrom={renderedFrom}
+                  allowSelection={false}
+                  isClientSideGrid={true}
+                  allowAction={false}
+                  refreshGrid={fetchResourceData}
+                  showOnlyShowFilteredRecordSwitch={true}
+                />
+              )}
+            </div>
+          </>
+        )}
       </CustomContainer>
     </div>
   );
