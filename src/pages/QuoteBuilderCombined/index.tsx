@@ -45,7 +45,7 @@ import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEnt
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { quoteStepColors } from '../../constants/helpers';
 import InfiniteScroll from "react-infinite-scroll-component";
 import { FaSuitcase } from "react-icons/fa";
@@ -860,7 +860,7 @@ const QuoteBuilders = () => {
             </QuoteHeader>
           </div>
           {
-            isMobile ?
+            isMobile && !isTablet ?
               <CustomSwipableList
                 allowSelection={true}
                 allowSwipe={true}

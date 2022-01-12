@@ -231,6 +231,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                          
                         </Grid>
                         <Grid item xs={12} md={5} sm={6}>
+                          
                           {id && (
                             <Fragment>
                               <Box mt={1}>

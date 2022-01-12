@@ -34,7 +34,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { MdAccountCircle } from "react-icons/md";
 import {AiFillCrown, MdAdd} from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { prepareDataForGrid } from "../../constants/helpers";
 
 let productTemplateTimeout;
@@ -296,10 +296,10 @@ const ProductTemplate: FC = () => {
             <CustomContainer>
                 <div className="header-panel">
                     <Grid container className={styles.filter_side_container}>
-                        <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
+                        <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center gap-1">
                             <ImInsertTemplate size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.productTemplate.title}</span>
                         </Grid>
-                        <Grid md={6} sm={6} xs={12} container className={styles.filter_side}>
+                        <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
                             <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
 
                                 <Grid style={{display: "flex", flex:1}}>
@@ -314,23 +314,23 @@ const ProductTemplate: FC = () => {
 
                                 <Grid style={{display: "flex" , gap:"5px"}}>
                                         {productTemplatePermissions.isCreate &&
-                                            <Button onClick={() => CreateNew("0", false)} variant={isMobile ? "text" : "contained"} size="small" color="primary" className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                                                    startIcon={isMobile ? null : <AddOutlined />}>
-                                                {isMobile ? <MdAdd size={23}/> : "Add"}
+                                            <Button onClick={() => CreateNew("0", false)} variant={isMobile && !isTablet ? "text" : "contained"} size="small" color="primary" className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                                                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}>
+                                                {isMobile && !isTablet ? <MdAdd size={23}/> : "Add"}
                                             </Button>
                                         }
                                         {productTemplatePermissions.isDelete &&
                                             <Button
-                                                variant={isMobile ? "text" : "contained"}
+                                                variant={isMobile && !isTablet ? "text" : "outlined"}
                                                 color="default"
                                                 size="small"
                                                 onClick={openActions}
                                                 disabled={selectedRecords.length ? false : true}
                                                 aria-controls="action-menu"
-                                                className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                                                className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
 
 
-                                            >{isMobile ? "" :  "Actions" } <ExpandMore/>
+                                            >{isMobile && !isTablet ? "" :  "Actions" } <ExpandMore/>
                                             </Button>
                                         }
                                         <Menu
@@ -352,7 +352,7 @@ const ProductTemplate: FC = () => {
                         </Grid>
                     </Grid>
                 </div>
-                {isMobile ? <CustomSwipableList
+                {isMobile && !isTablet ? <CustomSwipableList
                     allowSelection={true}
                     allowSwipe={true}
                     permissions={productTemplatePermissions}

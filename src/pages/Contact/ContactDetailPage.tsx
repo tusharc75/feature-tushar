@@ -17,7 +17,8 @@ import {
   sidebarResource,
   customerAccount,
   processFieldName,
-  defaultActivityShow
+  defaultActivityShow,
+  userType
 } from './../../constants/helpers';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -712,8 +713,8 @@ const ContactDetailsPage = (props) => {
               // style={{ marginTop: "150px", minHeight: "200px" }}
               showHeading={true}
             >
-              {/* {
-                !Boolean('isUserExist' in contactData && contactData.isUserExist) &&
+              {
+                user.user?.userType === userType.brandAdmin && !contactData?.isUserExist &&
                 <Button
                   color="primary"
                   size="small"
@@ -722,7 +723,7 @@ const ContactDetailsPage = (props) => {
                 >
                   Give Portal Access
                 </Button>
-              } */}
+              }
               {contactPermissions.isUpdate && canEdit ? (
                 <Button
                   id="detailEditButton"

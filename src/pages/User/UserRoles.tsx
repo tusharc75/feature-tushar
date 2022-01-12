@@ -53,7 +53,7 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                     primary={
                       <Typography
                         title={obj.name || ""}
-                        className="text-truncate"
+                        className={permissions?.role?.isRead ? "link text-truncate" : "text-truncate"}
                       >
                         {
                           permissions.role.isRead ?

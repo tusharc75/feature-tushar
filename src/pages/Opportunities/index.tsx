@@ -29,7 +29,7 @@ import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticFiel
 import { MdAccountCircle, MdAdd } from "react-icons/md";
 import { AiFillCrown } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { FaSuitcase } from 'react-icons/fa';
 import useColumns from '../../constants/useColumns';
 import { classNames } from 'react-easy-crop/helpers';
@@ -557,7 +557,7 @@ const Opportunities = () => {
 
         {
           Object.keys(frameWorkComponent).length > 0 ?
-            isMobile ? 
+            isMobile && !isTablet ? 
               
             
               <CustomSwipableList
