@@ -181,6 +181,9 @@ export default function Products() {
                                 exclusive
                                 onChange={(e, value) => {
                                     if (value) {
+                                        setProducts([]);
+                                        setTotalCount(0);
+                                        
                                         setSelectedOrderType(value)
                                         setLoading(true);
 

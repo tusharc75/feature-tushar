@@ -321,17 +321,9 @@ function MyOwnCart() {
                                   <b>Pricing Method:</b> {item.pricingMethod}
                                 </Grid>
                               }
-
                             </Grid>
 
                             <Grid container className="mt-4 mb-3">
-                              <Grid item xs={12}>
-                                <Typography variant="h5">{item?.currencyWithFormat}</Typography>
-                              </Grid>
-                            </Grid>
-
-
-                            <Grid container className="my-3">
                               <Grid item xs={6}>
                                 <PlusMinusTextboxComponent
                                   inputTextLabel="Quantity"
@@ -343,6 +335,13 @@ function MyOwnCart() {
                                     axiosInstance().put(`/ecommerce/cart`, { _id: item.cartId, qty: parseInt(value) }).then(() => {
                                       items[item.indexOfProduct].qty = parseInt(value);
                                       setCartProducts([...items]);
+
+                                      toastConfig.setToastConfig({
+                                        open: true,
+                                        type: "success",
+                                        message: "Quantity updated successfully"
+                                      });
+
                                     }).catch((error) => {
                                       toastConfig.setToastConfig(error);
                                       dispatch({ type: SET_CART, payload: [...items] });
@@ -352,6 +351,13 @@ function MyOwnCart() {
                                 />
                               </Grid>
                             </Grid>
+
+                            <Grid container className="my-3">
+                              <Grid item xs={12}>
+                                <Typography variant="h5">{item?.currencyWithFormat}</Typography>
+                              </Grid>
+                            </Grid>
+
 
                           </div>
                         </div>
@@ -384,10 +390,24 @@ function MyOwnCart() {
 
                   <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
 
-                  <p className="d-flex align-items-center gap-2 justify-content-space-between">
-                    <h4>Subtotal <span>({totalCount} items) </span></h4>
-                    <h4>{totalPrice ?? "-"}</h4>
-                  </p>
+                  <h4>Subtotal <span>({totalCount} items) </span></h4>
+
+                  <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
+
+                  {
+                    cartProducts.map(m => (
+                      <div key={m._id} className="d-flex gap-3 align-items-center justify-content-space-between">
+                        <div className="d-flex gap-2 align-items-center">
+                          <p>{m.productName}</p>
+                          <Chip size="small" label={ORDER_TYPES[m?.orderType]?.key} color="primary" />
+                        </div>
+
+                        <div>{formatAmountWithCurrency(m.currency, m.rate * m.qty)?.fullFormatAmount}</div>
+                      </div>
+                    ))
+                  }
+
+                  <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
 
                 </div>
 

@@ -47,7 +47,7 @@ const TYPES = {
   endDate: "END_DATE",
   unitAndPricingMethod: "UNIT",
   indexOfProductInCart: "INDEX_OF_PRODUCT_IN_CART",
-  updateWholePaload: "UPDATE_WHOLE_PALOAD",
+  updateWholePayload: "UPDATE_WHOLE_PALOAD",
 }
 
 const initialData = {
@@ -72,7 +72,7 @@ const reducer = (data = initialData, action) => {
     case TYPES.indexOfProductInCart:
       return { ...data, indexOfProductInCart: action.payload };
 
-    case TYPES.updateWholePaload:
+    case TYPES.updateWholePayload:
       return { ...data, ...action.payload };
 
     default:
@@ -126,7 +126,7 @@ export default function ProductDetails() {
 
       if (indexOfProductInCart > -1) {
         dispatchData({
-          type: TYPES.updateWholePaload,
+          type: TYPES.updateWholePayload,
           payload: {
             selectedUnit: cartItems[indexOfProductInCart].unit,
             selectedPricingMethod: cartItems[indexOfProductInCart].pricingMethod,
