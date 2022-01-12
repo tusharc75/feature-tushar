@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { Grid, Button, TextField, Box } from '@material-ui/core';
+import { Grid, Button, TextField, Box, useMediaQuery, useTheme } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { List } from '@material-ui/icons';
 import { camelCase, startCase } from 'lodash';
@@ -27,11 +27,13 @@ const resourcesSelect = {
   productInventory: ['productCategory', 'product', 'status']
 };
 
-const cancelTokenSource = axios.CancelToken.source();
+let cancelTokenSource = null;
 
 const simplifyStatus = (statusType: any) => Object.values(statusType).map((status: string) => status);
 
 const Report = () => {
+  const theme = useTheme();
+  const isExtraSmall = useMediaQuery(theme.breakpoints.down('xs'));
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
@@ -122,9 +124,10 @@ const Report = () => {
    */
   const fetchResourceData = () => {
     if ((selectedData && Object.keys(selectedData).length === 0) || !selectedData) return;
-    // if(axios.isCancel) {
-    //   cancelTokenSource.cancel()
-    // }
+    if (cancelTokenSource) {
+      cancelTokenSource.cancel();
+    }
+    cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
@@ -154,7 +157,11 @@ const Report = () => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
       })
-      .catch((err) => toastConfig.setToastConfig(err));
+      .catch((err) => {
+        if (!axios.isCancel(err)) {
+          toastConfig.setToastConfig(err);
+        }
+      });
   };
 
   const workingPage = ['productInventory', 'rentalManagement'];
@@ -194,8 +201,9 @@ const Report = () => {
           <>
             <div className="header-panel">
               <Grid container className={styles.rental_header_layout} spacing={1}>
-                <Grid item xs={2} sm={2}>
+                <Grid item xs={12} md={2}>
                   <Autocomplete
+                    style={{ maxWidth: isExtraSmall ? '100%' : 300 }}
                     options={resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : sidebarResource[_r]))}
                     limitTags={2}
                     disableListWrap
@@ -227,7 +235,7 @@ const Report = () => {
                   </Grid>
                 </Box>
               </Grid> */}
-                <Grid item xs={12} sm={8}>
+                <Grid item xs={12} md={8}>
                   <Grid container spacing={1}>
                     {selectedResource &&
                       selectedResource.length > 0 &&
@@ -236,11 +244,13 @@ const Report = () => {
                         const options = data === 'Status' ? status[resourceCamelCase] : dropdownList && dropdownList[data] ? dropdownList[data] : [];
 
                         return (
-                          <Grid item xs={12} sm={4} md={3} key={data}>
+                          <Grid item xs={12} sm={4} key={data}>
                             <Autocomplete
                               options={options}
                               limitTags={2}
                               disableCloseOnSelect={false}
+                              disableListWrap
+                              ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
                               multiple
                               value={selectedData && selectedData[data] ? selectedData[data] : []}
                               onChange={(_, val) => setSelectedData({ ...selectedData, [data]: val })}
@@ -256,7 +266,7 @@ const Report = () => {
                       })}
                   </Grid>
                 </Grid>
-                <Grid item xs={12} sm={3} md={2}>
+                <Grid item xs={12} md={2}>
                   <Box display="flex" justifyContent="flex-end" alignItems="center">
                     <Button onClick={fetchResourceData} startIcon={<List />} color="primary" variant="contained" size="small" disableElevation>
                       Show
