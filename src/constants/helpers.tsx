@@ -1440,21 +1440,17 @@ export const asyncForEach = async (
 };
 
 export const resourceOptions = [
-  RESOURCE_LABEL.customerAccount,
-  RESOURCE_LABEL.customerContact,
-  RESOURCE_LABEL.account,
-  RESOURCE_LABEL.contact,
-  RESOURCE_LABEL.lead,
-  RESOURCE_LABEL.opportunity,
-  RESOURCE_LABEL.quoteBuilder,
-  RESOURCE_LABEL.rentalManagement,
-  RESOURCE_LABEL.projectStrategy,
-  RESOURCE_LABEL.repairJob,
-  RESOURCE_LABEL.purchaseOrder,
-  RESOURCE_LABEL.deliveryTicket,
-  RESOURCE_LABEL.receivingTicket,
-  RESOURCE_LABEL.transferAsset
-].filter(d => d);
+  'Customer Account',
+  'Customer Contact',
+  'Supplier Account',
+  'Supplier Contact',
+  'Lead',
+  'Opportunity',
+  'Quote',
+  'Rental Management',
+  'Loading Ticket',
+  'Project Sales'
+];
 
 export const getApi = (resource: string) => {
   switch (kebabCase(resource)) {

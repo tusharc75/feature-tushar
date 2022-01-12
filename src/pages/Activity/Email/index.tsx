@@ -8,7 +8,7 @@ import { GetReferenceName, GetEmails } from '../../../axios/activity';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import { useData } from '../../../StateProvider/Provider';
 import CustomContainer from '../../../components/CustomContainer';
-import { Button, MenuItem, Menu, Typography, Tooltip, IconButton, TextField } from '@material-ui/core';
+import { Button, MenuItem, Menu, Typography, Tooltip, IconButton, TextField, Chip } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import axiosInstance from '../../../axios/axiosInstance';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -36,6 +36,7 @@ import { AiFillCrown, MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
 
 const tabs = {
   Inbox: 1,
@@ -79,6 +80,7 @@ const Email = () => {
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [columns] = useState([
     { field: 'to', headerName: 'Recipient', show: true, disabled: true, cellRenderer: 'recipentRenderer' },
+    { field: 'relatedTo', headerName: 'Related To', show: true, disabled: true, primaryField: true, cellRenderer: 'referenceRenderer' },
     {
       field: 'subject',
       headerName: 'Subject',
@@ -129,7 +131,7 @@ const Email = () => {
 
   useEffect(() => {
     fetchEmails();
-  }, [page, limit, filters, filter, sorting, selectedResourceData]);
+  }, [page, limit, filters, filter, sorting]);
 
   useEffect(() => {
     if (!resource) return;
@@ -253,10 +255,29 @@ const Email = () => {
     </div>
   );
 
+  const ReferenceRenderer = (params) => (
+    <>{params.value && params.value?.length > 0 ? params.value.map(d => {
+      return (
+        <>
+          <span >{d.name}</span>
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`${d.type}`}
+          />
+        </>
+      )
+    })
+      : <NoDataCell />
+    }
+    </>
+  );
+
   const CreatedByDateRenderer = (params) => <span className={emailStyles.emailCreatedAt}>{displayDate(params.data?.createdByDate)}</span>;
 
   const frameworkComponents = {
     recipentRenderer: RecipentRenderer,
+    referenceRenderer: ReferenceRenderer,
     subjectRenderer: SubjectRenderer,
     messageRenderer: MessageRenderer,
     createdByDate: CreatedByDateRenderer,
@@ -287,10 +308,6 @@ const Email = () => {
 
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
-    }
-
-    if (resource && camelCase(resource) !== "" && selectedResourceData?.id) {
-      deepFilter = `${deepFilter}&"resource"="${camelCase(resource)}"&resourceId="${selectedResourceData.id}"`
     }
     return deepFilter;
   };
@@ -409,6 +426,12 @@ const Email = () => {
                   value={selectedResourceData}
                   onChange={(event, newValue) => {
                     setSelectedResourceData(newValue);
+                    if (newValue?.id) {
+                      setFilter((prevState) => ([...prevState, { _id: newValue.id, type: camelCase(resource), name: newValue.name }]))
+                    }
+                    else {
+                      setFilter([])
+                    }
                   }}
                   size="small"
                   renderInput={(params) => <TextField {...params} label={`Select ${resource}`} variant="outlined" />}
