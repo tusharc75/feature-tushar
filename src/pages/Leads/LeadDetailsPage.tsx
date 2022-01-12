@@ -393,24 +393,24 @@ const LeadDetailsPage = () => {
                 >
                   {leadsPermissions.isUpdate && allowedToEdit && (
                     <Button
-                        variant={isMobile ? "text" : "contained"}
+                        variant={isMobile && !isTablet ? "text" : "contained"}
                         color="primary"
                         size="small"
                         onClick={handleOpneUpdateDialog}
-                        className={isMobile ? accountClass.mobile_button_layout : ""}
-                        style={isMobile ? {color:"#43aeaa"} : {}}
+                        className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                        style={isMobile && !isTablet ? {color:"#43aeaa"} : {}}
                     >
-                      {isMobile ? <BiEdit size={20}/> : "Edit"}
+                      {isMobile && !isTablet ? <BiEdit size={20}/> : "Edit"}
                     </Button>
                   )}
                   {!isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && (
                     <>
                       <Button
-                          variant={isMobile ? "text" : "contained"}
+                          variant={isMobile && !isTablet ? "text" : "contained"}
                         color="primary"
                         size="small"
-                          className={isMobile ? accountClass.mobile_button_layout : ""}
-                          style={isMobile ? {color:"var(--warning-light)" , borderColor:"var(--warning-light)"} : {}}
+                          className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                          style={isMobile && !isTablet ? {color:"var(--warning-light)" , borderColor:"var(--warning-light)"} : {}}
                         onClick={() => {
                           const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter((d) => d).join(' ');
                           setConvertLeadToOpportunityConfirmationDialog({
@@ -421,11 +421,11 @@ const LeadDetailsPage = () => {
                           });
                         }}
                       >
-                        {isMobile ? <FaFunnelDollar size={19}/> : "Convert Lead To Opportunity"}
+                        {isMobile && !isTablet ? <FaFunnelDollar size={19}/> : "Convert Lead To Opportunity"}
                       </Button>
                     </>
                   )}
-                  {leadsPermissions.isDelete && allowedToDelete && <DeleteButton text={isMobile ? <MdDelete size={20}/> : "Delete"} onClick={() => setShowConfirmBox(true)} className={isMobile ? accountClass.mobile_button_layout : ""}/>}
+                  {leadsPermissions.isDelete && allowedToDelete && <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20}/> : "Delete"} onClick={() => setShowConfirmBox(true)} className={isMobile  ? accountClass.mobile_button_layout : ""}/>}
                 </DetailsPageHeader>
               )}
 

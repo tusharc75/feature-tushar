@@ -25,7 +25,9 @@ import {
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { useHistory } from "react-router-dom";
 import { groupBy } from 'lodash';
-import { isMobile } from "react-device-detect";
+import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
+import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
+import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
@@ -340,7 +342,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     </Box>
     <Grid item xs={12} md={12} sm={12} className="mt-3">
       {columns ?
-        isMobile ?
+        isMobile && !isTablet ?
           <CustomSwipableList
             allowSelection={true}
             allowSwipe={true}
