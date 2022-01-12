@@ -6,7 +6,7 @@ import routes from "../../components/Helpers/Routes";
 import { prepareDataForGrid } from "../../constants/helpers"
 import useColumns, { getFrameworkComponents, getStaticFields } from "../../constants/useColumns"
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 
@@ -86,7 +86,7 @@ const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQu
   return (
     <>
       {
-        isMobile ? <CustomSwipableList
+        isMobile && !isTablet ? <CustomSwipableList
           allowSelection={true}
           allowSwipe={true}
           permissions={permissions.product}
