@@ -202,7 +202,7 @@ const Note = () => {
     await GetNotes(JSON.stringify(filter))
       .then(({ data }) => {
         let rows = data.map((u) => {
-          const { createdBy, updatedBy, relatedTo, ...restProperties } = u;
+          const { createdBy, updatedBy, ...restProperties } = u;
 
           let res = {
             ...restProperties,
@@ -322,7 +322,7 @@ const Note = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={6} md={6} sm={12} className="d-flex align-items-center gap-1">
-              <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title} ({dataRows.length})</span>
+              <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title}</span>
               <Autocomplete
                 options={resourceOptions}
                 getOptionLabel={(option) => option}
