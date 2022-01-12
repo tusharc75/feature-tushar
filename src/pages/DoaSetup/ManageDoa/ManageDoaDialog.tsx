@@ -1,8 +1,8 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Box, Button, TextField, Grid, Container, DialogContent, IconButton, ButtonGroup, makeStyles, InputAdornment, Chip } from '@material-ui/core';
+import { Box, Button, TextField, Grid, Container, DialogContent, IconButton, ButtonGroup, makeStyles, InputAdornment, Chip, Tooltip, FormControlLabel, Switch } from '@material-ui/core';
 import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { Formik, Form, Field, FieldArray, FormikProps } from 'formik';
-import { Add, Delete } from '@material-ui/icons';
+import { Add, Delete, SyncDisabled } from '@material-ui/icons';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -84,13 +84,14 @@ const DoaDialog = ({
   const fetchDoa = useCallback(() => {
     doa.length > 0
       ? setUsers(doa.map((d) => ({ ...d, user: d.user.map((e) => e._id).toString() })))
-      : setUsers([{ user: tempUserList ? tempUserList[0]?.name : '', amount: 0 }]);
+      : setUsers([{ user: tempUserList ? tempUserList[0]?.name : '', amount: 0, disable: false }]);
   }, []);
 
   useEffect(() => {
     fetchDoa();
   }, [fetchDoa]);
 
+  
   const handleSubmit = async (values) => {
     let doaArray;
     if (selectedType === 2) {
@@ -100,7 +101,8 @@ const DoaDialog = ({
         .map((item) => {
           return {
             user: item.user.split(','),
-            amount: item.amount ? Number(item.amount) : 0
+            amount: item.amount ? Number(item.amount) : 0,
+            disable: item.disable
           };
         });
       let self_index = doaArray.findIndex((x) => x.user === selectedEntity[0] || x.user === 'self');
@@ -150,11 +152,11 @@ const DoaDialog = ({
       if (newFilter === 'Sequence') {
         doa.length > 0
           ? setUsers(doa.map((d) => ({ ...d, user: d.user.map((e) => e._id).toString() })))
-          : setUsers([{ user: tempUserList ? tempUserList[0]?.id : '', amount: 0 }]);
+          : setUsers([{ user: tempUserList ? tempUserList[0]?.id : '', amount: 0, disable: false }]);
       } else {
         doa.length > 0
           ? setUsers(doa.map((d) => ({ ...d, user: d.user.map((e) => e._id).toString() })))
-          : setUsers([{ user: tempUserList ? tempUserList[0]?.id : '', amount: 0 }]);
+          : setUsers([{ user: tempUserList ? tempUserList[0]?.id : '', amount: 0, disable: false }]);
       }
       formikRef.current?.resetForm();
     }
@@ -259,7 +261,7 @@ const DoaDialog = ({
             </Grid>
           </Grid>
           <div className={classes.doaUsersStyle}>
-            <Formik initialValues={{ users: users }} enableReinitialize={true} innerRef={formikRef} onSubmit={() => {}}>
+            <Formik initialValues={{ users: users }} enableReinitialize={true} innerRef={formikRef} onSubmit={() => { }}>
               {({ values }) => (
                 <>
                   <DialogContent className={classes.contentBox}>
@@ -308,11 +310,11 @@ const DoaDialog = ({
                                               options={
                                                 selectedType === 2
                                                   ? userList?.filter(
-                                                      (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
-                                                    )
+                                                    (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
+                                                  )
                                                   : tempUserList?.filter(
-                                                      (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
-                                                    )
+                                                    (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
+                                                  )
                                               }
                                               getOptionLabel={(option: any) => (option?.name ? option?.name : '')}
                                               onChange={(event, newValue) => {
@@ -371,13 +373,13 @@ const DoaDialog = ({
                                             </Grid>
                                           )}
                                           <Grid item md={2}>
-                                            <ButtonGroup size="small" aria-label="small outlined button group">
+                                            <ButtonGroup size="medium" aria-label="small outlined button group">
                                               <IconButton
                                                 size="small"
                                                 aria-label="add"
                                                 disabled={values.users.length === userList.length}
                                                 onClick={() => {
-                                                  arrayHelpers.insert(index + 1, { user: '', amount: 0 });
+                                                  arrayHelpers.insert(index + 1, { user: '', amount: 0, disable: false });
                                                 }}
                                               >
                                                 <Add />
@@ -390,6 +392,20 @@ const DoaDialog = ({
                                               >
                                                 <Delete />
                                               </IconButton>
+                                              <FormControlLabel
+                                                key={1}
+                                                control={
+                                                  <Switch
+                                                    checked={userVal.disable}
+                                                    name="disable"
+                                                    onChange={(e) => {
+                                                      arrayHelpers.replace(index, { ...values.users[index],
+                                                        ['disable']: !userVal.disable});
+                                                    }}
+                                                  />
+                                                }
+                                                label=""
+                                              />
                                             </ButtonGroup>
                                           </Grid>
                                         </Grid>
@@ -401,7 +417,7 @@ const DoaDialog = ({
                                           color="primary"
                                           size="large"
                                           onClick={() => {
-                                            arrayHelpers.push({ user: '', amount: 0 });
+                                            arrayHelpers.push({ user: '', amount: 0, disable: false });
                                           }}
                                         >
                                           Add Users
