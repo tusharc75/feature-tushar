@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom'
 
 import routes from '../../components/Helpers/Routes';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import AddAssetsDialog from './AddAssetsDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -231,7 +231,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
       <Box mt={1}>
         {Object.keys(frameWorkComponent).length > 0 ?
-          isMobile ?
+          isMobile && !isTablet ?
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}

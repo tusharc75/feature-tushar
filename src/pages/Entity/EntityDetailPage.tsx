@@ -27,7 +27,7 @@ import { isObjectEmpty } from "../../constants/helpers";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import ResourceTransferDialog from "../../components/ResourceTransferDialog"
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import accountClass from "../Account/account.module.scss";
 import { BiEdit } from "react-icons/bi";
 import { MdDelete } from "react-icons/md";
@@ -374,23 +374,23 @@ const EntityDetailsPage = () => {
                 >
                   {permissions?.entity?.isUpdate && (
                     <Button
-                      variant={isMobile ? "text" : "contained"}
+                      variant={isMobile && !isTablet ? "text" : "contained"}
                       color="primary"
                       size="small"
                       onClick={handleOpenUpdateDialog}
-                      className={isMobile ? accountClass.mobile_button_layout : ""}
-                      style={isMobile ? { color: "#43aeaa" } : {}}
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                      style={isMobile && !isTablet ? { color: "#43aeaa" } : {}}
                     >
-                      {isMobile ? <BiEdit size={20} /> : "Edit"}
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
                     </Button>
                   )}
                   {/* <Box component="span" marginX={1} /> */}
                   {permissions?.entity?.isDelete && (
                     <DeleteButton
                       disabled={entityData?.createdBy?.user?._id !== user?.user?._id}
-                      text={isMobile ? <MdDelete size={20} /> : "Delete"}
+                      text={isMobile && !isTablet ? <MdDelete size={20} /> : "Delete"}
                       onClick={() => setShowDeleteEntityDialog(true)}
-                      className={isMobile ? accountClass.mobile_button_layout : ""}
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
                     />
                   )}
                 </DetailsPageHeader>

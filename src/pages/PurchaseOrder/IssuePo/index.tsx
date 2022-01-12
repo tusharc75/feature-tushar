@@ -206,11 +206,11 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         color="primary"
                         type="button"
                         size="small"
-                        startIcon={isMobile ? '' : <AiFillFilePdf />}
+                        startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                         disabled={downlodingFile}
                         onClick={() => { handleViewPdf(false) }}
                     >
-                        {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
+                        {isMobile && !isTablet ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
                     </Button>
                 )}
                 <Box mx={1} />
@@ -220,16 +220,16 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         color="primary"
                         type="button"
                         size="small"
-                        startIcon={isMobile ? '' : <AiFillFilePdf />}
+                        startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                         disabled={downlodingFile}
                         onClick={() => { handleViewPdf(true) }}
                     >
-                        {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
+                        {isMobile && !isTablet ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
                     </Button>
                 )}
                 <Box mx={1} />
                 {permissions?.purchaseOrder?.isRead && <Button
-                    variant={isMobile ? "outlined" : "contained"}
+                    variant={isMobile && !isTablet ? "outlined" : "contained"}
                     color="primary"
                     size="small"
                     onClick={() => {
@@ -237,13 +237,13 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         setEmailButtonLoading(true)
                     }}
                 >
-                    {isMobile ? <MdEmail size={22} /> : `Send Email`}
+                    {isMobile && !isTablet ? <MdEmail size={22} /> : `Send Email`}
                 </Button>}
             </Box>
             <Box display="flex" justifyContent="flex-end" p="4px">
                 <Box mx={1} />
                 <Button
-                    variant={isMobile ? "outlined" : "contained"}
+                    variant={isMobile && !isTablet ? "outlined" : "contained"}
                     color="primary"
                     size="small"
                     onClick={() => {
@@ -251,13 +251,13 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         handleUpdateData({ "status": "Issued" })
                     }}
                 >
-                    {isMobile ? <BiPurchaseTagAlt size={22} /> : `Issue PO`}
+                    {isMobile && !isTablet ? <BiPurchaseTagAlt size={22} /> : `Issue PO`}
                 </Button>
             </Box>
         </Box>
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns && frameWorkComponent ?
-                isMobile ? <CustomSwipableList
+                isMobile && !isTablet && !isTablet ? <CustomSwipableList
                     allowSelection={false}
                     allowSwipe={true}
                     permissions={permissions}

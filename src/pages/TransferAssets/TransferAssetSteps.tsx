@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import IconButton from '@material-ui/core/IconButton';
 import { Grid } from '@material-ui/core';
 import { IoIosArrowDropleftCircle } from 'react-icons/io';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { TiArrowBack } from 'react-icons/ti';
 import { RiShareForwardFill } from 'react-icons/ri';
 import MobileStepper from '@material-ui/core/MobileStepper';
@@ -107,7 +107,7 @@ const TransferSteps = (props) => {
 
   return (
     <div>
-      {isMobile ? (
+      {isMobile && !isTablet ? (
         <div>
           <MobileStepper
             style={{ background: '#dee2e6' }}
@@ -160,12 +160,19 @@ const TransferSteps = (props) => {
                   </IconButton>
                 </div>
               )}
+              {isTablet && !isTransferEnded && (
+                <div>
+                  <IconButton disabled={currentStep === 0 || !isPrevStep || isTransferEnded} onClick={goPrev} className="stepperButton">
+                    <TiArrowBack size={30} />
+                  </IconButton>
+                </div>
+              )}
             </Grid>
             <Grid item xs={12} sm={8} md={10}>
               <div className={classes.pStepper}>
                 <Grid container>
                   <Grid item xs={6}>
-                    {isMobile && !isTransferEnded && (
+                    {isMobile && !isTransferEnded && !isTablet && (
                       <div>
                         <IconButton color="primary" disabled={currentStep === 0 || !isPrevStep || isTransferEnded} onClick={goNext} size="small">
                           <IoIosArrowDropleftCircle />
@@ -174,7 +181,7 @@ const TransferSteps = (props) => {
                     )}
                   </Grid>
                   <Grid item xs={6} className="d-flex align-items-center justify-content-end mt-1 mb-1">
-                    {isMobile && !isTransferEnded && (
+                    {isMobile && !isTransferEnded && !isTablet && (
                       <div>
                         <IconButton
                           color="primary"
@@ -209,6 +216,18 @@ const TransferSteps = (props) => {
             <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-center mt-2 ">
               {!isMobile &&
                 !isTransferEnded && (
+                  <div>
+                    <IconButton
+                      onClick={goNext}
+                      disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
+                      className="stepperButtonNext"
+                    >
+                      <RiShareForwardFill />
+                    </IconButton>
+                  </div>
+                )}
+                {isTablet &&
+                !isTransferEnded &&  (
                   <div>
                     <IconButton
                       onClick={goNext}

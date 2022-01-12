@@ -720,23 +720,23 @@ export default function QuoteDetail() {
                           startIcon={<GiReceiveMoney />}
                           color="primary"
                         >
-                          {isMobile ? '' : 'Quote Summary'}
+                          {isMobile && !isTablet ? '' : 'Quote Summary'}
                         </Button>
                       </Tooltip>
                     )}
                     <Tooltip title={`Version : ${currentVersion}`}>
                       <Button
-                        variant={isMobile ? "text" : "outlined"}
+                        variant={isMobile && !isTablet ? "text" : "outlined"}
                         color="primary"
                         size="small"
-                        className={isMobile ? contactClass.mobile_button_layout : "mx-1"}
+                        className={isMobile && !isTablet ? contactClass.mobile_button_layout : "mx-1"}
                         onClick={() => {
                           setShowAllVersionStatus(true);
                         }}
-                        style={isMobile ? { color: "#43aeaa" } : {}}
-                        startIcon={isMobile ? null : <VscVersions />}
+                        style={isMobile && !isTablet ? { color: "#43aeaa" } : {}}
+                        startIcon={isMobile && !isTablet ? null : <VscVersions />}
                       >
-                        {isMobile ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
+                        {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
                       </Button>
                     </Tooltip>
                     {DOAApproved && versionStatus === 'Sent for DOA' && (
@@ -752,7 +752,7 @@ export default function QuoteDetail() {
                             startIcon={<ThumbUpIcon />}
                             color="primary"
                           >
-                            {isMobile ? '' : `${approvedButtonText}`}
+                            {isMobile && !isTablet ? '' : `${approvedButtonText}`}
                           </Button>
                         </Tooltip>
                         <Tooltip title="Reject">
@@ -767,23 +767,23 @@ export default function QuoteDetail() {
                             size="small"
                             color="primary"
                           >
-                            {isMobile ? '' : 'Reject'}
+                            {isMobile && !isTablet ? '' : 'Reject'}
                           </Button>
                         </Tooltip>
                       </>
                     )}
                     <>
                       <Button
-                        variant={isMobile ? "text" : "outlined"}
+                        variant={isMobile && !isTablet ? "text" : "outlined"}
                         color="default"
                         size="small"
-                        className={isMobile ? contactClass.mobile_button_layout : "mx-1"}
-                        endIcon={isMobile ? null : <ExpandMore />}
+                        className={isMobile && !isTablet ? contactClass.mobile_button_layout : "mx-1"}
+                        endIcon={isMobile && !isTablet ? null : <ExpandMore />}
                         onClick={openActions}
                         // className={styles.action_submit_btn}
                         aria-controls="action-menu"
                       >
-                        {isMobile ? <IoArrowDownCircleSharp size={20} /> : 'Actions '}
+                        {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Actions '}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}

@@ -1063,7 +1063,7 @@ export default function AccountDetailPage(props) {
                     </Box>
                   </TabPanel>
                   <TabPanel value={tabValue} index={1} >
-                    <Box style={{ overflow: 'auto' }}>
+                    <Box className={accountClass.set_width_table}>
                       <AccountHierarchy
                         data={accountHierarchyData}
                         currentAccountId={accountData._id}

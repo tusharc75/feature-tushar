@@ -591,14 +591,14 @@ function OpportunityDetailsPage() {
                 showHeading={true}
               >
                 {allowedToEdit ? (
-                  <Button variant={isMobile ? "text" : "contained"}
+                  <Button variant={isMobile && !isTablet ? "text" : "contained"}
                           color="primary"
                           size="small"
                           onClick={handleOpenUpdateDialog}
-                          className={isMobile ? accountClass.mobile_button_layout : ""}
-                          style={isMobile ? {color:"#43aeaa"} : {}}
+                          className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                          style={isMobile && !isTablet ? {color:"#43aeaa"} : {}}
                   >
-                    {isMobile ? <BiEdit size={20}/> : "Edit"}
+                    {isMobile && !isTablet ? <BiEdit size={20}/> : "Edit"}
                   </Button>
                 ) : null}
                 {opportunityPermissions.isDelete &&
@@ -606,9 +606,9 @@ function OpportunityDetailsPage() {
                   user?.user?._id &&
                   opportunityData.owner.optionValue === user.user._id ? (
                   <DeleteButton
-                      text={isMobile ? <MdDelete size={20}/> : "Delete"}
+                      text={isMobile && !isTablet ? <MdDelete size={20}/> : "Delete"}
                       onClick={() => setShowConfirmBox(true)}
-                      className={isMobile ? accountClass.mobile_button_layout : ""}
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
 
                   />
                 ) : null}

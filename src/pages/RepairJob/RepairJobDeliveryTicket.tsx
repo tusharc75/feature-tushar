@@ -17,7 +17,7 @@ import { groupBy } from 'lodash';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import InfoIcon from "@material-ui/icons/Info";
@@ -379,7 +379,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
     <Grid item xs={12} md={12} sm={12} className="mt-3">
 
       {columns ?
-        isMobile ?
+        isMobile && !isTablet ?
           <CustomSwipableList
             allowSelection={true}
             allowSwipe={true}
