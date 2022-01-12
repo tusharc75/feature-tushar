@@ -16,7 +16,7 @@ import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
 import { useData } from "../../StateProvider/Provider";
-import { isMobile } from 'react-device-detect';
+import { isMobile,isTablet } from 'react-device-detect';
 import MobileSortDialog from "../../components/MobileSortDialog"
 import MobileFilterDialog from "../../components/MobileFilterDialog"
 
