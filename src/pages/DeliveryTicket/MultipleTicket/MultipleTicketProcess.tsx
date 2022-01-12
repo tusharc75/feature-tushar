@@ -14,6 +14,7 @@ import CustomSwipableList from '../../../components/SwipableListComponents/Custo
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useHistory } from 'react-router-dom';
 import SignatureDialog from '../../../components/Helpers/SignatureDialog';
+import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 
 
 const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
@@ -29,12 +30,12 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
     const { isOffline } = useContext(CustomOfflineContext);
 
-    const [columns, setColumns] = useState([]);
+    const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState({});
 
     const [openSignatureDialog, setOpenSignatureDialog] = useState({ label: "", open: false });
-    const [submittingSign, setSubmittingSign] = useState(false);
     const [signaturesToSend, setSignaturesToSend] = useState([]);
+    const [isUpdating, setUpdating] = useState(false);
 
 
     useEffect(() => {
@@ -117,15 +118,18 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
         const signatures = [...signaturesToSend, { type: signedData.type, signature: signedData.sign, status: status }]
         setSignaturesToSend(signatures)
         if (signatures.length === 2) {
+            setUpdating(true)
             let data = {}
             data["_ids"] = selectedRecords.map((d) => d._id);
             data["status"] = DELIVERY_TICKET_MAPPED_STATUS[openSignatureDialog.label]
             data["signatures"] = signatures
             axiosInstance().post(`${deliveryTicket.deliveryTicketApi}/updatebulk`, data).then(({ data: { data } }) => {
+                setUpdating(false)
                 setOpenSignatureDialog({ open: false, label: "" })
                 setSignaturesToSend([])
                 fetchDeliveryTicket()
             }).catch((error) => {
+                setUpdating(false)
                 toastConfig.setToastConfig(error);
             });
         }
@@ -177,63 +181,65 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
             <Box mx={1} />
         </Box>
         <Grid item xs={12} md={12} sm={12} className="mt-3">
-            {isMobile && !isTablet ? (
-                <CustomSwipableList
-                    allowSelection={true}
-                    allowSwipe={true}
-                    permissions={permissions.deliveryTicket}
-                    primaryField={columns?.find((d) => d.primaryField)}
-                    onClick={(data) => {
-                        history.push(`${routes.deliveryTicketDetail.path}/${data._id}`);
-                    }}
-                    dataRows={dataRows}
-                    selectedRecords={selectedRecords}
-                    dispatch={dispatch}
-                    onEdit={() => { }}
-                    extraParamsToCheckDelete={true}
-                    onDelete={() => { }}
-                    rowCount={rowCount}
-                    page={page}
-                    loading={loading}
-                    chips={[
-                        {
-                            label: 'Status: ',
-                            field: 'status'
-                        },
-                        {
-                            label: 'Job Name: ',
-                            field: 'ticketName'
-                        }
-                    ]}
-                    onCreate={null}
-                    showClone={false}
-                    onClone={() => { }}
-                    renderedFrom={`TicketProcess_${deliveryTicket.deliveryTicketResource}`}
-                />
-            ) : Object.keys(frameWorkComponent).length > 0 ? (
-                <CustomAgGrid
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameWorkComponent}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    actionWidth={100}
-                    isClientSideGrid={true}
-                    loading={loading}
-                    allowSelection={true}
-                    allowAction={false}
-                    renderedFrom={`TicketProcess_${deliveryTicket.deliveryTicketResource}`}
-                    refreshGrid={fetchDeliveryTicket}
-                />
-            ) : null}
+            {columns && frameWorkComponent ?
+                isMobile && !isTablet ? (
+                    <CustomSwipableList
+                        allowSelection={true}
+                        allowSwipe={true}
+                        permissions={permissions.deliveryTicket}
+                        primaryField={columns?.find((d) => d.primaryField)}
+                        onClick={(data) => {
+                            history.push(`${routes.deliveryTicketDetail.path}/${data._id}`);
+                        }}
+                        dataRows={dataRows}
+                        selectedRecords={selectedRecords}
+                        dispatch={dispatch}
+                        onEdit={() => { }}
+                        extraParamsToCheckDelete={true}
+                        onDelete={() => { }}
+                        rowCount={rowCount}
+                        page={page}
+                        loading={loading}
+                        chips={[
+                            {
+                                label: 'Status: ',
+                                field: 'status'
+                            },
+                            {
+                                label: 'Job Name: ',
+                                field: 'ticketName'
+                            }
+                        ]}
+                        onCreate={null}
+                        showClone={false}
+                        onClone={() => { }}
+                        renderedFrom={`TicketProcess_${deliveryTicket.deliveryTicketResource}`}
+                    />
+                ) : Object.keys(frameWorkComponent).length > 0 ? (
+                    <CustomAgGrid
+                        columns={columns}
+                        dataRows={dataRows}
+                        frameworkComponents={frameWorkComponent}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount}
+                        limit={limit}
+                        pageSizes={pageSizes}
+                        page={page}
+                        actionWidth={100}
+                        isClientSideGrid={true}
+                        loading={loading}
+                        allowSelection={true}
+                        allowAction={false}
+                        renderedFrom={`TicketProcess_${deliveryTicket.deliveryTicketResource}`}
+                        refreshGrid={fetchDeliveryTicket}
+                    />
+                ) : null :
+                <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </Grid>
         {openSignatureDialog.open &&
             <SignatureDialog
-                submitting={submittingSign}
+                submitting={isUpdating}
                 label={openSignatureDialog.label}
                 steps={openSignatureDialog.label === "Sign-off - Dispatch" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
                 forDelivery={true}

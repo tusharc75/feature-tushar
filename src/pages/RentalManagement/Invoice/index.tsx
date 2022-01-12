@@ -109,6 +109,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
     let material: any = []
     let additionalcost: any = []
     try {
+      dispatch({ type: "loading", loading: true });
       if (isOffline) {
         const result = await findOne(objectStore.rentalManagement, rentalManagementData._id);
         material = result?.material;
