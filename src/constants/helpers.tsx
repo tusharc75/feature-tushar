@@ -132,7 +132,7 @@ export const sidebarResource = {
   opportunity: 'Opportunity',
   field: 'Field',
   productCategory: 'Product Category',
-  productInventory: 'Product Inventory',
+  productInventory: 'Serialized Asset',
   priceTemplate: 'Price Template',
   product: 'Product',
   productTemplate: 'Product Template',
@@ -158,7 +158,7 @@ export const sidebarResource = {
   budget: 'Budget',
   marketSegment: 'Market Segment',
   quotePdfTemplate: 'Quote Pdf Template',
-  warehouse: 'Warehouse',
+  warehouse: 'Plant',
   rentalManagement: 'Rental Management',
   deliveryTicket: 'Delivery Ticket',
   pricingCondition: 'Pricing Condition',
@@ -1428,6 +1428,18 @@ export const DELIVERY_TICKET_STATUS = {
   new: 'New',
   indTransit: 'In-Transit',
   delivered: 'Delivered',
+};
+
+export const RENTAL_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  jobPartiallyStarted: 'Job Partially Started',
+  jobStarted: 'Job Started',
+  jobPartiallyEnded: 'Job Partially Ended',
+  jobEnded: 'Job Ended',
+  readyToInvoice: 'Ready To Invoice',
+  invoiced: 'Invoiced',
+  closed: 'Closed',
 };
 
 export const asyncForEach = async (
