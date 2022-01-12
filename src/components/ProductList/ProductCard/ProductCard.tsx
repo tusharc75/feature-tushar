@@ -6,13 +6,12 @@ import styles from './product-card.module.scss'
 import { useHistory, useParams } from "react-router-dom";
 import { eProduct, formatAmountWithCurrency, ORDER_TYPES, CustomDialogTransition, dateFormatForInputControl } from "../../../constants/helpers";
 import { BsImage } from 'react-icons/bs';
-import { MdAddShoppingCart } from 'react-icons/md';
+import { MdAddShoppingCart, MdModeEdit } from 'react-icons/md';
 import routes from "../../Helpers/Routes";
 import Carousel from "react-material-ui-carousel";
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import { WishlistContext } from "../../../StateProvider/WishlistContext/WishlistProvider";
-import { id } from "date-fns/locale";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import AutorenewIcon from '@material-ui/icons/Autorenew';
@@ -48,7 +47,8 @@ const TYPES = {
   endDate: "END_DATE",
   unitAndPricingMethod: "UNIT",
   indexOfProductInCart: "INDEX_OF_PRODUCT_IN_CART",
-  updateWholePaload: "UPDATE_WHOLE_PALOAD",
+  updateWholePayload: "UPDATE_WHOLE_PALOAD",
+  resetValues: "RESET_VALUES"
 }
 
 const initialData = {
@@ -73,8 +73,11 @@ const reducer = (data = initialData, action) => {
     case TYPES.indexOfProductInCart:
       return { ...data, indexOfProductInCart: action.payload };
 
-    case TYPES.updateWholePaload:
+    case TYPES.updateWholePayload:
       return { ...data, ...action.payload };
+
+    case TYPES.resetValues:
+      return { ...initialData };
 
     default:
       return { ...data }
@@ -140,8 +143,15 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
       currency: rateCurrency.currency,
       mrp: mrp,
       rate: rate
-    }).then(() => {
+    }).then(({ data }) => {
       fetchCart();
+
+      toastConfig.setToastConfig({
+        open: true,
+        type: "success",
+        message: data.message
+      });
+
     }).catch((error) => {
       toastConfig.setToastConfig(error);
       // dispatch({ type: SET_CART, payload: [...items] });
@@ -193,6 +203,11 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
 
         if (addToCartBtnLoading) setAddToCartBtnLoading(false)
       })
+  }
+
+  const resetValues = () => {
+    setRateCurrency({ currency: "", rate: "", mrp: "", rateWithCurrency: "", isRateMrpSame: false });
+    dispatchData({ type: TYPES.resetValues })
   }
 
   return (
@@ -332,7 +347,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
 
                   if (indexOfProductInCart > -1) {
                     dispatchData({
-                      type: TYPES.updateWholePaload,
+                      type: TYPES.updateWholePayload,
                       payload: {
                         selectedUnit: cartItems[indexOfProductInCart].unit,
                         selectedPricingMethod: cartItems[indexOfProductInCart].pricingMethod,
@@ -352,7 +367,11 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
 
                   setAddToCartConfirmationDialog(prevState => { return { ...prevState, open: true, product: product } })
                 }}>
-                  <MdAddShoppingCart size={18} />
+                  {
+                    getIndexOfProductInCart(cartItems) === -1
+                      ? <MdAddShoppingCart size={18} />
+                      : <MdModeEdit size={18} />
+                  }
                 </Avatar>
             }
           </div>
@@ -392,6 +411,8 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
 
               axiosInstance().put(`/ecommerce/cart/remove`, { ids: [items[indexOfProduct]._id] }).then(({ data }) => {
                 setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false })
+                setAddToCartConfirmationDialog({ open: false, okBtnLoading: false, product: null });
+
                 setAddToCartBtnLoading(false)
 
                 dispatchData({ type: TYPES.indexOfProductInCart, payload: -1 })
@@ -401,6 +422,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
                   type: "success",
                   message: data.message,
                 });
+                resetValues();
 
               }).catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -420,11 +442,15 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
           aria-labelledby="customized-dialog-title"
           onClose={() => {
             setAddToCartConfirmationDialog(prevState => { return { ...prevState, open: false } })
+            resetValues();
           }}
           open={true}
           disableBackdropClick={true}
         >
-          <CustomDialogHeader title={product && data.indexOfProductInCart > -1 ? "Update cart" : "Add to cart"} onClose={() => { setAddToCartConfirmationDialog(prevState => { return { ...prevState, open: false } }) }}
+          <CustomDialogHeader title={product && data.indexOfProductInCart > -1 ? "Update cart" : "Add to cart"} onClose={() => {
+            setAddToCartConfirmationDialog(prevState => { return { ...prevState, open: false } })
+            resetValues();
+          }}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen(prevState => !prevState)
@@ -560,7 +586,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
                   }
                 </Box>
 
-                <Box>
+                <Box className="mb-2">
                   {
                     product && data.indexOfProductInCart > -1 && cartItems.length > 0 && cartItems.some(s => s.orderType.toLowerCase() === orderTypeInLowerCase && s.productDetail?._id === product?._id)
                       ? <Grid container>
@@ -587,7 +613,10 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
           </CustomDialogContent>
 
           <CustomDialogFooter>
-            <Button type="button" variant="outlined" color="primary" size="small" onClick={() => setAddToCartConfirmationDialog({ open: false, okBtnLoading: false, product: null })}>
+            <Button type="button" variant="outlined" color="primary" size="small" onClick={() => {
+              resetValues();
+              setAddToCartConfirmationDialog({ open: false, okBtnLoading: false, product: null });
+            }}>
               Cancel
             </Button>
 
@@ -597,7 +626,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
                   type="button"
                   color="primary"
                   variant="outlined"
-                  disabled={deleteProductFromCartConfirmationDialog.okBtnLoading}
+                  disabled={!rateCurrency.rateWithCurrency || deleteProductFromCartConfirmationDialog.okBtnLoading}
                   loading={deleteProductFromCartConfirmationDialog.okBtnLoading}
                   startIcon={addToCartBtnLoading ? null : <RemoveShoppingCartIcon />}
                   onClick={() => {
@@ -609,7 +638,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
                   type="button"
                   color="primary"
                   variant="outlined"
-                  disabled={addToCartBtnLoading || (orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase() ? !(data.startDate && data.endDate && data.selectedUnit && data.selectedPricingMethod) : !data.selectedUnit)}
+                  disabled={!rateCurrency.rateWithCurrency || addToCartBtnLoading || (orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase() ? !(data.startDate && data.endDate && data.selectedUnit && data.selectedPricingMethod) : !data.selectedUnit)}
                   loading={addToCartBtnLoading}
                   startIcon={addToCartBtnLoading ? null : <AddShoppingCartIcon />}
                   onClick={() => {
@@ -630,7 +659,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
         </Dialog>
       }
 
-    </div>
+    </div >
   );
 };
 
