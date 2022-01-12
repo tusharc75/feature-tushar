@@ -31,6 +31,7 @@ interface EditDialogProps {
   material: any[]
   selectedProducts: any[]
   isBulkedit: any
+  loading: any
 }
 
 const rateChangeFields = ["unit", "pricingMethod"]
@@ -44,7 +45,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     rowData,
     material,
     selectedProducts,
-    isBulkedit
+    isBulkedit,
+    loading
   }) => {
 
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
@@ -52,7 +54,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const ref = useRef(null);
 
@@ -571,7 +572,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
               >{"Close"}</Button>
               <CustomButton
                 loading={loading}
-                disabled={isEqual(ref?.current?.values, initialData.values)}
+                disabled={loading || isEqual(ref?.current?.values, initialData.values)}
                 variant="contained"
                 color="primary"
                 type="submit"

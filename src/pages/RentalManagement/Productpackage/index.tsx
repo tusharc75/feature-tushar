@@ -501,6 +501,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 rowData={recordToUpdate}
                 material={material}
                 selectedProducts={selectedProducts}
+                loading={isUpdating}
             />
         }
         {addExistingProductDialog.open &&
