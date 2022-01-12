@@ -46,6 +46,8 @@ import { CustomOfflineContext } from '../../StateProvider/OfflineContext/Offline
 import { GridApi } from 'ag-grid-community';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { MdAdd } from 'react-icons/all';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
 import { IoFilterCircle, MdFilterList, MdSort } from 'react-icons/all';
 import { FaSuitcase } from 'react-icons/fa';
 
@@ -95,6 +97,7 @@ export default function Account(props) {
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false);
   const [selectedType, setselectedType] = useState(1);
   const [accountId, setAccountId] = useState(null);
+  const [sortOpen, setSortOpen] = React.useState(false);
   const [showEntityDialog, setShowEntityDialog] = useState(false);
 
   const [singleAccountDelete, setSingleAccountDelete] = useState({
@@ -932,6 +935,44 @@ export default function Account(props) {
       );
     }
   };
+  
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+  
+  const handleClickOpen = () => {
+    setSortOpen(true);
+  };
+
+  const handleClickClose = () => {
+    setSortOpen(false);
+
+  };
+
+  const handleFilterClose = () => {
+    setisOpenDialog(false);
+  };
+  
+  let toggleInner = AccTypes && (
+    <ToggleButtonGroup
+      size="small"
+      className=" toggle-button-layout"
+      value={filter}
+      exclusive
+      onChange={handleFilter}
+    >
+      {AccTypes.map((k, index) => {
+        return (
+          <ToggleButton value={k.key} key={index}>
+            {k.key}
+          </ToggleButton>
+       
+        );
+      })}
+    </ToggleButtonGroup>
+  );
+
+  const [isOpenDialog, setisOpenDialog] = useState(false)
 
   return (
     <>
@@ -963,53 +1004,66 @@ export default function Account(props) {
           <Grid container className="header-panel" justify="space-between" alignContent="center">
             <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center gap-1 ">
               <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
-                <Grid style={{display:"inline-flex", alignItems:"center"}}>
-                <MdAccountCircle className="headerLogo" />{' '}
-                <span id="resourceHeader" className="listingHeader">
-                  {routes[accountResource].title}
-                </span>
+                <Grid style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <MdAccountCircle className="headerLogo" />{' '}
+                  <span id="resourceHeader" className="listingHeader">
+                    {routes[accountResource].title}
+                  </span>
                 </Grid>
 
                 {isMobile && (
                   <>
-                  <Grid style={{display:"inline-flex"}}>
-                    <Button
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={open ? 'true' : undefined}
-                      color="secondary"
-                      variant="text"
-                      disableElevation
-                      startIcon={<MdSort />}
-                      className={'sort-filter-tablet'}
-                      style={isTablet ? { marginLeft: '50px' } : {}}
-                    >
-                      Sort
-                    </Button>
+                    <Grid style={{ display: 'inline-flex' }}>
+                      <Button
+                        onClick={handleClickOpen}
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        aria-expanded={open ? 'true' : undefined}
+                        color="secondary"
+                        variant="text"
+                        disableElevation
+                        startIcon={<MdSort />}
+                        className={'sort-filter-tablet'}
+                        style={isTablet ? { marginLeft: '50px' } : {}}
+                      >
+                        Sort
+                      </Button>
+                      <MobileSortDialog
+                        isOpen={sortOpen}
+                        handleClose={handleClickClose}
+                        contentPart={toggleInner}
+                        secHeading={['Sort Accounts']}
+                        columns={columns}
+                        dispatch={dispatch}
+                      />
 
-                    <Button
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={open ? 'true' : undefined}
-                      variant="text"
-                      color="secondary"
-                      disableElevation
-                      className={'sort-filter-tablet'}
-                      startIcon={<MdFilterList />}
-                    >
-                      Filter
-                    </Button>
+                      <Button
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        aria-expanded={open ? 'true' : undefined}
+                        variant="text"
+                        color="secondary"
+                        disableElevation
+                        className={'sort-filter-tablet'}
+                        startIcon={<MdFilterList />}
+                        onClick={handleOpen}
+                      >
+                        Filter
+                      </Button>
+
+                      <MobileFilterDialog
+                        isOpen={isOpenDialog}
+                        handleClose={handleFilterClose}
+                        contentPart={toggleInner}
+                        secHeading={['Filter Accounts']}
+                        columns={columns}
+                        dispatch={dispatch}
+                      />
                     </Grid>
                   </>
                 )}
-                
-
-                
-
-
-
 
                 {isOffline ? (
                   <></>
@@ -1088,7 +1142,14 @@ export default function Account(props) {
                 )}
               </div>
             </Grid>
-            <Grid item md={6} sm={12} xs={12} className={`d-flex align-items-center gap-1 ${styles.filter_side}`}  justify={isMobile ? 'flex-start' : 'flex-end'}>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+              className={`d-flex align-items-center gap-1 ${styles.filter_side}`}
+              justify={isMobile ? 'flex-start' : 'flex-end'}
+            >
               <div
                 id="resourceOperations"
                 className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${
@@ -1100,8 +1161,8 @@ export default function Account(props) {
                   {!isOffline && (
                     <SearchBox
                       onSearch={handleSearch}
-                      searchbox={isMobile ? accountClass.search_box_input : ""}
-                      style={isMobile? { flex: 1 } : {}}
+                      searchbox={isMobile ? accountClass.search_box_input : ''}
+                      style={isMobile ? { flex: 1 } : {}}
                       value={search}
                       width={isMobile ? '200px' : 'auto'}
                     />

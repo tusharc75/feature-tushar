@@ -163,7 +163,19 @@ export default function MobileSortDialog({ isOpen, handleClose, contentPart, sec
         });
   
       } 
- 
+
+
+
+
+    // !clicked && setClicked(true);
+    // clicked && setClicked(false);
+    // console.log(field,"field")
+   
+    // dispatch({
+    //   type: 'sort',
+    //   sorting: [{colId:field}]
+    // });
+    // dispatch({ type: "loading", loading: true });
     toastConfig.setToastConfig({
       open: true,
       type: "success",
