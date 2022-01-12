@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { Grid, Button, TextField, Box, useMediaQuery, useTheme } from '@material-ui/core';
+import { Grid, Button, TextField, Box, useMediaQuery, useTheme, CircularProgress } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { List } from '@material-ui/icons';
 import { camelCase, startCase } from 'lodash';
@@ -24,7 +24,7 @@ import { sidebarResource, RENTAL_STATUS, INVENTORY_STATUS, prepareDataForGrid, g
 
 const resourcesSelect = {
   rentalManagement: ['customerAccount', 'customerContact', 'warehouse', 'status'],
-  productInventory: ['productCategory', 'product', 'status']
+  productInventory: ['productCategory', 'product', 'warehouse', 'status']
 };
 
 let cancelTokenSource = null;
@@ -132,16 +132,7 @@ const Report = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    let filters = Object.keys(selectedData).map((_d) => {
-      const field = camelCase(_d);
-      return {
-        field,
-        term: {
-          $in: field === 'status' ? selectedData[_d] : selectedData[_d === 'Plant' ? 'Warehouse' : _d].map((d: any) => d.optionValue)
-        }
-      };
-    });
-    let filterQuery = `filterById=${JSON.stringify(filters)}`;
+    let filterQuery = getFilter()
     axiosInstance()
       .get(`${routes[resourceCamelCase].path}/report?${filterQuery}`, {
         cancelToken: cancelTokenSource.token
@@ -163,6 +154,39 @@ const Report = () => {
         }
       });
   };
+
+  const getFilter = () => {
+    let filterQuery = ''
+
+    let filterById = Object.keys(selectedData)
+      .filter((d) => d !== 'Status')
+      .map((_d) => {
+        const field = camelCase(_d);
+        return {
+          field,
+          term: {
+            $in: selectedData[_d === 'Plant' ? 'Warehouse' : _d].map((d: any) => d.optionValue)
+          }
+        };
+      });
+
+    let deepFilter = selectedData['Status']
+      ? selectedData['Status'].map((_d) => ({
+          field: 'status',
+          term: _d
+        }))
+      : [];
+
+    if(filterById.length > 0) {
+      filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
+    }
+
+    if(deepFilter && deepFilter.length > 0) {
+      filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
+    }
+
+    return filterQuery
+  }
 
   const workingPage = ['productInventory', 'rentalManagement'];
 
@@ -196,12 +220,12 @@ const Report = () => {
           </Grid>
         </Grid>
       </Grid>
-      <CustomContainer>
+      <CustomContainer styles={{ paddingTop: 10 }}>
         {workingPage.includes(resourceCamelCase) && (
           <>
             <div className="header-panel">
               <Grid container className={styles.rental_header_layout} spacing={1}>
-                <Grid item xs={12} md={2}>
+                <Grid item xs={12} md={3}>
                   <Autocomplete
                     style={{ maxWidth: isExtraSmall ? '100%' : 300 }}
                     options={resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : sidebarResource[_r]))}
@@ -211,11 +235,28 @@ const Report = () => {
                     disableCloseOnSelect={false}
                     multiple
                     value={selectedResource ?? []}
-                    onChange={(_, val) => setSelectedResource(val)}
+                    onChange={(_, val) => {
+                      setSelectedResource(val)
+
+                      if(selectedData) {
+                        setSelectedData(prevState => {
+                          const data = Object.keys(prevState);
+                          const unselected = data.filter(d => !val.includes(d))
+                          const unselectedData = {...prevState}
+                          unselected.forEach(_d => {
+                            if(unselectedData[_d]) {
+                              delete unselectedData[_d]
+                            }
+                          })
+                          return unselectedData
+                        })
+                      }
+                     }
+                    }
                     fullWidth
                     getOptionSelected={(option, val) => option === val}
                     getOptionLabel={(option) => option}
-                    renderInput={(params) => <TextField {...params} variant="outlined" label="Select Resource" size="small" />}
+                    renderInput={(params) => <TextField {...params} variant="outlined" label="Select Filter" size="small" />}
                   />
                 </Grid>
                 {/* <Grid item xs={12} sm={2}>
@@ -235,7 +276,7 @@ const Report = () => {
                   </Grid>
                 </Box>
               </Grid> */}
-                <Grid item xs={12} md={8}>
+                <Grid item xs={12} md={7}>
                   <Grid container spacing={1}>
                     {selectedResource &&
                       selectedResource.length > 0 &&
@@ -268,7 +309,7 @@ const Report = () => {
                 </Grid>
                 <Grid item xs={12} md={2}>
                   <Box display="flex" justifyContent="flex-end" alignItems="center">
-                    <Button onClick={fetchResourceData} startIcon={<List />} color="primary" variant="contained" size="small" disableElevation>
+                    <Button onClick={fetchResourceData} startIcon={loading ? <CircularProgress color='inherit' size={18}/> : <List />} color="primary" variant="contained" size="small" disableElevation disabled={loading} >
                       Show
                     </Button>
                   </Box>
