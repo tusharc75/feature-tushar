@@ -173,7 +173,7 @@ export default function ManageAccount(props) {
     // if (addressDataDropdown) {
     //   setAddressDataSource(addressDataDropdown.option.filter(d => accountData?.initialValues?.billingAddress?.includes(d.optionValue) || accountData?.initialValues?.shippingAddress?.includes(d.optionValue)))
     // }
-     if (addressDataDropdown) {
+    if (addressDataDropdown) {
       setAddressDataSource(addressDataDropdown.option)
     }
 
@@ -259,15 +259,16 @@ export default function ManageAccount(props) {
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
     if (err.length) {
-      const input = document.querySelector(
+      const input: any = document.querySelectorAll(
         `input[name=${err[0]}]`,
       );
-
-      input.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'start',
-      });
+      input?.forEach((_i) => {
+        _i.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'start',
+        });
+      })
     }
   }
 
