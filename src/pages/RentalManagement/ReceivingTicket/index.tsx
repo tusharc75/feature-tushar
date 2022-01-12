@@ -88,6 +88,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   const fetchRecords = async () => {
     try {
       setNextStep(false)
+      dispatch({ type: "loading", loading: true });
       if (gridApi) {
         gridApi.deselectAll();
       }
