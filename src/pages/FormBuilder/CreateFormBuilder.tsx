@@ -24,7 +24,7 @@ import { useData } from "../../StateProvider/Provider";
 import { checkFormulaLoop, checkUniqueValidation } from "../../constants/formulaUtility";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { isEqual } from "lodash";
-import {isMobile} from "react-device-detect";
+import {isMobile, isTablet} from "react-device-detect";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import {IoIosArrowDropdown} from "react-icons/io";
 import {classNames} from "react-easy-crop/helpers";
@@ -338,17 +338,17 @@ const CreateFormBuilder = () => {
                             <Grid item xs={12} container justify="flex-end">
                                 <Box>
                                     {formBuilderPermissions.isUpdate &&
-                                        <Button disabled={isUpdating} color="primary" size="small" onClick={handleSave} variant={isMobile ? "text" : "contained"}
-                                                style={isMobile ? {color:"var(--success)"} : {}}
+                                        <Button disabled={isUpdating} color="primary" size="small" onClick={handleSave} variant={isMobile && !isTablet ? "text" : "contained"}
+                                                style={isMobile && !isTablet ? {color:"var(--success)"} : {}}
                                         >
-                                            {isMobile ? <RiSaveFill size={24}/> : "Save"}
+                                            {isMobile && !isTablet ? <RiSaveFill size={24}/> : "Save"}
                                             {isUpdating && <CircularProgress size={24} />}
                                         </Button>
                                     }
                                 </Box>
                                 <Box ml={1} >
-                                    <Button color="primary" variant={isMobile ? "text" : "contained"} size="small"
-                                            style={isMobile ? {color:"var(--error)"} : {}}
+                                    <Button color="primary" variant={isMobile && !isTablet ? "text" : "contained"} size="small"
+                                            style={isMobile && !isTablet ? {color:"var(--error)"} : {}}
                                         onClick={() => {
                                             if ((!isEqual(orisection, section)) && formBuilderPermissions.isUpdate) {
                                                 setShowConfirmDialog(true)
@@ -356,7 +356,7 @@ const CreateFormBuilder = () => {
                                             else {
                                                 history.push({ pathname: routes.formBuilder.path })
                                             }
-                                        }} >  {isMobile ? <RiCloseCircleFill size={24}/> : "Close"}
+                                        }} >  {isMobile && !isTablet ? <RiCloseCircleFill size={24}/> : "Close"}
                                     </Button>
                                 </Box>
                             </Grid>

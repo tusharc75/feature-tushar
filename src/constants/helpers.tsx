@@ -132,7 +132,7 @@ export const sidebarResource = {
   opportunity: 'Opportunity',
   field: 'Field',
   productCategory: 'Product Category',
-  productInventory: 'Product Inventory',
+  productInventory: 'Serialized Asset',
   priceTemplate: 'Price Template',
   product: 'Product',
   productTemplate: 'Product Template',
@@ -158,7 +158,7 @@ export const sidebarResource = {
   budget: 'Budget',
   marketSegment: 'Market Segment',
   quotePdfTemplate: 'Quote Pdf Template',
-  warehouse: 'Warehouse',
+  warehouse: 'Plant',
   rentalManagement: 'Rental Management',
   deliveryTicket: 'Delivery Ticket',
   pricingCondition: 'Pricing Condition',
@@ -1409,19 +1409,19 @@ export const arrayToDropwdownOption = (array) => {
 }
 
 export const INVENTORY_STATUS = {
-  customer: 'With Customer',
-  supplier: 'With Supplier',
+  new: 'New',
+  available: 'Available',
   reserved: 'Reserved',
   inSale: 'In Sale',
   inUse: 'In-Use',
   indTransit: 'In-Transit',
   underReview: 'Under Review',
-  repair: 'Repair',
-  available: 'Available',
+  repair: 'Repair', 
   readyToShip: 'Ready to ship',
-  new: 'New',
   scrap: 'Scrap',
   lost: 'Lost',
+  customer: 'With Customer',
+  supplier: 'With Supplier',
 };
 
 export const DELIVERY_TICKET_STATUS = {
@@ -1429,6 +1429,36 @@ export const DELIVERY_TICKET_STATUS = {
   indTransit: 'In-Transit',
   delivered: 'Delivered',
 };
+
+export const RENTAL_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  jobPartiallyStarted: 'Job Partially Started',
+  jobStarted: 'Job Started',
+  jobPartiallyEnded: 'Job Partially Ended',
+  jobEnded: 'Job Ended',
+  readyToInvoice: 'Ready To Invoice',
+  invoiced: 'Invoiced',
+  closed: 'Closed',
+};
+
+export const DELIVERY_TICKET_MAPPED_STATUS = {
+  "Sign-off - Dispatch": DELIVERY_TICKET_STATUS.indTransit,
+  "Sign-off - Delivery": DELIVERY_TICKET_STATUS.delivered
+}
+
+export const DELIVERY_TICKET_TYPE = {
+  loading: 'Loading',
+  receiving: 'Receiving',
+};
+
+export const DELIVERY_TICKET_REFRENCE_TYPE = {
+  rentalJob: 'Rental Job',
+  transferAsset: 'Transfer Asset',
+  repairJob: 'Repair Job',
+  salesOrder: 'Sales Order',
+};
+
 
 export const asyncForEach = async (
   array: any[],

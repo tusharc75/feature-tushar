@@ -24,7 +24,7 @@ import Loader from "../Loader";
 import { handleAutoCalculation, extractFields } from "../../constants/formulaUtility";
 import { CustomDialogTransition, gridLoadingTimeout } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import { AiTwotoneEdit } from 'react-icons/ai';
 import CustomSwipableList from "../SwipableListComponents/CustomSwipableList";
 import CustomDialogContent from "../CustomDialog/CustomDialogContent";
@@ -557,7 +557,7 @@ const ProductBuilder = (props) => {
               onClick={handelOpenBulkEdit}
               disabled={checkUniqTemplate()}
               aria-controls="action-menu">
-              {isMobile ? "" : "Bulk Edit"}
+              {isMobile && !isTablet ? "" : "Bulk Edit"}
             </Button>
           )}
           {permissions.isUpdate && (
@@ -570,7 +570,7 @@ const ProductBuilder = (props) => {
               startIcon={<ExpandMore />}
               disabled={selectedRecords.length ? false : true}
               aria-controls="action-menu">
-              {isMobile ? "" : "Actions"}
+              {isMobile && !isTablet ? "" : "Actions"}
             </Button>
           )}
           <Menu
@@ -594,7 +594,7 @@ const ProductBuilder = (props) => {
       )}
       <Box mt={1} >
         {
-          isMobile ?
+          isMobile && !isTablet ?
             <CustomSwipableList
 
               allowSelection={Editable}

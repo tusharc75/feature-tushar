@@ -109,7 +109,10 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                             </IconButton>
                         </HtmlTooltip>}
                 </div>
-            )
+            ),
+            Footer: () => {
+                return <>Total</>
+            }
         }]
         data.forEach(element => {
             if (element.type === "date") {
@@ -159,7 +162,11 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                             Header: fieldLabel,
                             Cell: ({ row }) => (
                                 row.original[fieldName] ? <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
-                            )
+                            ),
+                            Footer: (info) => {
+                                const total = info?.rows?.filter(f => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName])).reduce((sum, row) => row.values[fieldName] + sum, 0)
+                                return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
+                            }
                         })
                     })
                 }
@@ -203,21 +210,10 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
             )
         })
         coloum.forEach(element => {
-            if (element.accessor.includes("detail")) {
-                element["Footer"] = () => {
-                    return <>Total</>
-                }
-            }
-            else if (element.accessor === "qtyDisplay") {
+            if (element.accessor === "qtyDisplay") {
                 element["Footer"] = (info) => {
                     const qtyTotal = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
                     return <>{qtyTotal}</>
-                }
-            }
-            else if (element.accessor.includes("finalPrice")) {
-                element["Footer"] = (info) => {
-                    const total = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
-                    return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
                 }
             }
         });

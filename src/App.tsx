@@ -90,8 +90,6 @@ import RecordDeletedDialog from './components/Helpers/RecordDeletedDialog';
 import PricingConditions from './pages/PricingConditions';
 import RepairJob from './pages/RepairJob';
 import RepairJobDetails from './pages/RepairJob/RepairJobDetails';
-import ReceivingTicket from './pages/ReceivingTicket';
-import ReceivingTicketDetails from './pages/ReceivingTicket/ReceivingTicketDetails';
 import PricingConditionsDetails from './pages/PricingConditions/PricingConditionsDetails';
 import SalesOrder from './pages/SalesOrderCreation';
 import SalesOrderDetails from './pages/SalesOrderCreation/SalesOrderDetails';
@@ -527,12 +525,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.repairJobDetail.path}/:id`}>
               <RepairJobDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.receivingTicket.path}>
-              <ReceivingTicket />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.receivingTicketDetail.path}/:id`}>
-              <ReceivingTicketDetails />
             </PrivateRoute>
             <PrivateRoute exact path={routes.salesOrder.path}>
               <SalesOrder />

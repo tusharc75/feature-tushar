@@ -17,7 +17,7 @@ import CreateProduct from "../../../components/Product/CreateProduct";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import PurchaseOrderQtyDialog from "./PurchaseOrderQtyDialog";
 import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
@@ -218,32 +218,32 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex" alignItems="center">
                     <Button
-                        variant={isMobile ? "outlined" : "contained"}
+                        variant={isMobile && !isTablet ? "outlined" : "contained"}
                         color="primary"
                         size="small"
                         onClick={() => {
                             setIsAddNewProduct(true);
                         }}
                     >
-                        {isMobile ? <FaCartPlus size={22} /> : `Add New ${routes.product.title}`}
+                        {isMobile && !isTablet ? <FaCartPlus size={22} /> : `Add New ${routes.product.title}`}
                     </Button>
                     <Box mx={1} />
                     <Button
-                        variant={isMobile ? "outlined" : "contained"}
+                        variant={isMobile && !isTablet ? "outlined" : "contained"}
                         color="primary"
                         size="small"
                         onClick={() => {
                             setAddProductDialog(true);
                         }}
                     >
-                        {isMobile ? <FaCartArrowDown size={22} /> : `Add Existing ${routes.product.title}`}
+                        {isMobile && !isTablet ? <FaCartArrowDown size={22} /> : `Add Existing ${routes.product.title}`}
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
                     <Box display="flex" justifyContent="flex-end">
                         <Box mx={1} />
                         <Button
-                            variant={isMobile ? "outlined" : "contained"}
+                            variant={isMobile && !isTablet ? "outlined" : "contained"}
                             color="primary"
                             size="small"
                             disabled={selectedRecords.length === 0}
@@ -252,7 +252,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                                 setShowProductDialog(true)
                             }}
                         >
-                            {isMobile ? <EditIcon color="primary" /> : `Bulk Edit`}
+                            {isMobile && !isTablet ? <EditIcon color="primary" /> : `Bulk Edit`}
                         </Button>
                     </Box>
                     <HtmlTooltip title="Please select some product">
@@ -287,7 +287,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     </Menu>
                 </div>
             </Box>
-            {columns && frameWorkComponent ? isMobile ?
+            {columns && frameWorkComponent ? isMobile && !isTablet ?
                 <CustomSwipableList
                     allowSelection={true}
                     allowSwipe={true}

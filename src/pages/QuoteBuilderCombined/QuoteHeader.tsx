@@ -3,6 +3,7 @@ import SearchBox from "../../components/Helpers/SearchBox";
 import {
   AddOutlined,
 } from "@material-ui/icons";
+import {FaUserTie, IoFilterCircle, MdAccountBalanceWallet, MdAdd, MdFilterList, MdSort, FaCalendarDay, RiTicketFill, RiArrowUpDownFill, RiArrowUpDownLine, BsArrowUpShort, BsArrowUp, BsArrowDown} from "react-icons/all";
 import {
   Box,
   Grid,
@@ -15,8 +16,10 @@ import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
 import { useData } from "../../StateProvider/Provider";
-import { isMobile, isTablet } from 'react-device-detect';
-import {MdAdd} from "react-icons/all";
+import { isMobile,isTablet } from 'react-device-detect';
+import MobileSortDialog from "../../components/MobileSortDialog"
+import MobileFilterDialog from "../../components/MobileFilterDialog"
+
 
 function QuoteHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -34,6 +37,28 @@ function QuoteHeader(props) {
   };
 
   const [filter, setFilter] = useState("All Quotes");
+  const [open, setOpen] = useState(false);
+  const [isOpenDialog, setisOpenDialog] = useState(false)
+
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClickClose = () => {
+    setOpen(false);
+
+  };
+
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+
+  const handleClose = () => {
+    setisOpenDialog(false);
+  };
+
+
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
@@ -56,14 +81,97 @@ function QuoteHeader(props) {
     heading,
     children,
     showTransferEntityDialog,
-    showCloneQuoteDialog
+    showCloneQuoteDialog,
+    columns,
+    dispatch
 
   } = props;
+
+  let toggleInner = options && (
+    <ToggleButtonGroup
+      size="small"
+      className=" toggle-button-layout"
+      value={filter}
+      exclusive
+      onChange={handleFilter}
+    >
+      {options.map((k, index) => {
+        return (
+          <ToggleButton value={k.key} key={index}>
+            {k.key}
+          </ToggleButton>
+        );
+      })}
+    </ToggleButtonGroup>
+  );
+
   return (
     <Grid className={styles.filter_side_container} container>
-      <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
+       <Grid item xs={12} md={6} sm={6} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+      <div className="d-flex align-items-center">
         {icon} <span className="listingHeader">{heading}</span>
-        {options && (
+        </div>
+        {isMobile ? <div className="d-flex ">
+        <Button
+        onClick={handleClickOpen}
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        // aria-expanded={open ? 'true' : undefined}
+        color="secondary"
+        variant="text"
+        disableElevation
+        startIcon={<MdSort />}
+      >
+        Sort 
+        </Button>
+
+        <MobileSortDialog
+        isOpen={open}
+        handleClose={handleClickClose}
+        contentPart={toggleInner}
+        secHeading={["Sort Quotes"]}
+        columns={columns}
+        dispatch={dispatch}
+      
+        />
+
+
+
+        <Button
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        // aria-expanded={open ? 'true' : undefined}
+        variant="text"
+        color="secondary"
+        disableElevation
+        startIcon={<MdFilterList />}
+        onClick={handleOpen}
+      >
+        Filter 
+        </Button>
+
+
+        <MobileFilterDialog
+        isOpen={isOpenDialog}
+        handleClose={handleClose}
+        contentPart={toggleInner}
+        secHeading={["Filter Quotes"]}
+        columns={columns}
+        dispatch={dispatch}
+        />
+
+
+   
+   
+        
+
+      
+
+
+        </div> : 
+        options && (
           <ToggleButtonGroup
             size="small"
             className="ml-2"

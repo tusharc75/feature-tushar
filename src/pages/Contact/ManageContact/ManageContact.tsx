@@ -93,15 +93,10 @@ export default function ManageContact(props) {
             }
           });
         }
-        const addressDataDropdown = contactData.fields.find((d) => d.fieldName === "mailingAddress")?.option ?? [];
-        setAddressDataSource(addressDataDropdown)  
       }
-
-      const addressDataDropdown = contactData.fields.find((d) => d.fieldName === "mailingAddress");
-      if (accountId && addressDataDropdown) {
-        setAddressDataSource(addressDataDropdown?.option?.filter(d => contactData?.initialValues?.mailingAddress?.includes(d.optionValue)) ?? [])
-      }
-
+      
+      const addressDataDropdown = contactData.fields.find((d) => d.fieldName === "mailingAddress")?.option ?? [];
+      setAddressDataSource(addressDataDropdown)  
 
       if (fromProject) {
         setOwnerCollaboratorCommonDataSource(owners);
