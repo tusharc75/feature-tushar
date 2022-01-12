@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.39.0](https://github.com/vebholic/oms_frontend/compare/v2.38.0...v2.39.0) (2022-01-12)
+
+
+### Features
+
+* - Product details, cart screen changes done ([3fdf2a9](https://github.com/vebholic/oms_frontend/commit/3fdf2a9f5514cf6020e075648e67c0a7dae4a282))
+* - Skeleton added in product details screen ([28457bc](https://github.com/vebholic/oms_frontend/commit/28457bca6b2d94412c0c2daf19c696da17fd4a60))
+* **Contact:** Access to Portal handled ([47edc22](https://github.com/vebholic/oms_frontend/commit/47edc2277e279a90f7b19415aa581877c71aeab8))
+* **dashboard:** changes in dashboard ([92f6114](https://github.com/vebholic/oms_frontend/commit/92f611490cc7bc6ab61442a940bf4039ac2c918f))
+* **filter sort in opportunity:** filter Sort in Opportunity ([50ee5dc](https://github.com/vebholic/oms_frontend/commit/50ee5dc8f7c5b4292358059b881734c8416dfbfe))
+
+
+### Bug Fixes
+
+* bug fix ([50db8a5](https://github.com/vebholic/oms_frontend/commit/50db8a5e2a95e3ade57bde24cabd1aab45486321))
+* **dashboard:** fix and changes ([cf21109](https://github.com/vebholic/oms_frontend/commit/cf21109c8d6589bc76694ab9fd5e66afba8e1a88))
+* pO-957 ([dee70e1](https://github.com/vebholic/oms_frontend/commit/dee70e1c84f08eb5a4599878b7b60395812e6444))
+
 ## [2.38.0](https://github.com/vebholic/oms_frontend/compare/v2.37.1...v2.38.0) (2022-01-11)
 
 
