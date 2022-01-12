@@ -1,6 +1,6 @@
 
 import Box from "@material-ui/core/Box/Box";
-import React, { useState, useEffect, useReducer, useContext } from "react";
+import React, { useState, useEffect, useReducer, useContext, Fragment } from "react";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer, } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -23,6 +23,7 @@ import { Link } from "react-router-dom";
 import { startCase } from "lodash";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
+import AdditionalCostDialog from "../AdditionalCost/AdditionalCostDialog";
 
 
 const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJobStatus, statusOptions }) => {
@@ -47,6 +48,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
   const [downlodingFile, setDownlodingFile] = useState(null)
   const [emailAttachments, setEmailAttachments] = useState([]);
   const { isOffline } = useContext(CustomOfflineContext);
+  const [showCostDialog, setShowCostDialog] = useState(false)
 
   const NameRenderer = (params) => (
     <Link
@@ -107,6 +109,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
     let material: any = []
     let additionalcost: any = []
     try {
+      dispatch({ type: "loading", loading: true });
       if (isOffline) {
         const result = await findOne(objectStore.rentalManagement, rentalManagementData._id);
         material = result?.material;
@@ -220,9 +223,35 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
     setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
   }
 
+  const handleAddCost = (rows) => {
+    axiosInstance().post(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/add`, { additionalCost: rows })
+      .then(() => {
+        fetchData()
+        setShowCostDialog(false)
+      }).catch((error) => {
+        toastConfig.setToastConfig(error)
+      });
+  }
+
   return (<>
     <Box display="flex" justifyContent="space-between" m={1}>
       <Box display="flex" alignItems="center">
+        {!isOffline &&
+          <Fragment>
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              disabled={isOffline}
+              onClick={() => {
+                setShowCostDialog(true);
+              }}
+            >
+              Add Ad-hoc Charge
+            </Button>
+            <Box mx={1} />
+          </Fragment>
+        }
         {permissions?.rentalManagement?.isRead && (
           <Button
             variant="outlined"
@@ -335,6 +364,17 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         />
       </Dialog>
     )}
+    {showCostDialog &&
+      <AdditionalCostDialog
+        onClose={() => {
+          setShowCostDialog(false)
+        }}
+        handleAddCost={handleAddCost}
+        handleUpdateCost={() => { return false }}
+        currency={rentalManagementData?.currency}
+        costData={null}
+      />
+    }
   </>
   );
 }

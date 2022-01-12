@@ -523,12 +523,15 @@ const ProjectSales: FC = () => {
               selectedType={selectedType}
               handleFilterChange={handleProjectFilter}
               onCreate={handleCreate}
+              columns={columns}
+              dispatch={dispatch}
               showConfirmBox={showConfirmBox}
               canDelete={selectedRecords?.length === 0}
               selectedRecords={selectedRecords}
               setShowDeleteWarningConfirmBox={setShowDeleteWarningConfirmBox}
               setShowEntityDialog={setShowEntityDialog}
               setEntities={setEntities}
+              
             />
           </div>
 

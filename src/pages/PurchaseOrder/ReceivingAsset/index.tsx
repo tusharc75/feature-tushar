@@ -81,7 +81,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
             </Link>
             <Box padding={1}></Box>
             {
-                (params.data._id && params.data.actualReceived !== 0 && params.data.actualReceived !== undefined) &&
+                (params.data.actualReceived !== 0 && params.data.actualReceived !== undefined) &&
                 <HtmlTooltip title="Serialized Asset">
                     <span className="d-flex align-items-center gap-2">
                         <Chip label="Asset"
@@ -232,11 +232,11 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             color="primary"
                             type="button"
                             size="small"
-                            startIcon={isMobile ? '' : <AiFillFilePdf />}
+                            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                             disabled={downlodingFile}
                             onClick={() => { handleViewPdf(false) }}
                         >
-                            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
+                            {isMobile && !isTablet ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
                         </Button>
                     )}
                     <Box mx={1} />
@@ -246,16 +246,16 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             color="primary"
                             type="button"
                             size="small"
-                            startIcon={isMobile ? '' : <AiFillFilePdf />}
+                            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                             disabled={downlodingFile}
                             onClick={() => { handleViewPdf(true) }}
                         >
-                            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
+                            {isMobile && !isTablet ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
                         </Button>
                     )}
                     <Box mx={1} />
                     {permissions?.purchaseOrder?.isRead && <Button
-                        variant={isMobile ? "outlined" : "contained"}
+                        variant={isMobile && !isTablet ? "outlined" : "contained"}
                         color="primary"
                         size="small"
                         disabled={emailButtonLoading}
@@ -264,7 +264,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             fetchEmailAttachment()
                         }}
                     >
-                        {isMobile ? <MdEmail size={22} /> : `Send Email`}
+                        {isMobile && !isTablet ? <MdEmail size={22} /> : `Send Email`}
                     </Button>}
                 </Box>
                 <Box mx={1} />
@@ -294,7 +294,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     height={"calc(100vh - 330px)"}
                 >
                     {columns && frameWorkComponent ?
-                        isMobile ? <CustomSwipableList
+                        isMobile && !isTablet ? <CustomSwipableList
                             allowSelection={true}
                             allowSwipe={true}
                             permissions={permissions}

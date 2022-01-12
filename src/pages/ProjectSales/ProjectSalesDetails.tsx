@@ -387,23 +387,23 @@ const ProjectSalesDetails = () => {
                 <DetailsPageHeader heading={headingLbl} logo={undefined} mainPoints={mainPoints} showHeading={true}>
                   {(permissions?.projectStrategy?.isUpdate && isTeamMember) || isManager ? (
                     <Button
-                      variant={isMobile ? 'text' : 'contained'}
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
                       size="small"
-                      className={isMobile ? accountClass.mobile_button_layout : ''}
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
                       onClick={handleOpenUpdateDialog}
-                      style={isMobile ? { color: '#43aeaa' } : {}}
+                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                     >
-                      {isMobile ? <BiEdit size={20} /> : 'Edit'}
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   ) : null}
                   {permissions?.projectStrategy?.isDelete && isManager ? (
                     <DeleteButton
-                      text={isMobile ? <MdDelete size={20} /> : 'Delete'}
+                      text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
                       onClick={() => {
                         handleDeleteProject(id);
                       }}
-                      className={isMobile ? accountClass.mobile_button_layout : ''}
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
                     />
                   ) : null}
                 </DetailsPageHeader>

@@ -33,6 +33,7 @@ const AssetDashboard = ({ salesFilter }) => {
   const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [assetLocationData, setAssetLocationData] = React.useState([]);
   const [assetUtilizationData, setAssetUtilizationData] = React.useState([]);
+  const [assets, setAssets] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [loadingChartData, setLoadingChartData] = React.useState(false);
   const [limit, setLimit] = React.useState('10');
@@ -42,7 +43,7 @@ const AssetDashboard = ({ salesFilter }) => {
     country: {}
   });
   const [allProductCategories, setAllProductCategories] = React.useState([]);
-  const [loadingProductCategory, setLoadingProductCategory] = React.useState(false);
+  const [loadingDropdown, setLoadingDropdown] = React.useState(false);
 
   React.useEffect(() => {
     let timeout: ReturnType<typeof setTimeout> = setTimeout(() => {
@@ -76,27 +77,12 @@ const AssetDashboard = ({ salesFilter }) => {
   };
 
   React.useEffect(() => {
-    fetchProductCategory();
-  }, []);
+     let timeout = setTimeout(() => {
+       fetchAssetsData();  
+     },200)
 
-  const fetchProductCategory = () => {
-    setLoadingProductCategory(true);
-    axiosInstance()
-      .get(`${routes.productCategory.path}?limit=0`)
-      .then(({ data: { data } }) => {
-        setAllProductCategories(data.map((d) => ({ id: d._id, title: d.name })));
-        setLoadingProductCategory(false);
-      })
-      .catch((err) => {
-        setLoadingProductCategory(false);
-      });
-  };
-
-  React.useEffect(() => {
-    if (selectedEntity) {
-      fetchAssetsData();
-    }
-  }, [from, to, selectedEntity]);
+     return () => clearTimeout(timeout)
+  }, [from, to]);
 
   // NEW
   // const fetchAssetsData = () => {
@@ -174,7 +160,10 @@ const AssetDashboard = ({ salesFilter }) => {
           setFilter={setFilter}
           loading={loading}
           productCategories={allProductCategories}
-          loadingProductCategory={loadingProductCategory}
+          loadingDropdown={loadingDropdown}
+          setLoadingDropdown={setLoadingDropdown}
+          setAllProductCategories={setAllProductCategories}
+          setAssets={setAssets}
         />
         {/* <Box>
           <Autocomplete
@@ -212,13 +201,13 @@ const AssetDashboard = ({ salesFilter }) => {
             <MapView smallScreen={smallScreen} data={assetLocationData} loading={loading} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <AssetChart smallScreen={smallScreen} loading={loading || loadingChartData || loadingProductCategory} data={assetUtilizationData} />
+            <AssetChart smallScreen={smallScreen} loading={loading || loadingChartData || loadingDropdown} data={assetUtilizationData} />
           </Grid>
         </Grid>
         <Box mt={2}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <AssetStatusChart productCategories={allProductCategories} loadingProductCategory={loadingProductCategory} />
+              <AssetStatusChart productCategories={allProductCategories} loadingProductCategory={loadingDropdown} />
             </Grid>
             <Grid item xs={12} sm={6}>
               <RentalChart />
@@ -226,7 +215,7 @@ const AssetDashboard = ({ salesFilter }) => {
           </Grid>
         </Box>
         <Box mt={2}>
-          <AssetStats filter={filter} />
+          <AssetStats assets={assets.slice(0, 15000)} loading={loadingDropdown} filter={filter} />
         </Box>
       </Box>
     </div>

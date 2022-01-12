@@ -87,7 +87,10 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                   <Delete color="error" />
                 </IconButton>}
             </span>}
-        </div>)
+        </div>),
+      Footer: () => {
+        return <>Total</>
+      }
     },
     {
       accessor: 'assets',
@@ -144,7 +147,11 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               Header: fieldLabel,
               Cell: ({ row }) => (
                 row.original[fieldName] ? <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
-              )
+              ),
+              Footer: (info) => {
+                const total = info?.rows?.filter(f => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName])).reduce((sum, row) => row.values[fieldName] + sum, 0)
+                return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
+              }
             })
           })
         }
@@ -160,27 +167,15 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       }
     });
     coloum.forEach(element => {
-      if (element.accessor.includes("detail")) {
-        element["Footer"] = () => {
-          return <>Total</>
-        }
-      }
-      else if (element.accessor === "qty") {
+      if (element.accessor === "qty") {
         element["Footer"] = (info) => {
           const qtyTotal = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
           return <>{qtyTotal}</>
         }
       }
-      else if (element.accessor.includes("finalPrice")) {
-        element["Footer"] = (info) => {
-          const total = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
-          return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
-        }
-      }
     });
     setColumns(coloum)
     fetchProductInventory();
-
   }
 
   const fetchProductInventory = async () => {

@@ -70,6 +70,7 @@ const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOr
 
     const fetchProductInPurchaseOrder = () => {
         dispatch({ type: "loading", loading: true });
+        dispatch({ type: "initialize", data: [], count: 0 });
         if (gridApi) {
             gridApi.setRowData([]);
         }
@@ -230,6 +231,7 @@ const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOr
                                 loading={loading}
                                 isClientSideGrid={false}
                                 onCellValueChanged={onCellValueChanged}
+                                showOnlyShowFilteredRecordSwitch={true}
                             />
                             : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                     </div>

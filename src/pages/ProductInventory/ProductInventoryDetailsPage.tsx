@@ -11,7 +11,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { productInventory, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, sidebarResource } from "../../constants/helpers";
+import { productInventory, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, INVENTORY_STATUS } from "../../constants/helpers";
 import ManageProductInventory from "./ManageProductInventory";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
@@ -25,7 +25,7 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import ProductHierarchy from "../Product/ProductHierarchy";
 import { FaDiceOne, FaWpforms } from "react-icons/fa";
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import { BiFoodMenu } from "react-icons/bi";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import CustomTimeline from "../../components/CustomTimeline";
@@ -345,9 +345,9 @@ const ProductInventoryDetailsPage = () => {
 
 
   useEffect(() => {
-    let statuses = ["Available", "Scrap", "Lost"]
+    let statuses = [INVENTORY_STATUS.available, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost]
     if (productInventoryData) {
-      if (productInventoryData.status === "Lost" || productInventoryData.status === "Repair") {
+      if (productInventoryData.status === INVENTORY_STATUS.lost || productInventoryData.status === INVENTORY_STATUS.repair || productInventoryData.status === INVENTORY_STATUS.underReview) {
         setManualStatus(statuses)
       } else {
         setManualStatus(statuses.filter(status => status !== "Available"))
@@ -400,7 +400,7 @@ const ProductInventoryDetailsPage = () => {
                         size="small"
                         onClick={() => setShowRepairJobDialog(true)}
                       >
-                        {isMobile ? <GiAutoRepair size={20} /> : "Create Repair Job"}
+                        {isMobile && !isTablet ? <GiAutoRepair size={20} /> : "Create Repair Job"}
 
                       </Button>
                       <Button
@@ -410,9 +410,9 @@ const ProductInventoryDetailsPage = () => {
                         onClick={openActions}
                         disabled={updateLoading}
                         aria-controls="action-menu"
-                        endIcon={isMobile ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
+                        endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
                       >
-                        {isMobile ? <GrStatusInfo size={20} /> : "Change Status"}
+                        {isMobile && !isTablet ? <GrStatusInfo size={20} /> : "Change Status"}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -439,12 +439,12 @@ const ProductInventoryDetailsPage = () => {
                         }
                       </Menu>
                       <Button
-                        variant={isMobile ? "text" : "outlined"}
+                        variant={isMobile && !isTablet ? "text" : "outlined"}
                         color="primary"
                         size="small"
                         onClick={handleOpenUpdateDialog}
                       >
-                        {isMobile ? <MdEdit size={22} /> : "Edit"}
+                        {isMobile && !isTablet ? <MdEdit size={22} /> : "Edit"}
                       </Button>
                     </>
                   )}

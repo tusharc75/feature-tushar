@@ -47,7 +47,7 @@ const TYPES = {
   endDate: "END_DATE",
   unitAndPricingMethod: "UNIT",
   indexOfProductInCart: "INDEX_OF_PRODUCT_IN_CART",
-  updateWholePaload: "UPDATE_WHOLE_PALOAD",
+  updateWholePayload: "UPDATE_WHOLE_PALOAD",
 }
 
 const initialData = {
@@ -72,7 +72,7 @@ const reducer = (data = initialData, action) => {
     case TYPES.indexOfProductInCart:
       return { ...data, indexOfProductInCart: action.payload };
 
-    case TYPES.updateWholePaload:
+    case TYPES.updateWholePayload:
       return { ...data, ...action.payload };
 
     default:
@@ -95,7 +95,7 @@ export default function ProductDetails() {
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, cartItems }, dispatch }: any = useData();
   const [wishlist, setWishlist] = useState({ loading: false, disabled: false });
-  const [rateCurrency, setRateCurrency] = useState({ currency: "", rate: "", mrp: "", rateWithCurrency: "", unit: "", pricingMethod: "", isRateMrpSame: false })
+  const [rateCurrency, setRateCurrency] = useState({ currency: "", rate: "", mrp: "", rateWithCurrency: "", isRateMrpSame: false })
   const [deleteProductFromCartConfirmationDialog, setDeleteProductFromCartConfirmationDialog] = useState({ show: false, okBtnLoading: false })
   const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
   const [hasError, setHasError] = useState(false);
@@ -113,7 +113,7 @@ export default function ProductDetails() {
 
   useEffect(() => {
     fetchCart()
-    fetchProducts()
+    // fetchProducts()
     // fetchReviews()
   }, []);
 
@@ -121,10 +121,12 @@ export default function ProductDetails() {
     axiosInstance().get(`${eProduct.api}/${id}`).then(({ data: { data } }) => {
       setProductDetails({ ...data });
 
-      const indexOfProductInCart = cartItems.findIndex(({ orderType, productDetail }) => orderType === orderTypeInLowerCase && productDetail._id === id);
+      const indexOfProductInCart = getIndexOfProductInCart(cartItems);
+      //  .findIndex(({ orderType, productDetail }) => orderType === orderTypeInLowerCase && productDetail._id === id);
+
       if (indexOfProductInCart > -1) {
         dispatchData({
-          type: TYPES.updateWholePaload,
+          type: TYPES.updateWholePayload,
           payload: {
             selectedUnit: cartItems[indexOfProductInCart].unit,
             selectedPricingMethod: cartItems[indexOfProductInCart].pricingMethod,
@@ -162,25 +164,25 @@ export default function ProductDetails() {
     }
 
     if (record) {
-      setRateCurrency({ currency: record.currency, unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
+      setRateCurrency({ currency: record.currency, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
     }
 
     if (data.indexOfProductInCart !== -1) {
-      updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), unit, pricingMethod, data.startDate, data.endDate);
+      updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), unit, pricingMethod, data.startDate, data.endDate, record?.mrp, record?.rate);
     }
   }
 
-  const fetchProducts = () => {
-    axiosInstance()
-      .get(`${eProduct.api}?limit=0`)
-      .then(({ data: { data } }) => {
-        data = data.map(obj => ({ ...obj, selected: false }))
-        setProducts(data);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }
+  // const fetchProducts = () => {
+  //   axiosInstance()
+  //     .get(`${eProduct.api}?limit=0`)
+  //     .then(({ data: { data } }) => {
+  //       data = data.map(obj => ({ ...obj, selected: false }))
+  //       setProducts(data);
+  //     })
+  //     .catch((error) => {
+  //       toastConfig.setToastConfig(error);
+  //     });
+  // }
 
   const getIndexOfProductInCart = (data) => {
     return data.findIndex(({ orderType, productDetail }) => orderType === orderTypeInLowerCase && productDetail._id === id)
@@ -216,8 +218,8 @@ export default function ProductDetails() {
       qty: 1,
       type: 'product',
       materialId: item._id,
-      mrp: Number(item.mrp),
-      rate: 10,
+      mrp: Number(rateCurrency.mrp),
+      rate: rateCurrency.rate,
       unit: data.selectedUnit,
       orderType: orderTypeInLowerCase,
       currency: rateCurrency.currency
@@ -282,7 +284,7 @@ export default function ProductDetails() {
       })
   }
 
-  const updateCart = (cartId, value, unit, pricingMethod, startDate, endDate) => {
+  const updateCart = (cartId, value, unit, pricingMethod, startDate, endDate, mrp = rateCurrency?.mrp, rate = rateCurrency?.rate) => {
     axiosInstance().put(`/ecommerce/cart`, {
       _id: cartId,
       qty: value,
@@ -290,7 +292,9 @@ export default function ProductDetails() {
       pricingMethod: pricingMethod,
       startDate: startDate,
       endDate: endDate,
-      currency: rateCurrency.currency
+      currency: rateCurrency.currency,
+      mrp: mrp,
+      rate: rate
     }).then(() => {
 
     }).catch((error) => {
@@ -421,9 +425,12 @@ export default function ProductDetails() {
               }
             </Grid>
 
-            <Grid item xs={8}>
+            <Grid item xs={5}>
 
-              <h2>{productDetails.productName}</h2>
+              <div className="w-100 d-flex align-items-center gap-2 justify-content-space-between">
+                <h2>{productDetails.productName}</h2>
+                <Chip color="primary" label={ORDER_TYPES[orderTypeInLowerCase]?.key} />
+              </div>
 
               <Rating
                 name="half-rating-read"
@@ -444,7 +451,7 @@ export default function ProductDetails() {
               </div>
 
               <Grid container>
-                <Grid item xs={12} md={6} className="d-flex flex-column gap-3">
+                <Grid item xs={12} className="d-flex flex-column gap-3">
                   {
                     productDetails.unit || productDetails.pricingMethod ? <Grid container spacing={2}>
                       <Grid item xs={productDetails.pricingMethod ? 6 : 12}>
@@ -457,7 +464,7 @@ export default function ProductDetails() {
                               id="unit"
                               value={data.selectedUnit}
                               onChange={(e) => {
-                                changeRateCurrency(productDetails, e.target.value, rateCurrency.pricingMethod)
+                                changeRateCurrency(productDetails, e.target.value, data.selectedPricingMethod)
                               }}
                               label="Unit"
                             >
@@ -481,7 +488,7 @@ export default function ProductDetails() {
                               id="pricing-method"
                               value={data.selectedPricingMethod}
                               onChange={(e) => {
-                                changeRateCurrency(productDetails, rateCurrency.unit, e.target.value)
+                                changeRateCurrency(productDetails, data.selectedUnit, e.target.value)
                               }}
                               label="Pricing Method"
                             >
@@ -559,10 +566,9 @@ export default function ProductDetails() {
 
                   <Box className="my-3 d-flex gap-4 align-items-baseline">
                     {
-                      rateCurrency.rateWithCurrency ? <div className="d-flex align-items-center gap-2">
-                        <Chip color="primary" label={ORDER_TYPES[orderTypeInLowerCase]?.key} />
-                        <Typography variant="h5">{rateCurrency.rateWithCurrency}</Typography>
-                      </div> : <Typography variant="h6" className="text-error">Price calculation not available</Typography>
+                      rateCurrency.rateWithCurrency
+                        ? <Typography variant="h5">{rateCurrency.rateWithCurrency}</Typography>
+                        : <Typography variant="h6" className="text-error">Price calculation not available</Typography>
                     }
 
                     {
@@ -633,6 +639,8 @@ export default function ProductDetails() {
               </Grid>
 
             </Grid>
+
+            <Grid item xs={3}></Grid>
 
           </Grid> : <Grid container className="py-4 px-2" spacing={2}>
 
@@ -735,6 +743,6 @@ export default function ProductDetails() {
         ) : null
       }
 
-    </Fragment >
+    </Fragment>
   );
 }

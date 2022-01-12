@@ -43,6 +43,7 @@ import {
 } from '@material-ui/core';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Formik, Form, Field, FieldArray } from 'formik';
+import {CustomToastContext} from "../StateProvider/CustomToastContext/CustomToastContext"
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -55,7 +56,7 @@ const Transition = React.forwardRef(function Transition(
 
 export default function MobileFilterDialog({ isOpen, handleClose, contentPart, secHeading, columns,dispatch }) {
   const [showFilter, setShowFilter] = React.useState(false);
-
+  const toastConfig = React.useContext(CustomToastContext)
   const handleAddFilter = () => {
     if (!showFilter) {
       setShowFilter(true);
@@ -100,6 +101,12 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
               setTimeout(() => {
                 dispatch({ type: 'filter', filters: savedFilters });
               }, 500)
+
+              toastConfig.setToastConfig({
+                open: true,
+                type: "success",
+                message: 'Filtered Successfully',
+              });
             }
               
             }
