@@ -1045,25 +1045,38 @@ export default function ManageAccount(props) {
                         onSuccess={(obj) => {
                           if (obj) {
                             setShowAddAddresstDialog(false);
-                            setAddressDataSource((prevState) => [...prevState,
-                            {
-                              default: false,
-                              optionLabel: obj?.fullAddress,
-                              optionValue: obj._id,
-                              order: addressDataSource.length + 1,
-                            }]);
-                            setFieldValue(addressType.address, [...values[`${addressType.address}`], obj._id]);
-                            if (isShippingSameAsBilling === true) {
-                              if (addressType.address === "billingAddress") {
-                                setFieldValue("shippingAddress", [...values[`${addressType.address}`], obj._id]);
-                              } else {
-                                setFieldValue("billingAddress", [...values[`${addressType.address}`], obj._id]);
+                            if (obj?.isAlreadyExist === true) {
+                              let tempAddress = addressDataSource.find(d => d?.optionLabel === obj?.fullAddress)
+                              setFieldValue(addressType.address, [...values[`${addressType.address}`], tempAddress?.optionValue]);
+                              if (isShippingSameAsBilling === true) {
+                                if (addressType.address === "billingAddress") {
+                                  setFieldValue("shippingAddress", [...values[`${addressType.address}`], tempAddress?.optionValue]);
+                                } else {
+                                  setFieldValue("billingAddress", [...values[`${addressType.address}`], tempAddress?.optionValue]);
+                                }
                               }
-
                             }
+                            else {
+                              setAddressDataSource((prevState) => [...prevState,
+                              {
+                                default: false,
+                                optionLabel: obj?.fullAddress,
+                                optionValue: obj._id,
+                                order: addressDataSource.length + 1,
+                              }]);
+                              setFieldValue(addressType.address, [...values[`${addressType.address}`], obj._id]);
+                              if (isShippingSameAsBilling === true) {
+                                if (addressType.address === "billingAddress") {
+                                  setFieldValue("shippingAddress", [...values[`${addressType.address}`], obj._id]);
+                                } else {
+                                  setFieldValue("billingAddress", [...values[`${addressType.address}`], obj._id]);
+                                }
 
+                              }
+                            }
                           }
-                        }}
+                        }
+                        }
                       />
                     }
                     {isAccDialogVisible ? (
