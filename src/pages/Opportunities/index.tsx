@@ -540,6 +540,7 @@ const Opportunities = () => {
             heading={routes.opportunity.title}
             showTransferEntityDialog={handleTransferEntityDialog}
             columns={columns}
+            dispatch={dispatch}
           >
             {accountDetails.accountId && (
               <Chip
