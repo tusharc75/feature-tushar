@@ -14,46 +14,39 @@ interface FilterProps {
   loading: boolean;
   fetchData?: VoidFunction;
   enableSubmit?: boolean;
-  loadingProductCategory?: boolean;
+  loadingDropdown: boolean;
+  setLoadingDropdown: any
   productCategories: any[];
+  setAllProductCategories: any;
+  setAssets: any;
 }
 
 const AssetFilters = (props: FilterProps) => {
-  const { filter, setFilter, loading, productCategories, loadingProductCategory } = props;
-  const [loadingProduct, setLoadingProduct] = React.useState(false);
+  const { filter, setFilter, loading, productCategories, loadingDropdown, setAllProductCategories, setLoadingDropdown, setAssets } = props;
   const [allProducts, setAllProducts] = React.useState([]);
 
   const [filterAnchor, setFilterAnchor] = React.useState(null);
   const [openFilter, setOpenFilter] = React.useState(false);
 
   React.useEffect(() => {
-    // fetchProductCategory();
-    fetchProduct();
+    // 
+    fetchDropdownData();
   }, []);
 
-  // const fetchProductCategory = () => {
-  //   setLoadingProductCategory(true);
-  //   axiosInstance()
-  //     .get(`${routes.productCategory.path}?limit=0`)
-  //     .then(({ data: { data } }) => {
-  //       setProductCategories(data.map((d) => ({ id: d._id, title: d.name })))
-  //       setLoadingProductCategory(false);
-  //     })
-  //     .catch((err) => {
-  //       setLoadingProductCategory(false);
-  //     });
-  // };
-
-  const fetchProduct = () => {
-    setLoadingProduct(true);
+  const fetchDropdownData = () => {
+    setLoadingDropdown(true);
     axiosInstance()
-      .get(`${routes.product.path}?limit=0`)
+    .get(`/sa-formbuilder/lookup?lookupResource=Product,Product Category,Product Inventory`)
       .then(({ data: { data } }) => {
-        setAllProducts(data.map((d) => ({ id: d._id, title: d.productName })));
-        setLoadingProduct(false);
+        if(data) {
+          setAllProducts(data["Product"].map((d) => ({ id: d.optionValue, title: d.optionLabel })));
+          setAllProductCategories(data["Product Category"].map((d) => ({ id: d.optionValue, title: d.optionLabel })))
+          setAssets(data["Product Inventory"].map((d) => ({ id: d.optionValue, title: d.optionLabel })))
+        }
+        setLoadingDropdown(false);
       })
       .catch((err) => {
-        setLoadingProduct(false);
+        setLoadingDropdown(false);
       });
   };
 
@@ -86,7 +79,7 @@ const AssetFilters = (props: FilterProps) => {
               disabled={loading}
               fullWidth
               multiple={true}
-              loading={loadingProduct}
+              loading={loadingDropdown}
               loadingText={'Loading...'}
               value={filter.productDescription}
               options={productCategories}
@@ -114,7 +107,7 @@ const AssetFilters = (props: FilterProps) => {
               disabled={loading}
               fullWidth
               disableListWrap
-              loading={loadingProductCategory}
+              loading={loadingDropdown}
               loadingText={'Loading...'}
               multiple={true}
               value={filter.productCategory}

@@ -8,7 +8,7 @@ import { GetReferenceName, GetEmails } from '../../../axios/activity';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import { useData } from '../../../StateProvider/Provider';
 import CustomContainer from '../../../components/CustomContainer';
-import { Button, MenuItem, Menu, Typography, Tooltip, IconButton } from '@material-ui/core';
+import { Button, MenuItem, Menu, Typography, Tooltip, IconButton, TextField, Chip } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import axiosInstance from '../../../axios/axiosInstance';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -21,7 +21,7 @@ import Dialog from '@material-ui/core/Dialog';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import { isObjectEmpty } from '../../../constants/helpers';
+import { getApi, getData, isObjectEmpty, resourceOptions } from '../../../constants/helpers';
 import styles from '../../Leads/Header.module.scss';
 import emailStyles from './email.module.scss';
 import './email.scss';
@@ -34,6 +34,9 @@ import routes from '../../../components/Helpers/Routes';
 import { MdAccountCircle } from 'react-icons/md';
 import { AiFillCrown, MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
+import { Autocomplete } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
 
 const tabs = {
   Inbox: 1,
@@ -71,9 +74,13 @@ const Email = () => {
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = 'emailPage_selected';
-
+  const [resource, setResource] = useState('');
+  const [resourceData, setResourceData] = useState(null);
+  const [loadingResources, setLoadingResources] = useState(false);
+  const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [columns] = useState([
     { field: 'to', headerName: 'Recipient', show: true, disabled: true, cellRenderer: 'recipentRenderer' },
+    { field: 'relatedTo', headerName: 'Related To', show: true, disabled: true, primaryField: true, cellRenderer: 'referenceRenderer' },
     {
       field: 'subject',
       headerName: 'Subject',
@@ -118,13 +125,36 @@ const Email = () => {
         .then(({ data }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
   }, [referenceId]);
 
   useEffect(() => {
     fetchEmails();
   }, [page, limit, filters, filter, sorting]);
+
+  useEffect(() => {
+    if (!resource) return;
+    setLoadingResources(true);
+    axiosInstance()
+      .get(`${getApi(resource)}?limit=100`)
+      .then(({ data: { data } }) => {
+        if (data.length) {
+          const mappedData = data.map((_d) => getData(resource, _d));
+          setResourceData(mappedData || []);
+        }
+        setLoadingResources(false);
+      })
+      .catch((error) => {
+        setLoadingResources(false);
+      });
+
+    return () => {
+      setSelectedResourceData(null);
+      setResourceData(null);
+    };
+    // eslint-disable-next-line
+  }, [resource]);
 
   const fetchEmails = async () => {
     const queryString = getQueryString();
@@ -225,10 +255,29 @@ const Email = () => {
     </div>
   );
 
+  const ReferenceRenderer = (params) => (
+    <>{params.value && params.value?.length > 0 ? params.value.map(d => {
+      return (
+        <>
+          <span >{d.name}</span>
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`${d.type}`}
+          />
+        </>
+      )
+    })
+      : <NoDataCell />
+    }
+    </>
+  );
+
   const CreatedByDateRenderer = (params) => <span className={emailStyles.emailCreatedAt}>{displayDate(params.data?.createdByDate)}</span>;
 
   const frameworkComponents = {
     recipentRenderer: RecipentRenderer,
+    referenceRenderer: ReferenceRenderer,
     subjectRenderer: SubjectRenderer,
     messageRenderer: MessageRenderer,
     createdByDate: CreatedByDateRenderer,
@@ -260,7 +309,6 @@ const Email = () => {
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
-
     return deepFilter;
   };
 
@@ -351,13 +399,44 @@ const Email = () => {
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1">
               <HiOutlineMail className="headerLogo" /> <span className="listingHeader">{routes.activityEmail.title}</span>
-              {/* <ToggleButtonGroup size="small" className="ml-8" value={currentTab} exclusive onChange={handleTab}>
-                {Object.keys(tabs).map((k, index) => (
-                  <ToggleButton value={tabs[k]} key={index} className="l-2">
-                    {k} {currentTab === tabs[k] ? `(${rowCount})` : ''}
-                  </ToggleButton>
-                ))}
-              </ToggleButtonGroup> */}
+              <Autocomplete
+                options={resourceOptions}
+                getOptionLabel={(option) => option}
+                style={{ width: "200px" }}
+                value={resource}
+                onChange={(event, newValue) => {
+                  setResource(newValue);
+                }}
+                size="small"
+                renderInput={(params) =>
+                  isMobile && !isTablet ? (
+                    <TextField {...params} label="Select Resource" variant="standard" className={isMobile ? 'serchBox' : ''} />
+                  ) : (
+                    <TextField {...params} label="Select Resource" variant="outlined" />
+                  )
+                }
+              />
+              {Boolean(resource) && resourceData && (
+                <Autocomplete
+                  disabled={loadingResources}
+                  options={resourceData}
+                  getOptionLabel={(option: any) => option.name}
+                  getOptionSelected={(option: any, value: any) => option.name === value.name}
+                  style={{ width: "200px" }}
+                  value={selectedResourceData}
+                  onChange={(event, newValue) => {
+                    setSelectedResourceData(newValue);
+                    if (newValue?.id) {
+                      setFilter((prevState) => ([...prevState, { _id: newValue.id, type: camelCase(resource), name: newValue.name }]))
+                    }
+                    else {
+                      setFilter([])
+                    }
+                  }}
+                  size="small"
+                  renderInput={(params) => <TextField {...params} label={`Select ${resource}`} variant="outlined" />}
+                />
+              )}
             </Grid>
             <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
               <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
@@ -423,7 +502,7 @@ const Email = () => {
             allowSwipe={true}
             permissions={permissions.note}
             primaryField={columns?.find((d) => d.primaryField)}
-            onClick={(data) => {}}
+            onClick={(data) => { }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
