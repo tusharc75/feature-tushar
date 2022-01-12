@@ -11,7 +11,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { productInventory, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, sidebarResource } from "../../constants/helpers";
+import { productInventory, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, INVENTORY_STATUS } from "../../constants/helpers";
 import ManageProductInventory from "./ManageProductInventory";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
@@ -345,9 +345,9 @@ const ProductInventoryDetailsPage = () => {
 
 
   useEffect(() => {
-    let statuses = ["Available", "Scrap", "Lost"]
+    let statuses = [INVENTORY_STATUS.available, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost]
     if (productInventoryData) {
-      if (productInventoryData.status === "Lost" || productInventoryData.status === "Repair") {
+      if (productInventoryData.status === INVENTORY_STATUS.lost || productInventoryData.status === INVENTORY_STATUS.repair || productInventoryData.status === INVENTORY_STATUS.underReview) {
         setManualStatus(statuses)
       } else {
         setManualStatus(statuses.filter(status => status !== "Available"))
