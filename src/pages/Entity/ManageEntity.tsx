@@ -356,8 +356,8 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                       return [
                         ...prevState,
                         {
-                          optionValue: data.brand,
-                          optionLabel: data.fullAddress,
+                          optionValue: data?.brand,
+                          optionLabel: data?.fullAddress,
                           order: addressOptions.length,
                           default: false
                         }
