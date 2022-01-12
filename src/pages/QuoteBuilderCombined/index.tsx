@@ -811,6 +811,8 @@ const QuoteBuilders = () => {
               showCloneQuoteDialog={() => {
                 handleShowCloneQuoteDialog()
               }}
+              columns={columns}
+              dispatch={dispatch}
 
             >
               {accountDetails.accountId && (
