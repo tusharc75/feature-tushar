@@ -1430,6 +1430,24 @@ export const DELIVERY_TICKET_STATUS = {
   delivered: 'Delivered',
 };
 
+export const DELIVERY_TICKET_MAPPED_STATUS = {
+  "Sign-off - Dispatch": DELIVERY_TICKET_STATUS.indTransit,
+  "Sign-off - Delivery": DELIVERY_TICKET_STATUS.delivered
+}
+
+export const DELIVERY_TICKET_TYPE = {
+  loading: 'Loading',
+  receiving: 'Receiving',
+};
+
+export const DELIVERY_TICKET_REFRENCE_TYPE = {
+  rentalJob: 'Rental Job',
+  transferAsset: 'Transfer Asset',
+  repairJob: 'Repair Job',
+  salesOrder: 'Sales Order',
+};
+
+
 export const asyncForEach = async (
   array: any[],
   callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>

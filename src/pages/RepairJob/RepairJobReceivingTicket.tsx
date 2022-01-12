@@ -27,7 +27,6 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { makeStyles } from '@material-ui/core/styles';
-import ManageReceivingTicket from "../ReceivingTicket/ManageReceivingTicket";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { FaSuitcase } from "react-icons/fa";
 import { isMobile, isTablet } from "react-device-detect";
