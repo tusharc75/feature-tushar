@@ -91,7 +91,13 @@ const ManageAddressDialog = (props) => {
       })
       .catch((error) => {
         setLoading(false);
-        toastConfig.setToastConfig(error);
+        if (error?.status === 400 && error?.error === "Address Already Exist") {
+          values["isAlreadyExist"] = true
+          onSuccess(values);
+        }
+        else {
+          toastConfig.setToastConfig(error);
+        }
       });
   };
 
@@ -277,13 +283,13 @@ const ManageAddressDialog = (props) => {
                                       onChange={
                                         field.fieldName === 'fullAddress'
                                           ? (_, val) => {
-                                              if (typeof val !== 'object') return;
-                                              const placeId = val?.place_id ?? null;
-                                              getFullAddress(placeId);
-                                              if (!placeId) {
-                                                setAddressData(null);
-                                              }
+                                            if (typeof val !== 'object') return;
+                                            const placeId = val?.place_id ?? null;
+                                            getFullAddress(placeId);
+                                            if (!placeId) {
+                                              setAddressData(null);
                                             }
+                                          }
                                           : null
                                       }
                                     />
@@ -317,7 +323,7 @@ const ManageAddressDialog = (props) => {
                     })}
                 </Form>
                 <div>
-                    <p>Drag or click to select new coordinates</p>
+                  <p>Drag or click to select new coordinates</p>
                   <Box height={400} width={'100%'} borderRadius={4} overflow="hidden">
                     <GoogleMap
                       onClick={(position) => onCordChange(position)}
