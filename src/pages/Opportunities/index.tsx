@@ -539,6 +539,7 @@ const Opportunities = () => {
             icon={<GiHiveMind className="headerLogo" />}
             heading={routes.opportunity.title}
             showTransferEntityDialog={handleTransferEntityDialog}
+            columns={columns}
           >
             {accountDetails.accountId && (
               <Chip
