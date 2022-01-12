@@ -621,6 +621,12 @@ export default function ManageContact(props) {
                         onSuccess={(data) => {
 
                           setAddressOpen({ open: false, isClone: false })
+                          if (data?.isAlreadyExist === true) {
+                            let tempAddress = addressDataSource.find(d => d?.optionLabel === data?.fullAddress)
+                            setFieldValue("mailingAddress", [tempAddress.optionValue, ...values.mailingAddress ])
+                           
+                          }
+                          else {
                           setFieldValue("mailingAddress", [data._id, ...values.mailingAddress ])
                           setAddressDataSource((prevState) => [...prevState,
                           {
@@ -629,6 +635,7 @@ export default function ManageContact(props) {
                             optionValue: data._id,
                             order: addressDataSource.length + 1,
                           }]);
+                        }
                         }}
 
                       />

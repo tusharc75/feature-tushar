@@ -81,7 +81,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
             </Link>
             <Box padding={1}></Box>
             {
-                (params.data._id && params.data.actualReceived !== 0 && params.data.actualReceived !== undefined) &&
+                (params.data.actualReceived !== 0 && params.data.actualReceived !== undefined) &&
                 <HtmlTooltip title="Serialized Asset">
                     <span className="d-flex align-items-center gap-2">
                         <Chip label="Asset"
