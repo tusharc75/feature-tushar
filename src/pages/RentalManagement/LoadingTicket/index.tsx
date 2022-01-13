@@ -205,87 +205,83 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
-      <Button
-        onClick={() => {
-          setDownlodingFile(true);
-          axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
-            .then(({ data }) => {
-              axiosInstance()
-                .get(`user/download?fileName=${data.data.fileName}`, {
-                  responseType: "blob",
-                })
-                .then(({ data }) => {
-                  const file = new Blob([data], { type: "application/pdf" });
-                  const fileURL = URL.createObjectURL(file);
-                  const pdfWindow = window.open();
-                  pdfWindow.location.href = fileURL;
-                  toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-                  setDownlodingFile(false);
-                })
-                .catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setDownlodingFile(false);
-                });
-            }).catch((err) => {
-              toastConfig.setToastConfig(err);
-              setDownlodingFile(false);
-            })
-        }}
-        variant="outlined"
-        color="primary"
-        type="button"
-        size="small"
-        disabled={downlodingFile || isOffline}
-        startIcon={<AiFillFilePdf />}
-      >
-        {downlodingFile ? "Please wait..." : "Preview"}
-      </Button>
-      <Box mx={1} />
-      <Button variant="outlined" color="primary" aria-controls="simple-menu"
-        aria-haspopup="true"
-        disabled={selectedRecords.length === 0 || isOffline}
-        size="small"
-        onClick={handleClick}
-        endIcon={<ArrowDropDownIcon />}>
-        Change Status
-      </Button>
-      <Menu
-        id="simple-menu"
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-        getContentAnchorEl={null}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <MenuItem onClick={() => {
-          setAnchorEl(null)
-          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
-        }}>Scrap</MenuItem>
-        <MenuItem onClick={() => {
-          setAnchorEl(null)
-          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
-        }}>Lost</MenuItem>
-      </Menu>
-      <Box mx={1} />
-      <IconButton
-        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
-        onClick={() => {
-          handleDeliveryTicketDialog(selectedRecords, warehouse)
-        }}
-        color='primary'
-        size="small"
-      >
+      <Box display="flex" alignItems="center">
+        <Button
+          onClick={() => {
+            setDownlodingFile(true);
+            axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
+              .then(({ data }) => {
+                axiosInstance()
+                  .get(`user/download?fileName=${data.data.fileName}`, {
+                    responseType: "blob",
+                  })
+                  .then(({ data }) => {
+                    const file = new Blob([data], { type: "application/pdf" });
+                    const fileURL = URL.createObjectURL(file);
+                    const pdfWindow = window.open();
+                    pdfWindow.location.href = fileURL;
+                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                    setDownlodingFile(false);
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                  });
+              }).catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+              })
+          }}
+          variant="outlined"
+          color="primary"
+          type="button"
+          size="small"
+          disabled={downlodingFile || isOffline}
+          startIcon={<AiFillFilePdf />}
+        >
+          {downlodingFile ? "Please wait..." : "Preview"}
+        </Button>
+        <Box mx={1} />
+        <Button variant="outlined" color="primary" aria-controls="simple-menu"
+          aria-haspopup="true"
+          disabled={selectedRecords.length === 0 || isOffline}
+          size="small"
+          onClick={handleClick}
+          endIcon={<ArrowDropDownIcon />}>
+          Change Status
+        </Button>
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          <MenuItem onClick={() => {
+            setAnchorEl(null)
+            setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
+          }}>Scrap</MenuItem>
+          <MenuItem onClick={() => {
+            setAnchorEl(null)
+            setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
+          }}>Lost</MenuItem>
+        </Menu>
+        <Box mx={1} />
         <Tooltip
           title="Create Loading Ticket">
           <Button
+            onClick={() => {
+              handleDeliveryTicketDialog(selectedRecords, warehouse)
+            }}
             variant="outlined"
             color="primary"
             size="small"
@@ -294,19 +290,13 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             Create Loading Ticket
           </Button>
         </Tooltip>
-      </IconButton>
-      <Box mx={1} />
-      <IconButton
-        disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
-        onClick={() => {
-          setShowRemoveAssetFromLoadingTicketDialog(true)
-        }}
-        color='primary'
-        size="small"
-      >
+        <Box mx={1} />
         <Tooltip
           title="Remove Assets From Loading Ticket(s)">
           <Button
+            onClick={() => {
+              setShowRemoveAssetFromLoadingTicketDialog(true)
+            }}
             variant="outlined"
             color="primary"
             size="small"
@@ -315,20 +305,15 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             Remove Assets
           </Button>
         </Tooltip>
-      </IconButton>
-      <Box mx={1} />
-      {(showProcessDeliveryTicket && !isOffline) &&
-        <Fragment>
-          <IconButton
-            onClick={() => {
-              setOpenDeliveryTicketDialog(true)
-            }}
-            color='primary'
-            size="small"
-          >
+        <Box mx={1} />
+        {(showProcessDeliveryTicket && !isOffline) &&
+          <Fragment>
             <Tooltip
               title="Process Multiple Loading Ticket(s)">
               <Button
+                onClick={() => {
+                  setOpenDeliveryTicketDialog(true)
+                }}
                 variant="outlined"
                 color="primary"
                 size="small"
@@ -336,9 +321,9 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
                 Process Loading Ticket
               </Button>
             </Tooltip>
-          </IconButton>
-          <Box mx={1} />
-        </Fragment>}
+            <Box mx={1} />
+          </Fragment>}
+      </Box>
     </Box>
     <Grid item xs={12} md={12} sm={12} className="mt-3">
       {columns ?
