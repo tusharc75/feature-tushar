@@ -27,6 +27,10 @@ import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
 import InfoIcon from "@material-ui/icons/Info";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
+import { isMobile, isTablet } from "react-device-detect";
+import { MdAdd, MdDelete } from "react-icons/md";
+import { FiPackage } from "react-icons/fi";
+import { RiEditCircleLine } from "react-icons/ri";
 
 const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity }) => {
 
@@ -393,47 +397,50 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 <Box display="flex" justifyContent="space-between" m={1}>
                     <Box display="flex">
                         <Button
-                            variant="contained"
+                            variant={isMobile && !isTablet ? "text" : "contained"}
                             color="primary"
                             size="small"
                             disabled={isOffline}
+                            style={isMobile && !isTablet ? {color:"var(--secondary)"} : {}}
                             onClick={() => {
                                 setAddExistingProductDialog({ open: true, type: "product", parentId: null });
                             }}
                         >
-                            {`Add ${routes.product.title}`}
+                            {isMobile && !isTablet ? <MdAdd size={20}/> :  `Add ${routes.product.title}` }
                         </Button>
                         <Box mx={1} />
                         <Button
-                            variant="contained"
+                            variant={isMobile && !isTablet ? "text" : "contained"}
                             color="primary"
                             size="small"
+                            style={isMobile && !isTablet ? {color:"var(--colorOpportunity)"} : {}}
                             disabled={isOffline}
                             onClick={() => {
                                 setAddExistingProductDialog({ open: true, type: "package", parentId: null });
                             }}
                         >
-                            {`Add ${routes.packages.title}`}
+                            {isMobile && !isTablet ? <FiPackage size={18}/> :  `Add ${routes.packages.title}` }
                         </Button>
                     </Box>
                     <Box display="flex">
                         <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
                             <span>
                                 <Button
-                                    variant="contained"
+                                    variant={isMobile && !isTablet ? "text" : "contained"}
                                     color="primary"
                                     size="small"
+                                    style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
                                     disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
                                     onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
                                 >
-                                    Bulk Edit
+                                   {isMobile && !isTablet ? <RiEditCircleLine size={20}/> :  "Bulk Edit" }  
                                 </Button>
                             </span>
                         </HtmlTooltip>
                         <Box mx={1} />
                         <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
                             <Button
-                                variant="contained"
+                                variant={isMobile && !isTablet ? "text" : "contained"}
                                 color="primary"
                                 size="small"
                                 disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
@@ -449,7 +456,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                                 }}
                                 endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
                             >
-                                Delete
+                               {isMobile && !isTablet ? <MdDelete size={20}/> :  "Delete" }
                             </Button>
                         </HtmlTooltip>
                     </Box>

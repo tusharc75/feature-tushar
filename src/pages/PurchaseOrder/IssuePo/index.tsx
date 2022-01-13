@@ -15,7 +15,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { AiFillFilePdf } from "react-icons/ai";
 import routes from "../../../components/Helpers/Routes";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
-import { BiPurchaseTagAlt, MdEmail } from "react-icons/all";
+import { BiPurchaseTagAlt, IoMdDownload, MdEmail } from "react-icons/all";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
 import { prepareDataForGrid } from "../../../constants/helpers";
@@ -202,56 +202,60 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
             <Box display="flex" alignItems="center">
                 {permissions?.purchaseOrder?.isRead && (
                     <Button
-                        variant="outlined"
+                        variant={isMobile && !isTablet ? "text" : "outlined"}
                         color="primary"
                         type="button"
                         size="small"
+                        style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
                         startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                         disabled={downlodingFile}
                         onClick={() => { handleViewPdf(false) }}
                     >
-                        {isMobile && !isTablet ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
+                        {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
                     </Button>
                 )}
                 <Box mx={1} />
                 {permissions?.purchaseOrder?.isRead && (
                     <Button
-                        variant="outlined"
+                        variant={isMobile && !isTablet ? "text" : "outlined"}
                         color="primary"
                         type="button"
                         size="small"
-                        startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
+                        style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+                        startIcon={isMobile ? '' : <IoMdDownload />}
                         disabled={downlodingFile}
                         onClick={() => { handleViewPdf(true) }}
                     >
-                        {isMobile && !isTablet ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
+                        {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile ? "Please wait..." : "Download"}
                     </Button>
                 )}
                 <Box mx={1} />
                 {permissions?.purchaseOrder?.isRead && <Button
-                    variant={isMobile && !isTablet ? "outlined" : "contained"}
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="primary"
                     size="small"
+                    style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
                     onClick={() => {
                         fetchEmailAttachment()
                         setEmailButtonLoading(true)
                     }}
                 >
-                    {isMobile && !isTablet ? <MdEmail size={22} /> : `Send Email`}
+                    {isMobile && !isTablet ? <MdEmail size={20} /> : `Send Email`}
                 </Button>}
             </Box>
             <Box display="flex" justifyContent="flex-end" p="4px">
                 <Box mx={1} />
                 <Button
-                    variant={isMobile && !isTablet ? "outlined" : "contained"}
+                    variant={isMobile && !isTablet ? "text" : "contained"}
                     color="primary"
                     size="small"
+                    style={isMobile && !isTablet ? {color:"#FFD700"} : {}}
                     onClick={() => {
                         setCurrentStep(currentStep + 1)
                         handleUpdateData({ "status": "Issued" })
                     }}
                 >
-                    {isMobile && !isTablet ? <BiPurchaseTagAlt size={22} /> : `Issue PO`}
+                    {isMobile && !isTablet ? <BiPurchaseTagAlt size={20} /> : `Issue PO`}
                 </Button>
             </Box>
         </Box>

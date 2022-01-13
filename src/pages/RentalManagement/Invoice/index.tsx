@@ -14,7 +14,7 @@ import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
 import { isMobile, isTablet } from "react-device-detect";
 import { AiFillFilePdf } from "react-icons/ai";
 import routes from "../../../components/Helpers/Routes";
-import { BiPurchaseTagAlt, MdEmail } from "react-icons/all";
+import { BiPurchaseTagAlt, IoMdDownload, MdEmail } from "react-icons/all";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
 import { prepareDataForGrid, CHILD_RESOURCE } from "../../../constants/helpers";
@@ -225,43 +225,46 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
       <Box display="flex" alignItems="center">
         {permissions?.rentalManagement?.isRead && (
           <Button
-            variant="outlined"
+            variant={isMobile && !isTablet ? "text" : "outlined"}
             color="primary"
             type="button"
             size="small"
+            style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
             disabled={downlodingFile === "Preview" ? true : (false || isOffline)}
             startIcon={isMobile ? '' : <AiFillFilePdf />}
             onClick={() => handlePDF("Preview")}
           >
-            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === "Preview" ? "Please wait..." : "Preview"}
+            {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile === "Preview" ? "Please wait..." : "Preview"}
           </Button>
         )}
         <Box mx={1} />
         {permissions?.rentalManagement?.isRead && (
           <Button
-            variant="outlined"
+            variant={isMobile && !isTablet ? 'text' : 'outlined'}
             color="primary"
             type="button"
             size="small"
+            style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
             disabled={downlodingFile === "Download" ? true : (false || isOffline)}
-            startIcon={isMobile ? '' : <AiFillFilePdf />}
+            startIcon={isMobile ? '' : <IoMdDownload />}
             onClick={() => handlePDF("Download")}
           >
-            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === "Download" ? "Please wait..." : "Download"}
+            {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile === "Download" ? "Please wait..." : "Download"}
           </Button>
         )}
         <Box mx={1} />
         {permissions?.rentalManagement?.isRead && <Button
-          variant={isMobile ? "outlined" : "contained"}
+          variant={isMobile && !isTablet ? 'text' : 'outlined'}
           color="primary"
           size="small"
+          style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
           disabled={downlodingFile === "Email" ? true : (false || isOffline)}
           onClick={() => {
             fetchEmailsData()
             handlePDF("Email")
           }}
         >
-          {isMobile ? <MdEmail size={22} /> : downlodingFile === "Email" ? "Please wait..." : `Send Email`}
+          {isMobile && !isTablet ? <MdEmail size={20} /> : downlodingFile === "Email" ? "Please wait..." : `Send Email`}
         </Button>}
       </Box>
     </Box>

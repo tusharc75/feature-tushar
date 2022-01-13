@@ -1,16 +1,16 @@
-import Box from "@material-ui/core/Box/Box";
-import { useState, useEffect, useReducer, useContext } from "react";
-import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { Link } from 'react-router-dom'
-import routes from "../../../components/Helpers/Routes";
-import Grid from "@material-ui/core/Grid/Grid";
-import { Button, IconButton, Tooltip, Menu, MenuItem, Dialog, TextField, CircularProgress } from "@material-ui/core";
-import { AiFillFilePdf } from "react-icons/ai";
-import axiosInstance from "../../../axios/axiosInstance";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "../../../components/Helpers/NoDataCell";
+import Box from '@material-ui/core/Box/Box';
+import { useState, useEffect, useReducer, useContext } from 'react';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
+import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import { Link } from 'react-router-dom';
+import routes from '../../../components/Helpers/Routes';
+import Grid from '@material-ui/core/Grid/Grid';
+import { Button, IconButton, Tooltip, Menu, MenuItem, Dialog, TextField, CircularProgress } from '@material-ui/core';
+import { AiFillFilePdf, AiOutlineLoading3Quarters } from 'react-icons/ai';
+import axiosInstance from '../../../axios/axiosInstance';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
 import {
   deliveryTicket,
   gridLoadingTimeout,
@@ -19,39 +19,40 @@ import {
   INVENTORY_STATUS,
   DELIVERY_TICKET_STATUS,
   productInventory
-} from "../../../constants/helpers";
-import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
-import { useHistory } from "react-router-dom";
+} from '../../../constants/helpers';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import { useHistory } from 'react-router-dom';
 import { groupBy } from 'lodash';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
-import { isMobile, isTablet } from "react-device-detect";
-import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
+import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { makeStyles } from '@material-ui/core/styles';
+import { RiExchangeFundsLine } from 'react-icons/ri';
+import { IoRemoveCircleOutline } from 'react-icons/io5';
 
-const renderedFrom = "rentalManagementDetailsPageDeliveryTicket"
+const renderedFrom = 'rentalManagementDetailsPageDeliveryTicket';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: theme.palette.background.paper
   },
   paper: {
     width: '80%',
-    maxHeight: 435,
-  },
+    maxHeight: 435
+  }
 }));
 
 const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const classes = useStyles();
@@ -61,11 +62,11 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   const [assignedSerializedAsset, setAssignedSerializedAsset] = useState([]);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
-  const [downlodingFile, setDownlodingFile] = useState(false)
-  const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false)
-  const [okBtnLoading, setOkBtnLoading] = useState(false)
+  const [downlodingFile, setDownlodingFile] = useState(false);
+  const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false);
+  const [okBtnLoading, setOkBtnLoading] = useState(false);
 
-  const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: "", message: "" })
+  const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
@@ -77,68 +78,75 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   }, []);
 
   const fetchRecords = async () => {
-    setNextStep(false)
+    setNextStep(false);
     try {
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
       if (gridApi) {
         gridApi.deselectAll();
       }
-      var productAssets: any = []
-      var deliveryTicketList: any = []
-      dispatch({ type: "loading", loading: true });
+      var productAssets: any = [];
+      var deliveryTicketList: any = [];
+      dispatch({ type: 'loading', loading: true });
       if (isOffline) {
-        productAssets = await getRentalProductAssets(rentalManagementData._id)
-        productAssets = productAssets?.map(u => ({ ...u, productName: u?.product?.optionLabel }))
-        deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id)
-      }
-      else {
-        const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
-        setAssignedSerializedAsset(response?.data?.data)
-        productAssets = response?.data?.data
-        productAssets = productAssets.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
+        productAssets = await getRentalProductAssets(rentalManagementData._id);
+        productAssets = productAssets?.map((u) => ({ ...u, productName: u?.product?.optionLabel }));
+        deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id);
+      } else {
+        const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`);
+        setAssignedSerializedAsset(response?.data?.data);
+        productAssets = response?.data?.data;
+        productAssets = productAssets.map((d) => d.inventory).map((u) => ({ ...u, productName: u?.product?.optionLabel }));
 
-        const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=Rental Job&refrenceId=${rentalManagementData._id}`)
-        deliveryTicketList = result?.data?.data
+        const result = await axiosInstance().get(
+          `${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=Rental Job&refrenceId=${rentalManagementData._id}`
+        );
+        deliveryTicketList = result?.data?.data;
       }
-      deliveryTicketList.map(obj => {
-        if (obj.ticketType === "Loading") {
+      deliveryTicketList.map((obj) => {
+        if (obj.ticketType === 'Loading') {
           productAssets.map((d, index) => {
-            if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-              productAssets[index]["type"] = obj?.type
-              productAssets[index]["deliveryTicket"] = obj?.ticketName
-              productAssets[index]["deliveryTicketId"] = obj?._id
-              productAssets[index]["deliveryTicketStatus"] = obj?.status
+            if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
+              productAssets[index]['type'] = obj?.type;
+              productAssets[index]['deliveryTicket'] = obj?.ticketName;
+              productAssets[index]['deliveryTicketId'] = obj?._id;
+              productAssets[index]['deliveryTicketStatus'] = obj?.status;
             }
-          })
+          });
         }
-      })
+      });
       productAssets.forEach((d) => {
-        d["isChecked"] = false;
-        d["hideSelection"] = [INVENTORY_STATUS.inUse, INVENTORY_STATUS.indTransit, INVENTORY_STATUS.repair,
-        INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(d.status)
-          || d.deliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered
-      })
+        d['isChecked'] = false;
+        d['hideSelection'] =
+          [
+            INVENTORY_STATUS.inUse,
+            INVENTORY_STATUS.indTransit,
+            INVENTORY_STATUS.repair,
+            INVENTORY_STATUS.scrap,
+            INVENTORY_STATUS.lost,
+            INVENTORY_STATUS.underReview
+          ].includes(d.status) || d.deliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered;
+      });
       if (productAssets.filter((e) => e.deliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
-        setNextStep(true)
+        setNextStep(true);
       }
-      dispatch({ type: "initialize", data: productAssets, count: productAssets.length });
-      setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
-    }
-    catch (error) {
-      dispatch({ type: "loading", loading: false });
+      dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    } catch (error) {
+      dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
     }
-  }
+  };
 
-  const TicketRenderer = (params) => (
+  const TicketRenderer = (params) =>
     params?.value ? (
       <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
         {params.value}
       </Link>
     ) : (
       <NoDataCell />
-    )
-  );
+    );
 
   const InventoryRenderer = (params) => (
     <Link className="link text-truncate" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
@@ -156,16 +164,16 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     ticketRenderer: TicketRenderer,
     productNameRenderer: ProductNameRenderer,
     inventoryRenderer: InventoryRenderer,
-    commonRenderer: CommonRenderer,
+    commonRenderer: CommonRenderer
   };
 
   const columns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "inventoryRenderer" },
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "ticketRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productNameRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
+    { field: 'assetNumber', headerName: 'Asset Number', show: true, cellRenderer: 'inventoryRenderer' },
+    { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'deliveryTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
+    { field: 'productName', headerName: 'Product Description', show: true, disabled: true, cellRenderer: 'productNameRenderer' },
+    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
   ];
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
@@ -192,203 +200,222 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     setAnchorEl(null);
   };
 
-
-  return (<>
-    <Box display="flex" justifyContent="flex-end" pt={1}>
-      <Button
-        onClick={() => {
-          setDownlodingFile(true);
-          axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
-            .then(({ data }) => {
-              axiosInstance()
-                .get(`user/download?fileName=${data.data.fileName}`, {
-                  responseType: "blob",
-                })
-                .then(({ data }) => {
-                  const file = new Blob([data], { type: "application/pdf" });
-                  const fileURL = URL.createObjectURL(file);
-                  const pdfWindow = window.open();
-                  pdfWindow.location.href = fileURL;
-                  toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-                  setDownlodingFile(false);
-                })
-                .catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setDownlodingFile(false);
-                });
-            }).catch((err) => {
-              toastConfig.setToastConfig(err);
-              setDownlodingFile(false);
-            })
-        }}
-        variant="outlined"
-        color="primary"
-        type="button"
-        size="small"
-        disabled={downlodingFile || isOffline}
-        startIcon={<AiFillFilePdf />}
-      >
-        {downlodingFile ? "Please wait..." : "Preview"}
-      </Button>
-      <Box mx={1} />
-      <Button variant="outlined" color="primary" aria-controls="simple-menu"
-        aria-haspopup="true"
-        disabled={selectedRecords.length === 0 || isOffline}
-        size="small"
-        onClick={handleClick}
-        endIcon={<ArrowDropDownIcon />}>
-        Change Status
-      </Button>
-      <Menu
-        id="simple-menu"
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-        getContentAnchorEl={null}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <MenuItem onClick={() => {
-          setAnchorEl(null)
-          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
-        }}>Scrap</MenuItem>
-        <MenuItem onClick={() => {
-          setAnchorEl(null)
-          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
-        }}>Lost</MenuItem>
-      </Menu>
-      <Box mx={1} />
-      <IconButton
-        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
-        onClick={() => {
-          handleDeliveryTicketDialog(selectedRecords, warehouse)
-        }}
-        color='primary'
-        size="small"
-      >
-        <Tooltip
-          title="Create Loading Ticket">
-          <Button
-            variant="outlined"
-            color="primary"
-            size="small"
-            disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
+  return (
+    <>
+      <Box display="flex" justifyContent="flex-end" pt={1}>
+        <Button
+          onClick={() => {
+            setDownlodingFile(true);
+            axiosInstance()
+              .get(`/rental-management/${rentalManagementData._id}/pdf`)
+              .then(({ data }) => {
+                axiosInstance()
+                  .get(`user/download?fileName=${data.data.fileName}`, {
+                    responseType: 'blob'
+                  })
+                  .then(({ data }) => {
+                    const file = new Blob([data], { type: 'application/pdf' });
+                    const fileURL = URL.createObjectURL(file);
+                    const pdfWindow = window.open();
+                    pdfWindow.location.href = fileURL;
+                    toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+                    setDownlodingFile(false);
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                  });
+              })
+              .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+              });
+          }}
+          variant={isMobile && !isTablet ? 'text' : 'outlined'}
+          color="primary"
+          type="button"
+          size="small"
+          style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
+          disabled={downlodingFile || isOffline}
+          startIcon={isMobile ? '' : <AiFillFilePdf />}
+        >
+          {isMobile && !isTablet ? <AiFillFilePdf size={18}/> : downlodingFile ? 'Please wait...' : 'Preview'}
+        </Button>
+        <Box mx={1} />
+        <Button
+          variant={isMobile && !isTablet ? 'text' : 'outlined'}
+          color="primary"
+          aria-controls="simple-menu"
+          aria-haspopup="true"
+          disabled={selectedRecords.length === 0 || isOffline}
+          size="small"
+          style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+          onClick={handleClick}
+          endIcon={<ArrowDropDownIcon />}
+        >
+          {isMobile && !isTablet ? <RiExchangeFundsLine size={20} /> : 'Change Status'}
+        </Button>
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right'
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right'
+          }}
+        >
+          <MenuItem
+            onClick={() => {
+              setAnchorEl(null);
+              setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: '' });
+            }}
           >
-            Create Loading Ticket
-          </Button>
-        </Tooltip>
-      </IconButton>
-      <Box mx={1} />
-      <IconButton
-        disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
-        onClick={() => {
-          setShowRemoveAssetFromLoadingTicketDialog(true)
-        }}
-        color='primary'
-        size="small"
-      >
-        <Tooltip
-          title="Remove Assets From Loading Ticket(s)">
+            Scrap
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setAnchorEl(null);
+              setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: '' });
+            }}
+          >
+            Lost
+          </MenuItem>
+        </Menu>
+        <Box mx={1} />
+        <IconButton
+          disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.hasOwnProperty('deliveryTicketId'))}
+          onClick={() => {
+            handleDeliveryTicketDialog(selectedRecords, warehouse);
+          }}
+          color="primary"
+          size="small"
+        >
+          <Tooltip title="Create Loading Ticket">
             <Button
-              variant="outlined"
+              variant={isMobile && !isTablet ? "text" : "outlined"}
               color="primary"
               size="small"
-              disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
+              style={isMobile && !isTablet ? {color:"#FFD700"} : {}}
+              disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.hasOwnProperty('deliveryTicketId'))}
             >
-              Remove Assets
+              {isMobile && !isTablet ? <AiOutlineLoading3Quarters size={18} /> : 'Create Loading Ticket'}
             </Button>
-        </Tooltip>
-      </IconButton>
-      <Box mx={1} />
-    </Box>
-    <Grid item xs={12} md={12} sm={12} className="mt-3">
-      {columns ?
-        isMobile && !isTablet ?
-          <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={true}
-            primaryField={columns?.find(d => d.field)}
-            onClick={(data) => {
-              history.push(`${routes.productInventoryDetail.path}/${data._id}`)
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={false}
-            extraParamsToCheckDelete={true}
-            onDelete={false}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[
-            ]}
-            chips={[
-              {
-                label: "Status : ",
-                field: "status",
-              },
-              {
-                label: "Loading Ticket : ",
-                field: "deliveryTicket",
-                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
-              }
-            ]}
-            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-            onCreate={false}
-            showClone={false}
-            onClone={() => { }}
-            renderedFrom={renderedFrom}
-          /> :
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={false}
-            loading={loading}
-            isClientSideGrid={true}
-            allowSelection={true}
-            rowClassRules={{
-              "red-data-row":
-                function (params) {
-                  return [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some(s => s === params.data.status);
+          </Tooltip>
+        </IconButton>
+        <Box mx={1} />
+        <IconButton
+          disabled={selectedRecords.length === 0 || currentStep === 4 || selectedRecords.some((f) => !f.hasOwnProperty('deliveryTicketId'))}
+          onClick={() => {
+            setShowRemoveAssetFromLoadingTicketDialog(true);
+          }}
+          color="primary"
+          size="small"
+        >
+          <Tooltip title="Remove Assets From Loading Ticket(s)">
+            <Button
+              variant={isMobile && !isTablet ? "text" : "outlined"}
+              color="primary"
+              size="small"
+              style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
+              disabled={selectedRecords.length === 0 || currentStep === 4 || selectedRecords.some((f) => !f.hasOwnProperty('deliveryTicketId'))}
+            >
+              {isMobile && !isTablet ? <IoRemoveCircleOutline size={22}/> :  "Remove Assets" }
+              
+            </Button>
+          </Tooltip>
+        </IconButton>
+        <Box mx={1} />
+      </Box>
+      <Grid item xs={12} md={12} sm={12} className="mt-3">
+        {columns ? (
+          isMobile && !isTablet ? (
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={true}
+              primaryField={columns?.find((d) => d.field)}
+              onClick={(data) => {
+                history.push(`${routes.productInventoryDetail.path}/${data._id}`);
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={false}
+              extraParamsToCheckDelete={true}
+              onDelete={false}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              additionalDetails={[]}
+              chips={[
+                {
+                  label: 'Status : ',
+                  field: 'status'
                 },
-            }}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchRecords}
-          />
-        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-      }
-    </Grid>
-    {showDeliveryTicketDialog && (
-      <ManageDeliveryTicket
-        ticketType="Loading"
-        refrenceType="Rental Job"
-        refrenceData={rentalManagementData}
-        onClose={() => setShowDeliveryTicketDialog(false)}
-        productInventory={productInventoryForDeliveryTicket}
-        warehouseId={rentalManagementData?.warehouse}
-        onSuccess={() => {
-          setShowDeliveryTicketDialog(false);
-          fetchRecords();
-        }}
-      />
-    )}
-    {
-      showRemoveAssetFromLoadingTicketDialog && (
+                {
+                  label: 'Loading Ticket : ',
+                  field: 'deliveryTicket',
+                  onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
+                }
+              ]}
+              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+              onCreate={false}
+              showClone={false}
+              onClone={() => {}}
+              renderedFrom={renderedFrom}
+            />
+          ) : (
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameworkComponents}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              allowAction={false}
+              loading={loading}
+              isClientSideGrid={true}
+              allowSelection={true}
+              rowClassRules={{
+                'red-data-row': function (params) {
+                  return [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some((s) => s === params.data.status);
+                }
+              }}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchRecords}
+            />
+          )
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </Grid>
+      {showDeliveryTicketDialog && (
+        <ManageDeliveryTicket
+          ticketType="Loading"
+          refrenceType="Rental Job"
+          refrenceData={rentalManagementData}
+          onClose={() => setShowDeliveryTicketDialog(false)}
+          productInventory={productInventoryForDeliveryTicket}
+          warehouseId={rentalManagementData?.warehouse}
+          onSuccess={() => {
+            setShowDeliveryTicketDialog(false);
+            fetchRecords();
+          }}
+        />
+      )}
+      {showRemoveAssetFromLoadingTicketDialog && (
         <ConfirmationDialog
           open={showRemoveAssetFromLoadingTicketDialog}
           message={`Are you sure you want to remove selected records from Loading Ticket?`}
@@ -398,44 +425,55 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           onOk={() => {
             setOkBtnLoading(true);
 
-            const groupByCalls = groupBy(selectedRecords, "deliveryTicketId");
+            const groupByCalls = groupBy(selectedRecords, 'deliveryTicketId');
             let apiCalls = [];
 
             Object.keys(groupByCalls).forEach((key) => {
-              apiCalls.push(axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
-            })
-
-            Promise.all(apiCalls).then(() => {
-              toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged ${sidebarResource.deliveryTicket}(s)` });
-              fetchRecords();
-            }).catch((error) => {
-              toastConfig.setToastConfig(error);
-            }).finally(() => {
-              setOkBtnLoading(false);
-              setShowRemoveAssetFromLoadingTicketDialog(false);
+              apiCalls.push(
+                axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) })
+              );
             });
 
+            Promise.all(apiCalls)
+              .then(() => {
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: 'success',
+                  message: `Selected records removed from assiged ${sidebarResource.deliveryTicket}(s)`
+                });
+                fetchRecords();
+              })
+              .catch((error) => {
+                toastConfig.setToastConfig(error);
+              })
+              .finally(() => {
+                setOkBtnLoading(false);
+                setShowRemoveAssetFromLoadingTicketDialog(false);
+              });
           }}
           okBtnLoading={okBtnLoading}
         />
-      )
-    }
-    {
-      statusToUpdate.open && <Dialog open
-        classes={{
-          paper: classes.paper,
-        }}
-        onClose={() => setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false, open: false }))}
-      >
-        <CustomDialogHeader title="Are you sure ?"
-          showRequiredLabel={false}
-          onClose={() => setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false, open: false }))} />
+      )}
+      {statusToUpdate.open && (
+        <Dialog
+          open
+          classes={{
+            paper: classes.paper
+          }}
+          onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
+        >
+          <CustomDialogHeader
+            title="Are you sure ?"
+            showRequiredLabel={false}
+            onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
+          />
 
-        <CustomDialogContent>
-          <Box className="my-2">
-            {
-              statusToUpdate.status === "Repair" ? <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
-                : <TextField
+          <CustomDialogContent>
+            <Box className="my-2">
+              {statusToUpdate.status === 'Repair' ? (
+                <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
+              ) : (
+                <TextField
                   id="outlined-multiline-static"
                   label={`Please enter the reason for ${statusToUpdate.status}`}
                   multiline
@@ -444,56 +482,52 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
                   value={statusToUpdate.message}
                   variant="outlined"
                   onChange={(e) => {
-                    setStatusToUpdate(prevState => ({ ...prevState, message: e.target.value }))
+                    setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
                   }}
                 />
-            }
-          </Box>
-        </CustomDialogContent>
-        <CustomDialogFooter>
-          <Button
-            size="small"
-            variant="outlined" color="primary" onClick={() => setStatusToUpdate(prevState => ({ ...prevState, open: false }))}>
-            Cancel
-          </Button>
-          <Button
-            size="small"
-            onClick={() => {
-              setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
-              axiosInstance().put(`${productInventory.api}/update-status`, {
-                comment: statusToUpdate.message,
-                assets: selectedRecords.map(m => m?._id ?? m?.id),
-                status: statusToUpdate.status,
-                reference: {
-                  _id: rentalManagementData._id,
-                  type: "Rental"
-                }
-              }).then(({ data }) => {
-                toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
-                setStatusToUpdate({ open: false, isUpdating: false, status: "", message: "" });
-                fetchRecords();
-              }).catch((error) => {
-                setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false }));
-                toastConfig.setToastConfig(error)
-              })
-            }}
-            disabled={statusToUpdate.isUpdating}
-            variant="contained"
-            color="primary"
-          >
-            {
-              statusToUpdate.isUpdating ? <CircularProgress
-                style={{ marginRight: "8px" }}
-                size={20} color="inherit" /> : null
-            }
-            Change Status
-          </Button>
-        </CustomDialogFooter>
-      </Dialog>
-    }
-  </>
+              )}
+            </Box>
+          </CustomDialogContent>
+          <CustomDialogFooter>
+            <Button size="small" variant="outlined" color="primary" onClick={() => setStatusToUpdate((prevState) => ({ ...prevState, open: false }))}>
+              Cancel
+            </Button>
+            <Button
+              size="small"
+              onClick={() => {
+                setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: true }));
+                axiosInstance()
+                  .put(`${productInventory.api}/update-status`, {
+                    comment: statusToUpdate.message,
+                    assets: selectedRecords.map((m) => m?._id ?? m?.id),
+                    status: statusToUpdate.status,
+                    reference: {
+                      _id: rentalManagementData._id,
+                      type: 'Rental'
+                    }
+                  })
+                  .then(({ data }) => {
+                    toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
+                    setStatusToUpdate({ open: false, isUpdating: false, status: '', message: '' });
+                    fetchRecords();
+                  })
+                  .catch((error) => {
+                    setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false }));
+                    toastConfig.setToastConfig(error);
+                  });
+              }}
+              disabled={statusToUpdate.isUpdating}
+              variant="contained"
+              color="primary"
+            >
+              {statusToUpdate.isUpdating ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
+              Change Status
+            </Button>
+          </CustomDialogFooter>
+        </Dialog>
+      )}
+    </>
   );
-}
+};
 
 export default LoadingTicket;
-
