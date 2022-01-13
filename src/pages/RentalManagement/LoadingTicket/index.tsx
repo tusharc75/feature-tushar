@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, IconButton, Tooltip, Menu, MenuItem, Dialog, TextField, CircularProgress } from "@material-ui/core";
-import { AiFillFilePdf } from "react-icons/ai";
+import { AiFillFilePdf, AiOutlineLoading3Quarters } from 'react-icons/ai';
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
@@ -21,40 +21,41 @@ import {
   DELIVERY_TICKET_TYPE,
   DELIVERY_TICKET_REFRENCE_TYPE,
   productInventory
-} from "../../../constants/helpers";
-import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
-import { useHistory } from "react-router-dom";
+} from '../../../constants/helpers';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import { useHistory } from 'react-router-dom';
 import { groupBy } from 'lodash';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
-import { isMobile, isTablet } from "react-device-detect";
-import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
+import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { makeStyles } from '@material-ui/core/styles';
+import { RiExchangeFundsLine } from 'react-icons/ri';
+import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 
-const renderedFrom = "rentalManagementDetailsPageDeliveryTicket"
+const renderedFrom = 'rentalManagementDetailsPageDeliveryTicket';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: theme.palette.background.paper
   },
   paper: {
     width: '80%',
-    maxHeight: 435,
-  },
+    maxHeight: 435
+  }
 }));
 
 const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const classes = useStyles();
@@ -63,11 +64,11 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   const [warehouse, setWarehouse] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
-  const [downlodingFile, setDownlodingFile] = useState(false)
-  const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false)
-  const [okBtnLoading, setOkBtnLoading] = useState(false)
+  const [downlodingFile, setDownlodingFile] = useState(false);
+  const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false);
+  const [okBtnLoading, setOkBtnLoading] = useState(false);
 
-  const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: "", message: "" })
+  const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
@@ -83,15 +84,15 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   }, []);
 
   const fetchRecords = async () => {
-    setNextStep(false)
+    setNextStep(false);
     try {
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
       if (gridApi) {
         gridApi.deselectAll();
       }
-      var productAssets: any = []
-      var deliveryTicketList: any = []
-      dispatch({ type: "loading", loading: true });
+      var productAssets: any = [];
+      var deliveryTicketList: any = [];
+      dispatch({ type: 'loading', loading: true });
       if (isOffline) {
         productAssets = await getRentalProductAssets(rentalManagementData._id)
         productAssets = productAssets?.map(u => ({ ...u, productName: u?.product?.optionLabel }))
@@ -113,42 +114,48 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       deliveryTicketList.map(obj => {
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           productAssets.map((d, index) => {
-            if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-              productAssets[index]["type"] = obj?.type
-              productAssets[index]["deliveryTicket"] = obj?.ticketName
-              productAssets[index]["deliveryTicketId"] = obj?._id
-              productAssets[index]["deliveryTicketStatus"] = obj?.status
+            if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
+              productAssets[index]['type'] = obj?.type;
+              productAssets[index]['deliveryTicket'] = obj?.ticketName;
+              productAssets[index]['deliveryTicketId'] = obj?._id;
+              productAssets[index]['deliveryTicketStatus'] = obj?.status;
             }
-          })
+          });
         }
-      })
+      });
       productAssets.forEach((d) => {
-        d["isChecked"] = false;
-        d["hideSelection"] = [INVENTORY_STATUS.inUse, INVENTORY_STATUS.indTransit, INVENTORY_STATUS.repair,
-        INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(d.status)
-          || d.deliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered
-      })
+        d['isChecked'] = false;
+        d['hideSelection'] =
+          [
+            INVENTORY_STATUS.inUse,
+            INVENTORY_STATUS.indTransit,
+            INVENTORY_STATUS.repair,
+            INVENTORY_STATUS.scrap,
+            INVENTORY_STATUS.lost,
+            INVENTORY_STATUS.underReview
+          ].includes(d.status) || d.deliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered;
+      });
       if (productAssets.filter((e) => e.deliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
-        setNextStep(true)
+        setNextStep(true);
       }
-      dispatch({ type: "initialize", data: productAssets, count: productAssets.length });
-      setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
-    }
-    catch (error) {
-      dispatch({ type: "loading", loading: false });
+      dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    } catch (error) {
+      dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
     }
-  }
+  };
 
-  const TicketRenderer = (params) => (
+  const TicketRenderer = (params) =>
     params?.value ? (
       <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
         {params.value}
       </Link>
     ) : (
       <NoDataCell />
-    )
-  );
+    );
 
   const InventoryRenderer = (params) => (
     <Link className="link text-truncate" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
@@ -166,7 +173,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     ticketRenderer: TicketRenderer,
     productNameRenderer: ProductNameRenderer,
     inventoryRenderer: InventoryRenderer,
-    commonRenderer: CommonRenderer,
+    commonRenderer: CommonRenderer
   };
 
   const columns = [
@@ -232,23 +239,25 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
                 setDownlodingFile(false);
               })
           }}
-          variant="outlined"
+          variant={isMobile && !isTablet ? 'text' : 'outlined'}
           color="primary"
           type="button"
           size="small"
           disabled={downlodingFile || isOffline}
-          startIcon={<AiFillFilePdf />}
+          style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
+          startIcon={isMobile ? '' : <AiFillFilePdf />}
         >
-          {downlodingFile ? "Please wait..." : "Preview"}
+          {isMobile && !isTablet ? <AiFillFilePdf size={18}/> : isMobile && !isTablet ? <AiFillFilePdf size={18}/> : downlodingFile ? "Please wait..." : "Preview"}
         </Button>
         <Box mx={1} />
-        <Button variant="outlined" color="primary" aria-controls="simple-menu"
+        <Button variant={isMobile && !isTablet ? 'text' : 'outlined'} color="primary" aria-controls="simple-menu"
           aria-haspopup="true"
           disabled={selectedRecords.length === 0 || isOffline}
           size="small"
           onClick={handleClick}
+          style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
           endIcon={<ArrowDropDownIcon />}>
-          Change Status
+          {isMobile && !isTablet ? <RiExchangeFundsLine size={20} /> : 'Change Status'}
         </Button>
         <Menu
           id="simple-menu"
@@ -282,12 +291,13 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             onClick={() => {
               handleDeliveryTicketDialog(selectedRecords, warehouse)
             }}
-            variant="outlined"
+            variant={isMobile && !isTablet ? "text" : "outlined"}
             color="primary"
             size="small"
+            style={isMobile && !isTablet ? {color:"#FFD700"} : {}}
             disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
           >
-            Create Loading Ticket
+           {isMobile && !isTablet ? <AiOutlineLoading3Quarters size={18} /> : 'Create Loading Ticket'}
           </Button>
         </Tooltip>
         <Box mx={1} />
@@ -297,12 +307,13 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             onClick={() => {
               setShowRemoveAssetFromLoadingTicketDialog(true)
             }}
-            variant="outlined"
+            variant={isMobile && !isTablet ? "text" : "outlined"}
             color="primary"
             size="small"
+            style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
             disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
           >
-            Remove Assets
+            {isMobile && !isTablet ? <IoRemoveCircleOutline size={22}/> :  "Remove Assets" }
           </Button>
         </Tooltip>
         <Box mx={1} />
@@ -314,11 +325,12 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
                 onClick={() => {
                   setOpenDeliveryTicketDialog(true)
                 }}
-                variant="outlined"
+                variant={isMobile && !isTablet ? "text" : "outlined"}
                 color="primary"
+                style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
                 size="small"
               >
-                Process Loading Ticket
+                 {isMobile && !isTablet ? <IoRemoveCircleOutline size={22}/> :  "Process Loading Ticket" } 
               </Button>
             </Tooltip>
             <Box mx={1} />
@@ -415,44 +427,55 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           onOk={() => {
             setOkBtnLoading(true);
 
-            const groupByCalls = groupBy(selectedRecords, "deliveryTicketId");
+            const groupByCalls = groupBy(selectedRecords, 'deliveryTicketId');
             let apiCalls = [];
 
             Object.keys(groupByCalls).forEach((key) => {
-              apiCalls.push(axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
-            })
-
-            Promise.all(apiCalls).then(() => {
-              toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged ${sidebarResource.deliveryTicket}(s)` });
-              fetchRecords();
-            }).catch((error) => {
-              toastConfig.setToastConfig(error);
-            }).finally(() => {
-              setOkBtnLoading(false);
-              setShowRemoveAssetFromLoadingTicketDialog(false);
+              apiCalls.push(
+                axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) })
+              );
             });
 
+            Promise.all(apiCalls)
+              .then(() => {
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: 'success',
+                  message: `Selected records removed from assiged ${sidebarResource.deliveryTicket}(s)`
+                });
+                fetchRecords();
+              })
+              .catch((error) => {
+                toastConfig.setToastConfig(error);
+              })
+              .finally(() => {
+                setOkBtnLoading(false);
+                setShowRemoveAssetFromLoadingTicketDialog(false);
+              });
           }}
           okBtnLoading={okBtnLoading}
         />
-      )
-    }
-    {
-      statusToUpdate.open && <Dialog open
-        classes={{
-          paper: classes.paper,
-        }}
-        onClose={() => setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false, open: false }))}
-      >
-        <CustomDialogHeader title="Are you sure ?"
-          showRequiredLabel={false}
-          onClose={() => setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false, open: false }))} />
+      )}
+      {statusToUpdate.open && (
+        <Dialog
+          open
+          classes={{
+            paper: classes.paper
+          }}
+          onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
+        >
+          <CustomDialogHeader
+            title="Are you sure ?"
+            showRequiredLabel={false}
+            onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
+          />
 
-        <CustomDialogContent>
-          <Box className="my-2">
-            {
-              statusToUpdate.status === "Repair" ? <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
-                : <TextField
+          <CustomDialogContent>
+            <Box className="my-2">
+              {statusToUpdate.status === 'Repair' ? (
+                <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
+              ) : (
+                <TextField
                   id="outlined-multiline-static"
                   label={`Please enter the reason for ${statusToUpdate.status}`}
                   multiline
@@ -461,10 +484,10 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
                   value={statusToUpdate.message}
                   variant="outlined"
                   onChange={(e) => {
-                    setStatusToUpdate(prevState => ({ ...prevState, message: e.target.value }))
+                    setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
                   }}
                 />
-            }
+              )}
           </Box>
         </CustomDialogContent>
         <CustomDialogFooter>
@@ -507,7 +530,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           </Button>
         </CustomDialogFooter>
       </Dialog>
-    }
+      )}
     {openDeliveryTicketDialog &&
       <MultipleTicket
         refrenceData={rentalManagementData}
@@ -520,7 +543,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       />}
   </>
   );
-}
+};
 
 export default LoadingTicket;
-
