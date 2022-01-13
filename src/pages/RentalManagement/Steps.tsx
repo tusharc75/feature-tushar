@@ -22,7 +22,7 @@ import { AiOutlineCloseCircle } from "react-icons/ai";
 import { FaHourglassHalf } from "react-icons/fa";
 import styles from "./Retal.module.scss";
 
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import { RiShareForwardFill } from "react-icons/ri";
 import { TiArrowBack } from "react-icons/ti";
 import MobileStepper from "@material-ui/core/MobileStepper";
@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: "space-evenly",
         [theme.breakpoints.down("xs")]: {
             overflow: "auto"
-        },
+        }
     },
     step: {
         paddingLeft: "8px",
@@ -78,6 +78,7 @@ const useStyles = makeStyles((theme) => ({
         background: "#ffffff",
         borderLeft: "6px solid #378280",
         color: "#378280 !important",
+        fontWeight: 500
 
     },
     active: {
@@ -99,6 +100,13 @@ const useStyles = makeStyles((theme) => ({
         color: "#d60f0f",
         fontWeight: "bold",
     },
+    "@media only screen and (max-width: 1160px)" : {
+        pbStepper: {
+            "& .MuiStepLabel-iconContainer":{
+                 display:"none"
+            }
+        }
+    }
 }));
 
 const Steps = (props) => {
@@ -116,7 +124,7 @@ const Steps = (props) => {
 
     return (
         <div>
-            {isMobile ? <MobileStepper
+            {isMobile && !isTablet ? <MobileStepper
                 style={{ background: "#dee2e6" }}
                 variant="dots"
                 steps={steps.length}
@@ -148,8 +156,8 @@ const Steps = (props) => {
                 :
                 <div className="position-relative">
                     <Grid container className={styles.main_step_box} xs={12}>
-                        <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-center mt-2" >
-                            {!isStepEnded && <IconButton
+                        <Grid item xs={12} sm={isMobile ? 12 : 1} md={1} className="d-flex align-items-center justify-content-center mt-2" >
+                            {!isMobile && !isStepEnded && <IconButton
                                 disabled={currentStep === steps.length || currentStep === 0}
                                 className={"stepperButton"}
                                 onClick={() => {
@@ -159,8 +167,64 @@ const Steps = (props) => {
                                 <TiArrowBack size={30} />
                             </IconButton>}
                         </Grid>
-                        <Grid item xs={12} sm={8} md={10}>
+                        <Grid item xs={12} sm={isMobile ? 12 : 10} md={10} style={isMobile ? {padding:"0 10px"} : {}}>
                             <div className={classes.pStepper}>
+                            <Grid container>
+                      <Grid
+                        item
+                        xs={6}
+                        className="d-flex align-items-center justify-content-start "
+                      >
+                        {isMobile && (
+                          <>
+                                <div>
+                                  <IconButton
+                                    color="primary"
+                                    disabled={
+                                        currentStep === steps.length || currentStep === 0 || isStepEnded
+                                    }
+                                    onClick={() => {
+                                        setCurrentStep(currentStep - 1)
+                                    }}
+                                    size="small"
+                                  >
+                                    <TiArrowBack size={24} />
+                                  </IconButton>
+                                </div>
+                            
+                          </>
+                        )}
+                      </Grid>
+
+                      <Grid
+                        item
+                        xs={6}
+                        className="d-flex align-items-center justify-content-end"
+                      >
+                        {isMobile && (
+                          <>
+                                <div>
+                                  
+                                    <IconButton
+                                      color="primary"
+                                      onClick={() => {
+                                        setCurrentStep(currentStep + 1)
+                                      }}
+                                      size="small"
+                                      disabled={
+                                        currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep || isStepEnded
+                                      }
+                                    >
+                                      <RiShareForwardFill size={20} />
+                                    </IconButton>
+                                  
+                                </div>
+                            
+                          </>
+                        )}
+                      </Grid>
+                    </Grid>
+                    
                                 <Stepper className={`${classes.pbStepper} stepper-responsive mt-2`}
                                     activeStep={activeStep}>
                                     {steps.map((label, i) => (
@@ -183,8 +247,8 @@ const Steps = (props) => {
                                 </Stepper>
                             </div>
                         </Grid>
-                        <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-center mt-2 " >
-                            {!isStepEnded && <IconButton
+                        <Grid item xs={12} sm={isMobile ? 12 : 1} md={1} className="d-flex align-items-center justify-content-center mt-2 " >
+                            {!isMobile && !isStepEnded && <IconButton
                                 onClick={() => {
                                     setCurrentStep(currentStep + 1)
                                 }}

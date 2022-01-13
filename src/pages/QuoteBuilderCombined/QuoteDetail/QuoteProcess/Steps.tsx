@@ -42,7 +42,7 @@ import NewStepper from "../../../../components/Helpers/NewStepper";
 import CustomDialogFooter from "../../../../components/CustomDialog/CustomDialogFooter";
 import CustomDialogContent from "../../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "../../../../components/CustomDialog/CustomDialogHeader";
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import MobileStepper from '@material-ui/core/MobileStepper';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
@@ -126,7 +126,14 @@ const useStyles = makeStyles((theme) => ({
       padding: "5px 6px",
     },
 
-  }
+  },
+  "@media only screen and (max-width: 980px)" : {
+    pbStepper: {
+        "& .MuiStepLabel-iconContainer":{
+             display:"none"
+        }
+    }
+}
 }));
 
 const useColorlibStepIconStyles = makeStyles((theme) => ({
@@ -356,7 +363,7 @@ const Steps = (props) => {
   return (
     <div>
       {
-        isMobile ? <div>
+        isMobile && !isTablet ? <div>
           <MobileStepper
             style={{ background: "#dee2e6" }}
             variant="dots"
@@ -593,7 +600,7 @@ const Steps = (props) => {
                                   <IconButton
                                     color="primary"
                                     disabled={
-                                      !allowedToEdit ||
+                                      currentStep <= 0 || !allowedToEdit ||
                                       approvedQuote.approved ||
                                       versionStatus.includes("Rejected by Customer") ||
                                       (steps.length === 5 && currentStep > 3) ||

@@ -21,7 +21,7 @@ import { BsCheckCircle } from "react-icons/bs";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import { FaHourglassHalf } from "react-icons/fa";
 
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import { TiArrowBack } from "react-icons/ti";
 import { RiShareForwardFill } from "react-icons/ri";
 import MobileStepper from "@material-ui/core/MobileStepper";
@@ -176,7 +176,7 @@ const Steps = (props) => {
     return (
         <div>
             {
-                isMobile ? <div>
+                isMobile && !isTablet ? <div>
                     <MobileStepper
                         style={{ background: "#dee2e6" }}
                         variant="dots"
@@ -216,7 +216,7 @@ const Steps = (props) => {
                             <Grid
                                 item
                                 xs={12}
-                                sm={2}
+                                sm={1}
                                 md={1}
                                 className="d-flex align-items-center justify-content-center mt-2"
                             >
@@ -240,7 +240,7 @@ const Steps = (props) => {
                                     </>
                                 )}
                             </Grid>
-                            <Grid item xs={12} sm={8} md={10}>
+                            <Grid item xs={12} sm={10} md={10}>
                                 <div className={classes.pStepper}>
                                     <Grid container>
                                         <Grid
@@ -256,7 +256,7 @@ const Steps = (props) => {
                                                                     color="primary"
                                                                     disabled={currentStep >= 3 || currentStep === 0}
                                                                     onClick={() => {
-                                                                        setCurrentStep(currentStep + 1)
+                                                                        setCurrentStep(currentStep - 1)
                                                                     }}
                                                                     size="small"
                                                                 >
@@ -288,7 +288,7 @@ const Steps = (props) => {
                                                                         disabled={currentStep >= 3 || currentStepDisable}
 
                                                                     >
-                                                                        Next
+                                                                      <IoIosArrowDroprightCircle/>
                                                                     </IconButton>
                                                                 )}
                                                             </div>
@@ -326,7 +326,7 @@ const Steps = (props) => {
                             <Grid
                                 item
                                 xs={12}
-                                sm={2}
+                                sm={1}
                                 md={1}
                                 className="d-flex align-items-center justify-content-center mt-2 "
                             >

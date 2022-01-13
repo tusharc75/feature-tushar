@@ -907,14 +907,20 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                     onSuccess={(obj) => {
                       if (obj) {
                         setShowAddAddresstDialog(false);
-                        setAddressDataSource((prevState) => [...prevState,
-                        {
-                          default: false,
-                          optionLabel: obj?.fullAddress,
-                          optionValue: obj._id,
-                          order: addressDataSource.length + 1,
-                        }]);
-                        setFieldValue("finalDestination", [...values[`finalDestination`], obj._id]);
+                        if (obj?.isAlreadyExist === true) {
+                          let tempAddress = addressDataSource.find(d => d?.optionLabel === obj?.fullAddress)
+                          setFieldValue("finalDestination", [...values[`finalDestination`], tempAddress.optionValue]);
+                        }
+                        else {
+                          setAddressDataSource((prevState) => [...prevState,
+                          {
+                            default: false,
+                            optionLabel: obj?.fullAddress,
+                            optionValue: obj._id,
+                            order: addressDataSource.length + 1,
+                          }]);
+                          setFieldValue("finalDestination", [...values[`finalDestination`], obj._id]);
+                        }
                       }
                     }}
                   />

@@ -178,6 +178,11 @@
   display: flex;
   gap: 0.25rem;
 }
+@media only screen and (max-width: 1299px) {
+  .set_width_table {
+    width:93vw
+  }
+}
 @media only screen and (max-width: 1024px) {
   .account_header {
     //margin-top: 15px;
@@ -190,6 +195,9 @@
   .search_box_input{
   flex:none !important;
   width:300px !important;
+  }
+  .set_width_table {
+    width:97vw
   }
 
 }
@@ -209,6 +217,9 @@
   }
   .search_box_input {
     width: 100% !important;
+  }
+  .set_width_table {
+    width:95vw
   }
   
 
@@ -343,6 +354,9 @@
   .account_header-mobile{
     flex: 1;
     justify-content: space-between !important;
+  }
+  .set_width_table {
+    width:100vw
   }
 
 }
