@@ -1,17 +1,13 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
-import { formatAmountWithCurrency, eProduct, dateFormatForInputControl } from "../../constants/helpers";
+import { formatAmountWithCurrency, eProduct, dateFormatForInputControl, ORDER_TYPES } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { Rating } from "@material-ui/lab";
-import { Button, Box, Grid, makeStyles, IconButton, TextField, Typography } from "@material-ui/core";
-import FrequentlyBought from "../../components/ProductList/FrequentlyBought/FrequentlyBought";
-import SimilarItems from "../../components/ProductList/SimilarItems/SimilarItems";
+import { Box, Chip, Grid, makeStyles, Typography } from "@material-ui/core";
 import AddShoppingCartIcon from "@material-ui/icons/AddShoppingCart";
-import RemoveShoppingCartIcon from "@material-ui/icons/RemoveShoppingCart";
+import RemoveShoppingCartIcon from '@material-ui/icons/RemoveShoppingCart';
 import { BsImage } from "react-icons/bs";
-import RatingAndReviewChart from "../../components/ProductList/RatingAndReviewChart";
-import { Link } from "react-router-dom";
 import ManageQuoteDialog from "../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog";
 import { useData } from "../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
@@ -31,7 +27,9 @@ import Select from '@material-ui/core/Select';
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import PlusMinusTextboxComponent from "../../components/PlusMinusTextboxComponent/PlusMinusTextboxComponent";
 import DateUtils from '@date-io/date-fns';
-import { DatePicker, KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
+import { Skeleton } from "@material-ui/lab";
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -49,7 +47,7 @@ const TYPES = {
   endDate: "END_DATE",
   unitAndPricingMethod: "UNIT",
   indexOfProductInCart: "INDEX_OF_PRODUCT_IN_CART",
-  updateWholePaload: "UPDATE_WHOLE_PALOAD",
+  updateWholePayload: "UPDATE_WHOLE_PALOAD",
 }
 
 const initialData = {
@@ -74,7 +72,7 @@ const reducer = (data = initialData, action) => {
     case TYPES.indexOfProductInCart:
       return { ...data, indexOfProductInCart: action.payload };
 
-    case TYPES.updateWholePaload:
+    case TYPES.updateWholePayload:
       return { ...data, ...action.payload };
 
     default:
@@ -97,17 +95,25 @@ export default function ProductDetails() {
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, cartItems }, dispatch }: any = useData();
   const [wishlist, setWishlist] = useState({ loading: false, disabled: false });
-  const [rateCurrency, setRateCurrency] = useState({ currency: "", rate: "", mrp: "", rateWithCurrency: "", unit: "", pricingMethod: "", isRateMrpSame: false })
+  const [rateCurrency, setRateCurrency] = useState({ currency: "", rate: "", mrp: "", rateWithCurrency: "", isRateMrpSame: false })
   const [deleteProductFromCartConfirmationDialog, setDeleteProductFromCartConfirmationDialog] = useState({ show: false, okBtnLoading: false })
   const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
   const [hasError, setHasError] = useState(false);
 
   const history = useHistory();
-  let { id, orderType } = useParams();
+  let { id, orderType: orderTypeFromUrl } = useParams();
+  const orderTypeInLowerCase = orderTypeFromUrl.toLowerCase();
+
+  const [orderType, setOrderType] = useState(() => {
+    if (orderTypeFromUrl) {
+      return ORDER_TYPES.rent.value;
+    }
+    return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+  });
 
   useEffect(() => {
     fetchCart()
-    fetchProducts()
+    // fetchProducts()
     // fetchReviews()
   }, []);
 
@@ -115,10 +121,12 @@ export default function ProductDetails() {
     axiosInstance().get(`${eProduct.api}/${id}`).then(({ data: { data } }) => {
       setProductDetails({ ...data });
 
-      const indexOfProductInCart = cartItems.findIndex(({ productDetail }) => productDetail._id === id);
+      const indexOfProductInCart = getIndexOfProductInCart(cartItems);
+      //  .findIndex(({ orderType, productDetail }) => orderType === orderTypeInLowerCase && productDetail._id === id);
+
       if (indexOfProductInCart > -1) {
         dispatchData({
-          type: TYPES.updateWholePaload,
+          type: TYPES.updateWholePayload,
           payload: {
             selectedUnit: cartItems[indexOfProductInCart].unit,
             selectedPricingMethod: cartItems[indexOfProductInCart].pricingMethod,
@@ -156,24 +164,28 @@ export default function ProductDetails() {
     }
 
     if (record) {
-      setRateCurrency({ currency: record.currency, unit: unit, pricingMethod: pricingMethod, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
+      setRateCurrency({ currency: record.currency, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
     }
 
     if (data.indexOfProductInCart !== -1) {
-      updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), unit, pricingMethod, data.startDate, data.endDate);
+      updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), unit, pricingMethod, data.startDate, data.endDate, record?.mrp, record?.rate);
     }
   }
 
-  const fetchProducts = () => {
-    axiosInstance()
-      .get(`${eProduct.api}?limit=0`)
-      .then(({ data: { data } }) => {
-        data = data.map(obj => ({ ...obj, selected: false }))
-        setProducts(data);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  // const fetchProducts = () => {
+  //   axiosInstance()
+  //     .get(`${eProduct.api}?limit=0`)
+  //     .then(({ data: { data } }) => {
+  //       data = data.map(obj => ({ ...obj, selected: false }))
+  //       setProducts(data);
+  //     })
+  //     .catch((error) => {
+  //       toastConfig.setToastConfig(error);
+  //     });
+  // }
+
+  const getIndexOfProductInCart = (data) => {
+    return data.findIndex(({ orderType, productDetail }) => orderType === orderTypeInLowerCase && productDetail._id === id)
   }
 
   const fetchCart = () => {
@@ -182,7 +194,7 @@ export default function ProductDetails() {
 
         if (data) {
           dispatch({ type: SET_CART, payload: [...data] });
-          dispatchData({ type: TYPES.indexOfProductInCart, payload: data.findIndex(({ productDetail }) => productDetail._id === id) })
+          dispatchData({ type: TYPES.indexOfProductInCart, payload: getIndexOfProductInCart(data) })
 
           if (addToCartBtnLoading) setAddToCartBtnLoading(false)
 
@@ -206,14 +218,14 @@ export default function ProductDetails() {
       qty: 1,
       type: 'product',
       materialId: item._id,
-      mrp: Number(item.mrp),
-      rate: 10,
+      mrp: Number(rateCurrency.mrp),
+      rate: rateCurrency.rate,
       unit: data.selectedUnit,
-      orderType: 'rent',
+      orderType: orderTypeInLowerCase,
       currency: rateCurrency.currency
     }
 
-    if (orderType === "rent") {
+    if (orderTypeInLowerCase === ORDER_TYPES.rent.value.toLocaleLowerCase()) {
       product["pricingMethod"] = data.selectedPricingMethod;
       product["startDate"] = data.startDate;
       product["endDate"] = data.endDate;
@@ -272,7 +284,7 @@ export default function ProductDetails() {
       })
   }
 
-  const updateCart = (cartId, value, unit, pricingMethod, startDate, endDate) => {
+  const updateCart = (cartId, value, unit, pricingMethod, startDate, endDate, mrp = rateCurrency?.mrp, rate = rateCurrency?.rate) => {
     axiosInstance().put(`/ecommerce/cart`, {
       _id: cartId,
       qty: value,
@@ -280,7 +292,9 @@ export default function ProductDetails() {
       pricingMethod: pricingMethod,
       startDate: startDate,
       endDate: endDate,
-      currency: rateCurrency.currency
+      currency: rateCurrency.currency,
+      mrp: mrp,
+      rate: rate
     }).then(() => {
 
     }).catch((error) => {
@@ -318,12 +332,10 @@ export default function ProductDetails() {
           />
         )}
 
-
         {
-
           productDetails ? <Grid container className="py-4 px-2" spacing={2}>
 
-            <Grid item xs={3} className="d-flex flex-column align-items-center">
+            <Grid item xs={4} className="d-flex flex-column align-items-center">
               <Box display="flex" justifyContent="center" alignItems="center">
 
                 {productDetails?.sliderImage && productDetails?.sliderImage.length > 0 ? (
@@ -333,6 +345,7 @@ export default function ProductDetails() {
                     autoPlay={false}
                     navButtonsAlwaysVisible
                     cycleNavigation={false}
+                    indicators={productDetails?.sliderImage.length > 1}
                     timeout={150}
                     navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
                       style: {
@@ -388,6 +401,7 @@ export default function ProductDetails() {
                   variant="outlined"
                   disabled={wishlist.disabled}
                   loading={wishlist.loading}
+                  startIcon={addToCartBtnLoading ? null : <RemoveCircleIcon />}
                   onClick={() => {
                     setWishlist({ disabled: true, loading: true });
 
@@ -411,9 +425,12 @@ export default function ProductDetails() {
               }
             </Grid>
 
-            <Grid item xs={6}>
+            <Grid item xs={5}>
 
-              <h2>{productDetails.productName}</h2>
+              <div className="w-100 d-flex align-items-center gap-2 justify-content-space-between">
+                <h2>{productDetails.productName}</h2>
+                <Chip color="primary" label={ORDER_TYPES[orderTypeInLowerCase]?.key} />
+              </div>
 
               <Rating
                 name="half-rating-read"
@@ -424,329 +441,266 @@ export default function ProductDetails() {
                 size="small"
               />
 
-              {/* <div className="d-flex gap-2">
-              <h4>Avaibility-&nbsp;</h4>
-              {productDetails?.qty > 0 ? "In Stock" : "Out of Stock"}
-            </div> */}
-
-              <div className="d-flex gap-2">
+              <div>
                 <h4>Sold by - {user?.user?.brandName}</h4>
               </div>
 
-              <div className="d-flex gap-2 mt-5">
+              <div className="d-flex gap-2 my-5 flex-column">
                 <h4>Product Number - {productDetails.productNumber}</h4>
+                <h4>Product Category - {productDetails.productCategory?.optionLabel}</h4>
               </div>
 
-            </Grid>
-
-            <Grid item xs={3}>
-              <div className="d-flex flex-column gap-3">
-                {
-                  productDetails.unit || productDetails.pricingMethod ? <Grid container spacing={2}>
-                    <Grid item xs={productDetails.pricingMethod ? 6 : 12}>
-                      {
-                        productDetails.unit && <FormControl variant="outlined" margin="dense" fullWidth error={hasError && !data.selectedUnit}>
-                          <InputLabel id="unit-label">Unit</InputLabel>
-                          <Select
-                            required
-                            labelId="unit-label"
-                            id="unit"
-                            value={data.selectedUnit}
-                            onChange={(e) => {
-                              changeRateCurrency(productDetails, e.target.value, rateCurrency.pricingMethod)
-                            }}
-                            label="Unit"
-                          >
-                            {
-                              productDetails.unit.map(m => (
-                                <MenuItem value={m}>{m}</MenuItem>
-                              ))
-                            }
-                          </Select>
-                          {hasError && !data.selectedUnit && <FormHelperText>This is required!</FormHelperText>}
-                        </FormControl>
-                      }
-                    </Grid>
-                    <Grid item xs={productDetails.unit ? 6 : 12}>
-                      {
-                        orderType === "rent" && productDetails.pricingMethod && <FormControl variant="outlined" margin="dense" fullWidth error={hasError && !data.selectedPricingMethod}>
-                          <InputLabel id="pricing-method-label">Pricing Method</InputLabel>
-                          <Select
-                            required={orderType === "rent"}
-                            labelId="pricing-method-label"
-                            id="pricing-method"
-                            value={data.selectedPricingMethod}
-                            onChange={(e) => {
-                              changeRateCurrency(productDetails, rateCurrency.unit, e.target.value)
-                            }}
-                            label="Pricing Method"
-                          >
-                            {
-                              productDetails.pricingMethod.map(m => (
-                                <MenuItem value={m}>{m}</MenuItem>
-                              ))
-                            }
-                          </Select>
-                          {hasError && !data.selectedPricingMethod && <FormHelperText>This is required!</FormHelperText>}
-                        </FormControl>
-                      }
-                    </Grid>
-                  </Grid> : ""
-                }
-
-                {
-                  orderType === "rent" && <Grid item xs={12} sm={12} md={12}>
-                    <MuiPickersUtilsProvider utils={DateUtils}>
-                      <Grid container spacing={2}>
-
-                        <Grid item xs={6} sm={6}>
-                          <KeyboardDatePicker
-                            required={orderType === "rent"}
-                            inputVariant="outlined"
-                            variant="inline"
-                            fullWidth
-                            autoOk
-                            size="small"
-                            openTo="date"
-                            format={dateFormatForInputControl}
-                            maxDate={data.endDate}
-                            label="Start Date"
-                            views={['year', 'month', 'date']}
-                            value={data.startDate}
-                            onChange={(date) => {
-                              dispatchData({ type: TYPES.startDate, payload: date });
-
-                              if (data.indexOfProductInCart !== -1) {
-                                updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, date, data.endDate);
-                              }
-                            }}
-                          />
-
-                        </Grid>
-                        <Grid item xs={6} sm={6}>
-                          <KeyboardDatePicker
-                            required={orderType === "rent"}
-                            inputVariant="outlined"
-                            variant="inline"
-                            fullWidth
-                            autoOk
-                            size="small"
-                            minDate={data.startDate}
-                            openTo="date"
-                            format={dateFormatForInputControl}
-                            label="End Date"
-                            views={['year', 'month', 'date']}
-                            value={data.endDate}
-                            onChange={(date) => {
-
-                              dispatchData({ type: TYPES.endDate, payload: date })
-
-                              if (data.indexOfProductInCart !== -1) {
-                                updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, data.startDate, date);
-                              }
-
-                            }}
-                          />
-                        </Grid>
-                      </Grid>
-                    </MuiPickersUtilsProvider>
-                  </Grid>
-                }
-
-                {
-                  productDetails && data.indexOfProductInCart > -1 && cartItems.length > 0 && cartItems.some(s => s.productDetail?._id === productDetails?._id)
-                    ? <PlusMinusTextboxComponent
-                      inputTextLabel="Quantity"
-                      value={data.indexOfProductInCart > -1 ? cartItems[data.indexOfProductInCart]?.qty?.toString() ?? "1" : "1"}
-                      isRequired={true}
-                      onChange={(value) => {
-                        let items = [...cartItems];
-                        const indexOfProduct = items.findIndex(s => s.productDetail?._id === id);
-
-                        updateCart(items[indexOfProduct]._id, parseInt(value), data.selectedUnit, data.selectedPricingMethod, data.startDate, data.endDate);
-                      }}
-                    />
-                    : <CustomButton
-                      type="button"
-                      className="mt-2"
-                      color="primary"
-                      variant="outlined"
-                      disabled={addToCartBtnLoading || (orderType === "rent" ? !(data.startDate && data.endDate && data.selectedUnit && data.selectedPricingMethod) : !data.selectedUnit)}
-                      loading={addToCartBtnLoading}
-                      startIcon={addToCartBtnLoading ? null : <AddShoppingCartIcon />}
-                      onClick={() => {
-                        if (data.selectedUnit && data.selectedPricingMethod) {
-                          setAddToCartBtnLoading(true)
-                          onAddToCartItem(productDetails)
-                        } else {
-                          setHasError(true)
-                        }
-                      }}
-                    >
-                      Add to cart
-                    </CustomButton>
-                }
-
-                <Box className="my-3 d-flex gap-4 align-items-baseline">
-                  <Typography variant="h4">{rateCurrency.rateWithCurrency}</Typography>
+              <Grid container>
+                <Grid item xs={12} className="d-flex flex-column gap-3">
                   {
-                    rateCurrency.isRateMrpSame === false && <Typography variant="h5" className="custom-strike">{rateCurrency.mrp}</Typography>
+                    productDetails.unit || productDetails.pricingMethod ? <Grid container spacing={2}>
+                      <Grid item xs={productDetails.pricingMethod ? 6 : 12}>
+                        {
+                          productDetails.unit && <FormControl variant="outlined" margin="dense" fullWidth error={hasError && !data.selectedUnit}>
+                            <InputLabel id="unit-label">Unit</InputLabel>
+                            <Select
+                              required
+                              labelId="unit-label"
+                              id="unit"
+                              value={data.selectedUnit}
+                              onChange={(e) => {
+                                changeRateCurrency(productDetails, e.target.value, data.selectedPricingMethod)
+                              }}
+                              label="Unit"
+                            >
+                              {
+                                productDetails.unit.map(m => (
+                                  <MenuItem value={m}>{m}</MenuItem>
+                                ))
+                              }
+                            </Select>
+                            {hasError && !data.selectedUnit && <FormHelperText>This is required!</FormHelperText>}
+                          </FormControl>
+                        }
+                      </Grid>
+                      <Grid item xs={productDetails.unit ? 6 : 12}>
+                        {
+                          orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase() && productDetails.pricingMethod && <FormControl variant="outlined" margin="dense" fullWidth error={hasError && !data.selectedPricingMethod}>
+                            <InputLabel id="pricing-method-label">Pricing Method</InputLabel>
+                            <Select
+                              required={orderType === ORDER_TYPES.rent.key}
+                              labelId="pricing-method-label"
+                              id="pricing-method"
+                              value={data.selectedPricingMethod}
+                              onChange={(e) => {
+                                changeRateCurrency(productDetails, data.selectedUnit, e.target.value)
+                              }}
+                              label="Pricing Method"
+                            >
+                              {
+                                productDetails.pricingMethod.map(m => (
+                                  <MenuItem value={m}>{m}</MenuItem>
+                                ))
+                              }
+                            </Select>
+                            {hasError && !data.selectedPricingMethod && <FormHelperText>This is required!</FormHelperText>}
+                          </FormControl>
+                        }
+                      </Grid>
+                    </Grid> : ""
                   }
-                </Box>
 
-                {/* <div className="d-flex gap-2"> */}
+                  {
+                    orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase() && <Grid item xs={12} sm={12} md={12}>
+                      <MuiPickersUtilsProvider utils={DateUtils}>
+                        <Grid container spacing={2}>
 
-                {
-                  data.indexOfProductInCart !== -1 && <CustomButton
-                    fullWidth
-                    type="button"
-                    color="primary"
-                    variant="outlined"
-                    disabled={deleteProductFromCartConfirmationDialog.okBtnLoading}
-                    loading={deleteProductFromCartConfirmationDialog.okBtnLoading}
-                    onClick={() => {
-                      setDeleteProductFromCartConfirmationDialog({ show: true, okBtnLoading: false })
-                    }}
-                  >
-                    Remove from cart
-                  </CustomButton>
-                }
+                          <Grid item xs={6} sm={6}>
+                            <KeyboardDatePicker
+                              required={orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase()}
+                              inputVariant="outlined"
+                              variant="inline"
+                              fullWidth
+                              autoOk
+                              size="small"
+                              openTo="date"
+                              format={dateFormatForInputControl}
+                              maxDate={data.endDate}
+                              label="Start Date"
+                              views={['year', 'month', 'date']}
+                              value={data.startDate}
+                              onChange={(date) => {
+                                dispatchData({ type: TYPES.startDate, payload: date });
 
-                {/* <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    startIcon={<AddShoppingCartIcon />}
-                    onClick={onCheckout}
-                  >
-                    {checkoutLabel}
-                  </Button> */}
+                                if (data.indexOfProductInCart !== -1) {
+                                  updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, date, data.endDate);
+                                }
+                              }}
+                            />
 
-                {/* <Button
-                    variant="outlined"
-                    color="secondary"
-                    size="small"
-                    className={styles.secondary_buttons}
-                  >
-                    Add to Configure
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    size="small"
-                    className={styles.secondary_buttons}
-                  >
-                    Add to Planner
-                  </Button> */}
+                          </Grid>
+                          <Grid item xs={6} sm={6}>
+                            <KeyboardDatePicker
+                              required={orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase()}
+                              inputVariant="outlined"
+                              variant="inline"
+                              fullWidth
+                              autoOk
+                              size="small"
+                              minDate={data.startDate}
+                              openTo="date"
+                              format={dateFormatForInputControl}
+                              label="End Date"
+                              views={['year', 'month', 'date']}
+                              value={data.endDate}
+                              onChange={(date) => {
 
-                {/* </div> */}
+                                dispatchData({ type: TYPES.endDate, payload: date })
 
-              </div>
+                                if (data.indexOfProductInCart !== -1) {
+                                  updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, data.startDate, date);
+                                }
+
+                              }}
+                            />
+                          </Grid>
+                        </Grid>
+                      </MuiPickersUtilsProvider>
+                    </Grid>
+                  }
+
+                  <Box className="my-3 d-flex gap-4 align-items-baseline">
+                    {
+                      rateCurrency.rateWithCurrency
+                        ? <Typography variant="h5">{rateCurrency.rateWithCurrency}</Typography>
+                        : <Typography variant="h6" className="text-error">Price calculation not available</Typography>
+                    }
+
+                    {
+                      rateCurrency.isRateMrpSame === false && <Typography variant="h5" className="custom-strike">{rateCurrency.mrp}</Typography>
+                    }
+                  </Box>
+
+                  <Box>
+                    {
+                      productDetails && data.indexOfProductInCart > -1 && cartItems.length > 0 && cartItems.some(s => s.orderType.toLowerCase() === orderTypeInLowerCase && s.productDetail?._id === productDetails?._id)
+                        ? <Grid container>
+                          <Grid item xs={12} md={6}>
+                            <PlusMinusTextboxComponent
+                              inputTextLabel="Quantity"
+                              value={data.indexOfProductInCart > -1 ? cartItems[data.indexOfProductInCart]?.qty?.toString() ?? "1" : "1"}
+                              isRequired={true}
+                              onChange={(value) => {
+                                let items = [...cartItems];
+                                const indexOfProduct = getIndexOfProductInCart(items); // items.findIndex(s => s.orderType.toLowerCase() === orderTypeInLowerCase && s.productDetail?._id === id);
+
+                                updateCart(items[indexOfProduct]._id, parseInt(value), data.selectedUnit, data.selectedPricingMethod, data.startDate, data.endDate);
+                              }}
+                            />
+                          </Grid>
+                        </Grid>
+                        : <CustomButton
+                          type="button"
+                          className="mt-2"
+                          color="primary"
+                          variant="outlined"
+                          disabled={addToCartBtnLoading || (orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase() ? !(data.startDate && data.endDate && data.selectedUnit && data.selectedPricingMethod) : !data.selectedUnit)}
+                          loading={addToCartBtnLoading}
+                          startIcon={addToCartBtnLoading ? null : <AddShoppingCartIcon />}
+                          onClick={() => {
+                            if (data.selectedUnit && data.selectedPricingMethod) {
+                              setAddToCartBtnLoading(true)
+                              onAddToCartItem(productDetails)
+                            } else {
+                              setHasError(true)
+                            }
+                          }}
+                        >
+                          Add to cart
+                        </CustomButton>
+                    }
+                  </Box>
+
+                  <Box>
+                    {
+                      data.indexOfProductInCart !== -1 && <CustomButton
+                        type="button"
+                        color="primary"
+                        variant="outlined"
+                        disabled={deleteProductFromCartConfirmationDialog.okBtnLoading}
+                        loading={deleteProductFromCartConfirmationDialog.okBtnLoading}
+                        startIcon={addToCartBtnLoading ? null : <RemoveShoppingCartIcon />}
+                        onClick={() => {
+                          setDeleteProductFromCartConfirmationDialog({ show: true, okBtnLoading: false })
+                        }}
+                      >
+                        Remove from cart
+                      </CustomButton>
+                    }
+                  </Box>
+
+
+                </Grid>
+              </Grid>
 
             </Grid>
 
-          </Grid> : <div style={{ height: 300 }} className="d-flex align-items-center justify-content-center p-5">
-            Loading.....
-          </div>
+            <Grid item xs={3}></Grid>
+
+          </Grid> : <Grid container className="py-4 px-2" spacing={2}>
+
+            <Grid item xs={4} className="d-flex flex-column align-items-center">
+              <Box display="flex" justifyContent="center" alignItems="center">
+                <Skeleton width={200} height={200} />
+              </Box>
+
+              <Skeleton width={120} height={50} />
+            </Grid>
+
+            <Grid item xs={8}>
+
+              <Skeleton width={70} height={50} />
+
+              <Skeleton width={100} height={50} />
+
+              <Skeleton width={120} height={50} />
+
+              <Skeleton width={150} height={50} />
+
+              <Grid container className="mt-4">
+                <Grid item xs={12} md={6} className="d-flex flex-column gap-3">
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Skeleton width="100%" height={70} />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Skeleton width="100%" height={70} />
+                    </Grid>
+                  </Grid>
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Skeleton width="100%" height={70} />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Skeleton width="100%" height={70} />
+                    </Grid>
+                  </Grid>
+
+                  <Box className="my-3 d-flex gap-4 align-items-baseline">
+                    {
+                      <div className="d-flex align-items-center gap-2">
+                        <Skeleton width={100} height={50} />
+                        <Skeleton width={100} height={50} />
+                      </div>
+                    }
+                  </Box>
+
+                  <Skeleton width={150} height={70} />
+
+                </Grid>
+              </Grid>
+
+            </Grid>
+
+          </Grid>
         }
-
-
-
-
-
-
-
-
-        {/* <div className={styles.container_box}>
-          {productDetails ? (
-            <div className={styles.product_container}>
-              <div className={styles.product_image}>
-
-              </div>
-              <div className={styles.product_details}>
-                <header>
-                  <h1 className={styles.title}>{productDetails.productName}</h1>
-
-                  <div className={styles.user_rating}>
-                    <Rating
-                      name="half-rating-read"
-                      defaultValue={4.5}
-                      precision={0.5}
-                      value={productDetails?.averageRating}
-                      readOnly
-                      size="small"
-                    />
-                    <p>{productDetails?.averageRating}</p>
-                  </div>
-
-                  <span className={styles.avaibility}>
-                    <h3>Avaibility-&nbsp;</h3>
-                    {productDetails?.qty > 0 ? "In Stock" : "Out of Stock"}
-                  </span>
-                  <div className={styles.price}>
-                    <span className={styles.vendor}>
-                      <h5>Sold by: <span>{user?.user?.brandName}</span></h5>
-                    </span>
-                  </div>
-                  <div className={styles.set_width}> <hr /> </div>
-
-                </header>
-                <article>
-                  <p>{productDetails?.description}</p>
-                </article>
-                <div className={styles.controls}>
-
-                  {productDetails.productNumber && <div className={styles.controls_over}>
-                    <h5><li>Product Number - </li></h5>
-                    <a className="option">{` ${productDetails.productNumber}`}</a>
-                  </div>}
-                </div>
-
-
-
-
-
-                <div className={styles.price_and_discount}>
-                  <span className={styles.current}>
-                    <h2>{
-                      formatAmountWithCurrency(
-                        productDetails.currency, productDetails.mrp).fullFormatAmount
-                    }</h2>
-                    {
-                      formatAmountWithCurrency(
-                        productDetails.currency,
-                        calculateNetPrice(
-                          parseInt(productDetails.mrp),
-                          productDetails.discount
-                        )
-                      ).fullFormatAmount
-                    }
-                  </span>
-
-                  <span className={styles.mrp_price}>
-
-                    {
-                      formatAmountWithCurrency(
-                        productDetails.currency,
-                        productDetails.mrp
-                      ).fullFormatAmount
-                    }
-                  </span>
-                </div>
-
-              </div>
-            </div>
-          ) : (
-            <span>Loading...</span>
-          )}
-          <div className="a_divider_inner"></div>
-
-          <SimilarItems similarItems={similarItems} />
-          <div className="a_divider_inner"></div>
-          <RatingAndReviewChart id={id} reviews={reviews}
-            averageRating={Math.round(productDetails?.averageRating).toFixed(1) || 0} />
-        </div> */}
 
       </Box>
 
@@ -763,9 +717,10 @@ export default function ProductDetails() {
               setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, okBtnLoading: true } })
 
               let items = [...cartItems];
-              const indexOfProduct = items.findIndex(s => s.productDetail?._id === id);
+              const indexOfProduct = getIndexOfProductInCart(items);  //  items.findIndex(s => s.orderType.toLowerCase() === orderTypeInLowerCase && s.productDetail?._id === id);
 
-              const productsToUpdate = items.filter(s => s.productDetail?._id !== id);
+
+              const productsToUpdate = items.filter(s => { return !(s.orderType.toLowerCase() === orderTypeInLowerCase && s.productDetail?._id === id) });
               dispatch({ type: SET_CART, payload: [...productsToUpdate] });
 
               axiosInstance().put(`/ecommerce/cart/remove`, { ids: [items[indexOfProduct]._id] }).then(({ data }) => {
@@ -788,6 +743,6 @@ export default function ProductDetails() {
         ) : null
       }
 
-    </Fragment >
+    </Fragment>
   );
 }

@@ -14,6 +14,7 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageOpportunityDialog from './ManageOpportunityDialog/ManageOpportunityDialog';
 import { cloneDeep } from 'lodash';
+import CustomMobileStepperOpportunities from "../../components/CustomMobileStepperOpportunities"
 import {
   customerAccount,
   supplierAccount,
@@ -590,14 +591,14 @@ function OpportunityDetailsPage() {
                 showHeading={true}
               >
                 {allowedToEdit ? (
-                  <Button variant={isMobile ? "text" : "contained"}
+                  <Button variant={isMobile && !isTablet ? "text" : "contained"}
                           color="primary"
                           size="small"
                           onClick={handleOpenUpdateDialog}
-                          className={isMobile ? accountClass.mobile_button_layout : ""}
-                          style={isMobile ? {color:"#43aeaa"} : {}}
+                          className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                          style={isMobile && !isTablet ? {color:"#43aeaa"} : {}}
                   >
-                    {isMobile ? <BiEdit size={20}/> : "Edit"}
+                    {isMobile && !isTablet ? <BiEdit size={20}/> : "Edit"}
                   </Button>
                 ) : null}
                 {opportunityPermissions.isDelete &&
@@ -605,21 +606,21 @@ function OpportunityDetailsPage() {
                   user?.user?._id &&
                   opportunityData.owner.optionValue === user.user._id ? (
                   <DeleteButton
-                      text={isMobile ? <MdDelete size={20}/> : "Delete"}
+                      text={isMobile && !isTablet ? <MdDelete size={20}/> : "Delete"}
                       onClick={() => setShowConfirmBox(true)}
-                      className={isMobile ? accountClass.mobile_button_layout : ""}
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
 
                   />
                 ) : null}
               </DetailsPageHeader>
             )}
-
             <ProcessFlow
               disableBackNext={allowedToEdit ? false : true}
               steps={steps}
               activeStep={activeStep}
               handleMarkAsCompleted={handleMarkAsCompleted}
             />
+           
 
             {loading ? (
               <Grid container spacing={2}>
@@ -712,7 +713,7 @@ function OpportunityDetailsPage() {
             </div>
           </Paper>
         </div>
-        <div className="position-relative">
+        <div className={isMobile ? "position-relative mb-5" : "position-relative"}>
           {/* {showActivity ?
             <Paper>
               {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>

@@ -31,6 +31,7 @@ interface EditDialogProps {
   material: any[]
   selectedProducts: any[]
   isBulkedit: any
+  loading: any
 }
 
 const rateChangeFields = ["unit", "pricingMethod"]
@@ -44,7 +45,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     rowData,
     material,
     selectedProducts,
-    isBulkedit
+    isBulkedit,
+    loading
   }) => {
 
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
@@ -52,7 +54,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const ref = useRef(null);
 
@@ -150,7 +151,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
 
   const resetValueZero = (rows) => {
     const resetFields = []
-    initialData.fields.forEach((element) => {
+    allFields.forEach((element) => {
       if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
         if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
           element.displayUnits.forEach((_unit) => {
@@ -183,7 +184,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
 
   const sumOnParent = (packages, product) => {
     const resetFields = []
-    initialData.fields.forEach((element) => {
+    allFields.forEach((element) => {
       if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
         if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
           element.displayUnits.forEach((_unit) => {
@@ -220,7 +221,13 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           row[ele.fieldName] = sumValues[ele.fieldName];
         }
         else {
-          row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / product.length).toFixed(2));
+          const cur = rentalManagementData?.currency?.toLowerCase();
+          if (ele.fieldName === "discountPercentage") {
+            row[ele.fieldName] = parseFloat(((sumValues[`discount_${cur}`] / sumValues[`totalPrice_${cur}`]) * 100)?.toFixed(2));
+          }
+          if (ele.fieldName === "taxPercentage") {
+            row[ele.fieldName] = parseFloat(((sumValues[`tax_${cur}`] / (sumValues[`totalPrice_${cur}`] - sumValues[`discount_${cur}`])) * 100)?.toFixed(2));
+          }
         }
       })
     })
@@ -487,32 +494,62 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                   </Box>
                                 </Box>
                               </Grid>
-                              : <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                <Box display="flex" >
-                                  <Box flexGrow={1}  >
-                                    <FormTypes
-                                      {...field}
-                                      fields={initialData.fields}
-                                      fieldData={field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value)
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field.isTooltip}
-                                      tooltipMessage={field.tooltipMessage}
-                                      size="small"
-                                    />
+                              :
+                              ["estimateStartDate", "estimateEndDate"].includes(field.fieldName) ?
+                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Box display="flex" >
+                                    <Box flexGrow={1}  >
+                                      <FormTypes
+                                        {...field}
+                                        fields={initialData.fields}
+                                        fieldData={field}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value)
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field.isTooltip}
+                                        tooltipMessage={field.tooltipMessage}
+                                        size="small"
+                                        minDate={rentalManagementData?.estimateStartDate}
+                                        maxDate={rentalManagementData?.estimateEndDate}
+                                      />
+                                    </Box>
                                   </Box>
-                                </Box>
-                              </Grid>
+                                </Grid>
+                                : <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Box display="flex" >
+                                    <Box flexGrow={1}  >
+                                      <FormTypes
+                                        {...field}
+                                        fields={initialData.fields}
+                                        fieldData={field}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value)
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field.isTooltip}
+                                        tooltipMessage={field.tooltipMessage}
+                                        size="small"
+                                      />
+                                    </Box>
+                                  </Box>
+                                </Grid>
                         ))}
                       </Grid>
                     </Box>
@@ -535,7 +572,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
               >{"Close"}</Button>
               <CustomButton
                 loading={loading}
-                disabled={isEqual(ref?.current?.values, initialData.values)}
+                disabled={loading || isEqual(ref?.current?.values, initialData.values)}
                 variant="contained"
                 color="primary"
                 type="submit"

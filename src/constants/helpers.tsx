@@ -21,7 +21,19 @@ import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
-import { orderBy, uniqBy } from 'lodash';
+import { kebabCase, orderBy, uniqBy } from 'lodash';
+
+export const ORDER_TYPES =
+{
+  rent: {
+    key: 'Rent',  //  Just to display in UI
+    value: "Rent"
+  },
+  sale: {
+    key: 'Buy',  //  Just to display in UI
+    value: "Sale"
+  }
+};
 
 export const defaultActivityShow = false;
 
@@ -120,7 +132,7 @@ export const sidebarResource = {
   opportunity: 'Opportunity',
   field: 'Field',
   productCategory: 'Product Category',
-  productInventory: 'Product Inventory',
+  productInventory: 'Serialized Asset',
   priceTemplate: 'Price Template',
   product: 'Product',
   productTemplate: 'Product Template',
@@ -146,7 +158,7 @@ export const sidebarResource = {
   budget: 'Budget',
   marketSegment: 'Market Segment',
   quotePdfTemplate: 'Quote Pdf Template',
-  warehouse: 'Warehouse',
+  warehouse: 'Plant',
   rentalManagement: 'Rental Management',
   deliveryTicket: 'Delivery Ticket',
   pricingCondition: 'Pricing Condition',
@@ -996,8 +1008,8 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   };
 };
 
-export const determineLightOrDark = (color:any) => {
-  let r:number, g:number, b:number, hsp:number;
+export const determineLightOrDark = (color: any) => {
+  let r: number, g: number, b: number, hsp: number;
   // Check the format of the color, HEX or RGB?
   if (color.match(/^rgb/)) {
 
@@ -1007,14 +1019,14 @@ export const determineLightOrDark = (color:any) => {
     r = color[1];
     g = color[2];
     b = color[3];
-  } 
+  }
   else {
 
     // If RGB then Convert it to HEX
-    color = +("0x" + color.slice(1).replace( 
+    color = +("0x" + color.slice(1).replace(
       color.length < 5 && /./g, '$&$&'
     )
-             );
+    );
 
     r = color >> 16;
     g = color >> 8 & 255;
@@ -1029,10 +1041,10 @@ export const determineLightOrDark = (color:any) => {
   );
 
   // Using the HSP value, determine whether the color is light or dark
-  if (hsp>127.5) {
+  if (hsp > 127.5) {
 
     return 'light';
-  } 
+  }
   else {
 
     return 'dark';
@@ -1290,7 +1302,7 @@ export const prepareDataForGrid = (data, user = {}) => {
         else if (typeof data[key][0] !== "object" && key != "unit") {
           restProperties[key] = data[key].join(" , ")
         }
-        else{
+        else {
           restProperties[key] = data[key]
         }
       }
@@ -1397,19 +1409,19 @@ export const arrayToDropwdownOption = (array) => {
 }
 
 export const INVENTORY_STATUS = {
-  customer: 'With Customer',
-  supplier: 'With Supplier',
+  new: 'New',
+  available: 'Available',
   reserved: 'Reserved',
   inSale: 'In Sale',
   inUse: 'In-Use',
   indTransit: 'In-Transit',
   underReview: 'Under Review',
-  repair: 'Repair',
-  available: 'Available',
+  repair: 'Repair', 
   readyToShip: 'Ready to ship',
-  new: 'New',
   scrap: 'Scrap',
   lost: 'Lost',
+  customer: 'With Customer',
+  supplier: 'With Supplier',
 };
 
 export const DELIVERY_TICKET_STATUS = {
@@ -1418,11 +1430,122 @@ export const DELIVERY_TICKET_STATUS = {
   delivered: 'Delivered',
 };
 
+export const RENTAL_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  jobPartiallyStarted: 'Job Partially Started',
+  jobStarted: 'Job Started',
+  jobPartiallyEnded: 'Job Partially Ended',
+  jobEnded: 'Job Ended',
+  readyToInvoice: 'Ready To Invoice',
+  invoiced: 'Invoiced',
+  closed: 'Closed',
+};
+
+export const DELIVERY_TICKET_MAPPED_STATUS = {
+  "Sign-off - Dispatch": DELIVERY_TICKET_STATUS.indTransit,
+  "Sign-off - Delivery": DELIVERY_TICKET_STATUS.delivered
+}
+
+export const DELIVERY_TICKET_TYPE = {
+  loading: 'Loading',
+  receiving: 'Receiving',
+};
+
+export const DELIVERY_TICKET_REFRENCE_TYPE = {
+  rentalJob: 'Rental Job',
+  transferAsset: 'Transfer Asset',
+  repairJob: 'Repair Job',
+  salesOrder: 'Sales Order',
+};
+
+
 export const asyncForEach = async (
   array: any[],
   callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>
 ) => {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
+  }
+};
+
+export const resourceOptions = [
+  'Customer Account',
+  'Customer Contact',
+  'Supplier Account',
+  'Supplier Contact',
+  'Lead',
+  'Opportunity',
+  'Quote',
+  'Rental Management',
+  'Loading Ticket',
+  'Project Sales'
+];
+
+export const getApi = (resource: string) => {
+  switch (kebabCase(resource)) {
+    case 'loading-ticket':
+      return 'delivery-ticket';
+    case 'quote':
+      return 'quote-builder';
+    default:
+      return kebabCase(resource);
+  }
+};
+
+export const getData = (resource: string, data: any) => {
+  switch (kebabCase(resource)) {
+    case 'lead':
+      return {
+        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+        id: data._id
+      };
+    case 'opportunity':
+      return {
+        name: `${data.opportunityName}`,
+        id: data._id
+      };
+    case 'customer-account':
+      return {
+        name: `${data.accountName}`,
+        id: data._id
+      };
+    case 'supplier-account':
+      return {
+        name: `${data.accountName}`,
+        id: data._id
+      };
+    case 'customer-contact':
+      return {
+        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+        id: data._id
+      };
+    case 'supplier-contact':
+      return {
+        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+        id: data._id
+      };
+    case 'loading-ticket':
+      return {
+        name: `${data.ticketName}`,
+        id: data._id
+      };
+    case 'quote':
+      return {
+        name: `${data.quoteName}`,
+        id: data._id
+      };
+    case 'rental-management':
+      return {
+        name: `${data.rentalJobName}`,
+        id: data._id
+      };
+    case 'project-sales':
+      return {
+        name: `${data.projectName}`,
+        id: data._id
+      };
+    default:
+      break;
   }
 };

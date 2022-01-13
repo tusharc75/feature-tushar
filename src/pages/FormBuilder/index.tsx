@@ -10,7 +10,7 @@ import { FaWpforms } from 'react-icons/fa';
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { gridLoadingTimeout } from "../../constants/helpers";
 import { useHistory } from 'react-router-dom'
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 const FormBuilder = () => {
@@ -82,7 +82,7 @@ const FormBuilder = () => {
           </Grid>
         </Grid>
 
-        {isMobile ? <CustomSwipableList
+        {isMobile && !isTablet ? <CustomSwipableList
           allowSelection={false}
           allowSwipe={false}
           permissions={null}

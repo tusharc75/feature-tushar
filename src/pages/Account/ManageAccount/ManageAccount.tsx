@@ -173,7 +173,7 @@ export default function ManageAccount(props) {
     // if (addressDataDropdown) {
     //   setAddressDataSource(addressDataDropdown.option.filter(d => accountData?.initialValues?.billingAddress?.includes(d.optionValue) || accountData?.initialValues?.shippingAddress?.includes(d.optionValue)))
     // }
-     if (addressDataDropdown) {
+    if (addressDataDropdown) {
       setAddressDataSource(addressDataDropdown.option)
     }
 
@@ -259,15 +259,16 @@ export default function ManageAccount(props) {
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
     if (err.length) {
-      const input = document.querySelector(
+      const input: any = document.querySelectorAll(
         `input[name=${err[0]}]`,
       );
-
-      input.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'start',
-      });
+      input?.forEach((_i) => {
+        _i.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'start',
+        });
+      })
     }
   }
 
@@ -1044,25 +1045,38 @@ export default function ManageAccount(props) {
                         onSuccess={(obj) => {
                           if (obj) {
                             setShowAddAddresstDialog(false);
-                            setAddressDataSource((prevState) => [...prevState,
-                            {
-                              default: false,
-                              optionLabel: obj?.fullAddress,
-                              optionValue: obj._id,
-                              order: addressDataSource.length + 1,
-                            }]);
-                            setFieldValue(addressType.address, [...values[`${addressType.address}`], obj._id]);
-                            if (isShippingSameAsBilling === true) {
-                              if (addressType.address === "billingAddress") {
-                                setFieldValue("shippingAddress", [...values[`${addressType.address}`], obj._id]);
-                              } else {
-                                setFieldValue("billingAddress", [...values[`${addressType.address}`], obj._id]);
+                            if (obj?.isAlreadyExist === true) {
+                              let tempAddress = addressDataSource.find(d => d?.optionLabel === obj?.fullAddress)
+                              setFieldValue(addressType.address, [...values[`${addressType.address}`], tempAddress?.optionValue]);
+                              if (isShippingSameAsBilling === true) {
+                                if (addressType.address === "billingAddress") {
+                                  setFieldValue("shippingAddress", [...values[`${addressType.address}`], tempAddress?.optionValue]);
+                                } else {
+                                  setFieldValue("billingAddress", [...values[`${addressType.address}`], tempAddress?.optionValue]);
+                                }
                               }
-
                             }
+                            else {
+                              setAddressDataSource((prevState) => [...prevState,
+                              {
+                                default: false,
+                                optionLabel: obj?.fullAddress,
+                                optionValue: obj._id,
+                                order: addressDataSource.length + 1,
+                              }]);
+                              setFieldValue(addressType.address, [...values[`${addressType.address}`], obj._id]);
+                              if (isShippingSameAsBilling === true) {
+                                if (addressType.address === "billingAddress") {
+                                  setFieldValue("shippingAddress", [...values[`${addressType.address}`], obj._id]);
+                                } else {
+                                  setFieldValue("billingAddress", [...values[`${addressType.address}`], obj._id]);
+                                }
 
+                              }
+                            }
                           }
-                        }}
+                        }
+                        }
                       />
                     }
                     {isAccDialogVisible ? (

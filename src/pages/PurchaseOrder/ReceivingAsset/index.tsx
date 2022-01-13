@@ -111,19 +111,16 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
         setLoadingColumns(true)
         axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
             let fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
-            axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderService}`).then(({ data: { data } }) => {
-                fields = [...fields, ...CURReplaceByCurrencySingle(data, purchaseOrderData.currency)]
-                let rendererNames = [];
-                genrateColoum(fields, columns, rendererNames, false);
-                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-                tempFrameworkComponent = {
-                    nameRenderer: NameRenderer,
-                    ...tempFrameworkComponent,
-                }
-                setFrameWorkComponent({ ...tempFrameworkComponent })
-                setColumns([...columns])
-                setLoadingColumns(false)
-            })
+            let rendererNames = [];
+            genrateColoum(fields, columns, rendererNames, false);
+            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+            tempFrameworkComponent = {
+                nameRenderer: NameRenderer,
+                ...tempFrameworkComponent,
+            }
+            setFrameWorkComponent({ ...tempFrameworkComponent })
+            setColumns([...columns])
+            setLoadingColumns(false)
         })
     }
 
@@ -235,11 +232,11 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             color="primary"
                             type="button"
                             size="small"
-                            startIcon={isMobile ? '' : <AiFillFilePdf />}
+                            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                             disabled={downlodingFile}
                             onClick={() => { handleViewPdf(false) }}
                         >
-                            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
+                            {isMobile && !isTablet ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
                         </Button>
                     )}
                     <Box mx={1} />
@@ -249,16 +246,16 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             color="primary"
                             type="button"
                             size="small"
-                            startIcon={isMobile ? '' : <AiFillFilePdf />}
+                            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                             disabled={downlodingFile}
                             onClick={() => { handleViewPdf(true) }}
                         >
-                            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
+                            {isMobile && !isTablet ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
                         </Button>
                     )}
                     <Box mx={1} />
                     {permissions?.purchaseOrder?.isRead && <Button
-                        variant={isMobile ? "outlined" : "contained"}
+                        variant={isMobile && !isTablet ? "outlined" : "contained"}
                         color="primary"
                         size="small"
                         disabled={emailButtonLoading}
@@ -267,7 +264,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             fetchEmailAttachment()
                         }}
                     >
-                        {isMobile ? <MdEmail size={22} /> : `Send Email`}
+                        {isMobile && !isTablet ? <MdEmail size={22} /> : `Send Email`}
                     </Button>}
                 </Box>
                 <Box mx={1} />
@@ -297,7 +294,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     height={"calc(100vh - 330px)"}
                 >
                     {columns && frameWorkComponent ?
-                        isMobile ? <CustomSwipableList
+                        isMobile && !isTablet ? <CustomSwipableList
                             allowSelection={true}
                             allowSwipe={true}
                             permissions={permissions}

@@ -393,7 +393,7 @@ const Top2Dashboard = (props) => {
           <Typography variant="h5">Total offered value in {filterCurrency || currency} vs Entities</Typography>
         </Box>
 
-        {!loading ? (
+        {!loading ? tableDataRaw.length === 0 ? <Box height={400}>No Data</Box> : (
           <Box>
             {!tableView ? (
               <Chart id="allEntityChart" type="bar" data={allEntitySalesData} />

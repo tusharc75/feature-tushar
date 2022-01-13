@@ -362,7 +362,7 @@ export default function NewCreateQuotePdfTemplate() {
                             path: routes.quotePdfTemplate.path
                         },
                         {
-                            title: id === '0' || isClone === true ? 'New' : initialValues && initialValues.name
+                            title: id === '0' ? 'New' : isClone === true ? 'Clone' : initialValues && initialValues.name
                         }
                     ]}
                     isConfirmBeforeClick={hasPermissionToUpdate}
@@ -388,7 +388,7 @@ export default function NewCreateQuotePdfTemplate() {
                                 <Grid container>
                                     <Grid item xs={12} md={6}>
                                         <TextField
-                                            disabled={!hasPermissionToUpdate || Boolean(quoteData?._id)}
+                                            disabled={!isClone && (!hasPermissionToUpdate || Boolean(quoteData?._id))}
                                             variant="outlined"
                                             type="text"
                                             label="PDF Template Name"
@@ -403,15 +403,15 @@ export default function NewCreateQuotePdfTemplate() {
                                         />
                                     </Grid>
                                     <Grid item xs={12} md={6} className={`${classes.saveButtonContainer} gap-2`}>
-                                        <Button disabled={isUpdating || !hasPermissionToUpdate} size="small" color="primary"
+                                        <Button disabled={isUpdating || (!isClone && !hasPermissionToUpdate)} size="small" color="primary"
                                             onClick={submitForm} variant="contained" endIcon={isUpdating && <CircularProgress color='inherit' size={18} />}>
                                             Save
                                         </Button>
 
                                         {!quoteData &&
-                                            <Button disabled={isUpdatingAndPreview || !hasPermissionToUpdate} size="small" color="primary"
+                                            <Button disabled={!isClone && (isUpdatingAndPreview || !hasPermissionToUpdate)} size="small" color="primary"
                                                 onClick={() => { setIsPreview(true); submitForm() }} variant="contained" endIcon={isUpdatingAndPreview && <CircularProgress color='inherit' size={18} />}>
-                                                 Save & Preview
+                                                Save & Preview
                                             </Button>
                                         }
 
@@ -464,7 +464,7 @@ export default function NewCreateQuotePdfTemplate() {
                                 {!Boolean(quoteData?._id) && <Grid container spacing={1}>
                                     <Grid item xs={12} sm={3}>
                                         {<Autocomplete
-                                            disabled={!hasPermissionToUpdate}
+                                            disabled={!isClone && (!hasPermissionToUpdate)}
                                             multiple
                                             options={user?.entity}
                                             getOptionLabel={(option: any) => (option ? option?.entityName : "")}
@@ -493,7 +493,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
                                         {<Autocomplete
-                                            disabled={!hasPermissionToUpdate}
+                                            disabled={!isClone && (!hasPermissionToUpdate)}
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
                                             value={ownerCollaboratorData.filter((data) => data._id === values["owner"]).length
                                                 ? ownerCollaboratorData.filter((data) => data._id === values["owner"])[0]
@@ -524,7 +524,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
                                         {<Autocomplete
-                                            disabled={!hasPermissionToUpdate}
+                                            disabled={!isClone && (!hasPermissionToUpdate)}
                                             multiple
                                             options={ownerCollaboratorData.filter(d => d._id !== values["owner"])}
                                             getOptionLabel={(option: any) => (option ? option?.concatedName : "")}
@@ -555,7 +555,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     </Grid>
                                     <Grid item xs={12} sm={3} >
                                         {<Autocomplete
-                                            disabled={!hasPermissionToUpdate}
+                                            disabled={!isClone && (!hasPermissionToUpdate)}
                                             getOptionLabel={(option: any) => (option ? option : "")}
                                             value={typeOptions.find((data) => data === values["type"])
                                                 ? typeOptions.find((data) => data === values["type"])
@@ -584,7 +584,7 @@ export default function NewCreateQuotePdfTemplate() {
                                 <Grid container spacing={1}>
                                     <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
                                         <FormControlLabel
-                                            disabled={!hasPermissionToUpdate}
+                                            disabled={!isClone && (!hasPermissionToUpdate)}
                                             value={values['showPageNumberInFooter']}
                                             control={
                                                 <Checkbox
@@ -601,7 +601,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     </Grid>
                                     <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
                                         <FormControlLabel
-                                            disabled={!hasPermissionToUpdate}
+                                            disabled={!isClone && (!hasPermissionToUpdate)}
                                             value={values['landscape']}
                                             control={
                                                 <Checkbox

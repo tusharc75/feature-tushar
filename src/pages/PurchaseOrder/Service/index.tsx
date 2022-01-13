@@ -7,7 +7,7 @@ import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder,CHILD_RESOURCE } from "../../../constants/helpers";
+import { purchaseOrder, CHILD_RESOURCE } from "../../../constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -15,7 +15,7 @@ import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import ServiceDialog from "./ServiceDialog";
 import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
@@ -157,7 +157,7 @@ const Product = ({ purchaseOrderData, id }) => {
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex">
                     <Button
-                        variant={isMobile ? "outlined" : "contained"}
+                        variant={isMobile && !isTablet ? "outlined" : "contained"}
                         color="primary"
                         size="small"
                         onClick={() => {
@@ -165,7 +165,7 @@ const Product = ({ purchaseOrderData, id }) => {
                             setSelectedServiceData(null)
                         }}
                     >
-                        {isMobile ? <GrBusinessService size={20} /> : "Add Service"}
+                        {isMobile && !isTablet ? <GrBusinessService size={20} /> : "Ad hoc Charges"}
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
@@ -202,7 +202,7 @@ const Product = ({ purchaseOrderData, id }) => {
                     </Menu>
                 </div>
             </Box>
-            {columns && frameWorkComponent ? isMobile ?
+            {columns && frameWorkComponent ? isMobile && !isTablet ?
                 <CustomSwipableList
                     allowSelection={true}
                     allowSwipe={true}

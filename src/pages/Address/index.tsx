@@ -35,7 +35,7 @@ import queryString from 'query-string';
 import { MdAccountCircle } from 'react-icons/md';
 import { AiFillCrown, MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 
 const Address = () => {
@@ -432,7 +432,7 @@ const Address = () => {
         </div>
 
         {Object.keys(frameWorkComponent).length > 0 ? (
-          isMobile ? (
+          isMobile && !isTablet ? (
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}

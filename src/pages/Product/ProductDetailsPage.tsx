@@ -589,7 +589,7 @@ const ProductDetailsPage = () => {
                       ))
                     ) : inventoriesData?.length ? (
                       productData?.serializedProduct ? (
-                        inventoriesData.map(({ products, warehouse, count }, i) => (
+                        inventoriesData.map(({ products, warehouse, plant, count }, i) => (
                           <Box key={i}>
                             <Box display="flex" bgcolor="#f7f5f5" borderRadius="3px" borderBottom="1px solid #efe7e7">
                               <Grid>
@@ -599,14 +599,14 @@ const ProductDetailsPage = () => {
                                       <IconButton
                                         size="small"
                                         onClick={() => {
-                                          if (selectedWarehouse !== warehouse.optionValue) {
-                                            setSelectedWarehouse(warehouse.optionValue);
+                                          if (selectedWarehouse !== warehouse?.optionValue ?? plant?.optionValue) {
+                                            setSelectedWarehouse(warehouse?.optionValue ?? plant?.optionValue);
                                           } else {
                                             setSelectedWarehouse(null);
                                           }
                                         }}
                                       >
-                                        {selectedWarehouse === warehouse.optionValue ? <ExpandLess /> : <ExpandMore />}
+                                        {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? <ExpandLess /> : <ExpandMore />}
                                       </IconButton>
                                     </Box>
                                     <Box ml={1} display="flex" alignItems="center">
@@ -641,7 +641,7 @@ const ProductDetailsPage = () => {
                               </Grid>
                             </Box>
                             <Box p={1}>
-                              {selectedWarehouse === warehouse.optionValue ?
+                              {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ?
                                 inventoriesWarehouseLoading ?
                                   <Typography
                                     variant="subtitle2"

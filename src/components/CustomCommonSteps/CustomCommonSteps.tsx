@@ -18,7 +18,7 @@ import { GoPencil } from "react-icons/go";
 import { BsCheckCircle } from "react-icons/bs";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import { FaHourglassHalf } from "react-icons/fa";
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import { TiArrowBack } from "react-icons/ti";
 import { RiCheckboxCircleFill, RiShareForwardFill } from "react-icons/ri";
 import MobileStepper from "@material-ui/core/MobileStepper";
@@ -178,7 +178,7 @@ const CustomCommonSteps = (props) => {
     return (
         <div>
             {
-                isMobile ? <div>
+                isMobile && !isTablet ? <div>
                     <MobileStepper
                         style={{ background: "#dee2e6" }}
                         variant="dots"
@@ -230,23 +230,51 @@ const CustomCommonSteps = (props) => {
                                 md={1}
                                 className="d-flex align-items-center justify-content-center mt-2"
                             >
-                                {!isMobile && (
+                                {!isMobile &&  (
                                     <>
                                         <div>
                                             {(
                                                 <div>
-                                                    <IconButton
-                                                        disabled={currentStep === 0 || disablePreviousStep}
-                                                        onClick={() => {
-                                                            setCurrentStep(currentStep - 1)
-                                                            if (!forViewOnly) {
-                                                                onPreviousButtonClick(currentStep, currentStep - 1)
-                                                            }
-                                                        }}
-                                                        className="stepperButton"
-                                                    >
-                                                        <TiArrowBack size={30} />
-                                                    </IconButton>
+                                                    {
+                                                        !forViewOnly && <IconButton
+                                                            disabled={currentStep === 0 || disablePreviousStep}
+                                                            onClick={() => {
+                                                                setCurrentStep(currentStep - 1)
+                                                                if (!forViewOnly) {
+                                                                    onPreviousButtonClick(currentStep, currentStep - 1)
+                                                                }
+                                                            }}
+                                                            className="stepperButton"
+                                                        >
+                                                            <TiArrowBack size={30} />
+                                                        </IconButton>
+                                                    }
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
+
+
+                                {isTablet &&  (
+                                    <>
+                                        <div>
+                                            {(
+                                                <div>
+                                                    {
+                                                        !forViewOnly && <IconButton
+                                                            disabled={currentStep === 0 || disablePreviousStep}
+                                                            onClick={() => {
+                                                                setCurrentStep(currentStep - 1)
+                                                                if (!forViewOnly) {
+                                                                    onPreviousButtonClick(currentStep, currentStep - 1)
+                                                                }
+                                                            }}
+                                                            className="stepperButton"
+                                                        >
+                                                            <TiArrowBack size={30} />
+                                                        </IconButton>
+                                                    }
                                                 </div>
                                             )}
                                         </div>
@@ -260,7 +288,7 @@ const CustomCommonSteps = (props) => {
                                             item
                                             xs={6}
                                         >
-                                            {isMobile && (
+                                            {isMobile && !isTablet && (
                                                 <>
                                                     <div>
                                                         {(
@@ -289,7 +317,7 @@ const CustomCommonSteps = (props) => {
                                             xs={6}
                                             className="d-flex align-items-center justify-content-end mt-1 mb-1"
                                         >
-                                            {isMobile && (
+                                            {isMobile && !isTablet && (
                                                 <>
                                                     <div>
                                                         {(
@@ -350,6 +378,26 @@ const CustomCommonSteps = (props) => {
                                 className="d-flex align-items-center justify-content-center mt-2"
                             >
                                 {!isMobile && (
+                                    currentStep < steps.length ? <IconButton
+                                        onClick={() => {
+                                            if (currentStep < steps.length - 1) {
+                                                setCurrentStep(currentStep + 1)
+                                                if (!forViewOnly) {
+                                                    onNextButtonClick(currentStep, currentStep + 1, false)
+                                                }
+                                            } else {
+                                                if (!forViewOnly) {
+                                                    onNextButtonClick(currentStep, currentStep + 1, true)
+                                                }
+                                            }
+                                        }}
+                                        disabled={currentStep >= steps.length || (currentStep === 0 && disableNextStep) || disableNextStep}
+                                        className="stepperButtonNext"
+                                    >
+                                        {currentStep < steps.length - 1 ? <RiShareForwardFill /> : (forViewOnly ? "" : <RiCheckboxCircleFill />)}
+                                    </IconButton> : ""
+                                )}
+                                {isTablet && (
                                     currentStep < steps.length ? <IconButton
                                         onClick={() => {
                                             if (currentStep < steps.length - 1) {

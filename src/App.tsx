@@ -90,8 +90,6 @@ import RecordDeletedDialog from './components/Helpers/RecordDeletedDialog';
 import PricingConditions from './pages/PricingConditions';
 import RepairJob from './pages/RepairJob';
 import RepairJobDetails from './pages/RepairJob/RepairJobDetails';
-import ReceivingTicket from './pages/ReceivingTicket';
-import ReceivingTicketDetails from './pages/ReceivingTicket/ReceivingTicketDetails';
 import PricingConditionsDetails from './pages/PricingConditions/PricingConditionsDetails';
 import SalesOrder from './pages/SalesOrderCreation';
 import SalesOrderDetails from './pages/SalesOrderCreation/SalesOrderDetails';
@@ -107,6 +105,7 @@ import Address from "./pages/Address";
 import AddressDetailPage from './pages/Address/AddressDetailPage'
 import Logout from './pages/Auth/Logout';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
+import Report from './pages/Report';
 
 var notificationInterval: any = null;
 
@@ -527,12 +526,6 @@ function App() {
             <PrivateRoute exact path={`${routes.repairJobDetail.path}/:id`}>
               <RepairJobDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.receivingTicket.path}>
-              <ReceivingTicket />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.receivingTicketDetail.path}/:id`}>
-              <ReceivingTicketDetails />
-            </PrivateRoute>
             <PrivateRoute exact path={routes.salesOrder.path}>
               <SalesOrder />
             </PrivateRoute>
@@ -562,6 +555,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.addressDetail.path}/:id`}>
               <AddressDetailPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={`/:resource/report`}>
+              <Report />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}

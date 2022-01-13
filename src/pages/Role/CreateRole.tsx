@@ -20,7 +20,7 @@ import Loader from "../../components/Loader";
 import RoleEngine from "../../components/Shared/RoleEngine";
 import { roleTypes } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
-import { isMobile , isTablet } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const CreateRole = ({
   open,
@@ -41,7 +41,7 @@ const CreateRole = ({
   const [resource, setResource] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  
+
   useEffect(() => {
     if (isClone) {
       fetchRoleData()
@@ -132,7 +132,7 @@ const CreateRole = ({
         }
       }}
     >
-      <CustomDialogHeader title="Create New Role"
+      <CustomDialogHeader title={isClone ? "Clone Role" : "Create New Role"}
         onClose={() => setShowConfirmDialog(true)}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
@@ -247,7 +247,7 @@ const CreateRole = ({
           {
             showConfirmDialog ?
               <ConfirmCancelDialog
-              close={() => setShowConfirmDialog(false)}
+                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false)

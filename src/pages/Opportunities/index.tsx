@@ -26,12 +26,15 @@ import IconButton from "@material-ui/core/IconButton"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { prepareDataForGrid } from "../../constants/helpers"
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
-import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
+import { MdAccountCircle, MdAdd } from "react-icons/md";
+import { AiFillCrown,SiMarketo,AiFillFileMarkdown,FaPercentage } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { FaSuitcase } from 'react-icons/fa';
 import useColumns from '../../constants/useColumns';
+import { classNames } from 'react-easy-crop/helpers';
+
+
 
 let opportunityTimeout;
 const OpportunityTypes = [
@@ -536,6 +539,8 @@ const Opportunities = () => {
             icon={<GiHiveMind className="headerLogo" />}
             heading={routes.opportunity.title}
             showTransferEntityDialog={handleTransferEntityDialog}
+            columns={columns}
+            dispatch={dispatch}
           >
             {accountDetails.accountId && (
               <Chip
@@ -553,7 +558,10 @@ const Opportunities = () => {
 
         {
           Object.keys(frameWorkComponent).length > 0 ?
-            isMobile ? <CustomSwipableList
+            isMobile && !isTablet ? 
+              
+            
+              <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions[opportunityResource]}
@@ -588,14 +596,20 @@ const Opportunities = () => {
               ]}
               chips={[
                 {
+                  icon: <FaPercentage/>,
                   label: "Probability :",
-                  field: "probability",
+                  field: "probability"
+                  
+                 
+                  
                 },
                 {
+                  icon: <AiFillFileMarkdown/>,
                   label:"Market:",
-                  field:"marketSegment"
+                  field:"marketSegment",
                 },
                 {
+                  icon: <SiMarketo/>,
                   label:"Sub-Market:",
                   field:"subMarketSegment"
                 },
@@ -606,7 +620,8 @@ const Opportunities = () => {
               showClone={true}
               onClone={(data) => {  setShowCreateOpportunityDialog({ open: true, isClone: true, idToClone: data._id })}}
               renderedFrom={opportunityResource}
-            /> :
+            />
+              :
               <CustomAgGrid
                 columns={columns}
                 dataRows={dataRows}

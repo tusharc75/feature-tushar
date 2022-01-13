@@ -20,7 +20,7 @@ import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialo
 import AssignRegionalRolesUserDialog from "../../components/AssignRolesDialog/AssignRegionalRolesUserDialog";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from 'react-router-dom'
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 function reducer(state, action) {
@@ -444,7 +444,7 @@ const Roles: FC = () => {
             />
           </div>
 
-          {isMobile ? <CustomSwipableList
+          {isMobile && !isTablet ? <CustomSwipableList
             allowSelection={true}
             allowSwipe={true}
             permissions={permissions.role}

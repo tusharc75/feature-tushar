@@ -1,12 +1,12 @@
 import { useEffect, useState, Fragment, useContext } from 'react';
-import { Button, Box, Grid, FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
+import { Button, Box, Grid, Chip, TextField, IconButton } from '@material-ui/core';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import axiosInstance from '../../../axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory, Link } from 'react-router-dom';
-import { displayDate, formatAmountWithCurrency } from '../../../constants/helpers';
+import { displayDate, formatAmountWithCurrency, ORDER_TYPES } from '../../../constants/helpers';
 import Typography from '@material-ui/core/Typography';
-import { BsFillInfoCircleFill } from 'react-icons/bs';
 import { AiOutlineSafetyCertificate } from 'react-icons/ai';
 import { SET_CART } from '../../../StateProvider/actionTypes';
 import { BsImage } from "react-icons/bs";
@@ -16,6 +16,9 @@ import styles from './my-cart.module.scss';
 import PlusMinusTextboxComponent from '../../PlusMinusTextboxComponent/PlusMinusTextboxComponent';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from '../../CustomBreadCrumbs';
+import CloseIcon from '@material-ui/icons/Close';
+import { Skeleton } from "@material-ui/lab";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -71,7 +74,7 @@ function MyOwnCart() {
 
   const fetchAddresses = () => {
     axiosInstance().get("/sa-formbuilder/lookup?lookupResource=Address").then(({ data: { data } }) => {
-      setAddressOptions(data.Address)
+      setAddressOptions(data.Address?.filter(f => f.optionLabel && f.optionValue) ?? [])
     })
   }
 
@@ -102,45 +105,57 @@ function MyOwnCart() {
     deleteCartItem(cartId);
   };
 
+  useEffect(() => {
+    if (cartProducts.length > 0) {
+      const tempTotalPrice = cartProducts.reduce((acc, curr) => {
+        return acc + (curr.qty * curr.rate);
+      }, 0);
+
+      setTotalPrice(formatAmountWithCurrency(cartProducts[0].currency, tempTotalPrice)?.fullFormatAmount);
+    }
+    else {
+      setTotalPrice("");
+    }
+
+  }, [cartProducts])
+
   const fetchCart = () => {
-    let tempTotalPrice = 0;
     setCartProductsLoading(true);
     axiosInstance()
       .get(`/ecommerce/cart`)
       .then(({ data: { data } }) => {
         if (data) {
           dispatch({ type: SET_CART, payload: [...data] });
-          data.map((d) => {
-            tempTotalPrice = (d?.mrp ? parseInt(d?.mrp) : 0) + tempTotalPrice;
-          });
+
           setCart(data);
-          setCartProducts(data.map((d) => {
+          setCartProducts(data.map((d, index) => {
             return {
               ...d.product,
+              indexOfProduct: index,
               cartId: d._id,
               productId: d.materialId,
               qty: d.qty,
               productName: d.productDetail?.productName,
               mrp: d.mrp,
+              rate: d.rate,
               startDate: d?.startDate ? displayDate(d.startDate) : '',
               endDate: d?.endDate ? displayDate(d.endDate) : '',
               pricingMethod: d?.pricingMethod,
               unit: d?.unit,
               currency: d?.currency,
               orderType: d?.orderType,
-              currencyWithFormat: formatAmountWithCurrency(d?.currency, d.mrp)?.fullFormatAmount
+              sliderImage: d?.productDetail?.sliderImage ?? [],
+              currencyWithFormat: formatAmountWithCurrency(d?.currency, d.rate)?.fullFormatAmount
             }
           }));
 
-          if (data.length > 0) {
-            setTotalPrice(formatAmountWithCurrency(data[0].currency, tempTotalPrice)?.fullFormatAmount);
-          }
-
           setTotalCount(data.length);
         }
+
         if (data && data.length >= 1) {
           setCheckoutLabel('Place Order');
         }
+
         setCartProductsLoading(false);
         setDeleteProductFromCartConfirmationDialog({ show: false, okBtnLoading: false, recordToRemove: null })
       });
@@ -157,9 +172,7 @@ function MyOwnCart() {
   };
 
   const handleCreateQuote = (values) => {
-    // let selectedProductIds = addedCartItems.map((o) => o.productId);
 
-    // let selectedProducts = products.filter((obj) => selectedProductIds.indexOf(obj._id) >= 0);
     axiosInstance()
       .post(`quote-builder/create/from-cart`, { ...values, products: cartProducts })
       .then(({ data: { data } }) => {
@@ -169,288 +182,295 @@ function MyOwnCart() {
 
   return (
     <Fragment>
-      <Grid container className="headerbox"></Grid>
-      <Box className="detail-container">
-        <div className={styles.container}>
-          <div className={styles.wrapper}>
-            <div className={styles.box_layout}>
-              <div className={styles.cart_box}>
-                <h2>MY CART</h2>
-              </div>
+      <Grid container className="headerbox">
+        <CustomBreadCrumbs routes={[routes.eCommerce, { title: "Cart" }]} />
+      </Grid>
+      <Box className="main-container">
+        <Grid container spacing={3}>
 
-              {/* <hr /> */}
-              {cartProductsLoading ? (
-                <Grid container spacing={3}>
-                  <Grid item xs={12} className={styles.loadingContainer}>
-                    <Typography> ...Loading</Typography>
-                  </Grid>
-                </Grid>
-              ) : cartProducts.length ? (
-                cartProducts.map((item, index) => {
-                  return (
-                    <div key={item.id} className={styles.checkout_items}>
-                      <div className={styles.card}>
-                        <div className={`${styles.products_image_layout} d-flex justify-content-center`}>
+          <Grid item xs={1}></Grid>
 
-                          {item.sliderImage && item.sliderImage.length > 0 ? (
-                            <Carousel
-                              strictIndexing
-                              animation="slide"
-                              autoPlay={false}
-                              navButtonsAlwaysVisible
-                              // indicators={false}
-                              cycleNavigation={false}
-                              timeout={150}
-                              navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
-                                style: {
-                                  opacity: 0.4,
-                                  padding: 5,
-                                  borderRadius: "50%"
-                                }
-                              }}
-                            >
-                              {item.sliderImage.map((image: any, i) => (
-                                <div key={i} className={classes.imageContainer}>
-                                  <img className={classes.img} src={image} />
+          <Grid item xs={7}>
+            <div className="px-4 py-2">
+
+              <h1>Shopping Cart</h1>
+
+              <hr className="mt-3 mb-2" style={{ border: "0.5px solid #e9eaee" }} />
+
+              {
+                cartProductsLoading ? (
+                  <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                      {
+                        [1, 2, 3, 4, 5].map((item) => {
+                          return (
+                            <div key={item} className={styles.checkout_items}>
+                              <div className={styles.card}>
+                                <div className={`d-flex justify-content-center`}>
+                                  <Skeleton width={200} height={200} />
                                 </div>
-                              ))}
-                            </Carousel>
-                          ) : (
-                            <BsImage className={styles.no_image} />
-                          )}
 
-                        </div>
-                        <div className={styles.card_body}>
-                          <div className={`${styles.card_body_layout} my-3`}>
-                            <div className={styles.card_product_name_and_price}>
-                              <div className={styles.card_seller}>
-                                <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}`}><b><u>{item?.orderType}</u></b> - {item.productName}</Link>
-                              </div>
-                              <div className={styles.card_price}>
-                                {item?.currencyWithFormat}
+                                <div className={styles.card_body}>
+                                  <div className={`${styles.card_body_layout} my-3`}>
+                                    <div className={styles.card_product_name_and_price}>
+
+                                      <div className={`${styles.card_seller} w-100 d-flex justify-content-space-between`}>
+                                        <div className="d-flex gap-3 align-items-center">
+                                          <Skeleton width={200} height={35} />
+                                          <Skeleton width={50} height={35} />
+                                        </div>
+
+                                        <Skeleton width={35} height={35} />
+                                      </div>
+                                    </div>
+
+                                    <div className={styles.card_price}>
+                                      <Skeleton width={100} height={35} />
+                                    </div>
+
+                                    <div className={styles.card_vendor}>
+                                      <Skeleton width={60} height={35} />
+                                    </div>
+                                  </div>
+                                </div>
+
                               </div>
                             </div>
-
-                            {/* <div className={styles.card_desc}>
-                              {item.description}The iPad Pro is Apple's high-end tablet computer. The latest iPad Pro models feature a powerful M1
-                              chip
-                            </div> */}
-                            <div className={styles.card_vendor}>
-                              <span>Sold by:</span> {user?.user?.brandName}
-                            </div>
-                          </div>
-
-                          <Grid container>
-                            {
-                              item.startDate && <Grid item xs={6}>
-                                <b>Start Date:</b> {item.startDate}
-                              </Grid>
-                            }
-
-                            {
-                              item.endDate && <Grid item xs={6}>
-                                <b>End Date:</b> {item.endDate}
-                              </Grid>
-                            }
-
-                            {
-                              item.pricingMethod && <Grid item xs={6}>
-                                <b>Pricing Method:</b> {item.pricingMethod}
-                              </Grid>
-                            }
-
-                            <Grid item xs={6}>
-                              <b>Unit:</b> {item.unit}
-                            </Grid>
-                          </Grid>
-
-                          <Grid container className="my-3">
-                            <Grid item xs={6}>
-                              <PlusMinusTextboxComponent
-                                inputTextLabel="Quantity"
-                                value={item.qty}
-                                isRequired={true}
-                                onChange={(value) => {
-                                  let items = [...cartProducts];
-                                  const indexOfProduct = items.findIndex(s => s._id === item.cartId);
-
-                                  axiosInstance().put(`/ecommerce/cart`, { _id: item.cartId, qty: parseInt(value) }).then(() => {
-                                    items[indexOfProduct].qty = value;
-                                    setCartProducts([...items]);
-                                  }).catch((error) => {
-                                    toastConfig.setToastConfig(error);
-                                    dispatch({ type: SET_CART, payload: [...items] });
-                                  })
-
-                                }}
-                              />
-                            </Grid>
-                          </Grid>
-
-                          {/* <Grid container spacing={1} alignItems="flex-end">
-                            <Grid item>
-                              <IconButton onClick={() => {
-                                let items = [...cartProducts];
-                                items[index].quantity = parseInt(items[index].quantity) - 1;
-                                setCartProducts([...items]);
-                              }} size="small">
-                                <RemoveCircleOutlineOutlinedIcon />
-                              </IconButton>
-                            </Grid>
-                            <Grid item>
-                              <TextField id="input-with-icon-grid" type="number" label="Quantity" value={item.quantity} onChange={(e) => {
-                                let items = [...cartProducts];
-                                items[index].quantity = e.target.value;
-                                setCartProducts([...items]);
-                              }} />
-                            </Grid>
-                            <Grid item>
-                              <IconButton onClick={() => {
-                                let items = [...cartProducts];
-                                items[index].quantity = parseInt(items[index].quantity) + 1;
-                                setCartProducts([...items]);
-                              }} size="small">
-                                <AddCircleOutlineOutlinedIcon />
-                              </IconButton>
-                            </Grid>
-                          </Grid> */}
-
-                          <div className={styles.card_controls}>
-                            <Button
-                              variant="outlined"
-                              color="primary"
-                              onClick={() => {
-                                setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, show: true, recordToRemove: item } })
-                                // deleteCartItem(item.cartId)
-                              }}
-                              className={styles.remove_product}
-                            >
-                              Remove
-                            </Button>
-                            {/* <Button
-                              variant="outlined"
-                              color="primary"
-                              onClick={() => {
-                                onDeleteCartItem(item);
-                              }}
-                              className={styles.edit_product}
-                            >
-                              Save for later
-                            </Button> */}
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles.middle_line}>
-                        <hr />
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <Grid container spacing={3}>
-                  <Grid item xs={12} className={styles.loadingContainer}>
-                    <Typography> No items added to cart</Typography>
+                          )
+                        })
+                      }
+                    </Grid>
                   </Grid>
-                </Grid>
-              )}
-            </div>
+                ) : cartProducts.length ? (
+                  cartProducts.map((item) => {
+                    return (
+                      <div key={item.id} className={styles.checkout_items}>
+                        <div className={styles.card}>
+                          <div className={`${styles.products_image_layout} d-flex justify-content-center`}>
 
-            {cartProducts.length !== 0 && (
-              <div className={styles.price_card}>
-                <div className={styles.price_card_main}>
-                  <div className={styles.price_card_price_summary}>
-                    <div className={styles.price_card_product_summary}>
-                      <h3 className={styles.price_card_price_summary_heading}>Summary</h3>
-                    </div>
-                    <div className={styles.price_card_all_data}>
-                      <div>
-                        <div className={styles.price_card_summary}>
-                          <p>
-                            {' '}
-                            Sub-Total <span> ({totalCount} items) </span>{' '}
-                          </p>
-                          <h3 className={styles.price_card_price}>{totalPrice}</h3>
-                        </div>
-                        <div className={styles.price_card_summary_pickup}>
-                          <p>Pickup</p>
-                          <span className={styles.price_card_details}>
-                            {/* (<Button size="small">Details</Button>) */}
-                            <BsFillInfoCircleFill size={16} />
-                          </span>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className={styles.price_card_total}>
-                          <h3>Total Amount</h3>
-                          <h3 className={styles.price_card_price}>{totalPrice}</h3>
-                        </div>
-
-                        <Grid container className="px-3">
-                          <Grid item xs={12}>
-                            <FormControl variant="outlined" margin="dense" fullWidth disabled={cartProducts.length === 0}>
-                              <InputLabel id="shipping-address">Shipping Address</InputLabel>
-                              <Select
-                                required
-                                labelId="shipping-address"
-                                id="shipping-address"
-                                value={selectedShippingAddress}
-                                onChange={(e) => {
-                                  setSelectedShippingAddress(e.target.value)
+                            {item?.sliderImage && item?.sliderImage.length > 0 ? (
+                              <Carousel
+                                strictIndexing
+                                animation="slide"
+                                autoPlay={false}
+                                navButtonsAlwaysVisible
+                                indicators={item?.sliderImage.length > 1}
+                                cycleNavigation={false}
+                                timeout={150}
+                                navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
+                                  style: {
+                                    opacity: 0.4,
+                                    padding: 5,
+                                    borderRadius: "50%"
+                                  }
                                 }}
-                                label="Shipping Address"
                               >
-                                {
-                                  addressOptions.map(m => (
-                                    <MenuItem key={m.optionValue} value={m.optionValue}>{m.optionLabel}</MenuItem>
-                                  ))
-                                }
-                              </Select>
-                            </FormControl>
-                          </Grid>
-                        </Grid>
+                                {item?.sliderImage.map((image: any, i) => (
+                                  <div key={i} className={classes.imageContainer}>
+                                    <img className={classes.img} src={image} />
+                                  </div>
+                                ))}
+                              </Carousel>
+                            ) : (
+                              <BsImage className={styles.no_image} />
+                            )}
 
-                        <Grid container className="px-3">
-                          <Grid item xs={12}>
-                            <FormControl variant="outlined" margin="dense" fullWidth disabled={cartProducts.length === 0}>
-                              <InputLabel id="billing-address">Billing Address</InputLabel>
-                              <Select
-                                required
-                                labelId="billing-address"
-                                id="billing-address"
-                                value={selectedBillingAddress}
-                                onChange={(e) => {
-                                  setSelectedBillingAddress(e.target.value)
-                                }}
-                                label="Billing Address"
-                              >
-                                {
-                                  addressOptions.map(m => (
-                                    <MenuItem key={m.optionValue} value={m.optionValue}>{m.optionLabel}</MenuItem>
-                                  ))
-                                }
-                              </Select>
-                            </FormControl>
-                          </Grid>
-                        </Grid>
+                          </div>
+                          <div className={styles.card_body}>
+                            <div className={`${styles.card_body_layout} my-3`}>
+                              <div className={styles.card_product_name_and_price}>
+                                <div className={`${styles.card_seller} w-100 d-flex justify-content-space-between`}>
+                                  <div className="d-flex gap-3 align-items-center">
+                                    <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}/${item?.orderType}`}>{item.productName}</Link>
+                                    <Chip label={ORDER_TYPES[item?.orderType]?.key} color="primary" />
+                                  </div>
 
-                        <div className={styles.price_card_checkout_button}>
-                          <Button disabled={!selectedShippingAddress || !selectedBillingAddress} variant="contained" color="primary" fullWidth onClick={onCheckout}>
-                            {checkoutLabel}
-                          </Button>
-                          <div className={styles.secure_payment}>
-                            <AiOutlineSafetyCertificate size={38} />
-                            <p>Safe and Secure Payments.100% Authentic products.</p>
+                                  <IconButton aria-label="delete" onClick={() => {
+                                    setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, show: true, recordToRemove: item } })
+                                  }}>
+                                    <CloseIcon fontSize="small" />
+                                  </IconButton>
+
+                                </div>
+                              </div>
+
+                              <div className={styles.card_vendor}>
+                                <span>Sold by:</span> {user?.user?.brandName}
+                              </div>
+                            </div>
+
+                            <Grid container spacing={1}>
+                              {
+                                item.startDate && <Grid item xs={6}>
+                                  <b>Start Date:</b> {item.startDate}
+                                </Grid>
+                              }
+
+                              {
+                                item.endDate && <Grid item xs={6}>
+                                  <b>End Date:</b> {item.endDate}
+                                </Grid>
+                              }
+
+                              <Grid item xs={6}>
+                                <b>Unit:</b> {item.unit}
+                              </Grid>
+
+                              {
+                                item.pricingMethod && <Grid item xs={6}>
+                                  <b>Pricing Method:</b> {item.pricingMethod}
+                                </Grid>
+                              }
+                            </Grid>
+
+                            <Grid container className="mt-4 mb-3">
+                              <Grid item xs={6}>
+                                <PlusMinusTextboxComponent
+                                  inputTextLabel="Quantity"
+                                  value={item.qty}
+                                  isRequired={true}
+                                  onChange={(value) => {
+                                    let items = [...cartProducts];
+
+                                    axiosInstance().put(`/ecommerce/cart`, { _id: item.cartId, qty: parseInt(value) }).then(() => {
+                                      items[item.indexOfProduct].qty = parseInt(value);
+                                      setCartProducts([...items]);
+
+                                      toastConfig.setToastConfig({
+                                        open: true,
+                                        type: "success",
+                                        message: "Quantity updated successfully"
+                                      });
+
+                                    }).catch((error) => {
+                                      toastConfig.setToastConfig(error);
+                                      dispatch({ type: SET_CART, payload: [...items] });
+                                    })
+
+                                  }}
+                                />
+                              </Grid>
+                            </Grid>
+
+                            <Grid container className="my-3">
+                              <Grid item xs={12}>
+                                <Typography variant="h5">{item?.currencyWithFormat}</Typography>
+                              </Grid>
+                            </Grid>
+
+
                           </div>
                         </div>
+                        <div className={styles.middle_line}>
+                          <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
+                        </div>
                       </div>
+                    );
+                  })
+                ) : (
+                  <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                      <Typography> No items added to cart</Typography>
+                    </Grid>
+                  </Grid>
+                )}
+
+            </div>
+          </Grid>
+
+          <Grid item xs={3} style={{ background: "#f9fafc" }}>
+
+            <div className="px-4 py-2">
+
+              <h1>Order Summary</h1>
+
+              <div className="d-flex justify-content-space-between flex-column" style={{ height: 600 }}>
+
+                <div>
+
+                  <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
+
+                  <h4>Subtotal <span>({totalCount} items) </span></h4>
+
+                  <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
+
+                  {
+                    cartProducts.map(m => (
+                      <div key={m._id} className="d-flex gap-3 align-items-center justify-content-space-between">
+                        <div className="d-flex gap-2 align-items-center">
+                          <p>{m.productName}</p>
+                          <Chip size="small" label={ORDER_TYPES[m?.orderType]?.key} color="primary" />
+                        </div>
+
+                        <div>{formatAmountWithCurrency(m.currency, m.rate * m.qty)?.fullFormatAmount}</div>
+                      </div>
+                    ))
+                  }
+
+                  <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
+
+                </div>
+
+                <div>
+                  <p className="d-flex align-items-center gap-2 justify-content-space-between">
+                    <h4>Total Amount</h4>
+                    <h4>{totalPrice ?? "-"}</h4>
+                  </p>
+
+                  <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
+
+                  <Grid container>
+                    <Grid item xs={12}>
+                      <Autocomplete
+                        disabled={cartProducts.length === 0}
+                        fullWidth
+                        id="shipping-address"
+                        options={addressOptions}
+                        getOptionLabel={(option) => option.optionLabel}
+                        onChange={(_, newValue) => {
+                          setSelectedShippingAddress(newValue?.optionValue ?? "")
+                        }}
+                        renderInput={(params) => <TextField required {...params} label="Shipping Address" margin="dense" variant="outlined" />}
+                      />
+                    </Grid>
+                  </Grid>
+
+                  <Grid container>
+                    <Grid item xs={12}>
+                      <Autocomplete
+                        disabled={cartProducts.length === 0}
+                        fullWidth
+                        id="billing-address"
+                        options={addressOptions}
+                        getOptionLabel={(option) => option.optionLabel}
+                        onChange={(_, newValue) => {
+                          setSelectedBillingAddress(newValue?.optionValue ?? "")
+                        }}
+                        renderInput={(params) => <TextField required {...params} label="Billing Address" margin="dense" variant="outlined" />}
+                      />
+                    </Grid>
+                  </Grid>
+
+                  <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
+
+                  <div className="mt-4 d-flex flex-column gap-3">
+                    <Button disabled={!selectedShippingAddress || !selectedBillingAddress} variant="contained" color="primary" fullWidth onClick={onCheckout}>
+                      {checkoutLabel}
+                    </Button>
+                    <div className="d-flex gap-2 align-items-center">
+                      <AiOutlineSafetyCertificate size={38} />
+                      <p>Safe and Secure Payments.100% Authentic products.</p>
                     </div>
                   </div>
+
                 </div>
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+
+          </Grid>
+
+          <Grid item xs={1}></Grid>
+        </Grid>
 
         {openPlaceOrderDialog.open && (
           <ConfirmationDialog
@@ -474,32 +494,8 @@ function MyOwnCart() {
               }).catch((error) => {
                 toastConfig.setToastConfig(error);
               })
-
-
-              // setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, okBtnLoading: true } })
-              // onDeleteCartItem(deleteProductFromCartConfirmationDialog.recordToRemove)
             }}
           />
-          // <ManageQuoteDialog
-          //   open={openPlaceOrderDialog}
-          //   onSuccess={onSuccess}
-          //   onClose={() => {
-          //     setOpenPlaceOrderDialog(false);
-          //   }}
-          //   isNew={true}
-          //   dataToUpdate={null}
-          //   isClone={false}
-          //   resource={null}
-          //   isRedirectTodetailPage={true}
-          //   contactId={null}
-          //   opportunityId={null}
-          //   disableOwnerDropDown={true}
-          //   contacts={null}
-          //   doaCollaboratorResources={user?.user?.doa.map((obj) => obj.user)}
-          //   isRenderedFromOpportunity={false}
-          //   isCreateQuoteFromCart={true}
-          //   onHandleSubmit={handleCreateQuote}
-          // />
         )}
 
         {

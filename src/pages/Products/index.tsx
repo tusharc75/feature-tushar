@@ -6,25 +6,13 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
 import ProductCard from '../../components/ProductList/ProductCard/ProductCard';
-import { eProduct } from '../../constants/helpers';
+import { eProduct, ORDER_TYPES } from '../../constants/helpers';
 import { SET_CART } from '../../StateProvider/actionTypes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-
 import styles from './product-detail-page.module.scss'
-
-const ORDER_TYPES = [
-    {
-        key: 'Rent',
-        value: "rent"
-    },
-    {
-        key: 'Sale',
-        value: "sale"
-    }
-];
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -63,9 +51,9 @@ export default function Products() {
     const [productCategories, setProductCategories] = useState([]);
     const [selected, setSelected] = useState([]);
     const [categoryDataSource, setSelectedCategoryNameDataSource] = useState([]);
-    const [selectedOrderType, setSelectedOrderType] = useState(ORDER_TYPES[0].value)
+    const [selectedOrderType, setSelectedOrderType] = useState(ORDER_TYPES.rent.value)
 
-    const handleSelect = (event, nodeId) => {
+    const handleSelect = (_, nodeId) => {
         if (selected.length === 0 || (selected.length !== 0 && selected[0] !== nodeId)) {
             const category = categoryDataSource.find(o => o._id === nodeId);
 
@@ -85,7 +73,6 @@ export default function Products() {
 
         }
     }
-
 
     useEffect(() => {
         setLoading(true);
@@ -137,40 +124,6 @@ export default function Products() {
             });
     }, [])
 
-    // const fetchData = (categoryId, page, orderType = selectedOrderType) => {
-    //     setLoading(true);
-
-    //     if (categoryId) {
-    //         axiosInstance().get(`${eProduct.api}?page=${page}&limit=${limit}&orderType=${orderType}&deepFilter=[{"field":"productCategory","term":"${categoryId}"}]&filterType=and`).then(({ data: { data, count } }) => {
-    //             setTotalCount(count);
-    //             setProducts(prevState => [...prevState, ...data]);
-    //         }).catch((error) => {
-    //             toastConfig.setToastConfig(error);
-    //         }).finally(() => {
-    //             setLoading(false);
-    //         });
-    //     }
-    //     else if (page !== 0) {
-    //         axiosInstance().get(`${eProduct.api}?page=${page}&limit=${limit}&orderType=${orderType}`).then(({ data: { data, count } }) => {
-    //             setTotalCount(count);
-    //             setProducts(prevState => [...prevState, ...data]);
-    //         }).catch((error) => {
-    //             toastConfig.setToastConfig(error);
-    //         }).finally(() => {
-    //             setLoading(false);
-    //         });
-    //     } else {
-    //         axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${orderType}`).then(({ data: { data, count } }) => {
-    //             setTotalCount(count);
-    //             setProducts([...data]);
-    //         }).catch((error) => {
-    //             toastConfig.setToastConfig(error);
-    //         }).finally(() => {
-    //             setLoading(false);
-    //         });
-    //     }
-    // }
-
     const fetchCart = () => {
         axiosInstance()
             .get(`/ecommerce/cart`).then(({ data: { data } }) => {
@@ -183,27 +136,29 @@ export default function Products() {
     }
 
     const onAddToCartItem = (item) => {
-        let tempQuantity = 1
-        addedCartItems.some(o => {
-            if (o.productId === item._id) {
-                tempQuantity = tempQuantity + 1
-                return true
-            }
-        })
+        debugger;
 
-        axiosInstance()
-            .post(`/ecommerce/cart`, {
-                products: [{
-                    quantity: `${tempQuantity}`,
-                    productId: item._id
-                }]
-            }).then(() => {
-                fetchCart()
-            })
+        // let tempQuantity = 1
+        // addedCartItems.some(o => {
+        //     if (o.productId === item._id) {
+        //         tempQuantity = tempQuantity + 1
+        //         return true
+        //     }
+        // })
+
+        // axiosInstance()
+        //     .post(`/ecommerce/cart`, {
+        //         products: [{
+        //             quantity: `${tempQuantity}`,
+        //             productId: item._id
+        //         }]
+        //     }).then(() => {
+        //         fetchCart()
+        //     })
     }
 
     const renderTree = (nodes) => (
-        <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name} >
+        <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name}>
             {Array.isArray(nodes.children) ? nodes.children.map((node) => renderTree(node)) : null}
         </TreeItem>
     );
@@ -213,7 +168,7 @@ export default function Products() {
             <Grid container className="headerbox">
                 <CustomBreadCrumbs routes={[{ title: routes.eCommerce.title }]} />
             </Grid>
-            <div className="detail-container grid-product-category pr-0">
+            <div className="detail-container grid-product-category">
                 <div>
                     <Paper>
                         <div className={styles.sidebar_nav}>
@@ -225,26 +180,33 @@ export default function Products() {
                                 className="w-100"
                                 exclusive
                                 onChange={(e, value) => {
-                                    setSelectedOrderType(value)
-                                    setLoading(true);
+                                    if (value) {
+                                        setProducts([]);
+                                        setTotalCount(0);
+                                        
+                                        setSelectedOrderType(value)
+                                        setLoading(true);
 
-                                    axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${value}`).then(({ data: { data, count } }) => {
-                                        setTotalCount(count);
-                                        setProducts([...data]);
-                                    }).catch((error) => {
-                                        toastConfig.setToastConfig(error);
-                                    }).finally(() => {
-                                        setLoading(false);
-                                    });
+                                        axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${value}`).then(({ data: { data, count } }) => {
+                                            setTotalCount(count);
+                                            setProducts([...data]);
+                                        }).catch((error) => {
+                                            toastConfig.setToastConfig(error);
+                                        }).finally(() => {
+                                            setLoading(false);
+                                        });
+                                    }
                                 }}
                             >
-                                {ORDER_TYPES.map((k: any, index) => {
-                                    return (
-                                        <ToggleButton className="w-100" value={k.value} key={index}>
-                                            {k.key}
-                                        </ToggleButton>
-                                    );
-                                })}
+                                {
+                                    Object.keys(ORDER_TYPES).map((k: any, index) => {
+                                        return (
+                                            <ToggleButton className="w-100" value={ORDER_TYPES[k].value} key={index}>
+                                                {ORDER_TYPES[k].key}
+                                            </ToggleButton>
+                                        );
+                                    })
+                                }
                             </ToggleButtonGroup>
 
                             <div className="d-flex align-items-center justify-content-space-between my-2 px-1">
@@ -272,7 +234,7 @@ export default function Products() {
                             <hr />
 
                             <TreeView
-                                className={classes.root}
+                                className={`${classes.root} d-flex flex-column gap-1`}
                                 selected={selected}
                                 onNodeSelect={handleSelect}
                                 defaultCollapseIcon={<ExpandMoreIcon />}
@@ -327,17 +289,17 @@ export default function Products() {
                             products.length !== 0 ? <div className={`${styles.product_list_container}`}>
                                 {
                                     products.map((product, index: number) => (
-                                        <ProductCard key={index} product={product}
-                                            onAddItem={onAddToCartItem} selectedOrderType={selectedOrderType}
+                                        <ProductCard key={index} product={product} selectedOrderType={selectedOrderType}
                                         />
                                     ))
                                 }
-                            </div> : <div className="p-5 d-flex align-items-center justify-content-center" style={{ background: "white" }}>
-                                <h2 className={loading ? "loading-dots" : ""}>
-                                    {
-                                        loading ? "Loading product(s)" : "No product(s) found"
-                                    }
-                                </h2>
+                            </div> : <div className={`${styles.product_list_container}`}>
+                                {
+                                    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((_, index: number) => (
+                                        <ProductCard key={index} product={null} showSkeleton={true} selectedOrderType={selectedOrderType}
+                                        />
+                                    ))
+                                }
                             </div>
                         }
 
@@ -345,6 +307,7 @@ export default function Products() {
                     </InfiniteScroll>
                 </div>
             </div>
+
         </>
     )
 }

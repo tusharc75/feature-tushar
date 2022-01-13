@@ -25,6 +25,9 @@ const useStyles = makeStyles((theme) => ({
     background: "#dfdfdf",
     margin: "6px 6px",
     borderRadius: "6px",
+    "& .MuiGrid-spacing-xs-1" : {
+      width: "calc(100% + 14px)"
+    }
   },
 }));
 
@@ -65,7 +68,7 @@ const Activity = ({ type }) => {
           <CustomBreadCrumbs routes={[{ title: capitalize(routes[type].title) }]} />
         </Grid>
       </Grid>
-      <CustomContainer styles={{ width: "100%" }}>
+      <CustomContainer >
         <Box className={classes.activityHeader}>
           <Paper elevation={isMobile ? 0 : 4} style={{marginBottom: 20}} >
             <Grid container>

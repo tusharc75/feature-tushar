@@ -75,7 +75,7 @@ const ProductCategoryDetailPage = () => {
 
   const handleMainPoints = (data) => {
     let tempMp = {
-      name: `${data.searchAddress}`,
+      name: `${data?.name}`,
       taxJurisdiction: data.taxJurisdiction || "",
     };
     setMainPoints(tempMp);

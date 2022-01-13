@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Box, useMediaQuery, useTheme, CircularProgress, Typography, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import axios from 'axios';
 
 import axiosInstance from '../../../axios/axiosInstance';
 import MapView from './MapView';
@@ -12,6 +12,9 @@ import AssetStats from './AssetStats';
 import routes from '../../../components/Helpers/Routes';
 import AssetStatusChart from './AssetStatusChart';
 import RentalChart from './RentalChart';
+
+const CancelToken = axios.CancelToken;
+const source = CancelToken.source();
 
 export type FilterType = {
   productCategory: { id: string; title: string }[];
@@ -30,6 +33,7 @@ const AssetDashboard = ({ salesFilter }) => {
   const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [assetLocationData, setAssetLocationData] = React.useState([]);
   const [assetUtilizationData, setAssetUtilizationData] = React.useState([]);
+  const [assets, setAssets] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [loadingChartData, setLoadingChartData] = React.useState(false);
   const [limit, setLimit] = React.useState('10');
@@ -39,27 +43,18 @@ const AssetDashboard = ({ salesFilter }) => {
     country: {}
   });
   const [allProductCategories, setAllProductCategories] = React.useState([]);
-  const [loadingProductCategory, setLoadingProductCategory] = React.useState(false);
+  const [loadingDropdown, setLoadingDropdown] = React.useState(false);
 
   React.useEffect(() => {
-    setLoading(true);
-
-    let timeout: ReturnType<typeof setTimeout> = null;
-
-    if (timeout) {
-      clearTimeout(timeout);
-    }
-    timeout = setTimeout(() => {
+    let timeout: ReturnType<typeof setTimeout> = setTimeout(() => {
       fetchLocationBase();
     }, 200);
 
-    return () => {
-      timeout = null;
-      setLoading(false);
-    };
+    return () => clearTimeout(timeout);
   }, [filter, selectedEntity]);
 
   const fetchLocationBase = () => {
+    setLoading(true);
     let url = '?';
     Object.keys(filter).forEach((key) => {
       if (Array.isArray(filter[key]) && filter[key].length > 0) {
@@ -82,27 +77,50 @@ const AssetDashboard = ({ salesFilter }) => {
   };
 
   React.useEffect(() => {
-    if (selectedEntity) {
-      fetchAssetsData();
-    }
-  }, [from, to, selectedEntity, limit]);
+     let timeout = setTimeout(() => {
+       fetchAssetsData();  
+     },200)
 
-  React.useEffect(() => {
-    fetchProductCategory();
-  }, []);
+     return () => clearTimeout(timeout)
+  }, [from, to]);
 
-  const fetchProductCategory = () => {
-    setLoadingProductCategory(true);
-    axiosInstance()
-      .get(`${routes.productCategory.path}?limit=0`)
-      .then(({ data: { data } }) => {
-        setAllProductCategories(data.map((d) => ({ id: d._id, title: d.name })));
-        setLoadingProductCategory(false);
-      })
-      .catch((err) => {
-        setLoadingProductCategory(false);
-      });
-  };
+  // NEW
+  // const fetchAssetsData = () => {
+  //   let params = {
+  //     between: JSON.stringify({
+  //       from: new Date(from).toISOString().split('T')[0],
+  //       to: new Date(to).toISOString().split('T')[0]
+  //     }),
+  //     productCategory: filter.productCategory.map((d) => d?.id)
+  //   };
+
+  //   let url = '';
+
+  //   for (const k of Object.keys(params)) {
+  //     if (params[k]) {
+  //       if (Array.isArray(params[k]) && params[k].length > 0) {
+  //         url = `${url}${k}=${JSON.stringify(params[k])}&`;
+  //       }
+  //       if (k === 'between' && from && to) {
+  //         url = `${url}${k}=${params[k]}&`;
+  //       }
+  //     }
+  //   }
+
+  //   setLoadingChartData(true);
+
+  //   // axiosInstance()
+  //   //   .get(`/dashboard/assets-in-use-by-category?${url}`, { cancelToken: source.token })
+  //   //   .then(({ data: { data } }) => {
+  //   //     // setAssetUtilizationData(data.data);
+  //   //     // setLoadingChartData(false);
+  //   //   })
+  //   //   .catch(() => {
+  //   //     setLoadingChartData(false);
+  //   //   });
+  // };
+
+  // OLD
 
   const fetchAssetsData = () => {
     let params = {
@@ -142,9 +160,12 @@ const AssetDashboard = ({ salesFilter }) => {
           setFilter={setFilter}
           loading={loading}
           productCategories={allProductCategories}
-          loadingProductCategory={loadingProductCategory}
+          loadingDropdown={loadingDropdown}
+          setLoadingDropdown={setLoadingDropdown}
+          setAllProductCategories={setAllProductCategories}
+          setAssets={setAssets}
         />
-        <Box>
+        {/* <Box>
           <Autocomplete
             options={['10', '20', '50', '100', '200']}
             value={limit}
@@ -155,7 +176,7 @@ const AssetDashboard = ({ salesFilter }) => {
             getOptionLabel={(option) => option}
             renderInput={(params) => <TextField {...params} variant="outlined" label="Limit" size="small" />}
           />
-        </Box>
+        </Box> */}
       </Box>
       <Box position={'relative'} width={'100%'}>
         {loading && (
@@ -180,22 +201,21 @@ const AssetDashboard = ({ salesFilter }) => {
             <MapView smallScreen={smallScreen} data={assetLocationData} loading={loading} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <AssetChart loading={loading || loadingChartData || loadingProductCategory} data={assetUtilizationData} />
+            <AssetChart smallScreen={smallScreen} loading={loading || loadingChartData || loadingDropdown} data={assetUtilizationData} />
           </Grid>
         </Grid>
-        <Box>
-          <AssetStatusChart productCategories={allProductCategories} loadingProductCategory={loadingProductCategory} />
-        </Box>
-        <Box my={2}>
+        <Box mt={2}>
           <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <AssetStatusChart productCategories={allProductCategories} loadingProductCategory={loadingDropdown} />
+            </Grid>
             <Grid item xs={12} sm={6}>
               <RentalChart />
             </Grid>
-            <Grid item xs={12} sm={6}></Grid>
           </Grid>
         </Box>
-        <Box my={2}>
-          <AssetStats filter={filter} />
+        <Box mt={2}>
+          <AssetStats assets={assets.slice(0, 15000)} loading={loadingDropdown} filter={filter} />
         </Box>
       </Box>
     </div>

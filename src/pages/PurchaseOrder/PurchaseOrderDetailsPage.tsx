@@ -32,7 +32,7 @@ import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from "react-icons/
 import { BiEdit, BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
 import queryString from 'query-string';
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import Product from "./Product";
 import Service from "./Service";
 import IssuePo from "./IssuePo";
@@ -316,29 +316,29 @@ const PurchaseOrderDetailsPage = () => {
                                     {permissions?.purchaseOrder?.isUpdate && (purchaseOrderData?.status !== "Ready to Invoice" && purchaseOrderData?.status !== "Invoiced" && purchaseOrderData?.status !== "Closed") && (
                                         <>
                                             <Button
-                                                variant={isMobile ? "text" : "contained"}
+                                                variant={isMobile && !isTablet ? "text" : "contained"}
                                                 color="primary"
                                                 size="small"
                                                 onClick={handleOpenUpdateDialog}
-                                                className={isMobile ? accountClass.mobile_button_layout : ""}
-                                                style={isMobile ? { color: "#43aeaa" } : {}}
+                                                className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                                                style={isMobile && !isTablet ? { color: "#43aeaa" } : {}}
                                             >
-                                                {isMobile ? <BiEdit size={20} /> : "Edit"}
+                                                {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
                                             </Button>
                                         </>
                                     )}
-                                    {permissions?.purchaseOrder?.isUpdate && (purchaseOrderData?.status === "Ready to Invoice" || purchaseOrderData?.status === "Invoiced" || purchaseOrderData?.status === "Closed") && (
+                                    {permissions?.purchaseOrder?.isUpdate && (purchaseOrderData?.status === "Ready to Invoice" || purchaseOrderData?.status === "Invoiced") && (
                                         <>
                                             <Button
-                                                variant={isMobile ? "text" : "contained"}
+                                                variant={isMobile && !isTablet ? "text" : "contained"}
                                                 color="default"
                                                 size="small"
                                                 onClick={openActions}
                                                 disabled={updateLoading}
                                                 aria-controls="action-menu"
-                                                endIcon={isMobile ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
+                                                endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
                                             >
-                                                {isMobile ? <GrStatusGood size={18} style={{ color: "var(--warning-darken)" }} /> : "Change Status"}
+                                                {isMobile && !isTablet ? <GrStatusGood size={18} style={{ color: "var(--warning-darken)" }} /> : "Change Status"}
                                             </Button>
                                             <Menu
                                                 anchorEl={anchorEl}

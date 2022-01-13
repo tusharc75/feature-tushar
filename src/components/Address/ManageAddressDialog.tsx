@@ -1,7 +1,7 @@
 import { useState, useEffect, Fragment, useContext, useCallback } from 'react';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
-import { GoogleMap, Marker, MarkerClusterer, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, Marker } from '@react-google-maps/api';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -91,7 +91,13 @@ const ManageAddressDialog = (props) => {
       })
       .catch((error) => {
         setLoading(false);
-        toastConfig.setToastConfig(error);
+        if (error?.message === "Address Already Exist") {
+          values["isAlreadyExist"] = true
+          onSuccess(values);
+        }
+        else {
+          toastConfig.setToastConfig(error);
+        }
       });
   };
 
@@ -184,6 +190,13 @@ const ManageAddressDialog = (props) => {
     }
   }, [addressData]);
 
+  const onCordChange = (position: google.maps.MapMouseEvent) => {
+    if (!formikRef.current) return;
+    const setFieldValue = formikRef.current.setFieldValue;
+    setFieldValue('latitude', position.latLng.lat().toLocaleString());
+    setFieldValue('longitude', position.latLng.lng().toLocaleString());
+  };
+
   return (
     <Dialog
       maxWidth="md"
@@ -270,13 +283,13 @@ const ManageAddressDialog = (props) => {
                                       onChange={
                                         field.fieldName === 'fullAddress'
                                           ? (_, val) => {
-                                              if (typeof val !== 'object') return;
-                                              const placeId = val?.place_id ?? null;
-                                              getFullAddress(placeId);
-                                              if (!placeId) {
-                                                setAddressData(null);
-                                              }
+                                            if (typeof val !== 'object') return;
+                                            const placeId = val?.place_id ?? null;
+                                            getFullAddress(placeId);
+                                            if (!placeId) {
+                                              setAddressData(null);
                                             }
+                                          }
                                           : null
                                       }
                                     />
@@ -309,60 +322,62 @@ const ManageAddressDialog = (props) => {
                       );
                     })}
                 </Form>
-                <Box height={400} width={'100%'} maxWidth={400} borderRadius={8} overflow="hidden">
-                  <GoogleMap
-                    onClick={(position) => {
-                        setFieldValue('latitude', position.latLng.lat());
-                        setFieldValue('longitude', position.latLng.lng());
-                    }}
-                    options={{
-                      disableDefaultUI:true,
-                      mapTypeId: google.maps.MapTypeId.ROADMAP,
-                      mapTypeControlOptions: {
-                        style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
-                      },
-                      styles: [
-                        {
-                          featureType: 'water',
-                          stylers: [{ color: '#46bcec' }, { visibility: 'on' }]
+                <div>
+                  <p>Drag or click to select new coordinates</p>
+                  <Box height={400} width={'100%'} borderRadius={4} overflow="hidden">
+                    <GoogleMap
+                      onClick={(position) => onCordChange(position)}
+                      options={{
+                        disableDefaultUI: true,
+                        mapTypeId: google.maps.MapTypeId.ROADMAP,
+                        mapTypeControlOptions: {
+                          style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
                         },
-                        { featureType: 'landscape', stylers: [{ color: '#f2f2f2' }] },
-                        {
-                          featureType: 'road',
-                          stylers: [{ saturation: -100 }, { lightness: 45 }]
-                        },
-                        {
-                          featureType: 'road.highway',
-                          stylers: [{ visibility: 'simplified' }]
-                        },
+                        styles: [
+                          {
+                            featureType: 'water',
+                            stylers: [{ color: '#46bcec' }, { visibility: 'on' }]
+                          },
+                          { featureType: 'landscape', stylers: [{ color: '#f2f2f2' }] },
+                          {
+                            featureType: 'road',
+                            stylers: [{ saturation: -100 }, { lightness: 45 }]
+                          },
+                          {
+                            featureType: 'road.highway',
+                            stylers: [{ visibility: 'simplified' }]
+                          },
 
-                        { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-                        { featureType: 'poi', stylers: [{ visibility: 'off' }] }
-                      ]
-                    }}
-                    mapContainerStyle={{
-                      minHeight: '500px',
-                      height: '100%',
-                      maxWidth: '600px',
-                      minWidth: '100%'
-                    }}
-                    // onLoad={onLoad}
-                    // onUnmount={onUnmount}
-                    center={values.latitude && values.longitude ? new google.maps.LatLng(values?.latitude, values?.longitude) : new google.maps.LatLng(37.09, -95.713)}
-                    zoom={4}
-                  >
-                    {values.latitude && values.longitude &&
-                     <Marker 
-                        draggable
-                        onDragEnd={(position) => {
-                          setFieldValue('latitude', position.latLng.lat());
-                          setFieldValue('longitude', position.latLng.lng());
-                        }}
-                        position={new google.maps.LatLng(values?.latitude, values?.longitude)}
-                     /> 
-                     }
-                  </GoogleMap>
-                </Box>
+                          { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+                          { featureType: 'poi', stylers: [{ visibility: 'off' }] }
+                        ],
+                        gestureHandling: 'cooperative'
+                      }}
+                      mapContainerStyle={{
+                        minHeight: '500px',
+                        height: '100%',
+                        maxWidth: '600px',
+                        minWidth: '100%'
+                      }}
+                      // onLoad={onLoad}
+                      // onUnmount={onUnmount}
+                      center={
+                        values.latitude && values.longitude
+                          ? new google.maps.LatLng(values?.latitude, values?.longitude)
+                          : new google.maps.LatLng(37.09, -95.713)
+                      }
+                      zoom={4}
+                    >
+                      {values.latitude && values.longitude && (
+                        <Marker
+                          draggable
+                          onDragEnd={(position) => onCordChange(position)}
+                          position={new google.maps.LatLng(values?.latitude, values?.longitude)}
+                        />
+                      )}
+                    </GoogleMap>
+                  </Box>
+                </div>
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button
