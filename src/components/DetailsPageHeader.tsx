@@ -103,7 +103,7 @@ const DetailsPageHeader = (props) => {
                 </div>
             ) : null}
           </Grid>
-          <Grid id="detailHeaderPageActions" item className={isMobile && !isTablet ? "d-flex align-items-center justify-flex-end" : "d-flex align-items-center gap-2 justify-flex-end"}>{children}</Grid>
+          <Grid id="detailHeaderPageActions" item className={isMobile && !isTablet ? "d-flex align-items-center justify-flex-end gap-1" : "d-flex align-items-center gap-2 justify-flex-end"}>{children}</Grid>
         </Grid>
         <Box className="gap-2 detailHeaderDashboard">
           {loading ? (

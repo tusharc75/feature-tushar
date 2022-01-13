@@ -21,7 +21,7 @@ import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { prepareDataForGrid, CHILD_RESOURCE } from "../../../constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
-import { GrBusinessService } from "react-icons/all";
+import { GiSabersChoc, GrBusinessService } from "react-icons/all";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 
@@ -158,7 +158,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex">
                     <Button
-                        variant={"contained"}
+                        variant={isMobile && !isTablet ? "text" : "contained"}
                         color="primary"
                         size="small"
                         disabled={isOffline}
@@ -167,7 +167,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                             setSelectedCostData(null)
                         }}
                     >
-                        {"Add Ad-hoc Charge"}
+                        {isMobile && !isTablet ? <GiSabersChoc size={20}/> :"Add Ad-hoc Charge"}
                     </Button>
                 </Box>
             </Box>

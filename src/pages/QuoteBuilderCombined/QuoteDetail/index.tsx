@@ -256,7 +256,7 @@ export default function QuoteDetail() {
       .post('doa-request/limit', { entity: selectedEntity })
       .then(({ data: { data } }) => {
         setDOAsetup(data.doasetup);
-        setDOALimit(data.limit ? data.limit : data.minLimit);
+        setDOALimit(data.limit && data.limit !== 0 ? data.limit : data.minLimit);
         // setLastUser(data.lastUser);
       })
       .catch((err) => {
