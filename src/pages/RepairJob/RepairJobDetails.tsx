@@ -40,6 +40,10 @@ import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import AssetScrapRepairDialog from '../../components/AssetScrapRepairDialog/AssetScrapRepairDialog';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { MdAdd, MdDelete } from 'react-icons/md';
+import { GiAutoRepair } from 'react-icons/gi';
+import { RiEditCircleLine, RiExchangeFundsLine } from 'react-icons/ri';
+
 
 const renderedFrom = "repairJobDetails"
 const step1RenderedFrom = `${renderedFrom}_assets`
@@ -659,41 +663,49 @@ const RepairJobDetails = () => {
                                 repairJobData && repairJobData["status"] !== completedStatus && <Box display="flex" mt={2} mb={2} pr={1} justifyContent="flex-end" alignItems="center" className="gap-2">
                                   <Button
                                     disabled={showLoading}
-                                    variant="contained"
+                                    variant={isMobile && !isTablet ? "text" : "contained"}
                                     color="primary"
                                     type="button"
+                                    style={isMobile && !isTablet ? {color:"var(--secondary)"} : {}}
                                     size="small"
                                     onClick={() => {
                                       setAddSerializedAssetDialog(true)
                                     }}
                                   >
-                                    {`Add ${routes.productInventory.title}`}
+                                    {isMobile && !isTablet ? <MdAdd size={23}/> : `Add ${routes.productInventory.title}`}
                                   </Button>
 
                                   {
                                     repairJobData && repairJobData["typeOfRepair"] === "Internal" &&
                                     repairJobData["plant"].optionValue === repairJobData["repairPlant"].optionValue && <Button
-                                      variant="contained"
+                                      variant={isMobile && !isTablet ? "text" : "contained"}
                                       color="primary"
                                       type="button"
                                       size="small"
+                                      style={isMobile && !isTablet ? {color:"#FFFF5C"} : {}}
                                       disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.repaired === true) || showLoading}
                                       onClick={() => {
                                         setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...step1SelectedRecords.map(m => m._id)] })
                                       }}
                                     >
-                                      Complete Repair
+                                      {isMobile && !isTablet ? <GiAutoRepair/> :  "Complete Repair" }  
                                     </Button>
                                   }
 
                                   {
-                                    repairJobData && repairJobData["status"] !== repairJobStatus[2] && <Button variant="outlined" color="primary" aria-controls="simple-menu"
+                                    repairJobData && repairJobData["status"] !== repairJobStatus[2] && 
+                                    <Button 
+                                    variant={isMobile && !isTablet ? "text" : "outlined"}
+                                    color="primary" 
+                                    aria-controls="simple-menu"
                                       aria-haspopup="true"
                                       disabled={step1SelectedRecords.length === 0 || showLoading}
                                       size="small"
+                                      style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+                                      
                                       onClick={handleClick}
                                       endIcon={<ArrowDropDownIcon />}>
-                                      Change Status
+                                       {isMobile && !isTablet ? <RiExchangeFundsLine size={20}/> :  "Change Status" } 
                                     </Button>
                                   }
 
@@ -724,21 +736,23 @@ const RepairJobDetails = () => {
                                   </Menu>
 
                                  {!isRepairEnded && <Button
-                                    variant="contained"
+                                    variant={isMobile && !isTablet ? "text" : "contained"}
                                     color="primary"
                                     type="button"
+                                    style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
                                     size="small"
                                     disabled={step1SelectedRecords.length === 0 || showLoading}
                                     onClick={() => {
                                       setShowEditAssetDialog({ open: true, asset: null, selectedRecords: step1SelectedRecords })
                                     }}
                                   >
-                                    Bulk Edit
+                                  {isMobile && !isTablet ? <RiEditCircleLine size={20}/> :  "Bulk Edit" }  
                                   </Button>}
 
                                  {!isRepairEnded && <Button
-                                    variant="contained"
+                                    variant={isMobile && !isTablet ? "text" : "contained"}
                                     color="primary"
+                                    style={isMobile && !isTablet ? {color:"red"} : {}}
                                     type="button"
                                     size="small"
                                     disabled={step1SelectedRecords.length === 0 || step1SelectedRecords.some(s => s.status !== INVENTORY_STATUS.reserved) || showLoading}
@@ -746,7 +760,7 @@ const RepairJobDetails = () => {
                                       setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: step1SelectedRecords.map(m => m._id ?? m.id) });
                                     }}
                                   >
-                                    Delete
+                                    {isMobile && !isTablet ? <MdDelete size={20}/> :  "Delete" }
                                   </Button>}
                                 </Box>
                               }

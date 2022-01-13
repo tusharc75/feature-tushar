@@ -26,6 +26,7 @@ import { useHistory } from 'react-router-dom';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
 import { StayPrimaryPortraitSharp } from "@material-ui/icons";
 import { BiDollar } from "react-icons/bi";
+import { SiMarketo,AiFillFileMarkdown,GiArrowScope,FaPercentage,FaAward,SiStatuspage,GoVersions} from "react-icons/all";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -568,19 +569,23 @@ const ProjectSales: FC = () => {
                   ]}
                   chips={[
                     {
+                      icon:<FaAward/>,
                       label: "Award Date : ",
                       field: "awardDate",
 
                     },
                   {
+                    icon:<AiFillFileMarkdown/>,
                     label:"Market:",
                     field:"marketSegment",
                   },
                   {
+                    icon:<SiMarketo />,
                     label:"Sub-Market:",
                     field:"subMarketSegment"
                   },
                   {
+                    icon:<GiArrowScope/>,
                     label:"Scope:",
                     field:"scope"
                   },

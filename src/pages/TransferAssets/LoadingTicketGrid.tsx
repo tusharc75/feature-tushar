@@ -15,6 +15,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { AiFillFilePdf } from 'react-icons/ai';
+import { IoMdDownload } from 'react-icons/io';
 
 interface LoadingGridProps {
   fetchAssets: any;
@@ -225,33 +226,35 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         <Box>
           {permissions?.transferAsset?.isRead && (
             <Button
-              variant="outlined"
+              variant={isMobile && !isTablet ? "text" : "outlined"}
               color="primary"
               type="button"
               size="small"
-              startIcon={<AiFillFilePdf />}
+              style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
+              startIcon={isMobile ? '' : <AiFillFilePdf />}
               disabled={fileDownloading}
               onClick={() => {
                 handleViewPdf(false);
               }}
             >
-              {fileDownloading ? 'Please wait...' : 'Preview'}
+              {isMobile && !isTablet ? <AiFillFilePdf size={18} /> :  fileDownloading ? 'Please wait...' : 'Preview'}
             </Button>
           )}
           <Box component="span" mx={1} />
           {permissions?.transferAsset?.isRead && (
             <Button
-              variant="outlined"
+              variant={isMobile && !isTablet ? "text" : "outlined"}
               color="primary"
               type="button"
               size="small"
-              startIcon={<AiFillFilePdf />}
+              style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+              startIcon={isMobile ? '' : <IoMdDownload />}
               disabled={fileDownloading}
               onClick={() => {
                 handleViewPdf(true);
               }}
             >
-              {fileDownloading ? 'Please wait...' : 'Download'}
+              {isMobile && !isTablet ? <IoMdDownload size={20} /> : fileDownloading ? 'Please wait...' : 'Download'}
             </Button>
           )}
         </Box>

@@ -22,6 +22,7 @@ import {
   BsArrowUp,
   BsArrowDown
 } from 'react-icons/all';
+import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import {
   Box,
   Grid,
@@ -43,7 +44,7 @@ import {
 } from '@material-ui/core';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Formik, Form, Field, FieldArray } from 'formik';
-import {CustomToastContext} from "../StateProvider/CustomToastContext/CustomToastContext"
+import { CustomToastContext } from "../StateProvider/CustomToastContext/CustomToastContext"
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -54,9 +55,13 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function MobileFilterDialog({ isOpen, handleClose, contentPart, secHeading, columns,dispatch }) {
+export default function MobileFilterDialog({ isOpen, handleClose, contentPart, secHeading, columns, dispatch }) {
   const [showFilter, setShowFilter] = React.useState(false);
+  const [open,setOpen] = React.useState( isOpen);
+  const [close,setClose] = React.useState(handleClose)
   const toastConfig = React.useContext(CustomToastContext)
+
+
   const handleAddFilter = () => {
     if (!showFilter) {
       setShowFilter(true);
@@ -65,14 +70,14 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
     }
   };
 
-  React.useEffect(()=>{
-    if(columns){
-     
+  React.useEffect(() => {
+    if (columns) {
+
       sessionStorage.setItem('columns', JSON.stringify(columns))
     }
-  },[columns])
+  }, [columns])
 
-  
+
 
   return (
     <div>
@@ -89,18 +94,23 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
           {contentPart}
 
           <Formik
-            initialValues={{ filters:[""],fields:[""]}}
-            onSubmit={(values) =>{
-            
+            initialValues={{ filters: [""], fields: [''] }}
+            enableReinitialize={true} 
+
+            onSubmit={(values) => {
+
               const {fields,filters} = values
-              let savedFilters = Object.assign.apply({},fields.map((field,index)=>(
+              let newFields = fields.splice(1);
+              let savedFilters = Object.assign.apply({},newFields.map((field,index)=>(
                 {[field]:{filterType:'text',type:'contains',filter:filters[index]}}
               )))
-             
-             
+
+
               setTimeout(() => {
                 dispatch({ type: 'filter', filters: savedFilters });
               }, 500)
+              
+            setClose(true)
 
               toastConfig.setToastConfig({
                 open: true,
@@ -108,53 +118,114 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
                 message: 'Filtered Successfully',
               });
             }
-              
+
+
             }
             render={({ values, }) => (
               <Form>
                 <FieldArray
                   name="filters"
-                  render={(arrayHelpers) => {                
-                   return <div className="form-secion" style={{marginTop:"-5px"}}>
+                  render={(arrayHelpers) => (
+                     <div className="form-secion" style={{ marginTop: "35px" }}>
                       {values.filters && values.filters.length > 0 ? (
                         values.filters.map((filter, index) => (
-                          <div key={index}>
-                              <ButtonGroup size="small" aria-label="small outlined button group" style={{marginTop:"20px"}}>
-                                              <IconButton
-                                                size="small"
-                                                aria-label="add"
-                                                onClick={() => arrayHelpers.push('')} // insert an empty string at a position
-                                               
-                                              >
-                                                <Add />
-                                              </IconButton>
-                                              
-                                              <IconButton
-                                                size="small"
-                                                aria-label="delete"
-                                                style={{ color: '#f44336' }}
-                                                onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
-                                              >
-                                                <Delete />
-                                              </IconButton>
-                                            </ButtonGroup>     
-                            <FormControl fullWidth>
-                            {/* <InputLabel id="demo-simple-select-label">Select Filter Field</InputLabel>         */}
-                              <Field component="select" name={`fields.${index}`}>
-                              <option   value=''>Select a Field</option>
-                              {JSON.parse(sessionStorage.getItem('columns')) !== null && JSON.parse(sessionStorage.getItem('columns'))?.map((column, index)=>{                           
-                                return <option key={index}  value={column.field}>{column.headerName}</option>
-                              })}              
-                             </Field>
-                            <Field   name={`filters[${index}]`} id="standard-basic" label="Enter Filter Field" variant="standard" />
-                            </FormControl>
-                           
+                          <div key={index} style={{marginTop:"30px"}}>
 
-                        
+                            <Grid container spacing={2}>
+                           
+                              <Grid item xs={8} md={8}>
+                               {/* <InputLabel id="demo-simple-select-label" style={{marginBottom:"10px"}}>Filter Field</InputLabel>      */}
+                                <Autocomplete
+                                     id="country-select-demo"
+                                     style={{  height: "30px",marginBottom:"20px"}}
+                                     options={columns}
+                                     autoHighlight
+                                     getOptionLabel={(option:any) => (option?.headerName ? option?.headerName : '')}
+                                     renderOption={(option) => (
+                                        
+                                      <React.Fragment>{option?.headerName}</React.Fragment>
+                                       
+                                     )}
+                                     onChange={(event, newValue)=> {
+                                      
+                                       let field = newValue?.field
+                                       values?.fields?.push(field)
+                                      
+                                      //  arrayHelpers.replace(index,{
+                                      //    ...values.fields[index] as {},field
+                                      //  })
+                                     }}
+                                     renderInput={(params) => (
+                                      <TextField
+                                      {...params}
+                                      label="Choose a Field"
+                                      variant="outlined"
+                                      name="FilterField"
+                    
+                                      />
+                                    )}
+                                     />
+                                       
+                         
+                                
+                                {/* <Field component="select" name={`fields.${index}`}>
+                                  <option value=''>Select a Field</option>
+                                  {JSON.parse(sessionStorage.getItem('columns')) !== null && JSON.parse(sessionStorage.getItem('columns'))?.map((column, index) => {
+                                    return <option key={index} value={column.field}>{column.headerName}</option>
+                                  })}
+                                </Field>
+                                <Field className="filter-field" name={`filters[${index}]`} id="standard-basic" label="Enter Filter Field" variant="standard" /> */}
+                                 <TextField
+                                      style={{  height: "30px"}}
+                                      variant="outlined"
+                                      name="FilterField"
+                                      label="Filter Text"
+                                      onChange={(e)=>{
+                                      
+                                        let filterText = e.target.value
+                                          arrayHelpers.replace(index,filterText)
+
+                                       
+                                        // arrayHelpers.replace(index,{
+                                        //   ...values.filters[index] as {},filterText
+                                        // })
+                                      }
+                                    }
+                    
+                                      />
+                              </Grid>
+                              <Grid item xs={2} md={4}>
+                            
+                              <ButtonGroup size="small" aria-label="small outlined button group" style={{ marginTop: "40px" }}>
+                                <IconButton
+                                  size="small"
+                                  aria-label="add"
+                                  onClick={() => arrayHelpers.push('')} // insert an empty string at a position
+
+                                >
+                                  <Add />
+                                </IconButton>
+
+                                <IconButton
+                                  size="small"
+                                  aria-label="delete"
+                                  style={{ color: '#f44336' }}
+                                  onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
+                                >
+                                  <Delete />
+                                </IconButton>
+                              </ButtonGroup>
+                              </Grid>
+                             </Grid>
+
+                             
+
+
+
                           </div>
                         ))
                       ) : (
-                        
+
                         <div className="filter_add_button">
                           <Button
                             variant="text"
@@ -162,7 +233,7 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
                             size="small"
                             className="mobile_button add"
                             onClick={() => arrayHelpers.push('')}
-                            // startIcon={ <AddOutlined />}
+                          // startIcon={ <AddOutlined />}
                           >
                             <MdAdd size={25} />
                           </Button>
@@ -174,7 +245,7 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
                         </Button>
                       </div>
                     </div>
-            }}
+                  )}
                 />
               </Form>
             )}

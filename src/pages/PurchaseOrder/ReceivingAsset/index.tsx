@@ -20,11 +20,12 @@ import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { Link } from "react-router-dom";
 import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
 import { AiFillFilePdf } from "react-icons/ai";
-import { MdEmail } from "react-icons/md";
+import { MdAdd, MdEmail } from "react-icons/md";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import { genrateColoum, getFrameworkComponents } from "../../../constants/columns";
 import { useHistory } from "react-router-dom";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
+import { IoMdDownload } from "react-icons/io";
 
 const useStyles = makeStyles(() => ({
     equal: {
@@ -228,54 +229,58 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                 <Box display="flex">
                     {permissions?.purchaseOrder?.isRead && (
                         <Button
-                            variant="outlined"
+                            variant={isMobile && !isTablet ? "text" : "outlined"}
                             color="primary"
                             type="button"
                             size="small"
+                            style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
                             startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                             disabled={downlodingFile}
                             onClick={() => { handleViewPdf(false) }}
                         >
-                            {isMobile && !isTablet ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
+                            {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
                         </Button>
                     )}
                     <Box mx={1} />
                     {permissions?.purchaseOrder?.isRead && (
                         <Button
-                            variant="outlined"
+                            variant={isMobile && !isTablet ? "text" : "outlined"}
                             color="primary"
                             type="button"
                             size="small"
-                            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
+                            style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+                            startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
                             disabled={downlodingFile}
                             onClick={() => { handleViewPdf(true) }}
                         >
-                            {isMobile && !isTablet ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
+                            {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile ? "Please wait..." : "Download"}
                         </Button>
                     )}
                     <Box mx={1} />
                     {permissions?.purchaseOrder?.isRead && <Button
-                        variant={isMobile && !isTablet ? "outlined" : "contained"}
+                        variant={isMobile && !isTablet ? "text" : "contained"}
                         color="primary"
                         size="small"
+                        style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
                         disabled={emailButtonLoading}
                         onClick={() => {
                             setEmailButtonLoading(true)
                             fetchEmailAttachment()
                         }}
                     >
-                        {isMobile && !isTablet ? <MdEmail size={22} /> : `Send Email`}
+                        {isMobile && !isTablet ? <MdEmail size={20} /> : `Send Email`}
                     </Button>}
                 </Box>
                 <Box mx={1} />
                 <Button
-                    variant="contained"
+                    variant={isMobile && !isTablet ? "text" : "contained"}
                     color="primary"
                     size="small"
+                    style={isMobile && !isTablet ? {color:"var(--secondary)"} : {}}
                     disabled={selectedRecords.length === 0 || disableCreateAsset}
                     onClick={() => { setShowCreateAssetDialog(true) }}
                 >
-                    {`Create Asset`}
+                    {isMobile && !isTablet ? <MdAdd size={20} /> : `Create Asset`}
                 </Button>
             </Box>
         </Box>

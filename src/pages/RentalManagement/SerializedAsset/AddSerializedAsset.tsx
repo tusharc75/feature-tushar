@@ -6,6 +6,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { Box, CircularProgress } from "@material-ui/core";
 import SearchBox from '../../../components/Helpers/SearchBox'
 import routes from "../../../components/Helpers/Routes";
+import { Link, useHistory } from 'react-router-dom';
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
 import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData, INVENTORY_STATUS } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
@@ -15,6 +16,10 @@ import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import { prepareDataForGrid } from "../../../constants/helpers"
+import { isMobile, isTablet } from "react-device-detect";
+import { AddOutlined } from "@material-ui/icons";
+import { MdAdd } from "react-icons/md";
+import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 
 const addSerializedAssetsRenderedFrom = "addSerializedAssets";
 const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
@@ -31,6 +36,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
     const { state: { permissions } }: any = useData();
+    const history = useHistory();
 
     useEffect(() => {
         fetchProductInventory()
@@ -138,6 +144,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                 // )
                 .map((u) => {
                     let finalObject = prepareDataForGrid(u);
+                    finalObject["isChecked"] = false;
                     return finalObject
                 });
             dispatch({ type: "initialize", data: data.data, count: data.count });
@@ -230,7 +237,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         >
             <CustomDialogHeader title={`Add ${routes.productInventory.title}`} onClose={handleSerializedAssetClose} ></CustomDialogHeader>
             <CustomDialogContent>
-                <div className="listing-grid p-3">
+                <div className={isMobile ? "listing-grid" : "listing-grid p-3"}>
                     <Box mb={2}>
                         <Grid container >
                             <Grid item xs={12} sm={6}>
@@ -247,45 +254,90 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                     serializedProducts.length > 0 && serializedProducts.some(s => s.qty < 0) ? <div className="text-error font-weight-bold">You have selected more assets then needed.</div> : ""
                                 }
                             </Grid>
-                            <Grid item xs={12} sm={6} container justify="flex-end">
-                                <SearchBox
-                                    onSearch={handleSearch}
-                                    searchbox="terms_header_search_bar"
-                                    width="300px"
-                                    value={search}
-                                />
-                                <Box ml={1} mt={1} >
-                                    <Button size="small"
-                                        color="primary"
-                                        onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
-                                        variant="contained"
-                                        disabled={getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length === 0 || isAdding ||
-                                            serializedProducts.some(d => d?.qty < 0)}
-                                        endIcon={isAdding && <CircularProgress size={20} />}
-                                    >
-                                        {getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length ? "(" + getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length + ")  " : ""}
-                                        Add</Button>
+                            <Grid item xs={12} sm={12} container justify={isMobile ? "flex-start" : "flex-end"}>
+                                <Box className={isMobile ? "mobile-filter-side-header" : "filter-side-header"} component="div">
+                                    <SearchBox
+                                        onSearch={handleSearch}
+                                        searchbox="terms_header_search_bar"
+                                        value={search}
+                                        width={isMobile ? '200px' : '242px'}
+                                        style={isMobile ? { flex: 1 } : {}}
+                                    />
+                                    <Box ml={isMobile ? 0 : 1} mt={isMobile ? 0 : 1} >
+                                        <Button size="small"
+                                            color="primary"
+                                            onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
+                                            variant={isMobile && !isTablet ? 'text' : 'contained'}
+                                            disabled={getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length === 0 || isAdding ||
+                                                serializedProducts.some(d => d?.qty < 0)}
+                                            className={isMobile && !isTablet ? 'mobile_button' : ""}
+                                            endIcon={isAdding && <CircularProgress size={20} />}
+                                            startIcon={isMobile && !isTablet ? "" : <AddOutlined />}
+                                        >
+                                            {getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length ? "(" + getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length + ")  " : ""}
+                                            {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}</Button>
+                                    </Box>
                                 </Box>
                             </Grid>
                         </Grid>
                     </Box>
                     {Object.keys(frameWorkComponent).length > 0 && columns ?
-                        <CustomAgGrid
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameWorkComponent}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            allowAction={false}
-                            loading={loading}
-                            customGridOptions={{ getRowStyle: getRowStyleScheduled }}
-                            renderedFrom={addSerializedAssetsRenderedFrom}
-                            showOnlyShowFilteredRecordSwitch={true}
-                        />
+                        // isMobile && !isTablet ?
+                        //     <CustomSwipableList
+                        //         allowSelection={true}
+                        //         allowSwipe={true}
+                        //         permissions={permissions}
+                        //         primaryField={columns?.find(d => d.primaryField)}
+                        //         onClick={(data) => {
+                        //             history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+
+                        //         }}
+                        //         dataRows={dataRows}
+                        //         selectedRecords={selectedRecords}
+                        //         dispatch={dispatch}
+                        //         onEdit={false}
+                        //         extraParamsToCheckDelete={false}
+                        //         onDelete={false}
+                        //         rowCount={rowCount}
+                        //         page={page}
+                        //         loading={loading}
+                        //         checkError={false}
+                        //         chips={[
+                        //             {
+                        //                 label: "PO Number:",
+                        //                 field: "pONumber"
+                        //             },
+                        //             {
+                        //                 label: "Product Category:",
+                        //                 field: "productCategory"
+                        //             },
+                        //             {
+                        //                 label: "Plant:",
+                        //                 field: "warehouse"
+                        //             }
+                        //         ]}
+                        //         onCreate={null}
+                        //         showClone={false}
+                        //         onClone={false}
+                        //         fullHeight={true}
+                        //         renderedFrom={addSerializedAssetsRenderedFrom}
+                        //     /> :
+                            <CustomAgGrid
+                                columns={columns}
+                                dataRows={dataRows}
+                                frameworkComponents={frameWorkComponent}
+                                setGridApi={setGridApi}
+                                dispatch={dispatch}
+                                rowCount={rowCount}
+                                limit={limit}
+                                pageSizes={pageSizes}
+                                page={page}
+                                allowAction={false}
+                                loading={loading}
+                                customGridOptions={{ getRowStyle: getRowStyleScheduled }}
+                                renderedFrom={addSerializedAssetsRenderedFrom}
+                                showOnlyShowFilteredRecordSwitch={true}
+                            />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </div>
             </CustomDialogContent>
