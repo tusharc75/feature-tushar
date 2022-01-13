@@ -51,45 +51,45 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
     let query = filterById.length > 0 ? `?productCategory=${JSON.stringify(filterById)}` : '';
 
     // setLoading(true)
-    axiosInstance()
-      .get(`/dashboard/product-with-status-count${query}`)
-      .then(({ data: { data } }) => {
-        setLoading(false);
-        let labels = [];
-        let values = [];
-        if (data.data.length > 0) {
-          Object.keys(data.data[0]).map((label: any) => {
-            if (!ignoreId.includes(label)) {
-              values.push(getSum(data.data, label));
-              labels.push(label);
-            }
-          });
-        }
-        setPieData({
-          labels: labels,
-          datasets: [
-            {
-              label: '(%) Utilization',
-              data: values,
-              backgroundColor: [
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 99, 132, 0.6)',
-                'rgba(54, 162, 235, 0.6)',
-                'rgba(255, 206, 86, 0.6)',
-                'rgba(75, 192, 192, 0.6)',
-                'rgba(153, 102, 255, 0.6)',
-                'rgba(255, 159, 64, 0.6)',
-                'rgba(255, 99, 132, 0.6)'
-              ],
-              fill: true
-            }
-          ]
-        });
-      })
-      .catch((err) => {
-        setLoading(false);
-      });
+    // axiosInstance()
+    //   .get(`/dashboard/product-with-status-count${query}`)
+    //   .then(({ data: { data } }) => {
+    //     setLoading(false);
+    //     let labels = [];
+    //     let values = [];
+    //     if (data.data.length > 0) {
+    //       Object.keys(data.data[0]).map((label: any) => {
+    //         if (!ignoreId.includes(label)) {
+    //           values.push(getSum(data.data, label));
+    //           labels.push(label);
+    //         }
+    //       });
+    //     }
+    //     setPieData({
+    //       labels: labels,
+    //       datasets: [
+    //         {
+    //           label: '(%) Utilization',
+    //           data: values,
+    //           backgroundColor: [
+    //             'rgba(255, 99, 132, 1)',
+    //             'rgba(54, 162, 235, 1)',
+    //             'rgba(255, 99, 132, 0.6)',
+    //             'rgba(54, 162, 235, 0.6)',
+    //             'rgba(255, 206, 86, 0.6)',
+    //             'rgba(75, 192, 192, 0.6)',
+    //             'rgba(153, 102, 255, 0.6)',
+    //             'rgba(255, 159, 64, 0.6)',
+    //             'rgba(255, 99, 132, 0.6)'
+    //           ],
+    //           fill: true
+    //         }
+    //       ]
+    //     });
+    //   })
+    //   .catch((err) => {
+    //     setLoading(false);
+    //   });
   };
 
   // Exporting data into sheet
@@ -186,7 +186,7 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
         />
       </Box>
 
-      <Box display={'flex'} justifyContent={'space-between'}>
+      {tableDataRaw.length > 0 && <Box display={'flex'} justifyContent={'space-between'}>
         <div>
           <Button disabled={loading} onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
             Export to
@@ -201,7 +201,7 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
         <Button disabled={loading} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
           {!tableView ? 'Table' : 'Chart'} View
         </Button>
-      </Box>
+      </Box>}
       <Box height={400}>
         {loading && <Typography>Loading...</Typography>}
         {tableDataRaw.length > 0 ? (
