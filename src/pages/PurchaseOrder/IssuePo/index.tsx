@@ -38,7 +38,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
     const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
     const [columns, setColumns] = useState([
         { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "nameRenderer" },
         { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
         { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" }
     ])

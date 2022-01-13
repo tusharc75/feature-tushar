@@ -33,7 +33,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
 
-    const [columns, setColumns] = useState([{ field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    const [columns, setColumns] = useState([{ field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" }])
 
 

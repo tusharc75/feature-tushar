@@ -67,7 +67,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
 
     const [columns, setColumns] = useState([
-        { field: "productDescription", headerName: "Product Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "productDescription", headerName: "Product Type", show: true, disabled: true, cellRenderer: "nameRenderer" },
     ])
 
     const NameRenderer = (params) => (

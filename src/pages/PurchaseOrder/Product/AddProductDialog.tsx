@@ -39,7 +39,7 @@ const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOr
     }, [page, limit, filters, sorting, search]);
 
     const columns = type === "product" ? [
-        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
         // { field: "entity", headerName: "Entity", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
