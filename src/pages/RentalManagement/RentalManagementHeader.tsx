@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useReducer } from "react";
 import SearchBox from "../../components/Helpers/SearchBox";
 import {
   AddOutlined,
@@ -24,6 +24,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { sidebarResource, CHILD_RESOURCE } from '../../constants/helpers';
 import { useData } from "../../StateProvider/Provider";
 import { rentalJobOfflineUpdate } from "./rentalOfflineHelper";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 
 function RentalManagementHeader(props) {
   const {
@@ -39,13 +40,16 @@ function RentalManagementHeader(props) {
     heading,
     children,
     showTransferEntityDialog,
-    selectedType
+    selectedType,
+    fetchRentalManagement
     // showCloneRentalManagementDialog
   } = props;
 
   const { state: { selectedEntity } }: any = useData();
   const [anchorEl, setAnchorEl] = useState(null);
   const toastConfig = useContext(CustomToastContext);
+  const [state, dispatch] = useReducer(reducer, intialState);
+
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -83,6 +87,9 @@ function RentalManagementHeader(props) {
     axiosInstance().get(`/field?resource=Product Inventory&view=true`).then(({ data: { data } }) => {
       insertUpdate(objectStore.resource, "productInventory", data);
     })
+    localStorage.removeItem("rental_management_selected")
+    dispatch({ type: "selection", selectedRecords: [] });
+    fetchRentalManagement()
   }
 
   const handleRemoveoffline = async () => {
@@ -95,71 +102,71 @@ function RentalManagementHeader(props) {
     <Grid container className={styles.rental_header_layout}>
       <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet">
         <Grid >
-        {icon} <span className="listingHeader">{heading}</span>
+          {icon} <span className="listingHeader">{heading}</span>
         </Grid>
-                {isMobile && (
-                  <>
-                  <Grid style={{display:"inline-flex"}}>
-                    <Button
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      // aria-expanded={open ? 'true' : undefined}
-                      color="secondary"
-                      variant="text"
-                      disableElevation
-                      startIcon={<MdSort />}
-                      className={'sort-filter-tablet'}
-                      style={isTablet ? { marginLeft: '50px' } : {}}
-                    >
-                      Sort
-                    </Button>
+        {isMobile && (
+          <>
+            <Grid style={{ display: "inline-flex" }}>
+              <Button
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                // aria-expanded={open ? 'true' : undefined}
+                color="secondary"
+                variant="text"
+                disableElevation
+                startIcon={<MdSort />}
+                className={'sort-filter-tablet'}
+                style={isTablet ? { marginLeft: '50px' } : {}}
+              >
+                Sort
+              </Button>
 
-                    <Button
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      // aria-expanded={open ? 'true' : undefined}
-                      variant="text"
-                      color="secondary"
-                      disableElevation
-                      className={'sort-filter-tablet'}
-                      startIcon={<MdFilterList />}
-                    >
-                      Filter
-                    </Button>
-                    </Grid>
-                  </>
-                )}
-                
+              <Button
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                // aria-expanded={open ? 'true' : undefined}
+                variant="text"
+                color="secondary"
+                disableElevation
+                className={'sort-filter-tablet'}
+                startIcon={<MdFilterList />}
+              >
+                Filter
+              </Button>
+            </Grid>
+          </>
+        )}
+
 
 
         <HideWhenOffline>
-        <div className={`align-items-center gap-1 layout-for-mobile `}>
-          {options && (
-            <ToggleButtonGroup
-              size="small"
-              className="ml-2"
-              value={options[selectedType - 1].key}
-              exclusive
-              onChange={handleFilter}
-            >
-              {options.map((k, index) => {
-                return (
-                  <ToggleButton value={k.key} key={index}>
-                    {k.key}
-                  </ToggleButton>
-                );
-              })}
-            </ToggleButtonGroup>
-          )}
+          <div className={`align-items-center gap-1 layout-for-mobile `}>
+            {options && (
+              <ToggleButtonGroup
+                size="small"
+                className="ml-2"
+                value={options[selectedType - 1].key}
+                exclusive
+                onChange={handleFilter}
+              >
+                {options.map((k, index) => {
+                  return (
+                    <ToggleButton value={k.key} key={index}>
+                      {k.key}
+                    </ToggleButton>
+                  );
+                })}
+              </ToggleButtonGroup>
+            )}
           </div>
         </HideWhenOffline>
         {children}
       </Grid>
       <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <Grid style={{ display: "flex", flex: 1, gap:"5px" }} className={isMobile ? styles.content_box : ""}>
+          <Grid style={{ display: "flex", flex: 1, gap: "5px" }} className={isMobile ? styles.content_box : ""}>
             <HideWhenOffline>
               <SearchBox
                 onSearch={onSearch}
@@ -168,52 +175,52 @@ function RentalManagementHeader(props) {
                 size="small"
                 placeholder={`Search ${routes.rentalManagement.title}`}
                 style={isMobile ? { flex: 1 } : {}}
-                
+
               />
             </HideWhenOffline>
             <Grid style={{ display: "flex", gap: "5px" }}>
-            <HideWhenOffline>
-              {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? "text" : "contained"}
-                  color="primary"
-                  size="small"
-                  // className={styles.add_submit_btn}
-                  onClick={onCreate}
-                  className={isMobile  && !isTablet ? "mobile_button" : styles.add_submit_btn}
-                  startIcon={isMobile  && !isTablet ? null : <AddOutlined />}
-                >
-                  {isMobile  && !isTablet ? <MdAdd size={23} /> : "Add"}
-                </Button>
-              )}
-              {
-                RentalManagementPermissions.isDelete && (
-                  <>
-                    <Button
-                      //disabled={canDelete}
-                      variant={isMobile  && !isTablet ? "text" : "outlined"}
-                      color="default"
-                      size="small"
-                      className={isMobile  && !isTablet ? "mobile_button" : styles.action_submit_btn}
-                      onClick={openActions}
-                      // className={styles.action_submit_btn}
-                      aria-controls="action-menu"
-                    >
-                      {isMobile  && !isTablet ? "" : "Actions"} <ExpandMore />
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left",
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {/* <MenuItem
+              <HideWhenOffline>
+                {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && (
+                  <Button
+                    variant={isMobile && !isTablet ? "text" : "contained"}
+                    color="primary"
+                    size="small"
+                    // className={styles.add_submit_btn}
+                    onClick={onCreate}
+                    className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                  >
+                    {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
+                  </Button>
+                )}
+                {
+                  RentalManagementPermissions.isDelete && (
+                    <>
+                      <Button
+                        //disabled={canDelete}
+                        variant={isMobile && !isTablet ? "text" : "outlined"}
+                        color="default"
+                        size="small"
+                        className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                        onClick={openActions}
+                        // className={styles.action_submit_btn}
+                        aria-controls="action-menu"
+                      >
+                        {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: "bottom",
+                          horizontal: "left",
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        {/* <MenuItem
                         onClick={() => {
                           closeActions();
                           showConfirmBox(null);
@@ -221,7 +228,7 @@ function RentalManagementHeader(props) {
                       >
                         Delete
                       </MenuItem> */}
-                      {/* {
+                        {/* {
                         RentalManagementPermissions.isUpdate && <MenuItem
                           disabled={!selectedRecords.length || selectedRecords.find((d) => d.canDelete === false)}
                           onClick={() => {
@@ -230,25 +237,25 @@ function RentalManagementHeader(props) {
                           }}
                         >Transfer Entity</MenuItem>
                       } */}
-                      {
-                        <MenuItem
-                          disabled={!selectedRecords.length || selectedRecords.find((d) => d.canDelete === false)}
-                          onClick={() => handleAddOffline()}
-                        >Add Offline</MenuItem>
-                      }
-                      {
-                        <MenuItem
-                          onClick={() => handleRemoveoffline()}
-                        >Clear All Offline Data</MenuItem>
-                      }
-                    </Menu>
-                  </>
-                )
-              }
-            </HideWhenOffline>
+                        {
+                          <MenuItem
+                            disabled={!selectedRecords.length || selectedRecords.find((d) => d.canDelete === false)}
+                            onClick={() => handleAddOffline()}
+                          >Add Offline</MenuItem>
+                        }
+                        {
+                          <MenuItem
+                            onClick={() => handleRemoveoffline()}
+                          >Clear All Offline Data</MenuItem>
+                        }
+                      </Menu>
+                    </>
+                  )
+                }
+              </HideWhenOffline>
+            </Grid>
           </Grid>
-          </Grid>
-         
+
         </Box>
       </Grid>
     </Grid>

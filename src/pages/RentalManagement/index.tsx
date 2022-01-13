@@ -435,6 +435,7 @@ const RentalManagement = () => {
     }
   };
 
+
   return (
     <>
       <Fragment>
@@ -483,10 +484,10 @@ const RentalManagement = () => {
               icon={<FaRegistered className="headerLogo" />}
               heading={routes.rentalManagement.title}
               showTransferEntityDialog={handleTransferEntityDialog}
-            // showCloneRentalManagementDialog={() => {
-            //   handleShowCloneRentalManagementDialog()
-            // }}
-
+              // showCloneRentalManagementDialog={() => {
+              //   handleShowCloneRentalManagementDialog()
+              // }}
+              fetchRentalManagement={fetchRentalManagement}
             >
               {accountDetails.accountId && (
                 <Chip
@@ -507,7 +508,7 @@ const RentalManagement = () => {
 
           {
             Object.keys(frameWorkComponent).length > 0 ?
-              isMobile  && !isTablet ?
+              isMobile && !isTablet ?
                 <CustomSwipableList
                   allowSelection={true}
                   allowSwipe={true}
