@@ -91,7 +91,7 @@ const ManageAddressDialog = (props) => {
       })
       .catch((error) => {
         setLoading(false);
-        if (error?.message === "Address Already Exist") {
+        if (error?.data?.isAlreadyExist) {
           values["isAlreadyExist"] = true
           onSuccess(values);
         }

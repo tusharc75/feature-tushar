@@ -24,7 +24,10 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { useHistory } from "react-router-dom";
 import InfoIcon from '@material-ui/icons/Info';
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
+import { CgAssign } from "react-icons/cg";
+import { IoCreate } from "react-icons/io5";
+import { MdDeleteSweep } from "react-icons/md";
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
 
@@ -386,29 +389,31 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     <Box display="flex" justifyContent="flex-end" pt={1} pb={2}>
       <Box display="flex" alignItems="center">
         <Button
-          variant="contained"
+          variant={isMobile && !isTablet ? "text" : "contained"}
           color="primary"
           type="button"
           size="small"
+          style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
           disabled={disableAssignSerializedAssets()}
           onClick={() => {
             setAddSerializedAssetDialog(true)
           }}
         >
-          {`Assign ${routes.productInventory.title}`}
+          {isMobile && !isTablet ? <CgAssign size={20}/> :  `Assign ${routes.productInventory.title}`}
         </Button>
         <Box mx={1} />
         <Button
-          variant="contained"
+          variant={isMobile && !isTablet ? "text" : "contained"}
           color="primary"
           type="button"
           size="small"
+          style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
           disabled={showManagePurchaseOrderDialog.products.length === 0}
           onClick={() => {
             setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: true }))
           }}
         >
-          {`Create ${routes.purchaseOrder.title}`}
+          {isMobile && !isTablet ? <IoCreate size={20}/> : `Create ${routes.purchaseOrder.title}`}
         </Button>
         {poCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
           <IconButton size="small" onClick={() => {
@@ -421,17 +426,18 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         </HtmlTooltip>}
         <Box mx={1} />
         <Button
-          variant="contained"
+          variant={isMobile && !isTablet ? "text" : "contained"}
           color="primary"
           type="button"
           size="small"
+          style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
           disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
           onClick={() => {
             setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
             setShowConfirmBox(true)
           }}
         >
-          Delete Assets
+         {isMobile && !isTablet ? <MdDeleteSweep size={20}/> :  "Delete Assets" }
         </Button>
         <Box mx={1} />
       </Box>

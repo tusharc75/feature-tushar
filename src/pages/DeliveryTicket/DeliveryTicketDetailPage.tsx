@@ -15,7 +15,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import ManageDeliveryTicket from "./ManageDeliveryTicket"
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { productInventory, gridLoadingTimeout } from "../../constants/helpers"
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import { IoIosArrowDropright, IoIosArrowDropleft, IoMdDownload } from 'react-icons/io';
 import Activity from "../../components/Activity";
 import { isMobile, isTablet } from "react-device-detect";
 import SignatureDialog from '../../components/Helpers/SignatureDialog';
@@ -24,8 +24,8 @@ import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import moment from 'moment';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
-import { FaFileSignature, FaWpforms } from "react-icons/fa";
-import { BiFoodMenu } from "react-icons/bi";
+import { FaFileSignature, FaSignature, FaWpforms } from "react-icons/fa";
+import { BiEdit, BiFoodMenu } from "react-icons/bi";
 import { prepareDataForGrid, DELIVERY_TICKET_MAPPED_STATUS } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
@@ -516,23 +516,25 @@ export default function DeliveryTicketDetail(props) {
                 >
                   {permissions?.deliveryTicket?.isUpdate && canEdit && deliveryTicketData?.status !== "Delivered" && (
                     <Button
-                      variant="contained"
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
                       size="small"
                       onClick={handleOpenUpdateDialog}
+                      style={isMobile && !isTablet ? {color:"var(--teal)"} : {}}
                     >
-                      Edit
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
                     </Button>
                   )}
                   {deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id || canEdit ?
                     label !== "" ?
                       <Button
-                        variant="contained"
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
                         color="primary"
                         size="small"
                         disabled={loading}
+                        style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
                         onClick={() => setOpenSignatureDialog(true)}>
-                        {label}
+                        {isMobile && !isTablet ? <FaFileSignature size={18} /> :  label}
                       </Button>
                       : null
                     : null}
@@ -544,7 +546,7 @@ export default function DeliveryTicketDetail(props) {
                       onClick={() => setOpenSigns(true)}
                       style={isMobile && !isTablet ? { color: "var(--info-darken)" } : {}}
                     >
-                      {isMobile && !isTablet ? <FaFileSignature size={20} /> : "View Signatures"}
+                      {isMobile && !isTablet ? <FaSignature size={20} /> : "View Signatures"}
                     </Button> : null
                   }
                 </DetailsPageHeader>
@@ -662,28 +664,30 @@ export default function DeliveryTicketDetail(props) {
                         <Box mx={1} />
                         {permissions?.deliveryTicket?.isRead && (
                           <Button
-                            variant="outlined"
+                            variant={isMobile && !isTablet ? "text" : "outlined"}
                             color="primary"
                             type="button"
                             size="small"
+                            style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
                             startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                             disabled={downlodingFile || isOffline}
                             onClick={() => { handleViewPdf(false) }}
                           >
-                            {isMobile && !isTablet ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Preview"}
+                            {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
                           </Button>
                         )}
                         {permissions?.deliveryTicket?.isRead && (
                           <Button
-                            variant="outlined"
+                            variant={isMobile && !isTablet ? "text" : "outlined"}
                             color="primary"
                             type="button"
                             size="small"
-                            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
+                            style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+                            startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
                             disabled={downlodingFile || isOffline}
                             onClick={() => { handleViewPdf(true) }}
                           >
-                            {isMobile && !isTablet ? <AiFillFilePdf size={22} /> : downlodingFile ? "Please wait..." : "Download"}
+                            {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile ? "Please wait..." : "Download"}
                           </Button>
                         )}
                       </Grid>
