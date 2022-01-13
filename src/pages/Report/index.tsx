@@ -17,7 +17,7 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { sidebarResource, RENTAL_STATUS, INVENTORY_STATUS, prepareDataForGrid, gridLoadingTimeout } from './../../constants/helpers';
+import { resourceNames, RENTAL_STATUS, INVENTORY_STATUS, prepareDataForGrid, gridLoadingTimeout } from './../../constants/helpers';
 
 const resourcesSelect = {
   rentalManagement: ['customerAccount', 'customerContact', 'warehouse', 'status'],
@@ -218,7 +218,7 @@ const Report = () => {
               <Grid container className={styles.rental_header_layout} spacing={1}>
                 <Grid item xs={12} md={3}>
                   <Autocomplete
-                    options={resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : sidebarResource[_r]))}
+                    options={resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : resourceNames[_r]))}
                     limitTags={2}
                     disableListWrap
                     ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
