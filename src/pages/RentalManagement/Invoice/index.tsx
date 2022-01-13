@@ -281,7 +281,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         )}
         <Box mx={1} />
         {permissions?.rentalManagement?.isRead && <Button
-          variant={isMobile ? "outlined" : "contained"}
+          variant="outlined"
           color="primary"
           size="small"
           disabled={downlodingFile === "Email" ? true : (false || isOffline)}
