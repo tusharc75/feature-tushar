@@ -239,8 +239,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             <CustomDialogContent>
                 <div className={isMobile ? "listing-grid" : "listing-grid p-3"}>
                     <Box mb={2}>
-                        <Grid container >
-                            <Grid item xs={12} sm={6}>
+                        <Grid container spacing={1}>
+                            <Grid item xs={12} sm={12} md={6}>
                                 <div>
                                     {
                                         serializedProducts.length > 0 ?
@@ -254,22 +254,22 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                     serializedProducts.length > 0 && serializedProducts.some(s => s.qty < 0) ? <div className="text-error font-weight-bold">You have selected more assets then needed.</div> : ""
                                 }
                             </Grid>
-                            <Grid item xs={12} sm={12} container justify={isMobile ? "flex-start" : "flex-end"}>
-                                <Box className={isMobile ? "mobile-filter-side-header" : "filter-side-header"} component="div">
-                                    <SearchBox
-                                        onSearch={handleSearch}
-                                        searchbox="terms_header_search_bar"
-                                        value={search}
-                                        width={isMobile ? '200px' : '242px'}
-                                        style={isMobile ? { flex: 1 } : {}}
-                                    />
-                                    <Box ml={isMobile ? 0 : 1} mt={isMobile ? 0 : 1} >
-                                        <Button size="small"
-                                            color="primary"
-                                            onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
-                                            variant={isMobile && !isTablet ? 'text' : 'contained'}
-                                            disabled={getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length === 0 || isAdding ||
-                                                serializedProducts.some(d => d?.qty < 0)}
+                            <Grid item xs={12} sm={12} md={6} container justify={isMobile ? "flex-start" : "flex-end"}>
+                            <Box className={isMobile ? "mobile-filter-side-header" : "filter-side-header-serialized"} component="div">
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    searchbox="terms_header_search_bar"
+                                    value={search}
+                                    width={isMobile ? '200px' : '242px'}
+                                    style={isMobile ? { flex: 1 } : {}}
+                                />
+                                <Box ml={isMobile ? 0 : 1} mt={isMobile ? 0 : 1} className="d-flex">
+                                    <Button size="small"
+                                        color="primary"
+                                        onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
+                                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                                        disabled={getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length === 0 || isAdding ||
+                                            serializedProducts.some(d => d?.qty < 0)}
                                             className={isMobile && !isTablet ? 'mobile_button' : ""}
                                             endIcon={isAdding && <CircularProgress size={20} />}
                                             startIcon={isMobile && !isTablet ? "" : <AddOutlined />}
