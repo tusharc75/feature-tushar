@@ -17,7 +17,8 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { resourceNames, RENTAL_STATUS, INVENTORY_STATUS, prepareDataForGrid, gridLoadingTimeout } from './../../constants/helpers';
+import { resourceNames, RENTAL_STATUS, INVENTORY_STATUS, prepareDataForGrid, gridLoadingTimeout, downloadExcel } from './../../constants/helpers';
+import Loader from '../../components/Loader';
 
 const resourcesSelect = {
   rentalManagement: ['customerAccount', 'customerContact', 'warehouse', 'status'],
@@ -49,6 +50,7 @@ const Report = () => {
   const [dropdownList, setDropdownList] = React.useState(null);
   const [selectedData, setSelectedData] = React.useState(null);
   const [selectedResource, setSelectedResource] = React.useState(null);
+  const [isExporting, setExporting] = React.useState(false);
 
   // Grid Configs
   const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
@@ -185,6 +187,35 @@ const Report = () => {
     return filterQuery
   }
 
+  const exportData = () => {
+    if ((selectedData && Object.keys(selectedData).length === 0) || !selectedData || isExporting) return;
+    toastConfig.setToastConfig({
+      open: true,
+      message: "Please wait exporting data",
+      type: "info"
+    });
+    setExporting(true)
+    let filterQuery = getFilter()
+    axiosInstance()
+    .get(`${routes[resourceCamelCase].path}/report/export?export=1&${filterQuery}`)
+    .then((res) => {
+      const fileName = res.headers['content-disposition'].split('filename=')[1];
+      downloadExcel(res.data, fileName);
+        setExporting(false)
+        toastConfig.setToastConfig({
+          open: true,
+          message: "Successfully Exported",
+          type: "success"
+        });
+      })
+      .catch((err) => {
+        setExporting(false)
+          toastConfig.setToastConfig(err);
+      });
+  }
+
+  
+
   const workingPage = ['productInventory', 'rentalManagement'];
 
   if (!workingPage.includes(resourceCamelCase)) {
@@ -202,7 +233,7 @@ const Report = () => {
             <Grid item xs={12} sm={12}>
               <Grid container justifyContent="flex-end">
               <div id="importExportLinks">
-                <span className='cursor-pointer mr-2' style={{color: theme.palette.info.light}}>
+                <span aria-disabled={isExporting} onClick={exportData} className={`${isExporting ? 'cursor-stop' :'cursor-pointer'} mr-2`} style={{color: theme.palette.info.light}}>
                   Export All
                 </span>
               </div>
@@ -290,7 +321,7 @@ const Report = () => {
               </Grid>
             </div>
             <div>
-              {Object.keys(frameWorkComponent).length > 0 && (
+              {Object.keys(frameWorkComponent).length > 0 ? (
                 <CustomAgGrid
                   columns={columns}
                   dataRows={dataRows}
@@ -310,7 +341,7 @@ const Report = () => {
                   refreshGrid={fetchResourceData}
                   showOnlyShowFilteredRecordSwitch={false}
                 />
-              )}
+              ) : <Loader text={"Loading Data..."} style={{marginTop: '15vh'}} />}
             </div>
           </>
         )}
