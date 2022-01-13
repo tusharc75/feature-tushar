@@ -243,7 +243,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           size="small"
           disabled={downlodingFile || isOffline}
           startIcon={isMobile ? '' : <AiFillFilePdf />}
-          style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
+          style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
 
         >
           {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
@@ -254,10 +254,10 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           disabled={selectedRecords.length === 0 || isOffline}
           size="small"
           onClick={handleClick}
-          style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+          style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
           endIcon={<ArrowDropDownIcon />}>
-         {isMobile && !isTablet ? <RiExchangeFundsLine size={20} /> : 'Change Status'}
-         
+          {isMobile && !isTablet ? <RiExchangeFundsLine size={20} /> : 'Change Status'}
+
         </Button>
         <Menu
           id="simple-menu"
@@ -275,8 +275,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             horizontal: 'right'
           }}
         >
-         {(selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
-            || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
+          {(selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") && [INVENTORY_STATUS.underReview].includes(f.status)
+            && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
             <Fragment>
               <MenuItem onClick={() => {
                 setAnchorEl(null)
@@ -296,230 +296,197 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             setAnchorEl(null)
             setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
           }}>{INVENTORY_STATUS.lost}</MenuItem>
-
         </Menu>
         <Box mx={1} />
-        {/* <IconButton
-          disabled={
-            selectedRecords.length === 0 ||
-            selectedRecords.some(
-              (f) =>
-                f.hasOwnProperty('receivingTicketId') ||
-                [INVENTORY_STATUS.lost].includes(f.status) ||
-                ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)
-            )
-          }
-          onClick={() => {
-            handleReceivingTicketDialog(selectedRecords);
-          }}
-          color="primary"
-          size="small"
-        > */}
-          <Tooltip title="Create Receiving Ticket">
-            <Button
-              variant={isMobile && !isTablet ? "text" : "outlined"}
-              color="primary"
-              size="small"
-              style={isMobile && !isTablet ? {color:"#FFD700"} : {}}
-              onClick={() => {
-                handleReceivingTicketDialog(selectedRecords)
-              }}
-              disabled={(selectedRecords.length === 0)
-                || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
-            >
-              {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Create Receiving Ticket'}
-            </Button>
-          </Tooltip>
-        {/* </IconButton> */}
+        <Tooltip title="Create Receiving Ticket">
+          <Button
+            variant={isMobile && !isTablet ? "text" : "outlined"}
+            color="primary"
+            size="small"
+            style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
+            onClick={() => {
+              handleReceivingTicketDialog(selectedRecords)
+            }}
+            disabled={(selectedRecords.length === 0)
+              || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId")
+                || !f.hasOwnProperty("deliveryTicketId")
+                || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
+          >
+            {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Create Receiving Ticket'}
+          </Button>
+        </Tooltip>
         <Box mx={1} />
-        {/* <IconButton
-          disabled={
-            selectedRecords.length === 0 ||
-            selectedRecords.some(
-              (f) =>
-                !f.hasOwnProperty('receivingTicketId') ||
-                [INVENTORY_STATUS.underReview].includes(f.status) ||
-                f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered
-            )
-          }
-          onClick={() => {
-            setShowRemoveAssetFromReceivingTicketDialog(true);
-          }}
-          color="primary"
-          size="small"
-        > */}
-          <Tooltip title="Remove Assets From Receiving Ticket(s)">
-            <Button
-              variant={isMobile && !isTablet ? "text" : "outlined"}
-              color="primary"
-              size="small"
-              style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
-              onClick={() => {
-                setShowRemoveAssetFromReceivingTicketDialog(true)
-              }}
-              disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
+        <Tooltip title="Remove Assets From Receiving Ticket(s)">
+          <Button
+            variant={isMobile && !isTablet ? "text" : "outlined"}
+            color="primary"
+            size="small"
+            style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
+            onClick={() => {
+              setShowRemoveAssetFromReceivingTicketDialog(true)
+            }}
+            disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
               || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered))}
 
-            >
-              {isMobile && !isTablet ? <IoRemoveCircleOutline size={22}/> :  "Remove Assets" }
-            </Button>
-          </Tooltip>
-        {/* </IconButton> */}
+          >
+            {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : "Remove Assets"}
+          </Button>
+        </Tooltip>
         <Box mx={1} />
         {(showProcessDeliveryTicket && !isOffline) &&
           <Fragment>
             <Tooltip
               title="Process Multiple Receiving Ticket(s)">
               <Button
-                variant="outlined"
+                variant={isMobile && !isTablet ? "text" : "contained"}
                 color="primary"
                 size="small"
                 onClick={() => {
                   setOpenDeliveryTicketDialog(true)
                 }}
               >
-                Process Receiving Ticket
+                {isMobile && !isTablet ? <AddBoxRoundedIcon /> : "Process Receiving Ticket"}
               </Button>
             </Tooltip>
             <Box mx={1} />
           </Fragment>}
-       </Box>
-       </Box>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
-        {columns ? (
-          isMobile ? (
-            <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={true}
-              primaryField={columns?.find((d) => d.field)}
-              onClick={(data) => {
-                history.push(`${routes.productInventoryDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={false}
-              extraParamsToCheckDelete={true}
-              onDelete={false}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              chips={[
-                {
-                  label: 'Status : ',
-                  field: 'status'
-                },
-                {
-                  label: 'Receiving Ticket : ',
-                  field: 'receivingTicket',
-                  onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.receivingTicketId}`)
-                },
-                {
-                  label: 'Loading Ticket : ',
-                  field: 'deliveryTicket',
-                  onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
-                }
-              ]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={false}
-              onClone={() => {}}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={false}
-              loading={loading}
-              isClientSideGrid={true}
-              renderedFrom={renderedFrom}
-              rowClassRules={{
-                'red-data-row': function (params) {
-                  return [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some((s) => s === params.data.status);
-                }
-              }}
-              refreshGrid={fetchRecords}
-            />
-          )
-        ) : (
-          <Box p={2} height={500} bgcolor="white">
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </Grid>
-      {showReceivingTicketDialog && (
-        <ManageDeliveryTicket
-          ticketType="Receiving"
-          refrenceType="Rental Job"
-          refrenceData={rentalManagementData}
-          productInventory={productInventoryForReceivingTicket}
-          onClose={() => setShowReceivingTicketDialog(false)}
-          onSuccess={() => {
-            setShowReceivingTicketDialog(false);
-            fetchRecords();
-          }}
-          warehouseId={rentalManagementData?.warehouse}
-        />
-      )}
-      {showRemoveAssetFromReceivingTicketDialog && (
-        <ConfirmationDialog
-          open={showRemoveAssetFromReceivingTicketDialog}
-          message={`Are you sure you want to remove selected records from Receiving Ticket?`}
-          onClose={() => {
-            setShowRemoveAssetFromReceivingTicketDialog(false);
-          }}
-          onOk={() => {
-            setOkBtnLoading(true);
-            const groupByCalls = groupBy(selectedRecords, 'receivingTicketId');
-            let apiCalls = [];
-            Object.keys(groupByCalls).forEach((key) => {
-              apiCalls.push(
-                axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) })
-              );
-            });
-            Promise.all(apiCalls)
-              .then(() => {
-                toastConfig.setToastConfig({
-                  open: true,
-                  type: 'success',
-                  message: `Selected records removed from assiged ${sidebarResource.receivingTicket}(s)`
-                });
-                fetchRecords();
-              })
-              .catch((error) => {
-                toastConfig.setToastConfig(error);
-              })
-              .finally(() => {
-                setOkBtnLoading(false);
-                setShowRemoveAssetFromReceivingTicketDialog(false);
-              });
-          }}
-          okBtnLoading={okBtnLoading}
-        />
-      )}
-      {statusToUpdate.open && (
-        <Dialog
-          open
-          classes={{
-            paper: classes.paper
-          }}
-          onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
-        >
-          <CustomDialogHeader
-            title="Are you sure ?"
-            showRequiredLabel={false}
-            onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
+      </Box>
+    </Box>
+    <Grid item xs={12} md={12} sm={12} className="mt-3">
+      {columns ? (
+        isMobile ? (
+          <CustomSwipableList
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={true}
+            primaryField={columns?.find((d) => d.field)}
+            onClick={(data) => {
+              history.push(`${routes.productInventoryDetail.path}/${data._id}`);
+            }}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={false}
+            extraParamsToCheckDelete={true}
+            onDelete={false}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            additionalDetails={[]}
+            chips={[
+              {
+                label: 'Status : ',
+                field: 'status'
+              },
+              {
+                label: 'Receiving Ticket : ',
+                field: 'receivingTicket',
+                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.receivingTicketId}`)
+              },
+              {
+                label: 'Loading Ticket : ',
+                field: 'deliveryTicket',
+                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
+              }
+            ]}
+            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+            onCreate={false}
+            showClone={false}
+            onClone={() => { }}
+            renderedFrom={renderedFrom}
           />
+        ) : (
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowAction={false}
+            loading={loading}
+            isClientSideGrid={true}
+            renderedFrom={renderedFrom}
+            rowClassRules={{
+              'red-data-row': function (params) {
+                return [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some((s) => s === params.data.status);
+              }
+            }}
+            refreshGrid={fetchRecords}
+          />
+        )
+      ) : (
+        <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
+    </Grid>
+    {showReceivingTicketDialog && (
+      <ManageDeliveryTicket
+        ticketType="Receiving"
+        refrenceType="Rental Job"
+        refrenceData={rentalManagementData}
+        productInventory={productInventoryForReceivingTicket}
+        onClose={() => setShowReceivingTicketDialog(false)}
+        onSuccess={() => {
+          setShowReceivingTicketDialog(false);
+          fetchRecords();
+        }}
+        warehouseId={rentalManagementData?.warehouse}
+      />
+    )}
+    {showRemoveAssetFromReceivingTicketDialog && (
+      <ConfirmationDialog
+        open={showRemoveAssetFromReceivingTicketDialog}
+        message={`Are you sure you want to remove selected records from Receiving Ticket?`}
+        onClose={() => {
+          setShowRemoveAssetFromReceivingTicketDialog(false);
+        }}
+        onOk={() => {
+          setOkBtnLoading(true);
+          const groupByCalls = groupBy(selectedRecords, 'receivingTicketId');
+          let apiCalls = [];
+          Object.keys(groupByCalls).forEach((key) => {
+            apiCalls.push(
+              axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) })
+            );
+          });
+          Promise.all(apiCalls)
+            .then(() => {
+              toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: `Selected records removed from assiged ${sidebarResource.receivingTicket}(s)`
+              });
+              fetchRecords();
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+            })
+            .finally(() => {
+              setOkBtnLoading(false);
+              setShowRemoveAssetFromReceivingTicketDialog(false);
+            });
+        }}
+        okBtnLoading={okBtnLoading}
+      />
+    )}
+    {statusToUpdate.open && (
+      <Dialog
+        open
+        classes={{
+          paper: classes.paper
+        }}
+        onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
+      >
+        <CustomDialogHeader
+          title="Are you sure ?"
+          showRequiredLabel={false}
+          onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
+        />
 
         <CustomDialogContent>
           <Box className="my-2">
@@ -579,7 +546,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           </Button>
         </CustomDialogFooter>
       </Dialog>
-      )}
+    )}
     {openDeliveryTicketDialog &&
       <MultipleTicket
         refrenceData={rentalManagementData}
