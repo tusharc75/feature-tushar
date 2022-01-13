@@ -87,7 +87,10 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                   <Delete color="error" />
                 </IconButton>}
             </span>}
-        </div>)
+        </div>),
+      Footer: () => {
+        return <>Total</>
+      }
     },
     {
       accessor: 'assets',
@@ -144,7 +147,11 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               Header: fieldLabel,
               Cell: ({ row }) => (
                 row.original[fieldName] ? <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
-              )
+              ),
+              Footer: (info) => {
+                const total = info?.rows?.filter(f => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName])).reduce((sum, row) => row.values[fieldName] + sum, 0)
+                return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
+              }
             })
           })
         }
@@ -160,27 +167,15 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       }
     });
     coloum.forEach(element => {
-      if (element.accessor.includes("detail")) {
-        element["Footer"] = () => {
-          return <>Total</>
-        }
-      }
-      else if (element.accessor === "qty") {
+      if (element.accessor === "qty") {
         element["Footer"] = (info) => {
           const qtyTotal = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
           return <>{qtyTotal}</>
         }
       }
-      else if (element.accessor.includes("finalPrice")) {
-        element["Footer"] = (info) => {
-          const total = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
-          return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
-        }
-      }
     });
     setColumns(coloum)
     fetchProductInventory();
-
   }
 
   const fetchProductInventory = async () => {
@@ -388,64 +383,60 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   }
 
   return (<Fragment>
+    <Box display="flex" justifyContent="flex-end" pt={1} pb={2}>
+      <Box display="flex" alignItems="center">
+        <Button
+          variant="contained"
+          color="primary"
+          type="button"
+          size="small"
+          disabled={disableAssignSerializedAssets()}
+          onClick={() => {
+            setAddSerializedAssetDialog(true)
+          }}
+        >
+          {`Assign ${routes.productInventory.title}`}
+        </Button>
+        <Box mx={1} />
+        <Button
+          variant="contained"
+          color="primary"
+          type="button"
+          size="small"
+          disabled={showManagePurchaseOrderDialog.products.length === 0}
+          onClick={() => {
+            setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: true }))
+          }}
+        >
+          {`Create ${routes.purchaseOrder.title}`}
+        </Button>
+        {poCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
+          <IconButton size="small" onClick={() => {
+            history.push(routes.purchaseOrder.path, {
+              rental: rentalManagementData,
+            })
+          }}>
+            <InfoIcon color={"primary"} />
+          </IconButton>
+        </HtmlTooltip>}
+        <Box mx={1} />
+        <Button
+          variant="contained"
+          color="primary"
+          type="button"
+          size="small"
+          disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
+          onClick={() => {
+            setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
+            setShowConfirmBox(true)
+          }}
+        >
+          Delete Assets
+        </Button>
+        <Box mx={1} />
+      </Box>
+    </Box>
     <Grid container spacing={2}>
-      <Grid item xs={12} sm={12} md={12} lg={12}>
-        <Box display="flex" mt={2} justifyContent="space-between" alignItems="center" padding={"4px"}>
-          {!isMobile && <h3 className="form-label-style" title={"Products and Packages"}>
-            {"Products and Packages"}
-          </h3>}
-          <div>
-            <Button
-              variant="contained"
-              color="primary"
-              type="button"
-              size="small"
-              disabled={disableAssignSerializedAssets()}
-              onClick={() => {
-                setAddSerializedAssetDialog(true)
-              }}
-            >
-              {`Assign ${routes.productInventory.title}`}
-            </Button>
-            <Box mx={1} component="span" />
-            <Button
-              variant="contained"
-              color="primary"
-              type="button"
-              size="small"
-              disabled={showManagePurchaseOrderDialog.products.length === 0}
-              onClick={() => {
-                setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: true }))
-              }}
-            >
-              {`Create ${routes.purchaseOrder.title}`}
-            </Button>
-            {poCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
-              <IconButton size="small" onClick={() => {
-                history.push(routes.purchaseOrder.path, {
-                  rental: rentalManagementData,
-                })
-              }}>
-                <InfoIcon color={"primary"} />
-              </IconButton>
-            </HtmlTooltip>}
-            <Box mx={1} component="span" />
-            <Button
-              variant="contained"
-              color="primary"
-              type="button"
-              size="small"
-              disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
-              onClick={() => {
-                setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
-                setShowConfirmBox(true)
-              }}
-            >
-              Delete Assets
-            </Button>
-          </div>
-        </Box>
-      </Grid>
       <Grid item xs={12} md={12} sm={12} >
         {columns && rowsData ?
           <Box

@@ -362,7 +362,7 @@ export default function NewCreateQuotePdfTemplate() {
                             path: routes.quotePdfTemplate.path
                         },
                         {
-                            title: id === '0' || isClone === true ? 'New' : initialValues && initialValues.name
+                            title: id === '0' ? 'New' : isClone === true ? 'Clone' : initialValues && initialValues.name
                         }
                     ]}
                     isConfirmBeforeClick={hasPermissionToUpdate}
@@ -601,7 +601,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     </Grid>
                                     <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
                                         <FormControlLabel
-                                            disabled={ !isClone && (!hasPermissionToUpdate)}
+                                            disabled={!isClone && (!hasPermissionToUpdate)}
                                             value={values['landscape']}
                                             control={
                                                 <Checkbox

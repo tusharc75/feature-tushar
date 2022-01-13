@@ -9,6 +9,7 @@ import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { GiHiveMind } from "react-icons/gi";
+import { SiMarketo,AiFillFileMarkdown,FaPercentage ,SiStatuspage,GoVersions} from "react-icons/all";
 import {
   isObjectEmpty,
   customerAccount,
@@ -811,6 +812,8 @@ const QuoteBuilders = () => {
               showCloneQuoteDialog={() => {
                 handleShowCloneQuoteDialog()
               }}
+              columns={columns}
+              dispatch={dispatch}
 
             >
               {accountDetails.accountId && (
@@ -896,6 +899,7 @@ const QuoteBuilders = () => {
                 ]}
                 chips={[
                   {
+                    icon:<GoVersions/>,
                     label: "Version(s): ",
                     field: "versionCount",
                     onClick: (data) => {
@@ -904,17 +908,23 @@ const QuoteBuilders = () => {
                     }
                   },
                   {
+                    icon:<SiStatuspage/>,
                     label: "Status: ",
                     field: "status",
                     chipColorVariable: quoteStepColors
+                
                   },
                   {
+                    icon:<AiFillFileMarkdown/>,
                     label:"Market:",
                     field:"marketSegment"
+                    
                   },
                   {
+                    icon:<SiMarketo />,
                     label:"Sub-Market:",
                     field:"subMarketSegment"
+                 
                   },
 
                 ]}

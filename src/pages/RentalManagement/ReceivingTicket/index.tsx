@@ -1,5 +1,5 @@
 import Box from "@material-ui/core/Box/Box";
-import { useState, useEffect, useReducer, useContext } from "react";
+import { useState, useEffect, useReducer, useContext, Fragment } from "react";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -16,7 +16,8 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
   gridLoadingTimeout, deliveryTicket, rentalManagement,
-  sidebarResource, productInventory as productInventoryHelperObject, INVENTORY_STATUS, DELIVERY_TICKET_STATUS
+  sidebarResource, productInventory as productInventoryHelperObject, INVENTORY_STATUS, DELIVERY_TICKET_STATUS,
+  DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE
 } from "../../../constants/helpers";
 import { groupBy } from "lodash";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -33,6 +34,7 @@ import CustomSwipableList from "../../../components/SwipableListComponents/Custo
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
+import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 
 const renderedFrom = "rentalManagementDetailsPageReceivingTicket"
 
@@ -68,6 +70,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
   const { isOffline } = useContext(CustomOfflineContext);
 
+  const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
+  const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -83,6 +88,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   const fetchRecords = async () => {
     try {
       setNextStep(false)
+      dispatch({ type: "loading", loading: true });
       if (gridApi) {
         gridApi.deselectAll();
       }
@@ -99,8 +105,14 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         productAssets = response?.data?.data
         productAssets = productAssets.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
 
-        const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=Rental Job&refrenceId=${rentalManagementData._id}`)
+        const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}`)
         deliveryTicketList = result?.data?.data
+      }
+
+      if (deliveryTicketList.length) {
+        if (deliveryTicketList.filter((e) => e.ticketType === DELIVERY_TICKET_TYPE.receiving && [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status)).length) {
+          setShowProcessDeliveryTicket(true)
+        }
       }
       deliveryTicketList?.map(obj => {
         productAssets?.map((d, index) => {
@@ -123,7 +135,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         d["isChecked"] = false;
         d["hideSelection"] = [INVENTORY_STATUS.indTransit, INVENTORY_STATUS.lost].includes(d.status);
       })
-      if (productAssets.filter((e) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(e.status)).length === productAssets.length) {
+      if (productAssets.filter((e) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.available, INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(e.status)).length === productAssets.length) {
         setNextStep(true)
       }
       dispatch({ type: "initialize", data: productAssets, count: productAssets.length });
@@ -179,7 +191,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "deliveryTicketRenderer" },
     { field: "receivingTicket", headerName: "Receiving Ticket", show: true, cellRenderer: "receivingTicketRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productNameRenderer" },
+    { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
@@ -202,122 +214,140 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
-      <Button
-        onClick={() => {
-          setDownlodingFile(true);
-          axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
-            .then(({ data }) => {
-              axiosInstance()
-                .get(`user/download?fileName=${data.data.fileName}`, {
-                  responseType: "blob",
-                })
-                .then(({ data }) => {
-                  const file = new Blob([data], { type: "application/pdf" });
-                  const fileURL = URL.createObjectURL(file);
-                  const pdfWindow = window.open();
-                  pdfWindow.location.href = fileURL;
-                  toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-                  setDownlodingFile(false);
-                })
-                .catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setDownlodingFile(false);
-                });
-            }).catch((err) => {
-              toastConfig.setToastConfig(err);
-              setDownlodingFile(false);
-            })
-        }}
-        variant="outlined"
-        color="primary"
-        type="button"
-        size="small"
-        disabled={downlodingFile || isOffline}
-        startIcon={<AiFillFilePdf />}
-      >
-        {downlodingFile ? "Please wait..." : "Preview"}
-      </Button>
-      <Box mx={1} />
-      <Button variant="outlined" color="primary" aria-controls="simple-menu"
-        aria-haspopup="true"
-        disabled={selectedRecords.length === 0 || isOffline}
-        size="small"
-        onClick={handleClick}
-        endIcon={<ArrowDropDownIcon />}>
-        Change Status
-      </Button>
-      <Menu
-        id="simple-menu"
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-        getContentAnchorEl={null}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <MenuItem onClick={() => {
-          setAnchorEl(null)
-          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
-        }}>Scrap</MenuItem>
-        <MenuItem onClick={() => {
-          setAnchorEl(null)
-          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
-        }}>Lost</MenuItem>
-      </Menu>
-      <Box mx={1} />
-      <IconButton
-        disabled={(selectedRecords.length === 0)
-          || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
-        onClick={() => {
-          handleReceivingTicketDialog(selectedRecords)
-        }}
-        color='primary'
-        size="small"
-      >
+      <Box display="flex" alignItems="center">
+        <Button
+          onClick={() => {
+            setDownlodingFile(true);
+            axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
+              .then(({ data }) => {
+                axiosInstance()
+                  .get(`user/download?fileName=${data.data.fileName}`, {
+                    responseType: "blob",
+                  })
+                  .then(({ data }) => {
+                    const file = new Blob([data], { type: "application/pdf" });
+                    const fileURL = URL.createObjectURL(file);
+                    const pdfWindow = window.open();
+                    pdfWindow.location.href = fileURL;
+                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                    setDownlodingFile(false);
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                  });
+              }).catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+              })
+          }}
+          variant="outlined"
+          color="primary"
+          type="button"
+          size="small"
+          disabled={downlodingFile || isOffline}
+          startIcon={<AiFillFilePdf />}
+        >
+          {downlodingFile ? "Please wait..." : "Preview"}
+        </Button>
+        <Box mx={1} />
+        <Button variant="outlined" color="primary" aria-controls="simple-menu"
+          aria-haspopup="true"
+          disabled={selectedRecords.length === 0 || isOffline}
+          size="small"
+          onClick={handleClick}
+          endIcon={<ArrowDropDownIcon />}>
+          Change Status
+        </Button>
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          {(selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
+            || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
+            <Fragment>
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: "" })
+              }}>{INVENTORY_STATUS.available}</MenuItem>
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.repair, message: "" })
+              }}>{INVENTORY_STATUS.repair}</MenuItem>
+            </Fragment>
+          }
+          <MenuItem onClick={() => {
+            setAnchorEl(null)
+            setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
+          }}>{INVENTORY_STATUS.scrap}</MenuItem>
+          <MenuItem onClick={() => {
+            setAnchorEl(null)
+            setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
+          }}>{INVENTORY_STATUS.lost}</MenuItem>
+        </Menu>
+        <Box mx={1} />
         <Tooltip
           title="Create Receiving Ticket">
           <Button
             variant="outlined"
             color="primary"
             size="small"
+            onClick={() => {
+              handleReceivingTicketDialog(selectedRecords)
+            }}
             disabled={(selectedRecords.length === 0)
               || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
           >
             Create Receiving Ticket
           </Button>
         </Tooltip>
-      </IconButton>
-      <Box mx={1} />
-      <IconButton
-        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
-          || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered))}
-        onClick={() => {
-          setShowRemoveAssetFromReceivingTicketDialog(true)
-        }}
-        color='primary'
-        size="small"
-      >
+        <Box mx={1} />
         <Tooltip
           title="Remove Assets From Receiving Ticket(s)">
           <Button
+            onClick={() => {
+              setShowRemoveAssetFromReceivingTicketDialog(true)
+            }}
             variant="outlined"
             color="primary"
             size="small"
             disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
-            || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered))}
+              || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered))}
           >
             Remove Assets
-          </Button>        
+          </Button>
         </Tooltip>
-      </IconButton>
-      <Box mx={1} />
+        <Box mx={1} />
+        {(showProcessDeliveryTicket && !isOffline) &&
+          <Fragment>
+            <Tooltip
+              title="Process Multiple Receiving Ticket(s)">
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                onClick={() => {
+                  setOpenDeliveryTicketDialog(true)
+                }}
+              >
+                Process Receiving Ticket
+              </Button>
+            </Tooltip>
+            <Box mx={1} />
+          </Fragment>}
+      </Box>
     </Box>
     <Grid item xs={12} md={12} sm={12} className="mt-3">
       {columns ?
@@ -442,20 +472,19 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
         <CustomDialogContent>
           <Box className="my-2">
-            {
-              statusToUpdate.status === "Repair" ? <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
-                : <TextField
-                  id="outlined-multiline-static"
-                  label={`Please enter the reason for ${statusToUpdate.status}`}
-                  multiline
-                  fullWidth
-                  rows={4}
-                  value={statusToUpdate.message}
-                  variant="outlined"
-                  onChange={(e) => {
-                    setStatusToUpdate(prevState => ({ ...prevState, message: e.target.value }))
-                  }}
-                />
+            {[INVENTORY_STATUS.available, INVENTORY_STATUS.repair].includes(statusToUpdate.status) ? <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
+              : <TextField
+                id="outlined-multiline-static"
+                label={`Please enter the reason for ${statusToUpdate.status}`}
+                multiline
+                fullWidth
+                rows={4}
+                value={statusToUpdate.message}
+                variant="outlined"
+                onChange={(e) => {
+                  setStatusToUpdate(prevState => ({ ...prevState, message: e.target.value }))
+                }}
+              />
             }
           </Box>
         </CustomDialogContent>
@@ -500,6 +529,16 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         </CustomDialogFooter>
       </Dialog>
     }
+    {openDeliveryTicketDialog &&
+      <MultipleTicket
+        refrenceData={rentalManagementData}
+        ticketType={DELIVERY_TICKET_TYPE.receiving}
+        refrenceType="Rental Job"
+        handleClose={() => {
+          setOpenDeliveryTicketDialog(false)
+          fetchRecords()
+        }}
+      />}
   </>
   );
 }

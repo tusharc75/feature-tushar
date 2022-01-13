@@ -1,5 +1,5 @@
 import Box from "@material-ui/core/Box/Box";
-import { useState, useEffect, useReducer, useContext } from "react";
+import { useState, useEffect, useReducer, useContext, Fragment } from "react";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -18,6 +18,8 @@ import {
   sidebarResource,
   INVENTORY_STATUS,
   DELIVERY_TICKET_STATUS,
+  DELIVERY_TICKET_TYPE,
+  DELIVERY_TICKET_REFRENCE_TYPE,
   productInventory
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -35,6 +37,7 @@ import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { makeStyles } from '@material-ui/core/styles';
+import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 
 const renderedFrom = "rentalManagementDetailsPageDeliveryTicket"
 
@@ -58,7 +61,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
   const [gridApi, setGridApi] = useState(null);
   const [warehouse, setWarehouse] = useState(null);
-  const [assignedSerializedAsset, setAssignedSerializedAsset] = useState([]);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [downlodingFile, setDownlodingFile] = useState(false)
@@ -71,6 +73,10 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
   const { isOffline } = useContext(CustomOfflineContext);
+
+
+  const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
+  const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
 
   useEffect(() => {
     fetchRecords();
@@ -93,15 +99,19 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       }
       else {
         const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
-        setAssignedSerializedAsset(response?.data?.data)
         productAssets = response?.data?.data
         productAssets = productAssets.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
 
-        const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=Rental Job&refrenceId=${rentalManagementData._id}`)
+        const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
         deliveryTicketList = result?.data?.data
       }
+      if (deliveryTicketList.length) {
+        if (deliveryTicketList.filter((e) => [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status)).length) {
+          setShowProcessDeliveryTicket(true)
+        }
+      }
       deliveryTicketList.map(obj => {
-        if (obj.ticketType === "Loading") {
+        if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           productAssets.map((d, index) => {
             if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
               productAssets[index]["type"] = obj?.type
@@ -164,7 +174,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "ticketRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productNameRenderer" },
+    { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
@@ -195,87 +205,83 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
-      <Button
-        onClick={() => {
-          setDownlodingFile(true);
-          axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
-            .then(({ data }) => {
-              axiosInstance()
-                .get(`user/download?fileName=${data.data.fileName}`, {
-                  responseType: "blob",
-                })
-                .then(({ data }) => {
-                  const file = new Blob([data], { type: "application/pdf" });
-                  const fileURL = URL.createObjectURL(file);
-                  const pdfWindow = window.open();
-                  pdfWindow.location.href = fileURL;
-                  toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-                  setDownlodingFile(false);
-                })
-                .catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setDownlodingFile(false);
-                });
-            }).catch((err) => {
-              toastConfig.setToastConfig(err);
-              setDownlodingFile(false);
-            })
-        }}
-        variant="outlined"
-        color="primary"
-        type="button"
-        size="small"
-        disabled={downlodingFile || isOffline}
-        startIcon={<AiFillFilePdf />}
-      >
-        {downlodingFile ? "Please wait..." : "Preview"}
-      </Button>
-      <Box mx={1} />
-      <Button variant="outlined" color="primary" aria-controls="simple-menu"
-        aria-haspopup="true"
-        disabled={selectedRecords.length === 0 || isOffline}
-        size="small"
-        onClick={handleClick}
-        endIcon={<ArrowDropDownIcon />}>
-        Change Status
-      </Button>
-      <Menu
-        id="simple-menu"
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-        getContentAnchorEl={null}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <MenuItem onClick={() => {
-          setAnchorEl(null)
-          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
-        }}>Scrap</MenuItem>
-        <MenuItem onClick={() => {
-          setAnchorEl(null)
-          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
-        }}>Lost</MenuItem>
-      </Menu>
-      <Box mx={1} />
-      <IconButton
-        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
-        onClick={() => {
-          handleDeliveryTicketDialog(selectedRecords, warehouse)
-        }}
-        color='primary'
-        size="small"
-      >
+      <Box display="flex" alignItems="center">
+        <Button
+          onClick={() => {
+            setDownlodingFile(true);
+            axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
+              .then(({ data }) => {
+                axiosInstance()
+                  .get(`user/download?fileName=${data.data.fileName}`, {
+                    responseType: "blob",
+                  })
+                  .then(({ data }) => {
+                    const file = new Blob([data], { type: "application/pdf" });
+                    const fileURL = URL.createObjectURL(file);
+                    const pdfWindow = window.open();
+                    pdfWindow.location.href = fileURL;
+                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                    setDownlodingFile(false);
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                  });
+              }).catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+              })
+          }}
+          variant="outlined"
+          color="primary"
+          type="button"
+          size="small"
+          disabled={downlodingFile || isOffline}
+          startIcon={<AiFillFilePdf />}
+        >
+          {downlodingFile ? "Please wait..." : "Preview"}
+        </Button>
+        <Box mx={1} />
+        <Button variant="outlined" color="primary" aria-controls="simple-menu"
+          aria-haspopup="true"
+          disabled={selectedRecords.length === 0 || isOffline}
+          size="small"
+          onClick={handleClick}
+          endIcon={<ArrowDropDownIcon />}>
+          Change Status
+        </Button>
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          <MenuItem onClick={() => {
+            setAnchorEl(null)
+            setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
+          }}>Scrap</MenuItem>
+          <MenuItem onClick={() => {
+            setAnchorEl(null)
+            setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
+          }}>Lost</MenuItem>
+        </Menu>
+        <Box mx={1} />
         <Tooltip
           title="Create Loading Ticket">
           <Button
+            onClick={() => {
+              handleDeliveryTicketDialog(selectedRecords, warehouse)
+            }}
             variant="outlined"
             color="primary"
             size="small"
@@ -284,29 +290,40 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             Create Loading Ticket
           </Button>
         </Tooltip>
-      </IconButton>
-      <Box mx={1} />
-      <IconButton
-        disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
-        onClick={() => {
-          setShowRemoveAssetFromLoadingTicketDialog(true)
-        }}
-        color='primary'
-        size="small"
-      >
+        <Box mx={1} />
         <Tooltip
           title="Remove Assets From Loading Ticket(s)">
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
-              disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
-            >
-              Remove Assets
-            </Button>
+          <Button
+            onClick={() => {
+              setShowRemoveAssetFromLoadingTicketDialog(true)
+            }}
+            variant="outlined"
+            color="primary"
+            size="small"
+            disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
+          >
+            Remove Assets
+          </Button>
         </Tooltip>
-      </IconButton>
-      <Box mx={1} />
+        <Box mx={1} />
+        {(showProcessDeliveryTicket && !isOffline) &&
+          <Fragment>
+            <Tooltip
+              title="Process Multiple Loading Ticket(s)">
+              <Button
+                onClick={() => {
+                  setOpenDeliveryTicketDialog(true)
+                }}
+                variant="outlined"
+                color="primary"
+                size="small"
+              >
+                Process Loading Ticket
+              </Button>
+            </Tooltip>
+            <Box mx={1} />
+          </Fragment>}
+      </Box>
     </Box>
     <Grid item xs={12} md={12} sm={12} className="mt-3">
       {columns ?
@@ -375,8 +392,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     </Grid>
     {showDeliveryTicketDialog && (
       <ManageDeliveryTicket
-        ticketType="Loading"
-        refrenceType="Rental Job"
+        ticketType={DELIVERY_TICKET_TYPE.loading}
+        refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
         refrenceData={rentalManagementData}
         onClose={() => setShowDeliveryTicketDialog(false)}
         productInventory={productInventoryForDeliveryTicket}
@@ -491,6 +508,16 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         </CustomDialogFooter>
       </Dialog>
     }
+    {openDeliveryTicketDialog &&
+      <MultipleTicket
+        refrenceData={rentalManagementData}
+        ticketType={DELIVERY_TICKET_TYPE.loading}
+        refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
+        handleClose={() => {
+          setOpenDeliveryTicketDialog(false)
+          fetchRecords()
+        }}
+      />}
   </>
   );
 }

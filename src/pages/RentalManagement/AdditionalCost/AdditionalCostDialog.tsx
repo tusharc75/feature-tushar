@@ -63,6 +63,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
   }
 
   const handleSubmit = (values) => {
+    setLoading(true)
     if (!costData) {
       let returnData = []
       returnData = [{ ...values }]
@@ -197,7 +198,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
               >{"Close"}</Button>
               <CustomButton
                 loading={loading}
-                disabled={isEqual(ref?.current?.values, initialData.values)}
+                disabled={loading || isEqual(ref?.current?.values, initialData.values)}
                 variant="contained"
                 color="primary"
                 type="submit"
@@ -207,7 +208,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
             </CustomDialogFooter>
             {showConfirmDialog ?
               <ConfirmCancelDialog
-              close={() => setShowConfirmDialog(false)}
+                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false)
