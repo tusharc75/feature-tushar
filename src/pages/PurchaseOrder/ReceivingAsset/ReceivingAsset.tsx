@@ -51,7 +51,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
     const columns = [
         {
             accessor: 'description',
-            Header: 'Product Description',
+            Header: 'Product Type',
             Cell: ({ row }) => (
                 <div className="d-flex gap-2 align-items-center">
                     <p
