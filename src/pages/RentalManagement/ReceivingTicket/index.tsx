@@ -214,124 +214,112 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
-      <Button
-        onClick={() => {
-          setDownlodingFile(true);
-          axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
-            .then(({ data }) => {
-              axiosInstance()
-                .get(`user/download?fileName=${data.data.fileName}`, {
-                  responseType: "blob",
-                })
-                .then(({ data }) => {
-                  const file = new Blob([data], { type: "application/pdf" });
-                  const fileURL = URL.createObjectURL(file);
-                  const pdfWindow = window.open();
-                  pdfWindow.location.href = fileURL;
-                  toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-                  setDownlodingFile(false);
-                })
-                .catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setDownlodingFile(false);
-                });
-            }).catch((err) => {
-              toastConfig.setToastConfig(err);
-              setDownlodingFile(false);
-            })
-        }}
-        variant="outlined"
-        color="primary"
-        type="button"
-        size="small"
-        disabled={downlodingFile || isOffline}
-        startIcon={<AiFillFilePdf />}
-      >
-        {downlodingFile ? "Please wait..." : "Preview"}
-      </Button>
-      <Box mx={1} />
-      <Button variant="outlined" color="primary" aria-controls="simple-menu"
-        aria-haspopup="true"
-        disabled={selectedRecords.length === 0 || isOffline}
-        size="small"
-        onClick={handleClick}
-        endIcon={<ArrowDropDownIcon />}>
-        Change Status
-      </Button>
-      <Menu
-        id="simple-menu"
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-        getContentAnchorEl={null}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        {(selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
-          || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
-          <Fragment>
-            <MenuItem onClick={() => {
-              setAnchorEl(null)
-              setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: "" })
-            }}>{INVENTORY_STATUS.available}</MenuItem>
-            <MenuItem onClick={() => {
-              setAnchorEl(null)
-              setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.repair, message: "" })
-            }}>{INVENTORY_STATUS.repair}</MenuItem>
-          </Fragment>
-        }
-        <MenuItem onClick={() => {
-          setAnchorEl(null)
-          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
-        }}>{INVENTORY_STATUS.scrap}</MenuItem>
-        <MenuItem onClick={() => {
-          setAnchorEl(null)
-          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
-        }}>{INVENTORY_STATUS.lost}</MenuItem>
-      </Menu>
-      <Box mx={1} />
-      <IconButton
-        disabled={(selectedRecords.length === 0)
-          || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
-        onClick={() => {
-          handleReceivingTicketDialog(selectedRecords)
-        }}
-        color='primary'
-        size="small"
-      >
+      <Box display="flex" alignItems="center">
+        <Button
+          onClick={() => {
+            setDownlodingFile(true);
+            axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
+              .then(({ data }) => {
+                axiosInstance()
+                  .get(`user/download?fileName=${data.data.fileName}`, {
+                    responseType: "blob",
+                  })
+                  .then(({ data }) => {
+                    const file = new Blob([data], { type: "application/pdf" });
+                    const fileURL = URL.createObjectURL(file);
+                    const pdfWindow = window.open();
+                    pdfWindow.location.href = fileURL;
+                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                    setDownlodingFile(false);
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                  });
+              }).catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+              })
+          }}
+          variant="outlined"
+          color="primary"
+          type="button"
+          size="small"
+          disabled={downlodingFile || isOffline}
+          startIcon={<AiFillFilePdf />}
+        >
+          {downlodingFile ? "Please wait..." : "Preview"}
+        </Button>
+        <Box mx={1} />
+        <Button variant="outlined" color="primary" aria-controls="simple-menu"
+          aria-haspopup="true"
+          disabled={selectedRecords.length === 0 || isOffline}
+          size="small"
+          onClick={handleClick}
+          endIcon={<ArrowDropDownIcon />}>
+          Change Status
+        </Button>
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          {(selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
+            || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
+            <Fragment>
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: "" })
+              }}>{INVENTORY_STATUS.available}</MenuItem>
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.repair, message: "" })
+              }}>{INVENTORY_STATUS.repair}</MenuItem>
+            </Fragment>
+          }
+          <MenuItem onClick={() => {
+            setAnchorEl(null)
+            setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
+          }}>{INVENTORY_STATUS.scrap}</MenuItem>
+          <MenuItem onClick={() => {
+            setAnchorEl(null)
+            setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
+          }}>{INVENTORY_STATUS.lost}</MenuItem>
+        </Menu>
+        <Box mx={1} />
         <Tooltip
           title="Create Receiving Ticket">
           <Button
             variant="outlined"
             color="primary"
             size="small"
+            onClick={() => {
+              handleReceivingTicketDialog(selectedRecords)
+            }}
             disabled={(selectedRecords.length === 0)
               || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
           >
             Create Receiving Ticket
           </Button>
         </Tooltip>
-      </IconButton>
-      <Box mx={1} />
-      <IconButton
-        disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
-          || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered))}
-        onClick={() => {
-          setShowRemoveAssetFromReceivingTicketDialog(true)
-        }}
-        color='primary'
-        size="small"
-      >
+        <Box mx={1} />
         <Tooltip
           title="Remove Assets From Receiving Ticket(s)">
           <Button
+            onClick={() => {
+              setShowRemoveAssetFromReceivingTicketDialog(true)
+            }}
             variant="outlined"
             color="primary"
             size="small"
@@ -341,30 +329,25 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             Remove Assets
           </Button>
         </Tooltip>
-      </IconButton>
-      <Box mx={1} />
-      {(showProcessDeliveryTicket && !isOffline) &&
-        <Fragment>
-          <IconButton
-            onClick={() => {
-              setOpenDeliveryTicketDialog(true)
-            }}
-            color='primary'
-            size="small"
-          >
+        <Box mx={1} />
+        {(showProcessDeliveryTicket && !isOffline) &&
+          <Fragment>
             <Tooltip
               title="Process Multiple Receiving Ticket(s)">
               <Button
                 variant="outlined"
                 color="primary"
                 size="small"
+                onClick={() => {
+                  setOpenDeliveryTicketDialog(true)
+                }}
               >
                 Process Receiving Ticket
               </Button>
             </Tooltip>
-          </IconButton>
-          <Box mx={1} />
-        </Fragment>}
+            <Box mx={1} />
+          </Fragment>}
+      </Box>
     </Box>
     <Grid item xs={12} md={12} sm={12} className="mt-3">
       {columns ?
