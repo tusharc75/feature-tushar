@@ -113,6 +113,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         if (deliveryTicketList.filter((e) => e.ticketType === DELIVERY_TICKET_TYPE.receiving && [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status)).length) {
           setShowProcessDeliveryTicket(true)
         }
+        else {
+          setShowProcessDeliveryTicket(false)
+        }
       }
       deliveryTicketList?.map(obj => {
         productAssets?.map((d, index) => {
