@@ -12,6 +12,7 @@ import { GiBackwardTime } from "react-icons/gi";
 import { RiShareForwardFill } from "react-icons/ri";
 import { TiArrowBack } from "react-icons/ti";
 import IconButton from '@material-ui/core/IconButton';
+import CustomMobileStepperOpportunities from "../../../../components/CustomMobileStepperOpportunities";
 
 
 import {
@@ -32,8 +33,8 @@ import {
   IoIosArrowDropleftCircle,
 } from "react-icons/io";
 import { GoPencil } from "react-icons/go";
-import { BsCheckCircle } from "react-icons/bs";
-import { AiOutlineCloseCircle } from "react-icons/ai";
+import { BsCheckCircle, BsChevronRight } from "react-icons/bs";
+import { AiOutlineCloseCircle, AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
 import { FcCancel } from "react-icons/fc";
 import { FcClock } from "react-icons/fc";
 import { FcApproval } from "react-icons/fc";
@@ -363,45 +364,80 @@ const Steps = (props) => {
   return (
     <div>
       {
-        isMobile && !isTablet ? <div>
-          <MobileStepper
-            style={{ background: "#dee2e6" }}
-            variant="dots"
-            steps={DOAData ? DOAData.length : steps.length}
-            position="bottom"
-            activeStep={activeStep}
-            nextButton={
-              !allowedToEdit ||
+        isMobile && !isTablet ? 
+        // <div>
+        //   <MobileStepper
+        //     style={{ background: "#dee2e6" }}
+        //     variant="dots"
+        //     steps={DOAData ? DOAData.length : steps.length}
+        //     position="bottom"
+        //     activeStep={activeStep}
+        //     nextButton={
+        //       !allowedToEdit ||
+        //         loading || globalLoading ||
+        //         !nextStep ||
+        //         versionStatus.includes("Sent for DOA") ||
+        //         versionStatus.includes("Accepted  by DOA") ||
+        //         steps[currentStep]?.key === "DOA Process" ||
+        //         approvedQuote.approved
+        //         ? <Button size="small" disabled variant="contained">
+        //           {steps[activeStep + 1]?.label ?? ""}
+        //         </Button>
+        //         : <Button size="small" disabled={loading} color="primary" onClick={handleNext} variant="contained" endIcon={<KeyboardArrowRight />}>
+        //           {steps[activeStep + 1]?.label ?? ""}
+        //         </Button>
+        //     }
+        //     backButton={
+        //       currentStep <= 0 || !allowedToEdit ||
+        //         versionStatus.includes("Rejected by Customer") ||
+        //         (steps.length === 5 && currentStep > 3) ||
+        //         versionStatus.includes("Sent for DOA") ||
+        //         (steps.length === 6 && currentStep >= 4) ||
+        //         versionStatus.includes("Sent to Customer") ||
+        //         loading || globalLoading
+        //         ? <Button size="small" disabled variant="contained" startIcon={<KeyboardArrowLeft />}>
+        //           {steps[activeStep - 1]?.label ?? ""}
+        //         </Button>
+        //         : <Button size="small" disabled={loading} color="primary" onClick={handleBack} variant="contained" startIcon={<KeyboardArrowLeft />}>
+        //           {steps[activeStep - 1]?.label ?? ""}
+        //         </Button>
+        //     }
+        //   />
+        // </div> 
+        <CustomMobileStepperOpportunities 
+        stepName={((activeStep + 1) + "/" + steps.length) + " " + steps[activeStep]?.label} 
+        nextButton={
+            !allowedToEdit ||
                 loading || globalLoading ||
                 !nextStep ||
                 versionStatus.includes("Sent for DOA") ||
                 versionStatus.includes("Accepted  by DOA") ||
                 steps[currentStep]?.key === "DOA Process" ||
                 approvedQuote.approved
-                ? <Button size="small" disabled variant="contained">
-                  {steps[activeStep + 1]?.label ?? ""}
+                ? <Button size="small" disabled variant="text" endIcon={<AiOutlineRight /> }  className="ml-1 MobileStep-next-back-button">
+                  {"Next"}
                 </Button>
-                : <Button size="small" disabled={loading} color="primary" onClick={handleNext} variant="contained" endIcon={<KeyboardArrowRight />}>
-                  {steps[activeStep + 1]?.label ?? ""}
+                : <Button size="small" disabled={loading} color="primary" onClick={handleNext} variant="text" endIcon={<AiOutlineRight />} className="ml-1 MobileStep-next-back-button">
+                  {"Next"}
                 </Button>
-            }
-            backButton={
-              currentStep <= 0 || !allowedToEdit ||
-                versionStatus.includes("Rejected by Customer") ||
-                (steps.length === 5 && currentStep > 3) ||
-                versionStatus.includes("Sent for DOA") ||
-                (steps.length === 6 && currentStep >= 4) ||
-                versionStatus.includes("Sent to Customer") ||
-                loading || globalLoading
-                ? <Button size="small" disabled variant="contained" startIcon={<KeyboardArrowLeft />}>
-                  {steps[activeStep - 1]?.label ?? ""}
-                </Button>
-                : <Button size="small" disabled={loading} color="primary" onClick={handleBack} variant="contained" startIcon={<KeyboardArrowLeft />}>
-                  {steps[activeStep - 1]?.label ?? ""}
-                </Button>
-            }
-          />
-        </div> :
+
+
+        } backButton={
+          currentStep <= 0 || !allowedToEdit ||
+          versionStatus.includes("Rejected by Customer") ||
+          (steps.length === 5 && currentStep > 3) ||
+          versionStatus.includes("Sent for DOA") ||
+          (steps.length === 6 && currentStep >= 4) ||
+          versionStatus.includes("Sent to Customer") ||
+          loading || globalLoading
+          ? <Button size="small" disabled variant="text" startIcon={<AiOutlineLeft />} className="mr-1 MobileStep-next-back-button">
+            {"Back"}
+          </Button>
+          : <Button size="small" disabled={loading} color="primary" onClick={handleBack} variant="text" startIcon={<AiOutlineLeft />} className="mr-1 MobileStep-next-back-button">
+            {"Back"}
+          </Button>
+           }   /> 
+           :  
           <>
             <div className="position-relative">
               {!versionStatus.includes("Accepted by Customer") &&
