@@ -386,7 +386,7 @@ export default function QuoteProcess(props) {
           }
         });
     }
-  }, [DOAsetup]);
+  }, [DOAsetup, DOAlimit]);
 
   const fetchDOAData = () => {
     if ((ProcessStatus === 'DOA Process' && DOAneeded) || (versionStatus.includes('Rejected by DOA') && ProcessStatus === 'End')) {

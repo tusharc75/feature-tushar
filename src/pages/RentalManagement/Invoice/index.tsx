@@ -7,7 +7,7 @@ import { CommonRenderer, DateRenderer, } from "../../../components/AgGridCompone
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, Dialog, IconButton } from "@material-ui/core";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, rentalManagement, sidebarResource } from "../../../constants/helpers";
+import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, rentalManagement, RENTAL_STATUS, sidebarResource } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
@@ -236,7 +236,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
   return (<>
     <Box display="flex" justifyContent="space-between" m={1}>
       <Box display="flex" alignItems="center">
-        {!isOffline &&
+        {(!isOffline && ![RENTAL_STATUS.invoiced, RENTAL_STATUS.closed].includes(rentalManagementData.status)) &&
           <Fragment>
             <Button
               variant="outlined"
@@ -258,7 +258,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             color="primary"
             type="button"
             size="small"
-            style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
+            style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
             disabled={downlodingFile === "Preview" ? true : (false || isOffline)}
             startIcon={isMobile ? '' : <AiFillFilePdf />}
             onClick={() => handlePDF("Preview")}
@@ -273,7 +273,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             color="primary"
             type="button"
             size="small"
-            style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+            style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
             disabled={downlodingFile === "Download" ? true : (false || isOffline)}
             startIcon={isMobile ? '' : <IoMdDownload />}
             onClick={() => handlePDF("Download")}
@@ -286,7 +286,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           variant={isMobile && !isTablet ? 'text' : 'outlined'}
           color="primary"
           size="small"
-          style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
+          style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
           disabled={downlodingFile === "Email" ? true : (false || isOffline)}
           onClick={() => {
             fetchEmailsData()

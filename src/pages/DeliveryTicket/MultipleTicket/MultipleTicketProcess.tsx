@@ -137,48 +137,38 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
 
     return (<>
         <Box display="flex" justifyContent="flex-end" pt={1}>
-            <IconButton
-                disabled={selectedRecords.length === 0}
-                onClick={() => {
-                    setOpenSignatureDialog({ label: "Sign-off - Dispatch", open: true })
-                }}
-                color='primary'
-                size="small"
-            >
+            <Box display="flex" alignItems="center">
                 <Tooltip
                     title="Sign-off - Dispatch">
                     <Button
                         variant="outlined"
                         color="primary"
                         size="small"
+                        onClick={() => {
+                            setOpenSignatureDialog({ label: "Sign-off - Dispatch", open: true })
+                        }}
                         disabled={selectedRecords.length === 0 || (selectedRecords.some(f => f.status !== DELIVERY_TICKET_STATUS.new))}
                     >
                         Sign-off - Dispatch
                     </Button>
                 </Tooltip>
-            </IconButton>
-            <Box mx={1} />
-            <IconButton
-                disabled={selectedRecords.length === 0}
-                onClick={() => {
-                    setOpenSignatureDialog({ label: "Sign-off - Delivery", open: true })
-                }}
-                color='primary'
-                size="small"
-            >
+                <Box mx={1} />
                 <Tooltip
                     title="Sign-off - Delivery">
                     <Button
                         variant="outlined"
                         color="primary"
                         size="small"
+                        onClick={() => {
+                            setOpenSignatureDialog({ label: "Sign-off - Delivery", open: true })
+                        }}
                         disabled={selectedRecords.length === 0 || (selectedRecords.some(f => f.status !== DELIVERY_TICKET_STATUS.indTransit))}
                     >
                         Sign-off - Delivery
                     </Button>
                 </Tooltip>
-            </IconButton>
-            <Box mx={1} />
+                <Box mx={1} />
+            </Box>
         </Box>
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns && frameWorkComponent ?

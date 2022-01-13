@@ -107,8 +107,11 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         deliveryTicketList = result?.data?.data
       }
       if (deliveryTicketList.length) {
-        if (deliveryTicketList.filter((e) => [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status)).length) {
+        if ((deliveryTicketList.filter((e) => [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status))).length > 0) {
           setShowProcessDeliveryTicket(true)
+        }
+        else {
+          setShowProcessDeliveryTicket(false)
         }
       }
       deliveryTicketList.map(obj => {
@@ -244,10 +247,10 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           type="button"
           size="small"
           disabled={downlodingFile || isOffline}
-          style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
+          style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
           startIcon={isMobile ? '' : <AiFillFilePdf />}
         >
-          {isMobile && !isTablet ? <AiFillFilePdf size={18}/> : isMobile && !isTablet ? <AiFillFilePdf size={18}/> : downlodingFile ? "Please wait..." : "Preview"}
+          {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
         </Button>
         <Box mx={1} />
         <Button variant={isMobile && !isTablet ? 'text' : 'outlined'} color="primary" aria-controls="simple-menu"
@@ -255,7 +258,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           disabled={selectedRecords.length === 0 || isOffline}
           size="small"
           onClick={handleClick}
-          style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+          style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
           endIcon={<ArrowDropDownIcon />}>
           {isMobile && !isTablet ? <RiExchangeFundsLine size={20} /> : 'Change Status'}
         </Button>
@@ -294,10 +297,10 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             variant={isMobile && !isTablet ? "text" : "outlined"}
             color="primary"
             size="small"
-            style={isMobile && !isTablet ? {color:"#FFD700"} : {}}
+            style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
             disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
           >
-           {isMobile && !isTablet ? <AiOutlineLoading3Quarters size={18} /> : 'Create Loading Ticket'}
+            {isMobile && !isTablet ? <AiOutlineLoading3Quarters size={18} /> : 'Create Loading Ticket'}
           </Button>
         </Tooltip>
         <Box mx={1} />
@@ -310,10 +313,10 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             variant={isMobile && !isTablet ? "text" : "outlined"}
             color="primary"
             size="small"
-            style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
+            style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
             disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
           >
-            {isMobile && !isTablet ? <IoRemoveCircleOutline size={22}/> :  "Remove Assets" }
+            {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : "Remove Assets"}
           </Button>
         </Tooltip>
         <Box mx={1} />
@@ -325,12 +328,11 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
                 onClick={() => {
                   setOpenDeliveryTicketDialog(true)
                 }}
-                variant={isMobile && !isTablet ? "text" : "outlined"}
+                variant={isMobile && !isTablet ? "text" : "contained"}
                 color="primary"
-                style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
                 size="small"
               >
-                 {isMobile && !isTablet ? <IoRemoveCircleOutline size={22}/> :  "Process Loading Ticket" } 
+                {isMobile && !isTablet ? <AddBoxRoundedIcon /> : "Process Loading Ticket"}
               </Button>
             </Tooltip>
             <Box mx={1} />
@@ -456,38 +458,38 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           okBtnLoading={okBtnLoading}
         />
       )}
-      {statusToUpdate.open && (
-        <Dialog
-          open
-          classes={{
-            paper: classes.paper
-          }}
+    {statusToUpdate.open && (
+      <Dialog
+        open
+        classes={{
+          paper: classes.paper
+        }}
+        onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
+      >
+        <CustomDialogHeader
+          title="Are you sure ?"
+          showRequiredLabel={false}
           onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
-        >
-          <CustomDialogHeader
-            title="Are you sure ?"
-            showRequiredLabel={false}
-            onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
-          />
+        />
 
-          <CustomDialogContent>
-            <Box className="my-2">
-              {statusToUpdate.status === 'Repair' ? (
-                <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
-              ) : (
-                <TextField
-                  id="outlined-multiline-static"
-                  label={`Please enter the reason for ${statusToUpdate.status}`}
-                  multiline
-                  fullWidth
-                  rows={4}
-                  value={statusToUpdate.message}
-                  variant="outlined"
-                  onChange={(e) => {
-                    setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
-                  }}
-                />
-              )}
+        <CustomDialogContent>
+          <Box className="my-2">
+            {statusToUpdate.status === 'Repair' ? (
+              <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
+            ) : (
+              <TextField
+                id="outlined-multiline-static"
+                label={`Please enter the reason for ${statusToUpdate.status}`}
+                multiline
+                fullWidth
+                rows={4}
+                value={statusToUpdate.message}
+                variant="outlined"
+                onChange={(e) => {
+                  setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
+                }}
+              />
+            )}
           </Box>
         </CustomDialogContent>
         <CustomDialogFooter>
@@ -530,7 +532,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           </Button>
         </CustomDialogFooter>
       </Dialog>
-      )}
+    )}
     {openDeliveryTicketDialog &&
       <MultipleTicket
         refrenceData={rentalManagementData}
