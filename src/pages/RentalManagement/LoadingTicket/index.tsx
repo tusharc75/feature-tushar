@@ -107,8 +107,11 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         deliveryTicketList = result?.data?.data
       }
       if (deliveryTicketList.length) {
-        if (deliveryTicketList.filter((e) => [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status)).length) {
+        if ((deliveryTicketList.filter((e) => [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status))).length > 0) {
           setShowProcessDeliveryTicket(true)
+        }
+        else {
+          setShowProcessDeliveryTicket(false)
         }
       }
       deliveryTicketList.map(obj => {
