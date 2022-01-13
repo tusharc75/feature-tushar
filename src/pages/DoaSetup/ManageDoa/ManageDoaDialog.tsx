@@ -392,10 +392,14 @@ const DoaDialog = ({
                                               >
                                                 <Delete />
                                               </IconButton>
+                                              <Tooltip
+                                                title={userVal.disable ? "User Disabled" : "User Enabled"}
+                                              >
                                               <FormControlLabel
                                                 key={1}
                                                 control={
                                                   <Switch
+                                                    color={userVal.disable ? 'primary' : 'secondary'}
                                                     checked={userVal.disable}
                                                     name="disable"
                                                     onChange={(e) => {
@@ -406,6 +410,7 @@ const DoaDialog = ({
                                                 }
                                                 label=""
                                               />
+                                            </Tooltip>
                                             </ButtonGroup>
                                           </Grid>
                                         </Grid>
