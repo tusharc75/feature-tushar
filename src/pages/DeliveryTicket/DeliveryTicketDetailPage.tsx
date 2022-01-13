@@ -26,7 +26,7 @@ import moment from 'moment';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 import { FaFileSignature, FaSignature, FaWpforms } from "react-icons/fa";
 import { BiEdit, BiFoodMenu } from "react-icons/bi";
-import { prepareDataForGrid } from "../../constants/helpers"
+import { prepareDataForGrid, DELIVERY_TICKET_MAPPED_STATUS } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -59,10 +59,6 @@ function a11yProps(index: any) {
 
 const renderedFrom = "deliveryTicketDetailInventoryPage"
 
-const mappedStatus = {
-  "Sign-off - Dispatch": "In-Transit",
-  "Sign-off - Delivery": "Delivered"
-}
 
 export default function DeliveryTicketDetail(props) {
   const history = useHistory();
@@ -390,10 +386,10 @@ export default function DeliveryTicketDetail(props) {
   };
 
   const handleChangeStatus = (label) => {
-    if (mappedStatus[label]) {
+    if (DELIVERY_TICKET_MAPPED_STATUS[label]) {
       const fieldsDataForUpdate = deliveryTicketFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       let values = getObjKeysWithValues(deliveryTicketData, fieldsDataForUpdate)
-      values["status"] = mappedStatus[label]
+      values["status"] = DELIVERY_TICKET_MAPPED_STATUS[label]
       values["_id"] = deliveryTicketData._id
       axiosInstance().put(`${deliveryTicketApi}`, values).then(({ data: { data } }) => {
         fetchDeliveryTicketData()

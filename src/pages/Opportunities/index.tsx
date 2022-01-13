@@ -27,7 +27,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { prepareDataForGrid } from "../../constants/helpers"
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
 import { MdAccountCircle, MdAdd } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
+import { AiFillCrown,SiMarketo,AiFillFileMarkdown,FaPercentage } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaSuitcase } from 'react-icons/fa';
@@ -540,6 +540,7 @@ const Opportunities = () => {
             heading={routes.opportunity.title}
             showTransferEntityDialog={handleTransferEntityDialog}
             columns={columns}
+            dispatch={dispatch}
           >
             {accountDetails.accountId && (
               <Chip
@@ -595,7 +596,7 @@ const Opportunities = () => {
               ]}
               chips={[
                 {
-                  icon: <MdAdd/>,
+                  icon: <FaPercentage/>,
                   label: "Probability :",
                   field: "probability"
                   
@@ -603,10 +604,12 @@ const Opportunities = () => {
                   
                 },
                 {
+                  icon: <AiFillFileMarkdown/>,
                   label:"Market:",
                   field:"marketSegment",
                 },
                 {
+                  icon: <SiMarketo/>,
                   label:"Sub-Market:",
                   field:"subMarketSegment"
                 },

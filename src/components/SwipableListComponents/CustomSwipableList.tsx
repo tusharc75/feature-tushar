@@ -81,7 +81,7 @@ export default function CustomSwipableList({
                                 onChange={(e) => {
                                     setIsAllChecked(e.target.checked);
                                     const updatedMetadata = dataRows.map(d => {
-                                        return { ...d, isChecked: e.target.checked };
+                                        return { ...d, isChecked: !d.hideSelection ? e.target.checked : false };
                                     })
                                     dispatch({
                                         type: 'selection',
@@ -199,20 +199,20 @@ export default function CustomSwipableList({
                                     </div>
                                     {
                                         chips.length > 0 &&
-                                        
+
                                         <div className="d-flex gap-2 mt-1 mb-1 flex-wrap ml-2">
                                             {
                                                 [
                                                     ...chips.map(c => (
                                                         c.forceShow === true || d[c.field] ? <Chip className="overflow-hidden " key={c.field}
                                                             onClick={c.onClick ? () => c.onClick(d, index) : null}
-                                                            size="small" icon={c.icon} color={c.color} label={`${c.label} ${(c.fieldType === "date" ? moment(d[c.field]).format(dateFormat) : d[c.field]) ?? ""}`} style={c.setBackground && c.setBackground(d) ? c.setBackground(d) : c.chipColorVariable ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase()) : {} }
+                                                            size="small" icon={c.icon} color={c.color} label={`${c.label} ${(c.fieldType === "date" ? moment(d[c.field]).format(dateFormat) : d[c.field]) ?? ""}`} style={c.setBackground && c.setBackground(d) ? c.setBackground(d) : c.chipColorVariable ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase()) : {}}
                                                         /> : <Fragment key={c.field}></Fragment>
                                                     ))
                                                 ]
                                             }
                                         </div>
-                                        
+
                                     }
                                     {
                                         owerCollaboratorInitialsOrImages && d[owerCollaboratorInitialsOrImages]?.length > 0 && <div className="avatars ml-2 mt-2">
