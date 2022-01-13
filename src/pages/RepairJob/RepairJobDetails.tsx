@@ -95,7 +95,7 @@ const RepairJobDetails = () => {
   const commonStep1Columns = [
     { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "assetNumberRenderer", width: 300, required: false },
     { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer", required: false },
-    { field: "product", headerName: "Product Description", show: true, cellRenderer: "commonRenderer", required: false },
+    { field: "product", headerName: "Product Type", show: true, cellRenderer: "commonRenderer", required: false },
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer", required: false },
   ];
 
