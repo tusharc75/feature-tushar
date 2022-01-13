@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { Grid, Button, TextField, Box, useMediaQuery, useTheme, CircularProgress } from '@material-ui/core';
+import { Grid, Button, TextField, Box, CircularProgress, useTheme } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { List } from '@material-ui/icons';
 import { camelCase, startCase } from 'lodash';
@@ -12,9 +12,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import CustomContainer from '../../components/CustomContainer';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import SearchBox from '../../components/Helpers/SearchBox';
-import Tooltip from '../../components/CustomTooltipTitle';
 import VirtualizedList from '../../components/VirtualizedList';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { useData } from '../../StateProvider/Provider';
@@ -32,8 +29,7 @@ let cancelTokenSource = null;
 const simplifyStatus = (statusType: any) => Object.values(statusType).map((status: string) => status);
 
 const Report = () => {
-  const theme = useTheme();
-  const isExtraSmall = useMediaQuery(theme.breakpoints.down('xs'));
+  const theme = useTheme()
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
@@ -155,6 +151,7 @@ const Report = () => {
       });
   };
 
+  // Create and return query for filters
   const getFilter = () => {
     let filterQuery = ''
 
@@ -204,17 +201,11 @@ const Report = () => {
           <Grid container direction="row">
             <Grid item xs={12} sm={12}>
               <Grid container justifyContent="flex-end">
-                {/* <ImportExportLinks
-                  permissions={permissions[resourceCamelCase]}
-                  module="rentalManagements"
-                  api={''}
-                  afterImportCompleted={() => {}}
-                  isExportAllOrSomeFeature={true}
-                  total={0}
-                  recordsToExport={0}
-                  ids={[]}
-                  onExportToExcelSuccess={() => {}}
-                /> */}
+              <div id="importExportLinks">
+                <span className='cursor-pointer mr-2' style={{color: theme.palette.info.light}}>
+                  Export All
+                </span>
+              </div>
               </Grid>
             </Grid>
           </Grid>
@@ -227,7 +218,6 @@ const Report = () => {
               <Grid container className={styles.rental_header_layout} spacing={1}>
                 <Grid item xs={12} md={3}>
                   <Autocomplete
-                    style={{ maxWidth: isExtraSmall ? '100%' : 300 }}
                     options={resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : sidebarResource[_r]))}
                     limitTags={2}
                     disableListWrap
@@ -259,23 +249,6 @@ const Report = () => {
                     renderInput={(params) => <TextField {...params} variant="outlined" label="Select Filter" size="small" />}
                   />
                 </Grid>
-                {/* <Grid item xs={12} sm={2}>
-                <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                  <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile ? styles.content_box : ''}>
-                    <HideWhenOffline>
-                      <SearchBox
-                        onSearch={() => {}}
-                        searchbox={isMobile ? styles.search_box_input : ''}
-                        value={''}
-                        size="small"
-                        placeholder={`Search`}
-                        style={isMobile ? { flex: 1 } : {}}
-                      />
-                    </HideWhenOffline>
-                    <Grid style={{ display: 'flex', gap: '5px' }}></Grid>
-                  </Grid>
-                </Box>
-              </Grid> */}
                 <Grid item xs={12} md={7}>
                   <Grid container spacing={1}>
                     {selectedResource &&
@@ -335,7 +308,7 @@ const Report = () => {
                   isClientSideGrid={true}
                   allowAction={false}
                   refreshGrid={fetchResourceData}
-                  showOnlyShowFilteredRecordSwitch={true}
+                  showOnlyShowFilteredRecordSwitch={false}
                 />
               )}
             </div>
