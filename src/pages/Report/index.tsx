@@ -67,10 +67,16 @@ const Report = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (o?.fieldData?.fieldName === 'serialNumber') {
-            o.fieldData.primaryField = true;
+          if(resourceCamelCase.includes('Inventory')) {
+            if (o?.fieldData?.fieldName === 'serialNumber') {
+              o.fieldData.primaryField = true;
+            }
+          } else {
+            if (o?.fieldData?.fieldName === 'rentalJobName') {
+              o.fieldData.primaryField = true;
+            }
           }
-          let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path);
+          let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase}Detail`].path);
 
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
