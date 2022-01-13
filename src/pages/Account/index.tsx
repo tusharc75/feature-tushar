@@ -48,8 +48,8 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import { MdAdd } from 'react-icons/all';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
-import { IoFilterCircle, MdFilterList, MdSort } from 'react-icons/all';
-import { FaSuitcase } from 'react-icons/fa';
+import { IoFilterCircle, MdFilterList, MdSort,MdWeb } from 'react-icons/all';
+import { FaSuitcase,FaAddressBook,FaAddressCard} from 'react-icons/fa';
 
 const AccTypes = [
   {
@@ -1336,9 +1336,20 @@ export default function Account(props) {
               ]}
               chips={[
                 {
+                  icon:<MdWeb/>,
                   label: 'Website:',
                   field: 'website'
+                },
+                {
+                  icon:<FaAddressBook/>,
+                  label: 'BillingAddress',
+                  field: 'billingAddress'
+                },{
+                  icon:<FaAddressCard/>,
+                  label: 'ShippingAddress',
+                  field: 'shippingAddress'
                 }
+
                 // {
 
                 //     logo: "accountLogo:",
