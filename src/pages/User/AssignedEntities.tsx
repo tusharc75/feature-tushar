@@ -218,7 +218,7 @@ export default function AssignedEntities({
                       <Grid container>
                         <Grid item xs={4}>
                           <Typography variant="subtitle2">
-                            Assigned Region Wide Functional Roles ({currentEntity?.role?.length || "0"})
+                            Assigned Roles ({currentEntity?.role?.length || "0"})
                           </Typography>
                         </Grid>
                         <Grid item xs={8} justify="flex-start">

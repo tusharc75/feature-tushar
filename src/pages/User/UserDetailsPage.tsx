@@ -675,6 +675,17 @@ const UserDetailsPage = () => {
                   showHeading={true}
                 >
                   {
+                    permissions?.role?.isUpdate && permissions?.entity?.isUpdate && 
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={entityDialogOpen}
+                    >
+                      Assign Entity/Role
+                    </Button>
+                  }
+                  {
                     isLoggedInUserBrandAdmin && (
                       <Button
                         variant={isMobile && !isTablet ? "text" : "contained"}
@@ -747,6 +758,16 @@ const UserDetailsPage = () => {
                           id="a11y-tab-1"
                         />
                       }
+                      <Tab
+                        label="User Session"
+                        aria-controls="a11y-tabpanel-2"
+                        id="a11y-tab-2"
+                      />
+                      <Tab
+                        label="Assigned Entity"
+                        aria-controls="a11y-tabpanel-3"
+                        id="a11y-tab-3"
+                      />
                     </Tabs>
                     <Box hidden={currentTabIndex !== 0}>
                       <DetailsPage data={userData} fields={userFields} />
@@ -817,107 +838,7 @@ const UserDetailsPage = () => {
                         {/* </div> */}
                       </Box>
                     }
-                  </>
-                )}
-              </Box>
-
-              {/* <Box style={{ padding: "0px", minHeight: "300px" }}>
-                <Box display="flex" padding={1} bgcolor="grey.200">
-                  <Grid container>
-                    <Grid item xs={8}>
-                      <Box display="flex">
-                        <Box padding="5px">
-                          <Typography variant="subtitle2">
-                            Assigned Company Wide Roles ({globalRoles.length || "0"})
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={4} container justify="flex-end">
-                      {permissions.user.isUpdate && (
-                        <IconButton
-                          color="primary"
-                          size="small"
-                          onClick={handleOpenDialog}
-                          disabled={!isLoggedInUserBrandAdmin && userData?.userType}
-                        >
-                          <ControlPoint />
-                        </IconButton>
-                      )}
-                    </Grid>
-                  </Grid>
-                </Box>
-
-                <Grid container style={{ padding: "8px" }} spacing={1}>
-                  <Grid item xs={12} sm={12} md={4}>
-                    <BoxWithBorder
-                      style={{
-                        padding: "0px",
-                        height: "352px",
-                      }}
-                    >
-                      {rolesLoading ? (
-                        [1, 2].map((i) => (
-                          <BoxWithBorder
-                            key={i}
-                            style={{ padding: "0px", margin: "8px" }}
-                          >
-                            <Box padding={1}>
-                              <Skeleton
-                                variant="text"
-                                width="100px"
-                                height="20px"
-                              />
-                              <Box marginTop={1} />
-                              <Skeleton variant="text" width="100%" height="15px" />
-                            </Box>
-                          </BoxWithBorder>
-                        ))
-                      ) : !globalRoles.length ? (
-                        <Box textAlign="center" marginTop={2}>
-                          <Typography variant="body2">
-                            User doesn't have any roles
-                          </Typography>
-                        </Box>
-                      ) : (
-                        <Box
-                          style={{
-                            height: "100%",
-                            overflowY: "auto",
-                          }}
-                        >
-                          {userData && (
-                            <UserRoles
-                              permissions={permissions}
-                              data={globalRoles}
-                              unassignRole={handleUnassignRole}
-                              loggedInUser={user?.user}
-                              currentUserId={id}
-
-                            />
-                          )}
-                        </Box>
-                      )}
-                    </BoxWithBorder>
-                  </Grid>
-                  <Grid item xs={12} sm={12} md={8} lg={8}>
-                    <BoxWithBorder
-                      style={{
-                        padding: "0px",
-                        height: "352px",
-                      }}
-                    >
-                      <RoleEngine
-                        field={unionRoleData ? unionRoleData.field : []}
-                        resource={unionRoleData ? unionRoleData.resource : []}
-                        isDisable={true}
-                      />
-                    </BoxWithBorder>
-                  </Grid>
-                </Grid>
-              </Box> */}
-
-              <Box>
+              <Box hidden={userData?.proxyDOA ? currentTabIndex !== 3: currentTabIndex !== 2}>
                 <Box
                   width="100%"
                   padding={1}
@@ -1018,6 +939,7 @@ const UserDetailsPage = () => {
                   }
                 </Typography>
               </Box>
+              <Box hidden={userData?.proxyDOA ? currentTabIndex !== 4: currentTabIndex !== 3}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
                   <Box
@@ -1090,6 +1012,280 @@ const UserDetailsPage = () => {
                   </Box>
                 </Grid>
               </Grid>
+              </Box>
+                  </>
+                )}
+              </Box>
+
+              {/* <Box style={{ padding: "0px", minHeight: "300px" }}>
+                <Box display="flex" padding={1} bgcolor="grey.200">
+                  <Grid container>
+                    <Grid item xs={8}>
+                      <Box display="flex">
+                        <Box padding="5px">
+                          <Typography variant="subtitle2">
+                            Assigned Company Wide Roles ({globalRoles.length || "0"})
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={4} container justify="flex-end">
+                      {permissions.user.isUpdate && (
+                        <IconButton
+                          color="primary"
+                          size="small"
+                          onClick={handleOpenDialog}
+                          disabled={!isLoggedInUserBrandAdmin && userData?.userType}
+                        >
+                          <ControlPoint />
+                        </IconButton>
+                      )}
+                    </Grid>
+                  </Grid>
+                </Box>
+
+                <Grid container style={{ padding: "8px" }} spacing={1}>
+                  <Grid item xs={12} sm={12} md={4}>
+                    <BoxWithBorder
+                      style={{
+                        padding: "0px",
+                        height: "352px",
+                      }}
+                    >
+                      {rolesLoading ? (
+                        [1, 2].map((i) => (
+                          <BoxWithBorder
+                            key={i}
+                            style={{ padding: "0px", margin: "8px" }}
+                          >
+                            <Box padding={1}>
+                              <Skeleton
+                                variant="text"
+                                width="100px"
+                                height="20px"
+                              />
+                              <Box marginTop={1} />
+                              <Skeleton variant="text" width="100%" height="15px" />
+                            </Box>
+                          </BoxWithBorder>
+                        ))
+                      ) : !globalRoles.length ? (
+                        <Box textAlign="center" marginTop={2}>
+                          <Typography variant="body2">
+                            User doesn't have any roles
+                          </Typography>
+                        </Box>
+                      ) : (
+                        <Box
+                          style={{
+                            height: "100%",
+                            overflowY: "auto",
+                          }}
+                        >
+                          {userData && (
+                            <UserRoles
+                              permissions={permissions}
+                              data={globalRoles}
+                              unassignRole={handleUnassignRole}
+                              loggedInUser={user?.user}
+                              currentUserId={id}
+
+                            />
+                          )}
+                        </Box>
+                      )}
+                    </BoxWithBorder>
+                  </Grid>
+                  <Grid item xs={12} sm={12} md={8} lg={8}>
+                    <BoxWithBorder
+                      style={{
+                        padding: "0px",
+                        height: "352px",
+                      }}
+                    >
+                      <RoleEngine
+                        field={unionRoleData ? unionRoleData.field : []}
+                        resource={unionRoleData ? unionRoleData.resource : []}
+                        isDisable={true}
+                      />
+                    </BoxWithBorder>
+                  </Grid>
+                </Grid>
+              </Box> */}
+
+              {/* <Box>
+                <Box
+                  width="100%"
+                  padding={1}
+                  bgcolor="grey.200"
+                  display="flex"
+                  justifyContent="space-between"
+                >
+                  <Grid container>
+                    <Grid item xs={8}>
+                      <Box display="flex">
+                        <Box padding="5px">
+                          <Typography variant="subtitle2">
+                            User Time Track
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Box>
+                <Box padding="10px">
+                  <Grid item xs={12} sm={12} md={12}>
+                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={4}>
+                          <FormControl fullWidth size="small" variant="outlined">
+                            <InputLabel id="duration">Select Duration</InputLabel>
+                            <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
+                              <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                              <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                              <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                              <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                              <MenuItem value={'custom'}>Custom</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <KeyboardDatePicker
+                            disabled={timeFrame !== 'custom'}
+                            inputVariant="outlined"
+                            variant="inline"
+                            fullWidth
+                            autoOk
+                            disableFuture
+                            size="small"
+                            openTo="year"
+                            format={dateFormatForInputControl}
+                            maxDate={trackingTime.between.to}
+                            label="From"
+                            views={['year', 'month', 'date']}
+                            value={trackingTime.between.from}
+                            onChange={(date) => {
+                              setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
+                            }}
+                          />
+
+
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <KeyboardDatePicker
+                            disabled={timeFrame !== 'custom'}
+                            inputVariant="outlined"
+                            variant="inline"
+                            fullWidth
+                            autoOk
+                            disableFuture
+                            size="small"
+                            minDate={trackingTime.between.from}
+                            openTo="year"
+                            format={dateFormatForInputControl}
+                            label="To"
+                            views={['year', 'month', 'date']}
+                            value={trackingTime.between.to}
+                            onChange={(date) => {
+                              setTrackingTime({ between: { to: date, from: trackingTime.between.from } });
+                            }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </MuiPickersUtilsProvider>
+                  </Grid>
+                </Box>
+                <Typography className="subtitle1 m-2">
+                  {
+
+                    userTrackingDataLoading ?
+                      (
+                        <Grid container spacing={2} style={{ padding: "8px" }}>
+                          <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                        </Grid>
+                      )
+                      :
+                      userTrackingData.labels.length === 0 ?
+                        (
+                          <h3>No activity found in the selected date range</h3>
+                        )
+                        :
+                        <Line type="line" data={userTrackingData} />
+                  }
+                </Typography>
+              </Box> */}
+              {/* <Grid container spacing={2}>
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Box
+                    width="100%"
+                    padding={1}
+                    bgcolor="grey.200"
+                    display="flex"
+                    justifyContent="space-between"
+                  >
+                    <Typography variant="subtitle2">
+                      Assigned Entity ({entities?.length || 0})
+                    </Typography>
+                    {permissions.entity.isUpdate && permissions.role.isUpdate && (
+                      <IconButton
+                        title="Assign entities"
+                        color="primary"
+                        size="small"
+                        onClick={entityDialogOpen}
+                      >
+                        <ControlPoint />
+                      </IconButton>
+                    )}
+                  </Box>
+                  <Box padding={1}>
+                    {loading ? (
+                      <Box display="flex">
+                        {[1, 2].map((i) => (
+                          <BoxWithBorder
+                            key={i}
+                            style={{
+                              padding: "8px",
+                              margin: "8px",
+                              width: "100%",
+                            }}
+                          >
+                            <Box padding={1}>
+                              <Skeleton
+                                variant="text"
+                                width="100px"
+                                height="20px"
+                              />
+                              <Box marginTop={1} />
+                              <Skeleton variant="text" width="100%" height="15px" />
+                            </Box>
+                          </BoxWithBorder>
+                        ))}
+                      </Box>
+                    ) :
+                      entities?.length ? (
+                        <AssignedEntities
+                          entities={entities}
+                          permissions={permissions}
+                          userId={id}
+                          loggedInUser={user?.user}
+                          onSuccess={() => {
+                            fetchUserData();
+                          }}
+                          entityAccessIds={entityAccess}
+                          roleAccessIds={roleAccessOfLoggedInUser}
+                        />
+
+
+                      )
+                        : (
+                          <Box textAlign="center" padding={2}>
+                            <Typography>No Entities </Typography>
+                          </Box>
+                        )
+                    }
+                  </Box>
+                </Grid>
+              </Grid> */}
 
               <div className="p-3">
                 {permissions[opportunity.opportunityResource]?.isRead &&
