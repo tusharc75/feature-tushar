@@ -77,7 +77,7 @@ const ApprovalProcessDialog = ({
             <CustomDialogContent>
 
                 <Grid item xs={12} sm={12} md={12} lg={12}>
-                    <Paper className="fixedRightPanel">
+                    <Paper >
                         <Box padding={2}>
                             <FormControl component="fieldset" fullWidth>
                                 <FormGroup>

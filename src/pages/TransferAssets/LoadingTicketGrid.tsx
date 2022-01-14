@@ -66,7 +66,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, disabled: true, cellRenderer: 'ticketRenderer' },
-    { field: 'productDescription', headerName: 'Product Description', show: true, cellRenderer: 'productRenderer' },
+    { field: 'productDescription', headerName: 'Product Type', show: true, cellRenderer: 'productRenderer' },
     { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'loadingTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
   ];
