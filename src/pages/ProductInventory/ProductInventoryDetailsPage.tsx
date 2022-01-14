@@ -11,7 +11,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { productInventory, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, INVENTORY_STATUS } from "../../constants/helpers";
+import { productInventory, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, INVENTORY_STATUS, repairJob } from "../../constants/helpers";
 import ManageProductInventory from "./ManageProductInventory";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
@@ -322,6 +322,21 @@ const ProductInventoryDetailsPage = () => {
     else {
       handleUpdateData({ status: o.optionValue })
     }
+  }
+
+  const handleAddAssetToRepairJob = (repairJobId) => {
+    axiosInstance()
+    .post(`${repairJob.repairJobApi}/${repairJobId}/add-assets`, { "ids": [id] })
+    .then(({ data }) => {
+      // toastConfig.setToastConfig({
+      //   type: 'success',
+      //   open: true,
+      //   message: data.message,
+      // })
+    })
+    .catch((error) => {
+      toastConfig.setToastConfig(error);
+    })
   }
 
   const handleUpdateData = (obj) => {
@@ -722,8 +737,9 @@ const ProductInventoryDetailsPage = () => {
           inventories={[id]}
           open={showRepairJobDialog}
           onClose={() => setShowRepairJobDialog(false)}
-          onSuccess={() => {
+          onSuccess={(obj) => {
             setShowRepairJobDialog(false);
+            handleAddAssetToRepairJob(obj?._id)
             fetchAllData()
           }}
         />

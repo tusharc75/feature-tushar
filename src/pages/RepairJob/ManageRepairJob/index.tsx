@@ -263,8 +263,9 @@ const ManageRepairJob = (props) => {
           toastConfig.setToastConfig(error);
         });
     } else {
+      const {productInventory, ...rest} = values
       axiosInstance()
-        .post(`${repairJob.repairJobApi}`, values)
+        .post(`${repairJob.repairJobApi}`, rest)
         .then(({ data: { data, message } }) => {
 
           axiosInstance()
