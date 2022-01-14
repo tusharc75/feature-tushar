@@ -25,7 +25,7 @@ import { utils, write } from 'xlsx';
 
 import axiosInstance from '../../../axios/axiosInstance';
 
-const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
+const AssetStatusChart = ({ productCategories, loadingProductCategory, between }) => {
   const [pieData, setPieData] = React.useState<ChartData>(null);
   const [selectedProductCategories, setSelectedProductCategories] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
@@ -34,8 +34,9 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
   const [tableDataRaw, setTableDataRaw] = React.useState([]);
 
   React.useEffect(() => {
-    productWithStatus();
-  }, [selectedProductCategories]);
+    const timeout = setTimeout(productWithStatus, 400)
+    return () => clearTimeout(timeout)
+  }, [selectedProductCategories, between]);
 
   const getSum = (array, column) => {
     let values = array.map((item) => parseInt(item[column]) || 0);
@@ -48,9 +49,10 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
       filterById.push(d.id);
     });
 
-    let query = filterById.length > 0 ? `?productCategory=${JSON.stringify(filterById)}` : '';
+    let query = `?between=${between}&`;
+    query = filterById.length > 0 ? `?productCategory=${JSON.stringify(filterById)}` : '';
 
-    setLoading(true)
+    setLoading(true);
     axiosInstance()
       .get(`/dashboard/product-with-status-count${query}`)
       .then(({ data: { data } }) => {
@@ -186,22 +188,24 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
         />
       </Box>
 
-      {tableDataRaw.length > 0 && <Box display={'flex'} justifyContent={'space-between'}>
-        <div>
-          <Button disabled={loading} onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
-            Export to
+      {tableDataRaw.length > 0 && (
+        <Box display={'flex'} justifyContent={'space-between'}>
+          <div>
+            <Button disabled={loading} onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
+              Export to
+            </Button>
+            <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
+              <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
+              <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
+              <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
+              <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
+            </Menu>
+          </div>
+          <Button disabled={loading} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
+            {!tableView ? 'Table' : 'Chart'} View
           </Button>
-          <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
-            <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
-            <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
-            <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
-            <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
-          </Menu>
-        </div>
-        <Button disabled={loading} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
-          {!tableView ? 'Table' : 'Chart'} View
-        </Button>
-      </Box>}
+        </Box>
+      )}
       <Box height={400}>
         {loading && <Typography>Loading...</Typography>}
         {tableDataRaw.length > 0 ? (
