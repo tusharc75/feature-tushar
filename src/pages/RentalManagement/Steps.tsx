@@ -18,7 +18,7 @@ import {
 } from "react-icons/io";
 import { GoPencil } from "react-icons/go";
 import { BsCheckCircle } from "react-icons/bs";
-import { AiOutlineCloseCircle } from "react-icons/ai";
+import { AiOutlineCloseCircle, AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
 import { FaHourglassHalf } from "react-icons/fa";
 import styles from "./Retal.module.scss";
 
@@ -28,6 +28,7 @@ import { TiArrowBack } from "react-icons/ti";
 import MobileStepper from "@material-ui/core/MobileStepper";
 import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
+import CustomMobileStepperOpportunities from "../../components/CustomMobileStepperOpportunities";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -124,35 +125,65 @@ const Steps = (props) => {
 
     return (
         <div>
-            {isMobile && !isTablet ? <MobileStepper
-                style={{ background: "#dee2e6" }}
-                variant="dots"
-                steps={steps.length}
-                position="bottom"
-                activeStep={currentStep}
-                nextButton={
-                    <Button size="small"
+            {isMobile && !isTablet ? 
+            // <MobileStepper
+            //     style={{ background: "#dee2e6" }}
+            //     variant="dots"
+            //     steps={steps.length}
+            //     position="bottom"
+            //     activeStep={currentStep}
+            //     nextButton={
+            //         <Button size="small"
+            //             color="primary"
+            //             disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep || isStepEnded} variant="contained"
+            //             endIcon={<KeyboardArrowRight />}
+            //             onClick={() => {
+            //                 setCurrentStep(currentStep + 1)
+            //             }}
+            //         >
+            //             {steps[currentStep + 1] ?? ""}
+            //         </Button>
+            //     }
+            //     backButton={
+            //         <Button size="small" variant="contained" color={"primary"} startIcon={<KeyboardArrowLeft />}
+            //             disabled={currentStep === steps.length || currentStep === 0 || isStepEnded}
+            //             onClick={() => {
+            //                 setCurrentStep(currentStep - 1)
+            //             }}
+            //         >
+            //             {steps[currentStep - 1] ?? ""}
+            //         </Button>
+            //     }
+            // />
+            
+            <CustomMobileStepperOpportunities 
+        stepName={((activeStep + 1) + "/" + steps.length) + " " + steps[currentStep] ?? ""} 
+        nextButton={
+            <Button size="small"
+            variant="text"
                         color="primary"
-                        disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep || isStepEnded} variant="contained"
-                        endIcon={<KeyboardArrowRight />}
+                        disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep || isStepEnded} 
+                        endIcon={<AiOutlineRight />}
+                        className="ml-1 MobileStep-next-back-button"
                         onClick={() => {
                             setCurrentStep(currentStep + 1)
                         }}
                     >
-                        {steps[currentStep + 1] ?? ""}
+                        {"Next"}
                     </Button>
-                }
-                backButton={
-                    <Button size="small" variant="contained" color={"primary"} startIcon={<KeyboardArrowLeft />}
+
+
+        } backButton={
+            <Button size="small" variant="text" color={"primary"} startIcon={<AiOutlineLeft />}
                         disabled={currentStep === steps.length || currentStep === 0 || isStepEnded}
+                        className="mr-1 MobileStep-next-back-button"
                         onClick={() => {
                             setCurrentStep(currentStep - 1)
                         }}
                     >
-                        {steps[currentStep - 1] ?? ""}
+                        {"Back"}
                     </Button>
-                }
-            />
+           }   /> 
                 :
                 <div className="position-relative">
                     <Grid container className={styles.main_step_box} xs={12}>

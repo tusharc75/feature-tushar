@@ -9,7 +9,8 @@ import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import { getLocalStorageArrayData, prepareDataForGrid } from "../../constants/helpers"
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { FaRegistered, FaSuitcase } from "react-icons/fa";
+import { FaRegistered, FaSuitcase,FaAddressBook,FaAddressCard } from "react-icons/fa";
+import {SiStatuspage } from "react-icons/all";
 import {
   isObjectEmpty,
   customerAccount,
@@ -481,6 +482,8 @@ const RentalManagement = () => {
               RentalManagementPermissions={permissions.rentalManagement}
               onCreate={clickCreateNew}
               showConfirmBox={showConfirmBox}
+              columns={columns}
+              dispatch={dispatch}
               icon={<FaRegistered className="headerLogo" />}
               heading={routes.rentalManagement.title}
               showTransferEntityDialog={handleTransferEntityDialog}
@@ -536,8 +539,19 @@ const RentalManagement = () => {
                   loading={loading}
                   chips={[
                     {
+                      icon:<SiStatuspage/>,
                       label: "Status: ",
                       field: "status",
+                    },
+                    {
+                      icon:<FaAddressBook/>,
+                      label:'Billing Address',
+                      field:"billingAddress"
+                    },
+                    {
+                      icon:<FaAddressCard/>,
+                      label:'Shipping Address',
+                      field:"shippingAddress"
                     }
                   ]}
                   additionalDetails={[

@@ -58,7 +58,7 @@ import { values } from "lodash";
 //   .of(string().email(({ value }) => `${value} is not a valid email`));
 
 const EmailSchema = object().shape({
-  name: string().required("please enter subject"),
+  subject: string().required("please enter subject"),
   to: array()
     .min(1, "Please enter a valid email")
     .transform(function (value, originalValue) {
@@ -197,7 +197,7 @@ export const CreateEmail = ({
         });
     } else {
       let initialData = {
-        name: subject ?? "",
+        subject: subject ?? "",
         file: "",
         content: RichTextEditor.createEmptyValue(),
         to: isQuoteBuilder && options.length ? [options[0]] : [],
@@ -215,7 +215,7 @@ export const CreateEmail = ({
         message: values.content.toString("html"),
         to: values.to,
         cc: values.cc,
-        subject: values.name,
+        subject: values.subject,
         attachment: (otherAttachments.length || fileImageAttachments.length)
           ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments]
           : [...imageAttachments]
@@ -262,7 +262,7 @@ export const CreateEmail = ({
       email: [values.to.slice(-1)[0]],
       version: version,
       emailBody: values.content.toString("html"),
-      emailSubject: values.name,
+      emailSubject: values.subject,
       cc: values.cc,
       id: id,
       attachments: [...stateQuoteBuilderAttachments, ...quoteBuilderOtherAttachments],
@@ -690,26 +690,27 @@ export const CreateEmail = ({
                               </Grid>
                             )}
                             <Grid item xs={12}>
-                              ̦
                               <TextField
+                                autoComplete="off"
                                 variant="outlined"
+                                
                                 type="text"
                                 label="Subject"
                                 required={true}
-                                name="name"
+                                name="subject"
                                 fullWidth
                                 margin="dense"
-                                value={values["name"]}
+                                value={values["subject"]}
                                 error={
-                                  touched["name"] && Boolean(errors["name"])
+                                  touched["subject"] && Boolean(errors["subject"])
                                 }
-                                helperText={touched["name"] && errors["name"]}
+                                helperText={touched["subject"] && errors["subject"]}
                                 onChange={(e) => {
                                   setFieldValue(
-                                    "name",
+                                    "subject",
                                     e.target.value.trimStart()
                                   )
-                                  handleValuesChange({ name: e.target.value.trimStart() })
+                                  handleValuesChange({ subject: e.target.value.trimStart() })
                                 }}
                               />
                               <Autocomplete
