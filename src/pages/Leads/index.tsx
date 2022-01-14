@@ -28,6 +28,7 @@ import { CustomOfflineContext } from "../../StateProvider/OfflineContext/Offline
 import { FcProcess } from "react-icons/fc";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
+import {BsBuilding,AiFillMail} from "react-icons/all";
 
 const LeadTypes = [
   {
@@ -591,6 +592,8 @@ const Leads = () => {
             selectedType={selectedType}
             onTypeChange={handleLeadTypeSel}
             options={LeadTypes}
+            columns={columns}
+            dispatch={dispatch}
             onSearch={handleSearch}
             searchVal={search}
             leadPermissions={leadsPermissions}
@@ -645,9 +648,16 @@ const Leads = () => {
               ]}
               chips={[
                 {
+                  icon:<BsBuilding />,
                   label: "Company: ",
                   field: "company",
                 },
+                {
+                  icon:<AiFillMail/>,
+                  label:"Email",
+                  field:"email"
+
+                }
               ]}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}

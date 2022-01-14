@@ -17,7 +17,6 @@ import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import RepairJobHeader from './RepairJobHeader';
-
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -28,6 +27,8 @@ import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField }
 import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
 import { camelCase } from 'lodash'
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import {FaSuitcase,SiStatuspage,FaWarehouse,GiAutoRepair,GrStatusInfo,BsFillPersonFill,GiCargoShip,FaShippingFast,RiSpaceShipFill} from "react-icons/all"
+
 
 let repairJobTimeout;
 const RepairJobType = [
@@ -677,6 +678,8 @@ const RepairJob = () => {
             onTypeChange={handleRepairJobTypeSel}
             options={RepairJobType}
             onSearch={handleSearch}
+            columns={columns}
+            dispatch={dispatch}
             searchVal={search}
             RepairJobPermissions={permissions.repairJob}
             onCreate={clickCreateNew}
@@ -731,15 +734,57 @@ const RepairJob = () => {
                 rowCount={rowCount}
                 page={page}
                 loading={loading}
+                additionalDetails={[
+                  {
+                    icon: <FaSuitcase size={18} />,
+                    field: "repairJobName"
+                  },
+                ]}
                 chips={[
                   {
+                    icon:<SiStatuspage/>,
                     label: "Status: ",
                     field: "status",
                   },
                   {
-                    label: "Status: ",
+                    icon:<GrStatusInfo/>,
+                    label: "Repair Status: ",
                     field: "typeOfRepair",
-                  }
+                  },
+                  { 
+                    icon:<BsFillPersonFill/>,
+                    label:"Repair Person: ",
+                    field:"repairPerson"
+                  },
+             
+                  {
+                    icon:<FaWarehouse/>,
+                    label:"Plant: ",
+                    field:"plant"
+                  },
+
+                  { 
+                    icon:<GiAutoRepair/>,
+                    label:"Repair Plant: ",
+                    field:"repairPlant"
+                },
+                  
+                  { 
+                    icon:<GiCargoShip/>,
+                    label:"Plant Ship To: ",
+                    field:"plantShipTo"
+                  },
+                  { 
+                    icon:<RiSpaceShipFill/>,
+                    label:"Supplier: ",
+                    field:"supplier"
+                  },
+                  { 
+                    icon:<FaShippingFast/>,
+                    label:"Supplier Ship To: ",
+                    field:"supplierShipTo"
+                  },
+                  
                 ]}
                 onCreate={false}
                 showClone={false}
