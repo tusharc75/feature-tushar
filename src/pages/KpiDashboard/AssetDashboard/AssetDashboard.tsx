@@ -77,11 +77,11 @@ const AssetDashboard = ({ salesFilter }) => {
   };
 
   React.useEffect(() => {
-     let timeout = setTimeout(() => {
-       fetchAssetsData();  
-     },200)
+    let timeout = setTimeout(() => {
+      fetchAssetsData();
+    }, 200);
 
-     return () => clearTimeout(timeout)
+    return () => clearTimeout(timeout);
   }, [from, to]);
 
   // NEW
@@ -207,7 +207,16 @@ const AssetDashboard = ({ salesFilter }) => {
         <Box mt={2}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <AssetStatusChart productCategories={allProductCategories} loadingProductCategory={loadingDropdown} />
+              <AssetStatusChart
+                between={{
+                  between: JSON.stringify({
+                    from: new Date(from).toISOString().split('T')[0],
+                    to: new Date(to).toISOString().split('T')[0]
+                  })
+                }}
+                productCategories={allProductCategories}
+                loadingProductCategory={loadingDropdown}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <RentalChart />
