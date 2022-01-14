@@ -201,13 +201,13 @@ const AssetDashboard = ({ salesFilter }) => {
             <MapView smallScreen={smallScreen} data={assetLocationData} loading={loading} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <AssetChart smallScreen={smallScreen} loading={loading || loadingChartData || loadingDropdown} data={assetUtilizationData} />
+            {/* <AssetChart smallScreen={smallScreen} loading={loading || loadingChartData || loadingDropdown} data={assetUtilizationData} /> */}
           </Grid>
         </Grid>
         <Box mt={2}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <AssetStatusChart
+              {/* <AssetStatusChart
                 between={{
                   between: JSON.stringify({
                     from: new Date(from).toISOString().split('T')[0],
@@ -216,7 +216,7 @@ const AssetDashboard = ({ salesFilter }) => {
                 }}
                 productCategories={allProductCategories}
                 loadingProductCategory={loadingDropdown}
-              />
+              /> */}
             </Grid>
             <Grid item xs={12} sm={6}>
               <RentalChart />
