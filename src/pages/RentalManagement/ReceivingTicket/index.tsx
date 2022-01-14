@@ -210,6 +210,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     setProductInventoryForReceivingTicket(selectedProductInventory);
     setShowReceivingTicketDialog(true);
   };
+  console.log(selectedRecords)
 
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
@@ -278,8 +279,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             horizontal: 'right'
           }}
         >
-          {(selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") && [INVENTORY_STATUS.underReview].includes(f.status)
-            && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
+          {(selectedRecords?.filter(f => f.hasOwnProperty("receivingTicketId") && [INVENTORY_STATUS.underReview].includes(f.status)
+            && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered)?.length === selectedRecords?.length) &&
             <Fragment>
               <MenuItem onClick={() => {
                 setAnchorEl(null)
