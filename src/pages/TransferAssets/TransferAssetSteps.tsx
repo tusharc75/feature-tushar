@@ -5,7 +5,7 @@ import StepLabel from '@material-ui/core/StepLabel';
 import clsx from 'clsx';
 import IconButton from '@material-ui/core/IconButton';
 import { Grid } from '@material-ui/core';
-import { IoIosArrowDropleftCircle } from 'react-icons/io';
+import { IoIosArrowDropleftCircle, IoMdDoneAll } from 'react-icons/io';
 import { isMobile, isTablet } from 'react-device-detect';
 import { TiArrowBack } from 'react-icons/ti';
 import { RiShareForwardFill } from 'react-icons/ri';
@@ -13,6 +13,8 @@ import MobileStepper from '@material-ui/core/MobileStepper';
 import Button from '@material-ui/core/Button';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
+import CustomMobileStepperOpportunities from "../../components/CustomMobileStepperOpportunities";
+import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
 
 const useStyles = makeStyles((theme) => ({
   backButton: {
@@ -109,7 +111,7 @@ const TransferSteps = (props) => {
     <div>
       {isMobile && !isTablet ? (
         <div>
-          <MobileStepper
+          {/* <MobileStepper
             style={{ background: '#dee2e6' }}
             variant="dots"
             steps={steps.length}
@@ -147,7 +149,45 @@ const TransferSteps = (props) => {
               //   {steps[activeStep - 1]?.label ?? ""}
               // </Button>
             }
-          />
+          /> */}
+          <CustomMobileStepperOpportunities 
+        stepName={((activeStep + 1) + "/" + steps.length) + " " + steps[activeStep]} 
+        nextButton={
+          <Button
+          size="small"
+          color="primary"
+          variant="text"
+          // hidden={currentStep >= 2 || (currentStep === 0 && isNextStep)}
+          disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
+          onClick={goNext}
+          endIcon={isInternal ? activeStep >= 1 ? <IoMdDoneAll/> : <AiOutlineRight /> : currentStep >= 2 ? <IoMdDoneAll/> : <AiOutlineRight />}
+          className="ml-1 MobileStep-next-back-button"
+        >
+          {/* {isInternal && currentStep === steps.length - 1 ? "Loading Ticket" : steps[currentStep + 1] ?? 'Receiving Ticket'} */}
+          {isInternal ? activeStep >= 1 ? "Finish" : "Next" : currentStep >= 2 ? "Finish" : "Next"}
+        </Button>
+        // : <Button size="small" disabled={loading} color="primary" onClick={handleNext} variant="contained" endIcon={<KeyboardArrowRight />}>
+        //   {steps[activeStep + 1]?.label ?? ""}
+        // </Button>
+
+
+        } backButton={
+          <Button
+          size="small"
+          disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
+          variant="text"
+          color="primary"
+          // hidden={currentStep <= 0 || (currentStep === 0 && isPrevStep)}
+          onClick={goPrev}
+          startIcon={<AiOutlineLeft />}
+          className="mr-1 MobileStep-next-back-button"
+        >
+          {"Back"}
+        </Button>
+        // <Button size="small" disabled={loading} color="primary" onClick={handleBack} variant="contained" startIcon={<KeyboardArrowLeft />}>
+        //   {steps[activeStep - 1]?.label ?? ""}
+        // </Button>
+           }   /> 
         </div>
       ) : (
         <div className="position-relative">
