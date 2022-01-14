@@ -15,7 +15,9 @@ import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import { processFieldName } from '../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
-import {MdAdd} from "react-icons/all";
+import {MdAdd,MdSort,MdFilterList} from "react-icons/all";
+import MobileSortDialog from '../../components/MobileSortDialog';
+import MobileFilterDialog from '../../components/MobileFilterDialog'
 
 function LeadsHeader(props) {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -31,12 +33,38 @@ function LeadsHeader(props) {
 
     const [filter, setFilter] = useState("All Leads");
 
+
     const handleFilter = (event, newFilter) => {
         if (newFilter !== null) {
             setFilter(newFilter);
             onTypeChange(options.find((d) => d.key === newFilter).value);
         }
     };
+
+    const [isOpenDialog, setisOpenDialog] = useState(false)
+
+
+
+    const handleOpen = () => {
+      setisOpenDialog(true);
+    };
+  
+    const handleClose = () => {
+      setisOpenDialog(false);
+    };
+  
+    const [open, setOpen] = React.useState(false);
+  
+    const handleClickOpen = () => {
+      setOpen(true);
+    };
+  
+    const handleClickClose = () => {
+      setOpen(false);
+  
+    };
+  
+  
 
     const {
         userId,
@@ -53,27 +81,117 @@ function LeadsHeader(props) {
         allowToConvertLeadToOpportunity,
         showLeadToOpportunityConfirmationDialog,
         selectedLeads,
-        showTransferEntityDialog
+        showTransferEntityDialog,
+        columns,
+        dispatch,
+        children
 
     } = props;
 
+    
+  let toggleInner = options && (
+    <ToggleButtonGroup
+      size="small"
+      className=" toggle-button-layout"
+      value={filter}
+      exclusive
+      onChange={handleFilter}
+    >
+      {options.map((k, index) => {
+        return (
+          <ToggleButton value={k.key} key={index}>
+            {k.key}
+          </ToggleButton>
+        );
+      })}
+    </ToggleButtonGroup>
+  );
+
     return <Grid className={`${styles.filter_side_container} gap-1`} container>
-        <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
+        <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+        <div className="d-flex align-items-center">
             {icon} <span className="listingHeader">{heading}
             </span>
-            {
-                options && <ToggleButtonGroup size="small" className="ml-2"
-                    value={filter}
-                    exclusive
-                    onChange={handleFilter}>
-                    {options.map((k, index) => {
-                        return (
-                            <ToggleButton value={k.key} key={index}>{k.key}
-                            </ToggleButton>
-                        );
-                    })}
-                </ToggleButtonGroup>
-            }
+            </div>
+            {isMobile && !isTablet ? 
+        <div className="d-flex ">
+        <Button
+        onClick={handleClickOpen}
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        // aria-expanded={open ? 'true' : undefined}
+        color="secondary"
+        variant="text"
+        disableElevation
+        startIcon={<MdSort />}
+      >
+        Sort 
+        </Button>
+
+        <MobileSortDialog
+        isOpen={open}
+        handleClose={handleClickClose}
+        contentPart={toggleInner}
+        secHeading={["Sort Leads"]}
+        columns={columns}
+        dispatch={dispatch}
+        />
+
+
+
+        <Button
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        // aria-expanded={open ? 'true' : undefined}
+        variant="text"
+        color="secondary"
+        disableElevation
+        startIcon={<MdFilterList />}
+        onClick={handleOpen}
+      >
+        Filter 
+        </Button>
+
+
+        <MobileFilterDialog
+        isOpen={isOpenDialog}
+        handleClose={handleClose}
+        contentPart={toggleInner}
+        secHeading={["Filter Leads"]}
+        columns={columns}
+        dispatch={dispatch}
+        />
+
+
+   
+   
+        
+
+      
+
+
+        </div> : options && (
+          <ToggleButtonGroup
+            size="small"
+            className="ml-2"
+            value={filter}
+            exclusive
+            onChange={handleFilter}
+          >
+            {options.map((k, index) => {
+              return (
+                <ToggleButton value={k.key} key={index}>
+                  {k.key}
+                </ToggleButton>
+              );
+            })}
+          </ToggleButtonGroup>
+        )}
+        
+        
+        {children}
         </Grid>
         <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
             <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">

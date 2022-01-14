@@ -41,9 +41,11 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdEmail } from 'react-icons/md';
 import queryString from 'query-string';
-import { MdAdd } from "react-icons/all";
-import { IoFilterCircle, MdFilterList, MdSort } from "react-icons/all";
+import { MdAdd } from 'react-icons/all';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import { FaSuitcase, MdFilterList, MdSort, MdWeb } from 'react-icons/all';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
 
 const ContactTypes = [
   {
@@ -84,7 +86,8 @@ export default function Contact(props) {
   const [contactId, setContactId] = useState('');
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
-
+  const [sortOpen, setSortOpen] = useState(false);
+  const [isOpenDialog, setisOpenDialog] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [showCreateContactDialog, setShowCreateContactDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [singleContactDelete, setSingleContactDelete] = useState({
@@ -116,12 +119,13 @@ export default function Contact(props) {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const columnState = JSON.parse(localStorage.getItem(contactResource));
   const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([])
+  const [clonedData, setClonedData] = useState([]);
   const [disablePortalAccess, setDisablePortalAccess] = useState(false);
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
-  const [entityAccess, setEntityAccess] = useState([])
-  const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([])
+  const [entityAccess, setEntityAccess] = useState([]);
+  const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
   const localStorageSelectedRecords = `${contactResource}_selected`;
+
 
   useEffect(() => {
     if (queryPage === undefined) {
@@ -134,36 +138,36 @@ export default function Contact(props) {
         queryType && querySearch && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
           : queryType && queryColFilter
-            ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-            : queryType && querySearch
-              ? `?page=${page}&type=${queryType}&search=${querySearch}`
-              : queryColFilter && querySearch
-                ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
-                : queryType
-                  ? `?page=${page}&type=${queryType}`
-                  : queryColFilter
-                    ? `?page=${page}&colFilter=${queryColFilter}`
-                    : querySearch
-                      ? `?page=${page}&search=${querySearch}`
-                      : `?page=${page}`
+          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+          : queryType && querySearch
+          ? `?page=${page}&type=${queryType}&search=${querySearch}`
+          : queryColFilter && querySearch
+          ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+          : queryType
+          ? `?page=${page}&type=${queryType}`
+          : queryColFilter
+          ? `?page=${page}&colFilter=${queryColFilter}`
+          : querySearch
+          ? `?page=${page}&search=${querySearch}`
+          : `?page=${page}`
       );
     } else {
       history.replace(
         queryType && querySearch && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
           : queryType && queryColFilter
-            ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-            : queryType && querySearch
-              ? `?page=${page}&type=${queryType}&search=${querySearch}`
-              : queryColFilter && querySearch
-                ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
-                : queryType
-                  ? `?page=${page}&type=${queryType}`
-                  : queryColFilter
-                    ? `?page=${page}&colFilter=${queryColFilter}`
-                    : querySearch
-                      ? `?page=${page}&search=${querySearch}`
-                      : `?page=${page}`
+          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+          : queryType && querySearch
+          ? `?page=${page}&type=${queryType}&search=${querySearch}`
+          : queryColFilter && querySearch
+          ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+          : queryType
+          ? `?page=${page}&type=${queryType}`
+          : queryColFilter
+          ? `?page=${page}&colFilter=${queryColFilter}`
+          : querySearch
+          ? `?page=${page}&search=${querySearch}`
+          : `?page=${page}`
       );
     }
   }, [page, queryPage]);
@@ -175,8 +179,8 @@ export default function Contact(props) {
       dispatch({ type: 'pageChange', page: savedPage });
     }
     fetchGridColumns();
-    fetchLoggedInUserEntities()
-    fetchLoggedInUserRole()
+    fetchLoggedInUserEntities();
+    fetchLoggedInUserRole();
   }, []);
 
   const fetchGridColumns = async () => {
@@ -237,10 +241,10 @@ export default function Contact(props) {
         querySearch && queryColFilter
           ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}&search=${search}`
           : queryColFilter
-            ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
-            : querySearch
-              ? `?page=${page}&type=${newFilter}&search=${search}`
-              : `?page=${page}&type=${newFilter}`
+          ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
+          : querySearch
+          ? `?page=${page}&type=${newFilter}&search=${search}`
+          : `?page=${page}&type=${newFilter}`
       );
     }
   };
@@ -285,20 +289,20 @@ export default function Contact(props) {
         queryType && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${search}`
           : queryType
-            ? `?page=${page}&type=${queryType}&search=${search}`
-            : queryColFilter
-              ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
-              : `?page=${page}&search=${search}`
+          ? `?page=${page}&type=${queryType}&search=${search}`
+          : queryColFilter
+          ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
+          : `?page=${page}&search=${search}`
       );
     } else {
       history.replace(
         queryType && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
           : queryType
-            ? `?page=${page}&type=${queryType}`
-            : queryColFilter
-              ? `?page=${page}&colFilter=${queryColFilter}`
-              : `?page=${page}`
+          ? `?page=${page}&type=${queryType}`
+          : queryColFilter
+          ? `?page=${page}&colFilter=${queryColFilter}`
+          : `?page=${page}`
       );
     }
   }, [search]);
@@ -326,10 +330,10 @@ export default function Contact(props) {
         queryType && querySearch
           ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]&search=${querySearch}`
           : queryType
-            ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
-            : querySearch
-              ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-              : `?page=${page}&colFilter=[${serialize(filters)}]`
+          ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
+          : querySearch
+          ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+          : `?page=${page}&colFilter=[${serialize(filters)}]`
       );
     }
 
@@ -338,10 +342,10 @@ export default function Contact(props) {
         queryType && querySearch
           ? `?page=${page}&type=${queryType}&search=${querySearch}`
           : queryType
-            ? `?page=${page}&type=${queryType}`
-            : querySearch
-              ? `?page=${page}&search=${querySearch}`
-              : `?page=${page}`
+          ? `?page=${page}&type=${queryType}`
+          : querySearch
+          ? `?page=${page}&search=${querySearch}`
+          : `?page=${page}`
       );
     }
     if (Object.keys(filters).length === 0 && queryColFilter === undefined) {
@@ -359,34 +363,33 @@ export default function Contact(props) {
   };
 
   const handleAccessToPortal = () => {
-    setShowAssignEntityDialog(true)
+    setShowAssignEntityDialog(true);
   };
 
   const fetchLoggedInUserRole = async () => {
     let roleIds = [];
-    await axiosInstance().get(`/user/${user.user?._id}`).then(({ data: { data } }) => {
-      data.entities.map((item) => {
-        item.role.forEach((role) => {
-          if (roleIds.includes(role?._id)) {
-
-          } else {
-            roleIds.push(role?._id)
-          }
-        })
-
+    await axiosInstance()
+      .get(`/user/${user.user?._id}`)
+      .then(({ data: { data } }) => {
+        data.entities.map((item) => {
+          item.role.forEach((role) => {
+            if (roleIds.includes(role?._id)) {
+            } else {
+              roleIds.push(role?._id);
+            }
+          });
+        });
+        setRoleAccessOfLoggedInUser(roleIds);
       })
-      setRoleAccessOfLoggedInUser(roleIds)
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
-  }
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const fetchLoggedInUserEntities = async () => {
     const entityIds = user.entity?.map((e) => e._id);
-    setEntityAccess(entityIds)
-  }
-
-
+    setEntityAccess(entityIds);
+  };
 
   const RelatedLeadRenderer = (params) =>
     params.value ? (
@@ -693,12 +696,39 @@ export default function Contact(props) {
     }
   };
 
+  const toggleInner = ContactTypes && (
+    <ToggleButtonGroup id="resourceTypeSelector" size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
+      {ContactTypes.map((k: any, index) => {
+        return (
+          <ToggleButton value={k.key} key={index}>
+            {k.key}
+          </ToggleButton>
+        );
+      })}
+    </ToggleButtonGroup>
+  );
+
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
   const handleContactSelect = (filterValues) => {
     setSelectedType(filterValues);
+  };
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+
+  const handleClickOpen = () => {
+    setSortOpen(true);
+  };
+
+  const handleClickClose = () => {
+    setSortOpen(false);
+  };
+
+  const handleFilterClose = () => {
+    setisOpenDialog(false);
   };
 
   return (
@@ -751,6 +781,7 @@ export default function Contact(props) {
                           color="secondary"
                           variant="text"
                           disableElevation
+                          onClick={handleClickOpen}
                           startIcon={<MdSort />}
                           style={{ marginLeft: '40px' }}
                           className={'sort-filter-tablet'}
@@ -758,6 +789,14 @@ export default function Contact(props) {
                           Sort
                         </Button>
 
+                        <MobileSortDialog
+                          isOpen={sortOpen}
+                          handleClose={handleClickClose}
+                          contentPart={toggleInner}
+                          secHeading={['Sort Accounts']}
+                          columns={columns}
+                          dispatch={dispatch}
+                        />
                         <Button
                           id="demo-customized-button"
                           aria-controls="demo-customized-menu"
@@ -768,15 +807,23 @@ export default function Contact(props) {
                           disableElevation
                           startIcon={<MdFilterList />}
                           className={'sort-filter-tablet'}
+                          onClick={handleOpen}
                         >
                           Filter
                         </Button>
+                        <MobileFilterDialog
+                          isOpen={isOpenDialog}
+                          handleClose={handleFilterClose}
+                          contentPart={toggleInner}
+                          secHeading={['Filter Accounts']}
+                          columns={columns}
+                          dispatch={dispatch}
+                        />
                       </Grid>
                     </>
                   )}
 
-
-                  <Grid className='align-toggle-button'>
+                  <Grid className="align-toggle-button">
                     {ContactTypes && (
                       <ToggleButtonGroup
                         id="resourceTypeSelector"
@@ -808,13 +855,9 @@ export default function Contact(props) {
                           }}
                         />
                       )}
-
                     </Grid>
                   </Grid>
-
                 </Grid>
-
-
               </Grid>
             </Grid>
             <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
@@ -839,7 +882,7 @@ export default function Contact(props) {
                         size="small"
                         onClick={clickCreateNew}
                         className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                        startIcon={isMobile && !isTablet ? "" : <AddOutlined />}
+                        startIcon={isMobile && !isTablet ? '' : <AddOutlined />}
                       >
                         {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                       </Button>
@@ -887,15 +930,14 @@ export default function Contact(props) {
                           Delete
                         </MenuItem>
                       )}
-                      {
-                        user.user?.userType === userType.brandAdmin &&
+                      {user.user?.userType === userType.brandAdmin && (
                         <MenuItem
-                        disabled={selectedRecords.length === 0 || selectedRecords.some((record) => record?.isUserExist)}
-                        onClick={handleAccessToPortal}
-                      >
-                        Give Access to Portal
-                      </MenuItem>
-                      }
+                          disabled={selectedRecords.length === 0 || selectedRecords.some((record) => record?.isUserExist)}
+                          onClick={handleAccessToPortal}
+                        >
+                          Give Access to Portal
+                        </MenuItem>
+                      )}
                       {contactPermissions.isUpdate && (
                         <MenuItem
                           disabled={selectedRecords.length === 0}
@@ -925,7 +967,6 @@ export default function Contact(props) {
                           Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
                         </MenuItem>
                       )}
-
                     </Menu>
                   </>
                 </Grid>
@@ -933,8 +974,59 @@ export default function Contact(props) {
             </Grid>
           </Grid>
         </div>
-        <Box component="div">
-          {Object.keys(frameWorkComponent).length > 0 ? (
+
+        {Object.keys(frameWorkComponent).length > 0 &&
+          (isMobile && !isTablet ? (
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={contactPermissions}
+              primaryField={columns?.find((d) => d.field === 'concatedName')}
+              onClick={(d) => {
+                history.push(`${contactApi}/detail/${d._id}`);
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(d) => {
+                history.push(`${contactApi}/detail/${d._id}?openEdit=true`);
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(d) => {
+                setSingleContactDelete({
+                  show: true,
+                  id: d._id,
+                  contactedName: d.contactedName
+                });
+              }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              additionalDetails={[
+                {
+                  icon: <FaSuitcase size={18} />,
+                  field: 'accountName'
+                }
+              ]}
+              chips={[
+                {
+                  label: 'Email : ',
+                  field: 'email'
+                },
+                {
+                  label: 'Entity',
+                  field: 'entity'
+                }
+              ]}
+              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+              onCreate={false}
+              showClone={true}
+              onClone={(data) => {
+                setShowCreateContactDialog({ open: true, isClone: true, idToClone: data._id });
+              }}
+              renderedFrom={contactResource}
+            />
+          ) : (
             <CustomAgGrid
               columns={columns}
               dataRows={dataRows}
@@ -950,8 +1042,9 @@ export default function Contact(props) {
               renderedFrom={contactResource}
               refreshGrid={getContacts}
             />
-          ) : null}
+          ))}
 
+        <Box component="div">
           {showDeleteWarningConfirmBox?.show ? (
             <MessageDialog
               open={showDeleteWarningConfirmBox?.show}
@@ -987,8 +1080,7 @@ export default function Contact(props) {
               isClone={showCreateContactDialog?.isClone}
             />
           )}
-          {
-            showAssignEntityDialog &&
+          {showAssignEntityDialog && (
             <Dialog
               fullWidth
               maxWidth="xs"
@@ -999,8 +1091,8 @@ export default function Contact(props) {
               <AssignEntityDialog
                 entitiesDialogOpen={showAssignEntityDialog}
                 onSuccess={() => {
-                  setShowAssignEntityDialog(false)
-                  getContacts()
+                  setShowAssignEntityDialog(false);
+                  getContacts();
                 }}
                 handleCloseDialog={() => setShowAssignEntityDialog(false)}
                 assignedEntity={[]}
@@ -1013,7 +1105,7 @@ export default function Contact(props) {
                 contactResource={contactResource}
               />
             </Dialog>
-          }
+          )}
 
           {singleContactDelete.show ? (
             <ConfirmationDialog
