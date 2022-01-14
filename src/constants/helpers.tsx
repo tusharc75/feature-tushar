@@ -237,6 +237,16 @@ export const resourceNames = {
 
 };
 
+export const primaryFields = {
+  productInventory: "assetNumber",
+  rentalManagement: "rentalJobName",
+  transferAsset: "transferAssetNumber",
+  repairJob: "repairJobName",
+  purchaseOrder: "purchaseOrderNumber",
+  deliveryTicket: "ticketName"
+  
+}
+
 export const RESOURCE_LABEL = {
   account: 'Supplier Accounts',
   warehouse: 'Plants',
