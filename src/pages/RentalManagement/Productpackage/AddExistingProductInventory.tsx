@@ -111,6 +111,9 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                     term: filters[field].filter
                 })
             });
+            if (type !== "product") {
+                updatedFilters.push({ field: 'packageType', term: 'product' })
+            }
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
         if (sorting.length > 0) {
