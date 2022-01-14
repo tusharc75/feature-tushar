@@ -168,7 +168,7 @@ export default function Products() {
             <Grid container className="headerbox">
                 <CustomBreadCrumbs routes={[{ title: routes.eCommerce.title }]} />
             </Grid>
-            <div className="detail-container grid-product-category pr-0">
+            <div className="detail-container grid-product-category">
                 <div>
                     <Paper>
                         <div className={styles.sidebar_nav}>
