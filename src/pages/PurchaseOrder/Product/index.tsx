@@ -27,13 +27,15 @@ import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomRenderCell from "../../../components/Helpers/CustomRenderCell";
 import InfoIcon from "@material-ui/icons/Info";
+import { MdAdd } from "react-icons/md";
+import { RiEditCircleLine } from "react-icons/ri";
 
 const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable, id, setPurchaseOrderProduct }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
 
-    const [columns, setColumns] = useState([{ field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    const [columns, setColumns] = useState([{ field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" }])
 
 
@@ -218,52 +220,57 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex" alignItems="center">
                     <Button
-                        variant={isMobile && !isTablet ? "outlined" : "contained"}
+                        variant={isMobile && !isTablet ? "text" : "contained"}
                         color="primary"
                         size="small"
+                        style={isMobile && !isTablet ? {color:"var(--secondary)"} : {}}
                         onClick={() => {
                             setIsAddNewProduct(true);
                         }}
                     >
-                        {isMobile && !isTablet ? <FaCartPlus size={22} /> : `Add New ${routes.product.title}`}
+                        {isMobile && !isTablet ? <MdAdd size={22} /> : `Add New ${routes.product.title}`}
                     </Button>
                     <Box mx={1} />
                     <Button
-                        variant={isMobile && !isTablet ? "outlined" : "contained"}
+                        variant={isMobile && !isTablet ? "text" : "contained"}
                         color="primary"
                         size="small"
+                        style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
                         onClick={() => {
                             setAddProductDialog(true);
                         }}
                     >
-                        {isMobile && !isTablet ? <FaCartArrowDown size={22} /> : `Add Existing ${routes.product.title}`}
+                        {isMobile && !isTablet ? <FaCartArrowDown size={18} /> : `Add Existing ${routes.product.title}`}
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
                     <Box display="flex" justifyContent="flex-end">
                         <Box mx={1} />
                         <Button
-                            variant={isMobile && !isTablet ? "outlined" : "contained"}
+                            variant={isMobile && !isTablet ? "text" : "contained"}
                             color="primary"
                             size="small"
+                            style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
                             disabled={selectedRecords.length === 0}
                             onClick={() => {
                                 setIsBulkEdit(true)
                                 setShowProductDialog(true)
                             }}
+
                         >
-                            {isMobile && !isTablet ? <EditIcon color="primary" /> : `Bulk Edit`}
+                            {isMobile && !isTablet ? <RiEditCircleLine  size={20}/> : `Bulk Edit`}
                         </Button>
                     </Box>
                     <HtmlTooltip title="Please select some product">
                         <Button
-                            variant="outlined"
+                            variant={isMobile && !isTablet ? "text" : "outlined"}
                             color="default"
                             size="small"
                             onClick={openActions}
                             disabled={selectedRecords.length ? false : true}
                             aria-controls="action-menu"
-                        >Actions
+                        >
+                            {isMobile && !isTablet ? "" : "Actions"}
                             <ExpandMore />
                         </Button>
                     </HtmlTooltip>

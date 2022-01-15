@@ -37,7 +37,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 
 const TaskSchema = object().shape({
   name: string().required('Please enter task name'),
-  assignee: string().required('Please select assignee'),
+  // assignee: string().required('Please select assignee'),
   reporter: string().required(),
   startDate: string().required('Please enter start date'),
   dueDate: string().required('Please enter due date')

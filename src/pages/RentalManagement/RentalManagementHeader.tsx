@@ -1,13 +1,21 @@
-import { useState, useContext } from 'react';
-import SearchBox from '../../components/Helpers/SearchBox';
-import { AddOutlined } from '@material-ui/icons';
-import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import styles from '../Leads/Header.module.scss';
-import HideWhenOffline from '../../components/HideWhenOffline';
-import routes from '../../components/Helpers/Routes';
+import { useState, useContext, useReducer } from "react";
+import SearchBox from "../../components/Helpers/SearchBox";
+import {
+  AddOutlined,
+} from "@material-ui/icons";
+import {
+  Box,
+  Grid,
+  MenuItem,
+  Button,
+  Menu,
+} from "@material-ui/core";
+import { ExpandMore } from "@material-ui/icons";
+import ToggleButton from "@material-ui/lab/ToggleButton";
+import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
+import styles from "../Leads/Header.module.scss";
+import HideWhenOffline from "../../components/HideWhenOffline";
+import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, MdFilterList, MdSort } from 'react-icons/md';
 import { objectStore, insertUpdate, clearAll } from '../../constants/indexdbhelper';
@@ -18,6 +26,7 @@ import { useData } from '../../StateProvider/Provider';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 
 function RentalManagementHeader(props) {
 
@@ -37,7 +46,8 @@ function RentalManagementHeader(props) {
     columns,
     dispatch,
     showTransferEntityDialog,
-    selectedType
+    selectedType,
+    fetchRentalManagement
     // showCloneRentalManagementDialog
   } = props;
 
@@ -48,7 +58,8 @@ function RentalManagementHeader(props) {
   }: any = useData();
   const [anchorEl, setAnchorEl] = useState(null);
   const toastConfig = useContext(CustomToastContext);
-  
+  const [state] = useReducer(reducer, intialState);
+
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -92,29 +103,24 @@ function RentalManagementHeader(props) {
     selectedRecords.forEach((element) => {
       data.push(element._id);
     });
-    await rentalJobOfflineUpdate(data);
-    closeActions();
-    axiosInstance()
-      .get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`)
-      .then(({ data: { data } }) => {
-        insertUpdate(objectStore.resource, 'rentalManagementProduct', data);
-      });
-    axiosInstance()
-      .get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`)
-      .then(({ data: { data } }) => {
-        insertUpdate(objectStore.resource, 'rentalManagementCost', data);
-      });
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource['deliveryTicket']}&showHiddenFields=true`)
-      .then(({ data: { data } }) => {
-        insertUpdate(objectStore.resource, objectStore.deliveryTicket, data);
-      });
-    axiosInstance()
-      .get(`/field?resource=Product Inventory&view=true`)
-      .then(({ data: { data } }) => {
-        insertUpdate(objectStore.resource, 'productInventory', data);
-      });
-  };
+    await rentalJobOfflineUpdate(data)
+    closeActions()
+    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`).then(({ data: { data } }) => {
+      insertUpdate(objectStore.resource, "rentalManagementProduct", data);
+    })
+    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`).then(({ data: { data } }) => {
+      insertUpdate(objectStore.resource, "rentalManagementCost", data);
+    })
+    axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}&showHiddenFields=true`).then(({ data: { data } }) => {
+      insertUpdate(objectStore.resource, objectStore.deliveryTicket, data);
+    })
+    axiosInstance().get(`/field?resource=Product Inventory&view=true`).then(({ data: { data } }) => {
+      insertUpdate(objectStore.resource, "productInventory", data);
+    })
+    localStorage.removeItem("rental_management_selected")
+    dispatch({ type: "selection", selectedRecords: [] });
+    fetchRentalManagement()
+  }
 
   const handleRemoveoffline = async () => {
     await clearAll(objectStore.rentalManagement);
@@ -274,7 +280,7 @@ function RentalManagementHeader(props) {
                       >
                         Delete
                       </MenuItem> */}
-                      {/* {
+                        {/* {
                         RentalManagementPermissions.isUpdate && <MenuItem
                           disabled={!selectedRecords.length || selectedRecords.find((d) => d.canDelete === false)}
                           onClick={() => {

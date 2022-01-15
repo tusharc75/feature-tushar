@@ -21,7 +21,7 @@ import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { prepareDataForGrid } from "../../../constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
-import { GrBusinessService } from "react-icons/all";
+import { GiSabersChoc, GrBusinessService } from "react-icons/all";
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 
@@ -157,7 +157,7 @@ const Product = ({ purchaseOrderData, id }) => {
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex">
                     <Button
-                        variant={isMobile && !isTablet ? "outlined" : "contained"}
+                        variant={isMobile && !isTablet ? "text" : "contained"}
                         color="primary"
                         size="small"
                         onClick={() => {
@@ -165,20 +165,20 @@ const Product = ({ purchaseOrderData, id }) => {
                             setSelectedServiceData(null)
                         }}
                     >
-                        {isMobile && !isTablet ? <GrBusinessService size={20} /> : "Ad hoc Charges"}
+                        {isMobile && !isTablet ? <GiSabersChoc size={20} /> : "Ad hoc Charges"}
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
                     <HtmlTooltip title="Please select some product">
                         <span>
                             <Button
-                                variant="outlined"
+                                variant={isMobile && !isTablet ? "text" : "outlined"}
                                 color="default"
                                 size="small"
                                 onClick={openActions}
                                 disabled={selectedRecords.length ? false : true}
                                 aria-controls="action-menu"
-                            >Actions <ExpandMore />
+                            >  {isMobile ? '' : 'Actions'} <ExpandMore />
                             </Button>
                         </span>
                     </HtmlTooltip>

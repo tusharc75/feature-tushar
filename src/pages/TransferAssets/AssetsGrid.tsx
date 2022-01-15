@@ -15,6 +15,8 @@ import { prepareDataForGrid } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { FaSuitcase } from "react-icons/fa";
+import { IoRemoveCircleOutline } from 'react-icons/io5';
+import { MdAdd } from 'react-icons/md';
 interface AssetsGridProps {
   permissions?: any;
   user?: any;
@@ -204,19 +206,21 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     <Fragment>
       <Box display="flex" justifyContent="space-between" mx="4px">
         {permissions?.transferAsset.isUpdate && <Button
-          variant={isMobile ? 'outlined' : 'contained'}
+          variant={isMobile ? 'text' : 'contained'}
           color="primary"
           size="small"
+          style={isMobile && !isTablet ? {color:"var(--secondary)"} : {}}
           onClick={() => {
             setOpenAddNewAssets(true);
           }}
         >
-          {`Add ${routes.productInventory.title}`}
+          {isMobile && !isTablet ? <MdAdd size={22}/> :  `Add ${routes.productInventory.title}`}
         </Button>}
         {permissions?.transferAsset.isUpdate && <Button
-          variant="contained"
+          variant={isMobile ? 'text' : 'contained'}
           size="small"
           color="primary"
+          style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
           disabled={selectedRecords.length === 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0}
           onClick={() => {
             setShowConfirmBox(true);
@@ -224,7 +228,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           }}
         >
 
-          Remove Assets
+{isMobile && !isTablet ? <IoRemoveCircleOutline size={22}/> :  "Remove Assets" }
 
         </Button>}
       </Box>

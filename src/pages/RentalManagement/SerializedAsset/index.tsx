@@ -24,7 +24,10 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { useHistory } from "react-router-dom";
 import InfoIcon from '@material-ui/icons/Info';
-import { isMobile } from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
+import { CgAssign } from "react-icons/cg";
+import { IoCreate } from "react-icons/io5";
+import { MdDeleteSweep } from "react-icons/md";
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
 
@@ -383,64 +386,63 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   }
 
   return (<Fragment>
+    <Box display="flex" justifyContent="flex-end" pt={1} pb={2}>
+      <Box display="flex" alignItems="center">
+        <Button
+          variant={isMobile && !isTablet ? "text" : "contained"}
+          color="primary"
+          type="button"
+          size="small"
+          style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+          disabled={disableAssignSerializedAssets()}
+          onClick={() => {
+            setAddSerializedAssetDialog(true)
+          }}
+        >
+          {isMobile && !isTablet ? <CgAssign size={20}/> :  `Assign ${routes.productInventory.title}`}
+        </Button>
+        <Box mx={1} />
+        <Button
+          variant={isMobile && !isTablet ? "text" : "contained"}
+          color="primary"
+          type="button"
+          size="small"
+          style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
+          disabled={showManagePurchaseOrderDialog.products.length === 0}
+          onClick={() => {
+            setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: true }))
+          }}
+        >
+          {isMobile && !isTablet ? <IoCreate size={20}/> : `Create ${routes.purchaseOrder.title}`}
+        </Button>
+        {poCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
+          <IconButton size="small" onClick={() => {
+            history.push(routes.purchaseOrder.path, {
+              rental: rentalManagementData,
+            })
+          }}>
+            <InfoIcon color={"primary"} />
+          </IconButton>
+        </HtmlTooltip>}
+        <Box mx={1} />
+        <Button
+          variant={isMobile && !isTablet ? "text" : "contained"}
+          color="primary"
+          type="button"
+          size="small"
+          style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
+          disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
+          onClick={() => {
+            setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
+            setShowConfirmBox(true)
+          }}
+        >
+         {isMobile && !isTablet ? <MdDeleteSweep size={20}/> :  "Delete Assets" }
+        </Button>
+        <Box mx={1} />
+      </Box>
+    </Box>
     <Grid container spacing={2}>
-      <Grid item xs={12} sm={12} md={12} lg={12}>
-        <Box display="flex" mt={2} justifyContent="space-between" alignItems="center" padding={"4px"}>
-          {!isMobile && <h3 className="form-label-style" title={"Products and Packages"}>
-            {"Products and Packages"}
-          </h3>}
-          <div>
-            <Button
-              variant="contained"
-              color="primary"
-              type="button"
-              size="small"
-              disabled={disableAssignSerializedAssets()}
-              onClick={() => {
-                setAddSerializedAssetDialog(true)
-              }}
-            >
-              {`Assign ${routes.productInventory.title}`}
-            </Button>
-            <Box mx={1} component="span" />
-            <Button
-              variant="contained"
-              color="primary"
-              type="button"
-              size="small"
-              disabled={showManagePurchaseOrderDialog.products.length === 0}
-              onClick={() => {
-                setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: true }))
-              }}
-            >
-              {`Create ${routes.purchaseOrder.title}`}
-            </Button>
-            {poCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
-              <IconButton size="small" onClick={() => {
-                history.push(routes.purchaseOrder.path, {
-                  rental: rentalManagementData,
-                })
-              }}>
-                <InfoIcon color={"primary"} />
-              </IconButton>
-            </HtmlTooltip>}
-            <Box mx={1} component="span" />
-            <Button
-              variant="contained"
-              color="primary"
-              type="button"
-              size="small"
-              disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
-              onClick={() => {
-                setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
-                setShowConfirmBox(true)
-              }}
-            >
-              Delete Assets
-            </Button>
-          </div>
-        </Box>
-      </Grid>
       <Grid item xs={12} md={12} sm={12} >
         {columns && rowsData ?
           <Box

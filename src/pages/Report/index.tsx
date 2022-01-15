@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { Grid, Button, TextField, Box, useMediaQuery, useTheme, CircularProgress } from '@material-ui/core';
+import { Grid, Button, TextField, Box, CircularProgress, useTheme } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { List } from '@material-ui/icons';
 import { camelCase, startCase } from 'lodash';
@@ -12,15 +12,13 @@ import axiosInstance from '../../axios/axiosInstance';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import CustomContainer from '../../components/CustomContainer';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import SearchBox from '../../components/Helpers/SearchBox';
-import Tooltip from '../../components/CustomTooltipTitle';
 import VirtualizedList from '../../components/VirtualizedList';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { sidebarResource, RENTAL_STATUS, INVENTORY_STATUS, prepareDataForGrid, gridLoadingTimeout } from './../../constants/helpers';
+import { resourceNames, RENTAL_STATUS, INVENTORY_STATUS, prepareDataForGrid, gridLoadingTimeout, downloadExcel } from './../../constants/helpers';
+import Loader from '../../components/Loader';
 
 const resourcesSelect = {
   rentalManagement: ['customerAccount', 'customerContact', 'warehouse', 'status'],
@@ -32,8 +30,7 @@ let cancelTokenSource = null;
 const simplifyStatus = (statusType: any) => Object.values(statusType).map((status: string) => status);
 
 const Report = () => {
-  const theme = useTheme();
-  const isExtraSmall = useMediaQuery(theme.breakpoints.down('xs'));
+  const theme = useTheme()
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
@@ -53,6 +50,7 @@ const Report = () => {
   const [dropdownList, setDropdownList] = React.useState(null);
   const [selectedData, setSelectedData] = React.useState(null);
   const [selectedResource, setSelectedResource] = React.useState(null);
+  const [isExporting, setExporting] = React.useState(false);
 
   // Grid Configs
   const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
@@ -69,10 +67,16 @@ const Report = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (o?.fieldData?.fieldName === 'serialNumber') {
-            o.fieldData.primaryField = true;
+          if(resourceCamelCase.includes('Inventory')) {
+            if (o?.fieldData?.fieldName === 'serialNumber') {
+              o.fieldData.primaryField = true;
+            }
+          } else {
+            if (o?.fieldData?.fieldName === 'rentalJobName') {
+              o.fieldData.primaryField = true;
+            }
           }
-          let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path);
+          let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase}Detail`].path);
 
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
@@ -155,6 +159,7 @@ const Report = () => {
       });
   };
 
+  // Create and return query for filters
   const getFilter = () => {
     let filterQuery = ''
 
@@ -188,6 +193,35 @@ const Report = () => {
     return filterQuery
   }
 
+  const exportData = () => {
+    if ((selectedData && Object.keys(selectedData).length === 0) || !selectedData || isExporting) return;
+    toastConfig.setToastConfig({
+      open: true,
+      message: "Please wait exporting data",
+      type: "info"
+    });
+    setExporting(true)
+    let filterQuery = getFilter()
+    axiosInstance()
+    .get(`${routes[resourceCamelCase].path}/report/export?export=1&${filterQuery}`)
+    .then((res) => {
+      const fileName = res.headers['content-disposition'].split('filename=')[1];
+      downloadExcel(res.data, fileName);
+        setExporting(false)
+        toastConfig.setToastConfig({
+          open: true,
+          message: "Successfully Exported",
+          type: "success"
+        });
+      })
+      .catch((err) => {
+        setExporting(false)
+          toastConfig.setToastConfig(err);
+      });
+  }
+
+  
+
   const workingPage = ['productInventory', 'rentalManagement'];
 
   if (!workingPage.includes(resourceCamelCase)) {
@@ -204,17 +238,11 @@ const Report = () => {
           <Grid container direction="row">
             <Grid item xs={12} sm={12}>
               <Grid container justifyContent="flex-end">
-                {/* <ImportExportLinks
-                  permissions={permissions[resourceCamelCase]}
-                  module="rentalManagements"
-                  api={''}
-                  afterImportCompleted={() => {}}
-                  isExportAllOrSomeFeature={true}
-                  total={0}
-                  recordsToExport={0}
-                  ids={[]}
-                  onExportToExcelSuccess={() => {}}
-                /> */}
+              <div id="importExportLinks">
+                <span aria-disabled={isExporting} onClick={exportData} className={`${isExporting ? 'cursor-stop' :'cursor-pointer'} mr-2`} style={{color: theme.palette.info.light}}>
+                  Export All
+                </span>
+              </div>
               </Grid>
             </Grid>
           </Grid>
@@ -227,8 +255,7 @@ const Report = () => {
               <Grid container className={styles.rental_header_layout} spacing={1}>
                 <Grid item xs={12} md={3}>
                   <Autocomplete
-                    style={{ maxWidth: isExtraSmall ? '100%' : 300 }}
-                    options={resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : sidebarResource[_r]))}
+                    options={resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : resourceNames[_r]))}
                     limitTags={2}
                     disableListWrap
                     ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
@@ -259,23 +286,6 @@ const Report = () => {
                     renderInput={(params) => <TextField {...params} variant="outlined" label="Select Filter" size="small" />}
                   />
                 </Grid>
-                {/* <Grid item xs={12} sm={2}>
-                <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                  <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile ? styles.content_box : ''}>
-                    <HideWhenOffline>
-                      <SearchBox
-                        onSearch={() => {}}
-                        searchbox={isMobile ? styles.search_box_input : ''}
-                        value={''}
-                        size="small"
-                        placeholder={`Search`}
-                        style={isMobile ? { flex: 1 } : {}}
-                      />
-                    </HideWhenOffline>
-                    <Grid style={{ display: 'flex', gap: '5px' }}></Grid>
-                  </Grid>
-                </Box>
-              </Grid> */}
                 <Grid item xs={12} md={7}>
                   <Grid container spacing={1}>
                     {selectedResource &&
@@ -317,7 +327,7 @@ const Report = () => {
               </Grid>
             </div>
             <div>
-              {Object.keys(frameWorkComponent).length > 0 && (
+              {Object.keys(frameWorkComponent).length > 0 ? (
                 <CustomAgGrid
                   columns={columns}
                   dataRows={dataRows}
@@ -335,9 +345,9 @@ const Report = () => {
                   isClientSideGrid={true}
                   allowAction={false}
                   refreshGrid={fetchResourceData}
-                  showOnlyShowFilteredRecordSwitch={true}
+                  showOnlyShowFilteredRecordSwitch={false}
                 />
-              )}
+              ) : <Loader text={"Loading Data..."} style={{marginTop: '15vh'}} />}
             </div>
           </>
         )}
