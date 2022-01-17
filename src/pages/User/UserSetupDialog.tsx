@@ -33,21 +33,26 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 
-const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, userPermissions = null, fetchUsers, userList, selectedRecords, isRoleSetUpPermission, isApprovalProcess }) => {
+const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, userPermissions = null, fetchUsers, userList, selectedRecords, isRoleSetUpPermission, isApprovalProcess, roleAccessIds, entityAccessIds }) => {
     const { state: { user, permissions }, } = useData();
     const [activeStep, setActiveStep] = useState(0)
     const [stepsLabel, setStepsLabel] = useState([]);
     const classes = useStyles();
     useEffect(() => {
-        isApprovalProcess && setStepsLabel((prevStep) => [...prevStep,'Set Approval Process'])
-        isRoleSetUpPermission && setStepsLabel((prevStep) => [...prevStep,'Assign Role'])
+        if(isApprovalProcess){
+            setStepsLabel((prevStep) => [...prevStep,'Set Approval Process'])
+        }
+        if (isRoleSetUpPermission){
+            setStepsLabel((prevStep) => [...prevStep,'Assign Role'])
+        }
     }, [])
 
 
 
-    const getStepContent = (step: Number) => {
-        switch (step) {
-            case 0:
+    const getStepContent = (step: any) => {
+        let currentLabel = stepsLabel[step]
+        switch (currentLabel) {
+            case 'Set Approval Process':
                 return (
                     <ApprovalProcessDialog
                         openApprovalProcessDialog={open}
@@ -67,7 +72,7 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                     />
                 )
 
-            case 1:
+            case 'Assign Role':
                 return (
                     <AssignEntityDialog
                         entitiesDialogOpen={open}
@@ -82,6 +87,8 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
 
                         }}
                         isRenderedFromUserSetUp={true}
+                        roleAccessIds={roleAccessIds}
+                        entityAccessIds={entityAccessIds}
                     />
                 )
             // case 2:
