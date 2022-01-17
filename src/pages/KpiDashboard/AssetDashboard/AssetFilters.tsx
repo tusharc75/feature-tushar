@@ -18,7 +18,7 @@ interface FilterProps {
   setLoadingDropdown: any
   productCategories: any[];
   setAllProductCategories: any;
-  setAssets: any;
+  setAssets?: any;
 }
 
 const AssetFilters = (props: FilterProps) => {
@@ -36,12 +36,12 @@ const AssetFilters = (props: FilterProps) => {
   const fetchDropdownData = () => {
     setLoadingDropdown(true);
     axiosInstance()
-    .get(`/sa-formbuilder/lookup?lookupResource=Product,Product Category,Product Inventory`)
+    .get(`/sa-formbuilder/lookup?lookupResource=Product,Product Category`)
       .then(({ data: { data } }) => {
         if(data) {
           setAllProducts(data["Product"].map((d) => ({ id: d.optionValue, title: d.optionLabel })));
           setAllProductCategories(data["Product Category"].map((d) => ({ id: d.optionValue, title: d.optionLabel })))
-          setAssets(data["Product Inventory"].map((d) => ({ id: d.optionValue, title: d.optionLabel })))
+          // setAssets(data["Product Inventory"].map((d) => ({ id: d.optionValue, title: d.optionLabel })))
         }
         setLoadingDropdown(false);
       })
