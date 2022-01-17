@@ -406,19 +406,21 @@ export default function DeliveryTicketDetail(props) {
     let signaturesToSend = [...signatures];
     const status = label === "Sign-off - Dispatch" ? "Start Delivery" : "Sign-Off";
 
-    const { type, sign: newSign } = signedData;
+    const { type, sign: newSign, name } = signedData;
     const indexOfExistingSignature = signatures.findIndex((sign) => sign.type === type && sign.status === status);
 
     if (indexOfExistingSignature === -1) {
-      signaturesToSend = [...signatures, { type, signature: newSign, status: status }];
+      signaturesToSend = [...signatures, { type, signature: newSign, status: status, name: name }];
     } else {
       signaturesToSend[indexOfExistingSignature] = {
         ...signaturesToSend[indexOfExistingSignature],
         type,
         signature: newSign,
-        status: status
+        status: status,
+        name: name
       }
     }
+    
     setSignatures([...signaturesToSend]);
     if (signaturesToSend.length === 2 || signaturesToSend.length === 4) {
       if (isOffline) {
@@ -520,7 +522,7 @@ export default function DeliveryTicketDetail(props) {
                       color="primary"
                       size="small"
                       onClick={handleOpenUpdateDialog}
-                      style={isMobile && !isTablet ? {color:"var(--teal)"} : {}}
+                      style={isMobile && !isTablet ? { color: "var(--teal)" } : {}}
                     >
                       {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
                     </Button>
@@ -532,9 +534,9 @@ export default function DeliveryTicketDetail(props) {
                         color="primary"
                         size="small"
                         disabled={loading}
-                        style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+                        style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
                         onClick={() => setOpenSignatureDialog(true)}>
-                        {isMobile && !isTablet ? <FaFileSignature size={18} /> :  label}
+                        {isMobile && !isTablet ? <FaFileSignature size={18} /> : label}
                       </Button>
                       : null
                     : null}
@@ -668,7 +670,7 @@ export default function DeliveryTicketDetail(props) {
                             color="primary"
                             type="button"
                             size="small"
-                            style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
+                            style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
                             startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                             disabled={downlodingFile || isOffline}
                             onClick={() => { handleViewPdf(false) }}
@@ -682,7 +684,7 @@ export default function DeliveryTicketDetail(props) {
                             color="primary"
                             type="button"
                             size="small"
-                            style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+                            style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
                             startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
                             disabled={downlodingFile || isOffline}
                             onClick={() => { handleViewPdf(true) }}
