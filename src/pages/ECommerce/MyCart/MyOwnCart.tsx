@@ -129,6 +129,15 @@ function MyOwnCart() {
 
           setCart(data);
           setCartProducts(data.map((d, index) => {
+            let productImages = [];
+
+            if (d.hasOwnProperty(["sliderImage"])) {
+              productImages = [d.productImage ?? "", ...d["sliderImage"] as []].filter(image => image);
+            } else {
+              productImages = [d.productImage ?? ""].filter(f => f);
+            }
+
+
             return {
               ...d.product,
               indexOfProduct: index,
@@ -144,7 +153,7 @@ function MyOwnCart() {
               unit: d?.unit,
               currency: d?.currency,
               orderType: d?.orderType,
-              sliderImage: d?.productDetail?.sliderImage ?? [],
+              productImages: productImages,
               currencyWithFormat: formatAmountWithCurrency(d?.currency, d.rate)?.fullFormatAmount
             }
           }));
@@ -249,13 +258,13 @@ function MyOwnCart() {
                         <div className={styles.card}>
                           <div className={`${styles.products_image_layout} d-flex justify-content-center`}>
 
-                            {item?.sliderImage && item?.sliderImage.length > 0 ? (
+                            {item?.productImages && item?.productImages.length > 0 ? (
                               <Carousel
                                 strictIndexing
                                 animation="slide"
                                 autoPlay={false}
                                 navButtonsAlwaysVisible
-                                indicators={item?.sliderImage.length > 1}
+                                indicators={item?.productImages.length > 1}
                                 cycleNavigation={false}
                                 timeout={150}
                                 navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
@@ -266,9 +275,9 @@ function MyOwnCart() {
                                   }
                                 }}
                               >
-                                {item?.sliderImage.map((image: any, i) => (
+                                {item?.productImages.map((image: any, i) => (
                                   <div key={i} className={classes.imageContainer}>
-                                    <img className={classes.img} src={image} />
+                                    <img className={classes.img} src={image} loading='lazy' />
                                   </div>
                                 ))}
                               </Carousel>
