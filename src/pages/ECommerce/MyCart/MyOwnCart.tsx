@@ -13,10 +13,10 @@ import { BsImage } from "react-icons/bs";
 import { makeStyles } from '@material-ui/core/styles';
 import Carousel from "react-material-ui-carousel";
 import styles from './my-cart.module.scss';
-import PlusMinusTextboxComponent from '../../PlusMinusTextboxComponent/PlusMinusTextboxComponent';
+import PlusMinusTextboxComponent from '../../../components/PlusMinusTextboxComponent/PlusMinusTextboxComponent';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../CustomBreadCrumbs';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CloseIcon from '@material-ui/icons/Close';
 import { Skeleton } from "@material-ui/lab";
 
@@ -181,12 +181,13 @@ function MyOwnCart() {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
+    <>
+      <div className="p-2">
         <CustomBreadCrumbs routes={[routes.eCommerce, { title: "Cart" }]} />
-      </Grid>
-      <Box className="main-container">
-        <Grid container spacing={3}>
+      </div>
+
+      <Box>
+        <Grid container>
 
           <Grid item xs={1}></Grid>
 
@@ -394,18 +395,20 @@ function MyOwnCart() {
 
                   <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
 
-                  {
-                    cartProducts.map(m => (
-                      <div key={m._id} className="d-flex gap-3 align-items-center justify-content-space-between">
-                        <div className="d-flex gap-2 align-items-center">
-                          <p>{m.productName}</p>
-                          <Chip size="small" label={ORDER_TYPES[m?.orderType]?.key} color="primary" />
-                        </div>
+                  <div className="d-flex gap-2 flex-column">
+                    {
+                      cartProducts.map(m => (
+                        <div key={m._id} className="d-flex gap-3 align-items-center justify-content-space-between">
+                          <div className="d-flex gap-2 align-items-center">
+                            <p>{m.productName}</p>
+                            <Chip size="small" label={ORDER_TYPES[m?.orderType]?.key} color="primary" />
+                          </div>
 
-                        <div>{formatAmountWithCurrency(m.currency, m.rate * m.qty)?.fullFormatAmount}</div>
-                      </div>
-                    ))
-                  }
+                          <div>{formatAmountWithCurrency(m.currency, m.rate * m.qty)?.fullFormatAmount}</div>
+                        </div>
+                      ))
+                    }
+                  </div>
 
                   <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
 
@@ -515,7 +518,7 @@ function MyOwnCart() {
           ) : null
         }
       </Box>
-    </Fragment >
+    </ >
   );
 }
 
