@@ -19,7 +19,7 @@ function Dashboard() {
   const history = useHistory();
   const { dispatch }: any = useData();
   const {
-    state: { user }
+    state: { user, selectedEntity }
   } = useData();
   const [sections, setSections] = useState([]);
   const [search, setSearch] = useState('');
@@ -27,9 +27,17 @@ function Dashboard() {
 
   useEffect(() => {
     const arr = [];
-    let allData = user && [...user?.role.sideBar];
-    if (user?.role?.selectedEntity) {
-      allData = [...allData, ...user?.role?.selectedEntity?.resource];
+    let allData = [];
+    // let allData = user && [...user?.role.sideBar];
+    let entityData;
+      if (user?.entity && user.entity.length) {
+        entityData = user.entity.find(
+          (curEntity) => curEntity._id === selectedEntity
+        );
+
+      }
+    if (entityData?.resource) {
+      allData = entityData.resource ;
     }
     // if (['local', 'development'].includes(process.env.REACT_APP_ENV) && allData) {
     //   const indexOfProduct = allData.findIndex((d) => d.name === 'Product');
@@ -133,7 +141,7 @@ function Dashboard() {
     //     console.log(e);
     //   }
     // })();
-  }, [user]);
+  }, [user, selectedEntity]);
 
   const handleRoutes = (item) => {
     if (item.name === 'Product List') {

@@ -69,13 +69,10 @@ import QuoteBuilderCombined from './pages/QuoteBuilderCombined';
 import Reminder from './pages/Reminder';
 import ResetPassword from './pages/Auth/ResetPassword';
 import NotFound from './pages/NotFound';
-import Products from './pages/Products';
-import ProductDetails from './pages/Products/ProductDetails';
 import MarketSegment from './pages/MarketSegment';
 import Budget from './pages/Budget';
 import CreateNewQuotePdfTemplate from './pages/QuotePdfTemplate/NewCreateQuotePdfTemplate';
 import QuotePdfTemplate from './pages/QuotePdfTemplate';
-import MyOwnCart from './components/ProductList/MyCart/MyOwnCart';
 import Warehouse from './pages/Warehouse';
 import WarehouseDetailsPage from './pages/Warehouse/WarehouseDetailsPage';
 import ProductInventory from './pages/ProductInventory';
@@ -106,6 +103,10 @@ import AddressDetailPage from './pages/Address/AddressDetailPage'
 import Logout from './pages/Auth/Logout';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import Report from './pages/Report';
+
+import Products from './pages/ECommerce/Products';
+import ProductDetails from './pages/ECommerce/Products/ProductDetails';
+import MyOwnCart from './pages/ECommerce/MyCart/MyOwnCart';
 
 var notificationInterval: any = null;
 
@@ -250,7 +251,7 @@ function App() {
       // </Suspense>
       <Redirect
         to={{
-          pathname: redirectToAnotherScreen ? redirectToAnotherScreen.includes('?') ?  redirectToAnotherScreen.split('?')[0] : redirectToAnotherScreen : '/',
+          pathname: redirectToAnotherScreen ? redirectToAnotherScreen.includes('?') ? redirectToAnotherScreen.split('?')[0] : redirectToAnotherScreen : '/',
           state: { from: location }
         }}
       />
@@ -416,8 +417,8 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.productCategory.path}>
               <ProductCategory />
-              </PrivateRoute>
-              <PrivateRoute exact path={routes.productCategoryDetail.path + '/:id'}>
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.productCategoryDetail.path + '/:id'}>
               <ProductCategoryDetailPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.productTemplate.path}>
@@ -490,17 +491,8 @@ function App() {
             <PrivateRoute exact path={routes.quoteBuilder.path}>
               <QuoteBuilderCombined />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.eCommerce.path}>
-              <Products />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.eCommerceDetail.path}/:id/:orderType`}>
-              <ProductDetails />
-            </PrivateRoute>
             <PrivateRoute exact path={`${routes.productDetail.path}/:id/bom`}>
               <BOMTable />
-            </PrivateRoute>
-            <PrivateRoute exact path="/product/my-cart">
-              <MyOwnCart />
             </PrivateRoute>
             <PrivateRoute exact path={routes.budget.path}>
               <Budget />
@@ -559,6 +551,18 @@ function App() {
             <PrivateRoute exact path={`/:resource/report`}>
               <Report />
             </PrivateRoute>
+
+
+            <PrivateRoute exact path={routes.eCommerce.path} isEcommerceRoute={true}>
+              <Products />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.eCommerceDetail.path}/:id/:orderType`} isEcommerceRoute={true}>
+              <ProductDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.eCommerceDetail.path}/cart`} isEcommerceRoute={true}>
+              <MyOwnCart />
+            </PrivateRoute>
+
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
           </Switch>

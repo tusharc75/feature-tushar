@@ -14,21 +14,22 @@ interface ChartProps {
   loading: boolean;
   data: any[];
   smallScreen?: boolean;
+  categoryData?: any[];
 }
 
 const AssetChart = (props: ChartProps) => {
-  const { loading, data, smallScreen } = props;
+  const { loading, data, smallScreen, categoryData } = props;
   const [barData, setBarData] = React.useState<ChartData>(null);
   const [pieData, setPieData] = React.useState<ChartData>(null);
   const [tableView, setTableView] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [tableDataRaw, setTableDataRaw] = React.useState([]);
 
-  const msToH = (msTime: number) => {
+  const msToH = (msTime: number, isDay = false) => {
     if (!msTime || msTime === 0) return 0;
     msTime = msTime / (1000 * 60 * 60);
 
-    if (msTime > 60 * 24) msTime = msTime / (60 * 24);
+    if (msTime > 60 * 24 && isDay) msTime = msTime / (60 * 24);
 
     return msTime;
   };
@@ -45,23 +46,6 @@ const AssetChart = (props: ChartProps) => {
       const length = data.length;
       let total = data.map((_d) => _d?.inUsePercentage).reduce((acc, val) => acc + val) / length ?? 0;
       total = total !== 0 ? parseFloat(total.toFixed(4)) : total;
-
-      const labels = data.map((_d) => _d?.assetNumber);
-      const dataSet = data.map((_d) => msToH(_d?.useTime));
-
-      setTableDataRaw(
-        data.map((_d) => {
-          let totalTime = _d?.totalTime > 60 * 24 ? Math.floor(msToH(_d?.totalTime)) : msToH(_d?.totalTime).toFixed(2);
-          let useTime = _d?.totalTime > 60 * 24 ? Math.floor(msToH(_d?.useTime)) : msToH(_d?.useTime).toFixed(2);
-          return {
-            ['Asset Number']: _d?.assetNumber,
-            ['In Use (%)']: msToPercent(_d?.inUsePercentage, _d?.totalTime),
-            [`Time (${_d?.totalTime > 60 * 24 ? 'In Days' : 'In Hours'})`]: useTime,
-            [`Total Time (${_d?.totalTime > 60 * 24 ? 'In Days' : 'In Hours'})`]: totalTime
-          };
-        })
-      );
-
       setPieData({
         labels: [`In Use (${total} %)`, 'Total Utilization (%)'],
         datasets: [
@@ -73,6 +57,22 @@ const AssetChart = (props: ChartProps) => {
           }
         ]
       });
+    }
+
+    if (categoryData && categoryData.length > 0) {
+      const labels = data.map((_d) => _d?.categoryName);
+      const dataSet = categoryData.map((_d) => msToH(_d?.totalUseTime));
+
+      setTableDataRaw(
+        data.map((_d) => {
+          let dayInMs = 60 * 24 * 60 * 1000;
+          let totalTime = _d?.totalUseTime > dayInMs ? Math.floor(msToH(_d?.totalUseTime, true)) : msToH(_d?.totalUseTime, false).toFixed(2);
+          return {
+            ['Category Name']: _d?.categoryName,
+            [`Use Time (${_d?.totalUseTime > dayInMs ? 'In Days' : 'In Hours'})`]: totalTime
+          };
+        })
+      );
 
       setBarData({
         labels,
@@ -85,7 +85,7 @@ const AssetChart = (props: ChartProps) => {
         ]
       });
     }
-  }, [data]);
+  }, [data, categoryData]);
 
   const handleClose = (exportType: string) => () => {
     switch (exportType) {
@@ -154,9 +154,7 @@ const AssetChart = (props: ChartProps) => {
     setAnchorEl(null);
   };
 
-  if (loading || !pieData || !barData) return <Loader noLoader minHeight={'100%'} text={'Loading chart data...'} />;
-
-  if (!barData) return <Loader noLoader minHeight={'100%'} text={'No data available'} />;
+  if (loading) return <Loader noLoader minHeight={'100%'} text={'Loading chart data...'} />;
 
   return (
     <React.Fragment>
@@ -179,56 +177,51 @@ const AssetChart = (props: ChartProps) => {
       <Grid container spacing={2} justifyContent="space-between" alignItems="flex-end">
         <Grid item xs={12} sm={tableView && smallScreen ? 12 : 6} md={12}>
           <Box height={smallScreen && tableView ? 450 : 320}>
-            {tableDataRaw.length > 0 ? (
-              tableView ? (
-                <>
-                  <Box textAlign={'center'} mb={smallScreen ? 2 : 5}>
-                    <Typography variant="h5">Total Utilization</Typography>
-                  </Box>
-                  <TableContainer style={{ height: smallScreen ? '400px' : '600px' }}>
-                    <Table stickyHeader aria-label="caption table">
-                      <TableHead>
-                        <TableRow>
-                          {Object.keys(tableDataRaw[0]).map((label, i) => (
-                            <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                              {label}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {tableDataRaw.map((data, index) => (
-                          <TableRow key={index}>
-                            {Object.keys(data).map((label, i) => (
-                              <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                                {data[label].toLocaleString()}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </>
-              ) : (
-                <Box height={300}>
-                  <Chart
-                    id="utilization-pie-chart"
-                    options={{
-                      maintainAspectRatio: false
-                    }}
-                    type="pie"
-                    data={pieData}
-                  />
-                </Box>
-              )
-            ) : (
-              <div>No Data</div>
-            )}
+            
+              <Box height={300}>
+                <Chart
+                  id="utilization-pie-chart"
+                  options={{
+                    maintainAspectRatio: false
+                  }}
+                  type="pie"
+                  data={pieData}
+                />
+              </Box>
+            
           </Box>
         </Grid>
         <Grid item xs={12} sm={tableView ? 12 : 6} md={12}>
-          {!tableView && (
+          
+          { tableDataRaw.length > 0 ? tableView ? <>
+                <Box textAlign={'center'} mb={smallScreen ? 2 : 5}>
+                  <Typography variant="h5">Total Utilization</Typography>
+                </Box>
+                <TableContainer style={{ height: smallScreen ? '400px' : '600px' }}>
+                  <Table stickyHeader aria-label="caption table">
+                    <TableHead>
+                      <TableRow>
+                        {Object.keys(tableDataRaw[0]).map((label, i) => (
+                          <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                            {label}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {tableDataRaw.map((data, index) => (
+                        <TableRow key={index}>
+                          {Object.keys(data).map((label, i) => (
+                            <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                              {data[label].toLocaleString()}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </> :  (
             <Box height={330}>
               <Chart
                 id="utilization-chart"
@@ -239,7 +232,7 @@ const AssetChart = (props: ChartProps) => {
                 data={barData}
               />
             </Box>
-          )}
+          ) : <div>No Data</div>}
         </Grid>
       </Grid>
     </React.Fragment>

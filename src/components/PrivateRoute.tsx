@@ -4,8 +4,9 @@ import { Redirect, Route, useLocation } from 'react-router-dom';
 import { useData } from '../StateProvider/Provider';
 import Unauthorized from '../pages/Unauthorized';
 import Layout from './Layout';
+import ECommerceLayout from './ECommerce/Layout/ECommerceLayout';
 
-const ProtectedRoute = ({ children, ...rest }) => {
+const ProtectedRoute = ({ children, isEcommerceRoute = false, ...rest }) => {
   const {
     state: { user, permissions, userLoading }
   }: any = useData();
@@ -88,11 +89,14 @@ const ProtectedRoute = ({ children, ...rest }) => {
               <p>Checking Credentials...</p>
             </div>
           ) : access ? (
-            <Layout>
-              {/* <Suspense fallback={<div>Loading...</div>}> */}
-              {children}
-              {/* </Suspense> */}
-            </Layout>
+
+            isEcommerceRoute
+              ? <ECommerceLayout>
+                {children}
+              </ECommerceLayout>
+              : <Layout>
+                {children}
+              </Layout>
           ) : (
             <Unauthorized />
           )

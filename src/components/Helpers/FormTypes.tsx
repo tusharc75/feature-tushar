@@ -56,6 +56,7 @@ import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import HtmlTooltip from '../CustomTooltipTitle';
 import ImageCropTool from '../ImageCropTool';
+import RichTextEditor from './FormTypes/RichTextEditor';
 
 
 const filter = createFilterOptions();
@@ -2021,6 +2022,12 @@ const FormTypes = (props) => {
         </CustomDialogContent>
       </Dialog>
     </InfoLabel>
+  ) : type === 'richTextEditor' ? (
+    <RichTextEditor
+      name={name}
+      setFieldValue={setFieldValue}
+      value={values[name]}
+    />
   ) : null;
 };
 
