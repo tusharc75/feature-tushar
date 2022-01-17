@@ -36,7 +36,7 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between }
   React.useEffect(() => {
     const timeout = setTimeout(productWithStatus, 100)
     return () => clearTimeout(timeout)
-  }, [selectedProductCategories]);
+  }, [selectedProductCategories, between]);
 
   const getSum = (array, column) => {
     let values = array.map((item) => parseInt(item[column]) || 0);
