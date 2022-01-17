@@ -172,7 +172,7 @@ const CreateSerializedAsset = (props) => {
                                                                                             style={{ minWidth: 200 }}
                                                                                             value={userVal.warehouse}
                                                                                             options={wareHouseList}
-                                                                                            getOptionLabel={(option: any) => option ? option?.warehouseID || option?.warehouseName || option?.address : ""}
+                                                                                            getOptionLabel={(option: any) => option ? option?.warehouseName || option?.warehouseID || option?.address : ""}
                                                                                             onChange={(_, newValue) => {
                                                                                                 arrayHelpers.replace(index, {
                                                                                                     ...values.seriaizedAsset[index],
