@@ -89,6 +89,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                 if ((!currentStepDisable) && (
                     item.qty === 0
                     || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === 0
+                    || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === undefined
                     || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === null)) {
                     setCurrentStepDisable(true)
                 }
@@ -223,7 +224,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                         variant={isMobile && !isTablet ? "text" : "contained"}
                         color="primary"
                         size="small"
-                        style={isMobile && !isTablet ? {color:"var(--secondary)"} : {}}
+                        style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
                         onClick={() => {
                             setIsAddNewProduct(true);
                         }}
@@ -235,7 +236,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                         variant={isMobile && !isTablet ? "text" : "contained"}
                         color="primary"
                         size="small"
-                        style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+                        style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
                         onClick={() => {
                             setAddProductDialog(true);
                         }}
@@ -250,7 +251,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                             variant={isMobile && !isTablet ? "text" : "contained"}
                             color="primary"
                             size="small"
-                            style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
+                            style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
                             disabled={selectedRecords.length === 0}
                             onClick={() => {
                                 setIsBulkEdit(true)
@@ -258,7 +259,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                             }}
 
                         >
-                            {isMobile && !isTablet ? <RiEditCircleLine  size={20}/> : `Bulk Edit`}
+                            {isMobile && !isTablet ? <RiEditCircleLine size={20} /> : `Bulk Edit`}
                         </Button>
                     </Box>
                     <HtmlTooltip title="Please select some product">

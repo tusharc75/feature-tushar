@@ -10,15 +10,18 @@ import VirtualizedList from '../../../components/VirtualizedList';
 
 interface FilterProps {
   filter: FilterType;
-  assets: any[];
+  assets?: any[];
   loading: boolean;
 }
 
 const AssetStats = (props: FilterProps) => {
-  const { assets, loading } = props;
+  const { loading } = props;
   const [selectedAssets, setSelectedAssets] = React.useState([]);
+  const [assets, setAssets] = React.useState([]);
   const [assetStats, setAssetStats] = React.useState(null);
   const [loadingStats, setLoadingStats] = React.useState(false);
+  const [loadingAssets, setLoadingAssets] = React.useState(false);
+  const [searchVal, setSearchVal] = React.useState('')
 
   React.useEffect(() => {
     if (selectedAssets.length > 0) {
@@ -30,7 +33,7 @@ const AssetStats = (props: FilterProps) => {
     setLoadingStats(true);
     axiosInstance()
       .post('product-inventory/inventory-stats', {
-        ids: selectedAssets.map((a) => a.id)
+        ids: selectedAssets.map((a) => a.optionValue)
       })
       .then(({ data: { data } }) => {
         setAssetStats(data);
@@ -38,6 +41,27 @@ const AssetStats = (props: FilterProps) => {
       })
       .catch((err) => {
         setLoadingStats(false);
+      });
+  };
+  
+  React.useEffect(() => {
+    if(!searchVal) return
+    const timeout = setTimeout(searchAssets, 200)
+    return () => {
+      clearTimeout(timeout)
+    }
+  },[searchVal])
+
+  const searchAssets = () => {
+    setLoadingAssets(true)
+    axiosInstance()
+      .get(`/product-inventory/search-assets?assetNumber=${searchVal}`)
+      .then(({ data: { data } }) => {
+        setAssets(data)
+        setLoadingAssets(false)
+      })
+      .catch((err) => {
+        setLoadingAssets(false)
       });
   };
 
@@ -51,13 +75,14 @@ const AssetStats = (props: FilterProps) => {
             disableListWrap
             multiple={true}
             value={selectedAssets}
-            loading={loading}
+            loading={loadingAssets}
             onChange={(_, val) => setSelectedAssets(val)}
             fullWidth
             size="small"
-            getOptionSelected={(option, val) => option.id === val.id}
-            getOptionLabel={(option) => option.title}
-            renderOption={(option) => <Typography noWrap>{option.title}</Typography>}
+            getOptionSelected={(option, val) => option.optionValue === val.optionValue}
+            getOptionLabel={(option) => option.optionLabel}
+            renderOption={(option) => <Typography noWrap>{option.optionLabel}</Typography>}
+            onInputChange={(_, val) => setSearchVal(val)}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -67,7 +92,7 @@ const AssetStats = (props: FilterProps) => {
                   ...params.InputProps,
                   endAdornment: (
                     <React.Fragment>
-                      {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                      {loadingAssets ? <CircularProgress color="inherit" size={20} /> : null}
                       {params.InputProps.endAdornment}
                     </React.Fragment>
                   )

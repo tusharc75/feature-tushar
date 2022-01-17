@@ -34,7 +34,7 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between }
   const [tableDataRaw, setTableDataRaw] = React.useState([]);
 
   React.useEffect(() => {
-    const timeout = setTimeout(productWithStatus, 400)
+    const timeout = setTimeout(productWithStatus, 100)
     return () => clearTimeout(timeout)
   }, [selectedProductCategories, between]);
 
@@ -49,8 +49,8 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between }
       filterById.push(d.id);
     });
 
-    let query = `?between=${between}&`;
-    query = filterById.length > 0 ? `?productCategory=${JSON.stringify(filterById)}` : '';
+    let query = `?between=${between}&limit=100&`;
+    query = filterById.length > 0 ? `${query}productCategory=${JSON.stringify(filterById)}` : query;
 
     setLoading(true);
     axiosInstance()
@@ -59,14 +59,28 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between }
         setLoading(false);
         let labels = [];
         let values = [];
+        let tableData = []
         if (data.data.length > 0) {
-          Object.keys(data.data[0]).map((label: any) => {
+          tableData = data.data.map(d => {
+            const oldData = {...d}
+            delete oldData.productName
+            delete oldData._id
+            return {
+              ["Product"]: d.productName,
+              ['Total Assets']: Object.values(oldData).reduce((acc:number, val:number) => acc + val)
+            }
+          })
+          Object.keys(data.data[0]).forEach((label: any) => {
             if (!ignoreId.includes(label)) {
               values.push(getSum(data.data, label));
               labels.push(label);
+              
             }
           });
+          
         }
+
+        setTableDataRaw(tableData)
         setPieData({
           labels: labels,
           datasets: [

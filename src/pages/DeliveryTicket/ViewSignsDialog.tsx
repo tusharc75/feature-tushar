@@ -49,7 +49,9 @@ const ViewSignsDialog = ({ close, signatures }) => {
                       <Box textAlign="center" maxWidth={160}>
                         <Typography variant='body2' >{startCase(s.type)} Sign</Typography>
                         <Box my={2} />
-                        <img width="100%" height="100%" src={s.signature} alt={startCase(s.type)} />
+                        {s.name && <Typography variant='body2' >{s.name}</Typography>}
+                        <Box my={2} />
+                        <img width="100%" src={s.signature} alt={startCase(s.type)} />
                       </Box>
                     </Grid>
                   ))}

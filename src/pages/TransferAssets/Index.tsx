@@ -29,8 +29,9 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { FaSuitcase } from 'react-icons/fa';
-import { MdAdd } from 'react-icons/all';
-
+import { MdAdd,MdFilterList,MdSort,RiFileTransferFill,GiCargoShip,RiFolderTransferFill,SiStatuspage } from 'react-icons/all';
+import MobileSortDialog from "../../components/MobileSortDialog"
+import MobileFilterDialog from "../../components/MobileFilterDialog"
 const storedRoutes = localStorage.getItem('routes') ? JSON.parse(localStorage.getItem('routes')) : null;
 
 const TransferAsset = () => {
@@ -45,6 +46,9 @@ const TransferAsset = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const [open, setOpen] = React.useState(false);
+  const [isOpenDialog, setisOpenDialog] = useState(false)
+
 
   const {
     state: { user, permissions, selectedEntity }
@@ -162,6 +166,8 @@ const TransferAsset = () => {
     });
   }
 
+  console.log(columns,"columns")
+
   const handleDelete = () => {
     let ids = [];
     if (deleteRecord) {
@@ -242,6 +248,29 @@ const TransferAsset = () => {
     }
   };
 
+
+  
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+
+  const handleClose = () => {
+    setisOpenDialog(false);
+  };
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClickClose = () => {
+    setOpen(false);
+
+  };
+
+
+
+
+
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -270,9 +299,63 @@ const TransferAsset = () => {
       <div className="main-container">
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={6} className="d-flex align-items-center gap-1">
+          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+            <div className="d-flex align-items-center">
               <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
               <span className="listingHeader">{routes.transferAsset?.title} </span>
+              </div>
+              {isMobile && !isTablet && 
+        <div className="d-flex ">
+        <Button
+        onClick={handleClickOpen}
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        // aria-expanded={open ? 'true' : undefined}
+        color="secondary"
+        variant="text"
+        disableElevation
+        startIcon={<MdSort />}
+      >
+        Sort 
+        </Button>
+
+        <MobileSortDialog
+        isOpen={open}
+        handleClose={handleClickClose}
+        contentPart={null}
+        secHeading={["Sort Transfer Assests"]}
+        columns={columns}
+        dispatch={dispatch}
+        />
+
+
+
+        <Button
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        // aria-expanded={open ? 'true' : undefined}
+        variant="text"
+        color="secondary"
+        disableElevation
+        startIcon={<MdFilterList />}
+        onClick={handleOpen}
+      >
+        Filter 
+        </Button>
+
+
+        <MobileFilterDialog
+        isOpen={isOpenDialog}
+        handleClose={handleClose}
+        contentPart={null}
+        secHeading={["Filter Transfer Assests"]}
+        columns={columns}
+        dispatch={dispatch}
+        />
+        </div>}
+            
             </Grid>
             <Grid xs={12} sm={12} md={6} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -370,8 +453,34 @@ const TransferAsset = () => {
                 rowCount={rowCount}
                 page={page}
                 loading={loading}
-                chips={[]}
-                additionalDetails={[]}
+                chips={[
+                  {
+                    icons:<RiFileTransferFill/>,
+                    label:"Transfer From Plant: ",
+                    field:"transferFromPlant",
+                  },
+                  {
+                    icons:<RiFolderTransferFill />,
+                    label:"Transfer To Plant: ",
+                    field:"transferToPlant",
+                  },
+                  {
+                    icons:<GiCargoShip />,
+                    label:"Plant Ship To: ",
+                    field:"plantShipTo"
+                  },
+                  {
+                    icon:<SiStatuspage/>,
+                    label:"Status: ",
+                    field:"status: "
+                  }
+                ]}
+                additionalDetails={[
+                  {
+                    icon: <FaSuitcase size={18} />,
+                    field: "transferType"
+                  },
+                ]}
                 owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                 onCreate={false}
                 showClone={true}

@@ -157,30 +157,22 @@ export default function MobileSortDialog({ isOpen, handleClose, contentPart, sec
       if(selectedIndex === index && sortMode===''){
         setClicked(true);
         setSortMode('asc')
-        dispatch({
+       dispatch({
           type: 'sort',
           sorting: [{colId:field,sort:'asc'}]
-        });
+        })
+      
   
       } 
 
-
-
-
-    // !clicked && setClicked(true);
-    // clicked && setClicked(false);
-    // console.log(field,"field")
-   
-    // dispatch({
-    //   type: 'sort',
-    //   sorting: [{colId:field}]
-    // });
-    // dispatch({ type: "loading", loading: true });
     toastConfig.setToastConfig({
       open: true,
       type: "success",
       message: 'Sorted Successfully',
     });
+
+    sessionStorage.setItem('sortSuccess',JSON.stringify('sortSuccess'));
+
 
   };
 
@@ -216,8 +208,6 @@ export default function MobileSortDialog({ isOpen, handleClose, contentPart, sec
                       {selectedIndex === index && clicked && sortMode === 'desc'  && <BsArrowDown />  }
                       {selectedIndex === index && clicked && sortMode === 'default'  && <RiArrowUpDownLine />  }
                       {selectedIndex === index && clicked && sortMode=== '' && <BsArrowUp />  }
-                      
-
                     </ListItemIcon>
                   </ListItem>
                 ))}

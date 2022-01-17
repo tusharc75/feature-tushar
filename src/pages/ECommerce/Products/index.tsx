@@ -2,14 +2,14 @@ import { Paper, Grid, makeStyles } from '@material-ui/core';
 import { ToggleButton, ToggleButtonGroup, TreeItem, TreeView } from '@material-ui/lab';
 import React, { useEffect, useState, useContext, Fragment, useCallback } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component';
-import axiosInstance from '../../axios/axiosInstance';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import routes from '../../components/Helpers/Routes';
-import ProductCard from '../../components/ProductList/ProductCard/ProductCard';
-import { eProduct, ORDER_TYPES } from '../../constants/helpers';
-import { SET_CART } from '../../StateProvider/actionTypes';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
+import routes from '../../../components/Helpers/Routes';
+import ProductCard from '../../../components/ProductList/ProductCard/ProductCard';
+import { eProduct, ORDER_TYPES } from '../../../constants/helpers';
+import { SET_CART } from '../../../StateProvider/actionTypes';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import styles from './product-detail-page.module.scss'
@@ -29,7 +29,10 @@ const useStyles = makeStyles((theme) => ({
     },
     iconButton: {
         padding: 10
-    }
+    },
+    flexGrow1: {
+        flexGrow: 1,
+    },
 }));
 
 export default function Products() {
@@ -165,12 +168,11 @@ export default function Products() {
 
     return (
         <>
-            <Grid container className="headerbox">
-                <CustomBreadCrumbs routes={[{ title: routes.eCommerce.title }]} />
-            </Grid>
-            <div className="detail-container grid-product-category">
-                <div>
-                    <Paper>
+            <div className={classes.flexGrow1}>
+                <Grid container className="mt-2">
+
+                    <Grid item xs={3} className="border">
+
                         <div className={styles.sidebar_nav}>
 
                             <ToggleButtonGroup
@@ -183,7 +185,7 @@ export default function Products() {
                                     if (value) {
                                         setProducts([]);
                                         setTotalCount(0);
-                                        
+
                                         setSelectedOrderType(value)
                                         setLoading(true);
 
@@ -249,63 +251,68 @@ export default function Products() {
                             </TreeView>
                         </div>
 
-                    </Paper>
-                </div>
+                    </Grid>
 
-                <div className="position-relative">
+                    <Grid item xs={9} className="px-2">
 
-                    <InfiniteScroll
-                        dataLength={totalCount}
-                        height="calc(100vh - 115px)"
-                        next={() => {
-                            setTimeout(() => {
-                                // fetchData(null, page + 1, selectedOrderType)
-                                setPage(prevState => prevState + 1)
+                        <div className="p-2">
+                            <CustomBreadCrumbs routes={[{ title: routes.eCommerce.title }]} />
+                        </div>
 
-                                let url = `${eProduct.api}?page=${page + 1}&limit=${limit}&orderType=${selectedOrderType}`;
-                                if (selectedCategoryName) {
-                                    url = `${url}&deepFilter=[{"field":"productCategory","term":"${selectedCategoryName}"}]&filterType=and`
+                        <div className="position-relative">
+
+                            <InfiniteScroll
+                                dataLength={totalCount}
+                                next={() => {
+                                    setTimeout(() => {
+                                        // fetchData(null, page + 1, selectedOrderType)
+                                        setPage(prevState => prevState + 1)
+
+                                        let url = `${eProduct.api}?page=${page + 1}&limit=${limit}&orderType=${selectedOrderType}`;
+                                        if (selectedCategoryName) {
+                                            url = `${url}&deepFilter=[{"field":"productCategory","term":"${selectedCategoryName}"}]&filterType=and`
+                                        }
+
+                                        axiosInstance().get(url).then(({ data: { data, count } }) => {
+                                            setTotalCount(count);
+                                            setProducts(prevState => [...prevState, ...data]);
+                                        }).catch((error) => {
+                                            toastConfig.setToastConfig(error);
+                                        }).finally(() => {
+                                            setLoading(false);
+                                        });
+
+                                    }, 1500)
+                                }}
+                                hasMore={products.length !== totalCount}
+                                loader={
+                                    <h4 className="text-center border mt-3 p-3 loading-dots">
+                                        Loading more product(s)
+                                    </h4>
                                 }
-
-                                axiosInstance().get(url).then(({ data: { data, count } }) => {
-                                    setTotalCount(count);
-                                    setProducts(prevState => [...prevState, ...data]);
-                                }).catch((error) => {
-                                    toastConfig.setToastConfig(error);
-                                }).finally(() => {
-                                    setLoading(false);
-                                });
-
-                            }, 1500)
-                        }}
-                        hasMore={products.length !== totalCount}
-                        loader={
-                            <h4 className="text-center border mt-3 p-3 loading-dots">
-                                Loading more product(s)
-                            </h4>
-                        }
-                    >
-                        {
-                            products.length !== 0 ? <div className={`${styles.product_list_container}`}>
+                            >
                                 {
-                                    products.map((product, index: number) => (
-                                        <ProductCard key={index} product={product} selectedOrderType={selectedOrderType}
-                                        />
-                                    ))
+                                    products.length !== 0 ? <div className={`${styles.product_list_container}`}>
+                                        {
+                                            products.map((product, index: number) => (
+                                                <ProductCard key={index} product={product} selectedOrderType={selectedOrderType} />
+                                            ))
+                                        }
+                                    </div> : <div className={`${styles.product_list_container}`}>
+                                        {
+                                            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((_, index: number) => (
+                                                <ProductCard key={index} product={null} showSkeleton={true} selectedOrderType={selectedOrderType} />
+                                            ))
+                                        }
+                                    </div>
                                 }
-                            </div> : <div className={`${styles.product_list_container}`}>
-                                {
-                                    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((_, index: number) => (
-                                        <ProductCard key={index} product={null} showSkeleton={true} selectedOrderType={selectedOrderType}
-                                        />
-                                    ))
-                                }
-                            </div>
-                        }
 
+                            </InfiniteScroll>
+                        </div>
 
-                    </InfiniteScroll>
-                </div>
+                    </Grid>
+
+                </Grid>
             </div>
 
         </>
