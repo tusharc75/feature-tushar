@@ -316,7 +316,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
             disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
           >
-            {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : "Remove Assets"}
+            {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : "Remove Loading Ticket"}
           </Button>
         </Tooltip>
         <Box mx={1} />

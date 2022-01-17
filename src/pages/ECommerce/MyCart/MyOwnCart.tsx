@@ -13,10 +13,10 @@ import { BsImage } from "react-icons/bs";
 import { makeStyles } from '@material-ui/core/styles';
 import Carousel from "react-material-ui-carousel";
 import styles from './my-cart.module.scss';
-import PlusMinusTextboxComponent from '../../PlusMinusTextboxComponent/PlusMinusTextboxComponent';
+import PlusMinusTextboxComponent from '../../../components/PlusMinusTextboxComponent/PlusMinusTextboxComponent';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../CustomBreadCrumbs';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CloseIcon from '@material-ui/icons/Close';
 import { Skeleton } from "@material-ui/lab";
 
@@ -129,6 +129,15 @@ function MyOwnCart() {
 
           setCart(data);
           setCartProducts(data.map((d, index) => {
+            let productImages = [];
+
+            if (d.hasOwnProperty(["sliderImage"])) {
+              productImages = [d.productImage ?? "", ...d["sliderImage"] as []].filter(image => image);
+            } else {
+              productImages = [d.productImage ?? ""].filter(f => f);
+            }
+
+
             return {
               ...d.product,
               indexOfProduct: index,
@@ -144,7 +153,7 @@ function MyOwnCart() {
               unit: d?.unit,
               currency: d?.currency,
               orderType: d?.orderType,
-              sliderImage: d?.productDetail?.sliderImage ?? [],
+              productImages: productImages,
               currencyWithFormat: formatAmountWithCurrency(d?.currency, d.rate)?.fullFormatAmount
             }
           }));
@@ -181,12 +190,13 @@ function MyOwnCart() {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
+    <>
+      <div className="p-2">
         <CustomBreadCrumbs routes={[routes.eCommerce, { title: "Cart" }]} />
-      </Grid>
-      <Box className="main-container">
-        <Grid container spacing={3}>
+      </div>
+
+      <Box>
+        <Grid container>
 
           <Grid item xs={1}></Grid>
 
@@ -248,13 +258,13 @@ function MyOwnCart() {
                         <div className={styles.card}>
                           <div className={`${styles.products_image_layout} d-flex justify-content-center`}>
 
-                            {item?.sliderImage && item?.sliderImage.length > 0 ? (
+                            {item?.productImages && item?.productImages.length > 0 ? (
                               <Carousel
                                 strictIndexing
                                 animation="slide"
                                 autoPlay={false}
                                 navButtonsAlwaysVisible
-                                indicators={item?.sliderImage.length > 1}
+                                indicators={item?.productImages.length > 1}
                                 cycleNavigation={false}
                                 timeout={150}
                                 navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
@@ -265,9 +275,9 @@ function MyOwnCart() {
                                   }
                                 }}
                               >
-                                {item?.sliderImage.map((image: any, i) => (
+                                {item?.productImages.map((image: any, i) => (
                                   <div key={i} className={classes.imageContainer}>
-                                    <img className={classes.img} src={image} />
+                                    <img className={classes.img} src={image} loading='lazy' />
                                   </div>
                                 ))}
                               </Carousel>
@@ -394,18 +404,20 @@ function MyOwnCart() {
 
                   <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
 
-                  {
-                    cartProducts.map(m => (
-                      <div key={m._id} className="d-flex gap-3 align-items-center justify-content-space-between">
-                        <div className="d-flex gap-2 align-items-center">
-                          <p>{m.productName}</p>
-                          <Chip size="small" label={ORDER_TYPES[m?.orderType]?.key} color="primary" />
-                        </div>
+                  <div className="d-flex gap-2 flex-column">
+                    {
+                      cartProducts.map(m => (
+                        <div key={m._id} className="d-flex gap-3 align-items-center justify-content-space-between">
+                          <div className="d-flex gap-2 align-items-center">
+                            <p>{m.productName}</p>
+                            <Chip size="small" label={ORDER_TYPES[m?.orderType]?.key} color="primary" />
+                          </div>
 
-                        <div>{formatAmountWithCurrency(m.currency, m.rate * m.qty)?.fullFormatAmount}</div>
-                      </div>
-                    ))
-                  }
+                          <div>{formatAmountWithCurrency(m.currency, m.rate * m.qty)?.fullFormatAmount}</div>
+                        </div>
+                      ))
+                    }
+                  </div>
 
                   <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
 
@@ -515,7 +527,7 @@ function MyOwnCart() {
           ) : null
         }
       </Box>
-    </Fragment >
+    </ >
   );
 }
 

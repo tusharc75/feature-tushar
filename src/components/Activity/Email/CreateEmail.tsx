@@ -740,7 +740,7 @@ export const CreateEmail = ({
                                       touched["to"] && Boolean(errors["to"])
                                     }
                                     helperText={touched["to"] && errors["to"]}
-                                    name="Email"
+                                    name="to"
                                   />
                                 )}
                                 value={values["to"]}
@@ -810,7 +810,7 @@ export const CreateEmail = ({
                                       touched["cc"] && Boolean(errors["cc"])
                                     }
                                     helperText={touched["cc"] && errors["cc"]}
-                                    name="Email"
+                                    name="cc"
                                   />
                                 )}
                                 value={values["cc"]}

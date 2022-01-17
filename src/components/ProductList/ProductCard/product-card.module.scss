@@ -3,24 +3,25 @@
   position: relative;
   background: white;
   border-radius: 6px;
-  .title{
-     padding: 10px 8px;
-     display: flex;
-     justify-content: space-between;
-     align-items: center;
-     h4{
-       color: #DD5052;
-     }
-     h4:hover{
+  border: 1px solid var(--common-border-color);
+
+  .title {
+    padding: 10px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    h4 {
+      color: #dd5052;
+    }
+    h4:hover {
       color: var(--primary);
-     }
-    
+    }
   }
-  .product_less{
+  .product_less {
     width: 30px;
     height: 30px;
     font-size: 10px;
-    background-color: #DD5052;
+    background-color: #dd5052;
   }
 
   img {
@@ -44,15 +45,15 @@
     color: white;
   }
 
-  .no_image{
+  .no_image {
     transform: scale(1);
-    -webkit-transition: .3s ease-in-out;
-    transition: .3s ease-in-out;
+    -webkit-transition: 0.3s ease-in-out;
+    transition: 0.3s ease-in-out;
     font-size: 200px;
     padding: 40px;
     color: #d3d6d3;
   }
-  .no_image:hover{
+  .no_image:hover {
     transform: scale(1.3);
   }
   .text {
@@ -61,26 +62,26 @@
     align-items: center;
     padding: 8px 10px;
     text-align: left;
-    h4{
+    h4 {
       padding-bottom: 5px;
     }
-    &_layout{
+    &_layout {
       display: flex;
       align-items: center;
     }
-    .product_amount{
+    .product_amount {
       font-size: 1rem;
       font-weight: 700;
-      color: #DD5052;
+      color: #dd5052;
       margin-right: 10px;
     }
-    h4{
-        cursor: pointer;
+    h4 {
+      cursor: pointer;
 
-        &:hover{
-            color: red;
-            text-decoration: underline;
-        }
+      &:hover {
+        color: red;
+        text-decoration: underline;
+      }
     }
     p {
       font-size: 0.9rem;
@@ -106,24 +107,23 @@
       text-decoration: line-through;
     }
   }
-  .rating{
+  .rating {
     font-size: 10px;
     display: flex;
     align-items: center;
     padding: 2px 0 10px 0;
-    h5{
+    h5 {
       padding-top: 2px;
-      color: #FFB400;
+      color: #ffb400;
     }
   }
-  .cart_icon{
+  .cart_icon {
     background-color: var(--primary);
     width: 30px;
     height: 30px;
     font-size: 10px;
-    
   }
-  .cart_icon:hover{
-    transform: scale(1.1)
+  .cart_icon:hover {
+    transform: scale(1.1);
   }
 }
