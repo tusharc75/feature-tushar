@@ -1,6 +1,6 @@
 .global-chat {
   position: absolute;
-  bottom: 15px;
+  bottom: 45px;
   left: 70px;
   z-index: 1001;
 
@@ -8,7 +8,7 @@
    word-break: break-all;
  }
   @media screen and (max-width: 960px) {
-    left: 15px;
+    left: 5px;
   }
 }
 

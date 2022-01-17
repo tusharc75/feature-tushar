@@ -31,15 +31,16 @@ const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOr
     const [selectedProduct, setSelectedProduct] = useState({ name: "", id: "", quantity: 0 });
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
     const [disableSaveButton, setDisableSaveButton] = useState(false);
+    const localStorageSelectedRecords = "purchaseOrderProductPage_selected";
 
     useEffect(() => {
         if (type === "product") fetchProductInPurchaseOrder();
-    }, [page, limit, filters, sorting, search]);
+    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
     const columns = type === "product" ? [
-        { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
         // { field: "entity", headerName: "Entity", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
@@ -113,6 +114,10 @@ const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOr
         }
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
+        }
+        if (showFilteredRecordsOnly) {
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
         }
         const filterById = []
         if (filterById.length) {
@@ -232,6 +237,7 @@ const AddProductDialog = ({ addProductInPurchaseOrder, handleProductInPurchaseOr
                                 isClientSideGrid={false}
                                 onCellValueChanged={onCellValueChanged}
                                 showOnlyShowFilteredRecordSwitch={true}
+                                renderedFrom={"purchaseOrderProductPage"}
                             />
                             : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                     </div>

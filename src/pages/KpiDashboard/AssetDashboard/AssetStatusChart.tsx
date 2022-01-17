@@ -25,7 +25,7 @@ import { utils, write } from 'xlsx';
 
 import axiosInstance from '../../../axios/axiosInstance';
 
-const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
+const AssetStatusChart = ({ productCategories, loadingProductCategory, between }) => {
   const [pieData, setPieData] = React.useState<ChartData>(null);
   const [selectedProductCategories, setSelectedProductCategories] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
@@ -34,7 +34,8 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
   const [tableDataRaw, setTableDataRaw] = React.useState([]);
 
   React.useEffect(() => {
-    productWithStatus();
+    const timeout = setTimeout(productWithStatus, 100)
+    return () => clearTimeout(timeout)
   }, [selectedProductCategories]);
 
   const getSum = (array, column) => {
@@ -48,23 +49,38 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
       filterById.push(d.id);
     });
 
-    let query = filterById.length > 0 ? `?productCategory=${JSON.stringify(filterById)}` : '';
+    let query = `?between=${between}&limit=100&`;
+    query = filterById.length > 0 ? `${query}productCategory=${JSON.stringify(filterById)}` : query;
 
-    // setLoading(true)
+    setLoading(true);
     axiosInstance()
       .get(`/dashboard/product-with-status-count${query}`)
       .then(({ data: { data } }) => {
         setLoading(false);
         let labels = [];
         let values = [];
+        let tableData = []
         if (data.data.length > 0) {
-          Object.keys(data.data[0]).map((label: any) => {
+          tableData = data.data.map(d => {
+            const oldData = {...d}
+            delete oldData.productName
+            delete oldData._id
+            return {
+              ["Product"]: d.productName,
+              ['Total Assets']: Object.values(oldData).reduce((acc:number, val:number) => acc + val)
+            }
+          })
+          Object.keys(data.data[0]).forEach((label: any) => {
             if (!ignoreId.includes(label)) {
               values.push(getSum(data.data, label));
               labels.push(label);
+              
             }
           });
+          
         }
+
+        setTableDataRaw(tableData)
         setPieData({
           labels: labels,
           datasets: [
@@ -186,22 +202,24 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
         />
       </Box>
 
-      <Box display={'flex'} justifyContent={'space-between'}>
-        <div>
-          <Button disabled={loading} onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
-            Export to
+      {tableDataRaw.length > 0 && (
+        <Box display={'flex'} justifyContent={'space-between'}>
+          <div>
+            <Button disabled={loading} onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
+              Export to
+            </Button>
+            <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
+              <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
+              <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
+              <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
+              <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
+            </Menu>
+          </div>
+          <Button disabled={loading} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
+            {!tableView ? 'Table' : 'Chart'} View
           </Button>
-          <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
-            <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
-            <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
-            <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
-            <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
-          </Menu>
-        </div>
-        <Button disabled={loading} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
-          {!tableView ? 'Table' : 'Chart'} View
-        </Button>
-      </Box>
+        </Box>
+      )}
       <Box height={400}>
         {loading && <Typography>Loading...</Typography>}
         {tableDataRaw.length > 0 ? (

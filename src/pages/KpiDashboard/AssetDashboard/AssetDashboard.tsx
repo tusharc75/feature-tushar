@@ -33,9 +33,10 @@ const AssetDashboard = ({ salesFilter }) => {
   const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [assetLocationData, setAssetLocationData] = React.useState([]);
   const [assetUtilizationData, setAssetUtilizationData] = React.useState([]);
-  const [assets, setAssets] = React.useState([]);
+  const [productByCategory, setProductByCategory] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [loadingChartData, setLoadingChartData] = React.useState(false);
+  const [loadingChartData1, setLoadingChartData1] = React.useState(false);
   const [limit, setLimit] = React.useState('10');
   const [filter, setFilter] = React.useState<FilterType>({
     productCategory: [],
@@ -77,52 +78,53 @@ const AssetDashboard = ({ salesFilter }) => {
   };
 
   React.useEffect(() => {
-     let timeout = setTimeout(() => {
-       fetchAssetsData();  
-     },200)
+    let timeout = setTimeout(() => {
+      fetchAssetsData();
+      fetchAssetsDataOld();
+    }, 200);
 
-     return () => clearTimeout(timeout)
+    return () => clearTimeout(timeout);
   }, [from, to]);
 
   // NEW
-  // const fetchAssetsData = () => {
-  //   let params = {
-  //     between: JSON.stringify({
-  //       from: new Date(from).toISOString().split('T')[0],
-  //       to: new Date(to).toISOString().split('T')[0]
-  //     }),
-  //     productCategory: filter.productCategory.map((d) => d?.id)
-  //   };
+  const fetchAssetsData = () => {
+    let params = {
+      between: JSON.stringify({
+        from: new Date(from).toISOString().split('T')[0],
+        to: new Date(to).toISOString().split('T')[0]
+      }),
+      productCategory: filter.productCategory.map((d) => d?.id)
+    };
 
-  //   let url = '';
+    let url = '';
 
-  //   for (const k of Object.keys(params)) {
-  //     if (params[k]) {
-  //       if (Array.isArray(params[k]) && params[k].length > 0) {
-  //         url = `${url}${k}=${JSON.stringify(params[k])}&`;
-  //       }
-  //       if (k === 'between' && from && to) {
-  //         url = `${url}${k}=${params[k]}&`;
-  //       }
-  //     }
-  //   }
+    for (const k of Object.keys(params)) {
+      if (params[k]) {
+        if (Array.isArray(params[k]) && params[k].length > 0) {
+          url = `${url}${k}=${JSON.stringify(params[k])}&`;
+        }
+        if (k === 'between' && from && to) {
+          url = `${url}${k}=${params[k]}&`;
+        }
+      }
+    }
 
-  //   setLoadingChartData(true);
+    setLoadingChartData1(true);
 
-  //   // axiosInstance()
-  //   //   .get(`/dashboard/assets-in-use-by-category?${url}`, { cancelToken: source.token })
-  //   //   .then(({ data: { data } }) => {
-  //   //     // setAssetUtilizationData(data.data);
-  //   //     // setLoadingChartData(false);
-  //   //   })
-  //   //   .catch(() => {
-  //   //     setLoadingChartData(false);
-  //   //   });
-  // };
+    axiosInstance()
+      .get(`/dashboard/assets-in-use-by-category?${url}productCategory=${JSON.stringify([])}`)
+      .then(({ data: { data } }) => {
+        setProductByCategory(data.data);
+        setLoadingChartData1(false);
+      })
+      .catch(() => {
+        setLoadingChartData1(false);
+      });
+  };
 
   // OLD
 
-  const fetchAssetsData = () => {
+  const fetchAssetsDataOld = () => {
     let params = {
       between: JSON.stringify({
         from: new Date(from).toISOString().split('T')[0],
@@ -163,7 +165,6 @@ const AssetDashboard = ({ salesFilter }) => {
           loadingDropdown={loadingDropdown}
           setLoadingDropdown={setLoadingDropdown}
           setAllProductCategories={setAllProductCategories}
-          setAssets={setAssets}
         />
         {/* <Box>
           <Autocomplete
@@ -201,13 +202,26 @@ const AssetDashboard = ({ salesFilter }) => {
             <MapView smallScreen={smallScreen} data={assetLocationData} loading={loading} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <AssetChart smallScreen={smallScreen} loading={loading || loadingChartData || loadingDropdown} data={assetUtilizationData} />
+            <AssetChart
+              smallScreen={smallScreen}
+              loading={loading || loadingChartData || loadingDropdown || loadingChartData1}
+              data={assetUtilizationData}
+              categoryData={productByCategory}
+            />
           </Grid>
         </Grid>
         <Box mt={2}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <AssetStatusChart productCategories={allProductCategories} loadingProductCategory={loadingDropdown} />
+              <AssetStatusChart
+                between={ JSON.stringify({
+                    from: new Date(from).toISOString().split('T')[0],
+                    to: new Date(to).toISOString().split('T')[0]
+                  })
+                }
+                productCategories={allProductCategories}
+                loadingProductCategory={loadingDropdown}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <RentalChart />
@@ -215,7 +229,7 @@ const AssetDashboard = ({ salesFilter }) => {
           </Grid>
         </Box>
         <Box mt={2}>
-          <AssetStats assets={assets.slice(0, 15000)} loading={loadingDropdown} filter={filter} />
+          <AssetStats loading={loadingDropdown} filter={filter} />
         </Box>
       </Box>
     </div>

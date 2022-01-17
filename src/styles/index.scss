@@ -1337,8 +1337,24 @@ body::-webkit-scrollbar-thumb {
 .align-tablet{
   
 }
+.mobile-filter-side-header{
+    display: flex;
+    flex:1;
+    gap: 5px;
+}
+.filter-side-header-serialized{
+  display: flex;
+    gap: 5px;
+}
+
+@media only screen and (max-width: 960px){
+  .filter-side-header-serialized{
+    justify-content: space-between;
+    flex:1
+  }
 
 
+}
 
 @media only screen and (max-height: 1030px){
   .listingHeader {
