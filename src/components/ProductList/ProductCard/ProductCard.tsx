@@ -212,9 +212,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
 
   return (
     <div className={styles.product_card}>
-      {/* {product.mrp && parseInt(product.mrp) !== 0 && product.discount && parseInt(product.discount) !== 0 && (
-        <div className={styles.product_discount}>-{product.discount}%</div>
-      )} */}
+      
       <div className={styles.title}>
         {
           showSkeleton ? <Skeleton width={120} height={30} /> : <h4
