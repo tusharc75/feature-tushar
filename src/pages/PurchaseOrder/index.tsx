@@ -327,18 +327,7 @@ const PurchaseOrder = () => {
       };
       
 
-      let toggleInner = (
-        <ToggleButtonGroup
-        size="small"
-        className=" toggle-button-layout"
-        // value={filter}
-        exclusive
-        // onChange={handleFilter}
-      >
-        <ToggleButton>PurchaseOrder</ToggleButton>
-      </ToggleButtonGroup>
-      )
-   
+    
 
     return (<Fragment>
         <Grid container className="headerbox">
@@ -368,13 +357,14 @@ const PurchaseOrder = () => {
         <div className="main-container">
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={6} className="d-flex align-items-center gap-1">
+                <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+                <div className="d-flex align-items-center">
                         <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
                         <span className="listingHeader">{routes.purchaseOrder?.title} </span>
-
+                    </div>
                         {isMobile && (
                   <>
-                    <Grid style={{ display: 'inline-flex', marginLeft:"135px"}}>
+                    <Grid style={{ display: 'inline-flex'}}>
                       <Button
                         onClick={handleClickOpen}
                         id="demo-customized-button"
@@ -393,7 +383,7 @@ const PurchaseOrder = () => {
                       <MobileSortDialog
                         isOpen={sortOpen}
                         handleClose={handleClickClose}
-                        contentPart={toggleInner}
+                        contentPart={null}
                         secHeading={['Sort Purchase Order']}
                         columns={columns}
                         dispatch={dispatch}
@@ -417,7 +407,7 @@ const PurchaseOrder = () => {
                       <MobileFilterDialog
                         isOpen={isOpenDialog}
                         handleClose={handleFilterClose}
-                        contentPart={toggleInner}
+                        contentPart={null}
                         secHeading={['Filter Purchase Order']}
                         columns={columns}
                         dispatch={dispatch}
