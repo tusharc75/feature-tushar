@@ -1,31 +1,31 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { useParams } from "react-router-dom";
-import axiosInstance from "../../axios/axiosInstance";
-import { formatAmountWithCurrency, eProduct, dateFormatForInputControl, ORDER_TYPES } from "../../constants/helpers";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../../axios/axiosInstance";
+import { formatAmountWithCurrency, eProduct, dateFormatForInputControl, ORDER_TYPES } from "../../../constants/helpers";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { Rating } from "@material-ui/lab";
 import { Box, Chip, Grid, makeStyles, Typography } from "@material-ui/core";
 import AddShoppingCartIcon from "@material-ui/icons/AddShoppingCart";
 import RemoveShoppingCartIcon from '@material-ui/icons/RemoveShoppingCart';
 import { BsImage } from "react-icons/bs";
-import ManageQuoteDialog from "../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog";
-import { useData } from "../../StateProvider/Provider";
+import ManageQuoteDialog from "../../QuoteBuilderCombined/ManageQuote/ManageQuoteDialog";
+import { useData } from "../../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
-import routes from "../../components/Helpers/Routes";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { SET_CART } from "../../StateProvider/actionTypes";
+import routes from "../../../components/Helpers/Routes";
+import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
+import { SET_CART } from "../../../StateProvider/actionTypes";
 import Carousel from "react-material-ui-carousel";
 import styles from "./product-detail-page.module.scss";
-import { WishlistContext } from "../../StateProvider/WishlistContext/WishlistProvider";
-import CustomButton from "../../components/Helpers/CustomButton";
+import { WishlistContext } from "../../../StateProvider/WishlistContext/WishlistProvider";
+import CustomButton from "../../../components/Helpers/CustomButton";
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import PlusMinusTextboxComponent from "../../components/PlusMinusTextboxComponent/PlusMinusTextboxComponent";
+import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
+import PlusMinusTextboxComponent from "../../../components/PlusMinusTextboxComponent/PlusMinusTextboxComponent";
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
@@ -304,36 +304,15 @@ export default function ProductDetails() {
   }
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
+    <>
+      <div className="p-2">
         <CustomBreadCrumbs routes={[routes.eCommerce, { title: productDetails?.productName }]} />
-      </Grid>
-      <Box className="main-container">
-        {showCreateQuoteDialog && (
-          <ManageQuoteDialog
-            open={showCreateQuoteDialog}
-            onSuccess={() => { }}
-            onClose={() => {
-              setshowCreateQuoteDialog(false)
-            }}
-            isNew={true}
-            dataToUpdate={null}
-            isClone={false}
-            resource={null}
-            isRedirectTodetailPage={true}
-            contactId={null}
-            opportunityId={null}
-            disableOwnerDropDown={true}
-            contacts={null}
-            doaCollaboratorResources={user?.user?.doa.map(obj => obj.user)}
-            isRenderedFromOpportunity={false}
-            isCreateQuoteFromCart={true}
-            onHandleSubmit={handleCreateQuote}
-          />
-        )}
+      </div>
+
+      <Box>
 
         {
-          productDetails ? <Grid container className="py-4 px-2" spacing={2}>
+          productDetails ? <Grid container className="py-4 px-2">
 
             <Grid item xs={4} className="d-flex flex-column align-items-center">
               <Box display="flex" justifyContent="center" alignItems="center">
@@ -642,7 +621,7 @@ export default function ProductDetails() {
 
             <Grid item xs={3}></Grid>
 
-          </Grid> : <Grid container className="py-4 px-2" spacing={2}>
+          </Grid> : <Grid container className="py-4 px-2">
 
             <Grid item xs={4} className="d-flex flex-column align-items-center">
               <Box display="flex" justifyContent="center" alignItems="center">
@@ -705,6 +684,31 @@ export default function ProductDetails() {
       </Box>
 
       {
+        showCreateQuoteDialog && (
+          <ManageQuoteDialog
+            open={showCreateQuoteDialog}
+            onSuccess={() => { }}
+            onClose={() => {
+              setshowCreateQuoteDialog(false)
+            }}
+            isNew={true}
+            dataToUpdate={null}
+            isClone={false}
+            resource={null}
+            isRedirectTodetailPage={true}
+            contactId={null}
+            opportunityId={null}
+            disableOwnerDropDown={true}
+            contacts={null}
+            doaCollaboratorResources={user?.user?.doa.map(obj => obj.user)}
+            isRenderedFromOpportunity={false}
+            isCreateQuoteFromCart={true}
+            onHandleSubmit={handleCreateQuote}
+          />
+        )
+      }
+
+      {
         deleteProductFromCartConfirmationDialog.show ? (
           <ConfirmationDialog
             open={true}
@@ -743,6 +747,6 @@ export default function ProductDetails() {
         ) : null
       }
 
-    </Fragment>
+    </>
   );
 }

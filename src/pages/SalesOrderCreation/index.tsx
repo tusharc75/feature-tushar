@@ -2,8 +2,17 @@ import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { Chip, Grid, IconButton, Tooltip } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { FaRegistered } from 'react-icons/fa';
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, salesOrder, sidebarResource, prepareDataForGrid } from '../../constants/helpers';
+import { FaRegistered,FaSuitcase } from 'react-icons/fa';
+import {MdContactPhone,RiContactsBookUploadFill,RiShip2Fill,FaWarehouse,SiStatuspage } from 'react-icons/all';
+import {
+  isObjectEmpty,
+  customerAccount,
+  supplierAccount,
+  gridLoadingTimeout,
+  salesOrder,
+  sidebarResource,
+  prepareDataForGrid
+} from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -15,7 +24,8 @@ import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import SalesOrderHeader from './SalesOrderHeader';
-
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -132,7 +142,7 @@ const SalesOrder = () => {
             headerName: o?.fieldData?.fieldLabel,
             show: true,
             disabled: true,
-            cellRenderer: "salesOrderNoRenderer"
+            cellRenderer: 'salesOrderNoRenderer'
           }
         ];
       } else {
@@ -362,11 +372,10 @@ const SalesOrder = () => {
     axiosInstance()
       .get(`${salesOrder.salesOrderApi}${queryString}`)
       .then(({ data: { data, count } }) => {
-
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
           let res = {
-            ...finalObject,
+            ...finalObject
             // canDelete: u.owner?.optionValue === user?.user._id,
             // allowedToEdit: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
             // lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
@@ -484,14 +493,14 @@ const SalesOrder = () => {
                   permissions={permissions.salesOrder}
                   module="salesOrder"
                   api={salesOrder.salesOrderApi}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => {}}
                   isExportAllOrSomeFeature={true}
                   total={rowCount}
                   recordsToExport={selectedRecords.length}
                   ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
                   onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll()
-                    else fetchSalesOrder()
+                    if (gridApi) gridApi.deselectAll();
+                    else fetchSalesOrder();
                   }}
                 />
               </Grid>
@@ -516,9 +525,11 @@ const SalesOrder = () => {
             icon={<FaRegistered className="headerLogo" />}
             heading={routes.salesOrder.title}
             showTransferEntityDialog={handleTransferEntityDialog}
-          // showCloneSalesOrderDialog={() => {
-          //   handleShowCloneSalesOrderDialog()
-          // }}
+            columns={columns}
+            dispatch={dispatch}
+            // showCloneSalesOrderDialog={() => {
+            //   handleShowCloneSalesOrderDialog()
+            // }}
           >
             {accountDetails.accountId && (
               <Chip
@@ -537,23 +548,91 @@ const SalesOrder = () => {
           </SalesOrderHeader>
         </div>
 
-        {Object.keys(frameworkComponent).length > 0 && (
-          <CustomAgGrid
-            columns={columns}
+        {Object.keys(frameworkComponent).length > 0 &&
+          isMobile && !isTablet ? (
+            <CustomSwipableList 
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={permissions.salesOrder}
+            primaryField={columns?.find(d=>d.field==="salesOrderNo")}
+            onClick={(data) => {
+              history.push(`${routes.salesOrderDetail.path}/${data._id}`)
+            }}
             dataRows={dataRows}
-            frameworkComponents={frameworkComponent}
-            setGridApi={setGridApi}
+            selectedRecords={selectedRecords}
             dispatch={dispatch}
+            onEdit={(data) => {
+              history.push(`${routes.salesOrderDetail.path}/${data._id}?openEdit=true`)
+            }}
+            extraParamsToCheckDelete={true}
+            onDelete={(data) => {
+              setSingleSalesOrderDelete({
+                show: true,
+                id: data._id,
+                salesOrderName: `${data.salesOrderNo}`
+              })
+            }}
             rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
             page={page}
-            actionWidth={100}
             loading={loading}
-            renderedFrom={'salesOrderPage'}
-            refreshGrid={fetchSalesOrder}
-          />
-        )}
+            additionalDetails={[
+              {
+                icon: <FaSuitcase size={18} />,
+                field: "customerAccount"
+              },
+            ]}
+            chips={[
+              {
+                icon:<MdContactPhone />,
+                label: "Customer Contact: ",
+                field: "customerContact"  
+              },
+              {
+                icon:<RiContactsBookUploadFill />,
+                label:"Billing Address: ",
+                field:"billingAddress"
+              },
+              {
+                icon:<RiShip2Fill />,
+                label:"Shipping Address: ",
+                field:"shippingAddress"
+              },
+              { 
+                icon:<FaWarehouse />,
+                label:"Plants: ",
+                field:"plants"
+              },
+              {
+                icon:<SiStatuspage/>,
+                label:"Status: ",
+                field:"status:"
+              }
+            ]}
+            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+            onCreate={false}
+            showClone={true}
+            onClone={(data) => {  setShowManageSalesOrderDialog({ open: true, isClone: true, idToClone: data._id })}}
+            renderedFrom={salesOrderResource}
+            
+            
+            />
+          ) : (
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameworkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={100}
+              loading={loading}
+              renderedFrom={'salesOrderPage'}
+              refreshGrid={fetchSalesOrder}
+            />
+          )}
 
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
@@ -565,8 +644,9 @@ const SalesOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.salesOrderName ? 'Sales Order' : 'Sales Orders'}   ${deleteRecord.salesOrderName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.salesOrderName ? 'Sales Order' : 'Sales Orders'}   ${
+              deleteRecord.salesOrderName || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
