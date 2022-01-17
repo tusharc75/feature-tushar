@@ -221,7 +221,7 @@ const AssetDashboard = ({ salesFilter }) => {
                 }
                 productCategories={allProductCategories}
                 loadingProductCategory={loadingDropdown}
-              /> */}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <RentalChart />
