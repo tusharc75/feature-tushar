@@ -333,7 +333,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
               || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered))}
 
           >
-            {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : "Remove Assets"}
+            {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : "Remove Receiving Ticket"}
           </Button>
         </Tooltip>
         <Box mx={1} />
