@@ -110,7 +110,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       }
 
       if (deliveryTicketList.length) {
-        if (deliveryTicketList.filter((e) => e.ticketType === DELIVERY_TICKET_TYPE.receiving && [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status)).length) {
+        if (deliveryTicketList.filter((e) => [DELIVERY_TICKET_TYPE.receiving, DELIVERY_TICKET_TYPE.return].includes(e.ticketType) &&
+          [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status)).length) {
           setShowProcessDeliveryTicket(true)
         }
         else {

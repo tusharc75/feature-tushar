@@ -118,9 +118,9 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           productAssets.map((d, index) => {
             if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
-              productAssets[index]['deliveryTicket'] = obj?.ticketName;
-              productAssets[index]['deliveryTicketId'] = obj?._id;
-              productAssets[index]['deliveryTicketStatus'] = obj?.status;
+              productAssets[index]['loadingTicket'] = obj?.ticketName;
+              productAssets[index]['loadingTicketId'] = obj?._id;
+              productAssets[index]['loadingTicketStatus'] = obj?.status;
             }
           });
         }
@@ -135,9 +135,9 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             INVENTORY_STATUS.scrap,
             INVENTORY_STATUS.lost,
             INVENTORY_STATUS.underReview
-          ].includes(d.status) || d.deliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered;
+          ].includes(d.status) || d.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered;
       });
-      if (productAssets.filter((e) => e.deliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
+      if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
         setNextStep(true);
       }
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
@@ -152,7 +152,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
   const TicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
+      <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
         {params.value}
       </Link>
     ) : (
@@ -181,8 +181,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   const columns = [
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "inventoryRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "ticketRenderer" },
     { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
+    { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "ticketRenderer" },
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
@@ -296,28 +296,33 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             color="primary"
             size="small"
             style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
-            disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
+            disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => f.hasOwnProperty("loadingTicketId")))}
           >
             {isMobile && !isTablet ? <AiOutlineLoading3Quarters size={18} /> : 'Create Loading Ticket'}
           </Button>
         </Tooltip>
         <Box mx={1} />
-        <Tooltip
-          title="Remove Assets From Loading Ticket(s)">
-          <Button
-            onClick={() => {
-              setShowRemoveAssetFromLoadingTicketDialog(true)
-            }}
-            variant={isMobile && !isTablet ? "text" : "outlined"}
-            color="primary"
-            size="small"
-            style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
-            disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
-          >
-            {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : "Remove Loading Ticket"}
-          </Button>
-        </Tooltip>
-        <Box mx={1} />
+        {(selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("loadingTicketId") &&
+          f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedRecords?.length) ?
+          <Fragment>
+            <Tooltip
+              title="Remove Assets From Loading Ticket(s)">
+              <Button
+                onClick={() => {
+                  setShowRemoveAssetFromLoadingTicketDialog(true)
+                }}
+                variant={isMobile && !isTablet ? "text" : "outlined"}
+                color="primary"
+                size="small"
+                style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
+                disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("loadingTicketId")))}
+              >
+                {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : "Remove Loading Ticket"}
+              </Button>
+            </Tooltip>
+            <Box mx={1} />
+          </Fragment> : null
+        }
         {(showProcessDeliveryTicket && !isOffline) &&
           <Fragment>
             <Tooltip
@@ -366,8 +371,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
               },
               {
                 label: "Loading Ticket : ",
-                field: "deliveryTicket",
-                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
+                field: "loadingTicket",
+                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`)
               }
             ]}
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
@@ -427,7 +432,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           onOk={() => {
             setOkBtnLoading(true);
 
-            const groupByCalls = groupBy(selectedRecords, 'deliveryTicketId');
+            const groupByCalls = groupBy(selectedRecords, 'loadingTicketId');
             let apiCalls = [];
 
             Object.keys(groupByCalls).forEach((key) => {

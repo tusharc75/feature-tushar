@@ -307,9 +307,9 @@ function MyOwnCart() {
                     </Grid>
                   </Grid>
                 ) : cartProducts.length ? (
-                  cartProducts.filter(item => item.orderType === tabs.find(tab => tab.id === currentTab).key).map((item) => {
+                  [...cartProducts.filter(item => item.orderType === tabs.find(tab => tab.id === currentTab).key)].map((item) => {
                     return (
-                      <div key={item.id} className={styles.checkout_items}>
+                      <div key={item.indexOfProduct} className={styles.checkout_items}>
                         <div className={styles.card}>
                           <div className={`${styles.products_image_layout} d-flex justify-content-center`}>
 
