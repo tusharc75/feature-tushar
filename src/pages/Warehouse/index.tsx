@@ -32,11 +32,14 @@ import useColumns, {getStaticFields, getFrameworkComponents } from "../../consta
 import { prepareDataForGrid } from "../../constants/helpers"
 import { useLocation } from "react-router-dom";
 import queryString from "query-string";
-import { MdAccountCircle } from "react-icons/md";
+import { MdAccountCircle,MdSort, MdFilterList } from "react-icons/md";
 import {AiFillCrown, MdAdd} from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
+import MobileSortDialog from "../../components/MobileSortDialog"
+import MobileFilterDialog from "../../components/MobileFilterDialog"
+
 
 const AddressResource = () => {
   const location = useLocation();
@@ -77,6 +80,10 @@ const AddressResource = () => {
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([])
   const localStorageSelectedRecords = "warehouse_selected";
+  const [sortOpen, setSortOpen] = React.useState(false);
+  const [isOpenDialog, setisOpenDialog] = useState(false)
+
+
 
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
@@ -356,6 +363,24 @@ const AddressResource = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
+  
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+
+  const handleClose = () => {
+    setisOpenDialog(false);
+  };
+  const handleClickOpen = () => {
+    setSortOpen(true);
+  };
+
+  const handleClickClose = () => {
+    setSortOpen(false);
+
+  };
+
+
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -385,8 +410,55 @@ const AddressResource = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center gap-1">
+          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+          <div className="d-flex align-items-center">
               <FaWarehouse size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.warehouse.title}</span>
+            </div>
+            {isMobile && !isTablet &&
+        <div className="d-flex ">
+        <Button
+        onClick={handleClickOpen}
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        // aria-expanded={open ? 'true' : undefined}
+        color="secondary"
+        variant="text"
+        disableElevation
+        startIcon={<MdSort />}
+      >
+        Sort 
+        </Button>
+        <MobileSortDialog
+        isOpen={open}
+        handleClose={handleClickClose}
+        contentPart={null}
+        secHeading={["Sort Plants"]}
+        columns={columns}
+        dispatch={dispatch}
+        />
+        <Button
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        // aria-expanded={open ? 'true' : undefined}
+        variant="text"
+        color="secondary"
+        disableElevation
+        startIcon={<MdFilterList />}
+        onClick={handleOpen}
+      >
+        Filter 
+        </Button>
+        <MobileFilterDialog
+        isOpen={isOpenDialog}
+        handleClose={handleClose}
+        contentPart={null}
+        secHeading={["Filter Plants"]}
+        columns={columns}
+        dispatch={dispatch}
+        />
+        </div> }
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
