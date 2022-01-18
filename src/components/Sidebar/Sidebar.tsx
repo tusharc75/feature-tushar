@@ -96,7 +96,7 @@ const useStyles = makeStyles((theme) => ({
 
 function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const {
-    state: { user, selectedEntity, tour },
+    state: { permissions, user, selectedEntity, tour },
   }: any = useData();
 
   const history = useHistory();
@@ -280,20 +280,21 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 </ListItem>
               </Tooltip>
             </Link>
-            <Link to="/reports">
-              <Tooltip title={!toggleDrawer ? "Reports" : ""}>
-                <ListItem
-                  button
-                  selected={location.pathname === "/reports"}
-                  className="list-item"
-                >
-                  <ListItemIcon>
-                    <MdDashboard size={15} className="sidebar-icon" />
-                  </ListItemIcon>
-                  <ListItemText primary="Reports" />
-                </ListItem>
-              </Tooltip>
-            </Link>
+            {permissions?.rentalManagement?.isRead ?
+              <Link to="/reports">
+                <Tooltip title={!toggleDrawer ? "Reports" : ""}>
+                  <ListItem
+                    button
+                    selected={location.pathname === "/reports"}
+                    className="list-item"
+                  >
+                    <ListItemIcon>
+                      <MdDashboard size={15} className="sidebar-icon" />
+                    </ListItemIcon>
+                    <ListItemText primary="Reports" />
+                  </ListItem>
+                </Tooltip>
+              </Link> : null}
             {user &&
               listItems().map((listItem, i) => (
                 <React.Fragment key={i}>
