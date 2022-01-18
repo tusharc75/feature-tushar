@@ -550,7 +550,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
               toastConfig.setToastConfig({
                 open: true,
                 type: 'success',
-                message: `Selected records removed from assiged ${sidebarResource.receivingTicket}(s)`
+                message: `Selected records removed from assiged Receiving Ticket(s)`
               });
               fetchRecords();
             })
