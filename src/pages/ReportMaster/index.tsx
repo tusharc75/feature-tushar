@@ -4,7 +4,7 @@ import styles from '../Leads/Header.module.scss';
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { REPORT_LIST } from './../../constants/helpers';
-import { MdOutlineReceiptLong } from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { Link, withRouter, useHistory } from "react-router-dom";
 import { camelCase, startCase } from 'lodash';
 
@@ -22,7 +22,7 @@ const ReportMaster = () => {
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={12} className="d-flex align-items-center gap-1 layout-for-tablet">
                         <Grid style={{ display: "flex", justifyContent: "center" }}>
-                            <MdOutlineReceiptLong size={22} className="headerLogo" />
+                            <MdDashboard size={22} className="headerLogo" />
                             <span className="listingHeader">Reports</span>
                         </Grid>
                     </Grid>
