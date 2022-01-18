@@ -22,10 +22,10 @@ import PptxGenJs from 'pptxgenjs';
 import jsPDF from 'jspdf';
 import { saveAs } from 'file-saver';
 import { utils, write } from 'xlsx';
-
+import Loader from '../../../components/Loader';
 import axiosInstance from '../../../axios/axiosInstance';
 
-const AssetStatusChart = ({ productCategories, loadingProductCategory, between }) => {
+const AssetStatusChart = ({ productCategories, loadingProductCategory, between, smallScreen }) => {
   const [pieData, setPieData] = React.useState<ChartData>(null);
   const [selectedProductCategories, setSelectedProductCategories] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
@@ -34,8 +34,8 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between }
   const [tableDataRaw, setTableDataRaw] = React.useState([]);
 
   React.useEffect(() => {
-    const timeout = setTimeout(productWithStatus, 100)
-    return () => clearTimeout(timeout)
+    const timeout = setTimeout(productWithStatus, 100);
+    return () => clearTimeout(timeout);
   }, [selectedProductCategories, between]);
 
   const getSum = (array, column) => {
@@ -59,28 +59,26 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between }
         setLoading(false);
         let labels = [];
         let values = [];
-        let tableData = []
+        let tableData = [];
         if (data.data.length > 0) {
-          tableData = data.data.map(d => {
-            const oldData = {...d}
-            delete oldData.productName
-            delete oldData._id
+          tableData = data.data.map((d) => {
+            const oldData = { ...d };
+            delete oldData.productName;
+            delete oldData._id;
             return {
-              ["Product"]: d.productName,
-              ['Total Assets']: Object.values(oldData).reduce((acc:number, val:number) => acc + val)
-            }
-          })
+              ['Product']: d.productName,
+              ['Total Assets']: Object.values(oldData).reduce((acc: number, val: number) => acc + val)
+            };
+          });
           Object.keys(data.data[0]).forEach((label: any) => {
             if (!ignoreId.includes(label)) {
               values.push(getSum(data.data, label));
               labels.push(label);
-              
             }
           });
-          
         }
 
-        setTableDataRaw(tableData)
+        setTableDataRaw(tableData);
         setPieData({
           labels: labels,
           datasets: [
@@ -172,39 +170,41 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between }
 
   return (
     <div>
-      <Box width={200} mb={1}>
-        <Autocomplete
-          disabled={loadingProductCategory}
-          fullWidth
-          disableListWrap
-          loading={loadingProductCategory}
-          loadingText={'Loading...'}
-          multiple={true}
-          value={selectedProductCategories}
-          options={productCategories}
-          disableCloseOnSelect
-          limitTags={2}
-          onChange={(_, newVal) => setSelectedProductCategories(newVal)}
-          getOptionSelected={(option, value) => option.id === value.id}
-          getOptionLabel={(option) => option.title}
-          renderOption={(option, { selected }) => (
-            <React.Fragment>
-              <Checkbox
-                icon={<CheckBoxOutlineBlank fontSize="small" />}
-                checkedIcon={<CheckBox fontSize="small" />}
-                style={{ marginRight: 8 }}
-                checked={selected}
-              />
-              {option.title}
-            </React.Fragment>
-          )}
-          renderInput={(params) => <TextField {...params} variant="outlined" label="Product Category" size="small" />}
-        />
+      <Box textAlign={'center'}>
+        <Typography variant="h6">Asset Count</Typography>
       </Box>
-
       {tableDataRaw.length > 0 && (
-        <Box display={'flex'} justifyContent={'space-between'}>
-          <div>
+        <Box display={smallScreen ? "column" : 'flex'} justifyContent={'space-between'}>
+          <Box width={200} mb={1}>
+            <Autocomplete
+              disabled={loadingProductCategory}
+              fullWidth
+              disableListWrap
+              loading={loadingProductCategory}
+              loadingText={'Loading...'}
+              multiple={true}
+              value={selectedProductCategories}
+              options={productCategories}
+              disableCloseOnSelect
+              limitTags={2}
+              onChange={(_, newVal) => setSelectedProductCategories(newVal)}
+              getOptionSelected={(option, value) => option.id === value.id}
+              getOptionLabel={(option) => option.title}
+              renderOption={(option, { selected }) => (
+                <React.Fragment>
+                  <Checkbox
+                    icon={<CheckBoxOutlineBlank fontSize="small" />}
+                    checkedIcon={<CheckBox fontSize="small" />}
+                    style={{ marginRight: 8 }}
+                    checked={selected}
+                  />
+                  {option.title}
+                </React.Fragment>
+              )}
+              renderInput={(params) => <TextField {...params} variant="outlined" label="Product Category" size="small" />}
+            />
+          </Box>
+          <Box display={smallScreen ? "flex" : "block"} justifyContent={'space-between'}>
             <Button disabled={loading} onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
               Export to
             </Button>
@@ -214,15 +214,15 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between }
               <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
               <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
             </Menu>
-          </div>
-          <Button disabled={loading} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
-            {!tableView ? 'Table' : 'Chart'} View
-          </Button>
+            <Button disabled={loading} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
+              {!tableView ? 'Table' : 'Chart'} View
+            </Button>
+          </Box>
         </Box>
       )}
-      <Box height={400}>
-        {loading && <Typography>Loading...</Typography>}
-        {tableDataRaw.length > 0 ? (
+      <Box height={440}>
+        {loading && <Loader noLoader minHeight={'100%'} text={'Loading chart data...'} />}
+        {!loading && tableDataRaw.length > 0 ? (
           tableView ? (
             <TableContainer style={{ height: '400px' }}>
               <Table stickyHeader aria-label="caption table">

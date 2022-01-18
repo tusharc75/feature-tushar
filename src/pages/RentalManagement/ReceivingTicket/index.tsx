@@ -17,7 +17,8 @@ import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
   gridLoadingTimeout, deliveryTicket, rentalManagement,
   sidebarResource, productInventory as productInventoryHelperObject, INVENTORY_STATUS, DELIVERY_TICKET_STATUS,
-  DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE
+  DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE,
+  repairJob
 } from "../../../constants/helpers";
 import { groupBy } from "lodash";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -37,6 +38,7 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { RiExchangeFundsLine } from 'react-icons/ri';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
+import ManageRepairJob from '../../RepairJob/ManageRepairJob'
 
 const renderedFrom = 'rentalManagementDetailsPageReceivingTicket';
 
@@ -74,6 +76,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
 
+  const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -110,7 +114,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       }
 
       if (deliveryTicketList.length) {
-        if (deliveryTicketList.filter((e) => e.ticketType === DELIVERY_TICKET_TYPE.receiving && [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status)).length) {
+        if (deliveryTicketList.filter((e) => [DELIVERY_TICKET_TYPE.receiving, DELIVERY_TICKET_TYPE.return].includes(e.ticketType) &&
+          [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status)).length) {
           setShowProcessDeliveryTicket(true)
         }
         else {
@@ -228,6 +233,17 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     setProductInventoryForTicket(selectedProductInventory);
     setShowTicketDialog({ open: true, ticketType: ticketType });
   };
+
+  const handleAddAssetToRepairJob = (repairJobId) => {
+    axiosInstance()
+      .post(`${repairJob.repairJobApi}/${repairJobId}/add-assets`, { "ids": selectedRecords?.map(s => s._id) })
+      .then(({ data }) => {
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+  }
+
 
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
@@ -379,6 +395,29 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Create Return Ticket'}
           </Button>
         </Tooltip>
+
+        {(selectedRecords.length && selectedRecords?.filter(f =>
+        ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+          (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
+          && [INVENTORY_STATUS.underReview].includes(f.status)
+        )?.length === selectedRecords?.length) ?
+          <Fragment>
+            <Box mx={1} />
+            <Tooltip title="Create Repair Job">
+              <Button
+                variant={isMobile && !isTablet ? "text" : "outlined"}
+                color="primary"
+                size="small"
+                style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
+                onClick={() => {
+                  setShowRepairJobDialog(true)
+                }}
+              >
+                {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Create Repair Job'}
+              </Button>
+            </Tooltip>
+          </Fragment> : null}
+
         <Box mx={1} />
         {(showProcessDeliveryTicket && !isOffline) &&
           <Fragment>
@@ -511,7 +550,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
               toastConfig.setToastConfig({
                 open: true,
                 type: 'success',
-                message: `Selected records removed from assiged ${sidebarResource.receivingTicket}(s)`
+                message: `Selected records removed from assiged Receiving Ticket(s)`
               });
               fetchRecords();
             })
@@ -609,6 +648,20 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           fetchRecords()
         }}
       />}
+    {showRepairJobDialog &&
+      <ManageRepairJob
+        refrenceType="Rental Job"
+        refrenceData={rentalManagementData}
+        inventories={selectedRecords?.map(s => s._id)}
+        open={showRepairJobDialog}
+        onClose={() => setShowRepairJobDialog(false)}
+        onSuccess={(obj) => {
+          handleAddAssetToRepairJob(obj?._id)
+          setShowRepairJobDialog(false);
+          fetchRecords()
+        }}
+      />
+    }
   </>
   );
 };

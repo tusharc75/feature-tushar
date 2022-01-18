@@ -461,8 +461,8 @@ const ProductInventory = () => {
                                         variant={isMobile && !isTablet ? "text" : "contained"}
                                         size="small"
                                         color="primary"
-                                        className={isMobile && !isTablet  ? "mobile_button" : styles.add_submit_btn}
-                                        startIcon={isMobile && !isTablet  ? null : <AddOutlined />}
+                                        className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                                     >
                                         {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
                                     </Button>
@@ -577,7 +577,7 @@ const ProductInventory = () => {
         {
             showRepairJobDialog &&
             <ManageRepairJob
-                fromInventory
+                refrenceType="Product Inventory"
                 inventories={selectedRecords?.map(s => s.id)}
                 open={showRepairJobDialog}
                 onClose={() => setShowRepairJobDialog(false)}

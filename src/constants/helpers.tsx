@@ -121,7 +121,6 @@ export const formFieldNames = {
 };
 
 export const sidebarResource = {
-
   customerAccount: 'Customer Account',
   user: 'User',
   customerContact: 'Customer Contact',
@@ -163,11 +162,9 @@ export const sidebarResource = {
   deliveryTicket: 'Delivery Ticket',
   pricingCondition: 'Pricing Condition',
   repairJob: 'Repair Job',
-  receivingTicket: 'Receiving Ticket',
   salesOrder: 'Sales Order',
   eCommerce: 'e-Commerce',
   packages: 'Packages',
-
   supplierContact: 'Supplier Contact',
   supplierAccount: 'Supplier Account',
   pricing: 'Pricing',
@@ -176,10 +173,9 @@ export const sidebarResource = {
   projectSales: 'Project Sales',
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset'
-
 };
-export const resourceNames = {
 
+export const resourceNames = {
   customerAccount: 'Customer Account',
   user: 'User',
   customerContact: 'Customer Contact',
@@ -221,7 +217,6 @@ export const resourceNames = {
   deliveryTicket: 'Delivery Ticket',
   pricingCondition: 'Pricing Condition',
   repairJob: 'Repair Job',
-  receivingTicket: 'Receiving Ticket',
   salesOrder: 'Sales Order',
   eCommerce: 'e-Commerce',
   packages: 'Packages',
@@ -244,7 +239,6 @@ export const primaryFields = {
   repairJob: "repairJobName",
   purchaseOrder: "purchaseOrderNumber",
   deliveryTicket: "ticketName"
-  
 }
 
 export const RESOURCE_LABEL = {
@@ -291,7 +285,6 @@ export const RESOURCE_LABEL = {
   deliveryTicket: 'Delivery Tickets',
   pricingCondition: 'Pricing Setup',
   repairJob: 'Repair Jobs',
-  receivingTicket: 'Receiving Tickets',
   salesOrder: 'Sales Order',
   eCommerce: 'e-Commerce',
   packages: 'Packages',
@@ -343,8 +336,6 @@ export const productTemplate = {
   productTemplateRoute: 'product-template'
 };
 
-
-
 export const priceTemplate = {
   priceTemplateResource: 'priceTemplate',
   priceTemplateApi: '/price-template',
@@ -389,10 +380,7 @@ export const warehouse = {
   warehouseApi: '/warehouse'
 };
 
-export const receivingTicket = {
-  receivingTicketResource: 'receivingTicket',
-  receivingTicketApi: '/receiving-ticket'
-};
+
 
 export const projectSales = {
   projectSalesResource: 'projectSales',
@@ -460,7 +448,8 @@ export const eProduct = {
 export const productInventory = {
   api: '/product-inventory',
   route: '/product-inventory',
-  permission: 'productInventory'
+  permission: 'productInventory',
+  resource: 'product-inventory'
 };
 
 export const budget = {
@@ -1484,7 +1473,7 @@ export const INVENTORY_STATUS = {
   inUse: 'In-Use',
   indTransit: 'In-Transit',
   underReview: 'Under Review',
-  repair: 'Repair', 
+  repair: 'Repair',
   readyToShip: 'Ready to ship',
   scrap: 'Scrap',
   lost: 'Lost',
@@ -1521,14 +1510,12 @@ export const DELIVERY_TICKET_TYPE = {
   return: 'Return',
 };
 
-
 export const DELIVERY_TICKET_REFRENCE_TYPE = {
   rentalJob: 'Rental Job',
   transferAsset: 'Transfer Asset',
   repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
 };
-
 
 export const asyncForEach = async (
   array: any[],
@@ -1551,6 +1538,10 @@ export const resourceOptions = [
   'Loading Ticket',
   'Project Sales'
 ];
+
+
+export const REPORT_LIST = [sidebarResource.rentalManagement, sidebarResource.productInventory]
+
 
 export const getApi = (resource: string) => {
   switch (kebabCase(resource)) {

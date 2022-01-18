@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../../../axios/axiosInstance";
-import { formatAmountWithCurrency, eProduct, dateFormatForInputControl, ORDER_TYPES } from "../../../constants/helpers";
+import { formatAmountWithCurrency, eProduct, dateFormatForInputControl, ORDER_TYPES, getObjKeysWithValues } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { Rating } from "@material-ui/lab";
 import { Box, Chip, Grid, makeStyles, Typography, IconButton } from "@material-ui/core";
@@ -34,6 +34,7 @@ import { Skeleton } from "@material-ui/lab";
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 import SimilarItems from "../../../components/ProductList/SimilarItems/SimilarItems";
 import FrequentlyBought from "../../../components/ProductList/FrequentlyBought/FrequentlyBought";
+import ProductConfiguration from "./ProductConfiguration";
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -99,6 +100,7 @@ export default function ProductDetails() {
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, cartItems }, dispatch }: any = useData();
   const [wishlist, setWishlist] = useState({ loading: false, disabled: false });
+  const [productConfigData, setProductConfigData] = useState({ values: {}, fields: [], requiredValues: [""], error: "" });
   const [rateCurrency, setRateCurrency] = useState({ currency: "", rate: "", mrp: "", rateWithCurrency: "", isRateMrpSame: false })
   const [deleteProductFromCartConfirmationDialog, setDeleteProductFromCartConfirmationDialog] = useState({ show: false, okBtnLoading: false })
   const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
@@ -126,7 +128,7 @@ export default function ProductDetails() {
   useEffect(() => {
     axiosInstance().get(`${eProduct.api}/${id}`).then(({ data: { data } }) => {
       setProductDetails({ ...data });
-
+      prepareFormData(data)
       const indexOfProductInCart = getIndexOfProductInCart(cartItems);
 
       if (data.hasOwnProperty(["sliderImage"])) {
@@ -159,6 +161,19 @@ export default function ProductDetails() {
       toastConfig.setToastConfig(error);
     })
   }, [id])
+
+  const prepareFormData = (data:any) => {
+    if(data) {
+      const initialData = getObjKeysWithValues(data, data.fields)
+      
+      setProductConfigData({
+        ...productConfigData,
+        values: initialData,
+        fields: data.fields,
+        requiredValues: data?.fields.filter((d:any) => d.required).map((d:any) => d.fieldName) ?? []
+      }) 
+    }
+  }
 
   const changeRateCurrency = (productData, unit, pricingMethod) => {
 
@@ -226,6 +241,7 @@ export default function ProductDetails() {
   }
 
   const onAddToCartItem = (item) => {
+    const {values, requiredValues, error} = productConfigData
 
     let product = {
       qty: 1,
@@ -235,7 +251,8 @@ export default function ProductDetails() {
       rate: Number(rateCurrency.rate),
       unit: data.selectedUnit,
       orderType: orderTypeInLowerCase,
-      currency: rateCurrency.currency
+      currency: rateCurrency.currency,
+      productConfiguration: values
     }
 
     if (orderTypeInLowerCase === ORDER_TYPES.rent.value.toLocaleLowerCase()) {
@@ -243,6 +260,22 @@ export default function ProductDetails() {
       product["startDate"] = data.startDate;
       product["endDate"] = data.endDate;
     }
+
+    let requiredValuesLeft = requiredValues.filter(val => !values[val]);
+
+    if(requiredValuesLeft.length > 0) {
+      setProductConfigData({
+        ...productConfigData,
+        error: "Please select required (*) configuration"
+      })
+      setTimeout(() => setProductConfigData({
+        ...productConfigData,
+        error: ""
+      }), 5 * 1000)
+
+      setAddToCartBtnLoading(false)
+      return
+    } 
 
     axiosInstance()
       .post(`/ecommerce/cart`,
@@ -458,7 +491,7 @@ export default function ProductDetails() {
                             >
                               {
                                 productDetails.unit.map(m => (
-                                  <MenuItem value={m}>{m}</MenuItem>
+                                  <MenuItem value={m} key={m}>{m}</MenuItem>
                                 ))
                               }
                             </Select>
@@ -482,7 +515,7 @@ export default function ProductDetails() {
                             >
                               {
                                 productDetails.pricingMethod.map(m => (
-                                  <MenuItem value={m}>{m}</MenuItem>
+                                  <MenuItem value={m} key={m}>{m}</MenuItem>
                                 ))
                               }
                             </Select>
@@ -551,6 +584,13 @@ export default function ProductDetails() {
                       </MuiPickersUtilsProvider>
                     </Grid>
                   }
+                  
+                  <ProductConfiguration data={productConfigData} handleChange={(values) => {
+                    setProductConfigData({
+                      ...productConfigData,
+                      values
+                    })
+                  }} />
 
                   <Box className="my-3 d-flex gap-4 align-items-baseline">
                     {
