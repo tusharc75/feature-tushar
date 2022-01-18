@@ -175,7 +175,9 @@ export default function ProductDetails() {
     }
 
     if (record) {
-      setRateCurrency({ currency: record.currency, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
+      setRateCurrency({ currency: record.currency, rate: record.mrp, rateWithCurrency: formatAmountWithCurrency(record.currency, record.mrp)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
+    } else {
+      setRateCurrency({ currency: productData.currency, rate: productData.mrp, rateWithCurrency: formatAmountWithCurrency(productData.currency, productData.mrp)?.fullFormatAmount, mrp: productData.mrp, isRateMrpSame: true })
     }
 
     if (data.indexOfProductInCart !== -1) {
@@ -230,7 +232,7 @@ export default function ProductDetails() {
       type: 'product',
       materialId: item._id,
       mrp: Number(rateCurrency.mrp),
-      rate: rateCurrency.rate,
+      rate: Number(rateCurrency.rate),
       unit: data.selectedUnit,
       orderType: orderTypeInLowerCase,
       currency: rateCurrency.currency
@@ -262,11 +264,9 @@ export default function ProductDetails() {
   useEffect(() => {
     if (productDetails) {
       axiosInstance()
-        .get(
-          `${eProduct.api}?filterById=[{"field":"productCategory", "term": "${productDetails.productCategory?.optionLabel}"}]&limit=0`
-        )
+        .get(`/e-product/similar-product/${id}`)
         .then(({ data: { data } }) => {
-          setSimilarItems(data);
+          setSimilarItems([...data.filter(f => f._id !== id)]);
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -397,7 +397,7 @@ export default function ProductDetails() {
                     >
                       {productImages.map((image: any, i) => (
                         <div key={i} className={classes.imageContainer}>
-                          <img className={classes.img} src={image} />
+                          <img className={classes.img} src={image} style={{ width: "85%" }} />
                         </div>
                       ))}
                     </Carousel>
@@ -690,13 +690,15 @@ export default function ProductDetails() {
           </Grid>
         }
 
-        {/* <hr />
+        <hr />
 
-        <FrequentlyBought id={id} /> */}
+        <div className="my-3">
+          <FrequentlyBought id={id} orderType={orderType} mainProductMrp={Number(rateCurrency.mrp)} mainProductWithCurrency={rateCurrency.rateWithCurrency} />
+        </div>
 
         <hr />
 
-        <SimilarItems similarItems={similarItems} />
+        <SimilarItems similarItems={similarItems} orderType={orderType} />
 
       </Box>
 
