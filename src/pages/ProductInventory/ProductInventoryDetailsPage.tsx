@@ -733,7 +733,7 @@ const ProductInventoryDetailsPage = () => {
       {
         showRepairJobDialog &&
         <ManageRepairJob
-          fromInventory
+          refrenceType="Product Inventory"
           inventories={[id]}
           open={showRepairJobDialog}
           onClose={() => setShowRepairJobDialog(false)}
