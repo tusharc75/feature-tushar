@@ -1551,6 +1551,8 @@ const UserDetailsPage = () => {
           selectedRecords={[{ ...userData }]}
           isRoleSetUpPermission={permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate}
           isApprovalProcess={isLoggedInUserBrandAdmin}
+          roleAccessIds={roleAccessOfLoggedInUser}
+          entityAccessIds={entityAccess}
         />
       }
       {

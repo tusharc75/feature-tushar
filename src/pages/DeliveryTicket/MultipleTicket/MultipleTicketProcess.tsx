@@ -83,7 +83,7 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
                 }
                 let data: any = [], count;
                 if (!isOffline) {
-                    const response = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=${refrenceType}&refrenceId=${refrenceData._id}&ticketType=${ticketType}`)
+                    const response = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=${refrenceType}&refrenceId=${refrenceData._id}&ticketType=${ticketType?.toString()}`)
                     data = response?.data?.data;
                     count = data?.length;
                 }
@@ -115,7 +115,19 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
 
     const handleSignature = async (signedData) => {
         const status = openSignatureDialog.label === "Sign-off - Dispatch" ? "Start Delivery" : "Sign-Off";
-        const signatures = [...signaturesToSend, { type: signedData.type, signature: signedData.sign, status: status }]
+        const indexOfExistingSignature = signaturesToSend.findIndex((sign) => sign.type === signedData.type && sign.status === status);
+        let signatures: any = []
+        if (indexOfExistingSignature === -1) {
+            signatures = [...signaturesToSend, { type: signedData.type, signature: signedData.sign, name: signedData?.name, status: status }]
+        } else {
+            signatures[indexOfExistingSignature] = {
+                ...signatures[indexOfExistingSignature],
+                type: signedData.type,
+                signature: signedData.sign,
+                status: status,
+                name: signedData?.name
+            }
+        }
         setSignaturesToSend(signatures)
         if (signatures.length === 2) {
             setUpdating(true)

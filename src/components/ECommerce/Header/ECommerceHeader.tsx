@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useState, useContext, useEffect, Fragment } from 'react'
 import {
     AppBar,
     IconButton,
@@ -6,7 +6,9 @@ import {
     Toolbar,
     InputBase,
     MenuItem,
-    Menu
+    Menu,
+    TextField,
+    ClickAwayListener
 } from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
@@ -15,11 +17,27 @@ import { useData } from '../../../StateProvider/Provider';
 import { alpha, makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import FavoriteIcon from '@material-ui/icons/Favorite';
+import BookmarkIcon from '@material-ui/icons/Bookmark';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import { SVG } from "../../../assets"
 import { WishlistContext } from '../../../StateProvider/WishlistContext/WishlistProvider';
 import routes from '../../Helpers/Routes';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import useDebounce from '../../../hooks/useDebounce';
+import axiosInstance from '../../../axios/axiosInstance';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+
+
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import Divider from '@material-ui/core/Divider';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import Avatar from '@material-ui/core/Avatar';
+import Typography from '@material-ui/core/Typography';
+
+
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -85,7 +103,15 @@ const useStyles = makeStyles((theme) => ({
     },
     logo: {
         width: '140px'
-    }
+    },
+    root: {
+        width: '100%',
+        maxWidth: '36ch',
+        backgroundColor: theme.palette.background.paper,
+    },
+    inline: {
+        display: 'inline',
+    },
 }));
 
 export default function ECommerceHeader() {
@@ -93,13 +119,40 @@ export default function ECommerceHeader() {
     const history = useHistory();
     const { state: { cartItems } }: any = useData();
     const { wishlistState } = useContext(WishlistContext);
+    const toastConfig = useContext(CustomToastContext);
+
+    const [search, setSearch] = useState("")
+    const [open, setOpen] = useState(false);
+
+    const searchText = useDebounce(search, 500)
 
     const classes = useStyles();
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
+    const [searchItems, setSearchItems] = useState([]);
+
+    const [loading, setLoading] = useState(false)
 
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+    useEffect(() => {
+
+        if (searchText) {
+            axiosInstance().get(`/ecommerce/search?term=${searchText}`).then(({ data: { data } }) => {
+                setSearchItems([...data])
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            }).finally(() => {
+                setOpen(true)
+            })
+        }
+        else {
+            setSearchItems([]);
+            setOpen(true)
+        }
+
+    }, [searchText])
 
     const handleProfileMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -150,7 +203,7 @@ export default function ECommerceHeader() {
 
                 }}>
                     <Badge badgeContent={wishlistState.wishlist.length} color="secondary">
-                        <FavoriteIcon />
+                        <BookmarkIcon />
                     </Badge>
                 </IconButton>
                 <p>Messages</p>
@@ -196,26 +249,79 @@ export default function ECommerceHeader() {
                         <img className={classes.logo} src={SVG('LogoPng')} alt="equip logo" title="eQuipt Logo" />
                     </Link>
 
-                    <div className={classes.search}>
+                    <div className={`${classes.search} position-relative`}>
                         <div className={classes.searchIcon}>
                             <SearchIcon />
                         </div>
+
                         <InputBase
+                            value={search}
                             placeholder="Search…"
+                            onChange={(e) => {
+                                setSearch(e.target.value)
+                            }}
                             classes={{
                                 root: classes.inputRoot,
                                 input: classes.inputInput,
                             }}
                             inputProps={{ 'aria-label': 'search' }}
                         />
+
+                        {
+                            open && <div className="position-absolute border mt-2"
+                                style={{ background: "white", zIndex: 10, height: 500, width: 300, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}
+                            >
+                                <ClickAwayListener onClickAway={() => {
+                                    setOpen(false);
+                                }}>
+                                    <List className={classes.root}>
+                                        {
+                                            searchItems.map((m) => (
+                                                <Fragment key={m._id}>
+                                                    <ListItem button alignItems="flex-start"
+                                                    onClick={() => {
+                                                        history.push(`${routes.eCommerceDetail.path}/${m._id}/sale`)
+                                                    }}>
+                                                        <ListItemAvatar>
+                                                            {/* <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" /> */}
+                                                            <Avatar>
+                                                                <AccountCircle />
+                                                            </Avatar>
+                                                        </ListItemAvatar>
+                                                        <ListItemText
+                                                            primary={m.name}
+                                                            secondary={
+                                                                <Typography
+                                                                    component="span"
+                                                                    variant="body2"
+                                                                    className={classes.inline}
+                                                                    color="textPrimary"
+                                                                >
+                                                                    {m.type}
+                                                                </Typography>
+                                                            }
+                                                        />
+                                                    </ListItem>
+                                                    <Divider variant="inset" component="li" />
+                                                </Fragment>
+                                            ))
+                                        }
+
+                                    </List>
+                                </ClickAwayListener>
+
+                            </div>
+                        }
+
                     </div>
+
                     <div className={classes.grow} />
                     <div className={classes.sectionDesktop}>
                         <IconButton color="inherit" onClick={() => {
 
                         }}>
                             <Badge badgeContent={wishlistState.wishlist.length} color="secondary">
-                                <FavoriteIcon />
+                                <BookmarkIcon />
                             </Badge>
                         </IconButton>
                         <IconButton color="inherit" onClick={() => {

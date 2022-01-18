@@ -66,8 +66,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const [productInventoryForReceivingTicket, setProductInventoryForReceivingTicket] = useState<any[]>([]);
-  const [showReceivingTicketDialog, setShowReceivingTicketDialog] = useState(false);
+  const [productInventoryForTicket, setProductInventoryForTicket] = useState<any[]>([]);
+  const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: "" });
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -120,15 +120,19 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       deliveryTicketList?.map(obj => {
         productAssets?.map((d, index) => {
           if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
-            productAssets[index]['type'] = obj?.type;
-            if (obj.ticketType === 'Loading') {
-              productAssets[index]['deliveryTicket'] = obj?.ticketName;
-              productAssets[index]['deliveryTicketId'] = obj?._id;
+            if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
+              productAssets[index]['loadingTicket'] = obj?.ticketName;
+              productAssets[index]['loadingTicketId'] = obj?._id;
             }
-            if (obj.ticketType === 'Receiving') {
+            if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving) {
               productAssets[index]['receivingTicket'] = obj?.ticketName;
               productAssets[index]['receivingTicketId'] = obj?._id;
               productAssets[index]['receivingTicketStatus'] = obj?.status;
+            }
+            if (obj.ticketType === DELIVERY_TICKET_TYPE.return) {
+              productAssets[index]['returnTicket'] = obj?.ticketName;
+              productAssets[index]['returnTicketId'] = obj?._id;
+              productAssets[index]['returnTicketStatus'] = obj?.status;
             }
           }
         });
@@ -155,19 +159,22 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       {params.value}
     </Link>
   );
+
   const ProductNameRenderer = (params) => (
     <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data?.product?.optionValue}`}>
       {params.value}
     </Link>
   );
+
   const DeliveryTicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.deliveryTicketId}`}>
+      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
         {params.value}
       </Link>
     ) : (
       <NoDataCell />
     );
+
   const ReceivingTicketRenderer = (params) =>
     params?.value ? (
       <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`}>
@@ -177,21 +184,32 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       <NoDataCell />
     );
 
+  const ReturnTicketRenderer = (params) =>
+    params?.value ? (
+      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.returnTicketId}`}>
+        {params.value}
+      </Link>
+    ) : (
+      <NoDataCell />
+    );
+
   const frameworkComponents = {
     receivingTicketRenderer: ReceivingTicketRenderer,
     deliveryTicketRenderer: DeliveryTicketRenderer,
+    returnTicketRenderer: ReturnTicketRenderer,
     inventoryRenderer: InventoryRenderer,
     productNameRenderer: ProductNameRenderer,
     commonRenderer: CommonRenderer,
     dateRenderer: DateRenderer
   };
+
   const columns = [
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "inventoryRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "deliveryTicketRenderer" },
-    { field: "receivingTicket", headerName: "Receiving Ticket", show: true, cellRenderer: "receivingTicketRenderer" },
     { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
+    { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "deliveryTicketRenderer" },
+    { field: "receivingTicket", headerName: "Receiving Ticket", show: true, cellRenderer: "receivingTicketRenderer" },
+    { field: "returnTicket", headerName: "Return Ticket", show: true, cellRenderer: "returnTicketRenderer" },
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
@@ -206,11 +224,10 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     });
   }
 
-  const handleReceivingTicketDialog = (selectedProductInventory) => {
-    setProductInventoryForReceivingTicket(selectedProductInventory);
-    setShowReceivingTicketDialog(true);
+  const handleTicketDialog = (selectedProductInventory, ticketType) => {
+    setProductInventoryForTicket(selectedProductInventory);
+    setShowTicketDialog({ open: true, ticketType: ticketType });
   };
-  console.log(selectedRecords)
 
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
@@ -279,8 +296,11 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             horizontal: 'right'
           }}
         >
-          {(selectedRecords?.filter(f => f.hasOwnProperty("receivingTicketId") && [INVENTORY_STATUS.underReview].includes(f.status)
-            && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered)?.length === selectedRecords?.length) &&
+          {(selectedRecords?.filter(f =>
+            ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+              (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
+            && [INVENTORY_STATUS.underReview].includes(f.status)
+          )?.length === selectedRecords?.length) &&
             <Fragment>
               <MenuItem onClick={() => {
                 setAnchorEl(null)
@@ -309,38 +329,61 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             size="small"
             style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
             onClick={() => {
-              handleReceivingTicketDialog(selectedRecords)
+              handleTicketDialog(selectedRecords, DELIVERY_TICKET_TYPE.receiving)
             }}
             disabled={(selectedRecords.length === 0)
-              || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId")
-                || !f.hasOwnProperty("deliveryTicketId")
+              || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
+                || !f.hasOwnProperty("loadingTicketId")
                 || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
           >
             {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Create Receiving Ticket'}
           </Button>
         </Tooltip>
         <Box mx={1} />
-        <Tooltip title="Remove Assets From Receiving Ticket(s)">
+        {(selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("receivingTicketId") &&
+          f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedRecords?.length) ?
+          <Fragment>
+            <Tooltip title="Remove Assets From Receiving Ticket(s)">
+              <Button
+                variant={isMobile && !isTablet ? "text" : "outlined"}
+                color="primary"
+                size="small"
+                style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
+                onClick={() => {
+                  setShowRemoveAssetFromReceivingTicketDialog(true)
+                }}
+                disabled={(selectedRecords.length === 0) || (selectedRecords.some(f =>
+                  !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
+                  || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered))}
+              >
+                {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : "Remove Receiving Ticket"}
+              </Button>
+            </Tooltip>
+            <Box mx={1} />
+          </Fragment> : null
+        }
+        <Tooltip title="Create Return Ticket">
           <Button
             variant={isMobile && !isTablet ? "text" : "outlined"}
             color="primary"
             size="small"
-            style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
+            style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
             onClick={() => {
-              setShowRemoveAssetFromReceivingTicketDialog(true)
+              handleTicketDialog(selectedRecords, DELIVERY_TICKET_TYPE.return)
             }}
-            disabled={(selectedRecords.length === 0) || (selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
-              || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered))}
-
+            disabled={(selectedRecords.length === 0)
+              || (selectedRecords.some(f =>
+                !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
+                || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
           >
-            {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : "Remove Receiving Ticket"}
+            {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Create Return Ticket'}
           </Button>
         </Tooltip>
         <Box mx={1} />
         {(showProcessDeliveryTicket && !isOffline) &&
           <Fragment>
             <Tooltip
-              title="Process Multiple Receiving Ticket(s)">
+              title="Process Multiple Receiving/Return Ticket(s)">
               <Button
                 variant={isMobile && !isTablet ? "text" : "contained"}
                 color="primary"
@@ -349,7 +392,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
                   setOpenDeliveryTicketDialog(true)
                 }}
               >
-                {isMobile && !isTablet ? <AddBoxRoundedIcon /> : "Process Receiving Ticket"}
+                {isMobile && !isTablet ? <AddBoxRoundedIcon /> : "Process Ticket"}
               </Button>
             </Tooltip>
             <Box mx={1} />
@@ -389,8 +432,13 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
               },
               {
                 label: 'Loading Ticket : ',
-                field: 'deliveryTicket',
-                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.deliveryTicketId}`)
+                field: 'loadingTicket',
+                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`)
+              },
+              {
+                label: 'Return Ticket : ',
+                field: 'returnTicket',
+                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.returnTicketId}`)
               }
             ]}
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
@@ -428,15 +476,15 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         </Box>
       )}
     </Grid>
-    {showReceivingTicketDialog && (
+    {showTicketDialog.open && (
       <ManageDeliveryTicket
-        ticketType="Receiving"
+        ticketType={showTicketDialog.ticketType}
         refrenceType="Rental Job"
         refrenceData={rentalManagementData}
-        productInventory={productInventoryForReceivingTicket}
-        onClose={() => setShowReceivingTicketDialog(false)}
+        productInventory={productInventoryForTicket}
+        onClose={() => setShowTicketDialog({ open: false, ticketType: "" })}
         onSuccess={() => {
-          setShowReceivingTicketDialog(false);
+          setShowTicketDialog({ open: false, ticketType: "" });
           fetchRecords();
         }}
         warehouseId={rentalManagementData?.warehouse}
@@ -554,8 +602,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     {openDeliveryTicketDialog &&
       <MultipleTicket
         refrenceData={rentalManagementData}
-        ticketType={DELIVERY_TICKET_TYPE.receiving}
-        refrenceType="Rental Job"
+        ticketType={[DELIVERY_TICKET_TYPE.receiving, DELIVERY_TICKET_TYPE.return]}
+        refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
         handleClose={() => {
           setOpenDeliveryTicketDialog(false)
           fetchRecords()

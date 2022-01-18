@@ -168,12 +168,8 @@ export default function Products() {
 
     return (
         <>
-            <div className="p-2">
-                <CustomBreadCrumbs routes={[{ title: routes.eCommerce.title }]} />
-            </div>
-
             <div className={classes.flexGrow1}>
-                <Grid container>
+                <Grid container className="mt-2">
 
                     <Grid item xs={3} className="border">
 
@@ -258,6 +254,10 @@ export default function Products() {
                     </Grid>
 
                     <Grid item xs={9} className="px-2">
+
+                        <div className="p-2">
+                            <CustomBreadCrumbs routes={[{ title: routes.eCommerce.title }]} />
+                        </div>
 
                         <div className="position-relative">
 

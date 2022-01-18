@@ -7,12 +7,16 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import SignaturePad from 'react-signature-canvas';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import TextField from '@material-ui/core/TextField';
 
 export default function SignatureDialog(props) {
     const { open, onClose, onSigned, forDelivery, steps, label, submitting } = props;
     const { setToastConfig } = useContext(CustomToastContext);
 
     const [activeStep, setActiveStep] = useState(0)
+    const [name1, setName1] = useState("")
+    const [name2, setName2] = useState("")
+
     const signCanvas1: any = useRef(null);
     const signCanvas2: any = useRef(null);
 
@@ -23,11 +27,8 @@ export default function SignatureDialog(props) {
 
     const handleClickNext = (signCanvas) => {
         const isEmpty = signCanvas.current?.isEmpty();
-
-
         if (!isEmpty) {
             let signedData: any = {};
-
             if (label.includes("Dispatch")) {
                 signedData = {
                     type: activeStep === 0 ? "supervisor" : "deliveryPerson",
@@ -39,9 +40,10 @@ export default function SignatureDialog(props) {
                     sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")
                 }
             }
-
+            if (forDelivery) {
+                signedData.name = activeStep === 0 ? name1 : name2;
+            }
             onSigned(signedData)
-
             if (activeStep === 0) {
                 setActiveStep(prevStep => prevStep + 1)
                 // clearSignCanvas1()
@@ -86,21 +88,18 @@ export default function SignatureDialog(props) {
                         </Box>
                     </>
                 }
-
                 <div style={{ display: activeStep === 1 ? "none" : "block" }}>
                     <SignaturePad
                         ref={signCanvas1}
                         canvasProps={{ minWidth: 500, width: 500, height: 400 }}
                     />
                 </div>
-
                 <div style={{ display: activeStep === 0 ? "none" : "block" }}>
                     <SignaturePad
                         ref={signCanvas2}
                         canvasProps={{ minWidth: 500, width: 500, height: 400 }}
                     />
                 </div>
-
                 <Button
                     variant="outlined"
                     size="small"
@@ -110,13 +109,23 @@ export default function SignatureDialog(props) {
                 >
                     Clear
                 </Button>
+                {forDelivery &&
+                    <Box pt={2}>
+                        <TextField
+                            id="outlined-basic"
+                            label="Name"
+                            fullWidth
+                            margin="dense"
+                            value={activeStep === 0 ? name1 : name2}
+                            onChange={(e) => { activeStep === 0 ? setName1(e.target.value) : setName2(e.target.value) }}
+                            variant="outlined" />
+                    </Box>
+                }
             </CustomDialogContent>
-
             <CustomDialogFooter>
                 <Button variant="outlined" size="small" disabled={submitting} onClick={onClose} color="primary">
                     Close
                 </Button>
-
                 {forDelivery ?
                     <>
                         <Button

@@ -10,9 +10,11 @@ const WishlistProvider = ({ children }) => {
     const [wishlistState, wishlistDispatch] = useReducer(wishlistReducer, wishlistInitialState);
 
     useEffect(() => {
-        axiosInstance().get(`${eProduct.api}/wishlist`).then(({ data: { data } }) => {
-            wishlistDispatch({ type: "INITIALIZE", payload: data });
-        })
+        if (localStorage.getItem('token')) {
+            axiosInstance().get(`${eProduct.api}/wishlist`).then(({ data: { data } }) => {
+                wishlistDispatch({ type: "INITIALIZE", payload: data });
+            })
+        }
     }, [])
 
     return (
