@@ -31,6 +31,7 @@ const AssetDashboard = ({ salesFilter }) => {
   } = salesFilter;
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const mediumScreen = useMediaQuery(theme.breakpoints.between("sm", 'md'));
   const [assetLocationData, setAssetLocationData] = React.useState([]);
   const [assetUtilizationData, setAssetUtilizationData] = React.useState([]);
   const [productByCategory, setProductByCategory] = React.useState([]);
@@ -112,9 +113,9 @@ const AssetDashboard = ({ salesFilter }) => {
     setLoadingChartData1(true);
 
     axiosInstance()
-      .get(`/dashboard/assets-in-use-by-category?${url}productCategory=${JSON.stringify([])}`)
+      .get(`/dashboard/assets-in-use-by-category`)
       .then(({ data: { data } }) => {
-        setProductByCategory(data.data);
+        setProductByCategory(data);
         setLoadingChartData1(false);
       })
       .catch(() => {
@@ -146,7 +147,7 @@ const AssetDashboard = ({ salesFilter }) => {
     axiosInstance()
       .get(`/dashboard/assets-total-in-use?limit=${limit}&page=0&${url}`)
       .then(({ data: { data } }) => {
-        setAssetUtilizationData(data.data);
+        setAssetUtilizationData(data);
         setLoadingChartData(false);
       })
       .catch(() => {
@@ -221,6 +222,7 @@ const AssetDashboard = ({ salesFilter }) => {
                 }
                 productCategories={allProductCategories}
                 loadingProductCategory={loadingDropdown}
+                smallScreen={smallScreen || mediumScreen}
               />
             </Grid>
             <Grid item xs={12} sm={6}>

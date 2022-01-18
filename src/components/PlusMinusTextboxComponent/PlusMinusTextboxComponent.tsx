@@ -16,12 +16,13 @@ const CustomFormat = (props: NumberFormatCustomProps | any) => {
     return <NumberFormat {...other} getInputRef={inputRef} isNumericString />;
 };
 
-export default function PlusMinusTextboxComponent({ inputTextLabel, value, minValue = 1, isRequired = false, onChange, allowDecimal = false }) {
+function PlusMinusTextboxComponent({ inputTextLabel, value, minValue = 1, isRequired = false, onChange, allowDecimal = false }) {
 
     const inputNumberRef = useRef(null);
     const uniqueId = generateUniqueId();
 
     const [inputValue, setInputValue] = useState(value);
+    console.log(inputValue)
 
     useEffect(() => {
         const ignoreScroll = (e) => {
@@ -88,3 +89,5 @@ export default function PlusMinusTextboxComponent({ inputTextLabel, value, minVa
         </Grid>
     )
 }
+
+export default PlusMinusTextboxComponent
