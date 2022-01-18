@@ -256,7 +256,7 @@ export const CreateEmail = ({
     } catch (e) { }
   };
 
-  const handleSendQuoteEmail = (values) => {
+  const handleSendQuoteEmail = async (values) => {
     setSending(true);
     const body = {
       email: [values.to.slice(-1)[0]],
@@ -268,6 +268,10 @@ export const CreateEmail = ({
       attachments: [...stateQuoteBuilderAttachments, ...quoteBuilderOtherAttachments],
       eSign: toogle["e-Sign"],
     };
+    if (azureAccount && azureAccount?.username) {
+      body["graphToken"] = await getAzureAcessToken(instance);
+      body["mailbox"] = azureAccount.username;
+    }
     const api = refrenceType === "purchaseOrder" ? `${purchaseOrder.api}/${id}/send-email` :
       refrenceType === "rentalJob" ? `${rentalManagement.api}/${id}/send-email` :
         `/quote-builder/sendQuoteEmail`
