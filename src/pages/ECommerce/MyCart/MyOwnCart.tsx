@@ -509,12 +509,15 @@ function MyOwnCart() {
                       <Tooltip
                         title="Add Shipping Address"
                       >
+                        <span>
                         <IconButton
+                          disabled={cartProducts.length === 0}
                           onClick={() => setShowAddAddresstDialog({open: true, type: "ship"})}
                           size="small"
-                        >
+                          >
                           <AddIcon color={"primary"} />
                         </IconButton>
+                          </span>
                       </Tooltip>
                     </Grid>
                   </Grid>
@@ -547,12 +550,15 @@ function MyOwnCart() {
                       <Tooltip
                         title="Add Billing Address"
                       >
+                        <span>
                         <IconButton
+                          disabled={cartProducts.length === 0}
                           onClick={() => setShowAddAddresstDialog({open: true, type: "bill"})}
                           size="small"
-                        >
+                          >
                           <AddIcon color={"primary"} />
                         </IconButton>
+                          </span>
                       </Tooltip>
                     </Grid>
                   </Grid>
