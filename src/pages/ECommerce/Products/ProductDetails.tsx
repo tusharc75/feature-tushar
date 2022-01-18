@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../../../axios/axiosInstance";
-import { formatAmountWithCurrency, eProduct, dateFormatForInputControl, ORDER_TYPES, getObjKeys } from "../../../constants/helpers";
+import { formatAmountWithCurrency, eProduct, dateFormatForInputControl, ORDER_TYPES, getObjKeysWithValues } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { Rating } from "@material-ui/lab";
 import { Box, Chip, Grid, makeStyles, Typography, IconButton } from "@material-ui/core";
@@ -163,15 +163,16 @@ export default function ProductDetails() {
   }, [id])
 
   const prepareFormData = (data:any) => {
-      const initialData = getObjKeys("", data.fields)
+    if(data) {
+      const initialData = getObjKeysWithValues(data, data.fields)
       
       setProductConfigData({
         ...productConfigData,
         values: initialData,
         fields: data.fields,
         requiredValues: data?.fields.filter((d:any) => d.required).map((d:any) => d.fieldName) ?? []
-      })
-    
+      }) 
+    }
   }
 
   const changeRateCurrency = (productData, unit, pricingMethod) => {
@@ -490,7 +491,7 @@ export default function ProductDetails() {
                             >
                               {
                                 productDetails.unit.map(m => (
-                                  <MenuItem value={m}>{m}</MenuItem>
+                                  <MenuItem value={m} key={m}>{m}</MenuItem>
                                 ))
                               }
                             </Select>
@@ -514,7 +515,7 @@ export default function ProductDetails() {
                             >
                               {
                                 productDetails.pricingMethod.map(m => (
-                                  <MenuItem value={m}>{m}</MenuItem>
+                                  <MenuItem value={m} key={m}>{m}</MenuItem>
                                 ))
                               }
                             </Select>
@@ -584,21 +585,12 @@ export default function ProductDetails() {
                     </Grid>
                   }
                   
-                    {productConfigData.fields && productConfigData.fields.length > 0 && 
-                    <>
-                       <div className="d-flex gap-2 my-2 flex-column">
-                        <h4>Product Configuration</h4>
-                        {productConfigData.error && <Typography variant="body1" color='error'>{productConfigData.error}</Typography>}
-                       </div>
-                      <ProductConfiguration data={productConfigData} handleChange={(values) => {
-                        setProductConfigData({
-                          ...productConfigData,
-                          values
-                        })
-                      }} />
-                    </>
-                    
-                    }
+                  <ProductConfiguration data={productConfigData} handleChange={(values) => {
+                    setProductConfigData({
+                      ...productConfigData,
+                      values
+                    })
+                  }} />
 
                   <Box className="my-3 d-flex gap-4 align-items-baseline">
                     {
