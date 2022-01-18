@@ -9,7 +9,7 @@ import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { GiHiveMind } from "react-icons/gi";
-import { SiMarketo,AiFillFileMarkdown,FaPercentage ,SiStatuspage,GoVersions} from "react-icons/all";
+import { SiMarketo, AiFillFileMarkdown, FaPercentage, SiStatuspage, GoVersions } from "react-icons/all";
 import {
   isObjectEmpty,
   customerAccount,
@@ -122,6 +122,7 @@ const QuoteBuilders = () => {
   const [clonedId, setClonedId] = useState(null)
 
   const [versionStatusData, setVersionStatusData] = useState([]);
+  const [cloneQuoteWithVersionNumber, setCloneQuoteWithVersionNumber] = useState(0);
 
   const { qbApi } = quoteBuilder;
 
@@ -760,6 +761,14 @@ const QuoteBuilders = () => {
     }
   };
 
+  const handleCloneQuoteWithVersionFromAllVersion = (quoteId, versionNumber) => {
+    setCloneQuoteWithVersionNumber(versionNumber);
+    setshowCreateQuoteDialog(true);
+    setIsClone(true)
+    setClonedId(quoteId)
+    setShowVersionsDialog(false);
+  };
+
   return (
     <div className="quote_index_page">
       <Fragment>
@@ -892,39 +901,40 @@ const QuoteBuilders = () => {
                     icon: <FaSuitcase size={18} />,
                     field: "customerAccountName"
                   },
-                  { 
+                  {
                     icon: <BiDollar size={18} />,
-                    field:"estimatedAmount"
+                    field: "estimatedAmount"
                   }
                 ]}
                 chips={[
                   {
-                    icon:<GoVersions/>,
+                    icon: <GoVersions />,
                     label: "Version(s): ",
                     field: "versionCount",
                     onClick: (data) => {
                       setShowVersionsDialog(true)
                       getVersionStatus(data._id, data.currency)
+
                     }
                   },
                   {
-                    icon:<SiStatuspage/>,
+                    icon: <SiStatuspage />,
                     label: "Status: ",
                     field: "status",
                     chipColorVariable: quoteStepColors
-                
+
                   },
                   {
-                    icon:<AiFillFileMarkdown/>,
-                    label:"Market:",
-                    field:"marketSegment"
-                    
+                    icon: <AiFillFileMarkdown />,
+                    label: "Market:",
+                    field: "marketSegment"
+
                   },
                   {
-                    icon:<SiMarketo />,
-                    label:"Sub-Market:",
-                    field:"subMarketSegment"
-                 
+                    icon: <SiMarketo />,
+                    label: "Sub-Market:",
+                    field: "subMarketSegment"
+
                   },
 
                 ]}
@@ -1012,6 +1022,7 @@ const QuoteBuilders = () => {
           contacts={null}
           doaCollaboratorResources={doa}
           isRenderedFromOpportunity={false}
+          cloneQuoteWithVersionNumber={cloneQuoteWithVersionNumber}
         />
       )}
 
@@ -1029,7 +1040,7 @@ const QuoteBuilders = () => {
             versionStatusData.length === 0 ?
               <CommonSkeleton lenArray={arr} />
               :
-              <VersionStatus loadingVersions={loadingVersions} versionStatusData={versionStatusData} />
+              <VersionStatus handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion} versionStatusData={versionStatusData} />
           }
         </CustomDialogComponent>
       )}

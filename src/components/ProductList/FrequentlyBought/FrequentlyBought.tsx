@@ -1,86 +1,81 @@
 import { useEffect, useState, useContext } from 'react';
 import styles from './frequently_bought.module.scss';
 import Checkbox from '@material-ui/core/Checkbox';
-import { Button } from '@material-ui/core';
+import { Button, Grid } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import axiosInstance from '../../../axios/axiosInstance';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CircularProgress from "@material-ui/core/CircularProgress"
 import routes from '../../Helpers/Routes';
+import { BsImage } from "react-icons/bs";
+import { formatAmountWithCurrency } from '../../../constants/helpers';
+import { useData } from '../../../StateProvider/Provider';
 
-function FrequentlyBought({ id }) {
+function FrequentlyBought({ mainProductMrp, mainProductWithCurrency, id, orderType }) {
+
+  const { state: { user, cartItems } }: any = useData();
   const history = useHistory();
   const [count, setCount] = useState(0);
-  const [checkedItems, setCheckedItems] = useState([])
+  // const [checkedItems, setCheckedItems] = useState([])
   const [totalPrice, setTotalPrice] = useState(0);
   const [frequentData, setFrequentData] = useState([]);
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false)
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      select: false,
-      itemDesc: 'Frac Tree, 7 1/16 Run, 3 1/16 wing, 10,000 psi, Temperature ClassU, Material Class DD',
-      itemPrice: 3000
-    },
-    {
-      id: 2,
-      select: false,
-      itemDesc: 'Frac Tree, 7 1/16 Run, 3 1/16 wing, 10,000 psi, Temperature ClassU, Material Class DD',
-      itemPrice: 3000
-    }
-  ]);
+  // const [items, setItems] = useState([]);
 
   useEffect(() => {
     if (id) fetchFrequentProducts()
   }, [id])
 
-  const fetchCart = () => {
-    setLoading(true)
-    axiosInstance()
-      .get(`/ecommerce/cart`).then(({ data: { data } }) => {
-        let tempMappedQuantity = {}
-        if (data && data.length) {
-          data.forEach(o => {
-            tempMappedQuantity[o.productId] = o.quantity
-          })
-        }
+  // const fetchCart = () => {
+  //   setLoading(true)
+  //   axiosInstance()
+  //     .get(`/ecommerce/cart`).then(({ data: { data } }) => {
+  //       let tempMappedQuantity = {}
+  //       if (data && data.length) {
+  //         data.forEach(o => {
+  //           tempMappedQuantity[o.productId] = o.quantity
+  //         })
+  //       }
 
-        let cartItems = frequentData.filter(o => (checkedItems.indexOf(o._id) >= 0)).map(o => {
-          return {
-            quantity: `${tempMappedQuantity[o._id] || 1}`,
-            productId: o._id
-          }
-        })
-        axiosInstance()
-          .post(`/ecommerce/cart`, {
-            products: [...cartItems]
-          })
-          .then(({ data }) => {
-            setLoading(false)
-            history.push(routes.eCommerce.path);
-          }).catch((error) => {
-            setLoading(false)
-            toastConfig.setToastConfig(error);
-          });
-      })
-  }
+  //       let cartItems = frequentData.filter(o => (checkedItems.indexOf(o._id) >= 0)).map(o => {
+  //         return {
+  //           quantity: `${tempMappedQuantity[o._id] || 1}`,
+  //           productId: o._id
+  //         }
+  //       })
+  //       axiosInstance()
+  //         .post(`/ecommerce/cart`, {
+  //           products: [...cartItems]
+  //         })
+  //         .then(({ data }) => {
+  //           setLoading(false)
+  //           history.push(routes.eCommerce.path);
+  //         }).catch((error) => {
+  //           setLoading(false)
+  //           toastConfig.setToastConfig(error);
+  //         });
+  //     })
+  // }
 
   const fetchFrequentProducts = () => {
     axiosInstance()
-      .get(`product/customer/frequent/${id}`)
+      .get(`/e-product/frequent/${id}`)
       .then(({ data: { data } }) => {
-        setFrequentData([...data])
-        let tPrice = 0
-        if (data && data.length) {
-          let items = data.map(o => {
-            tPrice = tPrice + parseInt(o?.mrp)
-            return o._id
-          })
-          setTotalPrice(tPrice)
-          setCheckedItems([...items])
-        }
+
+        let fixedData = [...data.filter(f => f._id !== id).slice(0, 3).map((f) => { return { ...f, "isAddedInCart": cartItems.some(s => s.productDetail._id === f._id), "isChecked": cartItems.some(s => s.productDetail._id === f._id) } })]
+        setFrequentData([...fixedData])
+
+        // let tPrice = 0
+        // if (fixedData && fixedData.length) {
+        //   let items = fixedData.map(o => {
+        //     tPrice = tPrice + parseInt(o?.mrp)
+        //     return o._id
+        //   })
+        //   setTotalPrice(tPrice)
+        //   setCheckedItems([...items])
+        // }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -98,17 +93,18 @@ function FrequentlyBought({ id }) {
     setTotalPrice(tPrice)
   }
 
-  const handleCheckedItems = (e, id) => {
-    let items = [...checkedItems]
-    if (e.target.checked) {
-      items = [...items, id]
-    }
-    else {
-      items.splice(items.indexOf(id), 1)
-    }
-    changeTotalPrice(items)
-    setCheckedItems([...items])
-  }
+  // const handleCheckedItems = (e, id) => {
+  //   let items = [...checkedItems]
+  //   if (e.target.checked) {
+  //     items = [...items, id]
+  //   }
+  //   else {
+  //     items.splice(items.indexOf(id), 1)
+  //   }
+  //   changeTotalPrice(items)
+  //   setCheckedItems([...items])
+  // }
+
   function countTrue4obj(obj) {
     let count = 0;
     for (var p in obj) {
@@ -119,142 +115,284 @@ function FrequentlyBought({ id }) {
     return count;
   }
 
-  const handleChange = (event, index) => {
-    items[index]['select'] = !items[index]['select'];
+  const handleChange = (checked, index) => {
 
-    setItems([...items]);
-    let total = 0;
-    let cost = 0;
-    items.map((item) => {
-      total = total + countTrue4obj(item);
-      if (item.select == true) {
-        cost = cost + item.itemPrice;
-      }
-    });
-    setTotalPrice(cost);
-    setCount(total);
+    let tempFrequentData = [...frequentData];
+    tempFrequentData[index].isChecked = checked;
+    setFrequentData([...tempFrequentData]);
+
+    // items[index]['select'] = !items[index]['select'];
+
+    // setItems([...items]);
+    // let total = 0;
+    // let cost = 0;
+    // items.map((item) => {
+    //   total = total + countTrue4obj(item);
+    //   if (item.select == true) {
+    //     cost = cost + item.itemPrice;
+    //   }
+    // });
+    // setTotalPrice(cost);
+    // setCount(total);
   };
 
-  const onAddSelectedToCart = () => {
-    fetchCart()
-  }
-  const FracImage = 'https://freepngimg.com/thumb/disney_pluto/32386-8-pluto-transparent.png';
+  // const onAddSelectedToCart = () => {
+  //   fetchCart()
+  // }
 
-  return (
-    <div className={styles.outerbox}>
-      <div className={styles.set_width}>
-        <h2 className="text-align-center" color="textSecondary">
-          Frequently Bought Together
-        </h2>
-        <div className={styles.items_flex}>
-          {
-            frequentData && frequentData.length ?
-              frequentData.map((o, i) => {
-                return <>
-                  {
-                    checkedItems.indexOf(o._id) >= 0 ?
-                      <>
-                        <div>
-                          {' '}
-                          <img src={o?.productImage} alt={o?.productName} className={styles.frequently_bought_together_products} />
-                        </div>
-                        {
-                          i < checkedItems.length - 1 ?
-                            <span className={styles.set_icon}>
-                              <AddIcon />
-                            </span> : null
-                        }
-                      </> : null
-                  }
-                </>
-              }) : null
-          }
-        </div>
+  const RenderProductDetails = ({ index }) => {
+    return frequentData[index] ? <>
+      <div className="text-center">
+        {
+          frequentData[index]?.productImage ? (
+            <div style={{ height: 150 }} className="position-relative">
+              <img src={frequentData[index]?.productImage} className="cursor-pointer" alt={frequentData[index]?.productName} style={{ objectFit: "contain", height: "100%" }} onClick={() => {
+                history.push(`${routes.eCommerceDetail.path}/${frequentData[index]._id}/${orderType}`)
+              }} />
 
-        <div className={styles.total_price}>
-          <h2>Total Price = &nbsp;</h2>
-          <h3>${totalPrice}</h3>
-        </div>
-        <div className={styles.add_to_selected_card_button}>
-          <Button variant="contained" color="primary"
-            disabled={loading}
-            onClick={onAddSelectedToCart} >
-            {
-              loading ? <CircularProgress /> : null
-            } ADD SELECTED TO CART
-          </Button>
-          <div className={styles.contain_all_items}>
-            {
-              frequentData && frequentData.length ?
-                frequentData.map((o, i) => {
-                  return <div className={styles.frequently_bought_products_primary}>
-                    <Checkbox checked={checkedItems.indexOf(o._id) >= 0}
-                      onChange={(e) => handleCheckedItems(e, o._id)}
-                      inputProps={{ 'aria-label': 'disabled checked checkbox' }} size={'small'} className={styles.checkbox} />
-                    <p>{o?.description} &nbsp;<span>${o?.mrp}</span></p>
-                  </div>
-                }) : null
-            }
-          </div>
-        </div>
-      </div>
-
-
-      <div className={styles.wrapper}>
-        <div className={styles.card}>
-          <div className={styles.card__checkbox}>
-            <Checkbox color="primary" size="small" inputProps={{ 'aria-label': 'secondary checkbox' }} checked disabled />
-          </div>
-          <div className={styles.card__img}>
-            <img alt="image" src={FracImage} className={styles.card__img} />
-          </div>
-          <div className={styles.card__body}>
-            <p className={styles.card__desc}>Frac Tree, 7 1/16 Run, 3 1/16 wing, 10,000 psi, Temperature Class U, Material Class DD</p>
-            <h2 className={styles.card__price}>Rs. 3000 /day</h2>
-          </div>
-        </div>
-
-        {items.map((item, index) => (
-          <div key={item.id} className={styles.card}>
-            <div className={styles.card__checkbox}>
-              <Checkbox
+              <Checkbox className="position-absolute"
+                disabled={frequentData[index].isAddedInCart}
+                style={{ top: "-100%" }}
                 color="primary"
-                inputProps={{ 'aria-label': 'secondary checkbox' }}
-                name="select"
-                value={items[index].select}
-                onChange={(e) => handleChange(e, index)}
+                checked={frequentData[index].isChecked}
+                onChange={(e) => {
+                  handleChange(e.target.checked, index)
+                }}
+                inputProps={{ 'aria-label': 'primary checkbox' }}
               />
             </div>
-            <img alt="image" src={FracImage} className={styles.card__img} />
-            <div className={styles.card__body}>
-              <p className={styles.card__desc}>{item.itemDesc}</p>
-              <h2 className={styles.card__price}>Rs. {item.itemPrice} /day</h2>
-            </div>
-          </div>
-        ))}
-
-        <div className={styles.card}>
-          <div className={styles.card__pricesummary}>
-            <h3 className={styles.card__pricesummaryheading}>Price Summary</h3>
-            <div className={styles.card__summary}>
-              <p>Main Product Selected</p>
-              <h3>Rs. 3000 /day</h3>
-            </div>
-            <div className={styles.card__summary}>
-              <p>{count} Addon Selected</p>
-              <h3>Rs. {totalPrice} /day</h3>
-            </div>
-            <div className={styles.card__total}>
-              <h3>Total</h3>
-              <h3>Rs. {totalPrice + 3000} /day</h3>
-            </div>
-            <Button variant="contained" color="primary">
-              Rent All
-            </Button>
-          </div>
-        </div>
+          ) : (
+            <BsImage className={`${styles.no_image} cursor-pointer`} onClick={() => {
+              history.push(`${routes.eCommerceDetail.path}/${frequentData[index]._id}/${orderType}`)
+            }} />
+          )
+        }
       </div>
-    </div>
+      <h3 className="my-3 text-center text-truncate">{frequentData[index]?.productName}</h3>
+
+      <div className={`${styles.price} d-flex align-items-center justify-content-center`}>
+        {
+          frequentData[index] ? `${formatAmountWithCurrency(frequentData[index].currency, frequentData[index].mrp ?? 0)?.fullFormatAmount}` : ""
+        }
+      </div>
+
+    </> : <></>
+  }
+
+  const getSelectedRecordsTotal = () => {
+    return frequentData.filter(f => f.isChecked && f.mrp).map(m => Number(m.mrp)).reduce((a, b) => a + b, 0) ?? 0;
+  }
+
+
+  return (
+    <>
+      <div className="d-flex w-100 align-items-center justify-content-center my-3">
+        <h1>Frequently bought together ({orderType})</h1>
+      </div>
+
+      <Grid container className="mt-5">
+
+        <Grid item xs={8}>
+
+          <Grid container>
+            <Grid item xs={3}>
+              <RenderProductDetails index={0} />
+            </Grid>
+
+            <Grid item xs={1} className="align-items-center d-flex">
+              <h2>+</h2>
+            </Grid>
+
+            <Grid item xs={3}>
+              <RenderProductDetails index={1} />
+            </Grid>
+
+            <Grid item xs={1} className="align-items-center d-flex">
+              <h2>+</h2>
+            </Grid>
+
+            <Grid item xs={3}>
+              <RenderProductDetails index={2} />
+            </Grid>
+          </Grid>
+
+        </Grid>
+
+        <Grid item xs={4} className="border">
+
+          <div className="p-3 d-flex flex-column gap-3">
+
+            <h2>Price summary</h2>
+
+            <hr />
+
+            <div className="d-flex justify-content-space-between">
+              <h3>Main Product</h3>
+              <h3>
+                {mainProductWithCurrency}
+              </h3>
+            </div>
+
+            <div className="d-flex justify-content-space-between">
+              <h3>
+                {frequentData.filter(f => f.isChecked).length} Addon selected
+              </h3>
+
+              <h3>
+                {formatAmountWithCurrency(frequentData.find(f => f.hasOwnProperty("currency") && f.currency)?.currency, getSelectedRecordsTotal())?.fullFormatAmount}
+              </h3>
+            </div>
+
+            <hr />
+
+            <div className="d-flex justify-content-space-between">
+              <h3>
+                Total
+              </h3>
+
+              <h3>
+                {formatAmountWithCurrency(frequentData.find(f => f.hasOwnProperty("currency") && f.currency)?.currency, getSelectedRecordsTotal() + Number(mainProductMrp))?.fullFormatAmount}
+              </h3>
+            </div>
+
+            <hr />
+
+            <div className="d-flex justify-content-space-between">
+              <Button
+                variant="contained"
+                onClick={() => {
+
+                }}
+                fullWidth
+                color="primary"
+              >
+                Add all to cart
+              </Button>
+            </div>
+
+          </div>
+
+        </Grid>
+
+      </Grid>
+
+    </>
+
+
+    // <div className={styles.outerbox}>
+    //   <div className={styles.set_width}>
+    //     <h2 className="text-align-center" color="textSecondary">
+    //       Frequently Bought Together
+    //     </h2>
+    //     <div className={styles.items_flex}>
+    //       {
+    //         frequentData && frequentData.length ?
+    //           frequentData.map((o, i) => {
+    //             return <>
+    //               {
+    //                 checkedItems.indexOf(o._id) >= 0 ?
+    //                   <>
+    //                     <div>
+    //                       {' '}
+    //                       <img src={o?.productImage} alt={o?.productName} className={styles.frequently_bought_together_products} />
+    //                     </div>
+    //                     {
+    //                       i < checkedItems.length - 1 ?
+    //                         <span className={styles.set_icon}>
+    //                           <AddIcon />
+    //                         </span> : null
+    //                     }
+    //                   </> : null
+    //               }
+    //             </>
+    //           }) : null
+    //       }
+    //     </div>
+
+    //     <div className={styles.total_price}>
+    //       <h2>Total Price = &nbsp;</h2>
+    //       <h3>${totalPrice}</h3>
+    //     </div>
+    //     <div className={styles.add_to_selected_card_button}>
+    //       <Button variant="contained" color="primary"
+    //         disabled={loading}
+    //         onClick={onAddSelectedToCart} >
+    //         {
+    //           loading ? <CircularProgress /> : null
+    //         } ADD SELECTED TO CART
+    //       </Button>
+    //       <div className={styles.contain_all_items}>
+    //         {
+    //           frequentData && frequentData.length ?
+    //             frequentData.map((o, i) => {
+    //               return <div className={styles.frequently_bought_products_primary}>
+    //                 <Checkbox checked={checkedItems.indexOf(o._id) >= 0}
+    //                   onChange={(e) => handleCheckedItems(e, o._id)}
+    //                   inputProps={{ 'aria-label': 'disabled checked checkbox' }} size={'small'} className={styles.checkbox} />
+    //                 <p>{o?.description} &nbsp;<span>${o?.mrp}</span></p>
+    //               </div>
+    //             }) : null
+    //         }
+    //       </div>
+    //     </div>
+    //   </div>
+
+
+    //   <div className={styles.wrapper}>
+    //     <div className={styles.card}>
+    //       <div className={styles.card__checkbox}>
+    //         <Checkbox color="primary" size="small" inputProps={{ 'aria-label': 'secondary checkbox' }} checked disabled />
+    //       </div>
+    //       <div className={styles.card__img}>
+    //         <img alt="image" src={FracImage} className={styles.card__img} />
+    //       </div>
+    //       <div className={styles.card__body}>
+    //         <p className={styles.card__desc}>Frac Tree, 7 1/16 Run, 3 1/16 wing, 10,000 psi, Temperature Class U, Material Class DD</p>
+    //         <h2 className={styles.card__price}>Rs. 3000 /day</h2>
+    //       </div>
+    //     </div>
+
+    //     {items.map((item, index) => (
+    //       <div key={item.id} className={styles.card}>
+    //         <div className={styles.card__checkbox}>
+    //           <Checkbox
+    //             color="primary"
+    //             inputProps={{ 'aria-label': 'secondary checkbox' }}
+    //             name="select"
+    //             value={items[index].select}
+    //             onChange={(e) => handleChange(e, index)}
+    //           />
+    //         </div>
+    //         <img alt="image" src={FracImage} className={styles.card__img} />
+    //         <div className={styles.card__body}>
+    //           <p className={styles.card__desc}>{item.itemDesc}</p>
+    //           <h2 className={styles.card__price}>Rs. {item.itemPrice} /day</h2>
+    //         </div>
+    //       </div>
+    //     ))}
+
+    //     <div className={styles.card}>
+    //       <div className={styles.card__pricesummary}>
+    //         <h3 className={styles.card__pricesummaryheading}>Price Summary</h3>
+    //         <div className={styles.card__summary}>
+    //           <p>Main Product Selected</p>
+    //           <h3>Rs. 3000 /day</h3>
+    //         </div>
+    //         <div className={styles.card__summary}>
+    //           <p>{count} Addon Selected</p>
+    //           <h3>Rs. {totalPrice} /day</h3>
+    //         </div>
+    //         <div className={styles.card__total}>
+    //           <h3>Total</h3>
+    //           <h3>Rs. {totalPrice + 3000} /day</h3>
+    //         </div>
+    //         <Button variant="contained" color="primary">
+    //           Rent All
+    //         </Button>
+    //       </div>
+    //     </div>
+    //   </div>
+    // </div>
   );
 }
 

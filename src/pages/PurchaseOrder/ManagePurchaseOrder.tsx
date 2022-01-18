@@ -164,7 +164,26 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
         setFormsData(setFieldsInAscendingOrder(initialData.fields));
     }, [initialData.fields]);
 
-    const handleSubmit = (values) => {
+    const handleSubmit = async (
+        errors,
+        setTouched,
+        values,
+        setValues,
+        setErrors
+    ) => {
+        if (Object.keys(errors).length) {
+            initialData.fields.forEach((input) => {
+                if (input.required || values[input.fieldName]) {
+                    setTouched(input.fieldName, true);
+                }
+            });
+            setErrors({ ...errors });
+        } else {
+            handleUpdatePurchaseOrder(values)
+        }
+    };
+
+    const handleUpdatePurchaseOrder = (values) => {
         setLoading(true)
         if (purchaseOrderId && isClone === false) {
             values._id = purchaseOrderId
@@ -247,6 +266,20 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
         );
     };
 
+    const handleScroll = (errors) => {
+        const err = Object.keys(errors);
+        if (err.length) {
+            const input = document.querySelector(
+                `input[name=${err[0]}]`,
+            );
+            input.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'start',
+            });
+        }
+    }
+
     return (<Dialog
         maxWidth="md"
         fullScreen={fullScreen || (isMobile || isTablet)}
@@ -264,13 +297,16 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
             <Formik
                 initialValues={initialData.values}
                 validationSchema={yupSchema(initialData.fields)}
-                onSubmit={handleSubmit}
+                validateOnMount
+                onSubmit={() => { }}
             >
                 {({ values,
                     errors,
                     touched,
                     setFieldValue,
-                    submitForm,
+                    setFieldTouched,
+                    setErrors,
+                    setValues,
                 }) => (
                     <Fragment>
                         <CustomDialogHeader title={purchaseOrderId ? (isClone ? "Clone" : `Update [ ${purchaseOrderData?.purchaseOrderNumber || ""} ]`) : "Create " + routes.purchaseOrder.title}
@@ -523,7 +559,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                     tooltipMessage={field?.tooltipMessage}
                                                                                     size="small"
                                                                                     onOpen={() =>
-                                                                                        onCountryBillToDropDownOpen(values.supplier)
+                                                                                        onCountryBillToDropDownOpen(values["supplier"])
                                                                                     }
                                                                                 />)
                                                                                 :
@@ -549,7 +585,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                         tooltipMessage={field?.tooltipMessage}
                                                                                         size="small"
                                                                                         onOpen={() =>
-                                                                                            onCountrySellToDropDownOpen(values.supplier)
+                                                                                            onCountrySellToDropDownOpen(values["supplier"])
                                                                                         }
                                                                                     />)
                                                                                     : field.fieldName === "owner" ? (
@@ -676,7 +712,17 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                 variant="contained"
                                 color="primary"
                                 type="submit"
-                                onClick={submitForm}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleScroll(errors)
+                                    handleSubmit(
+                                        errors,
+                                        setFieldTouched,
+                                        values,
+                                        setValues,
+                                        setErrors
+                                    );
+                                }}
                                 disabled={
                                     loading
                                     // isFieldNotTouched(initialData, values)
@@ -690,7 +736,15 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                     open={showConfirmDialog}
                                     onSave={() => {
                                         setShowConfirmDialog(false)
-                                        submitForm();
+                                        handleScroll(errors)
+
+                                        handleSubmit(
+                                            errors,
+                                            setFieldTouched,
+                                            values,
+                                            setValues,
+                                            setErrors
+                                        );
                                     }}
                                     onClose={() => {
                                         setShowConfirmDialog(false)
