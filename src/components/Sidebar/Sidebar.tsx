@@ -23,7 +23,7 @@ import { BsCalendarFill } from "react-icons/bs";
 import { MdDashboard, MdLocalActivity } from "react-icons/md";
 import { RiFolderSettingsFill, RiAccountPinCircleFill } from "react-icons/ri";
 import { SiCivicrm } from "react-icons/si";
-import {AiFillAccountBook, AiFillSetting} from "react-icons/ai"
+import { AiFillAccountBook, AiFillSetting } from "react-icons/ai"
 
 
 import { AccountCircle } from "@material-ui/icons";
@@ -280,7 +280,20 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 </ListItem>
               </Tooltip>
             </Link>
-
+            <Link to="/reports">
+              <Tooltip title={!toggleDrawer ? "Reports" : ""}>
+                <ListItem
+                  button
+                  selected={location.pathname === "/reports"}
+                  className="list-item"
+                >
+                  <ListItemIcon>
+                    <MdDashboard size={15} className="sidebar-icon" />
+                  </ListItemIcon>
+                  <ListItemText primary="Reports" />
+                </ListItem>
+              </Tooltip>
+            </Link>
             {user &&
               listItems().map((listItem, i) => (
                 <React.Fragment key={i}>

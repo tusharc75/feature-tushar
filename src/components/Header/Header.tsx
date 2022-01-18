@@ -475,10 +475,12 @@ const Header = ({ toggleDrawer }) => {
           history.push('/');
           dispatch({ type: SET_USER, payload: null });
           dispatch({ type: SET_SELECTED_ENTITY, payload: null });
-          wishlistDispatch({ type: "INITIALIZE", payload: [] });
 
           // localStorage.removeItem("token");
           localStorage.clear();
+
+          wishlistDispatch({ type: "INITIALIZE", payload: [] });
+
           history.push('/login');
         })
         .catch((error) => {
@@ -951,9 +953,6 @@ const Header = ({ toggleDrawer }) => {
     }
     if (history.location.pathname.includes(routes.deliveryTicketDetail.path)) {
       history.push({ pathname: routes.deliveryTicket.path })
-    }
-    if (history.location.pathname.includes(routes.receivingTicketDetail.path)) {
-      history.push({ pathname: routes.receivingTicket.path })
     }
     if (history.location.pathname.includes(routes.productInventoryDetail.path)) {
       history.push({ pathname: routes.productInventory.path })

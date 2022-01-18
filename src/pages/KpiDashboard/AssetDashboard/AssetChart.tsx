@@ -60,11 +60,11 @@ const AssetChart = (props: ChartProps) => {
     }
 
     if (categoryData && categoryData.length > 0) {
-      const labels = data.map((_d) => _d?.categoryName);
+      const labels = categoryData.map((_d) => _d?.categoryName);
       const dataSet = categoryData.map((_d) => msToH(_d?.totalUseTime));
 
       setTableDataRaw(
-        data.map((_d) => {
+        categoryData.map((_d) => {
           let dayInMs = 60 * 24 * 60 * 1000;
           let totalTime = _d?.totalUseTime > dayInMs ? Math.floor(msToH(_d?.totalUseTime, true)) : msToH(_d?.totalUseTime, false).toFixed(2);
           return {
@@ -176,28 +176,28 @@ const AssetChart = (props: ChartProps) => {
       </Box>
       <Grid container spacing={2} justifyContent="space-between" alignItems="flex-end">
         <Grid item xs={12} sm={tableView && smallScreen ? 12 : 6} md={12}>
-          <Box height={smallScreen && tableView ? 450 : 320}>
-            
-              <Box height={300}>
-                <Chart
-                  id="utilization-pie-chart"
-                  options={{
-                    maintainAspectRatio: false
-                  }}
-                  type="pie"
-                  data={pieData}
-                />
-              </Box>
-            
+          <Box textAlign={'center'} mb={1}>
+            <Typography variant="h6">Total Utilization</Typography>
+          </Box>
+          <Box height={smallScreen ? 310 : 260}>
+            <Chart
+              id="utilization-pie-chart"
+              options={{
+                maintainAspectRatio: false
+              }}
+              type="pie"
+              data={pieData}
+            />
           </Box>
         </Grid>
         <Grid item xs={12} sm={tableView ? 12 : 6} md={12}>
-          
-          { tableDataRaw.length > 0 ? tableView ? <>
-                <Box textAlign={'center'} mb={smallScreen ? 2 : 5}>
-                  <Typography variant="h5">Total Utilization</Typography>
-                </Box>
-                <TableContainer style={{ height: smallScreen ? '400px' : '600px' }}>
+          <Box textAlign={'center'} mb={1}>
+            <Typography variant="h6">Assets by Category</Typography>
+          </Box>
+          {tableDataRaw.length > 0 ? (
+            tableView ? (
+              <>
+                <TableContainer style={{ height: 310 }}>
                   <Table stickyHeader aria-label="caption table">
                     <TableHead>
                       <TableRow>
@@ -221,18 +221,22 @@ const AssetChart = (props: ChartProps) => {
                     </TableBody>
                   </Table>
                 </TableContainer>
-              </> :  (
-            <Box height={330}>
-              <Chart
-                id="utilization-chart"
-                options={{
-                  maintainAspectRatio: false
-                }}
-                type="bar"
-                data={barData}
-              />
-            </Box>
-          ) : <div>No Data</div>}
+              </>
+            ) : (
+              <Box height={310}>
+                <Chart
+                  id="utilization-chart"
+                  options={{
+                    maintainAspectRatio: false
+                  }}
+                  type="bar"
+                  data={barData}
+                />
+              </Box>
+            )
+          ) : (
+            <div>No Data</div>
+          )}
         </Grid>
       </Grid>
     </React.Fragment>

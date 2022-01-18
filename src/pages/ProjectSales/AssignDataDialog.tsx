@@ -60,7 +60,7 @@ const AssignDataDialog = (props) => {
         break;
 
       case "opportunity":
-        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`
+        url = `/${type}?filterById=[{"field":"customerAccount", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`
         break;
 
       case "quote-builder":
