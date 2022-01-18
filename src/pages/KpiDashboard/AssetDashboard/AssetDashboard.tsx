@@ -112,7 +112,7 @@ const AssetDashboard = ({ salesFilter }) => {
     setLoadingChartData1(true);
 
     axiosInstance()
-      .get(`/dashboard/assets-in-use-by-category?${url}productCategory=${JSON.stringify([])}`)
+      .get(`/dashboard/assets-in-use-by-category?${url}`)
       .then(({ data: { data } }) => {
         setProductByCategory(data.data);
         setLoadingChartData1(false);

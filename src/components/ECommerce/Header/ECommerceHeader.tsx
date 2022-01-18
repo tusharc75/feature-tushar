@@ -36,7 +36,9 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
-
+import { isEmpty } from 'lodash';
+import { useAccount, useMsal } from '@azure/msal-react';
+import { SET_USER, SET_SELECTED_ENTITY } from '../../../StateProvider/actionTypes';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -116,9 +118,14 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ECommerceHeader() {
 
+    const { instance, accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});
+
     const history = useHistory();
-    const { state: { cartItems } }: any = useData();
-    const { wishlistState } = useContext(WishlistContext);
+    const {
+        state: { cartItems },
+        dispatch
+    }: any = useData();
     const toastConfig = useContext(CustomToastContext);
 
     const [search, setSearch] = useState("")
@@ -133,10 +140,13 @@ export default function ECommerceHeader() {
 
     const [loading, setLoading] = useState(false)
 
+    const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
+
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
     useEffect(() => {
+        setLoading(true)
 
         if (searchText) {
             axiosInstance().get(`/ecommerce/search?term=${searchText}`).then(({ data: { data } }) => {
@@ -145,11 +155,12 @@ export default function ECommerceHeader() {
                 toastConfig.setToastConfig(error);
             }).finally(() => {
                 setOpen(true)
+                setLoading(false)
             })
         }
         else {
             setSearchItems([]);
-            setOpen(true)
+            setLoading(false)
         }
 
     }, [searchText])
@@ -171,6 +182,37 @@ export default function ECommerceHeader() {
         setMobileMoreAnchorEl(event.currentTarget);
     };
 
+    const logoutUser = async () => {
+        try {
+            if (!isEmpty(account)) {
+                await instance.logoutPopup({
+                    account: account
+                });
+            }
+        } catch (e) {
+            toastConfig.setToastConfig({
+                open: true,
+                type: 'error',
+                message: 'Need to logout from Azure'
+            });
+        } finally {
+            await axiosInstance()
+                .get('/user/logout')
+                .then(() => {
+                    history.push('/');
+                    dispatch({ type: SET_USER, payload: null });
+                    dispatch({ type: SET_SELECTED_ENTITY, payload: null });
+                    wishlistDispatch({ type: "INITIALIZE", payload: [] });
+
+                    localStorage.clear();
+                    history.push('/login');
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
+        }
+    };
+
     const menuId = 'primary-search-account-menu';
     const renderMenu = (
         <Menu
@@ -182,8 +224,9 @@ export default function ECommerceHeader() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-            <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+            {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+            <MenuItem onClick={handleMenuClose}>My account</MenuItem> */}
+            <MenuItem onClick={logoutUser}>Logout</MenuItem>
         </Menu>
     );
 
@@ -249,71 +292,74 @@ export default function ECommerceHeader() {
                         <img className={classes.logo} src={SVG('LogoPng')} alt="equip logo" title="eQuipt Logo" />
                     </Link>
 
-                    <div className={`${classes.search} position-relative`}>
-                        <div className={classes.searchIcon}>
-                            <SearchIcon />
-                        </div>
+                    <ClickAwayListener onClickAway={() => {
+                        setOpen(false);
+                    }}>
+                        <div className={`${classes.search} position-relative`}>
+                            <div className={classes.searchIcon}>
+                                <SearchIcon />
+                            </div>
 
-                        <InputBase
-                            value={search}
-                            placeholder="Search…"
-                            onChange={(e) => {
-                                setSearch(e.target.value)
-                            }}
-                            classes={{
-                                root: classes.inputRoot,
-                                input: classes.inputInput,
-                            }}
-                            inputProps={{ 'aria-label': 'search' }}
-                        />
+                            <InputBase
+                                value={search}
+                                placeholder="Search..."
+                                onChange={(e) => {
+                                    setSearch(e.target.value)
+                                }}
+                                classes={{
+                                    root: classes.inputRoot,
+                                    input: classes.inputInput,
+                                }}
+                                inputProps={{ 'aria-label': 'search' }}
+                            />
 
-                        {
-                            open && <div className="position-absolute border mt-2"
-                                style={{ background: "white", zIndex: 10, height: 500, width: 300, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}
-                            >
-                                <ClickAwayListener onClickAway={() => {
-                                    setOpen(false);
-                                }}>
-                                    <List className={classes.root}>
+                            {
+                                loading ? <div className="position-absolute border mt-2 d-flex align-items-center justify-content-center"
+                                    style={{ background: "white", zIndex: 10, height: 150, width: 300, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}>
+                                    <h4 className="loading-dots">Loading</h4>
+                                </div> : (
+                                    open && <div className={`position-absolute border mt-2 ${searchItems.length === 0 ? "d-flex align-items-center justify-content-center" : ""}`}
+                                        style={{ background: "white", zIndex: 10, height: searchItems.length > 0 ? 500 : 150, width: 300, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}
+                                    >
+
                                         {
-                                            searchItems.map((m) => (
-                                                <Fragment key={m._id}>
-                                                    <ListItem button alignItems="flex-start"
-                                                    onClick={() => {
-                                                        history.push(`${routes.eCommerceDetail.path}/${m._id}/sale`)
-                                                    }}>
-                                                        <ListItemAvatar>
-                                                            {/* <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" /> */}
-                                                            <Avatar>
-                                                                <AccountCircle />
-                                                            </Avatar>
-                                                        </ListItemAvatar>
-                                                        <ListItemText
-                                                            primary={m.name}
-                                                            secondary={
-                                                                <Typography
-                                                                    component="span"
-                                                                    variant="body2"
-                                                                    className={classes.inline}
-                                                                    color="textPrimary"
-                                                                >
-                                                                    {m.type}
-                                                                </Typography>
-                                                            }
-                                                        />
-                                                    </ListItem>
-                                                    <Divider variant="inset" component="li" />
-                                                </Fragment>
-                                            ))
+                                            searchItems.length > 0 ? <List className={classes.root}>
+                                                {
+                                                    searchItems.map((m) => (
+                                                        <Fragment key={m._id}>
+                                                            <ListItem button alignItems="flex-start"
+                                                                onClick={() => {
+                                                                    setSearch("")
+                                                                    setOpen(false)
+                                                                    history.push(`${routes.eCommerceDetail.path}/${m._id}/sale`)
+                                                                }}>
+                                                                <ListItemText
+                                                                    primary={m.name}
+                                                                    secondary={
+                                                                        <Typography
+                                                                            component="span"
+                                                                            variant="body2"
+                                                                            className={classes.inline}
+                                                                            color="textPrimary"
+                                                                        >
+                                                                            {m.type}
+                                                                        </Typography>
+                                                                    }
+                                                                />
+                                                            </ListItem>
+                                                            <Divider />
+                                                        </Fragment>
+                                                    ))
+                                                }
+                                            </List> : <h4>No Products Found...</h4>
                                         }
 
-                                    </List>
-                                </ClickAwayListener>
+                                    </div>
+                                )
+                            }
 
-                            </div>
-                        }
-
-                    </div>
+                        </div>
+                    </ClickAwayListener>
 
                     <div className={classes.grow} />
                     <div className={classes.sectionDesktop}>
