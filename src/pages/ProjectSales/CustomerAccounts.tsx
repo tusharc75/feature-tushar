@@ -594,7 +594,7 @@ const CustomerAccounts = (props) => {
                     size="small"
                     style={{marginLeft:"10px"}}
                     onClick={() => {
-                      handleOpenDialog(dialogType);
+                      handleOpenDialog("customer-account");
 
                     }}
                 >

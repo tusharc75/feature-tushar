@@ -346,7 +346,6 @@ const User: FC = () => {
         
       })
       setRoleAccessOfLoggedInUser(roleIds)
-      console.log(roleIds)
     }).catch((error) => {
       toastConfig.setToastConfig(error);
     });
@@ -616,6 +615,8 @@ const User: FC = () => {
             selectedRecords={selectedRecords}
             isRoleSetUpPermission = {isRoleSetUpPermission}
             isApprovalProcess = {isLoggedInUserBrandAdmin}
+            roleAccessIds={roleAccessOfLoggedInUser}
+            entityAccessIds={entityAccess}
             />
         )
       }

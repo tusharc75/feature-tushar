@@ -12,7 +12,10 @@ import {
     getCollaboratorDropdownDataSource,
     CustomDialogTransition, setFieldsInAscendingOrder, generateUniqueIdOnly
 } from "./../../constants/helpers";
-import { getObjKeysWithValues, getObjKeys, yupSchema, deliveryTicket, sidebarResource } from "../../constants/helpers";
+import {
+    getObjKeysWithValues, getObjKeys, yupSchema, deliveryTicket, sidebarResource, DELIVERY_TICKET_TYPE,
+    DELIVERY_TICKET_REFRENCE_TYPE
+} from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import FormTypes from "../../components/Helpers/FormTypes";
 import { FaDiceOne } from "react-icons/fa";
@@ -66,25 +69,25 @@ const ManageDeliveryTicket = (props) => {
             let typeOfRepair = deliveryTicketData ? deliveryTicketData?.typeDetails?.typeOfRepair : refrenceData.typeOfRepair
 
             const newFilteredData = modifiedData.filter((formData) => {
-                if (type === "Transfer Asset") {
+                if (type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
                     if (transferType === "Internal") {
                         if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
                             return false
                         }
                     }
                     if (transferType.includes("External Supplier")) {
-                        if (formData.name.includes("Customer") || formData.name.includes(ticket_type === "Loading" ? "Receiving Plant" : "Pickup Plant")) {
+                        if (formData.name.includes("Customer") || formData.name.includes(ticket_type === DELIVERY_TICKET_TYPE.loading ? "Receiving Plant" : "Pickup Plant")) {
                             return false
                         }
                     }
                     if (transferType.includes("External Customer")) {
-                        if (formData.name.includes("Supplier") || formData.name.includes(ticket_type === "Loading" ? "Receiving Plant" : "Pickup Plant")) {
+                        if (formData.name.includes("Supplier") || formData.name.includes(ticket_type === DELIVERY_TICKET_TYPE.loading ? "Receiving Plant" : "Pickup Plant")) {
                             return false
                         }
                     }
                 }
-                if (type === "Repair Job") {
-                    if (ticket_type === "Loading") {
+                if (type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
+                    if (ticket_type === DELIVERY_TICKET_TYPE.loading) {
                         if (typeOfRepair === "Internal") {
                             if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
                                 return false
@@ -96,7 +99,7 @@ const ManageDeliveryTicket = (props) => {
                             }
                         }
                     }
-                    else if (ticket_type === "Receiving") {
+                    else if (ticket_type === DELIVERY_TICKET_TYPE.receiving) {
                         if (typeOfRepair === "Internal") {
                             if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
                                 return false
@@ -109,13 +112,13 @@ const ManageDeliveryTicket = (props) => {
                         }
                     }
                 }
-                if (type === "Rental Job" || type === "Sales Order") {
-                    if (ticket_type === "Loading") {
+                if (type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
+                    if (ticket_type === DELIVERY_TICKET_TYPE.loading) {
                         if (formData.name.includes("Supplier") || formData.name.includes("Receiving Plant")) {
                             return false
                         }
                     }
-                    else if (ticket_type === "Receiving") {
+                    else if (ticket_type === DELIVERY_TICKET_TYPE.receiving || ticket_type === DELIVERY_TICKET_TYPE.return) {
                         if (formData.name.includes("Supplier") || formData.name.includes("Pickup Plant")) {
                             return false
                         }
@@ -129,37 +132,37 @@ const ManageDeliveryTicket = (props) => {
 
     const updateFieldProperty = (fields, _type, _ticketType, _transferType, _typeOfRepair) => {
         fields.forEach((element: any) => {
-            if (_type === "Rental Job" || _type === "Sales Order") {
-                if (_ticketType === "Loading" && (element.sectionName?.includes("Pickup Plant") || element.sectionName?.includes("Customer"))) {
+            if (_type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || _type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
+                if (_ticketType === DELIVERY_TICKET_TYPE.loading && (element.sectionName?.includes("Pickup Plant") || element.sectionName?.includes("Customer"))) {
                     element.required = true;
                 }
-                else if (_ticketType === "Receiving" && (element.sectionName?.includes("Receiving Plant") || element.sectionName?.includes("Customer"))) {
+                else if (_ticketType === DELIVERY_TICKET_TYPE.receiving && (element.sectionName?.includes("Receiving Plant") || element.sectionName?.includes("Customer"))) {
                     element.required = true;
                 }
             }
-            else if (_type === "Repair Job") {
+            else if (_type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
                 if (_typeOfRepair === "External") {
-                    if (_ticketType === "Loading" && (element.sectionName?.includes("Pickup Plant") || element.sectionName?.includes("Supplier"))) {
+                    if (_ticketType === DELIVERY_TICKET_TYPE.loading && (element.sectionName?.includes("Pickup Plant") || element.sectionName?.includes("Supplier"))) {
                         element.required = true;
                     }
-                    else if (_ticketType === "Receiving" && (element.sectionName?.includes("Receiving Plant") || element.sectionName?.includes("Supplier"))) {
+                    else if (_ticketType === DELIVERY_TICKET_TYPE.receiving && (element.sectionName?.includes("Receiving Plant") || element.sectionName?.includes("Supplier"))) {
                         element.required = true;
                     }
                 }
             }
-            else if (_type === "Transfer Asset") {
+            else if (_type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
                 if (_transferType === "Internal") {
                     if (element.sectionName?.includes("Pickup Plant") || element.sectionName?.includes("Receiving Plant")) {
                         element.required = true;
                     }
                 }
                 else if (_transferType?.includes("External Supplier")) {
-                    if (element.sectionName?.includes("Supplier") || element.sectionName?.includes(_ticketType === "Loading" ? "Pickup Plant" : "Receiving Plant")) {
+                    if (element.sectionName?.includes("Supplier") || element.sectionName?.includes(_ticketType === DELIVERY_TICKET_TYPE.loading ? "Pickup Plant" : "Receiving Plant")) {
                         element.required = true;
                     }
                 }
                 else if (_transferType?.includes("External Customer")) {
-                    if (element.sectionName?.includes("Customer") || element.sectionName?.includes(_ticketType === "Loading" ? "Pickup Plant" : "Receiving Plant")) {
+                    if (element.sectionName?.includes("Customer") || element.sectionName?.includes(_ticketType === DELIVERY_TICKET_TYPE.loading ? "Pickup Plant" : "Receiving Plant")) {
                         element.required = true;
                     }
                 }
@@ -204,12 +207,12 @@ const ManageDeliveryTicket = (props) => {
             else {
                 fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, refrenceType, ticketType, refrenceData?.transferType, refrenceData?.typeOfRepair);
                 const tempInitialData = getObjKeys("", fieldsDataForCreate)
-                if (productInventory && refrenceData && (refrenceType === "Rental Job" || refrenceType === "Sales Order")) {
-
-                    if (refrenceType === "Rental Job") {
+                if (productInventory && refrenceData && (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder)) {
+                    
+                    if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob) {
                         tempInitialData["ticketName"] = `${refrenceData?.rentalJobName}_${generateUniqueIdOnly()}`
                         tempInitialData["rentalJob"] = refrenceData?._id
-                    } else if (refrenceType === "Sales Order") {
+                    } else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
                         tempInitialData["ticketName"] = `${refrenceData?.salesOrderNo}_${generateUniqueIdOnly()}`
                         tempInitialData["salesOrder"] = refrenceData?._id
                     }
@@ -220,8 +223,7 @@ const ManageDeliveryTicket = (props) => {
 
                     const warehouse = refrenceData?.warehouse?.optionValue ? refrenceData?.warehouse?.optionValue : (refrenceData?.plant?.optionValue ?? "")
 
-
-                    if (ticketType === "Loading") {
+                    if (ticketType === DELIVERY_TICKET_TYPE.loading) {
                         tempInitialData["pickupPlant"] = warehouse
                         fieldsDataForCreate?.forEach((e) => {
                             if (e.fieldName === "pickupPlant") {
@@ -232,7 +234,7 @@ const ManageDeliveryTicket = (props) => {
                             }
                         })
                     }
-                    else if (ticketType === "Receiving") {
+                    else if (ticketType === DELIVERY_TICKET_TYPE.receiving || ticketType === DELIVERY_TICKET_TYPE.return) {
                         tempInitialData["receivingPlant"] = warehouse
                         fieldsDataForCreate?.forEach((e) => {
                             if (e.fieldName === "pickupPlant") {
@@ -248,7 +250,7 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["pick-UpDate"] = moment(refrenceData?.estimateStartDate).subtract(1, 'days');
                     tempInitialData["deliveryDate"] = moment(refrenceData?.estimateStartDate).subtract(1, 'days');
                 }
-                else if (productInventory && refrenceType === "Repair Job" && refrenceData) {
+                else if (productInventory && refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.repairJob && refrenceData) {
                     tempInitialData["ticketName"] = `${refrenceData?.repairJobName}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = refrenceType;
                     tempInitialData["ticketType"] = ticketType;
@@ -260,7 +262,7 @@ const ManageDeliveryTicket = (props) => {
 
                     if (refrenceData?.typeOfRepair === "Internal") {
 
-                        if (ticketType === "Loading") {
+                        if (ticketType === DELIVERY_TICKET_TYPE.loading) {
                             tempInitialData["pickupPlant"] = warehouseId;
 
                             const pickupPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "pickupPlant")?.option;
@@ -291,7 +293,7 @@ const ManageDeliveryTicket = (props) => {
 
                     } else if (refrenceData?.typeOfRepair === "External") {
 
-                        if (ticketType === "Loading") {
+                        if (ticketType === DELIVERY_TICKET_TYPE.loading) {
                             tempInitialData["pickupPlant"] = warehouseId;
 
                             const pickupPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "pickupPlant")?.option;
@@ -318,14 +320,14 @@ const ManageDeliveryTicket = (props) => {
                         tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo?.optionValue;
                     }
                 }
-                else if (productInventory && refrenceType === "Transfer Asset" && refrenceData) {
+                else if (productInventory && refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset && refrenceData) {
                     tempInitialData["ticketName"] = `${refrenceData?.transferAssetNumber}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = refrenceType;
                     tempInitialData["ticketType"] = ticketType;
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
                     tempInitialData["transferAsset"] = refrenceData?._id;
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
-                    if (ticketType === "Loading") {
+                    if (ticketType === DELIVERY_TICKET_TYPE.loading) {
                         tempInitialData["pickupPlant"] = warehouseId;
                         tempInitialData["pickupPlantAddress"] = refrenceData?.transferFromPlant.address ?? "";
                         if (refrenceData?.transferType === "Internal") {
@@ -542,11 +544,11 @@ const ManageDeliveryTicket = (props) => {
                                                                             isTooltip={field?.isTooltip || false}
                                                                             tooltipMessage={field?.tooltipMessage}
                                                                             size="small"
-                                                                            //minDate={new Date()}
-                                                                            //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
-                                                                            // maxDate={
-                                                                            //     refrenceType === "Rental Job" || refrenceType === "Sales Order" ? refrenceData.estimateStartDate ? moment(refrenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
-                                                                            //         : refrenceType === "Transfer Asset" ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
+                                                                        //minDate={new Date()}
+                                                                        //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
+                                                                        // maxDate={
+                                                                        //     refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob ? refrenceData.estimateStartDate ? moment(refrenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
+                                                                        //         : refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
                                                                         />
                                                                     ) : field.fieldName === "deliveryDate" ? (
                                                                         <FormTypes
@@ -570,9 +572,9 @@ const ManageDeliveryTicket = (props) => {
                                                                             tooltipMessage={field?.tooltipMessage}
                                                                             size="small"
                                                                             minDate={moment(values["pick-UpDate"])} // Please, whoever changing this ask Gagan before any change 
-                                                                            //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
-                                                                            // maxDate={refrenceType === "Rental Job" || refrenceType === "Sales Order" ? refrenceData.estimateStartDate ? moment(refrenceData?.estimateStartDate) : moment().add(1, 'years').calendar() :
-                                                                            //     refrenceType === "Transfer Asset" ? moment().add(1, 'years').calendar() : moment().add(1, 'years').calendar()}
+                                                                        //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
+                                                                        // maxDate={refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob ? refrenceData.estimateStartDate ? moment(refrenceData?.estimateStartDate) : moment().add(1, 'years').calendar() :
+                                                                        //     refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset ? moment().add(1, 'years').calendar() : moment().add(1, 'years').calendar()}
                                                                         />
                                                                     ) : field.fieldName === "owner" ? (
                                                                         <FormTypes

@@ -83,7 +83,7 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
                 }
                 let data: any = [], count;
                 if (!isOffline) {
-                    const response = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=${refrenceType}&refrenceId=${refrenceData._id}&ticketType=${ticketType}`)
+                    const response = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=${refrenceType}&refrenceId=${refrenceData._id}&ticketType=${ticketType?.toString()}`)
                     data = response?.data?.data;
                     count = data?.length;
                 }
