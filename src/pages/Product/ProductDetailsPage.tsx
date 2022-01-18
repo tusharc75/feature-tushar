@@ -88,7 +88,7 @@ const ProductDetailsPage = () => {
   useEffect(() => {
     if (id) {
       getProductFieldsAndData();
-      getFrequentlyBoughtProduct();
+      //getFrequentlyBoughtProduct();
     }
   }, [id]);
 
@@ -249,7 +249,7 @@ const ProductDetailsPage = () => {
             type: 'success',
             open: true
           });
-          getFrequentlyBoughtProduct();
+          //getFrequentlyBoughtProduct();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
