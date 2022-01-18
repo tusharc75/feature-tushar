@@ -199,12 +199,12 @@ export default function ECommerceHeader() {
             await axiosInstance()
                 .get('/user/logout')
                 .then(() => {
-                    history.push('/');
                     dispatch({ type: SET_USER, payload: null });
                     dispatch({ type: SET_SELECTED_ENTITY, payload: null });
-                    wishlistDispatch({ type: "INITIALIZE", payload: [] });
 
                     localStorage.clear();
+
+                    wishlistDispatch({ type: "INITIALIZE", payload: [] });
                     history.push('/login');
                 })
                 .catch((error) => {
