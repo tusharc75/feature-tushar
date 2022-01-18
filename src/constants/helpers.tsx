@@ -1518,7 +1518,9 @@ export const DELIVERY_TICKET_MAPPED_STATUS = {
 export const DELIVERY_TICKET_TYPE = {
   loading: 'Loading',
   receiving: 'Receiving',
+  return: 'Return',
 };
+
 
 export const DELIVERY_TICKET_REFRENCE_TYPE = {
   rentalJob: 'Rental Job',

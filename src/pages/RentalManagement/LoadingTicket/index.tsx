@@ -118,7 +118,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           productAssets.map((d, index) => {
             if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
-              productAssets[index]['type'] = obj?.type;
               productAssets[index]['deliveryTicket'] = obj?.ticketName;
               productAssets[index]['deliveryTicketId'] = obj?._id;
               productAssets[index]['deliveryTicketStatus'] = obj?.status;
@@ -182,7 +181,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   const columns = [
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "inventoryRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "ticketRenderer" },
     { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
@@ -536,7 +534,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     {openDeliveryTicketDialog &&
       <MultipleTicket
         refrenceData={rentalManagementData}
-        ticketType={DELIVERY_TICKET_TYPE.loading}
+        ticketType={[DELIVERY_TICKET_TYPE.loading]}
         refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
         handleClose={() => {
           setOpenDeliveryTicketDialog(false)
