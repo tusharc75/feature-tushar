@@ -36,7 +36,9 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
-
+import { isEmpty } from 'lodash';
+import { useAccount, useMsal } from '@azure/msal-react';
+import { SET_USER, SET_SELECTED_ENTITY } from '../../../StateProvider/actionTypes';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -116,9 +118,14 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ECommerceHeader() {
 
+    const { instance, accounts } = useMsal();
+    const account = useAccount(accounts[0] || {});
+
     const history = useHistory();
-    const { state: { cartItems } }: any = useData();
-    const { wishlistState } = useContext(WishlistContext);
+    const {
+        state: { cartItems },
+        dispatch
+    }: any = useData();
     const toastConfig = useContext(CustomToastContext);
 
     const [search, setSearch] = useState("")
@@ -132,6 +139,8 @@ export default function ECommerceHeader() {
     const [searchItems, setSearchItems] = useState([]);
 
     const [loading, setLoading] = useState(false)
+
+    const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
 
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -173,6 +182,37 @@ export default function ECommerceHeader() {
         setMobileMoreAnchorEl(event.currentTarget);
     };
 
+    const logoutUser = async () => {
+        try {
+            if (!isEmpty(account)) {
+                await instance.logoutPopup({
+                    account: account
+                });
+            }
+        } catch (e) {
+            toastConfig.setToastConfig({
+                open: true,
+                type: 'error',
+                message: 'Need to logout from Azure'
+            });
+        } finally {
+            await axiosInstance()
+                .get('/user/logout')
+                .then(() => {
+                    history.push('/');
+                    dispatch({ type: SET_USER, payload: null });
+                    dispatch({ type: SET_SELECTED_ENTITY, payload: null });
+                    wishlistDispatch({ type: "INITIALIZE", payload: [] });
+
+                    localStorage.clear();
+                    history.push('/login');
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
+        }
+    };
+
     const menuId = 'primary-search-account-menu';
     const renderMenu = (
         <Menu
@@ -184,8 +224,9 @@ export default function ECommerceHeader() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-            <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+            {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+            <MenuItem onClick={handleMenuClose}>My account</MenuItem> */}
+            <MenuItem onClick={logoutUser}>Logout</MenuItem>
         </Menu>
     );
 
