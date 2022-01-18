@@ -111,7 +111,7 @@ const ProductInventoryDetailsPage = () => {
   const NameRenderer = (params) => (
     <>{
       params.value ? (
-        params.data.type === "Loading Ticket" || params.data.type === "Receiving Ticket" ?
+        params.data.type === "Loading Ticket" || params.data.type === "Receiving Ticket" || params.data.type === "Return Ticket" ?
           <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
             {params.value}
           </Link> : params.data.type.toLowerCase() === "repair" ?
@@ -326,17 +326,17 @@ const ProductInventoryDetailsPage = () => {
 
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
-    .post(`${repairJob.repairJobApi}/${repairJobId}/add-assets`, { "ids": [id] })
-    .then(({ data }) => {
-      // toastConfig.setToastConfig({
-      //   type: 'success',
-      //   open: true,
-      //   message: data.message,
-      // })
-    })
-    .catch((error) => {
-      toastConfig.setToastConfig(error);
-    })
+      .post(`${repairJob.repairJobApi}/${repairJobId}/add-assets`, { "ids": [id] })
+      .then(({ data }) => {
+        // toastConfig.setToastConfig({
+        //   type: 'success',
+        //   open: true,
+        //   message: data.message,
+        // })
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
   }
 
   const handleUpdateData = (obj) => {
