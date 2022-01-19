@@ -585,12 +585,26 @@ export default function ProductDetails() {
                     </Grid>
                   }
                   
-                  <ProductConfiguration data={productConfigData} handleChange={(values) => {
-                    setProductConfigData({
-                      ...productConfigData,
-                      values
-                    })
-                  }} />
+                  <ProductConfiguration 
+                    initializeProductConfig={() => {
+                      const items = [...cartItems];
+                      const productIndex = getIndexOfProductInCart(items)
+                      if(productIndex !== -1 && productConfigData.fields.length > 0) {
+                        const productConfiguration = items[productIndex].productConfiguration;
+                        setProductConfigData({
+                          ...productConfigData,
+                          values: productConfiguration
+                        })
+                      }
+                    }}
+                    data={productConfigData} 
+                    handleChange={(values:any) => {
+                      setProductConfigData({
+                        ...productConfigData,
+                        values
+                      })
+                    }} 
+                  />
 
                   <Box className="my-3 d-flex gap-4 align-items-baseline">
                     {
