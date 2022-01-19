@@ -70,14 +70,6 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
     }
   };
 
-  React.useEffect(() => {
-    if (columns) {
-
-      sessionStorage.setItem('columns', JSON.stringify(columns))
-    }
-  }, [columns])
-
-
 
   return (
     <div>
@@ -107,7 +99,8 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
 
 
               setTimeout(() => {
-                dispatch({ type: 'filter', filters: savedFilters });
+               dispatch({ type: 'filter', filters: savedFilters });
+             
               }, 500)
               
             setClose(true)
@@ -117,6 +110,8 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
                 type: "success",
                 message: 'Filtered Successfully',
               });
+
+              handleClose();
             }
 
 
@@ -150,6 +145,8 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
                                       
                                        let field = newValue?.field
                                        values?.fields?.push(field)
+
+                                       
                                       
                                       //  arrayHelpers.replace(index,{
                                       //    ...values.fields[index] as {},field
@@ -161,6 +158,7 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
                                       label="Choose a Field"
                                       variant="outlined"
                                       name="FilterField"
+                                      
                     
                                       />
                                     )}
@@ -168,13 +166,7 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
                                        
                          
                                 
-                                {/* <Field component="select" name={`fields.${index}`}>
-                                  <option value=''>Select a Field</option>
-                                  {JSON.parse(sessionStorage.getItem('columns')) !== null && JSON.parse(sessionStorage.getItem('columns'))?.map((column, index) => {
-                                    return <option key={index} value={column.field}>{column.headerName}</option>
-                                  })}
-                                </Field>
-                                <Field className="filter-field" name={`filters[${index}]`} id="standard-basic" label="Enter Filter Field" variant="standard" /> */}
+                             
                                  <TextField
                                       style={{  height: "30px"}}
                                       variant="outlined"

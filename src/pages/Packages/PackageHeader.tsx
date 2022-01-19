@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import SearchBox from "../../components/Helpers/SearchBox";
 import {
     AddOutlined,
@@ -16,7 +16,11 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import styles from "../Leads/Header.module.scss";
 import HideWhenOffline from "../../components/HideWhenOffline";
 import { isMobile, isTablet } from "react-device-detect";
-import {MdAdd} from "react-icons/all";
+import {MdAdd,MdSort,MdFilterList} from "react-icons/all";
+import MobileSortDialog from "../../components/MobileSortDialog";
+import MobileFilterDialog from "../../components/MobileFilterDialog"
+
+
 
 function PackageHeader(props) {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -37,6 +41,34 @@ function PackageHeader(props) {
             onTypeChange(options.find((d) => d.key === newFilter).value);
         }
     };
+    const [isOpenDialog, setisOpenDialog] = useState(false)
+
+
+
+    const handleOpen = () => {
+      setisOpenDialog(true);
+    };
+  
+    const handleClose = () => {
+      setisOpenDialog(false);
+    };
+  
+    const [open, setOpen] = useState(false);
+  
+    const handleClickOpen = () => {
+      setOpen(true);
+    };
+  
+    const handleClickClose = () => {
+      setOpen(false);
+  
+    };
+
+   
+    
+    
+    
+  
 
     const {
         openAssingToProduct,
@@ -53,14 +85,94 @@ function PackageHeader(props) {
         heading,
         children,
         showTransferEntityDialog,
+        columns,
+        dispatch
         // showClonePackageDialog
 
     } = props;
+
+
+  
+
+      let toggleInner = options && (
+        <ToggleButtonGroup
+          size="small"
+          className=" toggle-button-layout"
+          value={filter}
+          exclusive
+          onChange={handleFilter}
+        >
+          {options.map((k, index) => {
+            return (
+              <ToggleButton value={k.key} key={index}>
+                {k.key}
+              </ToggleButton>
+            );
+          })}
+        </ToggleButtonGroup>
+      );
+
     return (
         <Grid className={styles.filter_side_container} container>
             <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
-                <Grid className="d-flex align-item-center">
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+            <div className="d-flex align-items-center">  
                 {icon} <span className="listingHeader">{heading}</span>
+                
+                </div>
+                {isMobile && !isTablet &&
+        <div className="d-flex ">
+        <Button
+        onClick={handleClickOpen}
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        // aria-expanded={open ? 'true' : undefined}
+        color="secondary"
+        variant="text"
+        disableElevation
+        startIcon={<MdSort />}
+      >
+        Sort 
+        </Button>
+
+        <MobileSortDialog
+        isOpen={open}
+        handleClose={handleClickClose}
+        contentPart={toggleInner}
+        secHeading={["Sort Opportunities"]}
+        columns={columns}
+        dispatch={dispatch}
+        />
+
+
+
+        <Button
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        // aria-expanded={open ? 'true' : undefined}
+        variant="text"
+        color="secondary"
+        disableElevation
+        startIcon={<MdFilterList />}
+        onClick={handleOpen}
+      >
+        Filter 
+        </Button>
+
+
+        <MobileFilterDialog
+        isOpen={isOpenDialog}
+        handleClose={handleClose}
+        contentPart={toggleInner}
+        secHeading={["Filter Opportunities"]}
+        columns={columns}
+        dispatch={dispatch}
+        />
+        </div>
+        }
+
                 </Grid>
                 <HideWhenOffline>
                     {options && (

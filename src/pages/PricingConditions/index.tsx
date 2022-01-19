@@ -8,7 +8,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import CustomContainer from '../../components/CustomContainer';
 import styles from '../Leads/Header.module.scss';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { MdContacts } from 'react-icons/md';
+import { MdContacts,MdSort, MdFilterList } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
 import { isObjectEmpty, gridLoadingTimeout, pricingCondition } from '../../constants/helpers';
 import routes from './../../components/Helpers/Routes';
@@ -26,6 +26,8 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { startCase } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
+import MobileSortDialog from "../../components/MobileSortDialog";
+import MobileFilterDialog from "../../components/MobileFilterDialog"
 
 let timeout;
 
@@ -36,10 +38,10 @@ const PricingConditions = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-
+  const [isOpenDialog, setisOpenDialog] = useState(false)
   const [pricingConditionId, setPricingConditionId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
-
+  const [sortOpen, setSortOpen]= useState(false);
   const history = useHistory();
   const [gridApi, setGridApi] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -115,6 +117,26 @@ const PricingConditions = () => {
         dispatch({ type: 'loading', loading: false });
       });
   };
+
+    const handleOpen = () => {
+        setisOpenDialog(true);
+      };
+      
+      const handleClickOpen = () => {
+        setSortOpen(true);
+      };
+    
+      const handleClickClose = () => {
+        setSortOpen(false);
+    
+      };
+    
+      const handleFilterClose = () => {
+        setisOpenDialog(false);
+      };
+      
+     
+    
 
   const ActionsRenderer = (params) => (
     <>
@@ -250,9 +272,65 @@ const PricingConditions = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid className={styles.filter_side_container} container justify="space-between">
-            <Grid item className="d-flex align-items-center gap-1" md={6} sm={12} xs={12}>
+          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+            <div className="d-flex align-items-center">
               <MdContacts className="headerLogo" />
               <span className="listingHeader">{routes.pricingCondition.title}</span>
+              </div>
+              {isMobile && (
+                  <>
+                    <Grid style={{ display: 'inline-flex'}}>
+                      <Button
+                        onClick={handleClickOpen}
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        aria-expanded={ 'true'}
+                        color="secondary"
+                        variant="text"
+                        disableElevation
+                        startIcon={<MdSort />}
+                        className={'sort-filter-tablet'}
+                        style={isTablet ? { marginLeft: '50px' } : {}}
+                      >
+                        Sort
+                      </Button>
+                      <MobileSortDialog
+                        isOpen={sortOpen}
+                        handleClose={handleClickClose}
+                        contentPart={null}
+                        secHeading={['Sort Pricing Setup']}
+                        columns={columns}
+                        dispatch={dispatch}
+                      />
+
+                      <Button
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        aria-expanded={'true'}
+                        variant="text"
+                        color="secondary"
+                        disableElevation
+                        className={'sort-filter-tablet'}
+                        startIcon={<MdFilterList />}
+                        onClick={handleOpen}
+                      >
+                        Filter
+                      </Button>
+
+                      <MobileFilterDialog
+                        isOpen={isOpenDialog}
+                        handleClose={handleFilterClose}
+                        contentPart={null}
+                        secHeading={['Filter Pricing Setup']}
+                        columns={columns}
+                        dispatch={dispatch}
+                      />
+                    </Grid>
+                  </>
+                )}
+           
             </Grid>
             <Grid className={styles.filter_side} item md={6} sm={12} xs={12}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
