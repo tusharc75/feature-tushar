@@ -221,13 +221,11 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["ticketType"] = ticketType;
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
 
-                    const warehouse = refrenceData?.warehouse?.optionValue ? refrenceData?.warehouse?.optionValue : (refrenceData?.plant?.optionValue ?? "")
-
                     if (ticketType === DELIVERY_TICKET_TYPE.loading) {
-                        tempInitialData["pickupPlant"] = warehouse
+                        tempInitialData["pickupPlant"] = warehouseId
                         fieldsDataForCreate?.forEach((e) => {
                             if (e.fieldName === "pickupPlant") {
-                                const plantAddress = e?.option?.filter((e) => e.optionValue === warehouse)
+                                const plantAddress = e?.option?.filter((e) => e.optionValue === warehouseId)
                                 if (plantAddress.length) {
                                     tempInitialData["pickupPlantAddress"] = plantAddress[0].address
                                 }
@@ -235,10 +233,10 @@ const ManageDeliveryTicket = (props) => {
                         })
                     }
                     else if (ticketType === DELIVERY_TICKET_TYPE.receiving || ticketType === DELIVERY_TICKET_TYPE.return) {
-                        tempInitialData["receivingPlant"] = warehouse
+                        tempInitialData["receivingPlant"] = refrenceData?.warehouse?.optionValue
                         fieldsDataForCreate?.forEach((e) => {
                             if (e.fieldName === "pickupPlant") {
-                                const plantAddress = e?.option?.filter((e) => e.optionValue === warehouse)
+                                const plantAddress = e?.option?.filter((e) => e.optionValue === refrenceData?.warehouse?.optionValue)
                                 if (plantAddress.length) {
                                     tempInitialData["receivingPlantAddress"] = plantAddress[0].address
                                 }

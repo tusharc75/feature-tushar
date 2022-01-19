@@ -1,7 +1,8 @@
 import { Grid, Typography } from '@material-ui/core';
+import React from 'react';
 import FormTypes from '../../../components/Helpers/FormTypes';
 
-const ProductConfiguration = ({ data, handleChange }) => {
+const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) => {
   const { values, fields, error } = data;
   
     const onChange = (name, value) => {
@@ -10,8 +11,14 @@ const ProductConfiguration = ({ data, handleChange }) => {
         [name]: value
       };
       handleChange(newValues);
-    
   };
+
+  React.useEffect(() => {
+    if(fields) {
+      initializeProductConfig()
+    }
+  },[fields])
+
   if (!data || data.fields.length === 0 || !data.hasOwnProperty('fields')) return null;
 
   return (

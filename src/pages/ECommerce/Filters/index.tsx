@@ -30,11 +30,11 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-type CategoriesList = {
-  name: string;
-  id: string;
-  open: boolean;
-};
+// type CategoriesList = {
+//   name: string;
+//   id: string;    // If Product category will be here, Use this
+//   open: boolean;
+// };
 
 type FiltersList = {
   fieldName: string;
@@ -48,49 +48,53 @@ type FiltersList = {
 };
 
 const Filters = (props: any) => {
-  const { setToastConfig, productCategories } = props;
+  const { setToastConfig } = props;
   const classes = useStyles();
   const [loadingFilter, setLoadingFilter] = React.useState(false);
-  const [categoryList, setCategoryList] = React.useState<CategoriesList[] | any[]>([]);
+  // const [categoryList, setCategoryList] = React.useState<CategoriesList[] | any[]>([]);
   const [filters, setFilters] = React.useState<FiltersList[] | any[]>([]);
 
-  React.useEffect(() => {
-    setCategories();
-  }, [productCategories]);
+  // React.useEffect(() => {
+  //   setCategories();
+  // }, [productCategories]);
 
-  const setCategories = () => {
-    if (!productCategories && productCategories.length === 0) return;
-    setCategoryList(productCategories.map((p: any) => ({ name: p.name, id: p.id, open: false })));
-  };
+  // const setCategories = () => {
+  //   if (!productCategories && productCategories.length === 0) return;
+  //   setCategoryList(productCategories.map((p: any) => ({ name: p.name, id: p.id, open: false })));
+  // };
 
   /**
    *  Handle when one category is being expanded
+   *  No need fo this as of now
    */
 
-  const onCategoryClick = React.useCallback((id, open: boolean) => {
-    setCategoryList((prevState) =>
-      prevState.map((category: CategoriesList) => ({
-        ...category,
-        open: category.id === id ? !category.open : category.open
-      }))
-    );
+  // const onCategoryClick = React.useCallback((id, open: boolean) => {
+  //   setCategoryList((prevState) =>
+  //     prevState.map((category: CategoriesList) => ({
+  //       ...category,
+  //       open: category.id === id ? !category.open : category.open
+  //     }))
+  //   );
 
-    if (open) {
-      setTimeout(() =>  setFilters([]), 500)
-      return;
-    }
+  //   if (open) {
+  //     setTimeout(() =>  setFilters([]), 500)
+  //     return;
+  //   }
 
-    fetchFilters(id);
+  //   fetchFilters(id);
+  // }, []);
+
+  React.useEffect(() => {
+    fetchFilters();
   }, []);
 
   /**
    * Fetch filters of selected category
    */
-  const fetchFilters = (id) => {
-    let url = id ? `category=${id}` : '';
+  const fetchFilters = () => {
     setLoadingFilter(true);
     axiosInstance()
-      .get(`/ecommerce/filters?${url}`)
+      .get(`/ecommerce/filters`)
       .then(({ data: { data } }) => {
         setLoadingFilter(false);
         setFilters(
@@ -137,90 +141,99 @@ const Filters = (props: any) => {
   };
 
   return (
+    // <List
+    //   dense
+    //   component="nav"
+    //   aria-labelledby="nested-list-categories"
+    //   subheader={
+    //     <ListSubheader component="div" id="nested-list-categories">
+    //       {categoryList.length > 0 ? "Categories" : "Loading Categories..."}
+    //     </ListSubheader>
+    //   }
+    //   className={classes.root}
+    // >
+    //   {categoryList.map((item: CategoriesList) => (
+    //     <React.Fragment key={item.id}>
+    //       <ListItem>
+    //         <ListItemText primary={item.name} />
+    //         <ListItemSecondaryAction>
+    //           {loadingFilter ? (
+    //             <CircularProgress size={18} color="inherit" />
+    //           ) : (
+    //             <IconButton size="small" edge="end" onClick={() => onCategoryClick(item.id, item.open)}>
+    //               {item.open ? <ExpandLess /> : <ExpandMore />}
+    //             </IconButton>
+    //           )}
+    //         </ListItemSecondaryAction>
+    //       </ListItem>
+    //       <Collapse in={item.open} timeout="auto" unmountOnExit>
     <List
-      dense
       component="nav"
-      aria-labelledby="nested-list-categories"
+      disablePadding
+      dense
       subheader={
         <ListSubheader component="div" id="nested-list-categories">
-          {categoryList.length > 0 ? "Categories" : "Loading Categories..."}
+          {!loadingFilter && filters.length > 0 ? 'Filters' : 'Loading Filters...'}
         </ListSubheader>
       }
-      className={classes.root}
     >
-      {categoryList.map((item: CategoriesList) => (
-        <React.Fragment key={item.id}>
-          <ListItem>
-            <ListItemText primary={item.name} />
-            <ListItemSecondaryAction>
-              {loadingFilter ? (
-                <CircularProgress size={18} color="inherit" />
-              ) : (
-                <IconButton size="small" edge="end" onClick={() => onCategoryClick(item.id, item.open)}>
-                  {item.open ? <ExpandLess /> : <ExpandMore />}
+      {!loadingFilter && filters.length > 0 ? (
+        filters.map((filter: FiltersList) => (
+          <React.Fragment key={filter.fieldName}>
+            <ListItem>
+              <ListItemText primary={filter.fieldLabel} />
+              <ListItemSecondaryAction>
+                <IconButton size="small" edge="end" onClick={() => handleClickExpand(filter.fieldName)}>
+                  {filter.open ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
                 </IconButton>
-              )}
-            </ListItemSecondaryAction>
+              </ListItemSecondaryAction>
+            </ListItem>
+            <Collapse in={filter.open} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding dense>
+                {filter.option.map((opt) => (
+                  <ListItem key={opt.optionValue} className={classes.nested} role={undefined} dense>
+                    <ListItemIcon>
+                      <Checkbox
+                        size="small"
+                        edge="start"
+                        checked={opt.checked}
+                        tabIndex={-1}
+                        disableRipple
+                        onClick={() => handleClickFilter(filter.fieldName, opt.optionValue)}
+                        inputProps={{ 'aria-labelledby': opt.optionValue }}
+                      />
+                    </ListItemIcon>
+                    <ListItemText id={opt.optionValue} primary={opt.optionLabel} />
+                  </ListItem>
+                ))}
+              </List>
+            </Collapse>
+          </React.Fragment>
+        ))
+      ) : (
+        <>
+          <ListItem>
+            <Skeleton variant="text" width={'100%'} height={30} />
           </ListItem>
-          <Collapse in={item.open} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding dense>
-              {filters.length > 0 ? (
-                filters.map((filter: FiltersList) => (
-                  <React.Fragment key={filter.fieldName}>
-                    <ListItem className={classes.nested}>
-                      <ListItemText primary={filter.fieldLabel} />
-                      <ListItemSecondaryAction>
-                        <IconButton size="small" edge="end" onClick={() => handleClickExpand(filter.fieldName)}>
-                          {filter.open ? <Remove fontSize="small" /> : <Add fontSize="small" />}
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                    <Collapse in={filter.open} timeout="auto" unmountOnExit>
-                      <List component="div" disablePadding dense>
-                        {filter.option.map((opt) => (
-                          <ListItem key={opt.optionValue} className={classes.nestedDeep} role={undefined} dense>
-                            <ListItemIcon>
-                              <Checkbox
-                                size='small'
-                                edge="start"
-                                checked={opt.checked}
-                                tabIndex={-1}
-                                disableRipple
-                                onClick={() => handleClickFilter(filter.fieldName, opt.optionValue)}
-                                inputProps={{ 'aria-labelledby': opt.optionValue }}
-                              />
-                            </ListItemIcon>
-                            <ListItemText id={opt.optionValue} primary={opt.optionLabel} />
-                          </ListItem>
-                        ))}
-                      </List>
-                    </Collapse>
-                  </React.Fragment>
-                ))
-              ) : (
-                <>
-                  <ListItem className={classes.nested}>
-                    <Skeleton variant="text" width={'100%'} height={30} />
-                  </ListItem>
-                  <ListItem className={classes.nested}>
-                    <Skeleton variant="text" width={'100%'} height={30} />
-                  </ListItem>
-                  <ListItem className={classes.nested}>
-                    <Skeleton variant="text" width={'100%'} height={30} />
-                  </ListItem>
-                  <ListItem className={classes.nested}>
-                    <Skeleton variant="text" width={'100%'} height={30} />
-                  </ListItem>
-                  <ListItem className={classes.nested}>
-                    <Skeleton variant="text" width={'100%'} height={30} />
-                  </ListItem>
-                </>
-              )}
-            </List>
-          </Collapse>
-        </React.Fragment>
-      ))}
+          <ListItem>
+            <Skeleton variant="text" width={'100%'} height={30} />
+          </ListItem>
+          <ListItem>
+            <Skeleton variant="text" width={'100%'} height={30} />
+          </ListItem>
+          <ListItem>
+            <Skeleton variant="text" width={'100%'} height={30} />
+          </ListItem>
+          <ListItem>
+            <Skeleton variant="text" width={'100%'} height={30} />
+          </ListItem>
+        </>
+      )}
     </List>
+    //       </Collapse>
+    //     </React.Fragment>
+    //   ))}
+    // </List>
   );
 };
 
