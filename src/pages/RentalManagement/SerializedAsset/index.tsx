@@ -482,6 +482,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setAddSerializedAssetDialog({ open: false, type: "" });
         }}
         refrenceType={addSerializedAssetDialog.type === "plantWise" ? "Rental Job" : "Rental Job All"}
+        refrenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue }}
         isAdding={isAdding}
         selectedProducts={assetAssignedProduct}
         queryString={addSerializedAssetDialog.type === "all" ? `notInPlant=${rentalManagementData?.warehouse?.optionValue}&availableAssets=true` : ``}
