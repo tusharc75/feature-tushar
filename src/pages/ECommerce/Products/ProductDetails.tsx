@@ -162,16 +162,16 @@ export default function ProductDetails() {
     })
   }, [id])
 
-  const prepareFormData = (data:any) => {
-    if(data) {
+  const prepareFormData = (data: any) => {
+    if (data) {
       const initialData = getObjKeysWithValues(data, data.fields)
-      
+
       setProductConfigData({
         ...productConfigData,
         values: initialData,
         fields: data.fields,
-        requiredValues: data?.fields.filter((d:any) => d.required).map((d:any) => d.fieldName) ?? []
-      }) 
+        requiredValues: data?.fields.filter((d: any) => d.required).map((d: any) => d.fieldName) ?? []
+      })
     }
   }
 
@@ -241,7 +241,7 @@ export default function ProductDetails() {
   }
 
   const onAddToCartItem = (item) => {
-    const {values, requiredValues, error} = productConfigData
+    const { values, requiredValues, error } = productConfigData
 
     let product = {
       qty: 1,
@@ -263,7 +263,7 @@ export default function ProductDetails() {
 
     let requiredValuesLeft = requiredValues.filter(val => !values[val]);
 
-    if(requiredValuesLeft.length > 0) {
+    if (requiredValuesLeft.length > 0) {
       setProductConfigData({
         ...productConfigData,
         error: "Please select required (*) configuration"
@@ -275,7 +275,7 @@ export default function ProductDetails() {
 
       setAddToCartBtnLoading(false)
       return
-    } 
+    }
 
     axiosInstance()
       .post(`/ecommerce/cart`,
@@ -466,12 +466,16 @@ export default function ProductDetails() {
                 <h4>Sold by - {user?.user?.brandName}</h4>
               </div>
 
-              <div className="d-flex gap-2 my-5 flex-column">
-                <h4>Product Number - {productDetails.productNumber}</h4>
+              <div className="mt-3">
+                {/* <h4>Product Number - {productDetails.productNumber}</h4> */}
                 <h4>Product Category - {productDetails.productCategory?.optionLabel}</h4>
               </div>
 
-              <Grid container>
+              {
+                productDetails?.productShortDetail && <div className="mt-5" dangerouslySetInnerHTML={{ __html: productDetails?.productShortDetail }}></div>
+              }
+
+              <Grid className="mt-5" container>
                 <Grid item xs={12} className="d-flex flex-column gap-3">
                   {
                     productDetails.unit || productDetails.pricingMethod ? <Grid container spacing={2}>
@@ -584,12 +588,12 @@ export default function ProductDetails() {
                       </MuiPickersUtilsProvider>
                     </Grid>
                   }
-                  
-                  <ProductConfiguration 
+
+                  <ProductConfiguration
                     initializeProductConfig={() => {
                       const items = [...cartItems];
                       const productIndex = getIndexOfProductInCart(items)
-                      if(productIndex !== -1 && productConfigData.fields.length > 0) {
+                      if (productIndex !== -1 && productConfigData.fields.length > 0) {
                         const productConfiguration = items[productIndex].productConfiguration;
                         setProductConfigData({
                           ...productConfigData,
@@ -597,13 +601,13 @@ export default function ProductDetails() {
                         })
                       }
                     }}
-                    data={productConfigData} 
-                    handleChange={(values:any) => {
+                    data={productConfigData}
+                    handleChange={(values: any) => {
                       setProductConfigData({
                         ...productConfigData,
                         values
                       })
-                    }} 
+                    }}
                   />
 
                   <Box className="my-3 d-flex gap-4 align-items-baseline">
@@ -679,6 +683,10 @@ export default function ProductDetails() {
 
                 </Grid>
               </Grid>
+
+              {
+                productDetails?.productLongDetail && <div className="mt-3" dangerouslySetInnerHTML={{ __html: productDetails?.productLongDetail }}></div>
+              }
 
             </Grid>
 
