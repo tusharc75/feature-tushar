@@ -24,7 +24,7 @@ import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import moment from 'moment';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
-import { FaFileSignature, FaSignature, FaWpforms } from "react-icons/fa";
+import { FaFileSignature, FaMailchimp, FaSignature, FaWpforms } from "react-icons/fa";
 import { BiEdit, BiFoodMenu } from "react-icons/bi";
 import { prepareDataForGrid, DELIVERY_TICKET_MAPPED_STATUS, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
@@ -484,6 +484,17 @@ export default function DeliveryTicketDetail(props) {
       })
   }
 
+  const handleReceiveCustomerSign = () => {
+    if (deliveryTicketData?.customerAccount?.optionValue) {
+      axiosInstance().post(`${deliveryTicketApi}/receive-customer-sign`, { "id": deliveryTicketData.customerAccount.optionValue, "deliveryTicketId": id }).then(({ data: { data } }) => {
+        toastConfig.setToastConfig({ open: true, type: "success", message: data })
+
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    }
+  }
+
   return (
     <>
       <Fragment>
@@ -549,6 +560,17 @@ export default function DeliveryTicketDetail(props) {
                       style={isMobile && !isTablet ? { color: "var(--info-darken)" } : {}}
                     >
                       {isMobile && !isTablet ? <FaSignature size={20} /> : "View Signatures"}
+                    </Button> : null
+                  }
+                  {(deliveryTicketData?.ticketType === "Loading" && deliveryTicketData?.type === "Rental Job" && deliveryTicketData?.signatures?.length === 4) ?
+                    <Button
+                      variant={isMobile && !isTablet ? "text" : "contained"}
+                      color="primary"
+                      size="small"
+                      onClick={() => { handleReceiveCustomerSign() }}
+                      style={isMobile && !isTablet ? { color: "var(--info-darken)" } : {}}
+                    >
+                      {isMobile && !isTablet ? <FaMailchimp size={20} /> : "Send To Customer"}
                     </Button> : null
                   }
                 </DetailsPageHeader>
