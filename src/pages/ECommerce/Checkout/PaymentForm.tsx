@@ -88,7 +88,7 @@ const PaymentForm = ({ form, setForm, error }) => {
                 onValueChange: (values: NumberFormatValues) => {
                   handleChange('cardNumber', values.value);
                 }
-              } as NumberFormatPropsBase<typeof cardNumberRef>
+              } as NumberFormatPropsBase
             }}
           />
         </Grid>
@@ -116,7 +116,7 @@ const PaymentForm = ({ form, setForm, error }) => {
                     onValueChange: (values: NumberFormatValues) => {
                       handleChange('expiryDate', values.value);
                     }
-                  } as NumberFormatPropsBase<typeof cardDateRef>
+                  } as NumberFormatPropsBase
                 }}
               />
             </Grid>
@@ -142,7 +142,7 @@ const PaymentForm = ({ form, setForm, error }) => {
                     onValueChange: (values: NumberFormatValues) => {
                       handleChange('cvv', values.value);
                     }
-                  } as NumberFormatPropsBase<typeof cardDateRef>
+                  } as NumberFormatPropsBase
                 }}
               />
             </Grid>
