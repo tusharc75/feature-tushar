@@ -1,49 +1,22 @@
 import * as React from 'react';
 import './MobileFilterDialog.scss';
-import { AddOutlined } from '@material-ui/icons';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
 import TextField from '@material-ui/core/TextField';
 import { Add, Delete } from '@material-ui/icons';
 import {
-  FaUserTie,
-  IoFilterCircle,
-  MdAccountBalanceWallet,
-  MdAdd,
-  MdFilterList,
-  MdSort,
-  FaCalendarDay,
-  RiTicketFill,
-  RiArrowUpDownFill,
-  RiArrowUpDownLine,
-  BsArrowUpShort,
-  BsArrowUp,
-  BsArrowDown
+  MdAdd
 } from 'react-icons/all';
-import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Autocomplete } from '@material-ui/lab';
 import {
-  Box,
   Grid,
   Button,
   ButtonGroup,
   IconButton,
-  styled,
-  alpha,
   Dialog,
-  DialogActions,
   DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Slide,
-  createStyles,
-  makeStyles,
-  Theme,
-  Transitions
+  Slide
 } from '@material-ui/core';
 import { TransitionProps } from '@material-ui/core/transitions';
-import { Formik, Form, Field, FieldArray } from 'formik';
+import { Formik, Form, FieldArray } from 'formik';
 import { CustomToastContext } from "../StateProvider/CustomToastContext/CustomToastContext"
 
 const Transition = React.forwardRef(function Transition(
@@ -57,8 +30,8 @@ const Transition = React.forwardRef(function Transition(
 
 export default function MobileFilterDialog({ isOpen, handleClose, contentPart, secHeading, columns, dispatch }) {
   const [showFilter, setShowFilter] = React.useState(false);
-  const [open,setOpen] = React.useState( isOpen);
-  const [close,setClose] = React.useState(handleClose)
+  const [open, setOpen] = React.useState(isOpen);
+  const [close, setClose] = React.useState(handleClose)
   const toastConfig = React.useContext(CustomToastContext)
 
 
@@ -69,14 +42,6 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
       setShowFilter(false);
     }
   };
-
-  React.useEffect(() => {
-    if (columns) {
-
-      sessionStorage.setItem('columns', JSON.stringify(columns))
-    }
-  }, [columns])
-
 
 
   return (
@@ -95,28 +60,31 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
 
           <Formik
             initialValues={{ filters: [""], fields: [''] }}
-            enableReinitialize={true} 
+            enableReinitialize={true}
 
             onSubmit={(values) => {
 
-              const {fields,filters} = values
+              const { fields, filters } = values
               let newFields = fields.splice(1);
-              let savedFilters = Object.assign.apply({},newFields.map((field,index)=>(
-                {[field]:{filterType:'text',type:'contains',filter:filters[index]}}
+              let savedFilters = Object.assign.apply({}, newFields.map((field, index) => (
+                { [field]: { filterType: 'text', type: 'contains', filter: filters[index] } }
               )))
 
 
               setTimeout(() => {
                 dispatch({ type: 'filter', filters: savedFilters });
+
               }, 500)
-              
-            setClose(true)
+
+              setClose(true)
 
               toastConfig.setToastConfig({
                 open: true,
                 type: "success",
                 message: 'Filtered Successfully',
               });
+
+              handleClose();
             }
 
 
@@ -126,99 +94,96 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
                 <FieldArray
                   name="filters"
                   render={(arrayHelpers) => (
-                     <div className="form-secion" style={{ marginTop: "35px" }}>
+                    <div className="form-secion" style={{ marginTop: "35px" }}>
                       {values.filters && values.filters.length > 0 ? (
                         values.filters.map((filter, index) => (
-                          <div key={index} style={{marginTop:"30px"}}>
+                          <div key={index} style={{ marginTop: "30px" }}>
 
                             <Grid container spacing={2}>
-                           
+
                               <Grid item xs={8} md={8}>
-                               {/* <InputLabel id="demo-simple-select-label" style={{marginBottom:"10px"}}>Filter Field</InputLabel>      */}
+                                {/* <InputLabel id="demo-simple-select-label" style={{marginBottom:"10px"}}>Filter Field</InputLabel>      */}
                                 <Autocomplete
-                                     id="country-select-demo"
-                                     style={{  height: "30px",marginBottom:"20px"}}
-                                     options={columns}
-                                     autoHighlight
-                                     getOptionLabel={(option:any) => (option?.headerName ? option?.headerName : '')}
-                                     renderOption={(option) => (
-                                        
-                                      <React.Fragment>{option?.headerName}</React.Fragment>
-                                       
-                                     )}
-                                     onChange={(event, newValue)=> {
-                                      
-                                       let field = newValue?.field
-                                       values?.fields?.push(field)
-                                      
-                                      //  arrayHelpers.replace(index,{
-                                      //    ...values.fields[index] as {},field
-                                      //  })
-                                     }}
-                                     renderInput={(params) => (
-                                      <TextField
+                                  id="country-select-demo"
+                                  style={{ height: "30px", marginBottom: "20px" }}
+                                  options={columns}
+                                  autoHighlight
+                                  getOptionLabel={(option: any) => (option?.headerName ? option?.headerName : '')}
+                                  renderOption={(option) => (
+
+                                    <React.Fragment>{option?.headerName}</React.Fragment>
+
+                                  )}
+                                  onChange={(event, newValue) => {
+
+                                    let field = newValue?.field
+                                    values?.fields?.push(field)
+
+
+
+                                    //  arrayHelpers.replace(index,{
+                                    //    ...values.fields[index] as {},field
+                                    //  })
+                                  }}
+                                  renderInput={(params) => (
+                                    <TextField
                                       {...params}
                                       label="Choose a Field"
                                       variant="outlined"
                                       name="FilterField"
-                    
-                                      />
-                                    )}
-                                     />
-                                       
-                         
-                                
-                                {/* <Field component="select" name={`fields.${index}`}>
-                                  <option value=''>Select a Field</option>
-                                  {JSON.parse(sessionStorage.getItem('columns')) !== null && JSON.parse(sessionStorage.getItem('columns'))?.map((column, index) => {
-                                    return <option key={index} value={column.field}>{column.headerName}</option>
-                                  })}
-                                </Field>
-                                <Field className="filter-field" name={`filters[${index}]`} id="standard-basic" label="Enter Filter Field" variant="standard" /> */}
-                                 <TextField
-                                      style={{  height: "30px"}}
-                                      variant="outlined"
-                                      name="FilterField"
-                                      label="Filter Text"
-                                      onChange={(e)=>{
-                                      
-                                        let filterText = e.target.value
-                                          arrayHelpers.replace(index,filterText)
 
-                                       
-                                        // arrayHelpers.replace(index,{
-                                        //   ...values.filters[index] as {},filterText
-                                        // })
-                                      }
-                                    }
-                    
-                                      />
+
+                                    />
+                                  )}
+                                />
+
+
+
+
+                                <TextField
+                                  style={{ height: "30px" }}
+                                  variant="outlined"
+                                  name="FilterField"
+                                  label="Filter Text"
+                                  onChange={(e) => {
+
+                                    let filterText = e.target.value
+                                    arrayHelpers.replace(index, filterText)
+
+
+                                    // arrayHelpers.replace(index,{
+                                    //   ...values.filters[index] as {},filterText
+                                    // })
+                                  }
+                                  }
+
+                                />
                               </Grid>
                               <Grid item xs={2} md={4}>
-                            
-                              <ButtonGroup size="small" aria-label="small outlined button group" style={{ marginTop: "40px" }}>
-                                <IconButton
-                                  size="small"
-                                  aria-label="add"
-                                  onClick={() => arrayHelpers.push('')} // insert an empty string at a position
 
-                                >
-                                  <Add />
-                                </IconButton>
+                                <ButtonGroup size="small" aria-label="small outlined button group" style={{ marginTop: "40px" }}>
+                                  <IconButton
+                                    size="small"
+                                    aria-label="add"
+                                    onClick={() => arrayHelpers.push('')} // insert an empty string at a position
 
-                                <IconButton
-                                  size="small"
-                                  aria-label="delete"
-                                  style={{ color: '#f44336' }}
-                                  onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
-                                >
-                                  <Delete />
-                                </IconButton>
-                              </ButtonGroup>
+                                  >
+                                    <Add />
+                                  </IconButton>
+
+                                  <IconButton
+                                    size="small"
+                                    aria-label="delete"
+                                    style={{ color: '#f44336' }}
+                                    onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
+                                  >
+                                    <Delete />
+                                  </IconButton>
+                                </ButtonGroup>
                               </Grid>
-                             </Grid>
+                            </Grid>
 
-                             
+
 
 
 

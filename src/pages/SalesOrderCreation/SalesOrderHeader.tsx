@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
 import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
@@ -74,6 +74,7 @@ function SalesOrderHeader(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
+  
     }
   };
   let toggleInner = options && (

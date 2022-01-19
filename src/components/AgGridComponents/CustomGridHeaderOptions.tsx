@@ -119,6 +119,38 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
           >
             <FormControl component="fieldset" className="px-3 py-2">
               <FormGroup>
+                <FormControlLabel
+                  key={"allcolumns"}
+                  className="my-1"
+                  name={"allcolumns"}
+                  control={
+                    <Switch
+                      size="small"
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                        const newColumns = [...columns];
+                        newColumns?.forEach((e: any) => {
+                          if (!e.disabled) {
+                            e.show = event.target.checked;
+                          }
+                        })
+                        setColumns(newColumns);
+                        const hiddenColumns = newColumns.filter((d) => !d.show).map((m) => m.field);
+                        const nonHiddenColumns = newColumns.filter((d) => d.show).map((m) => m.field);
+                        columnApi.setColumnsVisible(hiddenColumns, false);
+                        columnApi.setColumnsVisible(nonHiddenColumns, true);
+                        if ((!isClientSideGrid) || saveColumnOptions) {
+                          let tempColumnState = columnApi.getColumnState()
+                          let hidedColumns = tempColumnState.filter(o => o?.hide)
+                            .map(o => o?.colId)
+                          updateGridHiddenColumns(hidedColumns)
+                        }
+                        const columnState = JSON.stringify(columnApi.getColumnState());
+                        localStorage.setItem(renderedFrom, columnState);
+                      }}
+                    />
+                  }
+                  label={"All Columns"}
+                />
                 {getSortedColumns(columns).map((column: any, index) => {
                   return (
                     <Tooltip key={index} title={column.disabled ? 'Main columns are always visible' : ''}>
@@ -148,9 +180,7 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
                                   .map(o => o?.colId)
                                 updateGridHiddenColumns(hidedColumns)
                               }
-
                               const columnState = JSON.stringify(columnApi.getColumnState());
-
                               localStorage.setItem(renderedFrom, columnState);
                             }}
                           />
@@ -163,7 +193,6 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
               </FormGroup>
             </FormControl>
           </Popover>
-
           {
             showOnlyShowFilteredRecordSwitch && <>
               <Divider orientation="vertical" flexItem className="mr-2" />

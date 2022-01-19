@@ -43,6 +43,12 @@ export default function SignatureDialog(props) {
             if (forDelivery) {
                 signedData.name = activeStep === 0 ? name1 : name2;
             }
+            if (label.includes("Customer Sign")) {
+                signedData = {
+                    sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png"),
+                    name: name1 || name2
+                }
+            }
             onSigned(signedData)
             if (activeStep === 0) {
                 setActiveStep(prevStep => prevStep + 1)
@@ -144,7 +150,7 @@ export default function SignatureDialog(props) {
                             disabled={submitting}
                             onClick={() => { handleClickNext(activeStep === 0 ? signCanvas1 : signCanvas2) }}
                         >
-                            {activeStep === 0 ? "Next" : "Submit"}
+                            {steps.length > 1 && activeStep === 0 ? "Next" : "Submit"}
                         </Button>
                     </>
                     : <Button

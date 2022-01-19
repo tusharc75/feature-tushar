@@ -2114,9 +2114,11 @@ export default function ManageQuoteDialog({
                     color="primary"
                     size="small"
                     disabled={
-                      loading ||
+                      !isClone &&
+                      (loading ||
                       uploadingImageOrFileProgress > 0 ||
                       isFieldNotTouched(entityData, values)
+                      )
                     }
                     onClick={(e) => {
                       e.preventDefault();

@@ -27,8 +27,9 @@ import { camelCase } from 'lodash';
 import ProductListDialog from './ProductListDialog';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import { prepareDataForGrid } from "../../constants/helpers"
-import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown } from "react-icons/all";
+import { MdAccountCircle,MdDescription} from "react-icons/md";
+import { GoDeviceMobile } from "react-icons/go";
+import { AiFillCrown,IoIosPricetags, RiPriceTagLine } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 
@@ -473,6 +474,8 @@ const PackageList = () => {
                             packagePermissions={permissions?.packages}
                             onCreate={clickCreateNew}
                             showConfirmBox={showConfirmBox}
+                            columns={columns}
+                            dispatch={dispatch}
                             canDelete={selectedRecords.length === 0}
                             icon={<BiPackage className="headerLogo" />}
                             heading={routes.packages.title}
@@ -522,11 +525,27 @@ const PackageList = () => {
                             page={page}
                             loading={loading}
                             additionalDetails={[
-
+                                    {
+                                        icon:<IoIosPricetags size={18}/>,
+                                        field:'packageType'
+                                    }
                             ]}
                             chips={[
-
-
+                                        {
+                                            icon:<MdDescription />,
+                                            label:'Package Description: ',
+                                            field:'packageDescription'
+                                        },
+                                       {
+                                           icon:<GoDeviceMobile />,
+                                           label:'Unit: ',
+                                           field:'unit'
+                                       },
+                                       {
+                                           icon:<RiPriceTagLine/>,
+                                           label:'Pricing Method',
+                                           field:'pricingMethod'
+                                       }
                             ]}
                             owerCollaboratorInitialsOrImages=""
                             onCreate={false}

@@ -865,7 +865,7 @@ const Header = ({ toggleDrawer }) => {
         <p>Help</p>
       </MenuItem>
 
-      {
+      {/* {
         permissions?.eCommerce?.isRead && <MenuItem
           id="shoppingCartButton"
           onClick={() => {
@@ -880,9 +880,9 @@ const Header = ({ toggleDrawer }) => {
           <Box component="span" mx={1} />
           <p>Wishlist</p>
         </MenuItem>
-      }
+      } */}
 
-      {
+      {/* {
         permissions?.eCommerce?.isRead && <MenuItem
           id="shoppingCartButton"
           onClick={() => {
@@ -897,7 +897,7 @@ const Header = ({ toggleDrawer }) => {
           <Box component="span" mx={1} />
           <p>Cart</p>
         </MenuItem>
-      }
+      } */}
     </Menu>
   );
 
@@ -1096,7 +1096,7 @@ const Header = ({ toggleDrawer }) => {
                   </Tooltip>
                 </IconButton>
               )}
-              {
+              {/* {
                 permissions?.eCommerce?.isRead && <IconButton
                   id="shoppingCartButton"
                   title="Wishlist"
@@ -1114,10 +1114,10 @@ const Header = ({ toggleDrawer }) => {
                     <FavoriteIcon className="setIcon" />
                   </Badge>
                 </IconButton>
-              }
+              } */}
 
               {/*Only show cart icon if environment is local || development*/}
-              {
+              {/* {
                 permissions?.eCommerce?.isRead && (
                   <IconButton
                     id="shoppingCartButton"
@@ -1137,7 +1137,7 @@ const Header = ({ toggleDrawer }) => {
                     </Badge>
                   </IconButton>
                 )
-              }
+              } */}
 
               <IconButton
                 id="notificationButton"

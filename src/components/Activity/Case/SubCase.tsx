@@ -9,24 +9,12 @@ import {
   TextField,
   Box,
   CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   Avatar
 } from '@material-ui/core';
-import { DeleteOutline } from '@material-ui/icons';
-
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { number } from 'yup/lib/locale';
-import { MdAdd, MdDelete } from 'react-icons/md';
+import { MdDelete } from 'react-icons/md';
 import {BsDot} from "react-icons/bs"
-import { classNames } from 'react-easy-crop/helpers';
-import { type } from 'os';
 import { SubCaseColors } from '../Helpers/utils';
 
 const useStyles = makeStyles((theme) => ({

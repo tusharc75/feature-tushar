@@ -37,13 +37,12 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates 
     setLoading(true);
     axiosInstance()
       .get('dashboard/regionalsales')
-      .then(async ({ data: { data } }) => {
+      .then(async ({ data: { data } }) => {    
         data = data.sort((a, b) => b.totalSell - a.totalSell);
         let regionSalesData = [];
-
         for (const d of data) {
           let totalBookedValue = 0;
-          if (d.totalSell && filterCurrency !== currency) {
+          if (d.totalSell && filterCurrency && filterCurrency !== currency) {
             const rateData = await getExchangeRates(moment().format('YYYY-MM-DD'), d.totalSell);
             totalBookedValue = rateData.rates[filterCurrency];
           } else {

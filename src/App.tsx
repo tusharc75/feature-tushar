@@ -107,6 +107,8 @@ import ReportMaster from './pages/ReportMaster';
 import Products from './pages/ECommerce/Products';
 import ProductDetails from './pages/ECommerce/Products/ProductDetails';
 import MyOwnCart from './pages/ECommerce/MyCart/MyOwnCart';
+import Checkout from './pages/ECommerce/Checkout';
+import CustomerSign from './pages/DeliveryTicket/CustomerSign';
 
 var notificationInterval: any = null;
 
@@ -556,16 +558,26 @@ function App() {
             </PrivateRoute>
 
 
-            <PrivateRoute exact path={routes.eCommerce.path} isEcommerceRoute={true}>
+            <PrivateRoute exact path={`${routes.eCommerce.path}`} isEcommerceRoute={true}>
               <Products />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.eCommerce.path}/:orderType`} isEcommerceRoute={true}>
+              <Products />
+            </PrivateRoute>
+
             <PrivateRoute exact path={`${routes.eCommerceDetail.path}/:id/:orderType`} isEcommerceRoute={true}>
               <ProductDetails />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.eCommerceDetail.path}/cart`} isEcommerceRoute={true}>
               <MyOwnCart />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.eCommerce.path}/checkout`} isEcommerceRoute={true}>
+              <Checkout />
+            </PrivateRoute>
 
+            <Route exact path={'/customer-sign/:id'}>
+              <CustomerSign />
+            </Route>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
           </Switch>
