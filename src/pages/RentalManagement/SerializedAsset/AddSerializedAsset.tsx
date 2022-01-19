@@ -8,7 +8,7 @@ import SearchBox from '../../../components/Helpers/SearchBox'
 import routes from "../../../components/Helpers/Routes";
 import { Link, useHistory } from 'react-router-dom';
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData, INVENTORY_STATUS } from '../../../constants/helpers';
+import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData, INVENTORY_STATUS, transferAsset } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { useData } from "../../../StateProvider/Provider";
 import Dialog from "@material-ui/core/Dialog/Dialog";
@@ -17,14 +17,16 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import { prepareDataForGrid } from "../../../constants/helpers"
 import { isMobile, isTablet } from "react-device-detect";
-import { AddOutlined } from "@material-ui/icons";
 import { MdAdd } from "react-icons/md";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
+import { groupBy, orderBy, sortBy, uniq, map } from "lodash";
+import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
 
 const addSerializedAssetsRenderedFrom = "addSerializedAssets";
 const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
 
-const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts,
+const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, refrenceType = null,
+    refrenceData = null,
     rentalId = null, repairJobId = null, transferAssetId = null, salesOrderId = null, notIn = null, queryString = null, filterByPlant = null }) => {
 
     const toastConfig = useContext(CustomToastContext)
@@ -37,6 +39,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
     const { state: { permissions } }: any = useData();
     const history = useHistory();
+
+    const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
 
     useEffect(() => {
         fetchProductInventory()
@@ -113,16 +117,6 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                         }
                     })
                 }
-                // if (d?.qty - alreadyStoredSelectedRecords.filter(obj => obj.product.optionValue === d._id).length <= -1) {
-                //     let tempSelectedRecoeds = [...alreadyStoredSelectedRecords]
-                //     var idx = tempSelectedRecoeds.findIndex(obj => obj.product.optionValue === d._id);
-                //     var removed = tempSelectedRecoeds.splice(idx, 1);
-                //     // dispatch({ type: "loading", loading: true });
-                //     // setTimeout(() => {
-                //     //     dispatch({ type: "loading", loading: false });
-                //     // }, gridLoadingTimeout);
-                //     dispatch({ type: "selection", selectedRecords: tempSelectedRecoeds });
-                // }
             })
         }
         setSerializedProducts(tempProducts)
@@ -228,6 +222,31 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         return null;
     };
 
+    const checkUniqWarehouse = () => {
+        if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0) {
+            return true;
+        } else if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), "warehouseId")).length === 1) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+
+    const handleAddAssetToTransferAsset = (transferAssetId) => {
+        axiosInstance().put(`${transferAsset.api}/add-asset/${transferAssetId}`, {
+            assets: getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map(s => s._id),
+            manualStatus: INVENTORY_STATUS.reserved
+        })
+            .then(({ data }) => {
+                fetchProductInventory()
+                setShowTransferAssetDialog(false)
+                addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])
+            })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+            })
+    }
+
     return (<Fragment>
         {(<Dialog
             fullScreen={true}
@@ -255,26 +274,40 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                 }
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} container justify={isMobile ? "flex-start" : "flex-end"}>
-                            <Box className={isMobile ? "mobile-filter-side-header" : "filter-side-header-serialized"} component="div">
-                                <SearchBox
-                                    onSearch={handleSearch}
-                                    searchbox="terms_header_search_bar"
-                                    value={search}
-                                    width={isMobile ? '200px' : '242px'}
-                                    style={isMobile ? { flex: 1 } : {}}
-                                />
-                                <Box ml={isMobile ? 0 : 1} mt={isMobile ? 0 : 1} className="d-flex">
-                                    <Button size="small"
-                                        color="primary"
-                                        onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
-                                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                                        disabled={getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length === 0 || isAdding ||
-                                            serializedProducts.some(d => d?.qty < 0)}
+                                <Box className={isMobile ? "mobile-filter-side-header" : "filter-side-header-serialized"} component="div">
+                                    <SearchBox
+                                        onSearch={handleSearch}
+                                        searchbox="terms_header_search_bar"
+                                        value={search}
+                                        width={isMobile ? '200px' : '242px'}
+                                        style={isMobile ? { flex: 1 } : {}}
+                                    />
+                                    {refrenceType === "Rental Job All" &&
+                                        <Box ml={isMobile ? 0 : 1} mt={isMobile ? 0 : 1} className="d-flex">
+                                            <Button size="small"
+                                                color="primary"
+                                                onClick={() => { setShowTransferAssetDialog(true) }}
+                                                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                                                disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 || isAdding || checkUniqWarehouse() ||
+                                                    serializedProducts.some(d => d?.qty < 0)}
+                                                className={isMobile && !isTablet ? 'mobile_button' : ""}
+                                                endIcon={isAdding && <CircularProgress size={20} />}
+                                            >
+                                                {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? "(" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")  " : ""}
+                                                {isMobile && !isTablet ? <MdAdd size={23} /> : 'Create Transfer Asset'}</Button>
+                                        </Box>
+                                    }
+                                    <Box ml={isMobile ? 0 : 1} mt={isMobile ? 0 : 1} className="d-flex">
+                                        <Button size="small"
+                                            color="primary"
+                                            onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
+                                            variant={isMobile && !isTablet ? 'text' : 'contained'}
+                                            disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 || isAdding ||
+                                                serializedProducts.some(d => d?.qty < 0)}
                                             className={isMobile && !isTablet ? 'mobile_button' : ""}
                                             endIcon={isAdding && <CircularProgress size={20} />}
-                                            startIcon={isMobile && !isTablet ? "" : <AddOutlined />}
                                         >
-                                            {getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length ? "(" + getLocalStorageArrayData(`${addSerializedAssetsRenderedFrom}_selected`).length + ")  " : ""}
+                                            {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? "(" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")  " : ""}
                                             {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}</Button>
                                     </Box>
                                 </Box>
@@ -322,26 +355,41 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                         //         fullHeight={true}
                         //         renderedFrom={addSerializedAssetsRenderedFrom}
                         //     /> :
-                            <CustomAgGrid
-                                columns={columns}
-                                dataRows={dataRows}
-                                frameworkComponents={frameWorkComponent}
-                                setGridApi={setGridApi}
-                                dispatch={dispatch}
-                                rowCount={rowCount}
-                                limit={limit}
-                                pageSizes={pageSizes}
-                                page={page}
-                                allowAction={false}
-                                loading={loading}
-                                customGridOptions={{ getRowStyle: getRowStyleScheduled }}
-                                renderedFrom={addSerializedAssetsRenderedFrom}
-                                showOnlyShowFilteredRecordSwitch={true}
-                            />
+                        <CustomAgGrid
+                            columns={columns}
+                            dataRows={dataRows}
+                            frameworkComponents={frameWorkComponent}
+                            setGridApi={setGridApi}
+                            dispatch={dispatch}
+                            rowCount={rowCount}
+                            limit={limit}
+                            pageSizes={pageSizes}
+                            page={page}
+                            allowAction={false}
+                            loading={loading}
+                            customGridOptions={{ getRowStyle: getRowStyleScheduled }}
+                            renderedFrom={addSerializedAssetsRenderedFrom}
+                            showOnlyShowFilteredRecordSwitch={true}
+                        />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </div>
             </CustomDialogContent>
         </Dialog>
+        )}
+        {showTransferAssetDialog && (
+            <ManageTransferAsset
+                isClone={false}
+                transferAssetId={null}
+                onClose={() => setShowTransferAssetDialog(false)}
+                onSuccess={(data) => {
+                    handleAddAssetToTransferAsset(data?._id);
+                }}
+                refrenceType={"Rental Job"}
+                refrenceData={{
+                    transferFromPlant: getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0]?.warehouseId,
+                    transferToPlant: refrenceData?.warehouse
+                }}
+            />
         )}
     </Fragment>
     );

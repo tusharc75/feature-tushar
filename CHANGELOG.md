@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.43.0](https://github.com/vebholic/oms_frontend/compare/v2.42.0...v2.43.0) (2022-01-19)
+
+
+### Features
+
+* - E-commerce header changes done ([1018765](https://github.com/vebholic/oms_frontend/commit/1018765783fa02bfb13e572002a965d3bf7a10b2))
+* - error message on logout issue fixed ([2f94f3e](https://github.com/vebholic/oms_frontend/commit/2f94f3e71db1b1e593a8d298e93f87634de891bf))
+* - PlusMinusComponent issue fixed ([8919467](https://github.com/vebholic/oms_frontend/commit/8919467a1d4a39681bfa21769bce8a52f3a19ef5))
+* - Product details screen updated ([99ada74](https://github.com/vebholic/oms_frontend/commit/99ada740071d183738bcf3efdb976f96b5a8ad2f))
+* **product:** product config fields in details page ([f351053](https://github.com/vebholic/oms_frontend/commit/f351053b419f2f63ba5e86b0b65a87f9b5b2c59c))
+
+
+### Bug Fixes
+
+* bug fix ([21b8ca2](https://github.com/vebholic/oms_frontend/commit/21b8ca2534fe9901676a53ee0747c308282bcf65))
+* bug fix ([a7b59ae](https://github.com/vebholic/oms_frontend/commit/a7b59ae3796a3c3a1425366ca9c43fc258149348))
+* bug fix ([31ffb74](https://github.com/vebholic/oms_frontend/commit/31ffb7471669b5f9ff9e54b503b6b67c46a8dae1))
+* bug fix ([ee18368](https://github.com/vebholic/oms_frontend/commit/ee183683dedf94e427144a40167863ac814200d1))
+* bug fix ([62b1743](https://github.com/vebholic/oms_frontend/commit/62b1743247c840961fc3f678e166b925e2eb3625))
+* bug fix ([b5603c2](https://github.com/vebholic/oms_frontend/commit/b5603c2718e86557d3474ff604e2dd494b846e31))
+* **cart:** add tabs for different types ([3f8469d](https://github.com/vebholic/oms_frontend/commit/3f8469da74353654f475af1e1a174c3c2c0f2600))
+* **dashboard:** ui fix ([fdca2b4](https://github.com/vebholic/oms_frontend/commit/fdca2b4e75a59eb6614b6def38333a0c2f2f6f80))
+* po-1012 ([0772745](https://github.com/vebholic/oms_frontend/commit/0772745c56e4967c49a5b189ea33548a2466f1e0))
+* **product:** pre fill existing data ([f8a7d3e](https://github.com/vebholic/oms_frontend/commit/f8a7d3efa09b4faef56028547919aa72993e15b2))
+* report link ([e0f5275](https://github.com/vebholic/oms_frontend/commit/e0f52751907c3d9119df4a416df0cdcc0745aa20))
+* return feature ([8a4a39d](https://github.com/vebholic/oms_frontend/commit/8a4a39d19f6fd1d1bf21e632f8a8fd37ed53b25d))
+
 ## [2.42.0](https://github.com/vebholic/oms_frontend/compare/v2.41.2...v2.42.0) (2022-01-18)
 
 

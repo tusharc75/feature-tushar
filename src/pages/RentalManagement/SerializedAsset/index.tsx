@@ -37,7 +37,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const [deleting, setDeleting] = useState(false)
   const [isAdding, setAdding] = useState(false)
   const [showConfirmBox, setShowConfirmBox] = useState(false)
-  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, type: "" })
   const [selectedProducts, setSelectedProducts] = useState([])
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([])
 
@@ -298,21 +298,11 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         }
       }
     })
-    // assets.forEach(d => {
-    //   const result = selectedProducts.find(f => d.productId === f.id);
-    //   if (result) {
-    //     let obj: any = {};
-    //     obj._id = result._id
-    //     obj.inventory = d.id;
-    //     obj.product = result.materialId
-    //     data.push(obj)
-    //   }
-    // })
     if (data.length) {
       setAdding(true)
       axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`, { "products": data })
         .then(({ data }) => {
-          setAddSerializedAssetDialog(false)
+          setAddSerializedAssetDialog({ open: false, type: "" })
           fetchProductInventory()
           setSelectedProducts([])
           setAssetAssignedProduct([])
@@ -323,7 +313,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             message: data.message,
           });
         }).catch((error) => {
-          setAddSerializedAssetDialog(false)
+          setAddSerializedAssetDialog({ open: false, type: "" })
           setAdding(false)
           toastConfig.setToastConfig(error)
         });
@@ -393,13 +383,13 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           color="primary"
           type="button"
           size="small"
-          style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+          style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
           disabled={disableAssignSerializedAssets()}
           onClick={() => {
-            setAddSerializedAssetDialog(true)
+            setAddSerializedAssetDialog({ open: true, type: "plantWise" })
           }}
         >
-          {isMobile && !isTablet ? <CgAssign size={20}/> :  `Assign ${routes.productInventory.title}`}
+          {isMobile && !isTablet ? <CgAssign size={20} /> : `Assign ${routes.productInventory.title}`}
         </Button>
         <Box mx={1} />
         <Button
@@ -407,13 +397,27 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           color="primary"
           type="button"
           size="small"
-          style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
+          style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
+          disabled={disableAssignSerializedAssets()}
+          onClick={() => {
+            setAddSerializedAssetDialog({ open: true, type: "all" })
+          }}
+        >
+          {isMobile && !isTablet ? <CgAssign size={20} /> : `All ${routes.productInventory.title}`}
+        </Button>
+        <Box mx={1} />
+        <Button
+          variant={isMobile && !isTablet ? "text" : "contained"}
+          color="primary"
+          type="button"
+          size="small"
+          style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
           disabled={showManagePurchaseOrderDialog.products.length === 0}
           onClick={() => {
             setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: true }))
           }}
         >
-          {isMobile && !isTablet ? <IoCreate size={20}/> : `Create ${routes.purchaseOrder.title}`}
+          {isMobile && !isTablet ? <IoCreate size={20} /> : `Create ${routes.purchaseOrder.title}`}
         </Button>
         {poCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
           <IconButton size="small" onClick={() => {
@@ -430,14 +434,14 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           color="primary"
           type="button"
           size="small"
-          style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
+          style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
           disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
           onClick={() => {
             setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
             setShowConfirmBox(true)
           }}
         >
-         {isMobile && !isTablet ? <MdDeleteSweep size={20}/> :  "Delete Assets" }
+          {isMobile && !isTablet ? <MdDeleteSweep size={20} /> : "Delete Assets"}
         </Button>
         <Box mx={1} />
       </Box>
@@ -471,15 +475,19 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         }
       </Grid>
     </Grid>
-    {addSerializedAssetDialog &&
+    {addSerializedAssetDialog.open &&
       <AddSerializedAsset
         addSerializedAsset={handleAddSerializedAsset}
         handleSerializedAssetClose={() => {
-          setAddSerializedAssetDialog(false);
+          setAddSerializedAssetDialog({ open: false, type: "" });
         }}
+        refrenceType={addSerializedAssetDialog.type === "plantWise" ? "Rental Job" : "Rental Job All"}
+        refrenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue }}
         isAdding={isAdding}
         selectedProducts={assetAssignedProduct}
-        filterByPlant={rentalManagementData?.warehouse?.optionValue ? rentalManagementData?.warehouse?.optionValue : null}
+        queryString={addSerializedAssetDialog.type === "all" ? `notInPlant=${rentalManagementData?.warehouse?.optionValue}&availableAssets=true` : ``}
+        filterByPlant={addSerializedAssetDialog.type === "plantWise" ?
+          rentalManagementData?.warehouse?.optionValue ? rentalManagementData?.warehouse?.optionValue : null : null}
       />
     }
     {showConfirmBox && (

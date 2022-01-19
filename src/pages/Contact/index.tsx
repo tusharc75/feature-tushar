@@ -246,6 +246,7 @@ export default function Contact(props) {
           ? `?page=${page}&type=${newFilter}&search=${search}`
           : `?page=${page}&type=${newFilter}`
       );
+      sessionStorage.setItem('filterSuccess',JSON.stringify('filterSuccess'));
     }
   };
 
@@ -352,6 +353,7 @@ export default function Contact(props) {
       sessionStorage.removeItem('filters');
     }
   }, [filters]);
+
 
   const handleEntityChange = (entityId) => {
     entityDispatch({ type: SET_SELECTED_ENTITY, payload: entityId });

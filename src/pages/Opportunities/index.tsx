@@ -598,9 +598,7 @@ const Opportunities = () => {
                 {
                   icon: <FaPercentage/>,
                   label: "Probability :",
-                  field: "probability"
-                  
-                 
+                  field: "probability" 
                   
                 },
                 {

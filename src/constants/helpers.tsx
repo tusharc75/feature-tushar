@@ -172,7 +172,8 @@ export const sidebarResource = {
   flags: 'Flags',
   projectSales: 'Project Sales',
   purchaseOrder: 'Purchase Order',
-  transferAsset: 'Transfer Asset'
+  transferAsset: 'Transfer Asset',
+  address: 'Address'
 };
 
 export const resourceNames = {

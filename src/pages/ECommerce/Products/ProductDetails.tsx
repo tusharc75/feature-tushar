@@ -126,6 +126,9 @@ export default function ProductDetails() {
   }, []);
 
   useEffect(() => {
+
+    dispatchData({ type: TYPES.updateWholePayload, payload: { ...initialData } })
+
     axiosInstance().get(`${eProduct.api}/${id}`).then(({ data: { data } }) => {
       setProductDetails({ ...data });
       prepareFormData(data)
@@ -149,12 +152,12 @@ export default function ProductDetails() {
           }
         })
 
-        changeRateCurrency(data, cartItems[indexOfProductInCart].unit, cartItems[indexOfProductInCart].pricingMethod)
+        changeRateCurrency(data, cartItems[indexOfProductInCart].unit, cartItems[indexOfProductInCart].pricingMethod, false)
       } else {
         let firstUnit = data.unit && data.unit.length > 0 ? data.unit[0] : "";
         let firstPricingMethod = data.pricingMethod && data.pricingMethod.length > 0 ? data.pricingMethod[0] : "";
 
-        changeRateCurrency(data, firstUnit, firstPricingMethod)
+        changeRateCurrency(data, firstUnit, firstPricingMethod, false)
       }
 
     }).catch((error) => {
@@ -162,20 +165,20 @@ export default function ProductDetails() {
     })
   }, [id])
 
-  const prepareFormData = (data:any) => {
-    if(data) {
+  const prepareFormData = (data: any) => {
+    if (data) {
       const initialData = getObjKeysWithValues(data, data.fields)
-      
+
       setProductConfigData({
         ...productConfigData,
         values: initialData,
         fields: data.fields,
-        requiredValues: data?.fields.filter((d:any) => d.required).map((d:any) => d.fieldName) ?? []
-      }) 
+        requiredValues: data?.fields.filter((d: any) => d.required).map((d: any) => d.fieldName) ?? []
+      })
     }
   }
 
-  const changeRateCurrency = (productData, unit, pricingMethod) => {
+  const changeRateCurrency = (productData, unit, pricingMethod, updateCartValue = true) => {
 
     dispatchData({ type: TYPES.unitAndPricingMethod, payload: { selectedUnit: unit, selectedPricingMethod: pricingMethod } })
 
@@ -195,8 +198,8 @@ export default function ProductDetails() {
       setRateCurrency({ currency: productData.currency, rate: productData.mrp, rateWithCurrency: formatAmountWithCurrency(productData.currency, productData.mrp)?.fullFormatAmount, mrp: productData.mrp, isRateMrpSame: true })
     }
 
-    if (data.indexOfProductInCart !== -1) {
-      updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), unit, pricingMethod, data.startDate, data.endDate, record?.mrp, record?.rate);
+    if (updateCartValue && data.indexOfProductInCart !== -1) {
+      updateCart(cartItems[data.indexOfProductInCart]._id, Number(cartItems[data.indexOfProductInCart].qty), unit, pricingMethod, data.startDate, data.endDate, record?.mrp, record?.rate);
     }
   }
 
@@ -241,7 +244,7 @@ export default function ProductDetails() {
   }
 
   const onAddToCartItem = (item) => {
-    const {values, requiredValues, error} = productConfigData
+    const { values, requiredValues, error } = productConfigData
 
     let product = {
       qty: 1,
@@ -263,7 +266,7 @@ export default function ProductDetails() {
 
     let requiredValuesLeft = requiredValues.filter(val => !values[val]);
 
-    if(requiredValuesLeft.length > 0) {
+    if (requiredValuesLeft.length > 0) {
       setProductConfigData({
         ...productConfigData,
         error: "Please select required (*) configuration"
@@ -275,7 +278,7 @@ export default function ProductDetails() {
 
       setAddToCartBtnLoading(false)
       return
-    } 
+    }
 
     axiosInstance()
       .post(`/ecommerce/cart`,
@@ -331,14 +334,14 @@ export default function ProductDetails() {
   const updateCart = (cartId, value, unit, pricingMethod, startDate, endDate, mrp = rateCurrency?.mrp, rate = rateCurrency?.rate) => {
     axiosInstance().put(`/ecommerce/cart`, {
       _id: cartId,
-      qty: value,
-      unit: unit,
+      qty: Number(value),
+      unit: Number(unit),
       pricingMethod: pricingMethod,
       startDate: startDate,
       endDate: endDate,
       currency: rateCurrency.currency,
-      mrp: mrp,
-      rate: rate
+      mrp: Number(mrp),
+      rate: Number(rate)
     }).then(() => {
 
     }).catch((error) => {
@@ -466,12 +469,16 @@ export default function ProductDetails() {
                 <h4>Sold by - {user?.user?.brandName}</h4>
               </div>
 
-              <div className="d-flex gap-2 my-5 flex-column">
-                <h4>Product Number - {productDetails.productNumber}</h4>
+              <div className="mt-3">
+                {/* <h4>Product Number - {productDetails.productNumber}</h4> */}
                 <h4>Product Category - {productDetails.productCategory?.optionLabel}</h4>
               </div>
 
-              <Grid container>
+              {
+                productDetails?.productShortDetail && <div className="mt-5" dangerouslySetInnerHTML={{ __html: productDetails?.productShortDetail }}></div>
+              }
+
+              <Grid className="mt-5" container>
                 <Grid item xs={12} className="d-flex flex-column gap-3">
                   {
                     productDetails.unit || productDetails.pricingMethod ? <Grid container spacing={2}>
@@ -549,7 +556,7 @@ export default function ProductDetails() {
                                 dispatchData({ type: TYPES.startDate, payload: date });
 
                                 if (data.indexOfProductInCart !== -1) {
-                                  updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, date, data.endDate);
+                                  updateCart(cartItems[data.indexOfProductInCart]._id, Number(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, date, data.endDate);
                                 }
                               }}
                             />
@@ -574,7 +581,7 @@ export default function ProductDetails() {
                                 dispatchData({ type: TYPES.endDate, payload: date })
 
                                 if (data.indexOfProductInCart !== -1) {
-                                  updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, data.startDate, date);
+                                  updateCart(cartItems[data.indexOfProductInCart]._id, Number(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, data.startDate, date);
                                 }
 
                               }}
@@ -584,13 +591,27 @@ export default function ProductDetails() {
                       </MuiPickersUtilsProvider>
                     </Grid>
                   }
-                  
-                  <ProductConfiguration data={productConfigData} handleChange={(values) => {
-                    setProductConfigData({
-                      ...productConfigData,
-                      values
-                    })
-                  }} />
+
+                  <ProductConfiguration
+                    initializeProductConfig={() => {
+                      const items = [...cartItems];
+                      const productIndex = getIndexOfProductInCart(items)
+                      if (productIndex !== -1 && productConfigData.fields.length > 0) {
+                        const productConfiguration = items[productIndex].productConfiguration;
+                        setProductConfigData({
+                          ...productConfigData,
+                          values: productConfiguration
+                        })
+                      }
+                    }}
+                    data={productConfigData}
+                    handleChange={(values: any) => {
+                      setProductConfigData({
+                        ...productConfigData,
+                        values
+                      })
+                    }}
+                  />
 
                   <Box className="my-3 d-flex gap-4 align-items-baseline">
                     {
@@ -617,7 +638,7 @@ export default function ProductDetails() {
                                 let items = [...cartItems];
                                 const indexOfProduct = getIndexOfProductInCart(items); // items.findIndex(s => s.orderType.toLowerCase() === orderTypeInLowerCase && s.productDetail?._id === id);
 
-                                updateCart(items[indexOfProduct]._id, parseInt(value), data.selectedUnit, data.selectedPricingMethod, data.startDate, data.endDate);
+                                updateCart(items[indexOfProduct]._id, Number(value), data.selectedUnit, data.selectedPricingMethod, data.startDate, data.endDate);
                               }}
                             />
                           </Grid>
@@ -665,6 +686,10 @@ export default function ProductDetails() {
 
                 </Grid>
               </Grid>
+
+              {
+                productDetails?.productLongDetail && <div className="mt-3" dangerouslySetInnerHTML={{ __html: productDetails?.productLongDetail }}></div>
+              }
 
             </Grid>
 

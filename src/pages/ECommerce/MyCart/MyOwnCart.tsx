@@ -204,7 +204,7 @@ function MyOwnCart() {
         }
 
         if (data && data.length >= 1) {
-          setCheckoutLabel('Place Order');
+          // setCheckoutLabel('Place Order');
         }
 
         setCartProductsLoading(false);
@@ -213,9 +213,10 @@ function MyOwnCart() {
   };
 
   const onCheckout = () => {
-    if (checkoutLabel === 'Place Order') {
-      setOpenPlaceOrderDialog(prevState => { return { ...prevState, open: true } });
-    }
+    // if (checkoutLabel === 'Place Order') {
+    //   setOpenPlaceOrderDialog(prevState => { return { ...prevState, open: true } });
+    // }
+    history.push(`${routes.eCommerce.path}/checkout?shipTo=${selectedShippingAddress.optionValue}&billTo=${selectedBillingAddress.optionValue}`)
   };
 
   const onSuccess = () => {
@@ -235,6 +236,7 @@ function MyOwnCart() {
 
   const tabs = [{title: "Rent", key: "rent", id: 0}, {title: "Buy", key: "sale", id: 1}]
   
+  const activeTab = tabs.find(tab => tab.id === currentTab)
 
   return (
     <>
@@ -307,7 +309,11 @@ function MyOwnCart() {
                     </Grid>
                   </Grid>
                 ) : cartProducts.length ? (
-                  [...cartProducts.filter(item => item.orderType === tabs.find(tab => tab.id === currentTab).key)].map((item) => {
+                  [...cartProducts.filter(item => item.orderType === activeTab.key)].length === 0 ? 
+                    <div>
+                       <Typography>No items added to {activeTab.title}</Typography>
+                    </div>
+                  : [...cartProducts.filter(item => item.orderType === activeTab.key)].map((item) => {
                     return (
                       <div key={item.indexOfProduct} className={styles.checkout_items}>
                         <div className={styles.card}>

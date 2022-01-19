@@ -13,6 +13,8 @@ import { useData } from '../../../StateProvider/Provider';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import styles from './product-detail-page.module.scss'
+import Filters from '../Filters';
+import { useParams } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -54,7 +56,33 @@ export default function Products() {
     const [productCategories, setProductCategories] = useState([]);
     const [selected, setSelected] = useState([]);
     const [categoryDataSource, setSelectedCategoryNameDataSource] = useState([]);
-    const [selectedOrderType, setSelectedOrderType] = useState(ORDER_TYPES.rent.value)
+    // const [selectedOrderType, setSelectedOrderType] = useState(orderType ?? ORDER_TYPES.rent.value)
+
+    let { orderType: orderTypeFromUrl } = useParams();
+    const orderTypeInLowerCase = orderTypeFromUrl?.toLowerCase();
+    // const [selectedOrderType, setSelectedOrderType] = useState(() => {
+
+    // });
+
+    // useEffect(() => {
+    //     if (orderTypeFromUrl) {
+
+    //         if (!orderTypeFromUrl) {
+    //             return ORDER_TYPES.rent.value;
+    //         }
+    //         return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+
+    //     }
+    // }, [orderTypeFromUrl]);
+
+    const getOrderType = () => {
+
+        if (orderTypeFromUrl) {
+            return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+        }
+
+        return ORDER_TYPES.rent.value;
+    }
 
     const handleSelect = (_, nodeId) => {
         if (selected.length === 0 || (selected.length !== 0 && selected[0] !== nodeId)) {
@@ -65,7 +93,7 @@ export default function Products() {
 
             setLoading(true);
 
-            axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${selectedOrderType}&deepFilter=[{"field":"productCategory","term":"${category.name}"}]&filterType=and`).then(({ data: { data, count } }) => {
+            axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${getOrderType()}&deepFilter=[{"field":"productCategory","term":"${category.name}"}]&filterType=and`).then(({ data: { data, count } }) => {
                 setTotalCount(count);
                 setProducts([...data]);
             }).catch((error) => {
@@ -78,9 +106,12 @@ export default function Products() {
     }
 
     useEffect(() => {
+        setProducts([]);
+        setTotalCount(0);
+
         setLoading(true);
 
-        axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${selectedOrderType}`).then(({ data: { data, count } }) => {
+        axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${getOrderType()}`).then(({ data: { data, count } }) => {
             setTotalCount(count);
             setProducts([...data]);
         }).catch((error) => {
@@ -125,7 +156,7 @@ export default function Products() {
 
                 setProductCategories(allCategories)
             });
-    }, [])
+    }, [orderTypeFromUrl])
 
     const fetchCart = () => {
         axiosInstance()
@@ -175,7 +206,7 @@ export default function Products() {
 
                         <div className={styles.sidebar_nav}>
 
-                            <ToggleButtonGroup
+                            {/* <ToggleButtonGroup
                                 id="productTypes"
                                 size="small"
                                 value={selectedOrderType}
@@ -209,7 +240,7 @@ export default function Products() {
                                         );
                                     })
                                 }
-                            </ToggleButtonGroup>
+                            </ToggleButtonGroup> */}
 
                             <div className="d-flex align-items-center justify-content-space-between my-2 px-1">
                                 <h3>Categories</h3>
@@ -220,7 +251,7 @@ export default function Products() {
 
                                         setLoading(true);
 
-                                        axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${selectedOrderType}`).then(({ data: { data, count } }) => {
+                                        axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${getOrderType()}`).then(({ data: { data, count } }) => {
                                             setTotalCount(count);
                                             setProducts([...data]);
                                         }).catch((error) => {
@@ -249,6 +280,9 @@ export default function Products() {
                                     })
                                 }
                             </TreeView>
+                            <Filters
+                                setToastConfig={toastConfig.setToastConfig}
+                            />
                         </div>
 
                     </Grid>
@@ -268,7 +302,7 @@ export default function Products() {
                                         // fetchData(null, page + 1, selectedOrderType)
                                         setPage(prevState => prevState + 1)
 
-                                        let url = `${eProduct.api}?page=${page + 1}&limit=${limit}&orderType=${selectedOrderType}`;
+                                        let url = `${eProduct.api}?page=${page + 1}&limit=${limit}&orderType=${getOrderType()}`;
                                         if (selectedCategoryName) {
                                             url = `${url}&deepFilter=[{"field":"productCategory","term":"${selectedCategoryName}"}]&filterType=and`
                                         }
@@ -295,13 +329,13 @@ export default function Products() {
                                     products.length !== 0 ? <div className={`${styles.product_list_container}`}>
                                         {
                                             products.map((product, index: number) => (
-                                                <ProductCard key={index} product={product} selectedOrderType={selectedOrderType} />
+                                                <ProductCard key={index} product={product} selectedOrderType={getOrderType()} />
                                             ))
                                         }
                                     </div> : <div className={`${styles.product_list_container}`}>
                                         {
                                             [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((_, index: number) => (
-                                                <ProductCard key={index} product={null} showSkeleton={true} selectedOrderType={selectedOrderType} />
+                                                <ProductCard key={index} product={null} showSkeleton={true} selectedOrderType={getOrderType()} />
                                             ))
                                         }
                                     </div>

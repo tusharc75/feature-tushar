@@ -178,14 +178,6 @@ function OpportunitiesHeader(props) {
   }, [isMenuOpen])
 
 
-  useEffect(() => {
-    if(JSON.parse(sessionStorage.getItem('sortSuccess')) === 'sortSuccess'){
-      handleClickClose();
-      sessionStorage.removeItem('sortSuccess')
-    }
-
-    
-  },[JSON.parse(sessionStorage.getItem('sortSuccess'))])
 
   const [filter, setFilter] = useState("All Opportunities");
 
@@ -193,6 +185,7 @@ function OpportunitiesHeader(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
+      
     }
   };
  
