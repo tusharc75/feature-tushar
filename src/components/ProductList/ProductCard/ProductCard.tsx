@@ -137,6 +137,8 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
 
     if (record) {
       setRateCurrency({ currency: record.currency, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
+    } else {
+      setRateCurrency({ currency: productData.currency, rate: productData.mrp, rateWithCurrency: formatAmountWithCurrency(productData.currency, productData.mrp)?.fullFormatAmount, mrp: productData.mrp, isRateMrpSame: true })
     }
 
     if (data.indexOfProductInCart !== -1) {
