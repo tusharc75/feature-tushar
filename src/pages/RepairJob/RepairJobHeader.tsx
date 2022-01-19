@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
 import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
@@ -48,6 +48,7 @@ function RepairJobHeader(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
+      sessionStorage.setItem('filterSuccess',JSON.stringify('filterSuccess'));
     }
   };
 
@@ -92,6 +93,24 @@ function RepairJobHeader(props) {
     </ToggleButtonGroup>
   );
 
+  useEffect(() => {
+    if(JSON.parse(sessionStorage.getItem('sortSuccess')) === 'sortSuccess'){
+      handleClickClose();
+      sessionStorage.removeItem('sortSuccess')
+    }
+
+    
+  },[JSON.parse(sessionStorage.getItem('sortSuccess'))])
+
+
+  useEffect(() => {
+    if(JSON.parse(sessionStorage.getItem('filterSuccess')) === 'filterSuccess'){
+      handleClose();
+      sessionStorage.removeItem('filterSuccess')
+    }
+
+    
+  },[JSON.parse(sessionStorage.getItem('filterSuccess'))])
 
 
   return (

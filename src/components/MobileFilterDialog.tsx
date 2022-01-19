@@ -107,7 +107,8 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
 
 
               setTimeout(() => {
-                dispatch({ type: 'filter', filters: savedFilters });
+               dispatch({ type: 'filter', filters: savedFilters });
+             
               }, 500)
               
             setClose(true)
@@ -117,6 +118,8 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
                 type: "success",
                 message: 'Filtered Successfully',
               });
+
+              sessionStorage.setItem('filterSuccess',JSON.stringify('filterSuccess'));
             }
 
 
@@ -150,6 +153,8 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
                                       
                                        let field = newValue?.field
                                        values?.fields?.push(field)
+
+                                       
                                       
                                       //  arrayHelpers.replace(index,{
                                       //    ...values.fields[index] as {},field
@@ -161,6 +166,7 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
                                       label="Choose a Field"
                                       variant="outlined"
                                       name="FilterField"
+                                      
                     
                                       />
                                     )}

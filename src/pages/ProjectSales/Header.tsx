@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import Chip from '@material-ui/core/Chip';
@@ -55,6 +55,7 @@ const ProjectStrategyHeader = (props) => {
   const handleFilter = (event, newFilter) => {
     if (newFilter !== null) {
       handleFilterChange(newFilter);
+      sessionStorage.setItem('filterSuccess',JSON.stringify('filterSuccess'));
     }
   };
 
@@ -72,6 +73,29 @@ const ProjectStrategyHeader = (props) => {
       <ToggleButton value={2}>My Projects</ToggleButton>
     </ToggleButtonGroup>
   );
+
+
+  useEffect(() => {
+    if(JSON.parse(sessionStorage.getItem('sortSuccess')) === 'sortSuccess'){
+      handleClickClose();
+      sessionStorage.removeItem('sortSuccess')
+    }
+
+    
+  },[JSON.parse(sessionStorage.getItem('sortSuccess'))])
+
+
+  useEffect(() => {
+    if(JSON.parse(sessionStorage.getItem('filterSuccess')) === 'filterSuccess'){
+      handleClose();
+      sessionStorage.removeItem('filterSuccess')
+    }
+
+    
+  },[JSON.parse(sessionStorage.getItem('filterSuccess'))])
+
+
+
 
   return (
     <Grid container className={styles.filter_side_container}>

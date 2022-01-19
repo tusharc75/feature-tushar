@@ -246,6 +246,7 @@ export default function Contact(props) {
           ? `?page=${page}&type=${newFilter}&search=${search}`
           : `?page=${page}&type=${newFilter}`
       );
+      sessionStorage.setItem('filterSuccess',JSON.stringify('filterSuccess'));
     }
   };
 
@@ -352,6 +353,27 @@ export default function Contact(props) {
       sessionStorage.removeItem('filters');
     }
   }, [filters]);
+
+  useEffect(() => {
+    if(JSON.parse(sessionStorage.getItem('sortSuccess')) === 'sortSuccess'){
+      handleClickClose();
+      sessionStorage.removeItem('sortSuccess')
+    }
+
+    
+  },[JSON.parse(sessionStorage.getItem('sortSuccess'))])
+
+
+  useEffect(() => {
+    if(JSON.parse(sessionStorage.getItem('filterSuccess')) === 'filterSuccess'){
+      handleFilterClose();
+      sessionStorage.removeItem('filterSuccess')
+    }
+
+    
+  },[JSON.parse(sessionStorage.getItem('filterSuccess'))])
+
+
 
   const handleEntityChange = (entityId) => {
     entityDispatch({ type: SET_SELECTED_ENTITY, payload: entityId });

@@ -327,6 +327,28 @@ const PurchaseOrder = () => {
       };
       
 
+      useEffect(() => {
+        if(JSON.parse(sessionStorage.getItem('sortSuccess')) === 'sortSuccess'){
+          handleClickClose();
+          sessionStorage.removeItem('sortSuccess')
+        }
+    
+        
+      },[JSON.parse(sessionStorage.getItem('sortSuccess'))])
+    
+    
+      useEffect(() => {
+        if(JSON.parse(sessionStorage.getItem('filterSuccess')) === 'filterSuccess'){
+            handleFilterClose();
+          sessionStorage.removeItem('filterSuccess')
+        }
+    
+        
+      },[JSON.parse(sessionStorage.getItem('filterSuccess'))])
+    
+    
+    
+
     
 
     return (<Fragment>

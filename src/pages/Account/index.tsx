@@ -933,6 +933,7 @@ export default function Account(props) {
           ? `?page=${page}&type=${newFilter}&search=${search}`
           : `?page=${page}&type=${newFilter}`
       );
+      sessionStorage.setItem('filterSuccess',JSON.stringify('filterSuccess'));
     }
   };
   
@@ -952,6 +953,27 @@ export default function Account(props) {
   const handleFilterClose = () => {
     setisOpenDialog(false);
   };
+
+  
+  useEffect(() => {
+    if(JSON.parse(sessionStorage.getItem('sortSuccess')) === 'sortSuccess'){
+      handleClickClose();
+      sessionStorage.removeItem('sortSuccess')
+    }
+
+    
+  },[JSON.parse(sessionStorage.getItem('sortSuccess'))])
+
+
+  useEffect(() => {
+    if(JSON.parse(sessionStorage.getItem('filterSuccess')) === 'filterSuccess'){
+      handleFilterClose();
+      sessionStorage.removeItem('filterSuccess')
+    }
+
+    
+  },[JSON.parse(sessionStorage.getItem('filterSuccess'))])
+
   
   let toggleInner = AccTypes && (
     <ToggleButtonGroup

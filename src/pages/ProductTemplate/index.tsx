@@ -309,6 +309,27 @@ const ProductTemplate: FC = () => {
     
       };
 
+
+      useEffect(() => {
+        if(JSON.parse(sessionStorage.getItem('sortSuccess')) === 'sortSuccess'){
+          handleClickClose();
+          sessionStorage.removeItem('sortSuccess')
+        }
+    
+        
+      },[JSON.parse(sessionStorage.getItem('sortSuccess'))])
+    
+    
+      useEffect(() => {
+        if(JSON.parse(sessionStorage.getItem('filterSuccess')) === 'filterSuccess'){
+          handleClose();
+          sessionStorage.removeItem('filterSuccess')
+        }
+    
+        
+      },[JSON.parse(sessionStorage.getItem('filterSuccess'))])
+    
+    
     return (
         <Fragment>
             <Grid container className="headerbox">

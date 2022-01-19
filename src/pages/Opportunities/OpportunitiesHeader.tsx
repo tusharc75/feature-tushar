@@ -187,12 +187,25 @@ function OpportunitiesHeader(props) {
     
   },[JSON.parse(sessionStorage.getItem('sortSuccess'))])
 
+
+  useEffect(() => {
+    if(JSON.parse(sessionStorage.getItem('filterSuccess')) === 'filterSuccess'){
+      handleClose();
+      sessionStorage.removeItem('filterSuccess')
+    }
+
+    
+  },[JSON.parse(sessionStorage.getItem('filterSuccess'))])
+
+
+
   const [filter, setFilter] = useState("All Opportunities");
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
+      sessionStorage.setItem('filterSuccess',JSON.stringify('filterSuccess'));
     }
   };
  
