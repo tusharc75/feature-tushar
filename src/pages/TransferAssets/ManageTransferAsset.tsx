@@ -32,13 +32,17 @@ interface Props {
   number?: string;
   isEditable?: boolean;
   isMainInfoEditable?: boolean;
+  refrenceType?: string;
+  refrenceData?: any;
 }
 
 const ManageTransferAsset: FC<Props> = (props) => {
   const {
     state: { selectedEntity, permissions }
   }: any = useData();
-  const { isClone = false, transferAssetId = null, onClose, onSuccess, number = '', isEditable = false, isMainInfoEditable = false } = props;
+  const { isClone = false, transferAssetId = null, onClose, onSuccess, number = '', isEditable = false, isMainInfoEditable = false,
+    refrenceType = null, refrenceData = null } = props;
+
   const toastConfig = useContext(CustomToastContext);
   const initialRender = useRef(true);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -114,6 +118,18 @@ const ManageTransferAsset: FC<Props> = (props) => {
           let createValues: any = getObjKeys('', fieldsDataForCreate);
           setAllFields(fieldsDataForCreate);
           createValues.transferAssetNumber = `TA_${generateUniqueIdOnly()}`;
+          if (refrenceType === "Rental Job") {
+            createValues["transferFromPlant"] = refrenceData?.transferFromPlant;
+            createValues["transfertoPlant"] = refrenceData?.transferToPlant;
+            fieldsDataForCreate?.forEach((e) => {
+              if (e.fieldName === "transfertoPlant") {
+                  const plantAddress = e?.option?.filter((e) => e.optionValue ===  refrenceData?.transferToPlant)
+                  if (plantAddress.length) {
+                    createValues["plantShipTo"] = plantAddress[0].address
+                  }
+              }
+          })
+          }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
             values: createValues
@@ -585,8 +601,8 @@ const ManageTransferAsset: FC<Props> = (props) => {
                             onSuccess={async ({ data }) => {
                               setTransferToPlantOpen({ open: false, isClone: false });
                               setFieldValue('transfertoPlant', data._id);
-                              const {data: {data: addressData} } = await axiosInstance().get(`warehouse/${data._id}`)
-                              setPlantShipToOptions(prevState => [{...addressData?.address, default: false, order: prevState.length}, ...prevState])
+                              const { data: { data: addressData } } = await axiosInstance().get(`warehouse/${data._id}`)
+                              setPlantShipToOptions(prevState => [{ ...addressData?.address, default: false, order: prevState.length }, ...prevState])
                               setFieldValue('plantShipTo', data.address);
                               setPlantsToCategoryOptions((prevState) => {
                                 return [
