@@ -521,7 +521,7 @@ const TopDashboard = (props) => {
                         <Skeleton variant="text" width={100} height={40} />
                       )}
                       <Typography variant="h6" className={styles.title}>
-                        {`Total Offered Volume in ${totalValueMT?.unit ?? "MT"}`}
+                        {`Total Booked Volume in ${totalValueMT?.unit ?? "MT"}`}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -553,7 +553,7 @@ const TopDashboard = (props) => {
               </Menu>
             </Box>
             <Box textAlign="center" mb={2}>
-              <Typography variant="h5">Total offered value in {filterCurrency || currency} vs Budget</Typography>
+              <Typography variant="h5">Total Booked value in {filterCurrency || currency} vs Budget</Typography>
             </Box>
             {!loadingChart ? tableDataRaw.length === 0 ? <Box height={400}>No Data</Box> : (
               <Box>

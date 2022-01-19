@@ -1218,6 +1218,13 @@ export default function QuoteProcess(props) {
     setAnchorEl(null);
   };
 
+  const findProfitPercentage = (CP,SP) => {
+    let parsedCP = parseInt(CP.amountWithouCurrencyCode.split(',').join(''))
+    let parsedSP = parseInt(SP.amountWithouCurrencyCode.split(',').join(''))
+    let profit = parsedSP - parsedCP;
+    return (profit*100/parsedCP).toFixed(2);
+  }
+
   return (
     <>
       <Paper className={classes.bgProduct}>
@@ -1722,7 +1729,7 @@ export default function QuoteProcess(props) {
             <Grid item className="quoteHeader">
               <div className={redCard ? 'quoteBox quoteRed' : 'quoteBox quoteProfit'}>
                 <span className="quoteAmount" title={totalProfit.fullFormatAmount}>
-                  {totalProfit.fullFormatAmount ? totalProfit.fullFormatAmount : defaultTotalValue}
+                  {totalProfit.fullFormatAmount ? totalProfit.fullFormatAmount : defaultTotalValue} {totalcost.fullFormatAmount ? `(${findProfitPercentage(totalcost,totalsale)} %)`: ''}
                 </span>
                 <div className={'quoteBoxContent'}>
                   <span className={'quoteDetailHeading'}>Total Profit </span>
