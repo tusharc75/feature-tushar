@@ -30,7 +30,7 @@ const ProductConfiguration = ({ data, handleChange }) => {
           <Grid item xs={6} key={field._id}>
             <FormTypes
               isNew={true}
-              {...field}
+              fieldData={field}
               values={values}
               errors={{}}
               touched={{}}

@@ -13,6 +13,7 @@ import { useData } from '../../../StateProvider/Provider';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import styles from './product-detail-page.module.scss'
+import Filters from '../Filters';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -211,7 +212,7 @@ export default function Products() {
                                 }
                             </ToggleButtonGroup>
 
-                            <div className="d-flex align-items-center justify-content-space-between my-2 px-1">
+                            {/* <div className="d-flex align-items-center justify-content-space-between my-2 px-1">
                                 <h3>Categories</h3>
                                 {
                                     selected && selected.length !== 0 ? <span className="link cursor-pointer" onClick={() => {
@@ -231,9 +232,9 @@ export default function Products() {
 
                                     }}>Clear</span> : <></>
                                 }
-                            </div>
+                            </div> */}
 
-                            <hr />
+                            {/* <hr />
 
                             <TreeView
                                 className={`${classes.root} d-flex flex-column gap-1`}
@@ -248,7 +249,11 @@ export default function Products() {
                                         return renderTree(obj)
                                     })
                                 }
-                            </TreeView>
+                            </TreeView> */}
+                            <Filters
+                               setToastConfig={toastConfig.setToastConfig}
+                               productCategories={productCategories}
+                            />
                         </div>
 
                     </Grid>
