@@ -126,6 +126,9 @@ export default function ProductDetails() {
   }, []);
 
   useEffect(() => {
+
+    dispatchData({ type: TYPES.updateWholePayload, payload: { ...initialData } })
+
     axiosInstance().get(`${eProduct.api}/${id}`).then(({ data: { data } }) => {
       setProductDetails({ ...data });
       prepareFormData(data)
@@ -149,12 +152,12 @@ export default function ProductDetails() {
           }
         })
 
-        changeRateCurrency(data, cartItems[indexOfProductInCart].unit, cartItems[indexOfProductInCart].pricingMethod)
+        changeRateCurrency(data, cartItems[indexOfProductInCart].unit, cartItems[indexOfProductInCart].pricingMethod, false)
       } else {
         let firstUnit = data.unit && data.unit.length > 0 ? data.unit[0] : "";
         let firstPricingMethod = data.pricingMethod && data.pricingMethod.length > 0 ? data.pricingMethod[0] : "";
 
-        changeRateCurrency(data, firstUnit, firstPricingMethod)
+        changeRateCurrency(data, firstUnit, firstPricingMethod, false)
       }
 
     }).catch((error) => {
@@ -175,7 +178,7 @@ export default function ProductDetails() {
     }
   }
 
-  const changeRateCurrency = (productData, unit, pricingMethod) => {
+  const changeRateCurrency = (productData, unit, pricingMethod, updateCartValue = true) => {
 
     dispatchData({ type: TYPES.unitAndPricingMethod, payload: { selectedUnit: unit, selectedPricingMethod: pricingMethod } })
 
@@ -195,7 +198,7 @@ export default function ProductDetails() {
       setRateCurrency({ currency: productData.currency, rate: productData.mrp, rateWithCurrency: formatAmountWithCurrency(productData.currency, productData.mrp)?.fullFormatAmount, mrp: productData.mrp, isRateMrpSame: true })
     }
 
-    if (data.indexOfProductInCart !== -1) {
+    if (updateCartValue && data.indexOfProductInCart !== -1) {
       updateCart(cartItems[data.indexOfProductInCart]._id, Number(cartItems[data.indexOfProductInCart].qty), unit, pricingMethod, data.startDate, data.endDate, record?.mrp, record?.rate);
     }
   }
