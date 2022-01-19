@@ -891,10 +891,10 @@ export default function DeliveryTicketDetail(props) {
             }}
             isAdding={isAdding}
             selectedProducts={[]}
-            rentalId={deliveryTicketData?.type === "Rental Job" ? deliveryTicketData?.rentalJob?.optionValue : ""}
-            repairJobId={deliveryTicketData?.type === "Repair Job" ? deliveryTicketData?.repairJob?.optionValue : ""}
-            transferAssetId={deliveryTicketData?.type === "Transfer Asset" ? deliveryTicketData?.transferAsset?.optionValue : ""}
-            salesOrderId={deliveryTicketData?.type === "Sales Order" ? deliveryTicketData?.salesOrder?.optionValue : ""}
+            rentalId={deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob ? deliveryTicketData?.rentalJob?.optionValue : ""}
+            repairJobId={deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob ? deliveryTicketData?.repairJob?.optionValue : ""}
+            transferAssetId={deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset ? deliveryTicketData?.transferAsset?.optionValue : ""}
+            salesOrderId={deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder ? deliveryTicketData?.salesOrder?.optionValue : ""}
             notIn={deliveryTicketData.ticketType}
           />
         }
