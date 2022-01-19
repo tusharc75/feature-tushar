@@ -52,8 +52,8 @@ const ManageAddressDialog = (props) => {
             additionalComments: oldData.additionalComments ?? '',
             city: oldData.city ?? '',
             country: oldData.country ?? '',
-            ['state/Province']: oldData['state/Province'] ?? '',
-            ['zipCode/PostalCode']: oldData['zipCode/PostalCode'] ?? '',
+            // ['state/Province']: oldData['state/Province'] ?? '',
+            // ['zipCode/PostalCode']: oldData['zipCode/PostalCode'] ?? '',
             longitude: oldData.longitude ?? '',
             latitude: oldData.latitude ?? ''
           };
@@ -82,6 +82,7 @@ const ManageAddressDialog = (props) => {
   }, []);
 
   const handleSubmit = (values) => {
+    // const {zipCodePostalCode, stateProvince, ...restValues} = values
     setLoading(true);
     axiosInstance()
       .post(`${address.addressApi}`, values)
@@ -123,9 +124,9 @@ const ManageAddressDialog = (props) => {
             fullAddress.city = address.long_name;
           }
 
-          if (type === 'administrative_area_level_1') {
-            fullAddress['state/Province'] = address.long_name;
-          }
+          // if (type === 'administrative_area_level_1') {
+          //   fullAddress['state/Province'] = address.long_name;
+          // }
 
           if (type === 'administrative_area_level_2') {
             fullAddress.county = address.long_name;
@@ -135,9 +136,9 @@ const ManageAddressDialog = (props) => {
             fullAddress.country = address.long_name;
           }
 
-          if (type === 'postal_code') {
-            fullAddress['zipCode/PostalCode'] = address.long_name;
-          }
+          // if (type === 'postal_code') {
+          //   fullAddress['zipCode/PostalCode'] = address.long_name;
+          // }
         });
 
         fullAddress.latitude = results.geometry.location.lat().toLocaleString();
@@ -162,21 +163,21 @@ const ManageAddressDialog = (props) => {
       } else {
         setFieldValue('city', '');
       }
-      if (addressData['state/Province']) {
-        setFieldValue('state/Province', addressData['state/Province']);
-      } else {
-        setFieldValue('state/Province', '');
-      }
+      // if (addressData['state/Province']) {
+      //   setFieldValue('state/Province', addressData['state/Province']);
+      // } else {
+      //   setFieldValue('state/Province', '');
+      // }
       if (addressData?.country) {
         setFieldValue('country', addressData.country);
       } else {
         setFieldValue('country', '');
       }
-      if (addressData['zipCode/PostalCode']) {
-        setFieldValue('zipCode/PostalCode', addressData['zipCode/PostalCode']);
-      } else {
-        setFieldValue('zipCode/PostalCode', '');
-      }
+      // if (addressData['zipCode/PostalCode']) {
+      //   setFieldValue('zipCode/PostalCode', addressData['zipCode/PostalCode']);
+      // } else {
+      //   setFieldValue('zipCode/PostalCode', '');
+      // }
       if (addressData?.latitude) {
         setFieldValue('latitude', addressData.latitude);
       } else {
