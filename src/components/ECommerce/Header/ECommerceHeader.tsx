@@ -13,7 +13,7 @@ import {
 } from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useHistory, useParams } from 'react-router-dom'
 import { useData } from '../../../StateProvider/Provider';
 import { alpha, makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
@@ -36,6 +36,7 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { SET_USER, SET_SELECTED_ENTITY } from '../../../StateProvider/actionTypes';
 import { capitalize } from 'lodash';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { ORDER_TYPES } from '../../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -144,6 +145,27 @@ export default function ECommerceHeader() {
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
     const [moreAnchorEl, setMoreAnchorEl] = React.useState(null);
+
+    let { orderType: orderTypeFromUrl } = useParams();
+    const orderTypeInLowerCase = orderTypeFromUrl?.toLowerCase();
+
+    const [orderType, setOrderType] = useState(() => {
+        if (orderTypeFromUrl) {
+            return ORDER_TYPES.rent.value;
+        }
+        return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+    });
+
+    const getOrderType = () => {
+        if (orderTypeFromUrl) {
+            return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+        }
+        return ORDER_TYPES.rent.value;
+    }
+
+    useEffect(() => {
+        setOrderType(getOrderType())
+    }, [orderTypeFromUrl])
 
     useEffect(() => {
         setLoading(true)
@@ -301,12 +323,12 @@ export default function ECommerceHeader() {
                     </Link>
 
                     <div className="d-flex align-items-center gap-2 mx-3">
-                        <Button style={{ color: "white" }}
+                        <Button className={orderType === ORDER_TYPES.sale.value ? "border-bottom" : ""} style={{ color: "white" }}
                             onClick={() => {
                                 history.push(`${routes.eCommerce.path}/Sale`)
                             }}
                         >Buy</Button>
-                        <Button style={{ color: "white" }}
+                        <Button className={orderType === ORDER_TYPES.rent.value ? "border-bottom" : ""} style={{ color: "white" }}
                             onClick={() => {
                                 history.push(`${routes.eCommerce.path}/Rent`)
                             }}
@@ -452,4 +474,3 @@ export default function ECommerceHeader() {
         </div>
     );
 }
-

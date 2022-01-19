@@ -196,7 +196,7 @@ export default function ProductDetails() {
     }
 
     if (data.indexOfProductInCart !== -1) {
-      updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), unit, pricingMethod, data.startDate, data.endDate, record?.mrp, record?.rate);
+      updateCart(cartItems[data.indexOfProductInCart]._id, Number(cartItems[data.indexOfProductInCart].qty), unit, pricingMethod, data.startDate, data.endDate, record?.mrp, record?.rate);
     }
   }
 
@@ -331,14 +331,14 @@ export default function ProductDetails() {
   const updateCart = (cartId, value, unit, pricingMethod, startDate, endDate, mrp = rateCurrency?.mrp, rate = rateCurrency?.rate) => {
     axiosInstance().put(`/ecommerce/cart`, {
       _id: cartId,
-      qty: value,
-      unit: unit,
+      qty: Number(value),
+      unit: Number(unit),
       pricingMethod: pricingMethod,
       startDate: startDate,
       endDate: endDate,
       currency: rateCurrency.currency,
-      mrp: mrp,
-      rate: rate
+      mrp: Number(mrp),
+      rate: Number(rate)
     }).then(() => {
 
     }).catch((error) => {
@@ -553,7 +553,7 @@ export default function ProductDetails() {
                                 dispatchData({ type: TYPES.startDate, payload: date });
 
                                 if (data.indexOfProductInCart !== -1) {
-                                  updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, date, data.endDate);
+                                  updateCart(cartItems[data.indexOfProductInCart]._id, Number(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, date, data.endDate);
                                 }
                               }}
                             />
@@ -578,7 +578,7 @@ export default function ProductDetails() {
                                 dispatchData({ type: TYPES.endDate, payload: date })
 
                                 if (data.indexOfProductInCart !== -1) {
-                                  updateCart(cartItems[data.indexOfProductInCart]._id, parseInt(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, data.startDate, date);
+                                  updateCart(cartItems[data.indexOfProductInCart]._id, Number(cartItems[data.indexOfProductInCart].qty), data.selectedUnit, data.selectedPricingMethod, data.startDate, date);
                                 }
 
                               }}
@@ -635,7 +635,7 @@ export default function ProductDetails() {
                                 let items = [...cartItems];
                                 const indexOfProduct = getIndexOfProductInCart(items); // items.findIndex(s => s.orderType.toLowerCase() === orderTypeInLowerCase && s.productDetail?._id === id);
 
-                                updateCart(items[indexOfProduct]._id, parseInt(value), data.selectedUnit, data.selectedPricingMethod, data.startDate, data.endDate);
+                                updateCart(items[indexOfProduct]._id, Number(value), data.selectedUnit, data.selectedPricingMethod, data.startDate, data.endDate);
                               }}
                             />
                           </Grid>
