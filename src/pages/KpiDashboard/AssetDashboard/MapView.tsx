@@ -53,7 +53,7 @@ const MapView = (props: MapViewProps) => {
   if(!window.google || typeof window.google !== 'object') return <div>Loading...</div>
 
   return (
-    <Box height={smallScreen ? '500px' : '700px'} borderRadius={8} overflow="hidden">
+    <Box height={smallScreen ? '500px' : '700px'} borderRadius={8} overflow="hidden" className='table-box-design px-5 pt'>
       <GoogleMap
         options={{
           mapTypeId: google.maps.MapTypeId.ROADMAP,
