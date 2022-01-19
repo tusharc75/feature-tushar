@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState,useEffect } from 'react'
 import SearchBox from '../../components/Helpers/SearchBox'
 import { AddOutlined } from "@material-ui/icons";
 import {
@@ -38,6 +38,7 @@ function LeadsHeader(props) {
         if (newFilter !== null) {
             setFilter(newFilter);
             onTypeChange(options.find((d) => d.key === newFilter).value);
+          
         }
     };
 
@@ -63,7 +64,6 @@ function LeadsHeader(props) {
       setOpen(false);
   
     };
-  
   
 
     const {

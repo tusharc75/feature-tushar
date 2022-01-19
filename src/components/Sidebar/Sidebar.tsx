@@ -20,7 +20,7 @@ import { ChevronRight, ExpandMore, ExpandLess } from "@material-ui/icons";
 import { kebabCase, lowerCase } from "lodash";
 import { FaUserTie, FaDatabase, FaHandshake, FaRegistered } from "react-icons/fa";
 import { BsCalendarFill } from "react-icons/bs";
-import { MdDashboard, MdLocalActivity } from "react-icons/md";
+import { MdDashboard, MdDescription, MdLocalActivity } from "react-icons/md";
 import { RiFolderSettingsFill, RiAccountPinCircleFill } from "react-icons/ri";
 import { SiCivicrm } from "react-icons/si";
 import { AiFillAccountBook, AiFillSetting } from "react-icons/ai"
@@ -289,7 +289,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                     className="list-item"
                   >
                     <ListItemIcon>
-                      <MdDashboard size={15} className="sidebar-icon" />
+                      <MdDescription size={16} className="sidebar-icon" />
                     </ListItemIcon>
                     <ListItemText primary="Reports" />
                   </ListItem>
