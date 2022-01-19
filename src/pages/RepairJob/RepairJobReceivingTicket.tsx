@@ -15,7 +15,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import {
-    gridLoadingTimeout, receivingTicket, repairJob,
+    gridLoadingTimeout, repairJob,
     sidebarResource, productInventory as productInventoryHelperObject, repairJobStatus, deliveryTicket, INVENTORY_STATUS
 } from "../../constants/helpers";
 import { groupBy } from "lodash";
@@ -410,7 +410,7 @@ const RepairJobReceivingTicket = (props) => {
             showRemoveAssetFromReceivingTicketDialog && (
                 <ConfirmationDialog
                     open={showRemoveAssetFromReceivingTicketDialog}
-                    message={`Are you sure you want to remove selected records from ${sidebarResource.receivingTicket}(s) ?`}
+                    message={`Are you sure you want to remove selected records from Receiving Ticket(s) ?`}
                     onClose={() => {
                         setShowRemoveAssetFromReceivingTicketDialog(false);
                     }}
@@ -425,7 +425,7 @@ const RepairJobReceivingTicket = (props) => {
                         })
 
                         Promise.all(apiCalls).then(() => {
-                            toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged ${sidebarResource.receivingTicket}(s)` });
+                            toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged Receiving Ticket(s)` });
                             fetchRecords();
                         }).catch((error) => {
                             toastConfig.setToastConfig(error);

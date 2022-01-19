@@ -65,7 +65,7 @@ const ProtectedRoute = ({ children, isEcommerceRoute = false, ...rest }) => {
         'entity',
         'logout',
         "address",
-        'report'
+        'reports'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);

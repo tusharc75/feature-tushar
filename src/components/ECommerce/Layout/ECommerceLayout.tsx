@@ -8,10 +8,10 @@ export default function ECommerceLayout({ children }) {
         <div className="ecommerce">
             <ECommerceHeader />
 
-            <div className='mb-3'>
+            <div className='mb-3' style={{ paddingTop: "3.5rem" }}>
                 {children}
             </div>
-            
+
             <ECommerceFooter />
         </div>
     )

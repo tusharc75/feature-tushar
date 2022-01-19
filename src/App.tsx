@@ -103,7 +103,7 @@ import AddressDetailPage from './pages/Address/AddressDetailPage'
 import Logout from './pages/Auth/Logout';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import Report from './pages/Report';
-
+import ReportMaster from './pages/ReportMaster';
 import Products from './pages/ECommerce/Products';
 import ProductDetails from './pages/ECommerce/Products/ProductDetails';
 import MyOwnCart from './pages/ECommerce/MyCart/MyOwnCart';
@@ -549,7 +549,10 @@ function App() {
             <PrivateRoute exact path={`${routes.addressDetail.path}/:id`}>
               <AddressDetailPage />
             </PrivateRoute>
-            <PrivateRoute exact path={`/:resource/report`}>
+            <PrivateRoute exact path={`/reports`}>
+              <ReportMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`/reports/:resource`}>
               <Report />
             </PrivateRoute>
 

@@ -933,6 +933,7 @@ export default function Account(props) {
           ? `?page=${page}&type=${newFilter}&search=${search}`
           : `?page=${page}&type=${newFilter}`
       );
+      sessionStorage.setItem('filterSuccess',JSON.stringify('filterSuccess'));
     }
   };
   
@@ -952,7 +953,9 @@ export default function Account(props) {
   const handleFilterClose = () => {
     setisOpenDialog(false);
   };
+
   
+
   let toggleInner = AccTypes && (
     <ToggleButtonGroup
       size="small"

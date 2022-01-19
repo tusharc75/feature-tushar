@@ -26,7 +26,7 @@ import moment from 'moment';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 import { FaFileSignature, FaMailchimp, FaSignature, FaWpforms } from "react-icons/fa";
 import { BiEdit, BiFoodMenu } from "react-icons/bi";
-import { prepareDataForGrid, DELIVERY_TICKET_MAPPED_STATUS } from "../../constants/helpers"
+import { prepareDataForGrid, DELIVERY_TICKET_MAPPED_STATUS, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -143,7 +143,7 @@ export default function DeliveryTicketDetail(props) {
         const response = await axiosInstance().get(`/field?resource=${sidebarResource["deliveryTicket"]}&showHiddenFields=true`)
         data = response?.data?.data
       }
-      if (ticket?.type === "Transfer Asset") {
+      if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
         data = data.filter((fields: any) => {
           if (ticket?.typeDetails?.transferType === "Internal") {
             if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Supplier")) {
@@ -166,14 +166,14 @@ export default function DeliveryTicketDetail(props) {
           return true
         })
       }
-      else if (ticket?.type === "Repair Job") {
+      else if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
         data = data.filter((fields: any) => {
           if (ticket?.typeDetails?.typeOfRepair === "Internal") {
             if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Supplier")) {
               return false
             }
           }
-          if (ticket.ticketType === "Loading") {
+          if (ticket.ticketType === DELIVERY_TICKET_TYPE.loading) {
             if (ticket?.typeDetails?.typeOfRepair === "External") {
               if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Receiving Plant")) {
                 return false
@@ -193,9 +193,9 @@ export default function DeliveryTicketDetail(props) {
           return true
         })
       }
-      else if (ticket?.type === "Rental Job" || ticket?.type === "Sales Order") {
+      else if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
         data = data.filter((fields: any) => {
-          if (ticket.ticketType === "Loading") {
+          if (ticket.ticketType === DELIVERY_TICKET_TYPE.loading) {
             if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Receiving Plant")) {
               return false
             }
@@ -913,10 +913,10 @@ export default function DeliveryTicketDetail(props) {
             }}
             isAdding={isAdding}
             selectedProducts={[]}
-            rentalId={deliveryTicketData?.type === "Rental Job" ? deliveryTicketData?.rentalJob?.optionValue : ""}
-            repairJobId={deliveryTicketData?.type === "Repair Job" ? deliveryTicketData?.repairJob?.optionValue : ""}
-            transferAssetId={deliveryTicketData?.type === "Transfer Asset" ? deliveryTicketData?.transferAsset?.optionValue : ""}
-            salesOrderId={deliveryTicketData?.type === "Sales Order" ? deliveryTicketData?.salesOrder?.optionValue : ""}
+            rentalId={deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob ? deliveryTicketData?.rentalJob?.optionValue : ""}
+            repairJobId={deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob ? deliveryTicketData?.repairJob?.optionValue : ""}
+            transferAssetId={deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset ? deliveryTicketData?.transferAsset?.optionValue : ""}
+            salesOrderId={deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder ? deliveryTicketData?.salesOrder?.optionValue : ""}
             notIn={deliveryTicketData.ticketType}
           />
         }

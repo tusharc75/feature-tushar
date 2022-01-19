@@ -13,6 +13,7 @@ import { useData } from '../../../StateProvider/Provider';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import styles from './product-detail-page.module.scss'
+import Filters from '../Filters';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -249,6 +250,9 @@ export default function Products() {
                                     })
                                 }
                             </TreeView>
+                            <Filters
+                               setToastConfig={toastConfig.setToastConfig}
+                            />
                         </div>
 
                     </Grid>

@@ -8,7 +8,7 @@ import { Button, Chip, IconButton } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import AddSerializedAsset from "./AddSerializedAsset";
+import AddSerializedAsset from "../../RentalManagement/SerializedAsset/AddSerializedAsset";
 import { dateFormat, formatAmountWithCurrency, salesOrder, sidebarResource, treeToFlatArray, productInventory } from "../../../constants/helpers";
 import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
