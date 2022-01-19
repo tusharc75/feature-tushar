@@ -157,11 +157,11 @@ export default function MobileSortDialog({ isOpen, handleClose, contentPart, sec
       if(selectedIndex === index && sortMode===''){
         setClicked(true);
         setSortMode('asc')
-       dispatch({
+          dispatch({
           type: 'sort',
           sorting: [{colId:field,sort:'asc'}]
         })
-      
+    
   
       } 
 
@@ -171,7 +171,8 @@ export default function MobileSortDialog({ isOpen, handleClose, contentPart, sec
       message: 'Sorted Successfully',
     });
 
-    sessionStorage.setItem('sortSuccess',JSON.stringify('sortSuccess'));
+    // sessionStorage.setItem('sortSuccess',JSON.stringify('sortSuccess'));
+    handleClose()
 
 
   };

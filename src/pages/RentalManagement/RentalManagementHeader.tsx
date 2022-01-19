@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext,useEffect } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
 import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
@@ -85,6 +85,7 @@ function RentalManagementHeader(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
+     
     }
   };
 
@@ -116,6 +117,9 @@ function RentalManagementHeader(props) {
         insertUpdate(objectStore.resource, 'productInventory', data);
       });
   };
+
+  
+
 
   const handleRemoveoffline = async () => {
     await clearAll(objectStore.rentalManagement);

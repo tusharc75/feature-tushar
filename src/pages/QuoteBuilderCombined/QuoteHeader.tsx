@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import SearchBox from "../../components/Helpers/SearchBox";
 import {
   AddOutlined,
@@ -64,9 +64,11 @@ function QuoteHeader(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
+   
     }
   };
 
+  
   const {
     selectedRecords,
     onTypeChange,

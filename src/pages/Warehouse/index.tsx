@@ -381,6 +381,10 @@ const AddressResource = () => {
   };
 
 
+
+
+
+
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -430,7 +434,7 @@ const AddressResource = () => {
         Sort 
         </Button>
         <MobileSortDialog
-        isOpen={open}
+        isOpen={sortOpen}
         handleClose={handleClickClose}
         contentPart={null}
         secHeading={["Sort Plants"]}

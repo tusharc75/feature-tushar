@@ -4,9 +4,10 @@ import styles from '../Leads/Header.module.scss';
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { REPORT_LIST } from './../../constants/helpers';
-import { MdOutlineReceiptLong } from "react-icons/md";
+import { MdDescription } from "react-icons/md";
 import { Link, withRouter, useHistory } from "react-router-dom";
 import { camelCase, startCase } from 'lodash';
+import { FaRegistered, FaSuitcase, FaAddressBook, FaAddressCard } from "react-icons/fa";
 
 const ReportMaster = () => {
 
@@ -22,7 +23,7 @@ const ReportMaster = () => {
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={12} className="d-flex align-items-center gap-1 layout-for-tablet">
                         <Grid style={{ display: "flex", justifyContent: "center" }}>
-                            <MdOutlineReceiptLong size={22} className="headerLogo" />
+                            <MdDescription size={22} className="headerLogo" />
                             <span className="listingHeader">Reports</span>
                         </Grid>
                     </Grid>
@@ -31,11 +32,13 @@ const ReportMaster = () => {
             <hr />
             <Box p={3}>
                 <Grid container spacing={2}>
-                    {REPORT_LIST.map((report) =>
+                    {REPORT_LIST.map((report, index) =>
                         <Grid item xs={3}>
                             <Link to={`/reports${routes[`${camelCase(report)}`]?.path}`}>
                                 <Box border={1} borderColor='grey.300' bgcolor='grey.100' borderRadius={1} p={2} >
-                                    <Typography variant="h6">{routes[camelCase(report)]?.title}</Typography>
+                                    <Typography variant="h6">
+                                        <MdDescription size={25} className='headerLogo mr-2 pt-1' />
+                                        {routes[camelCase(report)]?.title}</Typography>
                                 </Box>
                             </Link>
                         </Grid>
