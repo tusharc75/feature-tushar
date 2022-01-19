@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.42.0](https://github.com/vebholic/oms_frontend/compare/v2.41.2...v2.42.0) (2022-01-18)
+
+
+### Features
+
+* - e-commerce changes done ([ded5fcd](https://github.com/vebholic/oms_frontend/commit/ded5fcd8282fffa589e4be08457564136867ce2b))
+* - e-Commerce changes done ([e333729](https://github.com/vebholic/oms_frontend/commit/e3337299486cac0ceece2aba7d7e77561bba56f6))
+* **avisekh/feature:** avisekh/feature ([023ae80](https://github.com/vebholic/oms_frontend/commit/023ae80bd9af2448b7fc95b42c26c64299903546))
+
+
+### Bug Fixes
+
+* 13 jan bugs ([4a9b20f](https://github.com/vebholic/oms_frontend/commit/4a9b20f4d4b4f6e4eecf571c5b9de84c1f40b3a8))
+* bug fix ([18ac328](https://github.com/vebholic/oms_frontend/commit/18ac328d58580ee5a285db72f735879d8dd7b691))
+* **dashboard:** conflict ([49c1af7](https://github.com/vebholic/oms_frontend/commit/49c1af7394a1619c694e33c45849fd68ac564563))
+* **dashboard:** fix ([f367ac7](https://github.com/vebholic/oms_frontend/commit/f367ac7a12579d9817958619fcd78e26e451d575))
+* **dashboard:** fix ([fedbc24](https://github.com/vebholic/oms_frontend/commit/fedbc24fe17f11b21ae13dea17be0d8f85026a39))
+* **dashboard:** minor fix ([7e68432](https://github.com/vebholic/oms_frontend/commit/7e684329eb2278f4f02b430b88c8dd53a1daba28))
+* rTE ([89d27d3](https://github.com/vebholic/oms_frontend/commit/89d27d3218920129e0a4c04751d6b29f77067bab))
+* signature name ([56f75cf](https://github.com/vebholic/oms_frontend/commit/56f75cfb162302f96b62fcb047a11f1171bf8c00))
+
 ### [2.41.2](https://github.com/vebholic/oms_frontend/compare/v2.41.1...v2.41.2) (2022-01-17)
 
 ### [2.41.1](https://github.com/vebholic/oms_frontend/compare/v2.41.0...v2.41.1) (2022-01-16)

@@ -116,7 +116,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         additionalcost = result?.additionalCost;
       }
       else {
-        const resultMaterial = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`)
+        const resultMaterial = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}?isInvoice=true`)
         material = resultMaterial?.data?.data?.material;
         const resultCost = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`)
         additionalcost = resultCost?.data?.data;

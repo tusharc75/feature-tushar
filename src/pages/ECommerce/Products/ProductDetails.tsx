@@ -1,35 +1,40 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { useParams } from "react-router-dom";
-import axiosInstance from "../../axios/axiosInstance";
-import { formatAmountWithCurrency, eProduct, dateFormatForInputControl, ORDER_TYPES } from "../../constants/helpers";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../../axios/axiosInstance";
+import { formatAmountWithCurrency, eProduct, dateFormatForInputControl, ORDER_TYPES, getObjKeysWithValues } from "../../../constants/helpers";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { Rating } from "@material-ui/lab";
-import { Box, Chip, Grid, makeStyles, Typography } from "@material-ui/core";
+import { Box, Chip, Grid, makeStyles, Typography, IconButton } from "@material-ui/core";
 import AddShoppingCartIcon from "@material-ui/icons/AddShoppingCart";
 import RemoveShoppingCartIcon from '@material-ui/icons/RemoveShoppingCart';
 import { BsImage } from "react-icons/bs";
-import ManageQuoteDialog from "../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog";
-import { useData } from "../../StateProvider/Provider";
+import ManageQuoteDialog from "../../QuoteBuilderCombined/ManageQuote/ManageQuoteDialog";
+import { useData } from "../../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
-import routes from "../../components/Helpers/Routes";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { SET_CART } from "../../StateProvider/actionTypes";
+import routes from "../../../components/Helpers/Routes";
+import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
+import { SET_CART } from "../../../StateProvider/actionTypes";
 import Carousel from "react-material-ui-carousel";
 import styles from "./product-detail-page.module.scss";
-import { WishlistContext } from "../../StateProvider/WishlistContext/WishlistProvider";
-import CustomButton from "../../components/Helpers/CustomButton";
-import FavoriteIcon from '@material-ui/icons/Favorite';
+import { WishlistContext } from "../../../StateProvider/WishlistContext/WishlistProvider";
+import CustomButton from "../../../components/Helpers/CustomButton";
+import BookmarkIcon from '@material-ui/icons/Bookmark';
+import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import PlusMinusTextboxComponent from "../../components/PlusMinusTextboxComponent/PlusMinusTextboxComponent";
+import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
+import PlusMinusTextboxComponent from "../../../components/PlusMinusTextboxComponent/PlusMinusTextboxComponent";
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import { Skeleton } from "@material-ui/lab";
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+import SimilarItems from "../../../components/ProductList/SimilarItems/SimilarItems";
+import FrequentlyBought from "../../../components/ProductList/FrequentlyBought/FrequentlyBought";
+import ProductConfiguration from "./ProductConfiguration";
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -95,10 +100,13 @@ export default function ProductDetails() {
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, cartItems }, dispatch }: any = useData();
   const [wishlist, setWishlist] = useState({ loading: false, disabled: false });
+  const [productConfigData, setProductConfigData] = useState({ values: {}, fields: [], requiredValues: [""], error: "" });
   const [rateCurrency, setRateCurrency] = useState({ currency: "", rate: "", mrp: "", rateWithCurrency: "", isRateMrpSame: false })
   const [deleteProductFromCartConfirmationDialog, setDeleteProductFromCartConfirmationDialog] = useState({ show: false, okBtnLoading: false })
   const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
   const [hasError, setHasError] = useState(false);
+
+  const [productImages, setProductImages] = useState([])
 
   const history = useHistory();
   let { id, orderType: orderTypeFromUrl } = useParams();
@@ -120,9 +128,14 @@ export default function ProductDetails() {
   useEffect(() => {
     axiosInstance().get(`${eProduct.api}/${id}`).then(({ data: { data } }) => {
       setProductDetails({ ...data });
-
+      prepareFormData(data)
       const indexOfProductInCart = getIndexOfProductInCart(cartItems);
-      //  .findIndex(({ orderType, productDetail }) => orderType === orderTypeInLowerCase && productDetail._id === id);
+
+      if (data.hasOwnProperty(["sliderImage"])) {
+        setProductImages([data.productImage ?? "", ...data["sliderImage"] as []].filter(image => image));
+      } else {
+        setProductImages([data.productImage ?? ""].filter(f => f));
+      }
 
       if (indexOfProductInCart > -1) {
         dispatchData({
@@ -148,6 +161,19 @@ export default function ProductDetails() {
       toastConfig.setToastConfig(error);
     })
   }, [id])
+
+  const prepareFormData = (data:any) => {
+    if(data) {
+      const initialData = getObjKeysWithValues(data, data.fields)
+      
+      setProductConfigData({
+        ...productConfigData,
+        values: initialData,
+        fields: data.fields,
+        requiredValues: data?.fields.filter((d:any) => d.required).map((d:any) => d.fieldName) ?? []
+      }) 
+    }
+  }
 
   const changeRateCurrency = (productData, unit, pricingMethod) => {
 
@@ -213,6 +239,7 @@ export default function ProductDetails() {
   }
 
   const onAddToCartItem = (item) => {
+    const {values, requiredValues, error} = productConfigData
 
     let product = {
       qty: 1,
@@ -222,7 +249,8 @@ export default function ProductDetails() {
       rate: rateCurrency.rate,
       unit: data.selectedUnit,
       orderType: orderTypeInLowerCase,
-      currency: rateCurrency.currency
+      currency: rateCurrency.currency,
+      productConfiguration: values
     }
 
     if (orderTypeInLowerCase === ORDER_TYPES.rent.value.toLocaleLowerCase()) {
@@ -230,6 +258,22 @@ export default function ProductDetails() {
       product["startDate"] = data.startDate;
       product["endDate"] = data.endDate;
     }
+
+    let requiredValuesLeft = requiredValues.filter(val => !values[val]);
+
+    if(requiredValuesLeft.length > 0) {
+      setProductConfigData({
+        ...productConfigData,
+        error: "Please select required (*) configuration"
+      })
+      setTimeout(() => setProductConfigData({
+        ...productConfigData,
+        error: ""
+      }), 5 * 1000)
+
+      setAddToCartBtnLoading(false)
+      return
+    } 
 
     axiosInstance()
       .post(`/ecommerce/cart`,
@@ -252,7 +296,7 @@ export default function ProductDetails() {
     if (productDetails) {
       axiosInstance()
         .get(
-          `${eProduct.api}?filterById=[{"field":"productCategory", "term": "${productDetails.productCategory}"}]&limit=0`
+          `${eProduct.api}?filterById=[{"field":"productCategory", "term": "${productDetails.productCategory?.optionLabel}"}]&limit=0`
         )
         .then(({ data: { data } }) => {
           setSimilarItems(data);
@@ -304,125 +348,102 @@ export default function ProductDetails() {
   }
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
+    <>
+      <div className="p-2">
         <CustomBreadCrumbs routes={[routes.eCommerce, { title: productDetails?.productName }]} />
-      </Grid>
-      <Box className="main-container">
-        {showCreateQuoteDialog && (
-          <ManageQuoteDialog
-            open={showCreateQuoteDialog}
-            onSuccess={() => { }}
-            onClose={() => {
-              setshowCreateQuoteDialog(false)
-            }}
-            isNew={true}
-            dataToUpdate={null}
-            isClone={false}
-            resource={null}
-            isRedirectTodetailPage={true}
-            contactId={null}
-            opportunityId={null}
-            disableOwnerDropDown={true}
-            contacts={null}
-            doaCollaboratorResources={user?.user?.doa.map(obj => obj.user)}
-            isRenderedFromOpportunity={false}
-            isCreateQuoteFromCart={true}
-            onHandleSubmit={handleCreateQuote}
-          />
-        )}
+      </div>
+
+      <Box>
 
         {
-          productDetails ? <Grid container className="py-4 px-2" spacing={2}>
+          productDetails ? <Grid container className="py-4 px-2">
 
             <Grid item xs={4} className="d-flex flex-column align-items-center">
+
               <Box display="flex" justifyContent="center" alignItems="center">
 
-                {productDetails?.sliderImage && productDetails?.sliderImage.length > 0 ? (
-                  <Carousel
-                    strictIndexing
-                    animation="slide"
-                    autoPlay={false}
-                    navButtonsAlwaysVisible
-                    cycleNavigation={false}
-                    indicators={productDetails?.sliderImage.length > 1}
-                    timeout={150}
-                    navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
-                      style: {
-                        opacity: 0.4,
-                        padding: 5,
-                        borderRadius: "50%"
-                      }
-                    }}
-                  >
-                    {productDetails.sliderImage.map((image: any, i) => (
-                      <div key={i} className={classes.imageContainer}>
-                        <img className={classes.img} src={image} />
-                      </div>
-                    ))}
-                  </Carousel>
-                ) : (
-                  <BsImage className={styles.product_no_image} />
-                )}
+                <div>
+
+                  {
+                    wishlistState.wishlist.length === 0 || !wishlistState.wishlist.find(s => s._id === id) ? <IconButton
+                      disabled={wishlist.disabled}
+                      onClick={() => {
+                        setWishlist({ disabled: true, loading: true });
+                        axiosInstance().put(`${eProduct.api}/wishlist`, { productId: id }).then(({ data }) => {
+                          setWishlist({ disabled: false, loading: false });
+                          wishlistDispatch({ type: "ADD", payload: { _id: id } })
+
+                          toastConfig.setToastConfig({
+                            open: true,
+                            type: "success",
+                            message: data.message,
+                          });
+
+                        }).catch((error) => {
+                          toastConfig.setToastConfig(error);
+                          setWishlist({ disabled: false, loading: false });
+                        })
+                      }}
+                    >
+                      {wishlist.disabled ? <AutorenewIcon className="rotate" /> : <BookmarkBorderIcon />}
+                    </IconButton> : <IconButton
+                      disabled={wishlist.disabled}
+                      onClick={() => {
+                        setWishlist({ disabled: true, loading: true });
+
+                        axiosInstance().put(`${eProduct.api}/wishlist/remove`, { productId: id }).then(({ data }) => {
+                          setWishlist({ disabled: false, loading: false });
+                          wishlistDispatch({ type: "REMOVE", payload: id })
+
+                          toastConfig.setToastConfig({
+                            open: true,
+                            type: "success",
+                            message: data.message,
+                          });
+                        }).catch((error) => {
+                          toastConfig.setToastConfig(error);
+                          setWishlist({ disabled: false, loading: false });
+                        })
+                      }}
+                    >
+                      {wishlist.disabled ? <AutorenewIcon className="rotate" /> : <BookmarkIcon />}
+                    </IconButton>
+                  }
+
+
+                  {productImages.length > 0 ? (
+                    <Carousel
+                      strictIndexing
+                      animation="slide"
+                      autoPlay={false}
+                      navButtonsAlwaysVisible
+                      cycleNavigation={false}
+                      indicators={productImages.length > 1}
+                      timeout={150}
+                      navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
+                        style: {
+                          opacity: 0.4,
+                          padding: 5,
+                          borderRadius: "50%"
+                        }
+                      }}
+                    >
+                      {productImages.map((image: any, i) => (
+                        <div key={i} className={classes.imageContainer}>
+                          <img className={classes.img} src={image} />
+                        </div>
+                      ))}
+                    </Carousel>
+                  ) : (
+                    <div>
+                      <BsImage className={styles.product_no_image} />
+                    </div>
+                  )}
+
+                </div>
+
               </Box>
 
-              {
-                wishlistState.wishlist.length === 0 || !wishlistState.wishlist.find(s => s._id === id) ? <CustomButton
-                  type="button"
-                  className="mt-2"
-                  color="primary"
-                  variant="contained"
-                  disabled={wishlist.disabled}
-                  loading={wishlist.loading}
-                  startIcon={wishlist.loading ? null : <FavoriteIcon />}
-                  onClick={() => {
-                    setWishlist({ disabled: true, loading: true });
-                    axiosInstance().put(`${eProduct.api}/wishlist`, { productId: id }).then(({ data }) => {
-                      setWishlist({ disabled: false, loading: false });
-                      wishlistDispatch({ type: "ADD", payload: { _id: id } })
-
-                      toastConfig.setToastConfig({
-                        open: true,
-                        type: "success",
-                        message: data.message,
-                      });
-
-                    }).catch((error) => {
-                      toastConfig.setToastConfig(error);
-                      setWishlist({ disabled: false, loading: false });
-                    })
-                  }}
-                >
-                  Add to wishlist
-                </CustomButton> : <CustomButton
-                  type="button"
-                  className="mt-2"
-                  color="primary"
-                  variant="outlined"
-                  disabled={wishlist.disabled}
-                  loading={wishlist.loading}
-                  startIcon={addToCartBtnLoading ? null : <RemoveCircleIcon />}
-                  onClick={() => {
-                    setWishlist({ disabled: true, loading: true });
-
-                    axiosInstance().put(`${eProduct.api}/wishlist/remove`, { productId: id }).then(({ data }) => {
-                      setWishlist({ disabled: false, loading: false });
-                      wishlistDispatch({ type: "REMOVE", payload: id })
-
-                      toastConfig.setToastConfig({
-                        open: true,
-                        type: "success",
-                        message: data.message,
-                      });
-                    }).catch((error) => {
-                      toastConfig.setToastConfig(error);
-                      setWishlist({ disabled: false, loading: false });
-                    })
-                  }}
-                >
-                  Remove from wishlist
-                </CustomButton>
-              }
             </Grid>
 
             <Grid item xs={5}>
@@ -470,7 +491,7 @@ export default function ProductDetails() {
                             >
                               {
                                 productDetails.unit.map(m => (
-                                  <MenuItem value={m}>{m}</MenuItem>
+                                  <MenuItem value={m} key={m}>{m}</MenuItem>
                                 ))
                               }
                             </Select>
@@ -494,7 +515,7 @@ export default function ProductDetails() {
                             >
                               {
                                 productDetails.pricingMethod.map(m => (
-                                  <MenuItem value={m}>{m}</MenuItem>
+                                  <MenuItem value={m} key={m}>{m}</MenuItem>
                                 ))
                               }
                             </Select>
@@ -563,6 +584,13 @@ export default function ProductDetails() {
                       </MuiPickersUtilsProvider>
                     </Grid>
                   }
+                  
+                  <ProductConfiguration data={productConfigData} handleChange={(values) => {
+                    setProductConfigData({
+                      ...productConfigData,
+                      values
+                    })
+                  }} />
 
                   <Box className="my-3 d-flex gap-4 align-items-baseline">
                     {
@@ -642,7 +670,7 @@ export default function ProductDetails() {
 
             <Grid item xs={3}></Grid>
 
-          </Grid> : <Grid container className="py-4 px-2" spacing={2}>
+          </Grid> : <Grid container className="py-4 px-2">
 
             <Grid item xs={4} className="d-flex flex-column align-items-center">
               <Box display="flex" justifyContent="center" alignItems="center">
@@ -702,7 +730,40 @@ export default function ProductDetails() {
           </Grid>
         }
 
+        {/* <hr />
+
+        <FrequentlyBought id={id} /> */}
+
+        <hr />
+
+        <SimilarItems similarItems={similarItems} />
+
       </Box>
+
+      {
+        showCreateQuoteDialog && (
+          <ManageQuoteDialog
+            open={showCreateQuoteDialog}
+            onSuccess={() => { }}
+            onClose={() => {
+              setshowCreateQuoteDialog(false)
+            }}
+            isNew={true}
+            dataToUpdate={null}
+            isClone={false}
+            resource={null}
+            isRedirectTodetailPage={true}
+            contactId={null}
+            opportunityId={null}
+            disableOwnerDropDown={true}
+            contacts={null}
+            doaCollaboratorResources={user?.user?.doa.map(obj => obj.user)}
+            isRenderedFromOpportunity={false}
+            isCreateQuoteFromCart={true}
+            onHandleSubmit={handleCreateQuote}
+          />
+        )
+      }
 
       {
         deleteProductFromCartConfirmationDialog.show ? (
@@ -743,6 +804,6 @@ export default function ProductDetails() {
         ) : null
       }
 
-    </Fragment>
+    </>
   );
 }

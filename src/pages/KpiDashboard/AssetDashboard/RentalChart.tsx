@@ -181,7 +181,7 @@ const RentalChart = () => {
   return (
     <Box>
       <Box textAlign={'center'}>
-        <Typography variant="h5">Rental jobs by customer</Typography>
+        <Typography variant="h6">Rental Jobs by Customer</Typography>
       </Box>
       <Box display={'flex'} justifyContent={'space-between'}>
         <div>

@@ -26,7 +26,7 @@ import moment from 'moment';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 import { FaFileSignature, FaSignature, FaWpforms } from "react-icons/fa";
 import { BiEdit, BiFoodMenu } from "react-icons/bi";
-import { prepareDataForGrid, DELIVERY_TICKET_MAPPED_STATUS } from "../../constants/helpers"
+import { prepareDataForGrid, DELIVERY_TICKET_MAPPED_STATUS, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -143,7 +143,7 @@ export default function DeliveryTicketDetail(props) {
         const response = await axiosInstance().get(`/field?resource=${sidebarResource["deliveryTicket"]}&showHiddenFields=true`)
         data = response?.data?.data
       }
-      if (ticket?.type === "Transfer Asset") {
+      if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
         data = data.filter((fields: any) => {
           if (ticket?.typeDetails?.transferType === "Internal") {
             if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Supplier")) {
@@ -166,14 +166,14 @@ export default function DeliveryTicketDetail(props) {
           return true
         })
       }
-      else if (ticket?.type === "Repair Job") {
+      else if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
         data = data.filter((fields: any) => {
           if (ticket?.typeDetails?.typeOfRepair === "Internal") {
             if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Supplier")) {
               return false
             }
           }
-          if (ticket.ticketType === "Loading") {
+          if (ticket.ticketType === DELIVERY_TICKET_TYPE.loading) {
             if (ticket?.typeDetails?.typeOfRepair === "External") {
               if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Receiving Plant")) {
                 return false
@@ -193,9 +193,9 @@ export default function DeliveryTicketDetail(props) {
           return true
         })
       }
-      else if (ticket?.type === "Rental Job" || ticket?.type === "Sales Order") {
+      else if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
         data = data.filter((fields: any) => {
-          if (ticket.ticketType === "Loading") {
+          if (ticket.ticketType === DELIVERY_TICKET_TYPE.loading) {
             if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Receiving Plant")) {
               return false
             }
@@ -406,19 +406,21 @@ export default function DeliveryTicketDetail(props) {
     let signaturesToSend = [...signatures];
     const status = label === "Sign-off - Dispatch" ? "Start Delivery" : "Sign-Off";
 
-    const { type, sign: newSign } = signedData;
+    const { type, sign: newSign, name } = signedData;
     const indexOfExistingSignature = signatures.findIndex((sign) => sign.type === type && sign.status === status);
 
     if (indexOfExistingSignature === -1) {
-      signaturesToSend = [...signatures, { type, signature: newSign, status: status }];
+      signaturesToSend = [...signatures, { type, signature: newSign, status: status, name: name }];
     } else {
       signaturesToSend[indexOfExistingSignature] = {
         ...signaturesToSend[indexOfExistingSignature],
         type,
         signature: newSign,
-        status: status
+        status: status,
+        name: name
       }
     }
+
     setSignatures([...signaturesToSend]);
     if (signaturesToSend.length === 2 || signaturesToSend.length === 4) {
       if (isOffline) {
@@ -520,7 +522,7 @@ export default function DeliveryTicketDetail(props) {
                       color="primary"
                       size="small"
                       onClick={handleOpenUpdateDialog}
-                      style={isMobile && !isTablet ? {color:"var(--teal)"} : {}}
+                      style={isMobile && !isTablet ? { color: "var(--teal)" } : {}}
                     >
                       {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
                     </Button>
@@ -532,9 +534,9 @@ export default function DeliveryTicketDetail(props) {
                         color="primary"
                         size="small"
                         disabled={loading}
-                        style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+                        style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
                         onClick={() => setOpenSignatureDialog(true)}>
-                        {isMobile && !isTablet ? <FaFileSignature size={18} /> :  label}
+                        {isMobile && !isTablet ? <FaFileSignature size={18} /> : label}
                       </Button>
                       : null
                     : null}
@@ -668,7 +670,7 @@ export default function DeliveryTicketDetail(props) {
                             color="primary"
                             type="button"
                             size="small"
-                            style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
+                            style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
                             startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                             disabled={downlodingFile || isOffline}
                             onClick={() => { handleViewPdf(false) }}
@@ -682,7 +684,7 @@ export default function DeliveryTicketDetail(props) {
                             color="primary"
                             type="button"
                             size="small"
-                            style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+                            style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
                             startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
                             disabled={downlodingFile || isOffline}
                             onClick={() => { handleViewPdf(true) }}

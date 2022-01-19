@@ -144,6 +144,11 @@ const FieldList = {
     type: "multiImageUpload",
     icon: "far fa-calendar-check",
   },
+  RICHTEXTEDITOR: {
+    label: "Rich Text Editor",
+    type: "richTextEditor",
+    icon: "far fa-calendar-check",
+  },
 };
 
 export default FieldList;
