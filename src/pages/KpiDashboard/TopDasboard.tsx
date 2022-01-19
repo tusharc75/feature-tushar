@@ -521,7 +521,7 @@ const TopDashboard = (props) => {
                         <Skeleton variant="text" width={100} height={40} />
                       )}
                       <Typography variant="h6" className={styles.title}>
-                        {`Total Offered Volume in ${totalValueMT?.unit ?? "MT"}`}
+                        {`Total Booked Volume in ${totalValueMT?.unit ?? "MT"}`}
                       </Typography>
                     </Grid>
                   </Grid>
