@@ -1347,6 +1347,13 @@ body::-webkit-scrollbar-thumb {
     gap: 5px;
 }
 
+.table-box-design{
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 5px #DFDFDF;
+}
+
+
 @media only screen and (max-width: 960px){
   .filter-side-header-serialized{
     justify-content: space-between;

@@ -179,7 +179,7 @@ const RentalChart = () => {
   };
 
   return (
-    <Box>
+    <Box className='table-box-design px-3 pt-3 pb-3'>
       <Box textAlign={'center'}>
         <Typography variant="h5">Rental jobs by customer</Typography>
       </Box>

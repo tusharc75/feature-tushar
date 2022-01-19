@@ -178,7 +178,7 @@ const AssetChart = (props: ChartProps) => {
       </Box>
       <Grid container spacing={2} justifyContent="space-between" alignItems="flex-end">
         <Grid item xs={12} sm={tableView && smallScreen ? 12 : 6} md={12}>
-          <Box height={smallScreen && tableView ? 450 : 320}>
+          <Box height={smallScreen && tableView ? 450 : 320} className='table-box-design'>
             {tableDataRaw.length > 0 ? (
               tableView ? (
                 <>
@@ -229,8 +229,9 @@ const AssetChart = (props: ChartProps) => {
         </Grid>
         <Grid item xs={12} sm={tableView ? 12 : 6} md={12}>
           {!tableView && (
-            <Box height={330}>
+            <Box height={330} className='table-box-design'>
               <Chart
+                style={{padding:"5px"}}
                 id="utilization-chart"
                 options={{
                   maintainAspectRatio: false

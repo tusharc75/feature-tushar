@@ -155,7 +155,7 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
   };
 
   return (
-    <div>
+    <div className='table-box-design px-3 pt-3 pb-3 ' style={{height:"100%"}}>
       <Box width={200} mb={1}>
         <Autocomplete
           disabled={loadingProductCategory}

@@ -250,7 +250,7 @@ const Dashboard = () => {
                 </Box>
               )}
               {dashboardType && dashboardType.includes('Asset') && (
-                <Box p={1}>
+                <Box p={1} style={{backgroundColor:"#F5F5F5"}}>
                   <AssetDashboard salesFilter={salesFilter} />
                 </Box>
               )}
