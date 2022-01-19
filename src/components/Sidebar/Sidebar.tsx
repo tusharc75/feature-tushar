@@ -20,10 +20,10 @@ import { ChevronRight, ExpandMore, ExpandLess } from "@material-ui/icons";
 import { kebabCase, lowerCase } from "lodash";
 import { FaUserTie, FaDatabase, FaHandshake, FaRegistered } from "react-icons/fa";
 import { BsCalendarFill } from "react-icons/bs";
-import { MdDashboard, MdLocalActivity } from "react-icons/md";
+import { MdDashboard, MdDescription, MdLocalActivity } from "react-icons/md";
 import { RiFolderSettingsFill, RiAccountPinCircleFill } from "react-icons/ri";
 import { SiCivicrm } from "react-icons/si";
-import {AiFillAccountBook, AiFillSetting} from "react-icons/ai"
+import { AiFillAccountBook, AiFillSetting } from "react-icons/ai"
 
 
 import { AccountCircle } from "@material-ui/icons";
@@ -96,7 +96,7 @@ const useStyles = makeStyles((theme) => ({
 
 function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const {
-    state: { user, selectedEntity, tour },
+    state: { permissions, user, selectedEntity, tour },
   }: any = useData();
 
   const history = useHistory();
@@ -280,7 +280,21 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 </ListItem>
               </Tooltip>
             </Link>
-
+            {permissions?.rentalManagement?.isRead ?
+              <Link to="/reports">
+                <Tooltip title={!toggleDrawer ? "Reports" : ""}>
+                  <ListItem
+                    button
+                    selected={location.pathname === "/reports"}
+                    className="list-item"
+                  >
+                    <ListItemIcon>
+                      <MdDescription size={16} className="sidebar-icon" />
+                    </ListItemIcon>
+                    <ListItemText primary="Reports" />
+                  </ListItem>
+                </Tooltip>
+              </Link> : null}
             {user &&
               listItems().map((listItem, i) => (
                 <React.Fragment key={i}>

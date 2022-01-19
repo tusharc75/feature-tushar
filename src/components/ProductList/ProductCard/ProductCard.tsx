@@ -1,4 +1,4 @@
-import { useContext, useState, useReducer } from "react";
+import { useContext, useState, useReducer, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Box, Avatar, makeStyles, IconButton, Dialog, Button, Grid, MenuItem, InputLabel, FormHelperText, Typography } from "@material-ui/core";
 import { Rating, Skeleton } from "@material-ui/lab";
@@ -9,8 +9,8 @@ import { BsImage } from 'react-icons/bs';
 import { MdAddShoppingCart, MdModeEdit } from 'react-icons/md';
 import routes from "../../Helpers/Routes";
 import Carousel from "react-material-ui-carousel";
-import FavoriteIcon from '@material-ui/icons/Favorite';
-import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
+import BookmarkIcon from '@material-ui/icons/Bookmark';
+import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { WishlistContext } from "../../../StateProvider/WishlistContext/WishlistProvider";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -105,6 +105,18 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
 
   const [deleteProductFromCartConfirmationDialog, setDeleteProductFromCartConfirmationDialog] = useState({ show: false, okBtnLoading: false })
 
+  const [productImages, setProductImages] = useState([])
+
+  useEffect(() => {
+    if (product !== null) {
+      if (product.hasOwnProperty(["sliderImage"])) {
+        setProductImages([product.productImage ?? "", ...product["sliderImage"] as []].filter(image => image));
+      } else {
+        setProductImages([product.productImage ?? ""].filter(f => f));
+      }
+    }
+  }, [product]);
+
   const getIndexOfProductInCart = (data) => {
     return data.findIndex(({ orderType, productDetail }) => orderType === orderTypeInLowerCase && productDetail._id === product._id)
   }
@@ -125,6 +137,8 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
 
     if (record) {
       setRateCurrency({ currency: record.currency, rate: record.rate, rateWithCurrency: formatAmountWithCurrency(record.currency, record.rate)?.fullFormatAmount, mrp: record.mrp, isRateMrpSame: record.rate === record.mrp })
+    } else {
+      setRateCurrency({ currency: productData.currency, rate: productData.mrp, rateWithCurrency: formatAmountWithCurrency(productData.currency, productData.mrp)?.fullFormatAmount, mrp: productData.mrp, isRateMrpSame: true })
     }
 
     if (data.indexOfProductInCart !== -1) {
@@ -212,9 +226,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
 
   return (
     <div className={styles.product_card}>
-      {/* {product.mrp && parseInt(product.mrp) !== 0 && product.discount && parseInt(product.discount) !== 0 && (
-        <div className={styles.product_discount}>-{product.discount}%</div>
-      )} */}
+
       <div className={styles.title}>
         {
           showSkeleton ? <Skeleton width={120} height={30} /> : <h4
@@ -252,7 +264,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
                 })
               }}
             >
-              {disableWishlistButton ? <AutorenewIcon className="rotate" /> : <FavoriteIcon />}
+              {disableWishlistButton ? <AutorenewIcon className="rotate" /> : <BookmarkIcon />}
             </IconButton>
           ) : (
             <IconButton
@@ -281,7 +293,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
 
               }}
             >
-              {disableWishlistButton ? <AutorenewIcon className="rotate" /> : <FavoriteBorderIcon />}
+              {disableWishlistButton ? <AutorenewIcon className="rotate" /> : <BookmarkBorderIcon />}
             </IconButton>
           )
         }
@@ -294,12 +306,12 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
         alignItems="center"
       >
         {
-          showSkeleton ? <Skeleton height={200} width={200} /> : (product?.sliderImage && product?.sliderImage?.length > 0 ? <Carousel
+          showSkeleton ? <Skeleton height={200} width={200} /> : (productImages.length > 0 ? <Carousel
             strictIndexing
             animation="slide"
             autoPlay={false}
             navButtonsAlwaysVisible
-            indicators={product.sliderImage.length > 1}
+            indicators={productImages.length > 1}
             cycleNavigation={false}
             navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
               style: {
@@ -310,7 +322,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
               }
             }}
           >
-            {product.sliderImage.map((image: any, i) => (
+            {productImages.map((image: any, i) => (
               <div key={i} className={classes.imageContainer}>
                 <img className={classes.img} src={image}
                   onClick={() => {

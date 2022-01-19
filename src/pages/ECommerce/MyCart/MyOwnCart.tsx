@@ -1,5 +1,6 @@
-import { useEffect, useState, Fragment, useContext } from 'react';
+import { useEffect, useState, Fragment, useContext, useCallback } from 'react';
 import { Button, Box, Grid, Chip, TextField, IconButton } from '@material-ui/core';
+import clsx from 'clsx'
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import axiosInstance from '../../../axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
@@ -13,12 +14,15 @@ import { BsImage } from "react-icons/bs";
 import { makeStyles } from '@material-ui/core/styles';
 import Carousel from "react-material-ui-carousel";
 import styles from './my-cart.module.scss';
-import PlusMinusTextboxComponent from '../../PlusMinusTextboxComponent/PlusMinusTextboxComponent';
+import PlusMinusTextboxComponent from '../../../components/PlusMinusTextboxComponent/PlusMinusTextboxComponent';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../CustomBreadCrumbs';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CloseIcon from '@material-ui/icons/Close';
+import AddIcon from "@material-ui/icons/AddCircle";
 import { Skeleton } from "@material-ui/lab";
+import ManageAddressDialog from '../../../components/Address/ManageAddressDialog';
+import Tooltip from '../../../components/CustomTooltipTitle';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -41,6 +45,42 @@ const useStyles = makeStyles((theme) => ({
   },
   img: {
     maxWidth: "500px",
+  },
+  tabs: {
+    display: "flex",
+    marginTop: theme.spacing(2)
+  },
+  tab: { 
+    padding: theme.spacing(1, 2.5),
+    backgroundColor: theme.palette.background.default,
+    borderRadius: 2,
+    cursor: "pointer",
+
+    "&:hover": {
+      borderBottomWidth: "2px",
+      borderBottomStyle: "solid",
+      borderBottomColor: theme.palette.primary.main,
+    },
+
+    "&:first-child": {
+      marginRight: 10
+    },
+    
+    "& h4": {
+      fontSize: theme.spacing(2),
+      fontWeight: 400,
+      color: theme.palette.text.secondary
+    }
+  },
+  tabActive: {
+    borderBottomWidth: "2px",
+    borderBottomStyle: "solid",
+    borderBottomColor: theme.palette.primary.main,
+
+    "& h4": {
+      color: theme.palette.primary.main,
+      fontWeight: 'bold'
+    }
   }
 }));
 
@@ -50,6 +90,8 @@ function MyOwnCart() {
 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext)
+  const [currentTab, setCurrentTab] = useState(1);
+  const [showAddAddresstDialog, setShowAddAddresstDialog] = useState({open: false, type: ""});
   const [totalCount, setTotalCount] = useState(0);
   const [totalPrice, setTotalPrice] = useState("");
   const [checkoutLabel, setCheckoutLabel] = useState('Checkout');
@@ -129,6 +171,15 @@ function MyOwnCart() {
 
           setCart(data);
           setCartProducts(data.map((d, index) => {
+            let productImages = [];
+
+            if (d.hasOwnProperty(["sliderImage"])) {
+              productImages = [d.productImage ?? "", ...d["sliderImage"] as []].filter(image => image);
+            } else {
+              productImages = [d.productImage ?? ""].filter(f => f);
+            }
+
+
             return {
               ...d.product,
               indexOfProduct: index,
@@ -144,7 +195,7 @@ function MyOwnCart() {
               unit: d?.unit,
               currency: d?.currency,
               orderType: d?.orderType,
-              sliderImage: d?.productDetail?.sliderImage ?? [],
+              productImages: productImages,
               currencyWithFormat: formatAmountWithCurrency(d?.currency, d.rate)?.fullFormatAmount
             }
           }));
@@ -180,13 +231,19 @@ function MyOwnCart() {
       });
   };
 
+  let qtyTimeout:ReturnType<typeof setTimeout> = null
+
+  const tabs = [{title: "Rent", key: "rent", id: 0}, {title: "Buy", key: "sale", id: 1}]
+  
+
   return (
-    <Fragment>
-      <Grid container className="headerbox">
+    <>
+      <div className="p-2">
         <CustomBreadCrumbs routes={[routes.eCommerce, { title: "Cart" }]} />
-      </Grid>
-      <Box className="main-container">
-        <Grid container spacing={3}>
+      </div>
+
+      <Box>
+        <Grid container>
 
           <Grid item xs={1}></Grid>
 
@@ -194,9 +251,17 @@ function MyOwnCart() {
             <div className="px-4 py-2">
 
               <h1>Shopping Cart</h1>
+             <div className={classes.tabs}>
+               {tabs.map((tab) => (
+               <div key={tab.key} className={clsx(classes.tab, {
+                 [classes.tabActive]: currentTab === tab.id
+               })} onClick={() => setCurrentTab(tab.id)}>
+                 <h4>{tab.title}</h4>
+               </div>
+               ))}
+             </div>
 
-              <hr className="mt-3 mb-2" style={{ border: "0.5px solid #e9eaee" }} />
-
+              <hr style={{ border: "0.5px solid #e9eaee" }} />
               {
                 cartProductsLoading ? (
                   <Grid container spacing={3}>
@@ -242,19 +307,19 @@ function MyOwnCart() {
                     </Grid>
                   </Grid>
                 ) : cartProducts.length ? (
-                  cartProducts.map((item) => {
+                  [...cartProducts.filter(item => item.orderType === tabs.find(tab => tab.id === currentTab).key)].map((item) => {
                     return (
-                      <div key={item.id} className={styles.checkout_items}>
+                      <div key={item.indexOfProduct} className={styles.checkout_items}>
                         <div className={styles.card}>
                           <div className={`${styles.products_image_layout} d-flex justify-content-center`}>
 
-                            {item?.sliderImage && item?.sliderImage.length > 0 ? (
+                            {item?.productImages && item?.productImages.length > 0 ? (
                               <Carousel
                                 strictIndexing
                                 animation="slide"
                                 autoPlay={false}
                                 navButtonsAlwaysVisible
-                                indicators={item?.sliderImage.length > 1}
+                                indicators={item?.productImages.length > 1}
                                 cycleNavigation={false}
                                 timeout={150}
                                 navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
@@ -265,9 +330,9 @@ function MyOwnCart() {
                                   }
                                 }}
                               >
-                                {item?.sliderImage.map((image: any, i) => (
+                                {item?.productImages.map((image: any, i) => (
                                   <div key={i} className={classes.imageContainer}>
-                                    <img className={classes.img} src={image} />
+                                    <img className={classes.img} src={image} loading='lazy' />
                                   </div>
                                 ))}
                               </Carousel>
@@ -331,23 +396,26 @@ function MyOwnCart() {
                                   isRequired={true}
                                   onChange={(value) => {
                                     let items = [...cartProducts];
-
-                                    axiosInstance().put(`/ecommerce/cart`, { _id: item.cartId, qty: parseInt(value) }).then(() => {
-                                      items[item.indexOfProduct].qty = parseInt(value);
-                                      setCartProducts([...items]);
-
-                                      toastConfig.setToastConfig({
-                                        open: true,
-                                        type: "success",
-                                        message: "Quantity updated successfully"
-                                      });
-
-                                    }).catch((error) => {
-                                      toastConfig.setToastConfig(error);
-                                      dispatch({ type: SET_CART, payload: [...items] });
-                                    })
-
-                                  }}
+                                    if(qtyTimeout) {
+                                      clearTimeout(qtyTimeout)
+                                    }
+                                    qtyTimeout =  setTimeout(() => {
+                                      axiosInstance().put(`/ecommerce/cart`, { _id: item.cartId, qty: parseInt(value) }).then(() => {
+                                        items[item.indexOfProduct].qty = parseInt(value);
+                                        setCartProducts([...items]);
+                                
+                                        // toastConfig.setToastConfig({
+                                        //   open: true,
+                                        //   type: "success",
+                                        //   message: "Quantity updated successfully"
+                                        // });
+                                
+                                      }).catch((error) => {
+                                        toastConfig.setToastConfig(error);
+                                        dispatch({ type: SET_CART, payload: [...items] });
+                                      })
+                                    }, 200)      
+                                }}
                                 />
                               </Grid>
                             </Grid>
@@ -394,18 +462,20 @@ function MyOwnCart() {
 
                   <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
 
-                  {
-                    cartProducts.map(m => (
-                      <div key={m._id} className="d-flex gap-3 align-items-center justify-content-space-between">
-                        <div className="d-flex gap-2 align-items-center">
-                          <p>{m.productName}</p>
-                          <Chip size="small" label={ORDER_TYPES[m?.orderType]?.key} color="primary" />
-                        </div>
+                  <div className="d-flex gap-2 flex-column">
+                    {
+                      cartProducts.map(m => (
+                        <div key={m._id} className="d-flex gap-3 align-items-center justify-content-space-between">
+                          <div className="d-flex gap-2 align-items-center">
+                            <p>{m.productName}</p>
+                            <Chip size="small" label={ORDER_TYPES[m?.orderType]?.key} color="primary" />
+                          </div>
 
-                        <div>{formatAmountWithCurrency(m.currency, m.rate * m.qty)?.fullFormatAmount}</div>
-                      </div>
-                    ))
-                  }
+                          <div>{formatAmountWithCurrency(m.currency, m.rate * m.qty)?.fullFormatAmount}</div>
+                        </div>
+                      ))
+                    }
+                  </div>
 
                   <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
 
@@ -419,35 +489,77 @@ function MyOwnCart() {
 
                   <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
 
-                  <Grid container>
-                    <Grid item xs={12}>
+                  <Grid container spacing={1} justifyContent="space-between" alignItems='center'>
+                    <Grid item xs={10}>
                       <Autocomplete
                         disabled={cartProducts.length === 0}
                         fullWidth
-                        id="shipping-address"
+                        id="shipping-address" 
                         options={addressOptions}
                         getOptionLabel={(option) => option.optionLabel}
+                        getOptionSelected={(option, value) => option.optionValue === value.optionValue}
+                        value={selectedShippingAddress}
                         onChange={(_, newValue) => {
-                          setSelectedShippingAddress(newValue?.optionValue ?? "")
+                          setSelectedShippingAddress(newValue)
                         }}
                         renderInput={(params) => <TextField required {...params} label="Shipping Address" margin="dense" variant="outlined" />}
                       />
                     </Grid>
+                    <Grid item xs={2}>
+                      <Tooltip
+                        title="Add Shipping Address"
+                      >
+                        <span>
+                        <IconButton
+                          disabled={cartProducts.length === 0}
+                          onClick={() => setShowAddAddresstDialog({open: true, type: "ship"})}
+                          size="small"
+                          >
+                          <AddIcon color={"primary"} />
+                        </IconButton>
+                          </span>
+                      </Tooltip>
+                    </Grid>
                   </Grid>
 
-                  <Grid container>
-                    <Grid item xs={12}>
+                  <Grid container spacing={1} justifyContent="space-between" alignItems='center'>
+                    <Grid item xs={10}>
                       <Autocomplete
                         disabled={cartProducts.length === 0}
                         fullWidth
-                        id="billing-address"
+                        id="billing-address" 
                         options={addressOptions}
                         getOptionLabel={(option) => option.optionLabel}
+                        getOptionSelected={(option, value) => option.optionValue === value.optionValue}
+                        value={selectedBillingAddress}
                         onChange={(_, newValue) => {
-                          setSelectedBillingAddress(newValue?.optionValue ?? "")
+                          setSelectedBillingAddress(newValue)
                         }}
-                        renderInput={(params) => <TextField required {...params} label="Billing Address" margin="dense" variant="outlined" />}
+                        renderInput={(params) => (
+                          <TextField 
+                          {...params} 
+                            required 
+                            label="Billing Address" 
+                            margin="dense" 
+                            variant="outlined"
+                          />
+                        )}
                       />
+                    </Grid>
+                    <Grid item xs={2}>
+                      <Tooltip
+                        title="Add Billing Address"
+                      >
+                        <span>
+                        <IconButton
+                          disabled={cartProducts.length === 0}
+                          onClick={() => setShowAddAddresstDialog({open: true, type: "bill"})}
+                          size="small"
+                          >
+                          <AddIcon color={"primary"} />
+                        </IconButton>
+                          </span>
+                      </Tooltip>
                     </Grid>
                   </Grid>
 
@@ -483,7 +595,11 @@ function MyOwnCart() {
             onOk={() => {
               setOpenPlaceOrderDialog(prevState => { return { ...prevState, okBtnLoading: true } })
 
-              axiosInstance().post("/ecommerce/checkout", { cart: cartProducts.map(m => m.cartId), shippingAddress: selectedShippingAddress, billingAddress: selectedBillingAddress }).then(({ data }) => {
+              axiosInstance().post("/ecommerce/checkout", { 
+                cart: cartProducts.map(m => m.cartId), 
+                shippingAddress: selectedShippingAddress?.optionValue, 
+                billingAddress: selectedBillingAddress?.optionValue 
+              }).then(({ data }) => {
                 toastConfig.setToastConfig({
                   open: true,
                   type: "success",
@@ -497,6 +613,32 @@ function MyOwnCart() {
             }}
           />
         )}
+       {showAddAddresstDialog.open && <ManageAddressDialog
+          onClose={() => {
+            setShowAddAddresstDialog({open: false, type: ""});
+          }}
+          onSuccess={(obj) => {
+            if (obj) {
+              setShowAddAddresstDialog({open: false, type: ""});
+              setAddressOptions(prevState => {
+                let options = [...prevState]
+                options.push({
+                  optionValue: obj._id,
+                  optionLabel: obj.fullAddress,
+                  default: false,
+                  order: prevState.length
+                })
+                return options
+              })
+              if(showAddAddresstDialog.type === "bill") {
+                setSelectedBillingAddress({optionValue: obj._id, optionLabel: obj.fullAddress})
+              } else {
+                setSelectedShippingAddress({optionValue: obj._id, optionLabel: obj.fullAddress})
+              }
+            }
+          }
+          }
+        />}
 
         {
           deleteProductFromCartConfirmationDialog.show ? (
@@ -515,7 +657,7 @@ function MyOwnCart() {
           ) : null
         }
       </Box>
-    </Fragment >
+    </ >
   );
 }
 

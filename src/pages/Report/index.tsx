@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { Grid, Button, TextField, Box, CircularProgress, useTheme } from '@material-ui/core';
+import { Grid, Button, TextField, Box, CircularProgress, useTheme, useMediaQuery } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { List } from '@material-ui/icons';
 import { camelCase, startCase } from 'lodash';
@@ -17,8 +17,17 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { resourceNames, RENTAL_STATUS, INVENTORY_STATUS, prepareDataForGrid, gridLoadingTimeout, downloadExcel } from './../../constants/helpers';
+import {
+  resourceNames,
+  RENTAL_STATUS,
+  INVENTORY_STATUS,
+  prepareDataForGrid,
+  gridLoadingTimeout,
+  downloadExcel,
+  primaryFields
+} from './../../constants/helpers';
 import Loader from '../../components/Loader';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 
 const resourcesSelect = {
   rentalManagement: ['customerAccount', 'customerContact', 'warehouse', 'status'],
@@ -30,7 +39,8 @@ let cancelTokenSource = null;
 const simplifyStatus = (statusType: any) => Object.values(statusType).map((status: string) => status);
 
 const Report = () => {
-  const theme = useTheme()
+  const theme = useTheme();
+  const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
@@ -55,7 +65,7 @@ const Report = () => {
   // Grid Configs
   const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
   const { getColumnData } = useColumns();
-  const [columns, setColumns] = React.useState([]);
+  const [columns, setColumns] = React.useState(null);
   const [gridApi, setGridApi] = React.useState(null);
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
@@ -67,14 +77,8 @@ const Report = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if(resourceCamelCase.includes('Inventory')) {
-            if (o?.fieldData?.fieldName === 'serialNumber') {
-              o.fieldData.primaryField = true;
-            }
-          } else {
-            if (o?.fieldData?.fieldName === 'rentalJobName') {
-              o.fieldData.primaryField = true;
-            }
+          if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase]) {
+            o.fieldData.primaryField = true;
           }
           let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase}Detail`].path);
 
@@ -136,7 +140,7 @@ const Report = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    let filterQuery = getFilter()
+    let filterQuery = getFilter();
     axiosInstance()
       .get(`${routes[resourceCamelCase].path}/report?${filterQuery}`, {
         cancelToken: cancelTokenSource.token
@@ -161,7 +165,7 @@ const Report = () => {
 
   // Create and return query for filters
   const getFilter = () => {
-    let filterQuery = ''
+    let filterQuery = '';
 
     let filterById = Object.keys(selectedData)
       .filter((d) => d !== 'Status')
@@ -177,50 +181,48 @@ const Report = () => {
 
     let deepFilter = selectedData['Status']
       ? selectedData['Status'].map((_d) => ({
-          field: 'status',
-          term: _d
-        }))
+        field: 'status',
+        term: _d
+      }))
       : [];
 
-    if(filterById.length > 0) {
+    if (filterById.length > 0) {
       filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
     }
 
-    if(deepFilter && deepFilter.length > 0) {
+    if (deepFilter && deepFilter.length > 0) {
       filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
     }
 
-    return filterQuery
-  }
+    return filterQuery;
+  };
 
   const exportData = () => {
     if ((selectedData && Object.keys(selectedData).length === 0) || !selectedData || isExporting) return;
     toastConfig.setToastConfig({
       open: true,
-      message: "Please wait exporting data",
-      type: "info"
+      message: 'Please wait exporting data',
+      type: 'info'
     });
-    setExporting(true)
-    let filterQuery = getFilter()
+    setExporting(true);
+    let filterQuery = getFilter();
     axiosInstance()
-    .get(`${routes[resourceCamelCase].path}/report/export?export=1&${filterQuery}`)
-    .then((res) => {
-      const fileName = res.headers['content-disposition'].split('filename=')[1];
-      downloadExcel(res.data, fileName);
-        setExporting(false)
+      .get(`${routes[resourceCamelCase].path}/report/export?export=1&${filterQuery}`)
+      .then((res) => {
+        const fileName = res.headers['content-disposition'].split('filename=')[1];
+        downloadExcel(res.data, fileName);
+        setExporting(false);
         toastConfig.setToastConfig({
           open: true,
-          message: "Successfully Exported",
-          type: "success"
+          message: 'Successfully Exported',
+          type: 'success'
         });
       })
       .catch((err) => {
-        setExporting(false)
-          toastConfig.setToastConfig(err);
+        setExporting(false);
+        toastConfig.setToastConfig(err);
       });
-  }
-
-  
+  };
 
   const workingPage = ['productInventory', 'rentalManagement'];
 
@@ -232,17 +234,22 @@ const Report = () => {
     <div>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes[resourceCamelCase], { title: 'Report', path: '' }]} />
+          <CustomBreadCrumbs routes={[{ title: 'Reports', path: '/reports' }, { title: routes[resourceCamelCase]?.title, path: '' }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <Grid container direction="row">
             <Grid item xs={12} sm={12}>
               <Grid container justifyContent="flex-end">
-              <div id="importExportLinks">
-                <span aria-disabled={isExporting} onClick={exportData} className={`${isExporting ? 'cursor-stop' :'cursor-pointer'} mr-2`} style={{color: theme.palette.info.light}}>
-                  Export All
-                </span>
-              </div>
+                <div id="importExportLinks" style={{ minWidth: 80 }}>
+                  <span
+                    aria-disabled={isExporting}
+                    onClick={exportData}
+                    className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
+                    style={{ color: theme.palette.info.light, }}
+                  >
+                    Export All
+                  </span>
+                </div>
               </Grid>
             </Grid>
           </Grid>
@@ -263,23 +270,22 @@ const Report = () => {
                     multiple
                     value={selectedResource ?? []}
                     onChange={(_, val) => {
-                      setSelectedResource(val)
+                      setSelectedResource(val);
 
-                      if(selectedData) {
-                        setSelectedData(prevState => {
+                      if (selectedData) {
+                        setSelectedData((prevState) => {
                           const data = Object.keys(prevState);
-                          const unselected = data.filter(d => !val.includes(d))
-                          const unselectedData = {...prevState}
-                          unselected.forEach(_d => {
-                            if(unselectedData[_d]) {
-                              delete unselectedData[_d]
+                          const unselected = data.filter((d) => !val.includes(d));
+                          const unselectedData = { ...prevState };
+                          unselected.forEach((_d) => {
+                            if (unselectedData[_d]) {
+                              delete unselectedData[_d];
                             }
-                          })
-                          return unselectedData
-                        })
+                          });
+                          return unselectedData;
+                        });
                       }
-                     }
-                    }
+                    }}
                     fullWidth
                     getOptionSelected={(option, val) => option === val}
                     getOptionLabel={(option) => option}
@@ -319,7 +325,15 @@ const Report = () => {
                 </Grid>
                 <Grid item xs={12} md={2}>
                   <Box display="flex" justifyContent="flex-end" alignItems="center">
-                    <Button onClick={fetchResourceData} startIcon={loading ? <CircularProgress color='inherit' size={18}/> : <List />} color="primary" variant="contained" size="small" disableElevation disabled={loading} >
+                    <Button
+                      onClick={fetchResourceData}
+                      startIcon={loading ? <CircularProgress color="inherit" size={18} /> : <List />}
+                      color="primary"
+                      variant="contained"
+                      size="small"
+                      disableElevation
+                      disabled={loading}
+                    >
                       Show
                     </Button>
                   </Box>
@@ -327,27 +341,62 @@ const Report = () => {
               </Grid>
             </div>
             <div>
-              {Object.keys(frameWorkComponent).length > 0 ? (
-                <CustomAgGrid
-                  columns={columns}
-                  dataRows={dataRows}
-                  frameworkComponents={frameWorkComponent}
-                  setGridApi={setGridApi}
-                  dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  page={page}
-                  actionWidth={100}
-                  loading={loading}
-                  renderedFrom={renderedFrom}
-                  allowSelection={false}
-                  isClientSideGrid={true}
-                  allowAction={false}
-                  refreshGrid={fetchResourceData}
-                  showOnlyShowFilteredRecordSwitch={false}
-                />
-              ) : <Loader text={"Loading Data..."} style={{marginTop: '15vh'}} />}
+              {Object.keys(frameWorkComponent).length > 0 && columns ? (
+                isSmall ? (
+                  <CustomSwipableList
+                    allowSelection={false}
+                    allowSwipe={false}
+                    permissions={permissions[resourceCamelCase]}
+                    primaryField={columns?.find((d) => d.primaryField)}
+                    onClick={(data) => {
+                      history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
+                    }}
+                    selectedRecords={[]}
+                    dataRows={dataRows}
+                    dispatch={dispatch}
+                    onEdit={() => { }}
+                    extraParamsToCheckDelete={false}
+                    rowCount={rowCount}
+                    page={page}
+                    loading={loading}
+                    chips={columns.filter(
+                      (col) => col.hasOwnProperty('cellRendererParams')
+                    ).map(col => ({
+                      field: col.field,
+                      label: col.headerName
+                    }))}
+                    additionalDetails={[]}
+                    owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                    onCreate={false}
+                    showClone={false}
+                    onDelete={(data) => { }}
+                    onClone={(data) => { }}
+                    renderedFrom={routes.transferAsset?.title}
+                  />
+                ) : (
+                  <CustomAgGrid
+                    columns={columns}
+                    dataRows={dataRows}
+                    frameworkComponents={frameWorkComponent}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
+                    rowCount={rowCount}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    actionWidth={100}
+                    loading={loading}
+                    renderedFrom={renderedFrom}
+                    allowSelection={false}
+                    isClientSideGrid={true}
+                    allowAction={false}
+                    refreshGrid={fetchResourceData}
+                    showOnlyShowFilteredRecordSwitch={false}
+                  />
+                )
+              ) : (
+                <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
+              )}
             </div>
           </>
         )}

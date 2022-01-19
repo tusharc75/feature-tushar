@@ -30,6 +30,10 @@
     justify-content: space-between !important;
 }
 
+.justify-content-space-evenly {
+    justify-content: space-evenly !important;
+}
+
 .justify-content-center {
     justify-content: center !important;
 }
@@ -111,8 +115,20 @@
     border: 1px solid var(--common-border-color) !important;
 }
 
+.border-top {
+    border-top: 1px solid var(--common-border-color) !important;
+}
+
 .border-bottom {
     border-bottom: 1px solid var(--common-border-color) !important;
+}
+
+.border-left {
+    border-left: 1px solid var(--common-border-color) !important;
+}
+
+.border-right {
+    border-right: 1px solid var(--common-border-color) !important;
 }
 
 .border-0 {
@@ -125,6 +141,20 @@
 
 .lightgrey {
     color: lightgrey !important;
+}
+
+.m-auto {
+    margin: auto !important;
+}
+
+.mx-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.my-auto {
+    margin-top: auto !important;
+    margin-bottom: auto !important;
 }
 
 $directions: top, bottom, left, right;
@@ -303,6 +333,11 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
 .light-grey-bg {
     background-color: var(--lightgrey) !important;
 }
+
+.bg-primary {
+    background-color: var(--primary) !important;
+}
+
 
 .bg-white {
     background-color: var(--white) !important;

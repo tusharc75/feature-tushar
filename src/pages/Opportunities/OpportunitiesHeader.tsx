@@ -177,12 +177,15 @@ function OpportunitiesHeader(props) {
     }
   }, [isMenuOpen])
 
+
+
   const [filter, setFilter] = useState("All Opportunities");
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
+      
     }
   };
  

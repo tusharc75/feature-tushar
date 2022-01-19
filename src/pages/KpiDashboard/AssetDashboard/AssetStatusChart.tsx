@@ -22,10 +22,10 @@ import PptxGenJs from 'pptxgenjs';
 import jsPDF from 'jspdf';
 import { saveAs } from 'file-saver';
 import { utils, write } from 'xlsx';
-
+import Loader from '../../../components/Loader';
 import axiosInstance from '../../../axios/axiosInstance';
 
-const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
+const AssetStatusChart = ({ productCategories, loadingProductCategory, between, smallScreen }) => {
   const [pieData, setPieData] = React.useState<ChartData>(null);
   const [selectedProductCategories, setSelectedProductCategories] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
@@ -34,8 +34,9 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
   const [tableDataRaw, setTableDataRaw] = React.useState([]);
 
   React.useEffect(() => {
-    productWithStatus();
-  }, [selectedProductCategories]);
+    const timeout = setTimeout(productWithStatus, 100);
+    return () => clearTimeout(timeout);
+  }, [selectedProductCategories, between]);
 
   const getSum = (array, column) => {
     let values = array.map((item) => parseInt(item[column]) || 0);
@@ -48,48 +49,61 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
       filterById.push(d.id);
     });
 
-    let query = filterById.length > 0 ? `?productCategory=${JSON.stringify(filterById)}` : '';
+    let query = `?between=${between}&limit=100&`;
+    query = filterById.length > 0 ? `${query}productCategory=${JSON.stringify(filterById)}` : query;
 
-    // setLoading(true)
-    // axiosInstance()
-    //   .get(`/dashboard/product-with-status-count${query}`)
-    //   .then(({ data: { data } }) => {
-    //     setLoading(false);
-    //     let labels = [];
-    //     let values = [];
-    //     if (data.data.length > 0) {
-    //       Object.keys(data.data[0]).map((label: any) => {
-    //         if (!ignoreId.includes(label)) {
-    //           values.push(getSum(data.data, label));
-    //           labels.push(label);
-    //         }
-    //       });
-    //     }
-    //     setPieData({
-    //       labels: labels,
-    //       datasets: [
-    //         {
-    //           label: '(%) Utilization',
-    //           data: values,
-    //           backgroundColor: [
-    //             'rgba(255, 99, 132, 1)',
-    //             'rgba(54, 162, 235, 1)',
-    //             'rgba(255, 99, 132, 0.6)',
-    //             'rgba(54, 162, 235, 0.6)',
-    //             'rgba(255, 206, 86, 0.6)',
-    //             'rgba(75, 192, 192, 0.6)',
-    //             'rgba(153, 102, 255, 0.6)',
-    //             'rgba(255, 159, 64, 0.6)',
-    //             'rgba(255, 99, 132, 0.6)'
-    //           ],
-    //           fill: true
-    //         }
-    //       ]
-    //     });
-    //   })
-    //   .catch((err) => {
-    //     setLoading(false);
-    //   });
+    setLoading(true);
+    axiosInstance()
+      .get(`/dashboard/product-with-status-count${query}`)
+      .then(({ data: { data } }) => {
+        setLoading(false);
+        let labels = [];
+        let values = [];
+        let tableData = [];
+        if (data.data.length > 0) {
+          tableData = data.data.map((d) => {
+            const oldData = { ...d };
+            delete oldData.productName;
+            delete oldData._id;
+            return {
+              ['Product']: d.productName,
+              ['Total Assets']: Object.values(oldData).reduce((acc: number, val: number) => acc + val)
+            };
+          });
+          Object.keys(data.data[0]).forEach((label: any) => {
+            if (!ignoreId.includes(label)) {
+              values.push(getSum(data.data, label));
+              labels.push(label);
+            }
+          });
+        }
+
+        setTableDataRaw(tableData);
+        setPieData({
+          labels: labels,
+          datasets: [
+            {
+              label: '(%) Utilization',
+              data: values,
+              backgroundColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(255, 99, 132, 0.6)'
+              ],
+              fill: true
+            }
+          ]
+        });
+      })
+      .catch((err) => {
+        setLoading(false);
+      });
   };
 
   // Exporting data into sheet
@@ -155,56 +169,60 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory }) => {
   };
 
   return (
-    <div className='table-box-design px-3 pt-3 pb-3 ' style={{height:"100%"}}>
-      <Box width={200} mb={1}>
-        <Autocomplete
-          disabled={loadingProductCategory}
-          fullWidth
-          disableListWrap
-          loading={loadingProductCategory}
-          loadingText={'Loading...'}
-          multiple={true}
-          value={selectedProductCategories}
-          options={productCategories}
-          disableCloseOnSelect
-          limitTags={2}
-          onChange={(_, newVal) => setSelectedProductCategories(newVal)}
-          getOptionSelected={(option, value) => option.id === value.id}
-          getOptionLabel={(option) => option.title}
-          renderOption={(option, { selected }) => (
-            <React.Fragment>
-              <Checkbox
-                icon={<CheckBoxOutlineBlank fontSize="small" />}
-                checkedIcon={<CheckBox fontSize="small" />}
-                style={{ marginRight: 8 }}
-                checked={selected}
-              />
-              {option.title}
-            </React.Fragment>
-          )}
-          renderInput={(params) => <TextField {...params} variant="outlined" label="Product Category" size="small" />}
-        />
+    <div>
+      <Box textAlign={'center'}>
+        <Typography variant="h6">Asset Count</Typography>
       </Box>
-
-      {tableDataRaw.length > 0 && <Box display={'flex'} justifyContent={'space-between'}>
-        <div>
-          <Button disabled={loading} onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
-            Export to
-          </Button>
-          <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
-            <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
-            <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
-            <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
-            <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
-          </Menu>
-        </div>
-        <Button disabled={loading} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
-          {!tableView ? 'Table' : 'Chart'} View
-        </Button>
-      </Box>}
-      <Box height={400}>
-        {loading && <Typography>Loading...</Typography>}
-        {tableDataRaw.length > 0 ? (
+      {tableDataRaw.length > 0 && (
+        <Box display={smallScreen ? "column" : 'flex'} justifyContent={'space-between'}>
+          <Box width={200} mb={1}>
+            <Autocomplete
+              disabled={loadingProductCategory}
+              fullWidth
+              disableListWrap
+              loading={loadingProductCategory}
+              loadingText={'Loading...'}
+              multiple={true}
+              value={selectedProductCategories}
+              options={productCategories}
+              disableCloseOnSelect
+              limitTags={2}
+              onChange={(_, newVal) => setSelectedProductCategories(newVal)}
+              getOptionSelected={(option, value) => option.id === value.id}
+              getOptionLabel={(option) => option.title}
+              renderOption={(option, { selected }) => (
+                <React.Fragment>
+                  <Checkbox
+                    icon={<CheckBoxOutlineBlank fontSize="small" />}
+                    checkedIcon={<CheckBox fontSize="small" />}
+                    style={{ marginRight: 8 }}
+                    checked={selected}
+                  />
+                  {option.title}
+                </React.Fragment>
+              )}
+              renderInput={(params) => <TextField {...params} variant="outlined" label="Product Category" size="small" />}
+            />
+          </Box>
+          <Box display={smallScreen ? "flex" : "block"} justifyContent={'space-between'}>
+            <Button disabled={loading} onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
+              Export to
+            </Button>
+            <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
+              <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
+              <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
+              <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
+              <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
+            </Menu>
+            <Button disabled={loading} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
+              {!tableView ? 'Table' : 'Chart'} View
+            </Button>
+          </Box>
+        </Box>
+      )}
+      <Box height={440}>
+        {loading && <Loader noLoader minHeight={'100%'} text={'Loading chart data...'} />}
+        {!loading && tableDataRaw.length > 0 ? (
           tableView ? (
             <TableContainer style={{ height: '400px' }}>
               <Table stickyHeader aria-label="caption table">

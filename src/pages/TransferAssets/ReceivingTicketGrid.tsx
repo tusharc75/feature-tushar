@@ -5,7 +5,7 @@ import { Link, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import { receivingTicket, sidebarResource } from '../../constants/helpers';
+import { deliveryTicket, sidebarResource } from '../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { groupBy } from 'lodash';
@@ -223,7 +223,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     let apiCalls = [];
 
     Object.keys(groupByCalls).forEach((key) => {
-      apiCalls.push(axiosInstance().put(`${receivingTicket.receivingTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) }));
+      apiCalls.push(axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) }));
     });
 
     Promise.all(apiCalls)
@@ -255,8 +255,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               color="primary"
               type="button"
               size="small"
-              style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
-              startIcon={isMobile ? '' :  <AiFillFilePdf />}
+              style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
+              startIcon={isMobile ? '' : <AiFillFilePdf />}
               disabled={fileDownloading}
               onClick={() => {
                 handleViewPdf(false);
@@ -272,8 +272,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               color="primary"
               type="button"
               size="small"
-              style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
-              startIcon={isMobile ? '' :  <IoMdDownload />}
+              style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
+              startIcon={isMobile ? '' : <IoMdDownload />}
               disabled={fileDownloading}
               onClick={() => {
                 handleViewPdf(true);
@@ -308,7 +308,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               variant="contained"
               size="small"
               color="primary"
-              disabled={assetsDelivered.length > 0 
+              disabled={assetsDelivered.length > 0
                 || selectedRecords.filter((asset) => asset?.hasOwnProperty('receivingTicket')).length === 0
                 || selectedRecords.filter((asset) => !asset?.hasOwnProperty('receivingTicket')).length > 0
               }
@@ -349,12 +349,12 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               {
                 label: 'Loading Ticket : ',
                 field: 'loadingTicket',
-                onClick: (data:any) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`),
+                onClick: (data: any) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`),
               },
               {
                 label: 'Receiving Ticket : ',
                 field: 'receivingTicket',
-                onClick: (data:any) => history.push(`${routes.deliveryTicketDetail.path}/${data.receivingTicketId}`),
+                onClick: (data: any) => history.push(`${routes.deliveryTicketDetail.path}/${data.receivingTicketId}`),
               }
             ]}
             additionalDetails={[]}

@@ -2,6 +2,88 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.43.0](https://github.com/vebholic/oms_frontend/compare/v2.42.0...v2.43.0) (2022-01-19)
+
+
+### Features
+
+* - E-commerce header changes done ([1018765](https://github.com/vebholic/oms_frontend/commit/1018765783fa02bfb13e572002a965d3bf7a10b2))
+* - error message on logout issue fixed ([2f94f3e](https://github.com/vebholic/oms_frontend/commit/2f94f3e71db1b1e593a8d298e93f87634de891bf))
+* - PlusMinusComponent issue fixed ([8919467](https://github.com/vebholic/oms_frontend/commit/8919467a1d4a39681bfa21769bce8a52f3a19ef5))
+* - Product details screen updated ([99ada74](https://github.com/vebholic/oms_frontend/commit/99ada740071d183738bcf3efdb976f96b5a8ad2f))
+* **product:** product config fields in details page ([f351053](https://github.com/vebholic/oms_frontend/commit/f351053b419f2f63ba5e86b0b65a87f9b5b2c59c))
+
+
+### Bug Fixes
+
+* bug fix ([21b8ca2](https://github.com/vebholic/oms_frontend/commit/21b8ca2534fe9901676a53ee0747c308282bcf65))
+* bug fix ([a7b59ae](https://github.com/vebholic/oms_frontend/commit/a7b59ae3796a3c3a1425366ca9c43fc258149348))
+* bug fix ([31ffb74](https://github.com/vebholic/oms_frontend/commit/31ffb7471669b5f9ff9e54b503b6b67c46a8dae1))
+* bug fix ([ee18368](https://github.com/vebholic/oms_frontend/commit/ee183683dedf94e427144a40167863ac814200d1))
+* bug fix ([62b1743](https://github.com/vebholic/oms_frontend/commit/62b1743247c840961fc3f678e166b925e2eb3625))
+* bug fix ([b5603c2](https://github.com/vebholic/oms_frontend/commit/b5603c2718e86557d3474ff604e2dd494b846e31))
+* **cart:** add tabs for different types ([3f8469d](https://github.com/vebholic/oms_frontend/commit/3f8469da74353654f475af1e1a174c3c2c0f2600))
+* **dashboard:** ui fix ([fdca2b4](https://github.com/vebholic/oms_frontend/commit/fdca2b4e75a59eb6614b6def38333a0c2f2f6f80))
+* po-1012 ([0772745](https://github.com/vebholic/oms_frontend/commit/0772745c56e4967c49a5b189ea33548a2466f1e0))
+* **product:** pre fill existing data ([f8a7d3e](https://github.com/vebholic/oms_frontend/commit/f8a7d3efa09b4faef56028547919aa72993e15b2))
+* report link ([e0f5275](https://github.com/vebholic/oms_frontend/commit/e0f52751907c3d9119df4a416df0cdcc0745aa20))
+* return feature ([8a4a39d](https://github.com/vebholic/oms_frontend/commit/8a4a39d19f6fd1d1bf21e632f8a8fd37ed53b25d))
+
+## [2.42.0](https://github.com/vebholic/oms_frontend/compare/v2.41.2...v2.42.0) (2022-01-18)
+
+
+### Features
+
+* - e-commerce changes done ([ded5fcd](https://github.com/vebholic/oms_frontend/commit/ded5fcd8282fffa589e4be08457564136867ce2b))
+* - e-Commerce changes done ([e333729](https://github.com/vebholic/oms_frontend/commit/e3337299486cac0ceece2aba7d7e77561bba56f6))
+* **avisekh/feature:** avisekh/feature ([023ae80](https://github.com/vebholic/oms_frontend/commit/023ae80bd9af2448b7fc95b42c26c64299903546))
+
+
+### Bug Fixes
+
+* 13 jan bugs ([4a9b20f](https://github.com/vebholic/oms_frontend/commit/4a9b20f4d4b4f6e4eecf571c5b9de84c1f40b3a8))
+* bug fix ([18ac328](https://github.com/vebholic/oms_frontend/commit/18ac328d58580ee5a285db72f735879d8dd7b691))
+* **dashboard:** conflict ([49c1af7](https://github.com/vebholic/oms_frontend/commit/49c1af7394a1619c694e33c45849fd68ac564563))
+* **dashboard:** fix ([f367ac7](https://github.com/vebholic/oms_frontend/commit/f367ac7a12579d9817958619fcd78e26e451d575))
+* **dashboard:** fix ([fedbc24](https://github.com/vebholic/oms_frontend/commit/fedbc24fe17f11b21ae13dea17be0d8f85026a39))
+* **dashboard:** minor fix ([7e68432](https://github.com/vebholic/oms_frontend/commit/7e684329eb2278f4f02b430b88c8dd53a1daba28))
+* rTE ([89d27d3](https://github.com/vebholic/oms_frontend/commit/89d27d3218920129e0a4c04751d6b29f77067bab))
+* signature name ([56f75cf](https://github.com/vebholic/oms_frontend/commit/56f75cfb162302f96b62fcb047a11f1171bf8c00))
+
+### [2.41.2](https://github.com/vebholic/oms_frontend/compare/v2.41.1...v2.41.2) (2022-01-17)
+
+### [2.41.1](https://github.com/vebholic/oms_frontend/compare/v2.41.0...v2.41.1) (2022-01-16)
+
+## [2.41.0](https://github.com/vebholic/oms_frontend/compare/v2.40.0...v2.41.0) (2022-01-15)
+
+
+### Features
+
+* **feature/avisekh:** feature/avisekh ([b5757ff](https://github.com/vebholic/oms_frontend/commit/b5757ff644635cfa9246c3595e813a8b8a6f375e))
+* **feature/avisekh:** feature/avisekh ([3d2a24d](https://github.com/vebholic/oms_frontend/commit/3d2a24d449ac09fe6ebca4de5b525a76b611d8f3))
+* **feature/avisekh:** feature/avisekh ([cac6ca7](https://github.com/vebholic/oms_frontend/commit/cac6ca7ef4d54df0ce971c018f2a6d85750967d2))
+* **report:** export data ([302c2d5](https://github.com/vebholic/oms_frontend/commit/302c2d528c0050273994b51def95fa865e0e1e16))
+
+
+### Bug Fixes
+
+* bug fix ([8722656](https://github.com/vebholic/oms_frontend/commit/872265618502be22764bc5a5e4d980b2a1275050))
+* bug fix ([c875f1c](https://github.com/vebholic/oms_frontend/commit/c875f1c0248067ad990d10d461584d7db25cb515))
+* bug fix ([766ac28](https://github.com/vebholic/oms_frontend/commit/766ac28c6e902718710a65a0b643a5a6fe681e2e))
+* bug fix ([1568f8c](https://github.com/vebholic/oms_frontend/commit/1568f8c161bb0a1d7698e577438d6c490f83072a))
+* bug fix ([8efaa96](https://github.com/vebholic/oms_frontend/commit/8efaa9661af0820e7ea2497fa0b5c7d434e7ced8))
+* bug fix ([65ca5a8](https://github.com/vebholic/oms_frontend/commit/65ca5a8df168ee94ef66058687495ff823f03c6f))
+* bug fix ([9c486ac](https://github.com/vebholic/oms_frontend/commit/9c486ac1572a08bd47f004dde49ae65ae428a0ca))
+* bug fix ([aca9c92](https://github.com/vebholic/oms_frontend/commit/aca9c92b5e65588ae7161eb54cd92e2373bb1634))
+* **dashboard:** changes ([d0b6db6](https://github.com/vebholic/oms_frontend/commit/d0b6db61cf865bf75b1820cd083948eeee61639b))
+* **dashboard:** minor change ([6e7223d](https://github.com/vebholic/oms_frontend/commit/6e7223dfa617e45db1d034b3ab80c22360287e0d))
+* po-966 ([4575e76](https://github.com/vebholic/oms_frontend/commit/4575e7661d5e26b66acb2811791af71fe8689102))
+* **PO:** Product Description changed to Product Type ([647ac07](https://github.com/vebholic/oms_frontend/commit/647ac075ee596f2462340c2946884baadf24e42b))
+* **report:** fix ([5873c27](https://github.com/vebholic/oms_frontend/commit/5873c2712104ff1177d3463805ec578f608f9c48))
+* **report:** fix ([64ec5a5](https://github.com/vebholic/oms_frontend/commit/64ec5a569677ae13a85226d2b93ea13fb27b6dee))
+* **report:** style fix ([60d44ec](https://github.com/vebholic/oms_frontend/commit/60d44ecdb80e95a714351a2e56fcc18dcedb9570))
+* ug fix ([9ad077c](https://github.com/vebholic/oms_frontend/commit/9ad077c128ac14c511533727cf4cb53d4f2151d3))
+
 ## [2.40.0](https://github.com/vebholic/oms_frontend/compare/v2.39.0...v2.40.0) (2022-01-13)
 
 

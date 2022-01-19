@@ -475,8 +475,12 @@ const Header = ({ toggleDrawer }) => {
           history.push('/');
           dispatch({ type: SET_USER, payload: null });
           dispatch({ type: SET_SELECTED_ENTITY, payload: null });
+
           // localStorage.removeItem("token");
           localStorage.clear();
+
+          wishlistDispatch({ type: "INITIALIZE", payload: [] });
+
           history.push('/login');
         })
         .catch((error) => {
@@ -861,7 +865,7 @@ const Header = ({ toggleDrawer }) => {
         <p>Help</p>
       </MenuItem>
 
-      {
+      {/* {
         permissions?.eCommerce?.isRead && <MenuItem
           id="shoppingCartButton"
           onClick={() => {
@@ -876,9 +880,9 @@ const Header = ({ toggleDrawer }) => {
           <Box component="span" mx={1} />
           <p>Wishlist</p>
         </MenuItem>
-      }
+      } */}
 
-      {
+      {/* {
         permissions?.eCommerce?.isRead && <MenuItem
           id="shoppingCartButton"
           onClick={() => {
@@ -893,7 +897,7 @@ const Header = ({ toggleDrawer }) => {
           <Box component="span" mx={1} />
           <p>Cart</p>
         </MenuItem>
-      }
+      } */}
     </Menu>
   );
 
@@ -949,9 +953,6 @@ const Header = ({ toggleDrawer }) => {
     }
     if (history.location.pathname.includes(routes.deliveryTicketDetail.path)) {
       history.push({ pathname: routes.deliveryTicket.path })
-    }
-    if (history.location.pathname.includes(routes.receivingTicketDetail.path)) {
-      history.push({ pathname: routes.receivingTicket.path })
     }
     if (history.location.pathname.includes(routes.productInventoryDetail.path)) {
       history.push({ pathname: routes.productInventory.path })
@@ -1095,7 +1096,7 @@ const Header = ({ toggleDrawer }) => {
                   </Tooltip>
                 </IconButton>
               )}
-              {
+              {/* {
                 permissions?.eCommerce?.isRead && <IconButton
                   id="shoppingCartButton"
                   title="Wishlist"
@@ -1113,10 +1114,10 @@ const Header = ({ toggleDrawer }) => {
                     <FavoriteIcon className="setIcon" />
                   </Badge>
                 </IconButton>
-              }
+              } */}
 
               {/*Only show cart icon if environment is local || development*/}
-              {
+              {/* {
                 permissions?.eCommerce?.isRead && (
                   <IconButton
                     id="shoppingCartButton"
@@ -1136,7 +1137,7 @@ const Header = ({ toggleDrawer }) => {
                     </Badge>
                   </IconButton>
                 )
-              }
+              } */}
 
               <IconButton
                 id="notificationButton"

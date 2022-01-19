@@ -29,11 +29,16 @@ import queryString from 'query-string';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { MdAccountCircle } from 'react-icons/md';
-import { AiFillCrown, MdAdd } from 'react-icons/all';
+import { AiFillCrown, MdAdd,MdSort,MdFilterList,AiOutlineBgColors} from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { FaSuitcase } from 'react-icons/fa';
+import MobileSortDialog from "../../components/MobileSortDialog"
+import MobileFilterDialog from "../../components/MobileFilterDialog"
+
+
+
 
 function reducer(state, action) {
   switch (action.type) {
@@ -162,7 +167,8 @@ const ProductCategory = () => {
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = `${routes.productCategory.title}_selected`;
-
+  const [isOpenDialog, setisOpenDialog] = useState(false)
+  const [sortOpen, setSortOpen]= useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   if (columnState) {
     columns.map((item) => {
@@ -511,6 +517,26 @@ const ProductCategory = () => {
     setAnchorEl(null);
   };
 
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+  
+  const handleClickOpen = () => {
+    setSortOpen(true);
+  };
+
+  const handleClickClose = () => {
+    setSortOpen(false);
+
+  };
+
+  const handleFilterClose = () => {
+    setisOpenDialog(false);
+  };
+  
+
+
+
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -539,8 +565,64 @@ const ProductCategory = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
-              <FaThemeisle size={20} style={{ paddingBottom: '3px' }} /> <span className="listingHeader">{routes.productCategory.title}</span>
+          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+            <div className="d-flex align-items-center">
+              <FaThemeisle size={20} style={{ paddingBottom: '3px' }} /> 
+              <span className="listingHeader">{routes.productCategory.title}</span>
+              </div>
+              {isMobile && (
+                  <>
+                    <Grid style={{ display: 'inline-flex'}}>
+                      <Button
+                        onClick={handleClickOpen}
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        aria-expanded={ 'true'}
+                        color="secondary"
+                        variant="text"
+                        disableElevation
+                        startIcon={<MdSort />}
+                        className={'sort-filter-tablet'}
+                        style={isTablet ? { marginLeft: '50px' } : {}}
+                      >
+                        Sort
+                      </Button>
+                      <MobileSortDialog
+                        isOpen={sortOpen}
+                        handleClose={handleClickClose}
+                        contentPart={null}
+                        secHeading={['Sort Product Category']}
+                        columns={columns}
+                        dispatch={dispatch}
+                      />
+
+                      <Button
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        aria-expanded={'true'}
+                        variant="text"
+                        color="secondary"
+                        disableElevation
+                        className={'sort-filter-tablet'}
+                        startIcon={<MdFilterList />}
+                        onClick={handleOpen}
+                      >
+                        Filter
+                      </Button>
+
+                      <MobileFilterDialog
+                        isOpen={isOpenDialog}
+                        handleClose={handleFilterClose}
+                        contentPart={null}
+                        secHeading={['Filter Product Category']}
+                        columns={columns}
+                        dispatch={dispatch}
+                      />
+                    </Grid>
+                  </>
+                )}
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -641,8 +723,19 @@ const ProductCategory = () => {
               rowCount={rowCount}
               page={page}
               loading={loading}
-              additionalDetails={[]}
-              chips={[]}
+              additionalDetails={[
+                {
+                  icon: <FaSuitcase size={18} />,
+                  field: 'supplierAccount'
+                }
+              ]}
+              chips={[
+               {
+                 icon:<AiOutlineBgColors />,
+                 label:'Chip Color',
+                field:'chipColor'
+              }
+              ]}
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={true}

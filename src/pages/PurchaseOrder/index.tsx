@@ -26,10 +26,16 @@ import { prepareDataForGrid } from "../../constants/helpers"
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown, MdAdd } from "react-icons/all";
+import { AiFillCrown, MdAdd,MdSort,MdFilterList } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from "react-router-dom";
+import {FaSuitcase} from "react-icons/fa";
+import MobileSortDialog from "../../components/MobileSortDialog";
+import MobileFilterDialog from "../../components/MobileFilterDialog"
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -43,6 +49,7 @@ const PurchaseOrder = () => {
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
     const [gridApi, setGridApi] = useState(null);
+    const [sortOpen, setSortOpen]= useState(false);
     const [columns, setColumns] = useState([])
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -50,6 +57,7 @@ const PurchaseOrder = () => {
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
     const localStorageSelectedRecords = `${routes.purchaseOrder?.title}_selected`;
+    const [isOpenDialog, setisOpenDialog] = useState(false)
 
     const [fromRental, setFromRental] = useState(history.location?.state?.rental);
     const [fromSalesOrder, setFromSalesOrder] = useState(history.location?.state?.salesOrder);
@@ -301,6 +309,31 @@ const PurchaseOrder = () => {
         }
     };
 
+    const handleOpen = () => {
+        setisOpenDialog(true);
+      };
+      
+      const handleClickOpen = () => {
+        setSortOpen(true);
+      };
+    
+      const handleClickClose = () => {
+        setSortOpen(false);
+    
+      };
+    
+      const handleFilterClose = () => {
+        setisOpenDialog(false);
+      };
+      
+
+    
+    
+    
+    
+
+    
+
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
@@ -329,9 +362,67 @@ const PurchaseOrder = () => {
         <div className="main-container">
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={6} className="d-flex align-items-center gap-1">
+                <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+                <div className="d-flex align-items-center">
                         <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
                         <span className="listingHeader">{routes.purchaseOrder?.title} </span>
+                    </div>
+                        {isMobile && (
+                  <>
+                    <Grid style={{ display: 'inline-flex'}}>
+                      <Button
+                        onClick={handleClickOpen}
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        aria-expanded={ 'true'}
+                        color="secondary"
+                        variant="text"
+                        disableElevation
+                        startIcon={<MdSort />}
+                        className={'sort-filter-tablet'}
+                        style={isTablet ? { marginLeft: '50px' } : {}}
+                      >
+                        Sort
+                      </Button>
+                      <MobileSortDialog
+                        isOpen={sortOpen}
+                        handleClose={handleClickClose}
+                        contentPart={null}
+                        secHeading={['Sort Purchase Order']}
+                        columns={columns}
+                        dispatch={dispatch}
+                      />
+
+                      <Button
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        aria-expanded={'true'}
+                        variant="text"
+                        color="secondary"
+                        disableElevation
+                        className={'sort-filter-tablet'}
+                        startIcon={<MdFilterList />}
+                        onClick={handleOpen}
+                      >
+                        Filter
+                      </Button>
+
+                      <MobileFilterDialog
+                        isOpen={isOpenDialog}
+                        handleClose={handleFilterClose}
+                        contentPart={null}
+                        secHeading={['Filter Purchase Order']}
+                        columns={columns}
+                        dispatch={dispatch}
+                      />
+                    </Grid>
+                  </>
+                )}
+
+
+
                         {fromRental && (
                             <Chip
                                 className="ml-3"
@@ -438,6 +529,12 @@ const PurchaseOrder = () => {
                             rowCount={rowCount}
                             page={page}
                             loading={loading}
+                            additionalDetails={[
+                                {
+                                  icon: <FaSuitcase size={18} />,
+                                  field: 'supplierAccount'
+                                }
+                              ]}
                             chips={[
                                 {
                                     label: "Delivery Date: ",
@@ -448,7 +545,26 @@ const PurchaseOrder = () => {
                                 {
                                     label: "Status: ",
                                     field: "status",
-                                }
+                                },
+                                {
+                                    label: "Tax Schedule: ",
+                                    field: "taxSchedule",
+                                },
+                                {
+                                    label: "Country Bill To: ",
+                                    field: "countryBillTo",
+                                },
+                                {
+                                    label: "Country Sell To: ",
+                                    field: "countrysellTo",
+                                },
+                                {
+                                    label: "SupplierContact:  ",
+                                    field: "supplierContact",
+                                },
+                                
+                                
+                                
                             ]}
                             onCreate={false}
                             showClone={true}
