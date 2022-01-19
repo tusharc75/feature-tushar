@@ -369,7 +369,7 @@ const OpportunityDashboards = (props) => {
           </Box>
         </Popover>
         <Grid item xs={12} sm={4}>
-          <Paper>
+          {/* <Paper>
             <Box mb={2} p={2} display="flex" alignItems="center">
               <Box flex={0.5}>
                 <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
@@ -385,7 +385,7 @@ const OpportunityDashboards = (props) => {
                 </Box>
               </Box>
             </Box>
-          </Paper>
+          </Paper> */}
           <Paper style={{ padding: '10px', marginBottom: '16px' }}>
             <Box>
               <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>

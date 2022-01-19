@@ -1,64 +1,26 @@
 import * as React from 'react';
 import './MobileFilterDialog.scss';
 import {
-  Box,
-  Grid,
-  Button,
-  styled,
-  alpha,
   Dialog,
-  DialogActions,
   DialogContent,
-  Menu,
-  MenuProps,
-  DialogContentText,
   DialogTitle,
   Divider,
   Slide,
   List,
   ListItemIcon,
   ListItemText,
-  createStyles,
-  withStyles,
-  makeStyles,
-  Theme,
-  Transitions
+  withStyles
 } from '@material-ui/core';
 import MuiListItem from '@material-ui/core/ListItem';
-//   import styles from "../Leads/Header.module.scss";
 import styles from '../pages/Leads/Header.module.scss';
 import {
-  FaUserTie,
-  IoFilterCircle,
-  MdAccountBalanceWallet,
-  MdAdd,
-  MdFilterList,
   MdSort,
-  FaCalendarDay,
-  RiTicketFill,
-  RiArrowUpDownFill,
   RiArrowUpDownLine,
-  BsArrowUpShort,
   BsArrowUp,
   BsArrowDown
 } from 'react-icons/all';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { CustomToastContext } from '../StateProvider/CustomToastContext/CustomToastContext'
-
-const StyledMenu = styled((props: MenuProps) => (
-  <Menu
-    elevation={0}
-    anchorOrigin={{
-      vertical: 'bottom',
-      horizontal: 'right'
-    }}
-    transformOrigin={{
-      vertical: 'top',
-      horizontal: 'right'
-    }}
-    {...props}
-  />
-));
 
 const ListItem = withStyles({
   root: {
@@ -105,65 +67,65 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function MobileSortDialog({ isOpen, handleClose, contentPart, secHeading, columns,dispatch }) {
+export default function MobileSortDialog({ isOpen, handleClose, contentPart, secHeading, columns, dispatch }) {
   const [selectedIndex, setSelectedIndex] = React.useState(1);
   const toastConfig = React.useContext(CustomToastContext)
   const [clicked, setClicked] = React.useState(false);
-  const [ sortMode, setSortMode] = React.useState('');
+  const [sortMode, setSortMode] = React.useState('');
 
-  const handleListIconClick = (field,index:number) => {
-    if(selectedIndex !== index){
+  const handleListIconClick = (field, index: number) => {
+    if (selectedIndex !== index) {
       setClicked(true);
       setSortMode('asc')
       dispatch({
         type: 'sort',
-        sorting: [{colId:field,sort:'asc'}]
+        sorting: [{ colId: field, sort: 'asc' }]
       });
 
-    } 
+    }
 
-      if(selectedIndex === index && sortMode === 'asc'){
-        
-          setClicked(true);
-          setSortMode('desc')
-          dispatch({
-            type: 'sort',
-            sorting: [{colId:field,sort:'desc'}]
-          });
-        }
-      
+    if (selectedIndex === index && sortMode === 'asc') {
+
+      setClicked(true);
+      setSortMode('desc')
+      dispatch({
+        type: 'sort',
+        sorting: [{ colId: field, sort: 'desc' }]
+      });
+    }
 
 
-      if(selectedIndex === index && sortMode=== 'desc') {
-        setClicked(true);
-        setSortMode('default')
-        dispatch({
-          type: 'sort',
-          sorting: []
-        });
-        
-      }
 
-      if(selectedIndex === index && sortMode=== 'default') {
-        setClicked(true);
-        setSortMode('asc')
-        dispatch({
-          type: 'sort',
-          sorting: [{colId:field,sort:'asc'}]
-        });
-        
-      }
+    if (selectedIndex === index && sortMode === 'desc') {
+      setClicked(true);
+      setSortMode('default')
+      dispatch({
+        type: 'sort',
+        sorting: []
+      });
 
-      if(selectedIndex === index && sortMode===''){
-        setClicked(true);
-        setSortMode('asc')
-          dispatch({
-          type: 'sort',
-          sorting: [{colId:field,sort:'asc'}]
-        })
-    
-  
-      } 
+    }
+
+    if (selectedIndex === index && sortMode === 'default') {
+      setClicked(true);
+      setSortMode('asc')
+      dispatch({
+        type: 'sort',
+        sorting: [{ colId: field, sort: 'asc' }]
+      });
+
+    }
+
+    if (selectedIndex === index && sortMode === '') {
+      setClicked(true);
+      setSortMode('asc')
+      dispatch({
+        type: 'sort',
+        sorting: [{ colId: field, sort: 'asc' }]
+      })
+
+
+    }
 
     toastConfig.setToastConfig({
       open: true,
@@ -183,7 +145,7 @@ export default function MobileSortDialog({ isOpen, handleClose, contentPart, sec
 
   return (
     <div>
-      
+
       <Dialog
         open={isOpen}
         TransitionComponent={Transition}
@@ -203,12 +165,12 @@ export default function MobileSortDialog({ isOpen, handleClose, contentPart, sec
                     <ListItemIcon>
                       < MdSort />
                     </ListItemIcon>
-                    <ListItemText key={index} onClick={() => handleListIconClick(column.field,index)} primary={column.headerName} />
-                    <ListItemIcon key={index} onClick={() => handleListIconClick(column.field,index)}>
-                      {selectedIndex === index && clicked && sortMode=== 'asc' && <BsArrowUp />  }
-                      {selectedIndex === index && clicked && sortMode === 'desc'  && <BsArrowDown />  }
-                      {selectedIndex === index && clicked && sortMode === 'default'  && <RiArrowUpDownLine />  }
-                      {selectedIndex === index && clicked && sortMode=== '' && <BsArrowUp />  }
+                    <ListItemText key={index} onClick={() => handleListIconClick(column.field, index)} primary={column.headerName} />
+                    <ListItemIcon key={index} onClick={() => handleListIconClick(column.field, index)}>
+                      {selectedIndex === index && clicked && sortMode === 'asc' && <BsArrowUp />}
+                      {selectedIndex === index && clicked && sortMode === 'desc' && <BsArrowDown />}
+                      {selectedIndex === index && clicked && sortMode === 'default' && <RiArrowUpDownLine />}
+                      {selectedIndex === index && clicked && sortMode === '' && <BsArrowUp />}
                     </ListItemIcon>
                   </ListItem>
                 ))}
