@@ -107,6 +107,7 @@ import ReportMaster from './pages/ReportMaster';
 import Products from './pages/ECommerce/Products';
 import ProductDetails from './pages/ECommerce/Products/ProductDetails';
 import MyOwnCart from './pages/ECommerce/MyCart/MyOwnCart';
+import Checkout from './pages/ECommerce/Checkout';
 
 var notificationInterval: any = null;
 
@@ -564,6 +565,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.eCommerceDetail.path}/cart`} isEcommerceRoute={true}>
               <MyOwnCart />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.eCommerce.path}/checkout`} isEcommerceRoute={true}>
+              <Checkout />
             </PrivateRoute>
 
             <Route path="*" component={NotFound} />
