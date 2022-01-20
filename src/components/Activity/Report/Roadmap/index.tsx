@@ -37,7 +37,7 @@ function Roadmap({ type, filter }) {
         setTreeList(data.treeList);
         executeScroll();
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   let height = window.innerHeight - 250;
@@ -62,6 +62,7 @@ function Roadmap({ type, filter }) {
   const taskScroolRef = React.useRef(null);
   const onscroll = (event) => {
     var target = event.nativeEvent.target;
+    console.log(target.scrollTop)
     taskScroolRef.current.scrollTop = target.scrollTop;
   };
 
@@ -89,7 +90,6 @@ function Roadmap({ type, filter }) {
           display="flex"
           width="100%"
           height="100%"
-        
           style={{ position: "absolute" }}
         >
           <Box
@@ -101,7 +101,7 @@ function Roadmap({ type, filter }) {
             <Box
               height={60}
               bgcolor="grey.200"
-              display="flex"            
+              display="flex"
               style={{ position: "sticky", top: 0, zIndex: 1 }}
             >
               <Box p={2} display="flex" alignItems="center">
@@ -112,16 +112,15 @@ function Roadmap({ type, filter }) {
                 </Typography>
               </Box>
             </Box>
-            <div ref={taskScroolRef}>
-              <Box
-               
-                style={{
-                  position: "absolute",
-                  width: "100%",
-                  height: "100%",
-                  overflow: "hidden",
-                }}
-              >
+            <div
+              ref={taskScroolRef}
+              style={{
+                position: "relative",
+                width: "100%",
+                height: "100%",
+                overflow: "hidden",
+              }}>
+              <Box>
                 <ActivityList
                   fetchRoadmap={fetchRoadmap}
                   type={type}
@@ -200,29 +199,29 @@ function Roadmap({ type, filter }) {
         </Box>
       </Box>
       <Box display="flex" justifyContent="flex-end" className="mt-2">
-          <ButtonGroup disableElevation color="primary">
-            <Button
-              size="small"
-              variant={calendarType === "week" ? "contained" : "outlined"}
-              onClick={() => handelChangeCalendarType("week")}
-            >
-              Weeks
-            </Button>
-            <Button
-              size="small"
-              variant={calendarType === "month" ? "contained" : "outlined"}
-              onClick={() => handelChangeCalendarType("month")}
-            >
-              Months
-            </Button>
-            <Button
-              size="small"
-              variant={calendarType === "quater" ? "contained" : "outlined"}
-              onClick={() => handelChangeCalendarType("quater")}
-            >
-              Quaters
-            </Button>
-          </ButtonGroup>
+        <ButtonGroup disableElevation color="primary">
+          <Button
+            size="small"
+            variant={calendarType === "week" ? "contained" : "outlined"}
+            onClick={() => handelChangeCalendarType("week")}
+          >
+            Weeks
+          </Button>
+          <Button
+            size="small"
+            variant={calendarType === "month" ? "contained" : "outlined"}
+            onClick={() => handelChangeCalendarType("month")}
+          >
+            Months
+          </Button>
+          <Button
+            size="small"
+            variant={calendarType === "quater" ? "contained" : "outlined"}
+            onClick={() => handelChangeCalendarType("quater")}
+          >
+            Quaters
+          </Button>
+        </ButtonGroup>
       </Box>
     </Box>
   ) : (
