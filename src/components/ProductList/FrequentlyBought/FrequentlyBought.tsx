@@ -1,32 +1,84 @@
 import { useEffect, useState, useContext } from 'react';
 import styles from './frequently_bought.module.scss';
 import Checkbox from '@material-ui/core/Checkbox';
-import { Button, Grid } from '@material-ui/core';
+import { Button, Grid, withStyles } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import axiosInstance from '../../../axios/axiosInstance';
 import { useHistory } from 'react-router-dom';
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import CircularProgress from "@material-ui/core/CircularProgress"
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import routes from '../../Helpers/Routes';
-import { BsImage } from "react-icons/bs";
+import { BsImage } from 'react-icons/bs';
 import { formatAmountWithCurrency } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
+import { alpha, makeStyles, styled } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+  mainBox: {
+    backgroundColor: '#F9F9F9'
+  },
+  addOnProducts: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, minmax(200px, 1fr)) minmax(250px, 350px)',
+    justifyContent: 'center',
+    backgroundColor: '#F9F9F9',
+    padding: '20px 30px',
+    gridRowGap: '20px',
+    gridWrap: 'wrap',
+
+    '@media screen and (max-width: 960px)': {
+      gridTemplateColumns: 'repeat(3, minmax(200px, 1fr)) ',
+      gridTemplateRow: '1fr 1fr'
+    },
+    '@media screen and (max-width: 768px)': {
+      gridTemplateColumns: 'repeat(2, minmax(200px, 1fr)) ',
+      gridTemplateRow: '1fr 1fr'
+    }
+  },
+  gridLayout: {
+    '@media screen and (max-width: 960px)': {
+      gridColumn: '1/-1'
+    },
+    '@media screen and (max-width: 768px)': {
+      gridColumn: 'auto'
+    }
+  },
+
+  logoAlign: {
+    width: '100%',
+    height: 'auto'
+  },
+  priceHeading: {
+    paddingBottom: '10px',
+    paddingLeft: '3px',
+    color: 'grey'
+  },
+  addIcon: {
+    backgroundColor: '#F9F9F9'
+  },
+  imgLayout:{
+    display:"grid",
+    gridTemplateRows: 'minmax(100px , 200px)'
+  }
+}));
 
 function FrequentlyBought({ mainProductMrp, mainProductWithCurrency, id, orderType }) {
-
-  const { state: { user, cartItems } }: any = useData();
+  const classes = useStyles();
+  const {
+    state: { user, cartItems }
+  }: any = useData();
   const history = useHistory();
   const [count, setCount] = useState(0);
   // const [checkedItems, setCheckedItems] = useState([])
   const [totalPrice, setTotalPrice] = useState(0);
   const [frequentData, setFrequentData] = useState([]);
   const toastConfig = useContext(CustomToastContext);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   // const [items, setItems] = useState([]);
 
   useEffect(() => {
-    if (id) fetchFrequentProducts()
-  }, [id])
+    if (id) fetchFrequentProducts();
+  }, [id]);
 
   // const fetchCart = () => {
   //   setLoading(true)
@@ -63,9 +115,19 @@ function FrequentlyBought({ mainProductMrp, mainProductWithCurrency, id, orderTy
     axiosInstance()
       .get(`/e-product/frequent/${id}`)
       .then(({ data: { data } }) => {
-
-        let fixedData = [...data.filter(f => f._id !== id).slice(0, 3).map((f) => { return { ...f, "isAddedInCart": cartItems.some(s => s.productDetail._id === f._id), "isChecked": cartItems.some(s => s.productDetail._id === f._id) } })]
-        setFrequentData([...fixedData])
+        let fixedData = [
+          ...data
+            .filter((f) => f._id !== id)
+            .slice(0, 3)
+            .map((f) => {
+              return {
+                ...f,
+                isAddedInCart: cartItems.some((s) => s.productDetail._id === f._id),
+                isChecked: cartItems.some((s) => s.productDetail._id === f._id)
+              };
+            })
+        ];
+        setFrequentData([...fixedData]);
 
         // let tPrice = 0
         // if (fixedData && fixedData.length) {
@@ -80,18 +142,18 @@ function FrequentlyBought({ mainProductMrp, mainProductWithCurrency, id, orderTy
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const changeTotalPrice = (checkedItems) => {
-    let tPrice = 0
-    frequentData.forEach(o => {
+    let tPrice = 0;
+    frequentData.forEach((o) => {
       if (checkedItems.indexOf(o._id) >= 0) {
-        tPrice = tPrice + parseInt(o?.mrp)
+        tPrice = tPrice + parseInt(o?.mrp);
       }
-      return o._id
-    })
-    setTotalPrice(tPrice)
-  }
+      return o._id;
+    });
+    setTotalPrice(tPrice);
+  };
 
   // const handleCheckedItems = (e, id) => {
   //   let items = [...checkedItems]
@@ -114,9 +176,9 @@ function FrequentlyBought({ mainProductMrp, mainProductWithCurrency, id, orderTy
     }
     return count;
   }
+  
 
   const handleChange = (checked, index) => {
-
     let tempFrequentData = [...frequentData];
     tempFrequentData[index].isChecked = checked;
     setFrequentData([...tempFrequentData]);
@@ -141,143 +203,159 @@ function FrequentlyBought({ mainProductMrp, mainProductWithCurrency, id, orderTy
   // }
 
   const RenderProductDetails = ({ index }) => {
-    return frequentData[index] ? <>
-      <div className="text-center">
-        {
-          frequentData[index]?.productImage ? (
-            <div style={{ height: 150 }} className="position-relative">
-              <img src={frequentData[index]?.productImage} className="cursor-pointer" alt={frequentData[index]?.productName} style={{ objectFit: "contain", height: "100%" }} onClick={() => {
-                history.push(`${routes.eCommerceDetail.path}/${frequentData[index]._id}/${orderType}`)
-              }} />
 
-              <Checkbox className="position-absolute"
+    return frequentData[index] ? (
+      <> 
+        <Grid container className="d-flex justify-content-center align-item-center" style={{ backgroundColor: 'white' }}>
+          {frequentData[index]?.productImage ? (
+            
+              <Grid xs={12}  className={`${classes.imgLayout} position-relative`}>
+              <img
+                src={frequentData[index]?.productImage}
+                className={`${classes.logoAlign} cursor-pointer`}
+                alt={frequentData[index]?.productName}
+                style={{ objectFit: 'contain', height: '100%' }}
+                onClick={() => {
+                  history.push(`${routes.eCommerceDetail.path}/${frequentData[index]._id}/${orderType}`);
+                }}
+              />
+
+              <Checkbox
                 disabled={frequentData[index].isAddedInCart}
-                style={{ top: "-100%" }}
+                style={{position:"absolute" , top: '0' , right:"0" }}
                 color="primary"
                 checked={frequentData[index].isChecked}
                 onChange={(e) => {
-                  handleChange(e.target.checked, index)
+                  handleChange(e.target.checked, index);
                 }}
                 inputProps={{ 'aria-label': 'primary checkbox' }}
               />
-            </div>
+            
+            </Grid>
           ) : (
-            <BsImage className={`${styles.no_image} cursor-pointer`} onClick={() => {
-              history.push(`${routes.eCommerceDetail.path}/${frequentData[index]._id}/${orderType}`)
-            }} />
-          )
-        }
-      </div>
-      <h3 className="my-3 text-center text-truncate">{frequentData[index]?.productName}</h3>
+            <BsImage
+              className={`${styles.no_image} cursor-pointer`}
+              onClick={() => {
+                history.push(`${routes.eCommerceDetail.path}/${frequentData[index]._id}/${orderType}`);
+              }}
+            />
+          )}
+        </Grid>
+        <h4 className="pt-3 pb-2 text-truncate px-2" style={{color:"var(--primary-light)", opacity:"0.8"}}>{frequentData[index]?.productName}</h4>
 
-      <div className={`${styles.price} d-flex align-items-center justify-content-center`}>
-        {
-          frequentData[index] ? `${formatAmountWithCurrency(frequentData[index].currency, frequentData[index].mrp ?? 0)?.fullFormatAmount}` : ""
-        }
-      </div>
-
-    </> : <></>
-  }
+        <div className={`${styles.price} d-flex align-items-center px-2 pb-4`}>
+          {frequentData[index] ? `${formatAmountWithCurrency(frequentData[index].currency, frequentData[index].mrp ?? 0)?.fullFormatAmount}` : ''}
+        </div>
+      </>
+    ) : (
+      <></>
+    );
+  };
 
   const getSelectedRecordsTotal = () => {
-    return frequentData.filter(f => f.isChecked && f.mrp).map(m => Number(m.mrp)).reduce((a, b) => a + b, 0) ?? 0;
-  }
-
+    return (
+      frequentData
+        .filter((f) => f.isChecked && f.mrp)
+        .map((m) => Number(m.mrp))
+        .reduce((a, b) => a + b, 0) ?? 0
+    );
+  };
 
   return (
     <>
-      <div className="d-flex w-100 align-items-center justify-content-center my-3">
-        <h1>Frequently bought together ({orderType})</h1>
+      <div className="d-flex w-100 align-items-center px-4 my-3">
+        <h2>Frequently bought together ({orderType})</h2>
       </div>
 
-      <Grid container className="mt-5">
-
-        <Grid item xs={8}>
-
-          <Grid container>
-            <Grid item xs={3}>
+      <Grid className={classes.addOnProducts}>
+        
+          <Grid container className="d-flex justify-content-center align-item-center" style={{ backgroundColor: 'white' }}>
+            <Grid item xs={11}>
               <RenderProductDetails index={0} />
             </Grid>
 
-            <Grid item xs={1} className="align-items-center d-flex">
-              <h2>+</h2>
-            </Grid>
-
-            <Grid item xs={3}>
-              <RenderProductDetails index={1} />
-            </Grid>
-
-            <Grid item xs={1} className="align-items-center d-flex">
-              <h2>+</h2>
-            </Grid>
-
-            <Grid item xs={3}>
-              <RenderProductDetails index={2} />
+            <Grid item xs={1} className={`${classes.addIcon} d-flex justify-content-center align-item-center`}>
+              <h2 className='align-self-center'>+</h2>
             </Grid>
           </Grid>
 
-        </Grid>
 
-        <Grid item xs={4} className="border">
+          <Grid container className="d-flex justify-content-center align-item-center" style={{ backgroundColor: 'white' }}>
+          <Grid item xs={11}>
+            <RenderProductDetails index={1} />
+          </Grid>
 
-          <div className="p-3 d-flex flex-column gap-3">
+          <Grid item xs={1} className={`${classes.addIcon} d-flex justify-content-center align-item-center`}>
+            <h2 className='align-self-center'>+</h2>
+          </Grid>
+          </Grid>
 
-            <h2>Price summary</h2>
 
-            <hr />
+          <Grid container className="d-flex justify-content-center align-item-center" style={{ backgroundColor: 'white' }}>
+          <Grid item xs={11}>
+            <RenderProductDetails index={2} />
+          </Grid>
+          <Grid item xs={1} className={`${classes.addIcon} d-flex justify-content-center align-item-center`}>
+            <h2 className='align-self-center'>=</h2>
+          </Grid>
+          
+          </Grid>
 
-            <div className="d-flex justify-content-space-between">
-              <h3>Main Product</h3>
-              <h3>
-                {mainProductWithCurrency}
-              </h3>
+
+
+          <Grid
+          style={{ backgroundColor: "white", padding: "20px 15px" }}
+          className={`${classes.gridLayout}`}
+        >
+            <div className="p-3 d-flex flex-column gap-3">
+              <h2>Price summary</h2>
+
+              <hr />
+
+              <div className="d-flex justify-content-space-between">
+                <h3>Main Product</h3>
+                <h3>{mainProductWithCurrency}</h3>
+              </div>
+
+              <div className="d-flex justify-content-space-between">
+                <h3>{frequentData.filter((f) => f.isChecked).length} Addon selected</h3>
+
+                <h3>
+                  {
+                    formatAmountWithCurrency(
+                      frequentData.find((f) => f.hasOwnProperty('currency') && f.currency)?.currency,
+                      getSelectedRecordsTotal()
+                    )?.fullFormatAmount
+                  }
+                </h3>
+              </div>
+
+              <hr />
+
+              <div className="d-flex justify-content-space-between">
+                <h3>Total</h3>
+
+                <h3>
+                  {
+                    formatAmountWithCurrency(
+                      frequentData.find((f) => f.hasOwnProperty('currency') && f.currency)?.currency,
+                      getSelectedRecordsTotal() + Number(mainProductMrp)
+                    )?.fullFormatAmount
+                  }
+                </h3>
+              </div>
+
+              <hr />
+
+              <div className="d-flex justify-content-space-between">
+                <Button variant="contained" onClick={() => {}} fullWidth color="primary">
+                  Add all to cart
+                </Button>
+              </div>
             </div>
-
-            <div className="d-flex justify-content-space-between">
-              <h3>
-                {frequentData.filter(f => f.isChecked).length} Addon selected
-              </h3>
-
-              <h3>
-                {formatAmountWithCurrency(frequentData.find(f => f.hasOwnProperty("currency") && f.currency)?.currency, getSelectedRecordsTotal())?.fullFormatAmount}
-              </h3>
-            </div>
-
-            <hr />
-
-            <div className="d-flex justify-content-space-between">
-              <h3>
-                Total
-              </h3>
-
-              <h3>
-                {formatAmountWithCurrency(frequentData.find(f => f.hasOwnProperty("currency") && f.currency)?.currency, getSelectedRecordsTotal() + Number(mainProductMrp))?.fullFormatAmount}
-              </h3>
-            </div>
-
-            <hr />
-
-            <div className="d-flex justify-content-space-between">
-              <Button
-                variant="contained"
-                onClick={() => {
-
-                }}
-                fullWidth
-                color="primary"
-              >
-                Add all to cart
-              </Button>
-            </div>
-
-          </div>
-
-        </Grid>
-
+          </Grid>
       </Grid>
-
     </>
-
 
     // <div className={styles.outerbox}>
     //   <div className={styles.set_width}>
@@ -336,7 +414,6 @@ function FrequentlyBought({ mainProductMrp, mainProductWithCurrency, id, orderTy
     //       </div>
     //     </div>
     //   </div>
-
 
     //   <div className={styles.wrapper}>
     //     <div className={styles.card}>
