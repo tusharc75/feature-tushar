@@ -1,15 +1,18 @@
 import { useState, useCallback, useEffect } from 'react';
 import Chart from 'react-chartjs-2';
-import { Grid, Box, Paper, Typography } from '@material-ui/core';
+import { Grid, Box, Paper, Typography, Popover, TextField, Button } from '@material-ui/core';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
+import { Autocomplete } from '@material-ui/lab';
+import { FilterList } from '@material-ui/icons';
+import Countries from "../../constants/Country.json"
 
 
 const OpportunityTrends = (props) => {
   const {
     state: { selectedEntity }
   } = useData();
-  const { salesFilter, moment } = props;
+  const { customerAccounts, marketSegments, salesReps, moment } = props;
   const [oppTrends, setOppTrends] = useState({
     labels: [],
     datasets: []
@@ -19,19 +22,57 @@ const OpportunityTrends = (props) => {
     datasets: []
   });
 
+  const [salesFilterAnchor, setFilterAnchor] = useState(null);
+  const [openFilter, setOpenFilter] = useState(false);
+  const [subMarketSegments, setSubMarketSegments] = useState([]);
+  const [currentFilter, setCurrentFilter] = useState('');
+
+  const [leadFilter, setLeadFilter] = useState({
+    marketSegment: {},
+    salesRep: {},
+    customerAccount: {},
+    subMarketSegment: {},
+    productCategory: {},
+    between: {
+      from: new Date(moment().subtract(1, 'year').calendar()),
+      to: new Date()
+    },
+    countrySellTo: {},
+    countryBillTo: {}
+  });
+
+  const [oppurtunityFilter, setOppurtunityFilter] = useState({
+    marketSegment: {},
+    salesRep: {},
+    customerAccount: {},
+    subMarketSegment: {},
+    productCategory: {},
+    between: {
+      from: new Date(moment().subtract(1, 'year').calendar()),
+      to: new Date()
+    },
+    countrySellTo: {},
+    countryBillTo: {}
+  });
+
   const fetchOppTrends = useCallback(() => {
     let params = {
       entity: selectedEntity || '',
+      marketSegment: oppurtunityFilter.marketSegment ? oppurtunityFilter.marketSegment['id'] : '',
+      subMarketSegment: oppurtunityFilter.subMarketSegment ? oppurtunityFilter.subMarketSegment['id'] : '',
+      customerAccount: oppurtunityFilter.customerAccount ? oppurtunityFilter.customerAccount['id'] : '',
+      countrySellTo: oppurtunityFilter.countrySellTo ? oppurtunityFilter.countrySellTo["optionValue"] : '',
+      countryBillTo: oppurtunityFilter.countryBillTo ? oppurtunityFilter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
-        from: new Date(salesFilter.between.from).toISOString().split('T')[0],
-        to: new Date(salesFilter.between.to).toISOString().split('T')[0]
+        from: new Date(oppurtunityFilter.between.from).toISOString().split('T')[0],
+        to: new Date(oppurtunityFilter.between.to).toISOString().split('T')[0]
       })
     };
 
     let url = '?';
     for (const k of Object.keys(params)) {
       if (params[k]) {
-        if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
+        if (k === 'between' && oppurtunityFilter.between.from && oppurtunityFilter.between.to) {
           url = `${url}${k}=${params[k]}&`;
         }
         if (k !== 'between') {
@@ -104,7 +145,7 @@ const OpportunityTrends = (props) => {
         });
       })
       .catch((err) => { });
-  }, [salesFilter, selectedEntity]);
+  }, [oppurtunityFilter, selectedEntity]);
 
   useEffect(() => {
     fetchOppTrends();
@@ -113,16 +154,21 @@ const OpportunityTrends = (props) => {
   const fetctCreatedLeads = useCallback(() => {
     let params = {
       entity: selectedEntity || '',
+      marketSegment: leadFilter.marketSegment ? leadFilter.marketSegment['id'] : '',
+      subMarketSegment: leadFilter.subMarketSegment ? leadFilter.subMarketSegment['id'] : '',
+      customerAccount: leadFilter.customerAccount ? leadFilter.customerAccount['id'] : '',
+      countrySellTo: leadFilter.countrySellTo ? leadFilter.countrySellTo["optionValue"] : '',
+      countryBillTo: leadFilter.countryBillTo ? leadFilter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
-        from: new Date(salesFilter.between.from).toISOString().split('T')[0],
-        to: new Date(salesFilter.between.to).toISOString().split('T')[0]
+        from: new Date(leadFilter.between.from).toISOString().split('T')[0],
+        to: new Date(leadFilter.between.to).toISOString().split('T')[0]
       })
     };
 
     let url = '?';
     for (const k of Object.keys(params)) {
       if (params[k]) {
-        if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
+        if (k === 'between' && leadFilter.between.from && leadFilter.between.to) {
           url = `${url}${k}=${params[k]}&`;
         }
         if (k !== 'between') {
@@ -164,19 +210,158 @@ const OpportunityTrends = (props) => {
         });
       })
       .catch((err) => { });
-  }, [selectedEntity, salesFilter.between]);
+  }, [selectedEntity, leadFilter]);
 
   useEffect(() => {
     fetctCreatedLeads();
   }, [fetctCreatedLeads]);
 
+  const handleClickFilter = (event) => {
+    setFilterAnchor(event.currentTarget);
+    setOpenFilter((prev) => !prev);
+  };
+
   return (
     <Grid container spacing={2}>
+      <Popover
+        open={openFilter}
+        anchorEl={salesFilterAnchor}
+        onClose={handleClickFilter}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center'
+        }}
+      >
+        <Box p={2}>
+          <Box width="250px">
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={salesReps}
+              autoHighlight
+              value={currentFilter === "lead" ? leadFilter.salesRep : oppurtunityFilter.salesRep}
+              getOptionLabel={(option: any) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                currentFilter === "lead" ?
+                  setLeadFilter({ ...leadFilter, salesRep: val })
+                  : setOppurtunityFilter({ ...oppurtunityFilter, salesRep: val });
+              }}
+              renderInput={(params) => <TextField {...params} label="Sales Rep" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={customerAccounts}
+              autoHighlight
+              value={currentFilter === "lead" ? leadFilter.customerAccount : oppurtunityFilter.customerAccount}
+              getOptionLabel={(option: any) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                let data = currentFilter === "lead" ? { ...leadFilter, customerAccount: val } : { ...oppurtunityFilter, customerAccount: val }
+                if (val?.countryBillTo) {
+                  let foundCountry = Countries.find(o => o.optionValue === val?.countryBillTo)
+                  if (foundCountry) {
+                    data.countryBillTo = foundCountry
+                  }
+                }
+                if (val?.countrySellTo) {
+                  let foundCountry = Countries.find(o => o.optionValue === val?.countrySellTo)
+                  if (foundCountry) {
+                    data.countrySellTo = foundCountry
+                  }
+                }
+                currentFilter === "lead" ?
+                  setLeadFilter({ ...data })
+                  : setOppurtunityFilter({ ...data })
+              }}
+              renderInput={(params) => <TextField {...params} label="Customer Account" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={marketSegments}
+              autoHighlight
+              value={currentFilter === "lead" ? leadFilter.marketSegment : oppurtunityFilter.marketSegment}
+              getOptionLabel={(option: any) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                currentFilter === "lead" ?
+                  setLeadFilter({ ...leadFilter, marketSegment: val })
+                  : setOppurtunityFilter({ ...oppurtunityFilter, marketSegment: val });
+                if (val) {
+                  setSubMarketSegments(marketSegments.salesFilter((d) => d?.parentSegment === val?.id));
+                } else {
+                  setSubMarketSegments([]);
+                }
+              }}
+              renderInput={(params) => <TextField {...params} label="Market Segment" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={subMarketSegments}
+              autoHighlight
+              value={currentFilter === "lead" ? leadFilter.subMarketSegment : oppurtunityFilter.subMarketSegment}
+              getOptionLabel={(option: any) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => currentFilter === "lead" ?
+                setLeadFilter({ ...leadFilter, subMarketSegment: val })
+                : setOppurtunityFilter({ ...oppurtunityFilter, subMarketSegment: val })}
+              renderInput={(params) => <TextField {...params} label="Sub-Market Segment" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={Countries}
+              autoHighlight
+              value={currentFilter === "lead" ? leadFilter.countrySellTo : oppurtunityFilter.countrySellTo}
+              getOptionLabel={(option: any) => option.optionLabel || ''}
+              getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
+              onChange={(_, val) => currentFilter === "lead" ?
+                setLeadFilter({ ...leadFilter, countrySellTo: val })
+                : setOppurtunityFilter({ ...oppurtunityFilter, countrySellTo: val })}
+              renderInput={(params) => <TextField {...params} label="Country Sell To" variant="outlined" />}
+            />
+            <Box mt={1} />
+
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={Countries}
+              autoHighlight
+              value={currentFilter === "lead" ? leadFilter?.countryBillTo : oppurtunityFilter?.countryBillTo}
+              getOptionLabel={(option: any) => option.optionLabel || ''}
+              getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
+              onChange={(_, val) => currentFilter === "lead" ?
+                setLeadFilter({ ...leadFilter, countryBillTo: val })
+                : setOppurtunityFilter({ ...oppurtunityFilter, countryBillTo: val })}
+              renderInput={(params) => <TextField {...params} label="Country Bill To" variant="outlined" />}
+            />
+          </Box>
+        </Box>
+      </Popover>
       <Grid item xs={12} sm={6}>
         <Paper>
           <Box p={2}>
             <Typography variant="h6">Opportunity Trends</Typography>
-
+            <Button
+              onClick={(event) => {
+                handleClickFilter(event)
+                setCurrentFilter("oppurtunity")
+              }}
+              color="primary"
+              endIcon={<FilterList />}>
+              Filters
+            </Button>
             <Chart type="line" data={oppTrends} />
           </Box>
         </Paper>
@@ -185,7 +370,15 @@ const OpportunityTrends = (props) => {
         <Paper>
           <Box p={2}>
             <Typography variant="h6">Created Leads</Typography>
-
+            <Button
+              onClick={(event) => {
+                handleClickFilter(event)
+                setCurrentFilter("lead")
+              }}
+              color="primary"
+              endIcon={<FilterList />}>
+              Filters
+            </Button>
             <Chart type="bar" data={createdLeads} />
           </Box>
         </Paper>
