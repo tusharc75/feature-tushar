@@ -108,10 +108,10 @@ export default function ProductDetails() {
 
   const history = useHistory();
   let { id, orderType: orderTypeFromUrl } = useParams();
-  const orderTypeInLowerCase = orderTypeFromUrl.toLowerCase();
+  const orderTypeInLowerCase = orderTypeFromUrl?.toLowerCase();
 
   const [orderType, setOrderType] = useState(() => {
-    if (orderTypeFromUrl) {
+    if (!orderTypeFromUrl) {
       return ORDER_TYPES.rent.value;
     }
     return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
@@ -310,7 +310,7 @@ export default function ProductDetails() {
   return (
     <div className="container">
       <div className="p-2">
-        <ECommerceBreadCrumbs routes={[routes.eCommerce, { title: productDetails?.productName }]} />
+        <ECommerceBreadCrumbs routes={[{ path: `${routes.eCommerce.path}?category=${productDetails?.productCategory?.optionValue}&orderType=${orderType}`, title: productDetails?.productCategory?.optionLabel }, { title: productDetails?.productName }]} />
       </div>
       <Box>
         {productDetails ?

@@ -37,6 +37,7 @@ import { SET_USER, SET_SELECTED_ENTITY } from '../../../StateProvider/actionType
 import { capitalize } from 'lodash';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { ORDER_TYPES } from '../../../constants/helpers';
+import useQuery from '../../../hooks/useQuery';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -146,6 +147,8 @@ export default function ECommerceHeader() {
 
     const [moreAnchorEl, setMoreAnchorEl] = React.useState(null);
 
+    let query = useQuery();
+
     let { orderType: orderTypeFromUrl } = useParams();
     const orderTypeInLowerCase = orderTypeFromUrl?.toLowerCase();
 
@@ -254,8 +257,11 @@ export default function ECommerceHeader() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-            <MenuItem onClick={handleMenuClose}>My account</MenuItem> */}
+            {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem> */}
+            <MenuItem onClick={() => {
+                handleMenuClose()
+                history.push(`${routes.orders.path}`)
+            }}>Orders</MenuItem>
             <MenuItem onClick={logoutUser}>Logout</MenuItem>
         </Menu>
     );
@@ -325,12 +331,47 @@ export default function ECommerceHeader() {
                     <div className="d-flex align-items-center gap-2 mx-3">
                         <Button className={orderType === ORDER_TYPES.sale.value ? "border-bottom" : ""} style={{ color: "white" }}
                             onClick={() => {
-                                history.push(`${routes.eCommerce.path}/Sale`)
+                                setOrderType(ORDER_TYPES.sale.value);
+                                let queryString = [];
+
+                                queryString.push(`orderType=Sale`)
+
+                                if (query.get("category")) {
+                                    queryString.push(`category=${query.get("category")}`)
+                                }
+
+                                if (queryString.length > 0) {
+                                    history.push({
+                                        pathname: routes.eCommerce.path,
+                                        search: `?${queryString.join("&")}`
+                                    })
+                                }
+                                else {
+                                    history.push(routes.eCommerce.path)
+                                }
+
                             }}
                         >Buy</Button>
                         <Button className={orderType === ORDER_TYPES.rent.value ? "border-bottom" : ""} style={{ color: "white" }}
                             onClick={() => {
-                                history.push(`${routes.eCommerce.path}/Rent`)
+                                setOrderType(ORDER_TYPES.rent.value);
+                                let queryString = [];
+
+                                queryString.push(`orderType=Rent`)
+
+                                if (query.get("category")) {
+                                    queryString.push(`category=${query.get("category")}`)
+                                }
+
+                                if (queryString.length > 0) {
+                                    history.push({
+                                        pathname: routes.eCommerce.path,
+                                        search: `?${queryString.join("&")}`
+                                    })
+                                }
+                                else {
+                                    history.push(routes.eCommerce.path)
+                                }
                             }}
                         >Rent</Button>
                     </div>
