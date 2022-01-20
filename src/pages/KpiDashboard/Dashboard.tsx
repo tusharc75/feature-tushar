@@ -174,7 +174,7 @@ const Dashboard = () => {
                 marketSegments={marketSegments}
                 subMarketSegments={subMarketSegments}
                 productCategory={productCategory}
-                setSubMarketSegment={setSubMarketSegments}
+                setSubMarketSegments={setSubMarketSegments}
                 salesFilter={salesFilter}
                 setSalesFilter={setSalesFilter}
                 setDashboardType={setDashboardType}
@@ -195,7 +195,7 @@ const Dashboard = () => {
                     marketSegments={marketSegments}
                     subMarketSegments={subMarketSegments}
                     productCategory={productCategory}
-                    setSubMarketSegment={setSubMarketSegments}
+                    setSubMarketSegments={setSubMarketSegments}
                     setSalesFilter={setSalesFilter}
                   />
 
@@ -210,7 +210,7 @@ const Dashboard = () => {
                     marketSegments={marketSegments}
                     subMarketSegments={subMarketSegments}
                     productCategory={productCategory}
-                    setSubMarketSegment={setSubMarketSegments}
+                    setSubMarketSegments={setSubMarketSegments}
                     setSalesFilter={setSalesFilter}
                   />
 
@@ -225,7 +225,7 @@ const Dashboard = () => {
                     marketSegments={marketSegments}
                     subMarketSegments={subMarketSegments}
                     productCategory={productCategory}
-                    setSubMarketSegment={setSubMarketSegments}
+                    setSubMarketSegments={setSubMarketSegments}
                     setSalesFilter={setSalesFilter}
                   />
 
@@ -240,7 +240,7 @@ const Dashboard = () => {
                     marketSegments={marketSegments}
                     subMarketSegments={subMarketSegments}
                     productCategory={productCategory}
-                    setSubMarketSegment={setSubMarketSegments}
+                    setSubMarketSegments={setSubMarketSegments}
                     setSalesFilter={setSalesFilter}
                   />
 

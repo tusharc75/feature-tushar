@@ -82,9 +82,7 @@ const TopDashboard = (props) => {
     allData: []
   });
 
-  const fetchSalesData = useCallback(() => {
-    setLoadingChart(true);
-
+  const getURL = () => {
     let params = {
       entity: selectedEntity || "",
       marketSegment: filter.marketSegment ? filter.marketSegment['id'] : '',
@@ -101,6 +99,7 @@ const TopDashboard = (props) => {
     };
 
     let url = '?';
+
     for (const k of Object.keys(params)) {
       if (params[k]) {
         if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
@@ -111,8 +110,12 @@ const TopDashboard = (props) => {
         }
       }
     }
+    return url
+  }
 
-
+  const fetchSalesData = useCallback(() => {
+    setLoadingChart(true);
+    let url = getURL()
     axiosInstance()
       .get(`dashboard/sales${url}`)
       .then(async ({ data: { data } }) => {
@@ -203,14 +206,15 @@ const TopDashboard = (props) => {
   }, [fetchSalesData]);
 
   useEffect(() => {
-    axiosInstance().get("dashboard/total-weight-sold")
+    let url = getURL()
+    axiosInstance().get(`dashboard/total-weight-sold${url}`)
       .then(({ data }) => {
         setTotalValueMT({ qty: data?.data?.qty, unit: data?.data?.unit })
       })
       .catch((err) => {
 
       })
-  }, [selectedEntity])
+  }, [salesFilter, filter, filterCurrency, selectedEntity])
 
   useEffect(() => {
     const tableD = salesData.allData.map((d) => ({
@@ -607,7 +611,15 @@ const TopDashboard = (props) => {
         </Paper>
       </Grid>
       <Grid item xs={12} sm={12} md={12} lg={4}>
-        <TopDashboardTable moment={moment} filterCurrency={filterCurrency} currency={currency} getExchangeRates={getExchangeRates} />
+        <TopDashboardTable
+          moment={moment}
+          filterCurrency={filterCurrency}
+          currency={currency}
+          getExchangeRates={getExchangeRates}
+          salesReps={salesReps}
+          productCategory={productCategory}
+          customerAccounts={customerAccounts}
+          marketSegments={marketSegments} />
       </Grid>
     </Grid>
   );
