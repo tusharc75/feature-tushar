@@ -1559,7 +1559,7 @@ export const getData = (resource: string, data: any) => {
   switch (kebabCase(resource)) {
     case 'lead':
       return {
-        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+        name: `${data.company}`,
         id: data._id
       };
     case 'opportunity':

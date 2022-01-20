@@ -37,6 +37,7 @@ import CustomSwipableList from '../../../components/SwipableListComponents/Custo
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
+import { startCase } from "lodash";
 
 const tabs = {
   Inbox: 1,
@@ -207,7 +208,7 @@ const Email = () => {
   };
 
   const transform = (node, index) => {
-    if (node.type === 'tag' && ['h2', 'h1', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'u', 'ul', 'ol', 'li', 'del'].indexOf(node.name) >= 0) {
+    if (node.type === 'tag' && ['h2', 'h1', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'u', 'ul', 'ol', 'li', 'del', 'img'].indexOf(node.name) >= 0) {
       node.name = 'p';
       return convertNodeToElement(node, index, transform);
     }
@@ -263,7 +264,7 @@ const Email = () => {
           <Chip
             className="ml-3"
             color="primary"
-            label={`${d.type}`}
+            label={`${startCase(d.type)}`}
           />
         </>
       )
@@ -576,7 +577,13 @@ const Email = () => {
                 setFullScreen(false);
               }}
               fetchData={fetchEmails}
-              relatedTo={[{ type: 'my', name: user?.user?._id }]}
+              relatedTo={[
+                {
+                  type: resource && selectedResourceData ? camelCase(resource) : "user",
+                  referenceId: resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
+                  access: true,
+                },
+              ]}
               options={emailUsersOptions}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {

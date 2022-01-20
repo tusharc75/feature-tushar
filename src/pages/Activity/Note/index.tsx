@@ -28,6 +28,7 @@ import routes from '../../../components/Helpers/Routes';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import { MdAdd } from "react-icons/all";
 import { Autocomplete } from '@material-ui/lab';
+import { startCase } from "lodash";
 
 const Note = () => {
   const {
@@ -157,7 +158,7 @@ const Note = () => {
           <Chip
             className="ml-3"
             color="primary"
-            label={`${d.type}`}
+            label={`${startCase(d.type)}`}
           />
         </>
       )
@@ -166,6 +167,7 @@ const Note = () => {
     }
     </>
   );
+  
   const CreatedAtDateRenderer = (params) => <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(params.value)}</span>;
 
   const UpdatedAtDateRenderer = (params) =>
@@ -192,18 +194,14 @@ const Note = () => {
 
   const fetchNotes = async () => {
     // setLoading(true)
-
     dispatch({ type: 'loading', loading: true });
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     await GetNotes(JSON.stringify(filter))
       .then(({ data }) => {
         let rows = data.map((u) => {
           const { createdBy, updatedBy, ...restProperties } = u;
-
           let res = {
             ...restProperties,
             id: u._id,
@@ -358,7 +356,7 @@ const Note = () => {
                     }
                   }}
                   size="small"
-                  renderInput={(params) => <TextField {...params} label={`Select ${resource}`} variant="outlined" />}
+                  renderInput={(params) => <TextField {...params} label={`${resource}`} variant="outlined" />}
                 />
               )}
             </Grid>
@@ -505,7 +503,13 @@ const Note = () => {
         >
           <CreateNote
             noteId={isNew ? null : noteData?.id}
-            relatedTo={[{ type: 'my', name: user?.user?._id }]}
+            relatedTo={[
+              {
+                type: resource && selectedResourceData ? camelCase(resource) : "user",
+                referenceId: resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
+                access: true,
+              },
+            ]}
             handleClose={() => {
               handleClose()
               setFullScreen(false);
