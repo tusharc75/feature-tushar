@@ -577,10 +577,10 @@ function App() {
             <PrivateRoute exact path={`${routes.eCommerce.path}/cart/finish`} isEcommerceRoute={true}>
               <CheckoutSuccess />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.eCommerce.path}/orders`} isEcommerceRoute={true}>
+            <PrivateRoute exact path={`${routes.orders.path}`} isEcommerceRoute={true}>
               <Orders />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.eCommerce.path}/orders/:id`} isEcommerceRoute={true}>
+            <PrivateRoute exact path={`${routes.orderDetails.path}/:id`} isEcommerceRoute={true}>
               <OrderDetails />
             </PrivateRoute>
 
