@@ -7,13 +7,13 @@ import {
     InputBase,
     MenuItem,
     Menu,
-    TextField,
     Chip,
-    ClickAwayListener
+    ClickAwayListener,
+    Button
 } from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useHistory, useParams } from 'react-router-dom'
 import { useData } from '../../../StateProvider/Provider';
 import { alpha, makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
@@ -23,24 +23,20 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import { SVG } from "../../../assets"
 import { WishlistContext } from '../../../StateProvider/WishlistContext/WishlistProvider';
 import routes from '../../Helpers/Routes';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import useDebounce from '../../../hooks/useDebounce';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-
-
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import Divider from '@material-ui/core/Divider';
 import ListItemText from '@material-ui/core/ListItemText';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 import { isEmpty } from 'lodash';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { SET_USER, SET_SELECTED_ENTITY } from '../../../StateProvider/actionTypes';
 import { capitalize } from 'lodash';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { ORDER_TYPES } from '../../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -58,16 +54,16 @@ const useStyles = makeStyles((theme) => ({
     search: {
         position: 'relative',
         borderRadius: theme.shape.borderRadius,
-        backgroundColor: alpha(theme.palette.common.white, 0.15),
+        backgroundColor: "white",
         '&:hover': {
-            backgroundColor: alpha(theme.palette.common.white, 0.25),
+            backgroundColor: "white",
         },
         marginRight: theme.spacing(2),
         marginLeft: 0,
         width: '100%',
         [theme.breakpoints.up('sm')]: {
             marginLeft: theme.spacing(3),
-            width: 'auto',
+            // width: 'auto',
         },
     },
     searchIcon: {
@@ -78,9 +74,11 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        color: theme.palette.primary.main
     },
     inputRoot: {
-        color: 'inherit',
+        // color: 'inherit',
+        width: "100%"
     },
     inputInput: {
         padding: theme.spacing(1, 1, 1, 0),
@@ -88,9 +86,9 @@ const useStyles = makeStyles((theme) => ({
         paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
         transition: theme.transitions.create('width'),
         width: '100%',
-        [theme.breakpoints.up('md')]: {
-            width: '20ch',
-        },
+        // [theme.breakpoints.up('md')]: {
+        //     width: '20ch',
+        // },
     },
     sectionDesktop: {
         display: 'none',
@@ -109,7 +107,7 @@ const useStyles = makeStyles((theme) => ({
     },
     root: {
         width: '100%',
-        maxWidth: '36ch',
+        // maxWidth: '36ch',
         backgroundColor: theme.palette.background.paper,
     },
     inline: {
@@ -146,6 +144,29 @@ export default function ECommerceHeader() {
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
+    const [moreAnchorEl, setMoreAnchorEl] = React.useState(null);
+
+    let { orderType: orderTypeFromUrl } = useParams();
+    const orderTypeInLowerCase = orderTypeFromUrl?.toLowerCase();
+
+    const [orderType, setOrderType] = useState(() => {
+        if (orderTypeFromUrl) {
+            return ORDER_TYPES.rent.value;
+        }
+        return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+    });
+
+    const getOrderType = () => {
+        if (orderTypeFromUrl) {
+            return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+        }
+        return ORDER_TYPES.rent.value;
+    }
+
+    useEffect(() => {
+        setOrderType(getOrderType())
+    }, [orderTypeFromUrl])
+
     useEffect(() => {
         setLoading(true)
 
@@ -170,13 +191,21 @@ export default function ECommerceHeader() {
         setAnchorEl(event.currentTarget);
     };
 
-    const handleMobileMenuClose = () => {
-        setMobileMoreAnchorEl(null);
-    };
-
     const handleMenuClose = () => {
         setAnchorEl(null);
         handleMobileMenuClose();
+    };
+
+    const handleClick = (event) => {
+        setMoreAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setMoreAnchorEl(null);
+    };
+
+    const handleMobileMenuClose = () => {
+        setMobileMoreAnchorEl(null);
     };
 
     const handleMobileMenuOpen = (event) => {
@@ -289,9 +318,22 @@ export default function ECommerceHeader() {
                         <MenuIcon />
                     </IconButton>
 
-                    <Link to="/">
+                    <Link to={`${routes.eCommerce.path}/Rent`}>
                         <img className={classes.logo} src={SVG('LogoPng')} alt="equip logo" title="eQuipt Logo" />
                     </Link>
+
+                    <div className="d-flex align-items-center gap-2 mx-3">
+                        <Button className={orderType === ORDER_TYPES.sale.value ? "border-bottom" : ""} style={{ color: "white" }}
+                            onClick={() => {
+                                history.push(`${routes.eCommerce.path}/Sale`)
+                            }}
+                        >Buy</Button>
+                        <Button className={orderType === ORDER_TYPES.rent.value ? "border-bottom" : ""} style={{ color: "white" }}
+                            onClick={() => {
+                                history.push(`${routes.eCommerce.path}/Rent`)
+                            }}
+                        >Rent</Button>
+                    </div>
 
                     <ClickAwayListener onClickAway={() => {
                         setOpen(false);
@@ -316,11 +358,11 @@ export default function ECommerceHeader() {
 
                             {
                                 loading ? <div className="position-absolute border mt-2 d-flex align-items-center justify-content-center"
-                                    style={{ background: "white", zIndex: 10, height: 150, width: 300, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}>
+                                    style={{ background: "white", zIndex: 10, height: 150, width: 450, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}>
                                     <h4 className="loading-dots">Loading</h4>
                                 </div> : (
                                     open && <div className={`position-absolute border mt-2 ${searchItems.length === 0 ? "d-flex align-items-center justify-content-center" : ""}`}
-                                        style={{ background: "white", zIndex: 10, height: searchItems.length > 0 ? 500 : 150, width: 300, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}
+                                        style={{ background: "white", zIndex: 10, height: searchItems.length > 0 ? 500 : 150, width: 450, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}
                                     >
 
                                         {
@@ -372,6 +414,21 @@ export default function ECommerceHeader() {
                         </div>
                     </ClickAwayListener>
 
+                    <Button className="text-white mx-4" style={{ width: 150 }} endIcon={<ExpandMoreIcon />} aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
+                        Menu
+                    </Button>
+                    <Menu
+                        id="simple-menu"
+                        anchorEl={moreAnchorEl}
+                        keepMounted
+                        open={Boolean(moreAnchorEl)}
+                        onClose={handleClose}
+                    >
+                        <MenuItem onClick={handleClose}>Menu 1</MenuItem>
+                        <MenuItem onClick={handleClose}>Menu 2</MenuItem>
+                        <MenuItem onClick={handleClose}>Menu 3</MenuItem>
+                    </Menu>
+
                     <div className={classes.grow} />
                     <div className={classes.sectionDesktop}>
                         <IconButton color="inherit" onClick={() => {
@@ -417,4 +474,3 @@ export default function ECommerceHeader() {
         </div>
     );
 }
-

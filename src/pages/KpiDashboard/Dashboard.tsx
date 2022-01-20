@@ -244,13 +244,13 @@ const Dashboard = () => {
                     setSalesFilter={setSalesFilter}
                   />
 
-                  <Box my={2}>
+                  {/* <Box my={2}>
                     <OpportunitiesDashboard />
-                  </Box>
+                  </Box> */}
                 </Box>
               )}
               {dashboardType && dashboardType.includes('Asset') && (
-                <Box p={1}>
+                <Box p={1} style={{backgroundColor:"#F5F5F5"}}>
                   <AssetDashboard salesFilter={salesFilter} />
                 </Box>
               )}

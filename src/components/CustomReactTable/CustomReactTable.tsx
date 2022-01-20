@@ -2,12 +2,10 @@
 import React, { useEffect } from 'react'
 import MaUTable from '@material-ui/core/Table'
 import { TableBody, TableCell, TableHead, TableFooter, TableRow } from '@material-ui/core'
-import Checkbox from '@material-ui/core/Checkbox';
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
-import { TablePagination } from '@material-ui/core'
-import { gridPageSizes, treeToFlatArray } from '../../constants/helpers'
+import { treeToFlatArray } from '../../constants/helpers'
 import { uniqBy } from 'lodash';
-import { useTable, useExpanded, useRowSelect, usePagination, useFlexLayout } from 'react-table'
+import { useTable, useExpanded, useRowSelect, useFlexLayout } from 'react-table'
 import { useSticky } from "react-table-sticky";
 
 const IndeterminateCheckbox = React.forwardRef(

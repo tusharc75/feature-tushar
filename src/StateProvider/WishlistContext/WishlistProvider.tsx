@@ -1,6 +1,4 @@
-import React, { useState, createContext, useEffect, useReducer } from 'react'
-import axiosInstance from '../../axios/axiosInstance';
-import { eProduct } from '../../constants/helpers';
+import { createContext, useReducer } from 'react'
 import { wishlistInitialState, wishlistReducer } from './WishlistReducer';
 
 const WishlistContext = createContext(null);

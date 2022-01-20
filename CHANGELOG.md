@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.44.0](https://github.com/vebholic/oms_frontend/compare/v2.43.0...v2.44.0) (2022-01-20)
+
+
+### Features
+
+* - Cart icon removed from header of common layout ([28edc47](https://github.com/vebholic/oms_frontend/commit/28edc47c3fe6a9d97575f8855389fd9dbc3da4c0))
+* - Frequently bought together button added ([d83da7f](https://github.com/vebholic/oms_frontend/commit/d83da7f41d8b364e19b8bccb876d30e36bb36d43))
+* - Header - Highlighted selection of Rent/Buy done ([c2cb2aa](https://github.com/vebholic/oms_frontend/commit/c2cb2aa206b200e97ee8ee0531e8e82041ee3537))
+* - Product details code updated ([d783d7f](https://github.com/vebholic/oms_frontend/commit/d783d7fac4ea28d75d91e0bda835510ed8cbc684))
+* - Product details screen changed ([769406c](https://github.com/vebholic/oms_frontend/commit/769406cdc9831e7f7d65c200246ff6517bab149c))
+* **checkout:** add checkout page ([7fb2aff](https://github.com/vebholic/oms_frontend/commit/7fb2affad63cbfb1e6c30a67ad3210cc52076498))
+* **feature/avisekh:** feature/avisekh ([6acea09](https://github.com/vebholic/oms_frontend/commit/6acea09553eb20bb648dac7462bb0c8ede0a5990))
+* **OpportunityDashboards:** Number of Quotes dashboard not required ([2f977c0](https://github.com/vebholic/oms_frontend/commit/2f977c05a5a81ab0be96610815f8fb1e59f3706b))
+* **product:** add filters ([d5e9069](https://github.com/vebholic/oms_frontend/commit/d5e9069562b5ccb3bb3f490bc047cd1552e9c6d4))
+* **Quote:** Enable save button in case of cloning ([ff61d1b](https://github.com/vebholic/oms_frontend/commit/ff61d1b137b9f7af041ac848c5dec6af6bd49164))
+
+
+### Bug Fixes
+
+* **Address:** Address filed issue fixed ([cb5d5cf](https://github.com/vebholic/oms_frontend/commit/cb5d5cf80162e41303ba834b5e5f2658612f836f))
+* **app.tsx:** conflict fix ([01603e4](https://github.com/vebholic/oms_frontend/commit/01603e4c132090c51d58bb7f1a2663153e802acd))
+* bug fix ([a00f699](https://github.com/vebholic/oms_frontend/commit/a00f699774d6223a24d05184848fefdd36fa7bb8))
+* bug fix ([45b6f55](https://github.com/vebholic/oms_frontend/commit/45b6f55b31badbc980e734615ae5c28484a043b0))
+* bug fix ([d6d9086](https://github.com/vebholic/oms_frontend/commit/d6d9086fa303e9dbea1dd9269657e1d0b2c0793f))
+* **code optimised:** code optimised ([8aa1e39](https://github.com/vebholic/oms_frontend/commit/8aa1e39bfa5fd5b40b6c1aa19e4ed0a9630550ec))
+* coloum hide show ([19a5d4d](https://github.com/vebholic/oms_frontend/commit/19a5d4d70d9c0e5924bf4841bd74f5e4ed97224c))
+* **helpers:** Address added in side bar key ([ce64286](https://github.com/vebholic/oms_frontend/commit/ce64286d8c27dc2100dec9f6ce18bfca46e8fa27))
+* **PaymentForm:** Typescript type fix ([00b6105](https://github.com/vebholic/oms_frontend/commit/00b6105aacc22e92142d34710762c28bd6393296))
+* po-1030 ([f0c9040](https://github.com/vebholic/oms_frontend/commit/f0c90409990b1765638c5c40edb6698092abf166))
+* **product details:** fix and change ([330d63b](https://github.com/vebholic/oms_frontend/commit/330d63b1c9096bf3592c6ff3258d4e17c2553c66))
+* rental changes ([3e40678](https://github.com/vebholic/oms_frontend/commit/3e406780b5ba9f8aad7ae0b0e6b27b0ab15e91fc))
+
 ## [2.43.0](https://github.com/vebholic/oms_frontend/compare/v2.42.0...v2.43.0) (2022-01-19)
 
 

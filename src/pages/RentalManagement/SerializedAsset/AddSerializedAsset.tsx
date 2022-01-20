@@ -8,7 +8,7 @@ import SearchBox from '../../../components/Helpers/SearchBox'
 import routes from "../../../components/Helpers/Routes";
 import { Link, useHistory } from 'react-router-dom';
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData, INVENTORY_STATUS } from '../../../constants/helpers';
+import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData, INVENTORY_STATUS, transferAsset } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { useData } from "../../../StateProvider/Provider";
 import Dialog from "@material-ui/core/Dialog/Dialog";
@@ -17,15 +17,16 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import { prepareDataForGrid } from "../../../constants/helpers"
 import { isMobile, isTablet } from "react-device-detect";
-import { AddOutlined } from "@material-ui/icons";
 import { MdAdd } from "react-icons/md";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import { groupBy, orderBy, sortBy, uniq, map } from "lodash";
+import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
 
 const addSerializedAssetsRenderedFrom = "addSerializedAssets";
 const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
 
 const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, refrenceType = null,
+    refrenceData = null,
     rentalId = null, repairJobId = null, transferAssetId = null, salesOrderId = null, notIn = null, queryString = null, filterByPlant = null }) => {
 
     const toastConfig = useContext(CustomToastContext)
@@ -38,6 +39,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
     const { state: { permissions } }: any = useData();
     const history = useHistory();
+
+    const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
 
     useEffect(() => {
         fetchProductInventory()
@@ -229,6 +232,21 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         }
     };
 
+    const handleAddAssetToTransferAsset = (transferAssetId) => {
+        axiosInstance().put(`${transferAsset.api}/add-asset/${transferAssetId}`, {
+            assets: getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map(s => s._id),
+            manualStatus: INVENTORY_STATUS.reserved
+        })
+            .then(({ data }) => {
+                fetchProductInventory()
+                setShowTransferAssetDialog(false)
+                addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])
+            })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+            })
+    }
+
     return (<Fragment>
         {(<Dialog
             fullScreen={true}
@@ -268,7 +286,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                         <Box ml={isMobile ? 0 : 1} mt={isMobile ? 0 : 1} className="d-flex">
                                             <Button size="small"
                                                 color="primary"
-                                                onClick={() => { }}
+                                                onClick={() => { setShowTransferAssetDialog(true) }}
                                                 variant={isMobile && !isTablet ? 'text' : 'contained'}
                                                 disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 || isAdding || checkUniqWarehouse() ||
                                                     serializedProducts.some(d => d?.qty < 0)}
@@ -357,6 +375,21 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                 </div>
             </CustomDialogContent>
         </Dialog>
+        )}
+        {showTransferAssetDialog && (
+            <ManageTransferAsset
+                isClone={false}
+                transferAssetId={null}
+                onClose={() => setShowTransferAssetDialog(false)}
+                onSuccess={(data) => {
+                    handleAddAssetToTransferAsset(data?._id);
+                }}
+                refrenceType={"Rental Job"}
+                refrenceData={{
+                    transferFromPlant: getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0]?.warehouseId,
+                    transferToPlant: refrenceData?.warehouse
+                }}
+            />
         )}
     </Fragment>
     );
