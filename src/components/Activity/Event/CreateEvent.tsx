@@ -40,7 +40,7 @@ import { useAccount, useMsal } from "@azure/msal-react";
 import axiosInstance from "../../../axios/axiosInstance";
 import { useData } from "../../../StateProvider/Provider";
 import Loader from "../../Loader";
-import { dateFormat } from "../../../constants/helpers";
+import { dateFormat, getData } from "../../../constants/helpers";
 
 const EventSchema = object().shape({
   name: string().required("Please enter event name").min(3, "Too Short"),
@@ -220,43 +220,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
     "Lead",
     "Opportunity",
   ];
-
-  const getData = (resource: string, data: any) => {
-    switch (kebabCase(resource)) {
-      case "lead":
-        return {
-          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-          id: data._id,
-        };
-      case "opportunity":
-        return {
-          name: `${data.opportunityName}`,
-          id: data._id,
-        };
-      case "customer-account":
-        return {
-          name: `${data.accountName}`,
-          id: data._id,
-        };
-      case "supplier-account":
-        return {
-          name: `${data.accountName}`,
-          id: data._id,
-        };
-      case "customer-contact":
-        return {
-          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-          id: data._id,
-        };
-      case "supplier-contact":
-        return {
-          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-          id: data._id,
-        };
-      default:
-        break;
-    }
-  };
 
   return (
     <>

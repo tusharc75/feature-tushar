@@ -82,7 +82,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           {row.original?.type === "asset" &&
             <span className="d-flex align-items-center gap-2">
               <Chip label="Asset" size="small" color="primary" />
-              {(row.original.status === INVENTORY_STATUS.reserved && !isOffline) &&
+              {(row.original.status === INVENTORY_STATUS.reserved && row.original?.manualStatus !== INVENTORY_STATUS.reserved && !isOffline) &&
                 <IconButton size="small" onClick={() => {
                   setShowConfirmBox(true)
                   setDeleteData([row.original.inventory])
@@ -204,8 +204,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             detail: `${(i + 1)}.${(k + 1)} - ${_inventory.inventoryDetail?.assetNumber}`,
             type: "asset",
             status: _inventory.inventoryDetail?.status,
+            manualStatus: _inventory.inventoryDetail?.manualStatus,
             _id: _inventory.inventory,
-            isValid: true
+            isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true
           })
         })
         parent.subRows = subRows;
@@ -225,8 +226,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                 detail: `${(i + 1)}.${(j + 1)}.${(l + 1)} - ${_inventory.inventoryDetail?.assetNumber}`,
                 type: "asset",
                 status: _inventory.inventoryDetail?.status,
+                manualStatus: _inventory.inventoryDetail?.manualStatus,
                 _id: _inventory.inventory,
-                isValid: true
+                isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true
               })
             })
             _child.subRows = subRows;

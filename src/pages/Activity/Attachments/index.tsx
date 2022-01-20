@@ -31,6 +31,7 @@ import { MdAdd } from "react-icons/all";
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
+import { startCase } from "lodash";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -228,7 +229,7 @@ export default function Attachment() {
           <Chip
             className="ml-3"
             color="primary"
-            label={`${d.type}`}
+            label={`${startCase(d.type)}`}
           />
         </>
       )
@@ -607,7 +608,13 @@ export default function Attachment() {
           >
             <ManageAttachment
               attachmentId={attachmentData?.id}
-              relatedTo={[{ type: 'my', name: user?.user?._id }]}
+              relatedTo={[
+                {
+                  type: resource && selectedResourceData ? camelCase(resource) : "user",
+                  referenceId: resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
+                  access: true,
+                },
+              ]}
               handleClose={() => {
                 handleClose()
                 setFullScreen(false);

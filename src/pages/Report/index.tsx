@@ -24,10 +24,14 @@ import {
   prepareDataForGrid,
   gridLoadingTimeout,
   downloadExcel,
-  primaryFields
+  primaryFields,
+  dateFormat
 } from './../../constants/helpers';
 import Loader from '../../components/Loader';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import MomentUtils from '@date-io/moment';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { KeyboardDatePicker } from '@material-ui/pickers';
 
 const resourcesSelect = {
   rentalManagement: ['customerAccount', 'customerContact', 'warehouse', 'status'],
@@ -57,9 +61,13 @@ const Report = () => {
   let resourceStartCase = startCase(resource);
   const renderedFrom = `${resource}-report`;
 
-  const [dropdownList, setDropdownList] = React.useState(null);
-  const [selectedData, setSelectedData] = React.useState(null);
-  const [selectedResource, setSelectedResource] = React.useState(null);
+  const [dropdownList, setDropdownList] = React.useState([]);
+  const [selectedData, setSelectedData] = React.useState([]);
+  const [betweenDate, setBetweenDate] = React.useState({
+    startDate: new Date(),
+    endDate: new Date(),
+  });
+  const [selectedResource, setSelectedResource] = React.useState([]);
   const [isExporting, setExporting] = React.useState(false);
 
   // Grid Configs
@@ -69,6 +77,18 @@ const Report = () => {
   const [gridApi, setGridApi] = React.useState(null);
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+
+  const [resourceOptions, setResourceOptions] = React.useState([]);
+  React.useEffect(() => {
+    if (resource === "rental-management") {
+      setResourceOptions(["Date", ...resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : resourceNames[_r]))])
+    }
+    else {
+      setResourceOptions(resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : resourceNames[_r])))
+    }
+    fetchResourceData()
+    // eslint-disable-next-line
+  }, []);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -131,7 +151,7 @@ const Report = () => {
    * @returns none if no data selected
    */
   const fetchResourceData = () => {
-    if ((selectedData && Object.keys(selectedData).length === 0) || !selectedData) return;
+
     if (cancelTokenSource) {
       cancelTokenSource.cancel();
     }
@@ -141,8 +161,9 @@ const Report = () => {
       gridApi.setRowData([]);
     }
     let filterQuery = getFilter();
+
     axiosInstance()
-      .get(`${routes[resourceCamelCase].path}/report?${filterQuery}`, {
+      .get(`${routes[resourceCamelCase].path}/report${filterQuery}`, {
         cancelToken: cancelTokenSource.token
       })
       .then(({ data: { data } }) => {
@@ -166,7 +187,7 @@ const Report = () => {
   // Create and return query for filters
   const getFilter = () => {
     let filterQuery = '';
-
+    if (((selectedData && Object.keys(selectedData).length === 0) || !selectedData) && !selectedResource.includes("Date")) return filterQuery;
     let filterById = Object.keys(selectedData)
       .filter((d) => d !== 'Status')
       .map((_d) => {
@@ -193,8 +214,14 @@ const Report = () => {
     if (deepFilter && deepFilter.length > 0) {
       filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
     }
-
-    return filterQuery;
+    if (betweenDate) {
+      let tempBetween = {
+        from: betweenDate.startDate,
+        to: betweenDate.endDate
+      }
+      filterQuery = `${filterQuery}between=${JSON.stringify(tempBetween)}&`;
+    }
+    return `?${filterQuery}`;
   };
 
   const exportData = () => {
@@ -262,7 +289,7 @@ const Report = () => {
               <Grid container className={styles.rental_header_layout} spacing={1}>
                 <Grid item xs={12} md={3}>
                   <Autocomplete
-                    options={resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : resourceNames[_r]))}
+                    options={["All", ...resourceOptions]}
                     limitTags={2}
                     disableListWrap
                     ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
@@ -270,8 +297,12 @@ const Report = () => {
                     multiple
                     value={selectedResource ?? []}
                     onChange={(_, val) => {
-                      setSelectedResource(val);
-
+                      if (val.includes("All")) {
+                        setSelectedResource(resourceOptions);
+                      }
+                      else {
+                        setSelectedResource(val);
+                      }
                       if (selectedData) {
                         setSelectedData((prevState) => {
                           const data = Object.keys(prevState);
@@ -299,27 +330,76 @@ const Report = () => {
                       selectedResource.map((data: string) => {
                         data = data === 'Plant' ? 'Warehouse' : data;
                         const options = data === 'Status' ? status[resourceCamelCase] : dropdownList && dropdownList[data] ? dropdownList[data] : [];
+                        if (data === "Date") {
+                          return (
+                            <MuiPickersUtilsProvider utils={MomentUtils}>
+                              <KeyboardDatePicker
+                                autoOk
+                                size="medium"
+                                variant="inline"
+                                inputVariant="outlined"
+                                name="startDate"
+                                label="Start Date"
+                                value={betweenDate.startDate}
+                                onChange={(date: any) => {
+                                  setBetweenDate({
+                                    ...betweenDate,
+                                    startDate: date
+                                  });
+                                }}
+                                format={dateFormat}
+                                InputLabelProps={{
+                                  shrink: true,
+                                }}
+                                margin='dense'
+                              />
+                              <Box mx={1} />
+                              <KeyboardDatePicker
+                                autoOk
+                                size="medium"
+                                variant="inline"
+                                inputVariant="outlined"
+                                name="endDate"
+                                label="End Date"
+                                value={betweenDate.endDate}
+                                onChange={(date: any) => {
+                                  setBetweenDate({
+                                    ...betweenDate,
+                                    endDate: date
+                                  });
+                                }}
+                                format={dateFormat}
+                                InputLabelProps={{
+                                  shrink: true,
+                                }}
+                                margin='dense'
+                              />
+                            </MuiPickersUtilsProvider>
+                          );
+                        }
+                        else {
+                          return (
+                            <Grid item xs={12} sm={4} key={data}>
+                              <Autocomplete
+                                options={options}
+                                limitTags={2}
+                                disableCloseOnSelect={false}
+                                disableListWrap
+                                ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
+                                multiple
+                                value={selectedData && selectedData[data] ? selectedData[data] : []}
+                                onChange={(_, val) => setSelectedData({ ...selectedData, [data]: val })}
+                                fullWidth
+                                getOptionSelected={(option, val) => (data === 'Status' ? option === val : option.optionValue === val.optionValue)}
+                                getOptionLabel={(option) => (data === 'Status' ? option : option.optionLabel)}
+                                renderInput={(params) => (
+                                  <TextField {...params} variant="outlined" label={data === 'Warehouse' ? 'Plant' : data} size="small" />
+                                )}
+                              />
+                            </Grid>
+                          );
+                        }
 
-                        return (
-                          <Grid item xs={12} sm={4} key={data}>
-                            <Autocomplete
-                              options={options}
-                              limitTags={2}
-                              disableCloseOnSelect={false}
-                              disableListWrap
-                              ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
-                              multiple
-                              value={selectedData && selectedData[data] ? selectedData[data] : []}
-                              onChange={(_, val) => setSelectedData({ ...selectedData, [data]: val })}
-                              fullWidth
-                              getOptionSelected={(option, val) => (data === 'Status' ? option === val : option.optionValue === val.optionValue)}
-                              getOptionLabel={(option) => (data === 'Status' ? option : option.optionLabel)}
-                              renderInput={(params) => (
-                                <TextField {...params} variant="outlined" label={data === 'Warehouse' ? 'Plant' : data} size="small" />
-                              )}
-                            />
-                          </Grid>
-                        );
                       })}
                   </Grid>
                 </Grid>
