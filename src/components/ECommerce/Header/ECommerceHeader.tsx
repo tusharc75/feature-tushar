@@ -259,7 +259,8 @@ export default function ECommerceHeader() {
         >
             {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem> */}
             <MenuItem onClick={() => {
-                history.push(`${routes.eCommerce.path}/orders`)
+                handleMenuClose()
+                history.push(`${routes.orders.path}`)
             }}>Orders</MenuItem>
             <MenuItem onClick={logoutUser}>Logout</MenuItem>
         </Menu>
