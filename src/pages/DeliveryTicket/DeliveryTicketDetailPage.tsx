@@ -211,6 +211,9 @@ export default function DeliveryTicketDetail(props) {
           return true
         })
       }
+      if (ticket?.ticketType !== DELIVERY_TICKET_TYPE.return) {
+        data = data.filter((fields: any) => fields.fieldData.fieldName !== "returnReason")
+      }
       setDeliveryTicketFields(data);
       setLoading(false);
     }

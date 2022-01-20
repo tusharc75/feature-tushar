@@ -71,15 +71,14 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
   };
 
   var filterFieldType = [];
+  var isCalculativeField = true;
   if (module === 'form-builder') {
     filterFieldType = ['DECIMAL', 'CURRENCYAMOUNT', 'FORMULA', 'VLOOKUPDROPDOWN', 'CONVERTER'];
-  }
-  if (module === 'pdf-template') {
-    filterFieldType = ['SINGLELINE', 'MULTILINE', 'IMAGEUPLOAD'];
+    isCalculativeField = false;
   }
   if (subForms.includes(resource)) {
     filterFieldType = []
-    module = "form-builder-extra"
+    isCalculativeField = true;
   }
 
   const classes = useStyles();
@@ -90,42 +89,26 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
           <Grid item xs={12} md={3} sm={4}>
             <Box border={1} p={2} borderColor="grey.300" className={styles.set_gridbox_layout}>
               <Grid container spacing={1} className={styles.form_grid_box}>
-                {module !== 'pdf-template'
-                  ? Object.keys(FieldList).map((type, index) => {
-                    return !filterFieldType.includes(type) ? (
-                      <DragBox
-                        key={index}
-                        type="field"
-                        label={FieldList[type].label}
-                        name={FieldList[type].type}
-                        removeExtraField={removeExtraField}
-                      />
-                    ) : null;
-                  })
-                  : Object.keys(FieldList).map((type, index) => {
-                    return filterFieldType.includes(type) ? (
-                      <DragBox
-                        key={index}
-                        type="field"
-                        label={FieldList[type].label}
-                        name={FieldList[type].type}
-                        removeExtraField={removeExtraField}
-                      />
-                    ) : null;
-                  })}
+                {Object.keys(FieldList).map((type, index) => {
+                  return !filterFieldType.includes(type) ? (
+                    <DragBox
+                      key={index}
+                      type="field"
+                      label={FieldList[type].label}
+                      name={FieldList[type].type}
+                      removeExtraField={removeExtraField}
+                    />
+                  ) : null;
+                })}
               </Grid>
-              {module !== 'pdf-template' && (
-                <>
-                  <Box >
-                    <Divider />
-                  </Box>
-                  <DragBox name="New Section" label="New Section" type="master"></DragBox>
-                  {isCustomField && (
-                    <Box>
-                      <CustomField />
-                    </Box>
-                  )}
-                </>
+              <Box >
+                <Divider />
+              </Box>
+              <DragBox name="New Section" label="New Section" type="master"></DragBox>
+              {isCustomField && (
+                <Box>
+                  <CustomField />
+                </Box>
               )}
             </Box>
           </Grid>
@@ -140,6 +123,7 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
                 module={module}
                 extraFields={extraFields}
                 onAddRemoveField={onAddRemoveField}
+                isCalculativeField={isCalculativeField}
               />
             </Box>
           </Grid>
