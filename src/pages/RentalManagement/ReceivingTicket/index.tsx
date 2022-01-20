@@ -144,7 +144,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       });
       productAssets.forEach((d) => {
         d["isChecked"] = false;
-        d["hideSelection"] = [INVENTORY_STATUS.indTransit, INVENTORY_STATUS.lost].includes(d.status);
+        d["hideSelection"] = [INVENTORY_STATUS.indTransit, INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
       })
       if (productAssets.filter((e) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.available, INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(e.status)).length === productAssets.length) {
         setNextStep(true)
