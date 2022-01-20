@@ -27,8 +27,9 @@ import { camelCase } from 'lodash';
 import ProductListDialog from './ProductListDialog';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import { prepareDataForGrid } from "../../constants/helpers"
-import { MdAccountCircle,MdDescription,MdAdUnits,MdPriceCheck } from "react-icons/md";
-import { AiFillCrown,IoIosPricetags } from "react-icons/all";
+import { MdAccountCircle,MdDescription} from "react-icons/md";
+import { GoDeviceMobile } from "react-icons/go";
+import { AiFillCrown,IoIosPricetags, RiPriceTagLine } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 
@@ -536,12 +537,12 @@ const PackageList = () => {
                                             field:'packageDescription'
                                         },
                                        {
-                                           icon:<MdAdUnits />,
+                                           icon:<GoDeviceMobile />,
                                            label:'Unit: ',
                                            field:'unit'
                                        },
                                        {
-                                           icon:<MdPriceCheck/>,
+                                           icon:<RiPriceTagLine/>,
                                            label:'Pricing Method',
                                            field:'pricingMethod'
                                        }

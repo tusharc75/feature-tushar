@@ -259,6 +259,7 @@ function FrequentlyBought({ mainProductMrp, mainProductWithCurrency, id, orderTy
 
             <div className="d-flex justify-content-space-between">
               <Button
+                disabled={!frequentData.some(f => f.isAddedInCart === false && f.isChecked)}
                 variant="contained"
                 onClick={() => {
 
