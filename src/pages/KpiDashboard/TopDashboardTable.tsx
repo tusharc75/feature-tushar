@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Box, Paper, Typography, Table, TableBody, TableContainer, TableRow, TableCell, TableHead, Button, Menu, MenuItem } from '@material-ui/core';
-import { ImportExport } from '@material-ui/icons';
-import { startCase } from 'lodash';
+import { Box, Paper, Typography, Table, TableBody, TableContainer, TableRow, TableCell, TableHead, Button, Menu, MenuItem, Popover, TextField, FormControl, Grid, InputLabel, Select } from '@material-ui/core';
+import { FilterList, ImportExport } from '@material-ui/icons';
+import { filter, startCase } from 'lodash';
 import PptxGenJs from 'pptxgenjs';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -9,10 +9,11 @@ import { saveAs } from 'file-saver';
 import { utils, write } from 'xlsx';
 
 import axiosInstance from '../../axios/axiosInstance';
-import { formatAmountWithCurrency } from '../../constants/helpers';
+import { dateFormatForInputControl, formatAmountWithCurrency } from '../../constants/helpers';
 import { makeStyles } from '@material-ui/core/styles';
-import { Skeleton } from '@material-ui/lab';
+import { Autocomplete, Skeleton } from '@material-ui/lab';
 import { useData } from '../../StateProvider/Provider';
+import { KeyboardDatePicker } from 'formik-material-ui-pickers';
 
 const useStyles = makeStyles((theme) => ({
   regionTable: {
@@ -24,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates }) => {
+const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates, productCategory, salesReps, customerAccounts, marketSegments }) => {
   const {
     state: { selectedEntity }
   } = useData();
@@ -32,19 +33,65 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates 
   const [anchorElTable, setAnchorElTable] = useState(null);
   const [regionSales, setRegionSales] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [filterAnchor, setFilterAnchor] = useState(null);
+  const [openFilter, setOpenFilter] = useState(false);
+  const [filter, setFilter] = useState({
+    marketSegment: {},
+    salesRep: {},
+    customerAccount: {},
+    subMarketSegment: {},
+    productCategory: {},
+    between: {
+      from: new Date(moment().subtract(1, 'year').calendar()),
+      to: new Date()
+    },
+    countrySellTo: {},
+    countryBillTo: {}
+  });
+  const [subMarketSegments, setSubMarketSegments] = useState([]);
+
+  const getURL = () => {
+    let params = {
+      entity: selectedEntity || "",
+      marketSegment: filter.marketSegment ? filter.marketSegment['id'] : '',
+      subMarketSegment: filter.subMarketSegment ? filter.subMarketSegment['id'] : '',
+      productCategory: filter.productCategory ? filter.productCategory['id'] : '',
+      salesRep: filter.salesRep ? filter.salesRep['id'] : '',
+      customerAccount: filter.customerAccount ? filter.customerAccount['id'] : '',
+      between: JSON.stringify({
+        from: new Date(filter.between.from).toISOString().split('T')[0],
+        to: new Date(filter.between.to).toISOString().split('T')[0]
+      })
+    };
+
+    let url = '?';
+
+    for (const k of Object.keys(params)) {
+      if (params[k]) {
+        if (k === 'between' && filter.between.from && filter.between.to) {
+          url = `${url}${k}=${params[k]}&`;
+        }
+        if (k !== 'between') {
+          url = `${url}${k}=${params[k]}&`;
+        }
+      }
+    }
+    return url
+  }
 
   const fetchRegionalSalesData = () => {
     setLoading(true);
+    let url = getURL()
     axiosInstance()
-      .get('dashboard/regionalsales')
-      .then(async ({ data: { data } }) => {    
+      .get(`dashboard/regionalsales${url}`)
+      .then(async ({ data: { data } }) => {
         data = data.sort((a, b) => b.totalSell - a.totalSell);
         let regionSalesData = [];
         for (const d of data) {
           let totalBookedValue = 0;
           if (d.totalSell && filterCurrency && filterCurrency !== currency) {
             const rateData = await getExchangeRates(moment().format('YYYY-MM-DD'), d.totalSell);
-            totalBookedValue = rateData.rates[filterCurrency];
+            totalBookedValue = rateData?.rates[filterCurrency] || d.totalSell;
           } else {
             totalBookedValue = d.totalSell;
           }
@@ -60,7 +107,7 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates 
 
   useEffect(() => {
     fetchRegionalSalesData();
-  }, [filterCurrency, selectedEntity]);
+  }, [filterCurrency, filter, selectedEntity]);
 
   const handleClickTable = (event) => {
     setAnchorElTable(event.currentTarget);
@@ -99,7 +146,7 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates 
         doc.setFontSize(16);
         doc.text(`Sales Data By Region`, 70, 10);
 
-        let col = ['Region', 'Total Offered Value'];
+        let col = ['Region', 'Total Booked value By Region'];
         let row = [];
 
         if (regionSales && regionSales.length) {
@@ -148,8 +195,122 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates 
     setAnchorElTable(null);
   };
 
+
+  const handleClickFilter = (event) => {
+    setFilterAnchor(event.currentTarget);
+    setOpenFilter((prev) => !prev);
+  };
+
   return (
     <div>
+      <Popover
+        open={openFilter}
+        anchorEl={filterAnchor}
+        onClose={handleClickFilter}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center'
+        }}
+      >
+        <Box p={2}>
+          <Box width="250px">
+            {/* <Autocomplete
+              fullWidth
+              size="small"
+              disabled={filter.allEntity}
+              options={entities}
+              autoHighlight
+              value={filter.entity}
+              getOptionLabel={(option) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                setFilter({ ...filter, entity: val });
+              }}
+              renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
+            /> */}
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={salesReps}
+              autoHighlight
+              value={filter.salesRep}
+              getOptionLabel={(option: any) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                setFilter({ ...filter, salesRep: val });
+              }}
+              renderInput={(params) => <TextField {...params} label="Sales Rep" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={customerAccounts}
+              autoHighlight
+              value={filter.customerAccount}
+              getOptionLabel={(option: any) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                let data = { ...filter, customerAccount: val }
+                setFilter({ ...data });
+              }}
+              renderInput={(params) => <TextField {...params} label="Customer Account" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={marketSegments}
+              autoHighlight
+              value={filter.marketSegment}
+              getOptionLabel={(option: any) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => {
+                setFilter({ ...filter, marketSegment: val });
+                if (val) {
+                  setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
+                } else {
+                  setSubMarketSegments([]);
+                }
+              }}
+              renderInput={(params) => <TextField {...params} label="Market Segment" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={subMarketSegments}
+              autoHighlight
+              value={filter.subMarketSegment}
+              getOptionLabel={(option: any) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => setFilter({ ...filter, subMarketSegment: val })}
+              renderInput={(params) => <TextField {...params} label="Sub-Market Segment" variant="outlined" />}
+            />
+            <Box mt={1} />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={productCategory}
+              autoHighlight
+              value={filter.productCategory}
+              getOptionLabel={(option: any) => option.name || ''}
+              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
+              onChange={(_, val) => setFilter({ ...filter, productCategory: val })}
+              renderInput={(params) => <TextField {...params} label="Product Category" variant="outlined" />}
+            />
+            <Box mt={1} />
+          </Box>
+        </Box>
+      </Popover>
+      <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+        Filters
+      </Button>
       <Button onClick={handleClickTable} startIcon={<ImportExport />}>
         Export to
       </Button>

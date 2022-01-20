@@ -15,6 +15,7 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import styles from './product-detail-page.module.scss'
 import Filters from '../Filters';
 import { useParams } from 'react-router-dom';
+import ECommerceBreadCrumbs from '../../../components/ECommerce/BreadCrumbs/ECommerceBreadCrumbs';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -290,7 +291,7 @@ export default function Products() {
                     <Grid item xs={9} className="px-2">
 
                         <div className="p-2">
-                            <CustomBreadCrumbs routes={[{ title: routes.eCommerce.title }]} />
+                            <ECommerceBreadCrumbs routes={[{ title: routes.eCommerce.title }]} />
                         </div>
 
                         <div className="position-relative">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, Fragment } from "react";
+import { useState, useEffect, useContext, Fragment } from "react";
 import {
   Grid,
   Box,
@@ -40,13 +40,12 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import UserRoles from "./UserRoles";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
-import RoleEngine from "../../components/Shared/RoleEngine";
-import NewStepper from "../../components/Helpers/NewStepper";
-import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
-import { displayDate, isObjectEmpty, userType, defaultActivityShow, dateFormatForInputControl, opportunity, lead, customerAccount, supplierAccount, customerContact, supplierContact } from "../../constants/helpers";
+import {
+  displayDate, userType, defaultActivityShow, dateFormatForInputControl, opportunity,
+  lead, customerAccount, supplierAccount, customerContact, supplierContact
+} from "../../constants/helpers";
 import OpportunityAccordionInUserDetail from "./OpportunityAccordionInUserDetail";
 import LeadAccordionInUserDetailPage from "./LeadAccordionInUserDetailPage";
 import AccountAccordionDetail from "./AccountAccordionInDetail";
@@ -88,7 +87,6 @@ const UserDetailsPage = () => {
   const classes = useStyles();
   const { id } = useParams();
   const history = useHistory();
-  const location = useLocation();
   const queryParameter = useLocation().search;
   const userSetup = new URLSearchParams(queryParameter).get('userSetup');
   const {
@@ -123,10 +121,6 @@ const UserDetailsPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   // const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
-  const [doa, setDoa] = useState<any[]>([]);
-  const [doaCurrency, setDoaCurrency] = useState("");
-  const [doaType, setDoaType] = useState(null);
-  const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [orgChartData, setOrgChartData] = useState([])
@@ -675,7 +669,7 @@ const UserDetailsPage = () => {
                   showHeading={true}
                 >
                   {
-                    permissions?.role?.isUpdate && permissions?.entity?.isUpdate && 
+                    permissions?.role?.isUpdate && permissions?.entity?.isUpdate &&
                     <Button
                       variant="contained"
                       color="primary"
@@ -838,181 +832,181 @@ const UserDetailsPage = () => {
                         {/* </div> */}
                       </Box>
                     }
-              <Box hidden={userData?.proxyDOA ? currentTabIndex !== 3: currentTabIndex !== 2}>
-                <Box
-                  width="100%"
-                  padding={1}
-                  bgcolor="grey.200"
-                  display="flex"
-                  justifyContent="space-between"
-                >
-                  <Grid container>
-                    <Grid item xs={8}>
-                      <Box display="flex">
-                        <Box padding="5px">
-                          <Typography variant="subtitle2">
-                            User Time Track
-                          </Typography>
-                        </Box>
+                    <Box hidden={userData?.proxyDOA ? currentTabIndex !== 3 : currentTabIndex !== 2}>
+                      <Box
+                        width="100%"
+                        padding={1}
+                        bgcolor="grey.200"
+                        display="flex"
+                        justifyContent="space-between"
+                      >
+                        <Grid container>
+                          <Grid item xs={8}>
+                            <Box display="flex">
+                              <Box padding="5px">
+                                <Typography variant="subtitle2">
+                                  User Time Track
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </Grid>
+                        </Grid>
                       </Box>
-                    </Grid>
-                  </Grid>
-                </Box>
-                <Box padding="10px">
-                  <Grid item xs={12} sm={12} md={12}>
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                      <Box padding="10px">
+                        <Grid item xs={12} sm={12} md={12}>
+                          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                            <Grid container spacing={2}>
+                              <Grid item xs={12} sm={4}>
+                                <FormControl fullWidth size="small" variant="outlined">
+                                  <InputLabel id="duration">Select Duration</InputLabel>
+                                  <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
+                                    <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                                    <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                                    <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                                    <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                                    <MenuItem value={'custom'}>Custom</MenuItem>
+                                  </Select>
+                                </FormControl>
+                              </Grid>
+                              <Grid item xs={6} sm={4}>
+                                <KeyboardDatePicker
+                                  disabled={timeFrame !== 'custom'}
+                                  inputVariant="outlined"
+                                  variant="inline"
+                                  fullWidth
+                                  autoOk
+                                  disableFuture
+                                  size="small"
+                                  openTo="year"
+                                  format={dateFormatForInputControl}
+                                  maxDate={trackingTime.between.to}
+                                  label="From"
+                                  views={['year', 'month', 'date']}
+                                  value={trackingTime.between.from}
+                                  onChange={(date) => {
+                                    setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
+                                  }}
+                                />
+
+
+                              </Grid>
+                              <Grid item xs={6} sm={4}>
+                                <KeyboardDatePicker
+                                  disabled={timeFrame !== 'custom'}
+                                  inputVariant="outlined"
+                                  variant="inline"
+                                  fullWidth
+                                  autoOk
+                                  disableFuture
+                                  size="small"
+                                  minDate={trackingTime.between.from}
+                                  openTo="year"
+                                  format={dateFormatForInputControl}
+                                  label="To"
+                                  views={['year', 'month', 'date']}
+                                  value={trackingTime.between.to}
+                                  onChange={(date) => {
+                                    setTrackingTime({ between: { to: date, from: trackingTime.between.from } });
+                                  }}
+                                />
+                              </Grid>
+                            </Grid>
+                          </MuiPickersUtilsProvider>
+                        </Grid>
+                      </Box>
+                      <Typography className="subtitle1 m-2">
+                        {
+
+                          userTrackingDataLoading ?
+                            (
+                              <Grid container spacing={2} style={{ padding: "8px" }}>
+                                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                              </Grid>
+                            )
+                            :
+                            userTrackingData.labels.length === 0 ?
+                              (
+                                <h3>No activity found in the selected date range</h3>
+                              )
+                              :
+                              <Line type="line" data={userTrackingData} />
+                        }
+                      </Typography>
+                    </Box>
+                    <Box hidden={userData?.proxyDOA ? currentTabIndex !== 4 : currentTabIndex !== 3}>
                       <Grid container spacing={2}>
-                        <Grid item xs={12} sm={4}>
-                          <FormControl fullWidth size="small" variant="outlined">
-                            <InputLabel id="duration">Select Duration</InputLabel>
-                            <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
-                              <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                              <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                              <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                              <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                              <MenuItem value={'custom'}>Custom</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                        <Grid item xs={6} sm={4}>
-                          <KeyboardDatePicker
-                            disabled={timeFrame !== 'custom'}
-                            inputVariant="outlined"
-                            variant="inline"
-                            fullWidth
-                            autoOk
-                            disableFuture
-                            size="small"
-                            openTo="year"
-                            format={dateFormatForInputControl}
-                            maxDate={trackingTime.between.to}
-                            label="From"
-                            views={['year', 'month', 'date']}
-                            value={trackingTime.between.from}
-                            onChange={(date) => {
-                              setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
-                            }}
-                          />
+                        <Grid item xs={12} sm={12} md={12} lg={12}>
+                          <Box
+                            width="100%"
+                            padding={1}
+                            bgcolor="grey.200"
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Typography variant="subtitle2">
+                              Assigned Entity ({entities?.length || 0})
+                            </Typography>
+                            {permissions.entity.isUpdate && permissions.role.isUpdate && (
+                              <IconButton
+                                title="Assign entities"
+                                color="primary"
+                                size="small"
+                                onClick={entityDialogOpen}
+                              >
+                                <ControlPoint />
+                              </IconButton>
+                            )}
+                          </Box>
+                          <Box padding={1}>
+                            {loading ? (
+                              <Box display="flex">
+                                {[1, 2].map((i) => (
+                                  <BoxWithBorder
+                                    key={i}
+                                    style={{
+                                      padding: "8px",
+                                      margin: "8px",
+                                      width: "100%",
+                                    }}
+                                  >
+                                    <Box padding={1}>
+                                      <Skeleton
+                                        variant="text"
+                                        width="100px"
+                                        height="20px"
+                                      />
+                                      <Box marginTop={1} />
+                                      <Skeleton variant="text" width="100%" height="15px" />
+                                    </Box>
+                                  </BoxWithBorder>
+                                ))}
+                              </Box>
+                            ) :
+                              entities?.length ? (
+                                <AssignedEntities
+                                  entities={entities}
+                                  permissions={permissions}
+                                  userId={id}
+                                  loggedInUser={user?.user}
+                                  onSuccess={() => {
+                                    fetchUserData();
+                                  }}
+                                  entityAccessIds={entityAccess}
+                                  roleAccessIds={roleAccessOfLoggedInUser}
+                                />
 
 
-                        </Grid>
-                        <Grid item xs={6} sm={4}>
-                          <KeyboardDatePicker
-                            disabled={timeFrame !== 'custom'}
-                            inputVariant="outlined"
-                            variant="inline"
-                            fullWidth
-                            autoOk
-                            disableFuture
-                            size="small"
-                            minDate={trackingTime.between.from}
-                            openTo="year"
-                            format={dateFormatForInputControl}
-                            label="To"
-                            views={['year', 'month', 'date']}
-                            value={trackingTime.between.to}
-                            onChange={(date) => {
-                              setTrackingTime({ between: { to: date, from: trackingTime.between.from } });
-                            }}
-                          />
+                              )
+                                : (
+                                  <Box textAlign="center" padding={2}>
+                                    <Typography>No Entities </Typography>
+                                  </Box>
+                                )
+                            }
+                          </Box>
                         </Grid>
                       </Grid>
-                    </MuiPickersUtilsProvider>
-                  </Grid>
-                </Box>
-                <Typography className="subtitle1 m-2">
-                  {
-
-                    userTrackingDataLoading ?
-                      (
-                        <Grid container spacing={2} style={{ padding: "8px" }}>
-                          <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                        </Grid>
-                      )
-                      :
-                      userTrackingData.labels.length === 0 ?
-                        (
-                          <h3>No activity found in the selected date range</h3>
-                        )
-                        :
-                        <Line type="line" data={userTrackingData} />
-                  }
-                </Typography>
-              </Box>
-              <Box hidden={userData?.proxyDOA ? currentTabIndex !== 4: currentTabIndex !== 3}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
-                  <Box
-                    width="100%"
-                    padding={1}
-                    bgcolor="grey.200"
-                    display="flex"
-                    justifyContent="space-between"
-                  >
-                    <Typography variant="subtitle2">
-                      Assigned Entity ({entities?.length || 0})
-                    </Typography>
-                    {permissions.entity.isUpdate && permissions.role.isUpdate && (
-                      <IconButton
-                        title="Assign entities"
-                        color="primary"
-                        size="small"
-                        onClick={entityDialogOpen}
-                      >
-                        <ControlPoint />
-                      </IconButton>
-                    )}
-                  </Box>
-                  <Box padding={1}>
-                    {loading ? (
-                      <Box display="flex">
-                        {[1, 2].map((i) => (
-                          <BoxWithBorder
-                            key={i}
-                            style={{
-                              padding: "8px",
-                              margin: "8px",
-                              width: "100%",
-                            }}
-                          >
-                            <Box padding={1}>
-                              <Skeleton
-                                variant="text"
-                                width="100px"
-                                height="20px"
-                              />
-                              <Box marginTop={1} />
-                              <Skeleton variant="text" width="100%" height="15px" />
-                            </Box>
-                          </BoxWithBorder>
-                        ))}
-                      </Box>
-                    ) :
-                      entities?.length ? (
-                        <AssignedEntities
-                          entities={entities}
-                          permissions={permissions}
-                          userId={id}
-                          loggedInUser={user?.user}
-                          onSuccess={() => {
-                            fetchUserData();
-                          }}
-                          entityAccessIds={entityAccess}
-                          roleAccessIds={roleAccessOfLoggedInUser}
-                        />
-
-
-                      )
-                        : (
-                          <Box textAlign="center" padding={2}>
-                            <Typography>No Entities </Typography>
-                          </Box>
-                        )
-                    }
-                  </Box>
-                </Grid>
-              </Grid>
-              </Box>
+                    </Box>
                   </>
                 )}
               </Box>
@@ -1322,42 +1316,42 @@ const UserDetailsPage = () => {
                     isAllowedToEdit={permissions.user.isUpdate}
                   />
                 }
-                {permissions[supplierAccount.accountResource]?.isRead && 
-                <AccountAccordionDetail
-                  type="supplier"
-                  accounts={[...supplierAccountRelatedData?.Owner ?? [], ...supplierAccountRelatedData?.Collaborator ?? []]}
-                  recordsPerLine={3}
-                  expanded={false}
-                  userId={id}
-                  onSuccess={() => {
-                    fetchUserRelatedDetail()
-                  }}
-                  isAllowedToEdit={permissions.user.isUpdate}
-                />}
-                {permissions[customerContact.contactResource]?.isRead && 
-                <ContactAccordionInDetailPage
-                  type="customer"
-                  contacts={[...customerContactRelatedData?.Owner ?? [], ...customerContactRelatedData?.Collaborator ?? []]}
-                  recordsPerLine={3}
-                  expanded={false}
-                  userId={id}
-                  onSuccess={() => {
-                    fetchUserRelatedDetail()
-                  }}
-                  isAllowedToEdit={permissions.user.isUpdate}
-                />}
-                {permissions[supplierContact.contactResource]?.isRead && 
-                <ContactAccordionInDetailPage
-                  type="supplier"
-                  contacts={[...supplierContactRelatedData?.Owner ?? [], ...supplierContactRelatedData?.Collaborator ?? []]}
-                  recordsPerLine={3}
-                  expanded={false}
-                  userId={id}
-                  onSuccess={() => {
-                    fetchUserRelatedDetail()
-                  }}
-                  isAllowedToEdit={permissions.user.isUpdate}
-                />}
+                {permissions[supplierAccount.accountResource]?.isRead &&
+                  <AccountAccordionDetail
+                    type="supplier"
+                    accounts={[...supplierAccountRelatedData?.Owner ?? [], ...supplierAccountRelatedData?.Collaborator ?? []]}
+                    recordsPerLine={3}
+                    expanded={false}
+                    userId={id}
+                    onSuccess={() => {
+                      fetchUserRelatedDetail()
+                    }}
+                    isAllowedToEdit={permissions.user.isUpdate}
+                  />}
+                {permissions[customerContact.contactResource]?.isRead &&
+                  <ContactAccordionInDetailPage
+                    type="customer"
+                    contacts={[...customerContactRelatedData?.Owner ?? [], ...customerContactRelatedData?.Collaborator ?? []]}
+                    recordsPerLine={3}
+                    expanded={false}
+                    userId={id}
+                    onSuccess={() => {
+                      fetchUserRelatedDetail()
+                    }}
+                    isAllowedToEdit={permissions.user.isUpdate}
+                  />}
+                {permissions[supplierContact.contactResource]?.isRead &&
+                  <ContactAccordionInDetailPage
+                    type="supplier"
+                    contacts={[...supplierContactRelatedData?.Owner ?? [], ...supplierContactRelatedData?.Collaborator ?? []]}
+                    recordsPerLine={3}
+                    expanded={false}
+                    userId={id}
+                    onSuccess={() => {
+                      fetchUserRelatedDetail()
+                    }}
+                    isAllowedToEdit={permissions.user.isUpdate}
+                  />}
               </div>
             </Paper>
           </div>

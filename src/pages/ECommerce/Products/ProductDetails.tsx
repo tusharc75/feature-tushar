@@ -33,6 +33,7 @@ import AutorenewIcon from '@material-ui/icons/Autorenew';
 import SimilarItems from "../../../components/ProductList/SimilarItems/SimilarItems";
 import FrequentlyBought from "../../../components/ProductList/FrequentlyBought/FrequentlyBought";
 import ProductConfiguration from "./ProductConfiguration";
+import ECommerceBreadCrumbs from "../../../components/ECommerce/BreadCrumbs/ECommerceBreadCrumbs";
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -309,7 +310,7 @@ export default function ProductDetails() {
   return (
     <div className="container">
       <div className="p-2">
-        <CustomBreadCrumbs routes={[routes.eCommerce, { title: productDetails?.productName }]} />
+        <ECommerceBreadCrumbs routes={[routes.eCommerce, { title: productDetails?.productName }]} />
       </div>
       <Box>
         {productDetails ?
@@ -681,7 +682,10 @@ export default function ProductDetails() {
           </Grid>
         }
         <hr />
-        <div className="my-3">
+
+
+        <div className="my-3 px-4">
+
           <FrequentlyBought id={id} orderType={orderType} mainProductMrp={Number(rateCurrency.mrp)} mainProductWithCurrency={rateCurrency.rateWithCurrency} />
         </div>
         <hr />

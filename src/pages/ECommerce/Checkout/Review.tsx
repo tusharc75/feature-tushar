@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Typography, Box, Grid, List, ListItem, ListItemText, Divider } from '@material-ui/core';
+import { Skeleton } from '@material-ui/lab';
 
 interface ReviewProps {
   totalAmount?: number | string;
@@ -15,19 +16,36 @@ const Review = (props: ReviewProps) => {
       </Typography>
 
       <List disablePadding>
-        {cartItems.map((item: any) => (
-          <ListItem>
-            <ListItemText primary={`${item.itemName} - `} />
-            <Typography variant="subtitle1" style={{ fontWeight: 700 }}>
-              {item.formattedAmount}
-            </Typography>
-          </ListItem>
-        ))}
-        <Divider/>
+        {cartItems.length > 0 ? (
+          cartItems.map((item: any) => (
+            <ListItem>
+              <ListItemText primary={`${item.itemName} - `} />
+              <Typography variant="subtitle1" style={{ fontWeight: 700 }}>
+                {item.formattedAmount}
+              </Typography>
+            </ListItem>
+          ))
+        ) : (
+          <>
+            <ListItem>
+              <ListItemText primary={<Skeleton variant="text" width={100} />} />
+              <Skeleton variant="text" width={40} />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary={<Skeleton variant="text" width={100} />} />
+              <Skeleton variant="text" width={40} />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary={<Skeleton variant="text" width={100} />} />
+              <Skeleton variant="text" width={40} />
+            </ListItem>
+          </>
+        )}
+        <Divider />
         <ListItem>
           <ListItemText primary={'Total - '} />
           <Typography variant="subtitle1" style={{ fontWeight: 700 }}>
-            {totalAmount ?? '$0'}
+            {totalAmount ? totalAmount : '$ 0'}
           </Typography>
         </ListItem>
       </List>
