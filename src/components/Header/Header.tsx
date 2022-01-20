@@ -954,9 +954,6 @@ const Header = ({ toggleDrawer }) => {
     if (history.location.pathname.includes(routes.deliveryTicketDetail.path)) {
       history.push({ pathname: routes.deliveryTicket.path })
     }
-    if (history.location.pathname.includes(routes.receivingTicketDetail.path)) {
-      history.push({ pathname: routes.receivingTicket.path })
-    }
     if (history.location.pathname.includes(routes.productInventoryDetail.path)) {
       history.push({ pathname: routes.productInventory.path })
     }

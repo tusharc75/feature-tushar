@@ -8,6 +8,7 @@ import {
     MenuItem,
     Menu,
     TextField,
+    Chip,
     ClickAwayListener
 } from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu';
@@ -39,7 +40,7 @@ import Typography from '@material-ui/core/Typography';
 import { isEmpty } from 'lodash';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { SET_USER, SET_SELECTED_ENTITY } from '../../../StateProvider/actionTypes';
-
+import { capitalize } from 'lodash';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -277,7 +278,7 @@ export default function ECommerceHeader() {
 
     return (
         <div className={classes.grow}>
-            <AppBar position="static">
+            <AppBar position="fixed">
                 <Toolbar>
                     <IconButton
                         edge="start"
@@ -327,23 +328,33 @@ export default function ECommerceHeader() {
                                                 {
                                                     searchItems.map((m) => (
                                                         <Fragment key={m._id}>
-                                                            <ListItem button alignItems="flex-start"
-                                                                onClick={() => {
-                                                                    setSearch("")
-                                                                    setOpen(false)
-                                                                    history.push(`${routes.eCommerceDetail.path}/${m._id}/sale`)
-                                                                }}>
+                                                            <ListItem alignItems="flex-start">
                                                                 <ListItemText
                                                                     primary={m.name}
                                                                     secondary={
-                                                                        <Typography
-                                                                            component="span"
-                                                                            variant="body2"
-                                                                            className={classes.inline}
-                                                                            color="textPrimary"
-                                                                        >
-                                                                            {m.type}
-                                                                        </Typography>
+                                                                        <div className="d-flex flex-column gap-2">
+                                                                            <Typography
+                                                                                component="span"
+                                                                                variant="body2"
+                                                                                className={classes.inline}
+                                                                                color="textPrimary"
+                                                                            >
+                                                                                {capitalize(m.type)}
+                                                                            </Typography>
+
+                                                                            <div className="d-flex gap-3">
+                                                                                <Chip className="cursor-pointer" label="Rent" color="primary" title="Rent" onClick={() => {
+                                                                                    setSearch("")
+                                                                                    setOpen(false)
+                                                                                    history.push(`${routes.eCommerceDetail.path}/${m._id}/Rent`)
+                                                                                }} />
+                                                                                <Chip className="cursor-pointer" label="Buy" color="primary" title="Buy" onClick={() => {
+                                                                                    setSearch("")
+                                                                                    setOpen(false)
+                                                                                    history.push(`${routes.eCommerceDetail.path}/${m._id}/Sale`)
+                                                                                }} />
+                                                                            </div>
+                                                                        </div>
                                                                     }
                                                                 />
                                                             </ListItem>

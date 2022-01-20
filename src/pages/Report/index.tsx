@@ -181,9 +181,9 @@ const Report = () => {
 
     let deepFilter = selectedData['Status']
       ? selectedData['Status'].map((_d) => ({
-          field: 'status',
-          term: _d
-        }))
+        field: 'status',
+        term: _d
+      }))
       : [];
 
     if (filterById.length > 0) {
@@ -234,13 +234,13 @@ const Report = () => {
     <div>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes[resourceCamelCase], { title: 'Report', path: '' }]} />
+          <CustomBreadCrumbs routes={[{ title: 'Reports', path: '/reports' }, { title: routes[resourceCamelCase]?.title, path: '' }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <Grid container direction="row">
             <Grid item xs={12} sm={12}>
               <Grid container justifyContent="flex-end">
-                <div id="importExportLinks" style={{ minWidth: 80}}>
+                <div id="importExportLinks" style={{ minWidth: 80 }}>
                   <span
                     aria-disabled={isExporting}
                     onClick={exportData}
@@ -354,7 +354,7 @@ const Report = () => {
                     selectedRecords={[]}
                     dataRows={dataRows}
                     dispatch={dispatch}
-                    onEdit={() => {}}
+                    onEdit={() => { }}
                     extraParamsToCheckDelete={false}
                     rowCount={rowCount}
                     page={page}
@@ -369,8 +369,8 @@ const Report = () => {
                     owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                     onCreate={false}
                     showClone={false}
-                    onDelete={(data) => {}}
-                    onClone={(data) => {}}
+                    onDelete={(data) => { }}
+                    onClone={(data) => { }}
                     renderedFrom={routes.transferAsset?.title}
                   />
                 ) : (
