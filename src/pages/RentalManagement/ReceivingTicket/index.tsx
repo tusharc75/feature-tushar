@@ -397,8 +397,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         </Tooltip>
 
         {(selectedRecords.length && selectedRecords?.filter(f =>
-        ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-          (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
+          ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+            (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
           && [INVENTORY_STATUS.underReview].includes(f.status)
         )?.length === selectedRecords?.length) ?
           <Fragment>
@@ -503,7 +503,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             renderedFrom={renderedFrom}
             rowClassRules={{
               'red-data-row': function (params) {
-                return [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some((s) => s === params.data.status);
+                return ([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some((s) => s === params.data.status) || params?.data?.returnTicketId
+                );
               }
             }}
             refreshGrid={fetchRecords}
