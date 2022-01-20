@@ -70,14 +70,6 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
     }
   };
 
-  React.useEffect(() => {
-    if (columns) {
-
-      sessionStorage.setItem('columns', JSON.stringify(columns))
-    }
-  }, [columns])
-
-
 
   return (
     <div>
@@ -119,7 +111,7 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
                 message: 'Filtered Successfully',
               });
 
-              sessionStorage.setItem('filterSuccess',JSON.stringify('filterSuccess'));
+              handleClose();
             }
 
 
@@ -174,13 +166,7 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
                                        
                          
                                 
-                                {/* <Field component="select" name={`fields.${index}`}>
-                                  <option value=''>Select a Field</option>
-                                  {JSON.parse(sessionStorage.getItem('columns')) !== null && JSON.parse(sessionStorage.getItem('columns'))?.map((column, index) => {
-                                    return <option key={index} value={column.field}>{column.headerName}</option>
-                                  })}
-                                </Field>
-                                <Field className="filter-field" name={`filters[${index}]`} id="standard-basic" label="Enter Filter Field" variant="standard" /> */}
+                             
                                  <TextField
                                       style={{  height: "30px"}}
                                       variant="outlined"

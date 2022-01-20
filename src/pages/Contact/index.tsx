@@ -354,26 +354,6 @@ export default function Contact(props) {
     }
   }, [filters]);
 
-  useEffect(() => {
-    if(JSON.parse(sessionStorage.getItem('sortSuccess')) === 'sortSuccess'){
-      handleClickClose();
-      sessionStorage.removeItem('sortSuccess')
-    }
-
-    
-  },[JSON.parse(sessionStorage.getItem('sortSuccess'))])
-
-
-  useEffect(() => {
-    if(JSON.parse(sessionStorage.getItem('filterSuccess')) === 'filterSuccess'){
-      handleFilterClose();
-      sessionStorage.removeItem('filterSuccess')
-    }
-
-    
-  },[JSON.parse(sessionStorage.getItem('filterSuccess'))])
-
-
 
   const handleEntityChange = (entityId) => {
     entityDispatch({ type: SET_SELECTED_ENTITY, payload: entityId });
