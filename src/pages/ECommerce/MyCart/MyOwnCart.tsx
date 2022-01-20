@@ -216,7 +216,7 @@ function MyOwnCart() {
     // if (checkoutLabel === 'Place Order') {
     //   setOpenPlaceOrderDialog(prevState => { return { ...prevState, open: true } });
     // }
-    history.push(`${routes.eCommerce.path}/order/checkout?shipTo=${selectedShippingAddress.optionValue}&billTo=${selectedBillingAddress.optionValue}`)
+    history.push(`${routes.eCommerce.path}/cart/checkout?shipTo=${selectedShippingAddress.optionValue}&billTo=${selectedBillingAddress.optionValue}`)
   };
 
   const onSuccess = () => {
