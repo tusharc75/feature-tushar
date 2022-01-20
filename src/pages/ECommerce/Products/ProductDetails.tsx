@@ -682,7 +682,10 @@ export default function ProductDetails() {
           </Grid>
         }
         <hr />
-        <div className="my-3">
+
+
+        <div className="my-3 px-4">
+
           <FrequentlyBought id={id} orderType={orderType} mainProductMrp={Number(rateCurrency.mrp)} mainProductWithCurrency={rateCurrency.rateWithCurrency} />
         </div>
         <hr />
