@@ -4,7 +4,6 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import AddIcon from '@material-ui/icons/Add';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -16,7 +15,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomContainer from '../../components/CustomContainer';
 import ManageWarehouse from './ManageWarehouse';
 import routes from '../../components/Helpers/Routes';
-import {AddOutlined, ExpandMore} from '@material-ui/icons';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../constants/helpers';
@@ -28,18 +27,17 @@ import EntitySelectionsDialog from "../../components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import Chip from "@material-ui/core/Chip"
-import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
 import { useLocation } from "react-router-dom";
 import queryString from "query-string";
-import { MdAccountCircle,MdSort, MdFilterList } from "react-icons/md";
-import {AiFillCrown, MdAdd} from "react-icons/all";
+import { MdSort, MdFilterList } from "react-icons/md";
+import { MdAdd } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import MobileSortDialog from "../../components/MobileSortDialog"
 import MobileFilterDialog from "../../components/MobileFilterDialog"
-
 
 const AddressResource = () => {
   const location = useLocation();
@@ -48,7 +46,7 @@ const AddressResource = () => {
   const {
     state: { permissions, user, selectedEntity }
   }: any = useData();
-  const {getColumnData} = useColumns();
+  const { getColumnData } = useColumns();
 
   const [warehousePermissions, setWarehousePermissions] = useState({
     isCreate: permissions?.warehouse?.isCreate,
@@ -166,7 +164,7 @@ const AddressResource = () => {
       .get(`/warehouse${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u,user);
+          let finalObject = prepareDataForGrid(u, user);
           finalObject["canDelete"] = warehousePermissions.isDelete;
           finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
           finalObject["allowedToEdit"] = warehousePermissions.isUpdate;
@@ -363,7 +361,7 @@ const AddressResource = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  
+
   const handleOpen = () => {
     setisOpenDialog(true);
   };
@@ -414,72 +412,72 @@ const AddressResource = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
-          <div className="d-flex align-items-center">
-              <FaWarehouse size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.warehouse.title}</span>
-            </div>
-            {isMobile && !isTablet &&
-        <div className="d-flex ">
-        <Button
-        onClick={handleClickOpen}
-        id="demo-customized-button"
-        aria-controls="demo-customized-menu"
-        aria-haspopup="true"
-        // aria-expanded={open ? 'true' : undefined}
-        color="secondary"
-        variant="text"
-        disableElevation
-        startIcon={<MdSort />}
-      >
-        Sort 
-        </Button>
-        <MobileSortDialog
-        isOpen={sortOpen}
-        handleClose={handleClickClose}
-        contentPart={null}
-        secHeading={["Sort Plants"]}
-        columns={columns}
-        dispatch={dispatch}
-        />
-        <Button
-        id="demo-customized-button"
-        aria-controls="demo-customized-menu"
-        aria-haspopup="true"
-        // aria-expanded={open ? 'true' : undefined}
-        variant="text"
-        color="secondary"
-        disableElevation
-        startIcon={<MdFilterList />}
-        onClick={handleOpen}
-      >
-        Filter 
-        </Button>
-        <MobileFilterDialog
-        isOpen={isOpenDialog}
-        handleClose={handleClose}
-        contentPart={null}
-        secHeading={["Filter Plants"]}
-        columns={columns}
-        dispatch={dispatch}
-        />
-        </div> }
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+              <div className="d-flex align-items-center">
+                <FaWarehouse size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.warehouse.title}</span>
+              </div>
+              {isMobile && !isTablet &&
+                <div className="d-flex ">
+                  <Button
+                    onClick={handleClickOpen}
+                    id="demo-customized-button"
+                    aria-controls="demo-customized-menu"
+                    aria-haspopup="true"
+                    // aria-expanded={open ? 'true' : undefined}
+                    color="secondary"
+                    variant="text"
+                    disableElevation
+                    startIcon={<MdSort />}
+                  >
+                    Sort
+                  </Button>
+                  <MobileSortDialog
+                    isOpen={sortOpen}
+                    handleClose={handleClickClose}
+                    contentPart={null}
+                    secHeading={["Sort Plants"]}
+                    columns={columns}
+                    dispatch={dispatch}
+                  />
+                  <Button
+                    id="demo-customized-button"
+                    aria-controls="demo-customized-menu"
+                    aria-haspopup="true"
+                    // aria-expanded={open ? 'true' : undefined}
+                    variant="text"
+                    color="secondary"
+                    disableElevation
+                    startIcon={<MdFilterList />}
+                    onClick={handleOpen}
+                  >
+                    Filter
+                  </Button>
+                  <MobileFilterDialog
+                    isOpen={isOpenDialog}
+                    handleClose={handleClose}
+                    contentPart={null}
+                    secHeading={["Filter Plants"]}
+                    columns={columns}
+                    dispatch={dispatch}
+                  />
+                </div>}
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
 
-                <Grid style={{display: "flex", flex:1}}>
+                <Grid style={{ display: "flex", flex: 1 }}>
                   <SearchBox
-                      onSearch={handleSearch}
-                      searchbox={styles.search_box_input}
-                      width={isMobile && !isTablet ? "200px" : "242px"}
-                      style={isMobile && !isTablet ? {flex:1} : {}}
-                      size="small"
-                      value={search}
-                      placeholder={`Search ${routes.warehouse.title}`}
+                    onSearch={handleSearch}
+                    searchbox={styles.search_box_input}
+                    width={isMobile && !isTablet ? "200px" : "242px"}
+                    style={isMobile && !isTablet ? { flex: 1 } : {}}
+                    size="small"
+                    value={search}
+                    placeholder={`Search ${routes.warehouse.title}`}
                   />
                 </Grid>
 
-                <Grid style={{display: "flex" , gap:"5px"}}>
+                <Grid style={{ display: "flex", gap: "5px" }}>
                   {warehousePermissions.isCreate && (
                     <Button
                       onClick={() => {
@@ -492,70 +490,70 @@ const AddressResource = () => {
                       className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
                       startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                     >
-                      {isMobile && !isTablet ? <MdAdd size={23}/> : "Add"}
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
                     </Button>
                   )}
 
 
-                    <Button
-                        variant={isMobile && !isTablet ? "text" : "outlined"}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                        className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
-                    >
-                      {isMobile && !isTablet ? "" :  "Actions" } <ExpandMore/>
-                    </Button>
+                  <Button
+                    variant={isMobile && !isTablet ? "text" : "outlined"}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    disabled={selectedRecords.length ? false : true}
+                    aria-controls="action-menu"
+                    className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                  >
+                    {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                  </Button>
 
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {warehousePermissions.isDelete ?
-                        <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                        : null}
-                      {warehousePermissions.isUpdate && (
-                        <MenuItem
-                          disabled={selectedRecords.length === 0}
-                          onClick={() => {
-                            if (selectedRecords.some((d) => d.isUpdate === false)) {
-                              closeActions();
-                              setShowUpdateWarningConfirmBox(true)
-                            } else {
-                              closeActions();
-                              if (selectedRecords.length) {
-                                let entities = []
-                                selectedRecords.map(current => {
-                                  if (current?.entity) {
-                                    if (current?.entityId) {
-                                      entities.push(current?.entityId)
-                                    }
-                                    if (current?.restentity) {
-                                      let restEntities = current?.restentity.map(o => o.optionValue)
-                                      entities = [...entities, ...restEntities]
-                                    }
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    {warehousePermissions.isDelete ?
+                      <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                      : null}
+                    {warehousePermissions.isUpdate && (
+                      <MenuItem
+                        disabled={selectedRecords.length === 0}
+                        onClick={() => {
+                          if (selectedRecords.some((d) => d.isUpdate === false)) {
+                            closeActions();
+                            setShowUpdateWarningConfirmBox(true)
+                          } else {
+                            closeActions();
+                            if (selectedRecords.length) {
+                              let entities = []
+                              selectedRecords.map(current => {
+                                if (current?.entity) {
+                                  if (current?.entityId) {
+                                    entities.push(current?.entityId)
                                   }
-                                })
-                                setEntities([...entities])
-                              }
-                              setShowEntityDialog(true)
+                                  if (current?.restentity) {
+                                    let restEntities = current?.restentity.map(o => o.optionValue)
+                                    entities = [...entities, ...restEntities]
+                                  }
+                                }
+                              })
+                              setEntities([...entities])
                             }
-                          }}
-                        >
-                          Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
-                        </MenuItem>
-                      )}
-                    </Menu>
+                            setShowEntityDialog(true)
+                          }
+                        }}
+                      >
+                        Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+                      </MenuItem>
+                    )}
+                  </Menu>
                 </Grid>
               </Box>
             </Grid>
