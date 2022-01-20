@@ -571,7 +571,7 @@ function App() {
             <PrivateRoute exact path={`${routes.eCommerceDetail.path}/cart`} isEcommerceRoute={true}>
               <MyOwnCart />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.eCommerce.path}/checkout`} isEcommerceRoute={true}>
+            <PrivateRoute exact path={`${routes.eCommerce.path}/order/checkout`} isEcommerceRoute={true}>
               <Checkout />
             </PrivateRoute>
 
