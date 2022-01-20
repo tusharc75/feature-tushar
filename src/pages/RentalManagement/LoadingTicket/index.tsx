@@ -132,6 +132,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           });
         }
       });
+      console.log(productAssets)
       productAssets.forEach((d) => {
         d['isChecked'] = false;
         d['hideSelection'] =
@@ -142,7 +143,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             INVENTORY_STATUS.scrap,
             INVENTORY_STATUS.lost,
             INVENTORY_STATUS.underReview
-          ].includes(d.status) || d.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered;
+          ].includes(d.status) || d.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered || d?.manualStatus === INVENTORY_STATUS.reserved;
       });
       if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
         setNextStep(true);
