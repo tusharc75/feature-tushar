@@ -72,7 +72,7 @@
     .product_amount {
       font-size: 1rem;
       font-weight: 700;
-      color: #dd5052;
+      color: var(--primary);
       margin-right: 10px;
     }
     h4 {
@@ -96,7 +96,7 @@
     .amount {
       font-size: 18px;
       font-weight: bold;
-      color: #e83030;
+      color: var(--primary);
       padding: 10px 0 0;
     }
 
