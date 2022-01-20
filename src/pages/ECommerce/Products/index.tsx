@@ -1,9 +1,8 @@
-import { Paper, Grid, makeStyles } from '@material-ui/core';
-import { ToggleButton, ToggleButtonGroup, TreeItem, TreeView } from '@material-ui/lab';
-import React, { useEffect, useState, useContext, Fragment, useCallback } from 'react'
+import { Grid, makeStyles } from '@material-ui/core';
+import { TreeItem, TreeView } from '@material-ui/lab';
+import { useEffect, useState, useContext, useMemo } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component';
 import axiosInstance from '../../../axios/axiosInstance';
-import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import routes from '../../../components/Helpers/Routes';
 import ProductCard from '../../../components/ProductList/ProductCard/ProductCard';
 import { eProduct, ORDER_TYPES } from '../../../constants/helpers';
@@ -14,8 +13,9 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import styles from './product-detail-page.module.scss'
 import Filters from '../Filters';
-import { useParams } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import ECommerceBreadCrumbs from '../../../components/ECommerce/BreadCrumbs/ECommerceBreadCrumbs';
+import useQuery from '../../../hooks/useQuery';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -42,6 +42,7 @@ export default function Products() {
 
     const limit = 21;
     const toastConfig = useContext(CustomToastContext);
+    const history = useHistory();
 
     const [page, setPage] = useState(0);
     const [totalCount, setTotalCount] = useState(0);
@@ -49,17 +50,20 @@ export default function Products() {
     const [loading, setLoading] = useState(false)
 
     const [addedCartItems, setAddedCartItems] = useState([])
-    const [selectedCategoryName, setSelectedCategoryName] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState({ id: null, name: "" });
 
     const { dispatch }: any = useData();
 
     const classes = useStyles();
-    const [productCategories, setProductCategories] = useState([]);
+    const [productCategories, setProductCategories] = useState({ flatDataSource: [], treeDataSource: [] });
     const [selected, setSelected] = useState([]);
-    const [categoryDataSource, setSelectedCategoryNameDataSource] = useState([]);
+
     // const [selectedOrderType, setSelectedOrderType] = useState(orderType ?? ORDER_TYPES.rent.value)
 
-    let { orderType: orderTypeFromUrl } = useParams();
+    let query = useQuery();
+    const orderTypeFromUrl = query.get("orderType")
+    const category = query.get("category")
+
     const orderTypeInLowerCase = orderTypeFromUrl?.toLowerCase();
     // const [selectedOrderType, setSelectedOrderType] = useState(() => {
 
@@ -76,60 +80,17 @@ export default function Products() {
     //     }
     // }, [orderTypeFromUrl]);
 
-    const getOrderType = () => {
-
-        if (orderTypeFromUrl) {
-            return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
-        }
-
-        return ORDER_TYPES.rent.value;
-    }
-
-    const handleSelect = (_, nodeId) => {
-        if (selected.length === 0 || (selected.length !== 0 && selected[0] !== nodeId)) {
-            const category = categoryDataSource.find(o => o._id === nodeId);
-
-            setSelected([nodeId]);
-            setSelectedCategoryName(category.name);
-
-            setLoading(true);
-
-            axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${getOrderType()}&deepFilter=[{"field":"productCategory","term":"${category.name}"}]&filterType=and`).then(({ data: { data, count } }) => {
-                setTotalCount(count);
-                setProducts([...data]);
-            }).catch((error) => {
-                toastConfig.setToastConfig(error);
-            }).finally(() => {
-                setLoading(false);
-            });
-
-        }
-    }
+    // useEffect(() => {
+    //     setSelectedCategory({ id: null, name: category });
+    // }, [category])
 
     useEffect(() => {
-        setProducts([]);
-        setTotalCount(0);
-
-        setLoading(true);
-
-        axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${getOrderType()}`).then(({ data: { data, count } }) => {
-            setTotalCount(count);
-            setProducts([...data]);
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-        }).finally(() => {
-            setLoading(false);
-        });
-
-        fetchCart();
-
-        let queryString = `?limit=0`;
-
         axiosInstance()
-            .get(`/product-category${queryString}`)
+            .get(`/product-category?limit=0`)
             .then(({ data: { data } }) => {
 
-                setSelectedCategoryNameDataSource([...data])
+                // setSelectedCategoryNameDataSource([...data])
+
                 let parentCategories = {}
                 data.map(o => {
                     if (o?.parentCategory) {
@@ -155,9 +116,106 @@ export default function Products() {
 
                 let allCategories = data.filter(obj => !(obj?.parentCategory))
 
-                setProductCategories(allCategories)
+                setProductCategories({ flatDataSource: [...data], treeDataSource: [...allCategories] })
+
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
             });
-    }, [orderTypeFromUrl])
+    }, [])
+
+    useEffect(() => {
+
+        if (category) {
+            const categoryId = productCategories.flatDataSource.find(f => f._id === category)?._id;
+
+            if (categoryId) {
+                handleSelect(null, categoryId);
+            } else {
+                fetchProducts()
+            }
+        } else {
+            fetchProducts();
+        }
+
+    }, [query.get("orderType"), productCategories.flatDataSource, productCategories.treeDataSource])
+
+    const fetchProducts = () => {
+        setProducts([]);
+        setTotalCount(0);
+
+        setLoading(true);
+
+        let queryString = "";
+
+        if (getOrderType()) {
+            queryString = `${queryString}&orderType=${getOrderType()}`
+        }
+        if (query.get("category")) {
+            queryString = `${queryString}&category=${category}`
+        }
+
+        axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&${queryString}`).then(({ data: { data, count } }) => {
+            setTotalCount(count);
+            setProducts([...data]);
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+        }).finally(() => {
+            setLoading(false);
+        });
+
+        fetchCart();
+    }
+
+    const getOrderType = () => {
+
+        if (orderTypeFromUrl) {
+            return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+        }
+
+        return ORDER_TYPES.rent.value;
+    }
+
+    const handleSelect = (_, nodeId) => {
+        if (selected.length === 0 || (selected.length !== 0 && selected[0] !== nodeId)) {
+            setProducts([]);
+            setTotalCount(0);
+
+            const selectedCategory = productCategories.flatDataSource.find(o => o._id === nodeId);
+
+            let queryString = [];
+
+            if (query.get("orderType")) {
+                queryString.push(`orderType=${query.get("orderType")}`)
+            }
+            queryString.push(`category=${nodeId}`)
+
+            if (queryString.length > 0) {
+                history.push({
+                    pathname: history.location.pathname,
+                    search: `?${queryString.join("&")}`
+                })
+            }
+            else {
+                history.push(history.location.pathname)
+            }
+
+            setSelected([nodeId]);
+            setSelectedCategory({ id: nodeId, name: selectedCategory.name });
+
+            setLoading(true);
+
+            axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${getOrderType()}&deepFilter=[{"field":"productCategory","term":"${selectedCategory.name}"}]&filterType=and`).then(({ data: { data, count } }) => {
+                setTotalCount(count);
+                setProducts([...data]);
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            }).finally(() => {
+                setLoading(false);
+            });
+        } else {
+            fetchProducts();
+        }
+    }
 
     const fetchCart = () => {
         axiosInstance()
@@ -168,28 +226,6 @@ export default function Products() {
                     setAddedCartItems(data)
                 }
             })
-    }
-
-    const onAddToCartItem = (item) => {
-        debugger;
-
-        // let tempQuantity = 1
-        // addedCartItems.some(o => {
-        //     if (o.productId === item._id) {
-        //         tempQuantity = tempQuantity + 1
-        //         return true
-        //     }
-        // })
-
-        // axiosInstance()
-        //     .post(`/ecommerce/cart`, {
-        //         products: [{
-        //             quantity: `${tempQuantity}`,
-        //             productId: item._id
-        //         }]
-        //     }).then(() => {
-        //         fetchCart()
-        //     })
     }
 
     const renderTree = (nodes) => (
@@ -204,53 +240,25 @@ export default function Products() {
                 <Grid container className="mt-2">
 
                     <Grid item xs={3} className="border">
-
                         <div className={styles.sidebar_nav}>
-
-                            {/* <ToggleButtonGroup
-                                id="productTypes"
-                                size="small"
-                                value={selectedOrderType}
-                                className="w-100"
-                                exclusive
-                                onChange={(e, value) => {
-                                    if (value) {
-                                        setProducts([]);
-                                        setTotalCount(0);
-
-                                        setSelectedOrderType(value)
-                                        setLoading(true);
-
-                                        axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${value}`).then(({ data: { data, count } }) => {
-                                            setTotalCount(count);
-                                            setProducts([...data]);
-                                        }).catch((error) => {
-                                            toastConfig.setToastConfig(error);
-                                        }).finally(() => {
-                                            setLoading(false);
-                                        });
-                                    }
-                                }}
-                            >
-                                {
-                                    Object.keys(ORDER_TYPES).map((k: any, index) => {
-                                        return (
-                                            <ToggleButton className="w-100" value={ORDER_TYPES[k].value} key={index}>
-                                                {ORDER_TYPES[k].key}
-                                            </ToggleButton>
-                                        );
-                                    })
-                                }
-                            </ToggleButtonGroup> */}
 
                             <div className="d-flex align-items-center justify-content-space-between my-2 px-1">
                                 <h3>Categories</h3>
                                 {
                                     selected && selected.length !== 0 ? <span className="link cursor-pointer" onClick={() => {
                                         setSelected([]);
-                                        setSelectedCategoryName("");
+                                        setProducts([]);
+                                        setTotalCount(0);
+
+                                        setSelectedCategory({ id: null, name: "" });
 
                                         setLoading(true);
+
+                                        if (query.get("orderType")) {
+                                            history.push(`${routes.eCommerce.path}?orderType=${query.get("orderType")}`)
+                                        } else {
+                                            history.push(routes.eCommerce.path)
+                                        }
 
                                         axiosInstance().get(`${eProduct.api}?page=0&limit=${limit}&orderType=${getOrderType()}`).then(({ data: { data, count } }) => {
                                             setTotalCount(count);
@@ -276,7 +284,7 @@ export default function Products() {
                                 defaultExpandIcon={<ChevronRightIcon />}
                             >
                                 {
-                                    productCategories.map(obj => {
+                                    productCategories.treeDataSource.map(obj => {
                                         return renderTree(obj)
                                     })
                                 }
@@ -291,7 +299,7 @@ export default function Products() {
                     <Grid item xs={9} className="px-2">
 
                         <div className="p-2">
-                            <ECommerceBreadCrumbs routes={[{ title: routes.eCommerce.title }]} />
+                            <ECommerceBreadCrumbs routes={selectedCategory.id ? [{ title: selectedCategory.name }] : []} />
                         </div>
 
                         <div className="position-relative">
@@ -304,8 +312,8 @@ export default function Products() {
                                         setPage(prevState => prevState + 1)
 
                                         let url = `${eProduct.api}?page=${page + 1}&limit=${limit}&orderType=${getOrderType()}`;
-                                        if (selectedCategoryName) {
-                                            url = `${url}&deepFilter=[{"field":"productCategory","term":"${selectedCategoryName}"}]&filterType=and`
+                                        if (selectedCategory.id) {
+                                            url = `${url}&deepFilter=[{"field":"productCategory","term":"${selectedCategory.name}"}]&filterType=and`
                                         }
 
                                         axiosInstance().get(url).then(({ data: { data, count } }) => {

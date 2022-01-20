@@ -110,6 +110,8 @@ import MyOwnCart from './pages/ECommerce/MyCart/MyOwnCart';
 import Checkout from './pages/ECommerce/Checkout';
 import CustomerSign from './pages/DeliveryTicket/CustomerSign';
 import CheckoutSuccess from './pages/ECommerce/Success';
+import Orders from './pages/ECommerce/Orders';
+import OrderDetails from './pages/ECommerce/Orders/OrderDetails';
 
 var notificationInterval: any = null;
 
@@ -562,9 +564,6 @@ function App() {
             <PrivateRoute exact path={`${routes.eCommerce.path}`} isEcommerceRoute={true}>
               <Products />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.eCommerce.path}/:orderType`} isEcommerceRoute={true}>
-              <Products />
-            </PrivateRoute>
 
             <PrivateRoute exact path={`${routes.eCommerceDetail.path}/:id/:orderType`} isEcommerceRoute={true}>
               <ProductDetails />
@@ -578,6 +577,13 @@ function App() {
             <PrivateRoute exact path={`${routes.eCommerce.path}/cart/finish`} isEcommerceRoute={true}>
               <CheckoutSuccess />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.eCommerce.path}/orders`} isEcommerceRoute={true}>
+              <Orders />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.eCommerce.path}/orders/:id`} isEcommerceRoute={true}>
+              <OrderDetails />
+            </PrivateRoute>
+
 
             <Route exact path={'/customer-sign/:id'}>
               <CustomerSign />
