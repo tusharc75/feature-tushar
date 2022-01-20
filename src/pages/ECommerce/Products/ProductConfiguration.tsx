@@ -1,23 +1,23 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Grid, Typography, Box } from '@material-ui/core';
 import React from 'react';
 import FormTypes from '../../../components/Helpers/FormTypes';
 
 const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) => {
   const { values, fields, error } = data;
-  
-    const onChange = (name, value) => {
-      let newValues = {
-        ...values,
-        [name]: value
-      };
-      handleChange(newValues);
+
+  const onChange = (name, value) => {
+    let newValues = {
+      ...values,
+      [name]: value
+    };
+    handleChange(newValues);
   };
 
   React.useEffect(() => {
-    if(fields) {
+    if (fields) {
       initializeProductConfig()
     }
-  },[fields])
+  }, [fields])
 
   if (!data || data.fields.length === 0 || !data.hasOwnProperty('fields')) return null;
 
@@ -34,14 +34,17 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
       <Grid container spacing={2}>
         {' '}
         {fields.map((field) => (
-          <Grid item xs={6} key={field._id}>
+          <Grid item xs={12} key={field._id}>
+            <Box pb={1}>
+              <Typography variant="body1">{field.fieldLabel}</Typography>
+            </Box>
             <FormTypes
               isNew={true}
               fieldData={field}
               values={values}
               errors={{}}
               touched={{}}
-              label={field.fieldLabel}
+              label={""}
               name={field.fieldName}
               type={field.type}
               options={field.option}
