@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer, useMemo } from "react";
-import { Grid, Box, Button, Paper, Typography, IconButton, CircularProgress, Tab, Tabs, ButtonGroup, Container, InputAdornment, useMediaQuery } from "@material-ui/core";
-import { Autocomplete, Skeleton } from "@material-ui/lab";
-import { useParams, useHistory } from "react-router-dom";
+import { useState, useEffect, useContext, Fragment } from "react";
+import { Grid, Box, Button, IconButton, CircularProgress } from "@material-ui/core";
 import axiosInstance from "../../../axios/axiosInstance";
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
@@ -11,15 +9,13 @@ import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import AddExistingProductInventory from "./AddExistingProductInventory";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
-import { camelCase, startCase, orderBy, sum } from "lodash";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import Add from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 
 import moment from "moment";
 import {
-    getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow,
-    dateFormat, pricingCondition, generateUniqueId, treeToFlatArray, formatAmountWithCurrency, CHILD_RESOURCE
+    rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency, CHILD_RESOURCE
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import RentalJobQtyDialog from './RentalJobQtyDialog'

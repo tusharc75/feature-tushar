@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext, Fragment } from "react";
-import { Grid, Box, Button, Typography, Paper } from "@material-ui/core";
+import { useState, useEffect, useContext, Fragment } from "react";
+import { Grid, Box, Button, Paper } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -13,8 +13,6 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageWarehouse from "./ManageWarehouse";
 import DeleteButton from "../../components/Helpers/DeleteButton";
-
-
 
 const WarehouseDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -33,13 +31,8 @@ const WarehouseDetailsPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [addressResource, setAddressResource] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
-
     routes.warehouse,
   ]);
-
-
-
-
 
   useEffect(() => {
     if (id) {
@@ -48,8 +41,6 @@ const WarehouseDetailsPage = () => {
 
     }
   }, [id]);
-
-
 
   const fetchWarehouseData = async () => {
     setLoading(true);
@@ -69,8 +60,6 @@ const WarehouseDetailsPage = () => {
       toastConfig.setToastConfig(error);
     }
   };
-
-
 
   const handleMainPoints = (data) => {
     let tempMp = {
@@ -112,8 +101,6 @@ const WarehouseDetailsPage = () => {
     }
   };
 
-
-
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -122,11 +109,8 @@ const WarehouseDetailsPage = () => {
     setOpenUpdateDialog(false);
   };
 
-
-
   return (
     <>
-
       {openUpdateDialog && (
         <ManageWarehouse
           open={openUpdateDialog}
@@ -213,7 +197,6 @@ const WarehouseDetailsPage = () => {
                   )}
                 </DetailsPageHeader>
               )}
-
 
               <Box>
                 {loading || !warehouseFields.length ? (

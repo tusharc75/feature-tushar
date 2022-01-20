@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useCallback } from "react";
+import { useEffect, useState, useContext, useCallback } from "react";
 import {
   Dialog,
   Button,
@@ -20,14 +20,12 @@ import {
   yupSchema,
   getObjKeysWithValues,
   setFieldsInAscendingOrder,
-  isFieldNotTouched,
-  userType
-} from "../../constants/helpers";
+  isFieldNotTouched} from "../../constants/helpers";
 import { useLocation, useHistory } from "react-router-dom";
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { useData } from "../../StateProvider/Provider";
-import { isMobile , isTablet } from 'react-device-detect';
+import { isTablet } from 'react-device-detect';
 import {FaDiceOne} from "react-icons/fa";
 interface InitialData {
   fields: any[];

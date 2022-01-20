@@ -9,8 +9,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import axiosInstance from '../../axios/axiosInstance';
 import { GiStockpiles } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { ExpandMore } from '@material-ui/icons';
-import { Box, Chip, Menu, MenuItem } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
@@ -25,11 +24,10 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import ManageTransferAsset from './ManageTransferAsset';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { FaSuitcase } from 'react-icons/fa';
-import { MdAdd,MdFilterList,MdSort,RiFileTransferFill,GiCargoShip,RiFolderTransferFill,SiStatuspage } from 'react-icons/all';
+import { MdAdd, MdFilterList, MdSort, RiFileTransferFill, GiCargoShip, RiFolderTransferFill, SiStatuspage } from 'react-icons/all';
 import MobileSortDialog from "../../components/MobileSortDialog"
 import MobileFilterDialog from "../../components/MobileFilterDialog"
 const storedRoutes = localStorage.getItem('routes') ? JSON.parse(localStorage.getItem('routes')) : null;
@@ -166,7 +164,7 @@ const TransferAsset = () => {
     });
   }
 
-  console.log(columns,"columns")
+  console.log(columns, "columns")
 
   const handleDelete = () => {
     let ids = [];
@@ -249,7 +247,7 @@ const TransferAsset = () => {
   };
 
 
-  
+
   const handleOpen = () => {
     setisOpenDialog(true);
   };
@@ -267,7 +265,7 @@ const TransferAsset = () => {
 
   };
 
- 
+
 
 
 
@@ -299,67 +297,67 @@ const TransferAsset = () => {
       <div className="main-container">
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
-            <div className="d-flex align-items-center">
-              <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
-              <span className="listingHeader">{routes.transferAsset?.title} </span>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+              <div className="d-flex align-items-center">
+                <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
+                <span className="listingHeader">{routes.transferAsset?.title} </span>
               </div>
-              {isMobile && !isTablet && 
-        <div className="d-flex ">
-        <Button
-        onClick={handleClickOpen}
-        id="demo-customized-button"
-        aria-controls="demo-customized-menu"
-        aria-haspopup="true"
-        // aria-expanded={open ? 'true' : undefined}
-        color="secondary"
-        variant="text"
-        disableElevation
-        startIcon={<MdSort />}
-      >
-        Sort 
-        </Button>
+              {isMobile && !isTablet &&
+                <div className="d-flex ">
+                  <Button
+                    onClick={handleClickOpen}
+                    id="demo-customized-button"
+                    aria-controls="demo-customized-menu"
+                    aria-haspopup="true"
+                    // aria-expanded={open ? 'true' : undefined}
+                    color="secondary"
+                    variant="text"
+                    disableElevation
+                    startIcon={<MdSort />}
+                  >
+                    Sort
+                  </Button>
 
-        <MobileSortDialog
-        isOpen={open}
-        handleClose={handleClickClose}
-        contentPart={null}
-        secHeading={["Sort Transfer Assests"]}
-        columns={columns}
-        dispatch={dispatch}
-        />
-
-
-
-        <Button
-        id="demo-customized-button"
-        aria-controls="demo-customized-menu"
-        aria-haspopup="true"
-        // aria-expanded={open ? 'true' : undefined}
-        variant="text"
-        color="secondary"
-        disableElevation
-        startIcon={<MdFilterList />}
-        onClick={handleOpen}
-      >
-        Filter 
-        </Button>
+                  <MobileSortDialog
+                    isOpen={open}
+                    handleClose={handleClickClose}
+                    contentPart={null}
+                    secHeading={["Sort Transfer Assests"]}
+                    columns={columns}
+                    dispatch={dispatch}
+                  />
 
 
-        <MobileFilterDialog
-        isOpen={isOpenDialog}
-        handleClose={handleClose}
-        contentPart={null}
-        secHeading={["Filter Transfer Assests"]}
-        columns={columns}
-        dispatch={dispatch}
-        />
-        </div>}
-            
+
+                  <Button
+                    id="demo-customized-button"
+                    aria-controls="demo-customized-menu"
+                    aria-haspopup="true"
+                    // aria-expanded={open ? 'true' : undefined}
+                    variant="text"
+                    color="secondary"
+                    disableElevation
+                    startIcon={<MdFilterList />}
+                    onClick={handleOpen}
+                  >
+                    Filter
+                  </Button>
+
+
+                  <MobileFilterDialog
+                    isOpen={isOpenDialog}
+                    handleClose={handleClose}
+                    contentPart={null}
+                    secHeading={["Filter Transfer Assests"]}
+                    columns={columns}
+                    dispatch={dispatch}
+                  />
+                </div>}
+
             </Grid>
             <Grid xs={12} sm={12} md={6} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1 , gap: "5px" }} className={isMobile ? styles.content_box : ""}>
+                <Grid style={{ display: 'flex', flex: 1, gap: "5px" }} className={isMobile ? styles.content_box : ""}>
                   <SearchBox
                     onSearch={handleSearch}
                     searchbox={styles.search_box_input}
@@ -369,23 +367,23 @@ const TransferAsset = () => {
                     value={search}
                   />
                   <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.transferAsset?.isCreate && (
-                    <Button
-                      onClick={() => {
-                        setShowManageTransferAssetDialog({ open: true, isClone: false, idToClone: null });
-                      }}
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
-                      color="primary"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      startIcon={isMobile && !isTablet ? null : <AddIcon />}
-                    >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                    </Button>
-                  )}
-                </Grid>
+                    {permissions?.transferAsset?.isCreate && (
+                      <Button
+                        onClick={() => {
+                          setShowManageTransferAssetDialog({ open: true, isClone: false, idToClone: null });
+                        }}
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        size="small"
+                        color="primary"
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                        startIcon={isMobile && !isTablet ? null : <AddIcon />}
+                      >
+                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                      </Button>
+                    )}
+                  </Grid>
 
-                
+
 
                   {/* <HtmlTooltip title={selectedRecords.length > 0 ? '' : 'Please select some records'}>
                     <span>
@@ -455,24 +453,24 @@ const TransferAsset = () => {
                 loading={loading}
                 chips={[
                   {
-                    icons:<RiFileTransferFill/>,
-                    label:"Transfer From Plant: ",
-                    field:"transferFromPlant",
+                    icons: <RiFileTransferFill />,
+                    label: "Transfer From Plant: ",
+                    field: "transferFromPlant",
                   },
                   {
-                    icons:<RiFolderTransferFill />,
-                    label:"Transfer To Plant: ",
-                    field:"transferToPlant",
+                    icons: <RiFolderTransferFill />,
+                    label: "Transfer To Plant: ",
+                    field: "transferToPlant",
                   },
                   {
-                    icons:<GiCargoShip />,
-                    label:"Plant Ship To: ",
-                    field:"plantShipTo"
+                    icons: <GiCargoShip />,
+                    label: "Plant Ship To: ",
+                    field: "plantShipTo"
                   },
                   {
-                    icon:<SiStatuspage/>,
-                    label:"Status: ",
-                    field:"status: "
+                    icon: <SiStatuspage />,
+                    label: "Status: ",
+                    field: "status: "
                   }
                 ]}
                 additionalDetails={[

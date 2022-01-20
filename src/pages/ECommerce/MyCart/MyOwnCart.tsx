@@ -23,6 +23,7 @@ import AddIcon from "@material-ui/icons/AddCircle";
 import { Skeleton } from "@material-ui/lab";
 import ManageAddressDialog from '../../../components/Address/ManageAddressDialog';
 import Tooltip from '../../../components/CustomTooltipTitle';
+import ECommerceBreadCrumbs from '../../../components/ECommerce/BreadCrumbs/ECommerceBreadCrumbs';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -241,7 +242,7 @@ function MyOwnCart() {
   return (
     <>
       <div className="p-2">
-        <CustomBreadCrumbs routes={[routes.eCommerce, { title: "Cart" }]} />
+        <ECommerceBreadCrumbs routes={[routes.eCommerce, { title: "Cart" }]} />
       </div>
 
       <Box>
