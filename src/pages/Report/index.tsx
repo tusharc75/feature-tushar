@@ -81,7 +81,7 @@ const Report = () => {
   const [resourceOptions, setResourceOptions] = React.useState([]);
   React.useEffect(() => {
     if (resource === "rental-management") {
-      setResourceOptions(["date", ...resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : resourceNames[_r]))])
+      setResourceOptions(["Date", ...resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : resourceNames[_r]))])
     }
     else {
       setResourceOptions(resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : resourceNames[_r])))
@@ -187,7 +187,7 @@ const Report = () => {
   // Create and return query for filters
   const getFilter = () => {
     let filterQuery = '';
-    if (((selectedData && Object.keys(selectedData).length === 0) || !selectedData) && !selectedResource.includes("date")) return filterQuery;
+    if (((selectedData && Object.keys(selectedData).length === 0) || !selectedData) && !selectedResource.includes("Date")) return filterQuery;
     let filterById = Object.keys(selectedData)
       .filter((d) => d !== 'Status')
       .map((_d) => {
@@ -303,7 +303,6 @@ const Report = () => {
                       else {
                         setSelectedResource(val);
                       }
-
                       if (selectedData) {
                         setSelectedData((prevState) => {
                           const data = Object.keys(prevState);
@@ -331,14 +330,12 @@ const Report = () => {
                       selectedResource.map((data: string) => {
                         data = data === 'Plant' ? 'Warehouse' : data;
                         const options = data === 'Status' ? status[resourceCamelCase] : dropdownList && dropdownList[data] ? dropdownList[data] : [];
-
-                        if (data === "date") {
+                        if (data === "Date") {
                           return (
                             <MuiPickersUtilsProvider utils={MomentUtils}>
                               <KeyboardDatePicker
                                 autoOk
-                                size="small"
-                                disablePast
+                                size="medium"
                                 variant="inline"
                                 inputVariant="outlined"
                                 name="startDate"
@@ -354,15 +351,14 @@ const Report = () => {
                                 InputLabelProps={{
                                   shrink: true,
                                 }}
-                                margin="dense"
+                                margin='dense'
                               />
+                              <Box mx={1} />
                               <KeyboardDatePicker
                                 autoOk
-                                size="small"
-                                disablePast
+                                size="medium"
                                 variant="inline"
                                 inputVariant="outlined"
-                                minDate={betweenDate.startDate}
                                 name="endDate"
                                 label="End Date"
                                 value={betweenDate.endDate}
@@ -376,7 +372,7 @@ const Report = () => {
                                 InputLabelProps={{
                                   shrink: true,
                                 }}
-                                margin="dense"
+                                margin='dense'
                               />
                             </MuiPickersUtilsProvider>
                           );
