@@ -23,6 +23,7 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import { useData } from '../../StateProvider/Provider';
 import ManageWarehouse from '../Warehouse/ManageWarehouse';
 import ManageAccountDialog from '../Account/ManageAccount/index';
+import { FaDiceOne } from "react-icons/fa";
 
 interface Props {
   isClone?: boolean;
@@ -123,12 +124,12 @@ const ManageTransferAsset: FC<Props> = (props) => {
             createValues["transfertoPlant"] = refrenceData?.transferToPlant;
             fieldsDataForCreate?.forEach((e) => {
               if (e.fieldName === "transfertoPlant") {
-                  const plantAddress = e?.option?.filter((e) => e.optionValue ===  refrenceData?.transferToPlant)
-                  if (plantAddress.length) {
-                    createValues["plantShipTo"] = plantAddress[0].address
-                  }
+                const plantAddress = e?.option?.filter((e) => e.optionValue === refrenceData?.transferToPlant)
+                if (plantAddress.length) {
+                  createValues["plantShipTo"] = plantAddress[0].address
+                }
               }
-          })
+            })
           }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -271,7 +272,10 @@ const ManageTransferAsset: FC<Props> = (props) => {
                   {initialData.fields.length > 0 &&
                     initialData.fields.map((form, i) => (
                       <div key={i}>
-                        <h2 className="form-label-style">{form.name}</h2>
+                        <div className={"detail-box-content"}>
+                          <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                          <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                        </div>
                         <Box marginY={2}>
                           <Grid spacing={3} container alignItems="center">
                             {form.sectionFields.map((field, index2) =>

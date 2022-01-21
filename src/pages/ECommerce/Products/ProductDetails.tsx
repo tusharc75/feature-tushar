@@ -8,7 +8,6 @@ import { Box, Chip, Grid, makeStyles, Typography, IconButton } from "@material-u
 import AddShoppingCartIcon from "@material-ui/icons/AddShoppingCart";
 import RemoveShoppingCartIcon from '@material-ui/icons/RemoveShoppingCart';
 import { BsImage } from "react-icons/bs";
-import ManageQuoteDialog from "../../QuoteBuilderCombined/ManageQuote/ManageQuoteDialog";
 import { useData } from "../../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
 import routes from "../../../components/Helpers/Routes";
@@ -29,12 +28,12 @@ import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import PlusMinusTextboxComponent from "../../../components/PlusMinusTextboxComponent/PlusMinusTextboxComponent";
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import { Skeleton } from "@material-ui/lab";
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 import SimilarItems from "../../../components/ProductList/SimilarItems/SimilarItems";
 import FrequentlyBought from "../../../components/ProductList/FrequentlyBought/FrequentlyBought";
 import ProductConfiguration from "./ProductConfiguration";
+import ECommerceBreadCrumbs from "../../../components/ECommerce/BreadCrumbs/ECommerceBreadCrumbs";
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -42,9 +41,9 @@ const useStyles = makeStyles(() => ({
     justifyContent: "center",
     alignItems: "center",
   },
-  img: {
-    maxWidth: "500px",
-  },
+  // img: {
+  //   maxWidth: "500px",
+  // },
 }));
 
 const TYPES = {
@@ -92,7 +91,6 @@ export default function ProductDetails() {
   const classes = useStyles();
   const [productDetails, setProductDetails] = useState(null);
   const [similarItems, setSimilarItems] = useState([]);
-  const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
   const [addToCartBtnLoading, setAddToCartBtnLoading] = useState(false);
   const [checkoutLabel, setCheckoutLabel] = useState("Checkout")
   const [addedCartItems, setAddedCartItems] = useState([])
@@ -110,10 +108,10 @@ export default function ProductDetails() {
 
   const history = useHistory();
   let { id, orderType: orderTypeFromUrl } = useParams();
-  const orderTypeInLowerCase = orderTypeFromUrl.toLowerCase();
+  const orderTypeInLowerCase = orderTypeFromUrl?.toLowerCase();
 
   const [orderType, setOrderType] = useState(() => {
-    if (orderTypeFromUrl) {
+    if (!orderTypeFromUrl) {
       return ORDER_TYPES.rent.value;
     }
     return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
@@ -121,8 +119,6 @@ export default function ProductDetails() {
 
   useEffect(() => {
     fetchCart()
-    // fetchProducts()
-    // fetchReviews()
   }, []);
 
   useEffect(() => {
@@ -203,18 +199,6 @@ export default function ProductDetails() {
     }
   }
 
-  // const fetchProducts = () => {
-  //   axiosInstance()
-  //     .get(`${eProduct.api}?limit=0`)
-  //     .then(({ data: { data } }) => {
-  //       data = data.map(obj => ({ ...obj, selected: false }))
-  //       setProducts(data);
-  //     })
-  //     .catch((error) => {
-  //       toastConfig.setToastConfig(error);
-  //     });
-  // }
-
   const getIndexOfProductInCart = (data) => {
     return data.findIndex(({ orderType, productDetail }) => orderType === orderTypeInLowerCase && productDetail._id === id)
   }
@@ -235,12 +219,6 @@ export default function ProductDetails() {
           setCheckoutLabel("Create Quote")
         }
       })
-  }
-
-  const onCheckout = () => {
-    if (checkoutLabel === "Create Quote" && addedCartItems.length >= 1) {
-      setshowCreateQuoteDialog(true)
-    }
   }
 
   const onAddToCartItem = (item) => {
@@ -310,27 +288,6 @@ export default function ProductDetails() {
     }
   }, [productDetails]);
 
-  const calculateNetPrice = (price: number, discount: any) => {
-    let netPrice = price;
-    netPrice = price - (price * discount) / 100;
-    return netPrice;
-  };
-
-  const amountOfDiscount = (price: number, discount: any) => {
-    return (price * discount) / 100 + " " + productDetails.currency;
-  };
-
-  const handleCreateQuote = (values) => {
-    let selectedProductIds = addedCartItems.map(o => o.productDetail?._id)
-
-    let selectedProducts = products.filter(obj => selectedProductIds.indexOf(obj._id) >= 0)
-    axiosInstance()
-      .post(`quote-builder/create/from-cart`, { ...values, products: selectedProducts })
-      .then(({ data: { data } }) => {
-        history.push(`${routes.quoteBuilder.path}/detail/${data?._id}`);
-      })
-  }
-
   const updateCart = (cartId, value, unit, pricingMethod, startDate, endDate, mrp = rateCurrency?.mrp, rate = rateCurrency?.rate) => {
     axiosInstance().put(`/ecommerce/cart`, {
       _id: cartId,
@@ -351,22 +308,16 @@ export default function ProductDetails() {
   }
 
   return (
-    <>
+    <div className="container">
       <div className="p-2">
-        <CustomBreadCrumbs routes={[routes.eCommerce, { title: productDetails?.productName }]} />
+        <ECommerceBreadCrumbs routes={[{ path: `${routes.eCommerce.path}?category=${productDetails?.productCategory?.optionValue}&orderType=${orderType}`, title: productDetails?.productCategory?.optionLabel }, { title: productDetails?.productName }]} />
       </div>
-
       <Box>
-
-        {
-          productDetails ? <Grid container className="py-4 px-2">
-
-            <Grid item xs={4} className="d-flex flex-column align-items-center">
-
+        {productDetails ?
+          <Grid container className="py-4 px-2">
+            <Grid item xs={5} className="d-flex flex-column align-items-center">
               <Box display="flex" justifyContent="center" alignItems="center">
-
                 <div>
-
                   {
                     wishlistState.wishlist.length === 0 || !wishlistState.wishlist.find(s => s._id === id) ? <IconButton
                       disabled={wishlist.disabled}
@@ -413,7 +364,6 @@ export default function ProductDetails() {
                     </IconButton>
                   }
 
-
                   {productImages.length > 0 ? (
                     <Carousel
                       strictIndexing
@@ -433,7 +383,7 @@ export default function ProductDetails() {
                     >
                       {productImages.map((image: any, i) => (
                         <div key={i} className={classes.imageContainer}>
-                          <img className={classes.img} src={image} style={{ width: "85%" }} />
+                          <img src={image} style={{ width: "100%" }} />
                         </div>
                       ))}
                     </Carousel>
@@ -442,20 +392,15 @@ export default function ProductDetails() {
                       <BsImage className={styles.product_no_image} />
                     </div>
                   )}
-
                 </div>
-
               </Box>
-
             </Grid>
-
             <Grid item xs={5}>
-
+              <h5>{productDetails.productCategory?.optionLabel}</h5>
               <div className="w-100 d-flex align-items-center gap-2 justify-content-space-between">
                 <h2>{productDetails.productName}</h2>
                 <Chip color="primary" label={ORDER_TYPES[orderTypeInLowerCase]?.key} />
               </div>
-
               <Rating
                 name="half-rating-read"
                 defaultValue={4.5}
@@ -464,21 +409,12 @@ export default function ProductDetails() {
                 readOnly
                 size="small"
               />
-
-              <div>
-                <h4>Sold by - {user?.user?.brandName}</h4>
-              </div>
-
-              <div className="mt-3">
-                {/* <h4>Product Number - {productDetails.productNumber}</h4> */}
-                <h4>Product Category - {productDetails.productCategory?.optionLabel}</h4>
-              </div>
-
+              <h4 className="mb-2">Sold by - {user?.user?.brandName}</h4>
+              <hr></hr>
               {
-                productDetails?.productShortDetail && <div className="mt-5" dangerouslySetInnerHTML={{ __html: productDetails?.productShortDetail }}></div>
+                productDetails?.productShortDetail && <div className="mt-3 px-3" dangerouslySetInnerHTML={{ __html: productDetails?.productShortDetail }}></div>
               }
-
-              <Grid className="mt-5" container>
+              <Grid className="mt-3" container>
                 <Grid item xs={12} className="d-flex flex-column gap-3">
                   {
                     productDetails.unit || productDetails.pricingMethod ? <Grid container spacing={2}>
@@ -591,7 +527,6 @@ export default function ProductDetails() {
                       </MuiPickersUtilsProvider>
                     </Grid>
                   }
-
                   <ProductConfiguration
                     initializeProductConfig={() => {
                       const items = [...cartItems];
@@ -682,19 +617,11 @@ export default function ProductDetails() {
                       </CustomButton>
                     }
                   </Box>
-
-
                 </Grid>
               </Grid>
-
-              {
-                productDetails?.productLongDetail && <div className="mt-3" dangerouslySetInnerHTML={{ __html: productDetails?.productLongDetail }}></div>
-              }
-
             </Grid>
-
-            <Grid item xs={3}></Grid>
-
+            <Grid item xs={2}>
+            </Grid>
           </Grid> : <Grid container className="py-4 px-2">
 
             <Grid item xs={4} className="d-flex flex-column align-items-center">
@@ -754,44 +681,25 @@ export default function ProductDetails() {
 
           </Grid>
         }
-
         <hr />
 
-        <div className="my-3">
+
+        <div className="my-3 px-4">
+
           <FrequentlyBought id={id} orderType={orderType} mainProductMrp={Number(rateCurrency.mrp)} mainProductWithCurrency={rateCurrency.rateWithCurrency} />
         </div>
-
         <hr />
-
         <SimilarItems similarItems={similarItems} orderType={orderType} />
-
+        <hr />
+        {productDetails?.productLongDetail &&
+          <Fragment  >
+            <div className="d-flex w-100 align-items-center justify-content-center my-3">
+              <h1>Product Details</h1>
+            </div>
+            <div className="px-5" dangerouslySetInnerHTML={{ __html: productDetails?.productLongDetail }}></div>
+          </Fragment>
+        }
       </Box>
-
-      {
-        showCreateQuoteDialog && (
-          <ManageQuoteDialog
-            open={showCreateQuoteDialog}
-            onSuccess={() => { }}
-            onClose={() => {
-              setshowCreateQuoteDialog(false)
-            }}
-            isNew={true}
-            dataToUpdate={null}
-            isClone={false}
-            resource={null}
-            isRedirectTodetailPage={true}
-            contactId={null}
-            opportunityId={null}
-            disableOwnerDropDown={true}
-            contacts={null}
-            doaCollaboratorResources={user?.user?.doa.map(obj => obj.user)}
-            isRenderedFromOpportunity={false}
-            isCreateQuoteFromCart={true}
-            onHandleSubmit={handleCreateQuote}
-          />
-        )
-      }
-
       {
         deleteProductFromCartConfirmationDialog.show ? (
           <ConfirmationDialog
@@ -830,7 +738,6 @@ export default function ProductDetails() {
           />
         ) : null
       }
-
-    </>
+    </div>
   );
 }

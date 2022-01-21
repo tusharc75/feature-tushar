@@ -3,8 +3,6 @@ import { Box, Grid, MenuItem, Button, Menu } from "@material-ui/core";
 import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import SearchBox from "../../components/Helpers/SearchBox";
 
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import { BsPersonBoundingBox } from 'react-icons/bs';
 
 import styles from "../Leads/Header.module.scss";

@@ -80,12 +80,12 @@ const Checkout = () => {
           type: 'success',
           message: data.message
         });
-        history.push(`${routes.eCommerce.path}/order-completion?status="success"`)
+        history.push(`${routes.eCommerce.path}/cart/finish?status=success&orderId=${data.data.orderId}`);
       })
       .catch((error) => {
         setSubmitting(false);
         toastConfig.setToastConfig(error);
-        history.push(`${routes.eCommerce.path}/order-completion?status="failed"`)
+        history.push(`${routes.eCommerce.path}/cart/finish?status=failed`)
       });
   };
 

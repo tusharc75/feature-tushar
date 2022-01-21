@@ -1,25 +1,11 @@
-import React, { useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
 import Button from "@material-ui/core/Button";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import clsx from "clsx";
-import { GiBackwardTime } from "react-icons/gi";
 import IconButton from '@material-ui/core/IconButton';
-import {
-    StepIconProps,
-    Grid,
-} from "@material-ui/core";
-import {
-    IoIosArrowDroprightCircle,
-    IoIosArrowDropleftCircle,
-} from "react-icons/io";
-import { GoPencil } from "react-icons/go";
-import { BsCheckCircle } from "react-icons/bs";
-import { AiOutlineCloseCircle } from "react-icons/ai";
-import { FaHourglassHalf } from "react-icons/fa";
+import { Grid } from "@material-ui/core";
 import styles from "./SalesOrder.module.scss";
 
 import { isMobile } from "react-device-detect";
