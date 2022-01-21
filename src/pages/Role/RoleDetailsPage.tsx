@@ -309,7 +309,7 @@ const RoleDetailsPage = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+          <Grid item xs={12} sm={12} md={8} lg={8}>
             <Paper>
               {!roleData ? (
                 <div>
@@ -354,7 +354,7 @@ const RoleDetailsPage = () => {
                 </DetailsPageHeader>
               )}
 
-              <Box display="flex" marginTop={2} marginBottom={2} gridGap={10}>
+              <Box display="flex" marginTop={2} marginBottom={2} gridGap={10} px={1}>
                 <TextField
                   disabled={(roleData?.type && roleData?.permission) ? true : !permissions.role.isUpdate}
                   required
@@ -384,7 +384,7 @@ const RoleDetailsPage = () => {
               <Paper>
 
                 {loading ? (
-                  <div className="d-flex align-items-center justify-content-center" style={{ minHeight: 200 }}>
+                  <div className="d-flex align-items-center justify-content-center" style={{ minHeight: 200, height: "70vh" }}>
                     <Loader
                       style={{ height: "100%" }}
                       text="Loading..."
@@ -394,6 +394,7 @@ const RoleDetailsPage = () => {
                   field.length &&
                   resource.length && (
                     <RoleEngine
+                      style={{height: "70vh",}}
                       field={field}
                       resource={resource}
                       setField={setField}
@@ -499,7 +500,7 @@ const RoleDetailsPage = () => {
               )} */}
             </Paper>
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+          <Grid item xs={12} sm={12} md={4} lg={4}>
             <Paper>
               <Box
                 padding={1}
