@@ -130,11 +130,11 @@ const routes = {
     path: "/profile",
   },
   projectSales: {
-    title: storedRoutes ? storedRoutes.projectStrategy?.title : RESOURCE_LABEL.projectStrategy,
+    title: RESOURCE_LABEL.projectStrategy,
     path: "/project-sales",
   },
   projectSalesDetail: {
-    title: storedRoutes ? storedRoutes.projectStrategy?.title : RESOURCE_LABEL.projectStrategy,
+    title: RESOURCE_LABEL.projectStrategy,
     path: "/project-sales/detail",
   },
   priceTemplate: {
