@@ -37,7 +37,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 
 const TaskSchema = object().shape({
   name: string().required('Please enter task name'),
-  // assignee: string().required('Please select assignee'),
+  //assignee: string().required('Please select assignee'),
   reporter: string().required(),
   startDate: string().required('Please enter start date'),
   dueDate: string().required('Please enter due date')
@@ -116,9 +116,11 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
     }
     return errors;
   }
+
   const isFieldNotTouched = (initialValues, values) => {
     return Object.values(initialValues).toString() === Object.values(values).toString();
   };
+
   const handleValuesChange = (data) => {
     setFormValues((prevState) => ({
       ...prevState,
@@ -144,11 +146,10 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
             <>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-
                   <Box padding={1}>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                       <Box mb={2}>
-                        {/* <Breadcrumbs separator="/" aria-label="breadcrumb">
+                        <Breadcrumbs separator="/" aria-label="breadcrumb">
                           {initialValues.parent &&
                             initialValues.parent.map((_p, index) => {
                               return (
@@ -157,7 +158,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                 </Button>
                               );
                             })}
-                        </Breadcrumbs> */}
+                        </Breadcrumbs>
                       </Box>
                       <Grid container spacing={3}>
                         <Grid item xs={12} md={7} sm={6}>
@@ -194,157 +195,153 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                               }}
                             />
                           </Box>
-                          <Box pt={1}>
-                          <Button
-                                  variant="contained"
-                                  size="small"
-                                  disableElevation
-                                  onClick={() => setOpenAddSub(true)}
-                                  startIcon={<TableChartIcon />}
-                                >
-                                  Add a child Task
-                                </Button>
-                                </Box>
-                                <Box mt={2}>
-                                <SubTask
-                                  openAddSub={openAddSub}
-                                  setOpenAddSub={setOpenAddSub}
-                                  data={initialValues}
-                                  fetchTaskDetail={fetchTaskDetail}
-                                  setId={setId}
-                                />
-                              </Box>
-                              {
-                        id &&
-                        (<Box mt={2}>
-                          <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                        </Box>)
-                      }
-                      {id && (
-                        <Box mt={2}>
-                          <Divider />
-                          <Box mt={1}>
-                            <Comment referenceId={id} />
-                          </Box>
-                        </Box>
-                      )}
-                         
-                        </Grid>
-                        <Grid item xs={12} md={5} sm={6}>
-                          
-                          {id && (
-                            <Fragment>
-                              <Box mt={1}>
-                              <Box >
-                            <FormControl variant="outlined" fullWidth>
-                              <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
-                              <Field
-                                component={Select}
-                                labelId="demo-simple-select-outlined-label"
-                                id="demo-simple-select-outlined"
-                                margin="dense"
-                                label="Status"
-                                name="status"
+                          {id &&
+                            <Box pt={1}>
+                              <Button
+                                variant="contained"
+                                size="small"
+                                disableElevation
+                                onClick={() => setOpenAddSub(true)}
+                                startIcon={<TableChartIcon />}
                               >
-                                {statusList.map((_status, index) => (
-                                  <MenuItem key={index} value={_status.status}>
-                                    {_status.status}
-                                  </MenuItem>
-                                ))}
-                              </Field>
-                            </FormControl>
+                                Add a child Task
+                              </Button>
+                            </Box>
+                          }
+                          <Box mt={2}>
+                            <SubTask
+                              openAddSub={openAddSub}
+                              setOpenAddSub={setOpenAddSub}
+                              data={initialValues}
+                              fetchTaskDetail={fetchTaskDetail}
+                              setId={setId}
+                            />
                           </Box>
-                          <Box pt={1}>
-                            <Grid container spacing={1}>
-                              <Grid item xs={12} sm={12} md={12}>
-                                <UserDropdown
-                                  name="assignee"
-                                  label="Assignee"
-                                  errors={errors}
-                                  touched={touched}
-                                  required={true}
-                                  setFieldValue={(name, value) => {
-                                    handleValuesChange({ [name]: value });
-                                    setFieldValue(name, value);
-                                  }}
-                                  multiple={false}
-                                  value={values['assignee']}
-                                />
-                              </Grid>
-                              <Grid item xs={12} sm={12} md={12}>
-                                <UserDropdown
-                                  name="reporter"
-                                  label="Reporter"
-                                  errors={errors}
-                                  touched={touched}
-                                  required={true}
-                                  setFieldValue={(name, value) => {
-                                    handleValuesChange({ [name]: value });
-                                    setFieldValue(name, value);
-                                  }}
-                                  multiple={false}
-                                  value={values['reporter']}
-                                />
-                              </Grid>
-                            </Grid>
-                          </Box>
-                          <Box pt={1}>
-                            <Grid container spacing={1}>
-                              <Grid item xs={12} sm={12} md={12}>
-                                <Field
-                                  component={KeyboardDatePicker}
-                                  label="Start Date"
-                                  name="startDate"
-                                  autoOk
-                                  variant="inline"
-                                  inputVariant="outlined"
-                                  fullWidth
-                                  margin="dense"
-                                  format={dateFormat}
-                                  minDate={new Date()}
-                                  onChange={(value) => {
-                                    setFieldValue('dueDate', value);
-                                    setFieldValue('startDate', value);
-                                  }}
-                                  maxDate={initialValues.parentData && initialValues.parentData.dueDate}
-                                />
-                              </Grid>
-                              <Grid item xs={12} sm={12} md={12}>
-                                <Field
-                                  component={KeyboardDatePicker}
-                                  label="Due Date"
-                                  name="dueDate"
-                                  autoOk
-                                  variant="inline"
-                                  inputVariant="outlined"
-                                  fullWidth
-                                  margin="dense"
-                                  minDate={values.startDate}
-                                  maxDate={initialValues.parentData && initialValues.parentData.dueDate}
-                                  format={dateFormat}
-                                />
-                                 {initialValues.createdBy && initialValues.createdBy.date && (
-                                <Box mt={1} color="text.secondary">
-                                  <Typography variant="body2">Created {moment(initialValues.createdBy.date).format(dateFormat)}</Typography>
-                                </Box>
-                              )}
-                              {initialValues.updatedBy && initialValues.updatedBy.date && (
-                                <Box mt={1} color="text.secondary">
-                                  <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format(dateFormat)}</Typography>
-                                </Box>
-                              )}
-                              </Grid>
-                              
-                            </Grid>
-                          </Box>
-                               
+                          {id &&
+                            (<Box mt={2}>
+                              <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                            </Box>)
+                          }
+                          {id && (
+                            <Box mt={2}>
+                              <Divider />
+                              <Box mt={1}>
+                                <Comment referenceId={id} />
                               </Box>
-                             
-                            </Fragment>
+                            </Box>
                           )}
                         </Grid>
+                        <Grid item xs={12} md={5} sm={6}>
+                          <Fragment>
+                            <Box mt={1}>
+                              <Box >
+                                <FormControl variant="outlined" fullWidth>
+                                  <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
+                                  <Field
+                                    component={Select}
+                                    labelId="demo-simple-select-outlined-label"
+                                    id="demo-simple-select-outlined"
+                                    margin="dense"
+                                    label="Status"
+                                    name="status"
+                                  >
+                                    {statusList.map((_status, index) => (
+                                      <MenuItem key={index} value={_status.status}>
+                                        {_status.status}
+                                      </MenuItem>
+                                    ))}
+                                  </Field>
+                                </FormControl>
+                              </Box>
+                              <Box pt={1}>
+                                <Grid container spacing={1}>
+                                  <Grid item xs={12} sm={12} md={12}>
+                                    <UserDropdown
+                                      name="assignee"
+                                      label="Assignee"
+                                      errors={errors}
+                                      touched={touched}
+                                      required={false}
+                                      setFieldValue={(name, value) => {
+                                        handleValuesChange({ [name]: value });
+                                        setFieldValue(name, value);
+                                      }}
+                                      multiple={false}
+                                      value={values['assignee']}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={12} sm={12} md={12}>
+                                    <UserDropdown
+                                      name="reporter"
+                                      label="Reporter"
+                                      errors={errors}
+                                      touched={touched}
+                                      required={true}
+                                      setFieldValue={(name, value) => {
+                                        handleValuesChange({ [name]: value });
+                                        setFieldValue(name, value);
+                                      }}
+                                      multiple={false}
+                                      value={values['reporter']}
+                                    />
+                                  </Grid>
+                                </Grid>
+                              </Box>
+                              <Box pt={1}>
+                                <Grid container spacing={1}>
+                                  <Grid item xs={12} sm={12} md={12}>
+                                    <Field
+                                      component={KeyboardDatePicker}
+                                      label="Start Date"
+                                      name="startDate"
+                                      autoOk
+                                      variant="inline"
+                                      inputVariant="outlined"
+                                      fullWidth
+                                      margin="dense"
+                                      format={dateFormat}
+                                      minDate={new Date()}
+                                      onChange={(value) => {
+                                        setFieldValue('dueDate', value);
+                                        setFieldValue('startDate', value);
+                                      }}
+                                      maxDate={initialValues.parentData && initialValues.parentData.dueDate}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={12} sm={12} md={12}>
+                                    <Field
+                                      component={KeyboardDatePicker}
+                                      label="Due Date"
+                                      name="dueDate"
+                                      autoOk
+                                      variant="inline"
+                                      inputVariant="outlined"
+                                      fullWidth
+                                      margin="dense"
+                                      minDate={values.startDate}
+                                      maxDate={initialValues.parentData && initialValues.parentData.dueDate}
+                                      format={dateFormat}
+                                    />
+                                    {initialValues.createdBy && initialValues.createdBy.date && (
+                                      <Box mt={1} color="text.secondary">
+                                        <Typography variant="body2">Created {moment(initialValues.createdBy.date).format(dateFormat)}</Typography>
+                                      </Box>
+                                    )}
+                                    {initialValues.updatedBy && initialValues.updatedBy.date && (
+                                      <Box mt={1} color="text.secondary">
+                                        <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format(dateFormat)}</Typography>
+                                      </Box>
+                                    )}
+                                  </Grid>
+
+                                </Grid>
+                              </Box>
+
+                            </Box>
+
+                          </Fragment>
+                        </Grid>
                       </Grid>
-                     
                     </MuiPickersUtilsProvider>
                   </Box>
                 </Form>

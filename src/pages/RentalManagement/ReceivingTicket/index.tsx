@@ -144,7 +144,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       });
       productAssets.forEach((d) => {
         d["isChecked"] = false;
-        d["hideSelection"] = [INVENTORY_STATUS.indTransit, INVENTORY_STATUS.lost].includes(d.status);
+        d["hideSelection"] = [INVENTORY_STATUS.indTransit, INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
       })
       if (productAssets.filter((e) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.available, INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(e.status)).length === productAssets.length) {
         setNextStep(true)
@@ -397,8 +397,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         </Tooltip>
 
         {(selectedRecords.length && selectedRecords?.filter(f =>
-        ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-          (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
+          ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+            (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
           && [INVENTORY_STATUS.underReview].includes(f.status)
         )?.length === selectedRecords?.length) ?
           <Fragment>
@@ -503,7 +503,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             renderedFrom={renderedFrom}
             rowClassRules={{
               'red-data-row': function (params) {
-                return [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some((s) => s === params.data.status);
+                return ([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some((s) => s === params.data.status) || params?.data?.returnTicketId
+                );
               }
             }}
             refreshGrid={fetchRecords}

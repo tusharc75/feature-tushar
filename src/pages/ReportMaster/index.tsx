@@ -1,13 +1,11 @@
-import React from 'react';
-import { Grid, Typography, Box, CircularProgress, useTheme, useMediaQuery } from '@material-ui/core';
+import { Grid, Typography, Box } from '@material-ui/core';
 import styles from '../Leads/Header.module.scss';
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { REPORT_LIST } from './../../constants/helpers';
 import { MdDescription } from "react-icons/md";
-import { Link, withRouter, useHistory } from "react-router-dom";
-import { camelCase, startCase } from 'lodash';
-import { FaRegistered, FaSuitcase, FaAddressBook, FaAddressCard } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { camelCase } from 'lodash';
 
 const ReportMaster = () => {
 

@@ -4,6 +4,7 @@ import { CheckCircle, Cancel } from '@material-ui/icons';
 import { useLocation, useHistory } from 'react-router-dom';
 import { parse } from 'query-string';
 import Loader from '../../../components/Loader';
+import routes from '../../../components/Helpers/Routes';
 
 const getIcon = (status: string) => {
   switch (status) {
@@ -36,7 +37,8 @@ const statuses = ['success', 'failed'];
 
 const CheckoutSuccess = () => {
   const location = useLocation();
-  const { status }: any = parse(location.search);
+  const history = useHistory();
+  const { status, orderId }: any = parse(location.search);
 
   if (!status || !statuses.includes(status)) return <Loader noLoader text={'Nothing is here'} minHeight={'100%'} />;
 
@@ -48,6 +50,13 @@ const CheckoutSuccess = () => {
         </Typography>
 
         {getIcon(status)}
+
+        <Typography component="h5" variant="h6" align="center" className="cursor-pointer link" onClick={() => {
+          history.push(`${routes.orderDetails.path}/${orderId}`)
+        }}>
+          Click here to check order details
+        </Typography>
+
       </Paper>
     </Container>
   );

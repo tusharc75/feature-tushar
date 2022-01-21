@@ -24,11 +24,11 @@ import { useData } from "../../StateProvider/Provider";
 import { checkFormulaLoop, checkUniqueValidation } from "../../constants/formulaUtility";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { isEqual } from "lodash";
-import {isMobile, isTablet} from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import {IoIosArrowDropdown} from "react-icons/io";
-import {classNames} from "react-easy-crop/helpers";
-import {RiCloseCircleFill, RiSaveFill} from "react-icons/all";
+import { IoIosArrowDropdown } from "react-icons/io";
+import { classNames } from "react-easy-crop/helpers";
+import { RiCloseCircleFill, RiSaveFill } from "react-icons/all";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -45,8 +45,8 @@ const useStyles = makeStyles((theme) => ({
             display: "none",
         },
     },
-    menuButtonList:{
-        alignItems:"flex-start",
+    menuButtonList: {
+        alignItems: "flex-start",
         padding: "1px"
     },
     links: {
@@ -235,43 +235,39 @@ const CreateFormBuilder = () => {
                         if ((!isEqual(orisection, section)) && formBuilderPermissions.isUpdate) {
                             setShowConfirmDialog(true)
                         }
-                        else history.push({ pathname: routes.formBuilder.path })
+                        else history.push({ pathname: path })
                     }}
                 />
             </Grid>
             <Grid container justify="flex-end" item md={7} sm={1} xs={2} className="pr-3">
-
-                <div className={classes.linksContainer}>
-
-                <label
-                    htmlFor="importField"
-                    style={{ color: "white" }}
-                    className="cursor-pointer mr-3"
-                >
-                    Import Fields
-                    <input
-                        onClick={(e: any) => (e.target.value = null)}
-                        id="importField"
-                        name="importField"
-                        onChange={handleImportFields}
-                        style={{
-                            opacity: "0",
-                            position: "absolute",
-                            zIndex: -1,
-                        }}
-                        type="file"
-                    />
-                </label>
-                <label
-                    style={{ color: "white" }}
-                    className="cursor-pointer"
-                    onClick={handleExportFields}
-                >
-                    Export Fields
-                </label>
-
-                <a id="downloadAnchorElem" style={{ display: "none" }}></a>
-
+                <div className={classes.linksContainer} style={{ display: "none" }}>
+                    <label
+                        htmlFor="importField"
+                        style={{ color: "white" }}
+                        className="cursor-pointer mr-3"
+                    >
+                        Import Fields
+                        <input
+                            onClick={(e: any) => (e.target.value = null)}
+                            id="importField"
+                            name="importField"
+                            onChange={handleImportFields}
+                            style={{
+                                opacity: "0",
+                                position: "absolute",
+                                zIndex: -1,
+                            }}
+                            type="file"
+                        />
+                    </label>
+                    <label
+                        style={{ color: "white" }}
+                        className="cursor-pointer"
+                        onClick={handleExportFields}
+                    >
+                        Export Fields
+                    </label>
+                    <a id="downloadAnchorElem" style={{ display: "none" }}></a>
                 </div>
                 <Menu
                     id="importField"
@@ -324,42 +320,42 @@ const CreateFormBuilder = () => {
                 <Fragment>
                     <Box p={1} pb={0} ml={1} bgcolor="white" >
                         <Grid container spacing={1} className={isMobile ? "mobile_form_header" : "des_form_header"}>
-                            <Grid item xs={8} style={isMobile ? {display:"block"} : {display:"flex" } }>
-                            <Grid item xs={isMobile ? 12 : 6} md={4} sm={6}>
-                                <Typography variant="caption">Brand </Typography>
-                                <Typography variant="body1">{brandName}</Typography>
-                            </Grid>
-                            <Grid item xs={isMobile ? 12 : 6} md={4} sm={6}>
-                                <Typography variant="caption">Resource </Typography>
-                                <Typography variant="body1">{resource}</Typography>
-                            </Grid>
+                            <Grid item xs={8} style={isMobile ? { display: "block" } : { display: "flex" }}>
+                                <Grid item xs={isMobile ? 12 : 6} md={4} sm={6}>
+                                    <Typography variant="caption">Brand </Typography>
+                                    <Typography variant="body1">{brandName}</Typography>
+                                </Grid>
+                                <Grid item xs={isMobile ? 12 : 6} md={4} sm={6}>
+                                    <Typography variant="caption">Resource </Typography>
+                                    <Typography variant="body1">{resource}</Typography>
+                                </Grid>
                             </Grid>
                             <Grid item xs={4}>
-                            <Grid item xs={12} container justify="flex-end">
-                                <Box>
-                                    {formBuilderPermissions.isUpdate &&
-                                        <Button disabled={isUpdating} color="primary" size="small" onClick={handleSave} variant={isMobile && !isTablet ? "text" : "contained"}
-                                                style={isMobile && !isTablet ? {color:"var(--success)"} : {}}
-                                        >
-                                            {isMobile && !isTablet ? <RiSaveFill size={24}/> : "Save"}
-                                            {isUpdating && <CircularProgress size={24} />}
+                                <Grid item xs={12} container justify="flex-end">
+                                    <Box>
+                                        {formBuilderPermissions.isUpdate &&
+                                            <Button disabled={isUpdating} color="primary" size="small" onClick={handleSave} variant={isMobile && !isTablet ? "text" : "contained"}
+                                                style={isMobile && !isTablet ? { color: "var(--success)" } : {}}
+                                            >
+                                                {isMobile && !isTablet ? <RiSaveFill size={24} /> : "Save"}
+                                                {isUpdating && <CircularProgress size={24} />}
+                                            </Button>
+                                        }
+                                    </Box>
+                                    <Box ml={1} >
+                                        <Button color="primary" variant={isMobile && !isTablet ? "text" : "contained"} size="small"
+                                            style={isMobile && !isTablet ? { color: "var(--error)" } : {}}
+                                            onClick={() => {
+                                                if ((!isEqual(orisection, section)) && formBuilderPermissions.isUpdate) {
+                                                    setShowConfirmDialog(true)
+                                                }
+                                                else {
+                                                    history.push({ pathname: routes.formBuilder.path })
+                                                }
+                                            }} >  {isMobile && !isTablet ? <RiCloseCircleFill size={24} /> : "Close"}
                                         </Button>
-                                    }
-                                </Box>
-                                <Box ml={1} >
-                                    <Button color="primary" variant={isMobile && !isTablet ? "text" : "contained"} size="small"
-                                            style={isMobile && !isTablet ? {color:"var(--error)"} : {}}
-                                        onClick={() => {
-                                            if ((!isEqual(orisection, section)) && formBuilderPermissions.isUpdate) {
-                                                setShowConfirmDialog(true)
-                                            }
-                                            else {
-                                                history.push({ pathname: routes.formBuilder.path })
-                                            }
-                                        }} >  {isMobile && !isTablet ? <RiCloseCircleFill size={24}/> : "Close"}
-                                    </Button>
-                                </Box>
-                            </Grid>
+                                    </Box>
+                                </Grid>
                             </Grid>
                         </Grid>
                     </Box>
@@ -378,7 +374,7 @@ const CreateFormBuilder = () => {
                     {
                         showConfirmDialog ?
                             <ConfirmCancelDialog
-                               close={() => setShowConfirmDialog(false)}
+                                close={() => setShowConfirmDialog(false)}
                                 open={showConfirmDialog}
                                 onSave={() => {
                                     setShowConfirmDialog(false)

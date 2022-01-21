@@ -6,7 +6,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory, Link } from 'react-router-dom';
-import { displayDate, formatAmountWithCurrency, ORDER_TYPES } from '../../../constants/helpers';
+import { displayDate, formatAmountWithCurrency } from '../../../constants/helpers';
 import Typography from '@material-ui/core/Typography';
 import { AiOutlineSafetyCertificate } from 'react-icons/ai';
 import { SET_CART } from '../../../StateProvider/actionTypes';
@@ -23,6 +23,8 @@ import AddIcon from "@material-ui/icons/AddCircle";
 import { Skeleton } from "@material-ui/lab";
 import ManageAddressDialog from '../../../components/Address/ManageAddressDialog';
 import Tooltip from '../../../components/CustomTooltipTitle';
+import ECommerceBreadCrumbs from '../../../components/ECommerce/BreadCrumbs/ECommerceBreadCrumbs';
+import { ECommerceContext } from '../../../components/ECommerce/Layout/ECommerceContext/ECommerceContext';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -50,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     marginTop: theme.spacing(2)
   },
-  tab: { 
+  tab: {
     padding: theme.spacing(1, 2.5),
     backgroundColor: theme.palette.background.default,
     borderRadius: 2,
@@ -65,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
     "&:first-child": {
       marginRight: 10
     },
-    
+
     "& h4": {
       fontSize: theme.spacing(2),
       fontWeight: 400,
@@ -90,8 +92,9 @@ function MyOwnCart() {
 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext)
+  const { ORDER_TYPES, firstOrderType } = useContext(ECommerceContext);
   const [currentTab, setCurrentTab] = useState(1);
-  const [showAddAddresstDialog, setShowAddAddresstDialog] = useState({open: false, type: ""});
+  const [showAddAddresstDialog, setShowAddAddresstDialog] = useState({ open: false, type: "" });
   const [totalCount, setTotalCount] = useState(0);
   const [totalPrice, setTotalPrice] = useState("");
   const [checkoutLabel, setCheckoutLabel] = useState('Checkout');
@@ -171,14 +174,12 @@ function MyOwnCart() {
 
           setCart(data);
           setCartProducts(data.map((d, index) => {
-            let productImages = [];
 
-            if (d.hasOwnProperty(["sliderImage"])) {
-              productImages = [d.productImage ?? "", ...d["sliderImage"] as []].filter(image => image);
-            } else {
-              productImages = [d.productImage ?? ""].filter(f => f);
-            }
-
+            // if (d.hasOwnProperty(["sliderImage"])) {
+            //   productImages = [d.productImage ?? "", ...d["sliderImage"] as []].filter(image => image);
+            // } else {
+            //   productImages = [d.productImage ?? ""].filter(f => f);
+            // }
 
             return {
               ...d.product,
@@ -195,7 +196,7 @@ function MyOwnCart() {
               unit: d?.unit,
               currency: d?.currency,
               orderType: d?.orderType,
-              productImages: productImages,
+              productImage: d?.productDetail?.productImage,
               currencyWithFormat: formatAmountWithCurrency(d?.currency, d.rate)?.fullFormatAmount
             }
           }));
@@ -232,16 +233,16 @@ function MyOwnCart() {
       });
   };
 
-  let qtyTimeout:ReturnType<typeof setTimeout> = null
+  let qtyTimeout: ReturnType<typeof setTimeout> = null
 
-  const tabs = [{title: "Rent", key: "rent", id: 0}, {title: "Buy", key: "sale", id: 1}]
-  
+  const tabs = [{ title: "Rent", key: "rent", id: 0 }, { title: "Buy", key: "sale", id: 1 }]
+
   const activeTab = tabs.find(tab => tab.id === currentTab)
 
   return (
     <>
       <div className="p-2">
-        <CustomBreadCrumbs routes={[routes.eCommerce, { title: "Cart" }]} />
+        <ECommerceBreadCrumbs routes={[routes.eCommerce, { title: "Cart" }]} />
       </div>
 
       <Box>
@@ -253,15 +254,15 @@ function MyOwnCart() {
             <div className="px-4 py-2">
 
               <h1>Shopping Cart</h1>
-             <div className={classes.tabs}>
-               {tabs.map((tab) => (
-               <div key={tab.key} className={clsx(classes.tab, {
-                 [classes.tabActive]: currentTab === tab.id
-               })} onClick={() => setCurrentTab(tab.id)}>
-                 <h4>{tab.title}</h4>
-               </div>
-               ))}
-             </div>
+              <div className={classes.tabs}>
+                {tabs.map((tab) => (
+                  <div key={tab.key} className={clsx(classes.tab, {
+                    [classes.tabActive]: currentTab === tab.id
+                  })} onClick={() => setCurrentTab(tab.id)}>
+                    <h4>{tab.title}</h4>
+                  </div>
+                ))}
+              </div>
 
               <hr style={{ border: "0.5px solid #e9eaee" }} />
               {
@@ -309,138 +310,115 @@ function MyOwnCart() {
                     </Grid>
                   </Grid>
                 ) : cartProducts.length ? (
-                  [...cartProducts.filter(item => item.orderType === activeTab.key)].length === 0 ? 
+                  [...cartProducts.filter(item => item.orderType === activeTab.key)].length === 0 ?
                     <div>
-                       <Typography>No items added to {activeTab.title}</Typography>
+                      <Typography>No items added to {activeTab.title}</Typography>
                     </div>
-                  : [...cartProducts.filter(item => item.orderType === activeTab.key)].map((item) => {
-                    return (
-                      <div key={item.indexOfProduct} className={styles.checkout_items}>
-                        <div className={styles.card}>
-                          <div className={`${styles.products_image_layout} d-flex justify-content-center`}>
+                    : [...cartProducts.filter(item => item.orderType === activeTab.key)].map((item) => {
+                      return (
+                        <div key={item.indexOfProduct} className={styles.checkout_items}>
+                          <div className={styles.card}>
+                            <div className={`${styles.products_image_layout} w-100`}>
 
-                            {item?.productImages && item?.productImages.length > 0 ? (
-                              <Carousel
-                                strictIndexing
-                                animation="slide"
-                                autoPlay={false}
-                                navButtonsAlwaysVisible
-                                indicators={item?.productImages.length > 1}
-                                cycleNavigation={false}
-                                timeout={150}
-                                navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
-                                  style: {
-                                    opacity: 0.4,
-                                    padding: 5,
-                                    borderRadius: "50%"
-                                  }
-                                }}
-                              >
-                                {item?.productImages.map((image: any, i) => (
-                                  <div key={i} className={classes.imageContainer}>
-                                    <img className={classes.img} src={image} loading='lazy' />
+                              {
+                                item?.productImage ? <img width="90%" className={classes.img} src={item?.productImage} loading='lazy' /> : <BsImage className={styles.no_image} />
+                              }
+
+                            </div>
+                            <div className={styles.card_body}>
+                              <div className={`${styles.card_body_layout} my-3`}>
+                                <div className={styles.card_product_name_and_price}>
+                                  <div className={`${styles.card_seller} w-100 d-flex justify-content-space-between`}>
+                                    <div className="d-flex gap-3 align-items-center">
+                                      <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}/${item?.orderType}`}>{item.productName}</Link>
+                                      <Chip label={ORDER_TYPES[item?.orderType]?.key} color="primary" />
+                                    </div>
+
+                                    <IconButton aria-label="delete" onClick={() => {
+                                      setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, show: true, recordToRemove: item } })
+                                    }}>
+                                      <CloseIcon fontSize="small" />
+                                    </IconButton>
+
                                   </div>
-                                ))}
-                              </Carousel>
-                            ) : (
-                              <BsImage className={styles.no_image} />
-                            )}
+                                </div>
 
-                          </div>
-                          <div className={styles.card_body}>
-                            <div className={`${styles.card_body_layout} my-3`}>
-                              <div className={styles.card_product_name_and_price}>
-                                <div className={`${styles.card_seller} w-100 d-flex justify-content-space-between`}>
-                                  <div className="d-flex gap-3 align-items-center">
-                                    <Link className="link" to={`${routes.eCommerceDetail.path}/${item.productId}/${item?.orderType}`}>{item.productName}</Link>
-                                    <Chip label={ORDER_TYPES[item?.orderType]?.key} color="primary" />
-                                  </div>
-
-                                  <IconButton aria-label="delete" onClick={() => {
-                                    setDeleteProductFromCartConfirmationDialog(prevState => { return { ...prevState, show: true, recordToRemove: item } })
-                                  }}>
-                                    <CloseIcon fontSize="small" />
-                                  </IconButton>
-
+                                <div className={styles.card_vendor}>
+                                  <span>Sold by:</span> {user?.user?.brandName}
                                 </div>
                               </div>
 
-                              <div className={styles.card_vendor}>
-                                <span>Sold by:</span> {user?.user?.brandName}
-                              </div>
+                              <Grid container spacing={1}>
+                                {
+                                  item.startDate && <Grid item xs={6}>
+                                    <b>Start Date:</b> {item.startDate}
+                                  </Grid>
+                                }
+
+                                {
+                                  item.endDate && <Grid item xs={6}>
+                                    <b>End Date:</b> {item.endDate}
+                                  </Grid>
+                                }
+
+                                <Grid item xs={6}>
+                                  <b>Unit:</b> {item.unit}
+                                </Grid>
+
+                                {
+                                  item.pricingMethod && <Grid item xs={6}>
+                                    <b>Pricing Method:</b> {item.pricingMethod}
+                                  </Grid>
+                                }
+                              </Grid>
+
+                              <Grid container className="mt-4 mb-3">
+                                <Grid item xs={6}>
+                                  <PlusMinusTextboxComponent
+                                    inputTextLabel="Quantity"
+                                    value={item.qty}
+                                    isRequired={true}
+                                    onChange={(value) => {
+                                      let items = [...cartProducts];
+                                      if (qtyTimeout) {
+                                        clearTimeout(qtyTimeout)
+                                      }
+                                      qtyTimeout = setTimeout(() => {
+                                        axiosInstance().put(`/ecommerce/cart`, { _id: item.cartId, qty: parseInt(value) }).then(() => {
+                                          items[item.indexOfProduct].qty = parseInt(value);
+                                          setCartProducts([...items]);
+
+                                          // toastConfig.setToastConfig({
+                                          //   open: true,
+                                          //   type: "success",
+                                          //   message: "Quantity updated successfully"
+                                          // });
+
+                                        }).catch((error) => {
+                                          toastConfig.setToastConfig(error);
+                                          dispatch({ type: SET_CART, payload: [...items] });
+                                        })
+                                      }, 200)
+                                    }}
+                                  />
+                                </Grid>
+                              </Grid>
+
+                              <Grid container className="my-3">
+                                <Grid item xs={12}>
+                                  <Typography variant="h5">{item?.currencyWithFormat}</Typography>
+                                </Grid>
+                              </Grid>
+
+
                             </div>
-
-                            <Grid container spacing={1}>
-                              {
-                                item.startDate && <Grid item xs={6}>
-                                  <b>Start Date:</b> {item.startDate}
-                                </Grid>
-                              }
-
-                              {
-                                item.endDate && <Grid item xs={6}>
-                                  <b>End Date:</b> {item.endDate}
-                                </Grid>
-                              }
-
-                              <Grid item xs={6}>
-                                <b>Unit:</b> {item.unit}
-                              </Grid>
-
-                              {
-                                item.pricingMethod && <Grid item xs={6}>
-                                  <b>Pricing Method:</b> {item.pricingMethod}
-                                </Grid>
-                              }
-                            </Grid>
-
-                            <Grid container className="mt-4 mb-3">
-                              <Grid item xs={6}>
-                                <PlusMinusTextboxComponent
-                                  inputTextLabel="Quantity"
-                                  value={item.qty}
-                                  isRequired={true}
-                                  onChange={(value) => {
-                                    let items = [...cartProducts];
-                                    if(qtyTimeout) {
-                                      clearTimeout(qtyTimeout)
-                                    }
-                                    qtyTimeout =  setTimeout(() => {
-                                      axiosInstance().put(`/ecommerce/cart`, { _id: item.cartId, qty: parseInt(value) }).then(() => {
-                                        items[item.indexOfProduct].qty = parseInt(value);
-                                        setCartProducts([...items]);
-                                
-                                        // toastConfig.setToastConfig({
-                                        //   open: true,
-                                        //   type: "success",
-                                        //   message: "Quantity updated successfully"
-                                        // });
-                                
-                                      }).catch((error) => {
-                                        toastConfig.setToastConfig(error);
-                                        dispatch({ type: SET_CART, payload: [...items] });
-                                      })
-                                    }, 200)      
-                                }}
-                                />
-                              </Grid>
-                            </Grid>
-
-                            <Grid container className="my-3">
-                              <Grid item xs={12}>
-                                <Typography variant="h5">{item?.currencyWithFormat}</Typography>
-                              </Grid>
-                            </Grid>
-
-
+                          </div>
+                          <div className={styles.middle_line}>
+                            <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
                           </div>
                         </div>
-                        <div className={styles.middle_line}>
-                          <hr className="my-3" style={{ border: "0.5px solid #e9eaee" }} />
-                        </div>
-                      </div>
-                    );
-                  })
+                      );
+                    })
                 ) : (
                   <Grid container spacing={3}>
                     <Grid item xs={12}>
@@ -500,7 +478,7 @@ function MyOwnCart() {
                       <Autocomplete
                         disabled={cartProducts.length === 0}
                         fullWidth
-                        id="shipping-address" 
+                        id="shipping-address"
                         options={addressOptions}
                         getOptionLabel={(option) => option.optionLabel}
                         getOptionSelected={(option, value) => option.optionValue === value.optionValue}
@@ -516,14 +494,14 @@ function MyOwnCart() {
                         title="Add Shipping Address"
                       >
                         <span>
-                        <IconButton
-                          disabled={cartProducts.length === 0}
-                          onClick={() => setShowAddAddresstDialog({open: true, type: "ship"})}
-                          size="small"
+                          <IconButton
+                            disabled={cartProducts.length === 0}
+                            onClick={() => setShowAddAddresstDialog({ open: true, type: "ship" })}
+                            size="small"
                           >
-                          <AddIcon color={"primary"} />
-                        </IconButton>
-                          </span>
+                            <AddIcon color={"primary"} />
+                          </IconButton>
+                        </span>
                       </Tooltip>
                     </Grid>
                   </Grid>
@@ -533,7 +511,7 @@ function MyOwnCart() {
                       <Autocomplete
                         disabled={cartProducts.length === 0}
                         fullWidth
-                        id="billing-address" 
+                        id="billing-address"
                         options={addressOptions}
                         getOptionLabel={(option) => option.optionLabel}
                         getOptionSelected={(option, value) => option.optionValue === value.optionValue}
@@ -542,11 +520,11 @@ function MyOwnCart() {
                           setSelectedBillingAddress(newValue)
                         }}
                         renderInput={(params) => (
-                          <TextField 
-                          {...params} 
-                            required 
-                            label="Billing Address" 
-                            margin="dense" 
+                          <TextField
+                            {...params}
+                            required
+                            label="Billing Address"
+                            margin="dense"
                             variant="outlined"
                           />
                         )}
@@ -557,14 +535,14 @@ function MyOwnCart() {
                         title="Add Billing Address"
                       >
                         <span>
-                        <IconButton
-                          disabled={cartProducts.length === 0}
-                          onClick={() => setShowAddAddresstDialog({open: true, type: "bill"})}
-                          size="small"
+                          <IconButton
+                            disabled={cartProducts.length === 0}
+                            onClick={() => setShowAddAddresstDialog({ open: true, type: "bill" })}
+                            size="small"
                           >
-                          <AddIcon color={"primary"} />
-                        </IconButton>
-                          </span>
+                            <AddIcon color={"primary"} />
+                          </IconButton>
+                        </span>
                       </Tooltip>
                     </Grid>
                   </Grid>
@@ -601,10 +579,10 @@ function MyOwnCart() {
             onOk={() => {
               setOpenPlaceOrderDialog(prevState => { return { ...prevState, okBtnLoading: true } })
 
-              axiosInstance().post("/ecommerce/checkout", { 
-                cart: cartProducts.map(m => m.cartId), 
-                shippingAddress: selectedShippingAddress?.optionValue, 
-                billingAddress: selectedBillingAddress?.optionValue 
+              axiosInstance().post("/ecommerce/checkout", {
+                cart: cartProducts.map(m => m.cartId),
+                shippingAddress: selectedShippingAddress?.optionValue,
+                billingAddress: selectedBillingAddress?.optionValue
               }).then(({ data }) => {
                 toastConfig.setToastConfig({
                   open: true,
@@ -619,13 +597,13 @@ function MyOwnCart() {
             }}
           />
         )}
-       {showAddAddresstDialog.open && <ManageAddressDialog
+        {showAddAddresstDialog.open && <ManageAddressDialog
           onClose={() => {
-            setShowAddAddresstDialog({open: false, type: ""});
+            setShowAddAddresstDialog({ open: false, type: "" });
           }}
           onSuccess={(obj) => {
             if (obj) {
-              setShowAddAddresstDialog({open: false, type: ""});
+              setShowAddAddresstDialog({ open: false, type: "" });
               setAddressOptions(prevState => {
                 let options = [...prevState]
                 options.push({
@@ -636,10 +614,10 @@ function MyOwnCart() {
                 })
                 return options
               })
-              if(showAddAddresstDialog.type === "bill") {
-                setSelectedBillingAddress({optionValue: obj._id, optionLabel: obj.fullAddress})
+              if (showAddAddresstDialog.type === "bill") {
+                setSelectedBillingAddress({ optionValue: obj._id, optionLabel: obj.fullAddress })
               } else {
-                setSelectedShippingAddress({optionValue: obj._id, optionLabel: obj.fullAddress})
+                setSelectedShippingAddress({ optionValue: obj._id, optionLabel: obj.fullAddress })
               }
             }
           }

@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "../../../axios/axiosInstance";
-import { formatAmountWithCurrency, eProduct, dateFormatForInputControl, ORDER_TYPES, getObjKeysWithValues } from "../../../constants/helpers";
+import { formatAmountWithCurrency, eProduct, dateFormatForInputControl, getObjKeysWithValues } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { Rating } from "@material-ui/lab";
+import { Rating, ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { Box, Chip, Grid, makeStyles, Typography, IconButton } from "@material-ui/core";
 import AddShoppingCartIcon from "@material-ui/icons/AddShoppingCart";
 import RemoveShoppingCartIcon from '@material-ui/icons/RemoveShoppingCart';
@@ -33,6 +33,8 @@ import AutorenewIcon from '@material-ui/icons/Autorenew';
 import SimilarItems from "../../../components/ProductList/SimilarItems/SimilarItems";
 import FrequentlyBought from "../../../components/ProductList/FrequentlyBought/FrequentlyBought";
 import ProductConfiguration from "./ProductConfiguration";
+import ECommerceBreadCrumbs from "../../../components/ECommerce/BreadCrumbs/ECommerceBreadCrumbs";
+import { ECommerceContext } from "../../../components/ECommerce/Layout/ECommerceContext/ECommerceContext";
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -104,16 +106,17 @@ export default function ProductDetails() {
   const [hasError, setHasError] = useState(false);
 
   const [productImages, setProductImages] = useState([])
+  const { ORDER_TYPES, firstOrderType } = useContext(ECommerceContext);
 
   const history = useHistory();
   let { id, orderType: orderTypeFromUrl } = useParams();
-  const orderTypeInLowerCase = orderTypeFromUrl.toLowerCase();
+  const orderTypeInLowerCase = orderTypeFromUrl?.toLowerCase();
 
   const [orderType, setOrderType] = useState(() => {
-    if (orderTypeFromUrl) {
-      return ORDER_TYPES.rent.value;
+    if (!orderTypeFromUrl) {
+      return firstOrderType?.value;
     }
-    return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+    return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : firstOrderType?.value;
   });
 
   useEffect(() => {
@@ -121,6 +124,7 @@ export default function ProductDetails() {
   }, []);
 
   useEffect(() => {
+    setProductDetails(null);
 
     dispatchData({ type: TYPES.updateWholePayload, payload: { ...initialData } })
 
@@ -158,7 +162,7 @@ export default function ProductDetails() {
     }).catch((error) => {
       toastConfig.setToastConfig(error);
     })
-  }, [id])
+  }, [id, orderTypeFromUrl])
 
   const prepareFormData = (data: any) => {
     if (data) {
@@ -235,7 +239,7 @@ export default function ProductDetails() {
       productConfiguration: values
     }
 
-    if (orderTypeInLowerCase === ORDER_TYPES.rent.value.toLocaleLowerCase()) {
+    if (orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLocaleLowerCase()) {
       product["pricingMethod"] = data.selectedPricingMethod;
       product["startDate"] = data.startDate;
       product["endDate"] = data.endDate;
@@ -291,7 +295,7 @@ export default function ProductDetails() {
     axiosInstance().put(`/ecommerce/cart`, {
       _id: cartId,
       qty: Number(value),
-      unit: Number(unit),
+      unit: unit,
       pricingMethod: pricingMethod,
       startDate: startDate,
       endDate: endDate,
@@ -309,7 +313,7 @@ export default function ProductDetails() {
   return (
     <div className="container">
       <div className="p-2">
-        <CustomBreadCrumbs routes={[routes.eCommerce, { title: productDetails?.productName }]} />
+        <ECommerceBreadCrumbs routes={[{ path: `${routes.eCommerce.path}?category=${productDetails?.productCategory?.optionValue}&orderType=${orderType}`, title: productDetails?.productCategory?.optionLabel }, { title: productDetails?.productName }]} />
       </div>
       <Box>
         {productDetails ?
@@ -398,7 +402,28 @@ export default function ProductDetails() {
               <h5>{productDetails.productCategory?.optionLabel}</h5>
               <div className="w-100 d-flex align-items-center gap-2 justify-content-space-between">
                 <h2>{productDetails.productName}</h2>
-                <Chip color="primary" label={ORDER_TYPES[orderTypeInLowerCase]?.key} />
+
+                <ToggleButtonGroup
+                  size="small"
+                  value={orderType}
+                  exclusive
+                  onChange={(_, value) => {
+                    if (value) {
+                      setOrderType(value);
+                      history.push(`${routes.eCommerceDetail.path}/${id}/${value}`)
+                    }
+                  }}
+                  aria-label="text alignment"
+                >
+                  {
+                    Object.keys(ORDER_TYPES).map((key) => (
+                      <ToggleButton style={orderType === ORDER_TYPES[key].value ? { "background": "var(--primary)", "color": "white" } : {}} value={ORDER_TYPES[key].value} aria-label="left aligned">
+                        {ORDER_TYPES[key].key}
+                      </ToggleButton>
+                    ))
+                  }
+                </ToggleButtonGroup>
+
               </div>
               <Rating
                 name="half-rating-read"
@@ -408,7 +433,9 @@ export default function ProductDetails() {
                 readOnly
                 size="small"
               />
-              <h4 className="mb-2">Sold by - {user?.user?.brandName}</h4>
+              {
+                productDetails?.available && <h4 className="mb-2">Available - {productDetails?.available}</h4>
+              }
               <hr></hr>
               {
                 productDetails?.productShortDetail && <div className="mt-3 px-3" dangerouslySetInnerHTML={{ __html: productDetails?.productShortDetail }}></div>
@@ -443,7 +470,7 @@ export default function ProductDetails() {
                       </Grid>
                       <Grid item xs={productDetails.unit ? 6 : 12}>
                         {
-                          orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase() && productDetails.pricingMethod && <FormControl variant="outlined" margin="dense" fullWidth error={hasError && !data.selectedPricingMethod}>
+                          orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase() && data.selectedPricingMethod && <FormControl variant="outlined" margin="dense" fullWidth error={hasError && !data.selectedPricingMethod}>
                             <InputLabel id="pricing-method-label">Pricing Method</InputLabel>
                             <Select
                               required={orderType === ORDER_TYPES.rent.key}
@@ -469,13 +496,13 @@ export default function ProductDetails() {
                   }
 
                   {
-                    orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase() && <Grid item xs={12} sm={12} md={12}>
+                    orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase() && <Grid item xs={12} sm={12} md={12}>
                       <MuiPickersUtilsProvider utils={DateUtils}>
                         <Grid container spacing={2}>
 
                           <Grid item xs={6} sm={6}>
                             <KeyboardDatePicker
-                              required={orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase()}
+                              required={orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase()}
                               inputVariant="outlined"
                               variant="inline"
                               fullWidth
@@ -499,7 +526,7 @@ export default function ProductDetails() {
                           </Grid>
                           <Grid item xs={6} sm={6}>
                             <KeyboardDatePicker
-                              required={orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase()}
+                              required={orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase()}
                               inputVariant="outlined"
                               variant="inline"
                               fullWidth
@@ -582,7 +609,7 @@ export default function ProductDetails() {
                           className="mt-2"
                           color="primary"
                           variant="outlined"
-                          disabled={addToCartBtnLoading || (orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase() ? !(data.startDate && data.endDate && data.selectedUnit && data.selectedPricingMethod) : !data.selectedUnit)}
+                          disabled={addToCartBtnLoading || (orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase() ? !(data.startDate && data.endDate && data.selectedUnit && data.selectedPricingMethod) : !data.selectedUnit)}
                           loading={addToCartBtnLoading}
                           startIcon={addToCartBtnLoading ? null : <AddShoppingCartIcon />}
                           onClick={() => {
@@ -737,6 +764,6 @@ export default function ProductDetails() {
           />
         ) : null
       }
-    </div>
+    </div >
   );
 }

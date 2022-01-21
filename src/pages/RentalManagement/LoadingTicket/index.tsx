@@ -6,7 +6,7 @@ import { CommonRenderer } from "../../../components/AgGridComponents/CustomAgGri
 import { Link } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, IconButton, Tooltip, Menu, MenuItem, Dialog, TextField, CircularProgress } from "@material-ui/core";
+import { Button, Tooltip, Menu, MenuItem, Dialog, TextField, CircularProgress } from "@material-ui/core";
 import { AiFillFilePdf, AiOutlineLoading3Quarters } from 'react-icons/ai';
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -25,7 +25,6 @@ import {
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { useHistory } from 'react-router-dom';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
-import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
@@ -39,7 +38,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { RiExchangeFundsLine } from 'react-icons/ri';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
-import { groupBy, orderBy, sortBy, uniq, map } from "lodash";
+import { groupBy, uniq, map } from "lodash";
 
 const renderedFrom = 'rentalManagementDetailsPageDeliveryTicket';
 
@@ -133,6 +132,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           });
         }
       });
+      console.log(productAssets)
       productAssets.forEach((d) => {
         d['isChecked'] = false;
         d['hideSelection'] =
@@ -143,7 +143,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             INVENTORY_STATUS.scrap,
             INVENTORY_STATUS.lost,
             INVENTORY_STATUS.underReview
-          ].includes(d.status) || d.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered;
+          ].includes(d.status) || d.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered || d?.manualStatus === INVENTORY_STATUS.reserved;
       });
       if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
         setNextStep(true);

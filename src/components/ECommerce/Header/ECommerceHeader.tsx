@@ -36,7 +36,14 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { SET_USER, SET_SELECTED_ENTITY } from '../../../StateProvider/actionTypes';
 import { capitalize } from 'lodash';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { ORDER_TYPES } from '../../../constants/helpers';
+import useQuery from '../../../hooks/useQuery';
+import { ECommerceContext } from '../Layout/ECommerceContext/ECommerceContext';
+import LocationOnOutlinedIcon from '@material-ui/icons/LocationOnOutlined';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import Dialog from '@material-ui/core/Dialog';
+import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
+import ManageAddressDialog from '../../Address/ManageAddressDialog';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -122,10 +129,11 @@ export default function ECommerceHeader() {
 
     const history = useHistory();
     const {
-        state: { cartItems },
+        state: { user, cartItems },
         dispatch
     }: any = useData();
     const toastConfig = useContext(CustomToastContext);
+    const { ORDER_TYPES, firstOrderType } = useContext(ECommerceContext);
 
     const [search, setSearch] = useState("")
     const [open, setOpen] = useState(false);
@@ -141,26 +149,42 @@ export default function ECommerceHeader() {
 
     const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
 
+    const [location, setLocation] = useState(() => {
+        try {
+            if (localStorage.getItem("location")) {
+                const locaStorageLocation = JSON.parse(localStorage.getItem("location"));
+                return locaStorageLocation.fullAddress;
+            }
+            return "";
+        } catch (ex) {
+            console.error("e-commerce header", ex.message)
+            return "";
+        }
+    })
+
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
-    const [moreAnchorEl, setMoreAnchorEl] = React.useState(null);
+    const [moreAnchorEl, setMoreAnchorEl] = useState(null);
+    const [openLocationDialog, setOpenLocationDialog] = useState(false);
+
+    let query = useQuery();
 
     let { orderType: orderTypeFromUrl } = useParams();
     const orderTypeInLowerCase = orderTypeFromUrl?.toLowerCase();
 
     const [orderType, setOrderType] = useState(() => {
-        if (orderTypeFromUrl) {
-            return ORDER_TYPES.rent.value;
+        if (!orderTypeFromUrl) {
+            return firstOrderType?.value;
         }
-        return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+        return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : firstOrderType?.value;
     });
 
     const getOrderType = () => {
         if (orderTypeFromUrl) {
-            return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+            return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : firstOrderType?.value;
         }
-        return ORDER_TYPES.rent.value;
+        return firstOrderType?.value;
     }
 
     useEffect(() => {
@@ -254,8 +278,11 @@ export default function ECommerceHeader() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-            <MenuItem onClick={handleMenuClose}>My account</MenuItem> */}
+            {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem> */}
+            <MenuItem onClick={() => {
+                handleMenuClose()
+                history.push(`${routes.orders.path}`)
+            }}>Orders</MenuItem>
             <MenuItem onClick={logoutUser}>Logout</MenuItem>
         </Menu>
     );
@@ -318,21 +345,40 @@ export default function ECommerceHeader() {
                         <MenuIcon />
                     </IconButton>
 
-                    <Link to={`${routes.eCommerce.path}/Rent`}>
+                    <Link to={`${routes.eCommerce.path}`}>
                         <img className={classes.logo} src={SVG('LogoPng')} alt="equip logo" title="eQuipt Logo" />
                     </Link>
 
                     <div className="d-flex align-items-center gap-2 mx-3">
-                        <Button className={orderType === ORDER_TYPES.sale.value ? "border-bottom" : ""} style={{ color: "white" }}
-                            onClick={() => {
-                                history.push(`${routes.eCommerce.path}/Sale`)
-                            }}
-                        >Buy</Button>
-                        <Button className={orderType === ORDER_TYPES.rent.value ? "border-bottom" : ""} style={{ color: "white" }}
-                            onClick={() => {
-                                history.push(`${routes.eCommerce.path}/Rent`)
-                            }}
-                        >Rent</Button>
+
+                        {
+                            Object.keys(ORDER_TYPES).map((key) => (
+                                <Button key={key} style={orderType === ORDER_TYPES[key]?.value ? { background: "white", color: "var(--primary)" } : { color: "white" }}
+                                    onClick={() => {
+                                        setOrderType(ORDER_TYPES[key]?.value);
+                                        let queryString = [];
+
+                                        queryString.push(`orderType=${ORDER_TYPES[key]?.value}`)
+
+                                        if (query.get("category")) {
+                                            queryString.push(`category=${query.get("category")}`)
+                                        }
+
+                                        if (queryString.length > 0) {
+                                            history.push({
+                                                pathname: routes.eCommerce.path,
+                                                search: `?${queryString.join("&")}`
+                                            })
+                                        }
+                                        else {
+                                            history.push(routes.eCommerce.path)
+                                        }
+
+                                    }}
+                                >{ORDER_TYPES[key]?.key}</Button>
+                            ))
+                        }
+
                     </div>
 
                     <ClickAwayListener onClickAway={() => {
@@ -406,13 +452,27 @@ export default function ECommerceHeader() {
                                                 }
                                             </List> : <h4>No Products Found...</h4>
                                         }
-
                                     </div>
                                 )
                             }
 
                         </div>
                     </ClickAwayListener>
+
+                    <div className="cursor-pointer d-flex gap-2 px-2 py-1 align-items-center"
+                        onClick={() => {
+                            setOpenLocationDialog(true)
+                        }}
+                        style={{ width: "245px", border: "1px solid white", fontSize: "0.7rem", borderRadius: "5px" }}
+                    >
+                        <LocationOnOutlinedIcon />
+                        <div className="d-flex flex-column">
+                            <div>Deliver to {user?.user?.firstName}</div>
+                            <div>
+                                <b className="text-truncate">{location ? location : "Select Address"}</b>
+                            </div>
+                        </div>
+                    </div>
 
                     <Button className="text-white mx-4" style={{ width: 150 }} endIcon={<ExpandMoreIcon />} aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
                         Menu
@@ -471,6 +531,22 @@ export default function ECommerceHeader() {
             </AppBar>
             {renderMobileMenu}
             {renderMenu}
+
+            {
+                openLocationDialog && <ManageAddressDialog
+                    title="Search Location"
+                    onClose={() => {
+                        setOpenLocationDialog(false);
+                    }}
+                    onSuccess={(obj) => {
+                        if (obj) {
+                            setOpenLocationDialog(false);
+                            localStorage.setItem("location", JSON.stringify(obj));
+                            setLocation(obj.fullAddress);
+                        }
+                    }}
+                />
+            }
         </div>
     );
 }

@@ -23,17 +23,17 @@ import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
 import { kebabCase, orderBy, uniqBy } from 'lodash';
 
-export const ORDER_TYPES =
-{
-  rent: {
-    key: 'Rent',  //  Just to display in UI
-    value: "Rent"
-  },
-  sale: {
-    key: 'Buy',  //  Just to display in UI
-    value: "Sale"
-  }
-};
+// export const ORDER_TYPES =
+// {
+//   rent: {
+//     key: 'Rent',  //  Just to display in UI
+//     value: "Rent"
+//   },
+//   sale: {
+//     key: 'Buy',  //  Just to display in UI
+//     value: "Sale"
+//   }
+// };
 
 export const defaultActivityShow = false;
 
@@ -170,7 +170,7 @@ export const sidebarResource = {
   pricing: 'Pricing',
   priceBuilder: 'Price Builder',
   flags: 'Flags',
-  projectSales: 'Project Sales',
+  projectSales: 'Target Projects List',
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
   address: 'Address'
@@ -263,7 +263,7 @@ export const RESOURCE_LABEL = {
   doa: 'DOA',
   termsAndConditions: 'T&Cs',
   equiptmentRentalMaster: 'Equiptment Rental Master',
-  projectStrategy: 'Project Sales',
+  projectStrategy: 'Target Projects List',
   productBuilder: 'Price Builder',
   formBuilder: 'Form Builder',
   currencyConverter: 'Currency Converter',
@@ -1559,7 +1559,7 @@ export const getData = (resource: string, data: any) => {
   switch (kebabCase(resource)) {
     case 'lead':
       return {
-        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+        name: `${data.company}`,
         id: data._id
       };
     case 'opportunity':

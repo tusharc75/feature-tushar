@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.45.0](https://github.com/vebholic/oms_frontend/compare/v2.44.0...v2.45.0) (2022-01-21)
+
+
+### Features
+
+* - e-commerce breadcrumb separated ([26c0e8b](https://github.com/vebholic/oms_frontend/commit/26c0e8b91db23092b3b6f1e1169889d1913ccedd))
+* - ECommerce related changes done ([9a16a01](https://github.com/vebholic/oms_frontend/commit/9a16a017352d7a5a04c9e66c92a74c7beae62cd3))
+* - Orders, Order detail screen updated ([4ab8bca](https://github.com/vebholic/oms_frontend/commit/4ab8bca3aa7c1b1f598b84bc5f4d76a8492a5118))
+* **checkout finish:** checkout finish page ([406ff31](https://github.com/vebholic/oms_frontend/commit/406ff31d74e0f6ae6ce04f42388260a40d38e364))
+
+
+### Bug Fixes
+
+* bug fix ([77486f1](https://github.com/vebholic/oms_frontend/commit/77486f1e7d0db6b9e2b5f507f04fd9975a42a2f9))
+* bug fix ([d9d6ca5](https://github.com/vebholic/oms_frontend/commit/d9d6ca546d7e7218ca7bef2ac48b6c52eb5d0b5b))
+* bug fix ([50061ac](https://github.com/vebholic/oms_frontend/commit/50061ac5d59372251d650621e6c033950443750e))
+* **checkou:** route url fix ([fd494de](https://github.com/vebholic/oms_frontend/commit/fd494debb008b7f0bba1e2874775c2d742cd2979))
+* dashboard changes ([d8c51ab](https://github.com/vebholic/oms_frontend/commit/d8c51ab757788a9a116eb3c3a6b60119168b19ba))
+* form builder ([2bd9a01](https://github.com/vebholic/oms_frontend/commit/2bd9a01bcb5d33882530c9da8921da371f6a8061))
+* oAT-459 , 463 dashboard changes ([14a1c09](https://github.com/vebholic/oms_frontend/commit/14a1c0963f1f92aaa2261830e6ef6116fed052fb))
+* rental changes ([c68d310](https://github.com/vebholic/oms_frontend/commit/c68d31049d3dac10b15050ac669a6c244d567324))
+* report --- date and "All" option changes ([85053d5](https://github.com/vebholic/oms_frontend/commit/85053d55d06ef90f5700b3b071834f82a884e1cc))
+* report --- date and "All" option changes ([8cdb18a](https://github.com/vebholic/oms_frontend/commit/8cdb18aad2be132ed0e76408a1530280f5d1e10c))
+* **route:** route fix ([d86785b](https://github.com/vebholic/oms_frontend/commit/d86785b85fffccc188c117b011575386e6cf1ec0))
+
 ## [2.44.0](https://github.com/vebholic/oms_frontend/compare/v2.43.0...v2.44.0) (2022-01-20)
 
 

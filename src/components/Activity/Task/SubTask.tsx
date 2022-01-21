@@ -24,9 +24,9 @@ const useStyles = makeStyles(() => ({
     top: '-16px',
     right: '0'
   },
-  childChipLayout:{
-     fontSize: '10px',
-    minWidth:"70px !important"
+  childChipLayout: {
+    fontSize: '10px',
+    minWidth: "70px !important"
   }
 }));
 
@@ -34,7 +34,6 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
   const { setToastConfig } = useContext(CustomToastContext);
 
   const [childTasks, setChildTasks] = useState(data.childTask || null);
-  const [parentTasks, setParentTask] = useState(data.parent || null);
   const [isSubmitting, setSubmitting] = useState(false);
   const [taskName, setTaskName] = useState('');
   const [isError, setError] = useState(false);
@@ -96,64 +95,6 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
   return (
     <>
       <Box>
-        {parentTasks && parentTasks.length > 0 && (
-          <Box mb={1}>
-            <div className="position-relative">
-              <h4 className="form-label-style" title="Add Terms & Conditions">
-                Parent Task
-              </h4>
-            </div>
-          </Box>
-        )}
-        {parentTasks &&
-          parentTasks.map((element, index) => (
-            <Box
-              key={index}
-              border={1}
-              onClick={() => handleOpenActivity(element._id)}
-              borderColor="grey.300"
-              p={1.5}
-              mb={1}
-              boxShadow={1}
-              borderRadius={4}
-              style={{ cursor: 'pointer', padding: '6px', marginBottom: '0', boxShadow: 'none'  }}
-            >
-              <Grid container spacing={1} >
-                <Grid item xs={12} className='d-flex justify-content-space-between' >
-                <Grid style={{ display: 'flex', gap: '15px' }}>
-                  <Typography variant="body1" color="primary" style={{ paddingLeft: '10px', display:"flex", justifyContent:"center" , alignItems:"center" , color:"#a3a0a0" }}>
-                    <BsDot/>
-                  </Typography>
-                  <Typography variant="body1" color="primary">
-                    {element.name}
-                  </Typography>
-                </Grid>
-                <Grid style={{ display: 'flex', gap: '15px' }}>
-                  <Avatar style={{width:"24px",height:"24px"}}>M</Avatar>
-                  <Chip size="small" label={element.status} color="primary" className={classes.childChipLayout} style={{
-                    backgroundColor: SubCaseColors[element.status],
-                    color: "white",
-                  }}  id="check"/>
-                  {/* <IconButton
-                    size="small"
-                    color="default"
-                    onClick={(e) => {
-                      setShowConfirmBox(true);
-                      setDeleteTaskId(element._id);
-                      e.stopPropagation();
-                      // deleteTask(e, element._id)
-                    }}
-                  >
-                    <DeleteOutline color="error" />
-                  </IconButton> */}
-                </Grid>
-                </Grid>
-                
-              </Grid>
-            </Box>
-          ))}
-      </Box>
-      <Box>
         {((childTasks && childTasks.length > 0) || openAddSub === true) && (
           <Box mb={1}>
             <div className="position-relative">
@@ -174,7 +115,7 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
               mb={1}
               boxShadow={1}
               borderRadius={4}
-              style={{ cursor: 'pointer', padding: '6px', marginBottom: '0', boxShadow: 'none' }}
+              style={{ cursor: 'pointer', padding: '6px', boxShadow: 'none' }}
             >
               <Grid container spacing={1}>
                 <Grid item xs={12} className="d-flex justify-content-space-between">
@@ -193,29 +134,29 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
                   </Grid>
 
                   <Grid style={{ display: 'flex', gap: '15px' }}>
-                  <Avatar style={{ width: '24px', height: '24px' }}>M</Avatar>
-                  <Chip size="small" label={element.status} color="primary" className={classes.childChipLayout} style={{
-                    backgroundColor: SubCaseColors[element.status],
-                    color: "white",
-                  }}/>
-                 
-                  <IconButton
-                    size="small"
-                    color="default"
-                    onClick={(e) => {
-                      setShowConfirmBox(true);
-                      setDeleteTaskId(element._id);
-                      e.stopPropagation();
-                      // deleteTask(e, element._id)
-                    }}
-                    style={{ color: 'var(--error)' }}
-                  >
-                    <MdDelete />
-                  </IconButton>
-                </Grid>
+                    <Avatar style={{ width: '24px', height: '24px' }}>M</Avatar>
+                    <Chip size="small" label={element.status} color="primary" className={classes.childChipLayout} style={{
+                      backgroundColor: SubCaseColors[element.status],
+                      color: "white",
+                    }} />
+
+                    <IconButton
+                      size="small"
+                      color="default"
+                      onClick={(e) => {
+                        setShowConfirmBox(true);
+                        setDeleteTaskId(element._id);
+                        e.stopPropagation();
+                        // deleteTask(e, element._id)
+                      }}
+                      style={{ color: 'var(--error)' }}
+                    >
+                      <MdDelete />
+                    </IconButton>
+                  </Grid>
                 </Grid>
 
-                
+
               </Grid>
             </Box>
           ))}
