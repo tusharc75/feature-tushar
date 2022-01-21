@@ -21,6 +21,7 @@ import RoleEngine from "../../components/Shared/RoleEngine";
 import { roleTypes } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { isMobile, isTablet } from 'react-device-detect';
+import {useData} from '../../StateProvider/Provider'
 
 const CreateRole = ({
   open,
@@ -33,6 +34,7 @@ const CreateRole = ({
   roleId = null
 }) => {
   const theme = useTheme();
+  const {state : {user: { user }}} = useData()
   const history = useHistory();
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -73,10 +75,31 @@ const CreateRole = ({
         ? `/field?resource=Role&roleType=${roleType}`
         : `/field?resource=Role&roleType=${roleType}&entity=${selectedEntity}`;
     axiosInstance()
-      .get(api)
+      .get(`user/entity-union-role/?userId=${user?._id}&entityId=${selectedEntity}`)
       .then(({ data: { data } }) => {
-        setField(data.field);
-        setResource(data.resource);
+        const oldData = {...data}
+        const field = data.field.map(((f:any) => ({
+          ...f,
+          isCreate: false,
+          isRead: false,
+          isUpdate: false,
+          isCreateDisabled: !f.isCreate,
+          isReadDisabled: !f.isRead,
+          isUpdateDisabled: !f.isUpdate,
+        })))
+        const resource = data.resource.map((r:any) => ({
+          ...r,
+          isCreate: false,
+          isCreateDisabled: !r.isCreate,
+          isDelete: false,
+          isDeleteDisabled: !r.isDelete,
+          isRead: false,
+          isReadDisabled: !r.isRead,
+          isUpdate: false,
+          isUpdateDisabled: !r.isUpdate,
+        }))
+        setField(field);
+        setResource(resource);
         setLoading(false);
       })
       .catch((err) => {
@@ -92,12 +115,29 @@ const CreateRole = ({
       ) ||
       field.some((d) => d.isCreate || d.isRead || d.isUpdate || d.isDelete)
     ) {
+      const resources = resource.map(r => {
+        const newData = {...r}
+        delete newData.isCreateDisabled
+        delete newData.isDeleteDisabled
+        delete newData.isReadDisabled
+        delete newData.isUpdateDisabled
+
+        return newData
+      })
+      const fields = field.map(f => {
+        const newData = {...f}
+        delete newData.isCreateDisabled
+        delete newData.isReadDisabled
+        delete newData.isUpdateDisabled
+
+        return newData
+      })
       setSubmitting(true);
       axiosInstance()
         .post("/role", {
           ...values,
-          field,
-          resource,
+          field: fields,
+          resource: resources,
           type: roleType,
         })
         .then(({ data }) => {
@@ -119,6 +159,8 @@ const CreateRole = ({
       });
     }
   };
+
+
 
   return (
     <Dialog
