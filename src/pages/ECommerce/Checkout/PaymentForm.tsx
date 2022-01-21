@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Typography, Grid, TextField, FormControlLabel, Checkbox, Box } from '@material-ui/core';
 import { CreditCardOutlined } from '@material-ui/icons';
-import NumberFormat, { NumberFormatValues, NumberFormatPropsBase } from 'react-number-format';
+import NumberFormat, { NumberFormatValues } from 'react-number-format';
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -88,7 +88,7 @@ const PaymentForm = ({ form, setForm, error }) => {
                 onValueChange: (values: NumberFormatValues) => {
                   handleChange('cardNumber', values.value);
                 }
-              } as NumberFormatPropsBase
+              }
             }}
           />
         </Grid>
@@ -116,7 +116,7 @@ const PaymentForm = ({ form, setForm, error }) => {
                     onValueChange: (values: NumberFormatValues) => {
                       handleChange('expiryDate', values.value);
                     }
-                  } as NumberFormatPropsBase
+                  }
                 }}
               />
             </Grid>
@@ -142,7 +142,7 @@ const PaymentForm = ({ form, setForm, error }) => {
                     onValueChange: (values: NumberFormatValues) => {
                       handleChange('cvv', values.value);
                     }
-                  } as NumberFormatPropsBase
+                  }
                 }}
               />
             </Grid>

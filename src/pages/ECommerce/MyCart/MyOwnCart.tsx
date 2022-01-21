@@ -6,7 +6,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory, Link } from 'react-router-dom';
-import { displayDate, formatAmountWithCurrency, ORDER_TYPES } from '../../../constants/helpers';
+import { displayDate, formatAmountWithCurrency } from '../../../constants/helpers';
 import Typography from '@material-ui/core/Typography';
 import { AiOutlineSafetyCertificate } from 'react-icons/ai';
 import { SET_CART } from '../../../StateProvider/actionTypes';
@@ -23,6 +23,8 @@ import AddIcon from "@material-ui/icons/AddCircle";
 import { Skeleton } from "@material-ui/lab";
 import ManageAddressDialog from '../../../components/Address/ManageAddressDialog';
 import Tooltip from '../../../components/CustomTooltipTitle';
+import ECommerceBreadCrumbs from '../../../components/ECommerce/BreadCrumbs/ECommerceBreadCrumbs';
+import { ECommerceContext } from '../../../components/ECommerce/Layout/ECommerceContext/ECommerceContext';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -90,6 +92,7 @@ function MyOwnCart() {
 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext)
+  const { ORDER_TYPES, firstOrderType }= useContext(ECommerceContext);
   const [currentTab, setCurrentTab] = useState(1);
   const [showAddAddresstDialog, setShowAddAddresstDialog] = useState({open: false, type: ""});
   const [totalCount, setTotalCount] = useState(0);
@@ -216,7 +219,7 @@ function MyOwnCart() {
     // if (checkoutLabel === 'Place Order') {
     //   setOpenPlaceOrderDialog(prevState => { return { ...prevState, open: true } });
     // }
-    history.push(`${routes.eCommerce.path}/checkout?shipTo=${selectedShippingAddress.optionValue}&billTo=${selectedBillingAddress.optionValue}`)
+    history.push(`${routes.eCommerce.path}/cart/checkout?shipTo=${selectedShippingAddress.optionValue}&billTo=${selectedBillingAddress.optionValue}`)
   };
 
   const onSuccess = () => {
@@ -241,7 +244,7 @@ function MyOwnCart() {
   return (
     <>
       <div className="p-2">
-        <CustomBreadCrumbs routes={[routes.eCommerce, { title: "Cart" }]} />
+        <ECommerceBreadCrumbs routes={[routes.eCommerce, { title: "Cart" }]} />
       </div>
 
       <Box>

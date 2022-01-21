@@ -22,7 +22,6 @@ function PlusMinusTextboxComponent({ inputTextLabel, value, minValue = 1, isRequ
     const uniqueId = generateUniqueId();
 
     const [inputValue, setInputValue] = useState(value);
-    console.log(inputValue)
 
     useEffect(() => {
         const ignoreScroll = (e) => {

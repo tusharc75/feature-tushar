@@ -109,6 +109,10 @@ import ProductDetails from './pages/ECommerce/Products/ProductDetails';
 import MyOwnCart from './pages/ECommerce/MyCart/MyOwnCart';
 import Checkout from './pages/ECommerce/Checkout';
 import CustomerSign from './pages/DeliveryTicket/CustomerSign';
+import CheckoutSuccess from './pages/ECommerce/Success';
+import Orders from './pages/ECommerce/Orders';
+import OrderDetails from './pages/ECommerce/Orders/OrderDetails';
+import EcommercePolicy from './pages/EcommercePolicy';
 
 var notificationInterval: any = null;
 
@@ -550,18 +554,18 @@ function App() {
             <PrivateRoute exact path={`${routes.addressDetail.path}/:id`}>
               <AddressDetailPage />
             </PrivateRoute>
-            <PrivateRoute exact path={`/reports`}>
+            <PrivateRoute exact path={`${routes.reports.path}`}>
               <ReportMaster />
             </PrivateRoute>
-            <PrivateRoute exact path={`/reports/:resource`}>
+            <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
               <Report />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.eCommercePolicy.path}`}>
+              <EcommercePolicy />
             </PrivateRoute>
 
 
             <PrivateRoute exact path={`${routes.eCommerce.path}`} isEcommerceRoute={true}>
-              <Products />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.eCommerce.path}/:orderType`} isEcommerceRoute={true}>
               <Products />
             </PrivateRoute>
 
@@ -571,9 +575,19 @@ function App() {
             <PrivateRoute exact path={`${routes.eCommerceDetail.path}/cart`} isEcommerceRoute={true}>
               <MyOwnCart />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.eCommerce.path}/checkout`} isEcommerceRoute={true}>
+            <PrivateRoute exact path={`${routes.eCommerce.path}/cart/checkout`} isEcommerceRoute={true}>
               <Checkout />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.eCommerce.path}/cart/finish`} isEcommerceRoute={true}>
+              <CheckoutSuccess />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.orders.path}`} isEcommerceRoute={true}>
+              <Orders />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.orderDetails.path}/:id`} isEcommerceRoute={true}>
+              <OrderDetails />
+            </PrivateRoute>
+
 
             <Route exact path={'/customer-sign/:id'}>
               <CustomerSign />

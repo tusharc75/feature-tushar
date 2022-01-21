@@ -1,7 +1,6 @@
 import { useReducer, useState, useEffect, Fragment, FC, useContext } from 'react'
 import { Button, Box, } from '@material-ui/core'
 import { useHistory } from 'react-router-dom'
-
 import routes from '../../components/Helpers/Routes';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -17,6 +16,7 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 import { FaSuitcase } from "react-icons/fa";
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { MdAdd } from 'react-icons/md';
+
 interface AssetsGridProps {
   permissions?: any;
   user?: any;

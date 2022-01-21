@@ -72,14 +72,10 @@ const LookupResource = [
   { name: 'Address', value: 'Address' }
 ].sort((a, b) => a.name.localeCompare(b.name));
 
-export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields }) => {
+export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, isCalculativeField }) => {
   const [initialValues, setInitialValues] = useState({ ...fieldData });
 
   const inputRef = useRef(null);
-  const [cursorPosition, setCursorPosition] = useState<any>({
-    selectionStart: 0,
-    selectionEnd: 0
-  });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formValues, setFormValues] = useState({});
   const [isInitialUpdated, setIsInitialUpdated] = useState({
@@ -105,37 +101,29 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
   useEffect(() => {
     if (initialValues) {
       const values = initialValues;
-
       if (!values.isDefaultValue) {
         values.isDefaultValue = false;
         values.defaultValue = '';
       }
-
-      if (!values.disableOnEdit && module !== 'price-template' && module !== 'product-template' && module !== 'pdf-template') {
+      if (!values.disableOnEdit && module !== 'price-template' && module !== 'product-template') {
         values.disableOnEdit = false;
       }
-
-      if (!values.isWarningTooltip && module !== 'price-template' && module !== 'product-template' && module !== 'pdf-template') {
+      if (!values.isWarningTooltip && module !== 'price-template' && module !== 'product-template') {
         values.isWarningTooltip = false;
         values.warningTooltipMessage = '';
       }
-
-      if (!values.disableOnEdit && module !== 'price-template' && module !== 'product-template' && module !== 'pdf-template') {
+      if (!values.disableOnEdit && module !== 'price-template' && module !== 'product-template') {
         values.disableOnEdit = false;
       }
-
-      if (!values.hiddenField && module !== 'price-template' && module !== 'product-template' && module !== 'pdf-template') {
+      if (!values.hiddenField && module !== 'price-template' && module !== 'product-template') {
         values.hiddenField = false;
       }
-
       if (!values.addAdditionalOption && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown')) {
         values.addAdditionalOption = false;
       }
-
       if (!values.addManualOptionInExcel && fieldData.type === 'dropDown') {
         values.addManualOptionInExcel = false;
       }
-
       if (
         !values.unique &&
         (fieldData.type === 'multiLine' || fieldData.type === 'singleLine' || fieldData.type === 'mobileNumber' || fieldData.type === 'number')
@@ -148,8 +136,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       ) {
         values.primaryField = false;
       }
-
-
       if (values.type === 'process') {
         if (!values.showAdditionalInfoPopup) {
           values.showAdditionalInfoPopup = false;
@@ -158,10 +144,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         if (!values.additionalInfoSection) {
           values.additionalInfoSection = '';
         }
-
         setInitialValues(values);
       }
-
       return () => setInitialValues(null);
     }
   }, [fieldData]);
@@ -219,13 +203,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     });
   });
 
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
-
   const handleSave = (values) => {
     let data = [...section];
     data.forEach((row) => {
@@ -264,10 +241,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             } else {
               ele.defaultValue = '';
             }
-
-            // if (isChangeFieldName && values["editAble"] && (module === "product-template" || module === "price-template")) {
-            //   ele.fieldName = camelCase(ele.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''))
-            // }
 
             if (
               fieldData.type === 'dropDown' ||
@@ -337,6 +310,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             }
             if (ele.isDropdown) {
               ele.dropdownOnConverter = values.dropdownOnConverter;
+            }
+            if (module === "form-builder-master") {
+              ele.editAble = values.editAble || false;
+              ele.deletAble = values.deletAble || false;
             }
           }
         });
@@ -414,6 +391,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     if (event.which === 13) {
       event.preventDefault();
     }
+  };
+
+  const handleValuesChange = (data) => {
+    setFormValues((prevState) => ({
+      ...prevState,
+      ...data
+    }));
   };
 
   return (
@@ -651,7 +635,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'percent' ||
                     values['type'] === 'date' ||
                     values['type'] === 'converter') &&
-                    module !== 'form-builder' && (
+                    isCalculativeField && (
                       <>
                         <br></br>
                         <FormControlLabel
@@ -736,7 +720,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'decimal' ||
                     values['type'] === 'percent' ||
                     values['type'] === 'converter') &&
-                    module !== 'form-builder' && (
+                    isCalculativeField && (
                       <>
                         <br></br>
                         <FormControlLabel
@@ -785,7 +769,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'decimal' ||
                     values['type'] === 'percent' ||
                     values['type'] === 'converter') &&
-                    module !== 'form-builder' && (
+                    isCalculativeField && (
                       <>
                         <br></br>
                         <FormControlLabel
@@ -821,7 +805,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       _id={fieldData._id}
                     />
                   )}
-                  {values['type'] === 'converter' && module !== 'form-builder' && (
+                  {values['type'] === 'converter' && isCalculativeField && (
                     <>
                       <br></br>
                       <FormControlLabel
@@ -860,7 +844,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       control={
                         <Checkbox
                           name="required"
-                          disabled={!values['editAble'] && values['required'] ? true : false}
+                          disabled={values['required'] ? true : false}
                           checked={values['required']}
                           onChange={(e) => {
                             setFieldValue('required', e.target.checked);
@@ -1050,40 +1034,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       </Box>
                     ) : values['isDefaultValue'] ? (
                       <Box display="block">
-                        {module === 'pdf-template' &&
-                          ['multiLine', 'singleLine'].includes(fieldData.type) &&
-                          [
-                            'entity',
-                            'customerAccountName',
-                            'quoteDate',
-                            'quoteName',
-                            'version',
-                            'quoteId',
-                            'currency',
-                            'expiryDate',
-                            'incoTerms'
-                          ].map((item) => (
-                            <Chip
-                              className="ml-1 cursor-pointer"
-                              key={item}
-                              label={startCase(item)}
-                              onClick={() => {
-                                const value = values?.defaultValue;
-                                if (typeof value === 'string') {
-                                  const defVal = [
-                                    value.slice(0, cursorPosition.selectionStart),
-                                    `{{${item}}}`,
-                                    value.slice(cursorPosition.selectionStart)
-                                  ].join('');
-
-                                  setFieldValue('defaultValue', defVal);
-                                  handleValuesChange({
-                                    defaultValue: defVal
-                                  });
-                                }
-                              }}
-                            />
-                          ))}
                         <TextField
                           inputRef={inputRef}
                           variant="outlined"
@@ -1099,33 +1049,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           error={touched['defaultValue'] && Boolean(errors['defaultValue'])}
                           helperText={touched['defaultValue'] && errors['defaultValue']}
                           onChange={(e) => {
-                            if (module === 'pdf-template') {
-                              if (typeof inputRef.current === 'object' && inputRef.current !== null) {
-                                const selectionStart = inputRef.current.selectionStart;
-                                if (typeof selectionStart === 'number') {
-                                  setFieldValue('defaultValue', e.target.value.trimStart());
-                                  handleValuesChange({
-                                    defaultValue: e.target.value.trimStart()
-                                  });
-                                  setCursorPosition({ selectionStart, selectionEnd: selectionStart });
-                                }
-                              }
-                            } else {
-                              setFieldValue('defaultValue', e.target.value.trimStart());
-                              handleValuesChange({ defaultValue: e.target.value.trimStart() });
-                            }
-                          }}
-                          onClick={(e) => {
-                            if (module === 'pdf-template') {
-                              if (typeof inputRef.current === 'object' && inputRef.current !== null) {
-                                const selectionStart = inputRef.current.selectionStart;
-                                const selectionEnd = inputRef.current.selectionEnd;
-                                setCursorPosition({
-                                  selectionStart,
-                                  selectionEnd: selectionEnd
-                                });
-                              }
-                            }
+                            setFieldValue('defaultValue', e.target.value.trimStart());
+                            handleValuesChange({ defaultValue: e.target.value.trimStart() });
                           }}
                           onKeyPress={(event) => {
                             event.stopPropagation();
@@ -1133,7 +1058,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         />
                       </Box>
                     ) : null}
-                    {module !== 'price-template' && module !== 'product-template' && module !== 'pdf-template' ? (
+                    {module !== 'price-template' && module !== 'product-template' ? (
                       <FormControlLabel
                         disabled={values['required']}
                         control={
@@ -1220,10 +1145,40 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       />
                     )}
                   </Box>
+
+                  {module === "form-builder-master" &&
+                    <Box>
+                      <hr />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="editAble"
+                            checked={values['editAble']}
+                            onChange={(e) => {
+                              setFieldValue('editAble', e.target.checked);
+                            }}
+                            color="primary"
+                          />
+                        }
+                        label="Editable"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="deletAble"
+                            checked={values['deletAble']}
+                            onChange={(e) => {
+                              setFieldValue('deletAble', e.target.checked);
+                            }}
+                            color="primary"
+                          />
+                        }
+                        label="Deletable"
+                      />
+                    </Box>}
                 </Form>
               </Box>
             </CustomDialogContent>
-
             <CustomDialogFooter>
               <Button
                 size="small"
@@ -1243,7 +1198,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
             {showConfirmDialog ? (
               <ConfirmCancelDialog
-              close={() => setShowConfirmDialog(false)}
+                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false);

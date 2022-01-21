@@ -36,7 +36,8 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { SET_USER, SET_SELECTED_ENTITY } from '../../../StateProvider/actionTypes';
 import { capitalize } from 'lodash';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { ORDER_TYPES } from '../../../constants/helpers';
+import useQuery from '../../../hooks/useQuery';
+import { ECommerceContext } from '../Layout/ECommerceContext/ECommerceContext';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -126,7 +127,8 @@ export default function ECommerceHeader() {
         dispatch
     }: any = useData();
     const toastConfig = useContext(CustomToastContext);
-
+    const { ORDER_TYPES, firstOrderType }= useContext(ECommerceContext);
+    
     const [search, setSearch] = useState("")
     const [open, setOpen] = useState(false);
 
@@ -146,21 +148,23 @@ export default function ECommerceHeader() {
 
     const [moreAnchorEl, setMoreAnchorEl] = React.useState(null);
 
+    let query = useQuery();
+
     let { orderType: orderTypeFromUrl } = useParams();
     const orderTypeInLowerCase = orderTypeFromUrl?.toLowerCase();
 
     const [orderType, setOrderType] = useState(() => {
-        if (orderTypeFromUrl) {
-            return ORDER_TYPES.rent.value;
+        if (!orderTypeFromUrl) {
+            return firstOrderType?.value;
         }
-        return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+        return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : firstOrderType?.value;
     });
 
     const getOrderType = () => {
         if (orderTypeFromUrl) {
-            return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+            return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : firstOrderType?.value;
         }
-        return ORDER_TYPES.rent.value;
+        return firstOrderType?.value;
     }
 
     useEffect(() => {
@@ -254,8 +258,11 @@ export default function ECommerceHeader() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-            <MenuItem onClick={handleMenuClose}>My account</MenuItem> */}
+            {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem> */}
+            <MenuItem onClick={() => {
+                handleMenuClose()
+                history.push(`${routes.orders.path}`)
+            }}>Orders</MenuItem>
             <MenuItem onClick={logoutUser}>Logout</MenuItem>
         </Menu>
     );
@@ -318,21 +325,88 @@ export default function ECommerceHeader() {
                         <MenuIcon />
                     </IconButton>
 
-                    <Link to={`${routes.eCommerce.path}/Rent`}>
+                    <Link to={`${routes.eCommerce.path}`}>
                         <img className={classes.logo} src={SVG('LogoPng')} alt="equip logo" title="eQuipt Logo" />
                     </Link>
 
                     <div className="d-flex align-items-center gap-2 mx-3">
-                        <Button className={orderType === ORDER_TYPES.sale.value ? "border-bottom" : ""} style={{ color: "white" }}
+
+                        {
+                            Object.keys(ORDER_TYPES).map((key) => (
+                                <Button key={key} className={orderType === ORDER_TYPES[key]?.value ? "border-bottom" : ""} style={{ color: "white" }}
+                                    onClick={() => {
+                                        setOrderType(ORDER_TYPES[key]?.value);
+                                        let queryString = [];
+
+                                        queryString.push(`orderType=${ORDER_TYPES[key]?.value}`)
+
+                                        if (query.get("category")) {
+                                            queryString.push(`category=${query.get("category")}`)
+                                        }
+
+                                        if (queryString.length > 0) {
+                                            history.push({
+                                                pathname: routes.eCommerce.path,
+                                                search: `?${queryString.join("&")}`
+                                            })
+                                        }
+                                        else {
+                                            history.push(routes.eCommerce.path)
+                                        }
+
+                                    }}
+                                >{ORDER_TYPES[key]?.key}</Button>
+                            ))
+                        }
+
+
+
+
+                        {/* <Button className={orderType === ORDER_TYPES.sale.value ? "border-bottom" : ""} style={{ color: "white" }}
                             onClick={() => {
-                                history.push(`${routes.eCommerce.path}/Sale`)
+                                setOrderType(ORDER_TYPES.sale.value);
+                                let queryString = [];
+
+                                queryString.push(`orderType=Sale`)
+
+                                if (query.get("category")) {
+                                    queryString.push(`category=${query.get("category")}`)
+                                }
+
+                                if (queryString.length > 0) {
+                                    history.push({
+                                        pathname: routes.eCommerce.path,
+                                        search: `?${queryString.join("&")}`
+                                    })
+                                }
+                                else {
+                                    history.push(routes.eCommerce.path)
+                                }
+
                             }}
                         >Buy</Button>
-                        <Button className={orderType === ORDER_TYPES.rent.value ? "border-bottom" : ""} style={{ color: "white" }}
+                        <Button className={orderType === firstOrderType?.value ? "border-bottom" : ""} style={{ color: "white" }}
                             onClick={() => {
-                                history.push(`${routes.eCommerce.path}/Rent`)
+                                setOrderType(firstOrderType?.value);
+                                let queryString = [];
+
+                                queryString.push(`orderType=Rent`)
+
+                                if (query.get("category")) {
+                                    queryString.push(`category=${query.get("category")}`)
+                                }
+
+                                if (queryString.length > 0) {
+                                    history.push({
+                                        pathname: routes.eCommerce.path,
+                                        search: `?${queryString.join("&")}`
+                                    })
+                                }
+                                else {
+                                    history.push(routes.eCommerce.path)
+                                }
                             }}
-                        >Rent</Button>
+                        >Rent</Button> */}
                     </div>
 
                     <ClickAwayListener onClickAway={() => {

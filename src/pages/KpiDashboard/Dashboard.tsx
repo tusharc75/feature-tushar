@@ -174,7 +174,7 @@ const Dashboard = () => {
                 marketSegments={marketSegments}
                 subMarketSegments={subMarketSegments}
                 productCategory={productCategory}
-                setSubMarketSegment={setSubMarketSegments}
+                setSubMarketSegments={setSubMarketSegments}
                 salesFilter={salesFilter}
                 setSalesFilter={setSalesFilter}
                 setDashboardType={setDashboardType}
@@ -195,7 +195,7 @@ const Dashboard = () => {
                     marketSegments={marketSegments}
                     subMarketSegments={subMarketSegments}
                     productCategory={productCategory}
-                    setSubMarketSegment={setSubMarketSegments}
+                    setSubMarketSegments={setSubMarketSegments}
                     setSalesFilter={setSalesFilter}
                   />
 
@@ -210,7 +210,7 @@ const Dashboard = () => {
                     marketSegments={marketSegments}
                     subMarketSegments={subMarketSegments}
                     productCategory={productCategory}
-                    setSubMarketSegment={setSubMarketSegments}
+                    setSubMarketSegments={setSubMarketSegments}
                     setSalesFilter={setSalesFilter}
                   />
 
@@ -225,13 +225,12 @@ const Dashboard = () => {
                     marketSegments={marketSegments}
                     subMarketSegments={subMarketSegments}
                     productCategory={productCategory}
-                    setSubMarketSegment={setSubMarketSegments}
+                    setSubMarketSegments={setSubMarketSegments}
                     setSalesFilter={setSalesFilter}
                   />
 
                   <OpportunityTrends
                     getExchangeRates={getExchangeRates}
-                    salesFilter={salesFilter}
                     currency={currency}
                     setCurrency={setCurrency}
                     moment={moment}
@@ -240,8 +239,6 @@ const Dashboard = () => {
                     marketSegments={marketSegments}
                     subMarketSegments={subMarketSegments}
                     productCategory={productCategory}
-                    setSubMarketSegment={setSubMarketSegments}
-                    setSalesFilter={setSalesFilter}
                   />
 
                   {/* <Box my={2}>
@@ -250,7 +247,7 @@ const Dashboard = () => {
                 </Box>
               )}
               {dashboardType && dashboardType.includes('Asset') && (
-                <Box p={1} style={{backgroundColor:"#F5F5F5"}}>
+                <Box p={1} style={{ backgroundColor: "#F5F5F5" }}>
                   <AssetDashboard salesFilter={salesFilter} />
                 </Box>
               )}

@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs, ButtonGroup, Container, InputAdornment, TextField } from "@material-ui/core";
-import { Autocomplete, Skeleton } from "@material-ui/lab";
-import { useParams, useHistory } from "react-router-dom";
+import { useState, useEffect, useContext, Fragment, useReducer } from "react";
+import { Box, Button, IconButton } from "@material-ui/core";
 import axiosInstance from "../../../axios/axiosInstance";
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
@@ -9,18 +7,17 @@ import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { salesOrder } from "../../../constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
-import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
+import { CommonRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import AdditionalCostDialog from "./AdditionalCostDialog";
-import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { prepareDataForGrid, CHILD_RESOURCE } from "../../../constants/helpers";
-import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
+import { getFrameworkComponents, genrateColoum } from "../../../constants/columns"
 import { GrBusinessService } from "react-icons/all";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';

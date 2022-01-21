@@ -13,16 +13,15 @@ const OpportunityDashboards = (props) => {
   const {
     state: { selectedEntity }
   } = useData();
-  const { moment, currency, filterCurrency, salesFilter, getExchangeRates, setCurrency, marketSegments,
-    subMarketSegments,
+  const { moment, currency, filterCurrency, getExchangeRates, setCurrency, marketSegments,
     productCategory,
-    setSubMarketSegments,
-    setSalesFilter,
     salesReps,
     customerAccounts } = props;
   const [quoteStatus, setQuoteStatus] = useState('open');
   const [opp1Status, setOpp1Status] = useState('open');
   const [opp2Status, setOpp2Status] = useState('open');
+  const [currentFilter, setCurrentFilter] = useState('');
+  const [subMarketSegments, setSubMarketSegments] = useState([]);
 
   const [openQuoteData, setOpenQuoteData] = useState({
     all: 0,
@@ -38,13 +37,30 @@ const OpportunityDashboards = (props) => {
     datasets: []
   });
 
-  const [filterAnchor, setFilterAnchor] = useState(null);
+  const [salesFilterAnchor, setFilterAnchor] = useState(null);
   const [openFilter, setOpenFilter] = useState(false);
+
+  const [salesFilter, setSalesFilter] = useState({
+    marketSegment: {},
+    customerAccount: {},
+    subMarketSegment: {},
+    between: {
+      from: new Date(moment().subtract(1, 'year').calendar()),
+      to: new Date()
+    },
+    countrySellTo: {},
+    countryBillTo: {}
+  });
 
   const fetchOpportunitySalesRep = useCallback(() => {
     let params = {
       entity: selectedEntity || '',
       status: opp2Status,
+      marketSegment: salesFilter.marketSegment ? salesFilter.marketSegment['id'] : '',
+      subMarketSegment: salesFilter.subMarketSegment ? salesFilter.subMarketSegment['id'] : '',
+      customerAccount: salesFilter.customerAccount ? salesFilter.customerAccount['id'] : '',
+      countrySellTo: salesFilter.countrySellTo ? salesFilter.countrySellTo["optionValue"] : '',
+      countryBillTo: salesFilter.countryBillTo ? salesFilter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -69,7 +85,11 @@ const OpportunityDashboards = (props) => {
         const datasets = [];
 
         for (let d of data) {
+          if (d?.user?.firstName && d?.user?.lastName){
           labels.push(`${d.user.firstName} ${d.user.lastName}`);
+          }else {
+            labels.push('Deleted User')
+          }
           datasets.push(d.count);
         }
 
@@ -111,6 +131,11 @@ const OpportunityDashboards = (props) => {
     let params = {
       entity: selectedEntity || '',
       status: opp1Status,
+      marketSegment: salesFilter.marketSegment ? salesFilter.marketSegment['id'] : '',
+      subMarketSegment: salesFilter.subMarketSegment ? salesFilter.subMarketSegment['id'] : '',
+      customerAccount: salesFilter.customerAccount ? salesFilter.customerAccount['id'] : '',
+      countrySellTo: salesFilter.countrySellTo ? salesFilter.countrySellTo["optionValue"] : '',
+      countryBillTo: salesFilter.countryBillTo ? salesFilter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -177,6 +202,11 @@ const OpportunityDashboards = (props) => {
     let params = {
       status: quoteStatus,
       entity: selectedEntity ? selectedEntity : '',
+      marketSegment: salesFilter.marketSegment ? salesFilter.marketSegment['id'] : '',
+      subMarketSegment: salesFilter.subMarketSegment ? salesFilter.subMarketSegment['id'] : '',
+      customerAccount: salesFilter.customerAccount ? salesFilter.customerAccount['id'] : '',
+      countrySellTo: salesFilter.countrySellTo ? salesFilter.countrySellTo["optionValue"] : '',
+      countryBillTo: salesFilter.countryBillTo ? salesFilter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -228,7 +258,7 @@ const OpportunityDashboards = (props) => {
       <Grid container spacing={2}>
         <Popover
           open={openFilter}
-          anchorEl={filterAnchor}
+          anchorEl={salesFilterAnchor}
           onClose={handleClickFilter}
           anchorOrigin={{
             vertical: 'bottom',
@@ -241,42 +271,28 @@ const OpportunityDashboards = (props) => {
         >
           <Box p={2}>
             <Box width="250px">
-              {/* <Autocomplete
-              fullWidth
-              size="small"
-              disabled={salesFilter.allEntity}
-              options={entities}
-              autoHighlight
-              value={salesFilter.entity}
-              getOptionLabel={(option) => option.name || ''}
-              getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-              onChange={(_, val) => {
-                setSalesFilter({ ...salesFilter, entity: val });
-              }}
-              renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
-            /> */}
+              <FormControl size="small" variant="outlined" fullWidth>
+                <InputLabel id="status">Status</InputLabel>
+                <Select labelId="status" id="status"
+                  fullWidth value={currentFilter === "quote" ? quoteStatus : currentFilter === "customerAccount" ? opp1Status : opp2Status}
+                  onChange={(e) => {
+                    currentFilter === "quote" ? setQuoteStatus(e.target.value.toString())
+                      : currentFilter === "customerAccount" ? setOpp1Status(e.target.value.toString())
+                        : setOpp2Status(e.target.value.toString())
+                  }}>
+                  <MenuItem value={'won'}>Won</MenuItem>
+                  <MenuItem value={'open'}>Open</MenuItem>
+                  {currentFilter !== "quote" && <MenuItem value={'lost'}>Lost</MenuItem>}
+                </Select>
+              </FormControl>
               <Box mt={1} />
-              <Autocomplete
-                size="small"
-                fullWidth
-                options={salesReps}
-                autoHighlight
-                value={salesFilter.salesRep}
-                getOptionLabel={(option) => option.name || ''}
-                getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-                onChange={(_, val) => {
-                  setSalesFilter({ ...salesFilter, salesRep: val });
-                }}
-                renderInput={(params) => <TextField {...params} label="Sales Rep" variant="outlined" />}
-              />
-              <Box mt={1} />
-              <Autocomplete
+              {currentFilter !== "customerAccount" && <Autocomplete
                 size="small"
                 fullWidth
                 options={customerAccounts}
                 autoHighlight
                 value={salesFilter.customerAccount}
-                getOptionLabel={(option) => option.name || ''}
+                getOptionLabel={(option: any) => option.name || ''}
                 getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
                 onChange={(_, val) => {
                   let data = { ...salesFilter, customerAccount: val }
@@ -295,7 +311,7 @@ const OpportunityDashboards = (props) => {
                   setSalesFilter({ ...data });
                 }}
                 renderInput={(params) => <TextField {...params} label="Customer Account" variant="outlined" />}
-              />
+              />}
               <Box mt={1} />
               <Autocomplete
                 size="small"
@@ -303,12 +319,12 @@ const OpportunityDashboards = (props) => {
                 options={marketSegments}
                 autoHighlight
                 value={salesFilter.marketSegment}
-                getOptionLabel={(option) => option.name || ''}
+                getOptionLabel={(option: any) => option.name || ''}
                 getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
                 onChange={(_, val) => {
                   setSalesFilter({ ...salesFilter, marketSegment: val });
                   if (val) {
-                    setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
+                    setSubMarketSegments(marketSegments.salesFilter((d) => d?.parentSegment === val?.id));
                   } else {
                     setSubMarketSegments([]);
                   }
@@ -322,7 +338,7 @@ const OpportunityDashboards = (props) => {
                 options={subMarketSegments}
                 autoHighlight
                 value={salesFilter.subMarketSegment}
-                getOptionLabel={(option) => option.name || ''}
+                getOptionLabel={(option: any) => option.name || ''}
                 getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
                 onChange={(_, val) => setSalesFilter({ ...salesFilter, subMarketSegment: val })}
                 renderInput={(params) => <TextField {...params} label="Sub-Market Segment" variant="outlined" />}
@@ -331,23 +347,10 @@ const OpportunityDashboards = (props) => {
               <Autocomplete
                 size="small"
                 fullWidth
-                options={productCategory}
-                autoHighlight
-                value={salesFilter.productCategory}
-                getOptionLabel={(option) => option.name || ''}
-                getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-                onChange={(_, val) => setSalesFilter({ ...salesFilter, productCategory: val })}
-                renderInput={(params) => <TextField {...params} label="Product Category" variant="outlined" />}
-              />
-              <Box mt={1} />
-
-              <Autocomplete
-                size="small"
-                fullWidth
                 options={Countries}
                 autoHighlight
                 value={salesFilter.countrySellTo}
-                getOptionLabel={(option) => option.optionLabel || ''}
+                getOptionLabel={(option: any) => option.optionLabel || ''}
                 getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
                 onChange={(_, val) => setSalesFilter({ ...salesFilter, countrySellTo: val })}
                 renderInput={(params) => <TextField {...params} label="Country Sell To" variant="outlined" />}
@@ -360,7 +363,7 @@ const OpportunityDashboards = (props) => {
                 options={Countries}
                 autoHighlight
                 value={salesFilter?.countryBillTo}
-                getOptionLabel={(option) => option.optionLabel || ''}
+                getOptionLabel={(option: any) => option.optionLabel || ''}
                 getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
                 onChange={(_, val) => setSalesFilter({ ...salesFilter, countryBillTo: val })}
                 renderInput={(params) => <TextField {...params} label="Country Bill To" variant="outlined" />}
@@ -369,35 +372,18 @@ const OpportunityDashboards = (props) => {
           </Box>
         </Popover>
         <Grid item xs={12} sm={4}>
-          {/* <Paper>
-            <Box mb={2} p={2} display="flex" alignItems="center">
-              <Box flex={0.5}>
-                <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
-                  Filters
-                </Button>
-                <Typography variant="h6" color="secondary">
-                  Number Of Quotes
-                </Typography>
-                <Box display="flex" alignItems="center">
-                  <Typography variant="h6" color="textSecondary">
-                    {openQuoteData.all ?? 0}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          </Paper> */}
           <Paper style={{ padding: '10px', marginBottom: '16px' }}>
             <Box>
-              <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+              <Button
+                onClick={(event) => {
+                  handleClickFilter(event)
+                  setCurrentFilter("quote")
+                }}
+                color="primary"
+                endIcon={<FilterList />}>
                 Filters
               </Button>
-              <FormControl size="small" variant="outlined">
-                <InputLabel id="status">Status</InputLabel>
-                <Select labelId="status" id="status" value={quoteStatus} onChange={(e) => setQuoteStatus(e.target.value.toString())}>
-                  <MenuItem value={'won'}>Won</MenuItem>
-                  <MenuItem value={'open'}>Open</MenuItem>
-                </Select>
-              </FormControl>
+
             </Box>
             <Box my={2} display="flex" >
               <Box flex={0.5}>
@@ -433,17 +419,15 @@ const OpportunityDashboards = (props) => {
           </Paper>
           <Paper elevation={2}>
             <Box p={2} >
-              <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+              <Button
+                onClick={(event) => {
+                  handleClickFilter(event)
+                  setCurrentFilter("customerAccount")
+                }}
+                color="primary"
+                endIcon={<FilterList />}>
                 Filters
               </Button>
-              <FormControl size="small" variant="outlined">
-                <InputLabel id="status">Status</InputLabel>
-                <Select labelId="status" id="status" value={opp1Status} onChange={(e) => setOpp1Status(e.target.value.toString())}>
-                  <MenuItem value={'lost'}>Lost</MenuItem>
-                  <MenuItem value={'won'}>Won</MenuItem>
-                  <MenuItem value={'open'}>Open</MenuItem>
-                </Select>
-              </FormControl>
               <Typography variant="h6">{statusText[opp1Status]} Opportunities by Customer Account</Typography>
               <Chart
                 type="bar"
@@ -482,17 +466,15 @@ const OpportunityDashboards = (props) => {
         <Grid item xs={12} sm={4}>
           <Paper elevation={2}>
             <Box p={2}>
-              <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+              <Button
+                onClick={(event) => {
+                  handleClickFilter(event)
+                  setCurrentFilter("salesRep")
+                }}
+                color="primary"
+                endIcon={<FilterList />}>
                 Filters
               </Button>
-              <FormControl size="small" variant="outlined">
-                <InputLabel id="status">Status</InputLabel>
-                <Select labelId="status" id="status" value={opp2Status} onChange={(e) => setOpp2Status(e.target.value.toString())}>
-                  <MenuItem value={'lost'}>Lost</MenuItem>
-                  <MenuItem value={'won'}>Won</MenuItem>
-                  <MenuItem value={'open'}>Open</MenuItem>
-                </Select>
-              </FormControl>
               <Box textAlign="center">
                 <Typography variant="h6">{statusText[opp2Status]} Opportunities by Sales Rep</Typography>
                 {oppSalesRep.labels.length > 0
@@ -508,7 +490,9 @@ const OpportunityDashboards = (props) => {
           <OpportunityTable
             selectedEntity={selectedEntity}
             moment={moment}
-            salesFilter={salesFilter}
+            customerAccounts={customerAccounts}
+            marketSegments={marketSegments}
+            salesReps={salesReps}
             filterCurrency={filterCurrency}
             currency={currency}
             getExchangeRates={getExchangeRates}
