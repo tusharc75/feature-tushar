@@ -544,7 +544,7 @@ const CustomerAccounts = (props) => {
           <Typography variant="subtitle1" className={classes.cusName}>Customer Accounts</Typography>
           {(permissions?.isUpdate && isTeamMember) || isManager ? (
               <>
-              {customerAccounts.length > 0 &&
+              {/* {customerAccounts.length > 0 &&
                 opportunities.filter(
                     (o) => o.customerAccountName === currentAccount?._id
                 ).length < 1 ? (
@@ -572,7 +572,7 @@ const CustomerAccounts = (props) => {
                     >
                       <Delete color="disabled" />
                     </IconButton>
-                }
+                } */}
 
                 <Button
                   variant="contained"
@@ -652,9 +652,24 @@ const CustomerAccounts = (props) => {
                     
                     {customerAccounts.map((c, i) => (
                       <Tab
+                        wrapped
                         key={i}
                         tabIndex={i}
-                        label={c.accountName}
+                        label={<Box component={'h4'} fontWeight={'bold'}>
+                          {c.accountName}
+                          <IconButton
+                            title={`Remove Account: ${currentAccount?.accountName}`}
+                            aria-haspopup="true"
+                            color="primary"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveAccount();
+                            }}
+                        >
+                          <Delete color="error" fontSize="small"/>
+                        </IconButton>
+                        </Box>}
                         aria-controls={`vertical-tabpanel-${i}`}
                         id={`vertical-tab-${i}`}
                         className={classes.tabProject}
