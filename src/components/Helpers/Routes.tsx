@@ -321,6 +321,14 @@ const routes = {
     title: storedRoutes ? storedRoutes.eCommerce?.title : RESOURCE_LABEL.eCommerce,
     path: "/e-commerce/detail",
   },
+  orders: {
+    title: "Orders",
+    path: "/e-commerce/order",
+  },
+  orderDetails: {
+    title: "Orders",
+    path: "/e-commerce/order/detail",
+  },
 };
 
 export default routes;
