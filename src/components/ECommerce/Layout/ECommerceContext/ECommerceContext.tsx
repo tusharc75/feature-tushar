@@ -41,7 +41,7 @@ export const ECommerceProvider = ({ children }) => {
             ORDER_TYPES: orderTypes,
             firstOrderType: Object.values(orderTypes)[0]
         }}>
-            {loading ? "Loading..." : children}
+            {loading ? "" : children}
         </ECommerceContext.Provider>
     );
 };

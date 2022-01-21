@@ -1979,7 +1979,7 @@ export default function ManageQuoteDialog({
                                                 permissions?.projectStrategy?.isCreate && (
                                                   <Grid item xs={1} sm={1} md={1}>
                                                     <Tooltip
-                                                      title="Add Project Sales"
+                                                      title="Add Project List"
                                                       className="mt-1"
                                                     >
                                                       <IconButton

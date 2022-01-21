@@ -38,6 +38,12 @@ import { capitalize } from 'lodash';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import useQuery from '../../../hooks/useQuery';
 import { ECommerceContext } from '../Layout/ECommerceContext/ECommerceContext';
+import LocationOnOutlinedIcon from '@material-ui/icons/LocationOnOutlined';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import Dialog from '@material-ui/core/Dialog';
+import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
+import ManageAddressDialog from '../../Address/ManageAddressDialog';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -123,12 +129,12 @@ export default function ECommerceHeader() {
 
     const history = useHistory();
     const {
-        state: { cartItems },
+        state: { user, cartItems },
         dispatch
     }: any = useData();
     const toastConfig = useContext(CustomToastContext);
-    const { ORDER_TYPES, firstOrderType }= useContext(ECommerceContext);
-    
+    const { ORDER_TYPES, firstOrderType } = useContext(ECommerceContext);
+
     const [search, setSearch] = useState("")
     const [open, setOpen] = useState(false);
 
@@ -143,10 +149,24 @@ export default function ECommerceHeader() {
 
     const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
 
+    const [location, setLocation] = useState(() => {
+        try {
+            if (localStorage.getItem("location")) {
+                const locaStorageLocation = JSON.parse(localStorage.getItem("location"));
+                return locaStorageLocation.fullAddress;
+            }
+            return "";
+        } catch (ex) {
+            console.error("e-commerce header", ex.message)
+            return "";
+        }
+    })
+
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
-    const [moreAnchorEl, setMoreAnchorEl] = React.useState(null);
+    const [moreAnchorEl, setMoreAnchorEl] = useState(null);
+    const [openLocationDialog, setOpenLocationDialog] = useState(false);
 
     let query = useQuery();
 
@@ -333,7 +353,7 @@ export default function ECommerceHeader() {
 
                         {
                             Object.keys(ORDER_TYPES).map((key) => (
-                                <Button key={key} className={orderType === ORDER_TYPES[key]?.value ? "border-bottom" : ""} style={{ color: "white" }}
+                                <Button key={key} style={orderType === ORDER_TYPES[key]?.value ? { background: "white", color: "var(--primary)" } : { color: "white" }}
                                     onClick={() => {
                                         setOrderType(ORDER_TYPES[key]?.value);
                                         let queryString = [];
@@ -359,54 +379,6 @@ export default function ECommerceHeader() {
                             ))
                         }
 
-
-
-
-                        {/* <Button className={orderType === ORDER_TYPES.sale.value ? "border-bottom" : ""} style={{ color: "white" }}
-                            onClick={() => {
-                                setOrderType(ORDER_TYPES.sale.value);
-                                let queryString = [];
-
-                                queryString.push(`orderType=Sale`)
-
-                                if (query.get("category")) {
-                                    queryString.push(`category=${query.get("category")}`)
-                                }
-
-                                if (queryString.length > 0) {
-                                    history.push({
-                                        pathname: routes.eCommerce.path,
-                                        search: `?${queryString.join("&")}`
-                                    })
-                                }
-                                else {
-                                    history.push(routes.eCommerce.path)
-                                }
-
-                            }}
-                        >Buy</Button>
-                        <Button className={orderType === firstOrderType?.value ? "border-bottom" : ""} style={{ color: "white" }}
-                            onClick={() => {
-                                setOrderType(firstOrderType?.value);
-                                let queryString = [];
-
-                                queryString.push(`orderType=Rent`)
-
-                                if (query.get("category")) {
-                                    queryString.push(`category=${query.get("category")}`)
-                                }
-
-                                if (queryString.length > 0) {
-                                    history.push({
-                                        pathname: routes.eCommerce.path,
-                                        search: `?${queryString.join("&")}`
-                                    })
-                                }
-                                else {
-                                    history.push(routes.eCommerce.path)
-                                }
-                            }}
-                        >Rent</Button> */}
                     </div>
 
                     <ClickAwayListener onClickAway={() => {
@@ -480,13 +452,27 @@ export default function ECommerceHeader() {
                                                 }
                                             </List> : <h4>No Products Found...</h4>
                                         }
-
                                     </div>
                                 )
                             }
 
                         </div>
                     </ClickAwayListener>
+
+                    <div className="cursor-pointer d-flex gap-2 px-2 py-1 align-items-center"
+                        onClick={() => {
+                            setOpenLocationDialog(true)
+                        }}
+                        style={{ width: "245px", border: "1px solid white", fontSize: "0.7rem", borderRadius: "5px" }}
+                    >
+                        <LocationOnOutlinedIcon />
+                        <div className="d-flex flex-column">
+                            <div>Deliver to {user?.user?.firstName}</div>
+                            <div>
+                                <b className="text-truncate">{location ? location : "Select Address"}</b>
+                            </div>
+                        </div>
+                    </div>
 
                     <Button className="text-white mx-4" style={{ width: 150 }} endIcon={<ExpandMoreIcon />} aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
                         Menu
@@ -545,6 +531,22 @@ export default function ECommerceHeader() {
             </AppBar>
             {renderMobileMenu}
             {renderMenu}
+
+            {
+                openLocationDialog && <ManageAddressDialog
+                    title="Search Location"
+                    onClose={() => {
+                        setOpenLocationDialog(false);
+                    }}
+                    onSuccess={(obj) => {
+                        if (obj) {
+                            setOpenLocationDialog(false);
+                            localStorage.setItem("location", JSON.stringify(obj));
+                            setLocation(obj.fullAddress);
+                        }
+                    }}
+                />
+            }
         </div>
     );
 }

@@ -7,6 +7,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
 import { disabledColumns, getSortedColumns } from "../../constants/columns"
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
+import ArrangeViewDialog from './ArrangeViewDialog';
 
 let timeout
 export default function CustomGridHeaderOptions({ columns, setColumns, columnApi,
@@ -97,12 +98,13 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
               setOpenColumnSelectionAnchorEl(event.currentTarget);
             }}
           >
-            Columns
+            Arrange View
           </Button>
 
           <Popover
             id="columnSelection"
-            open={openColumnSelection}
+            // open={openColumnSelection}
+            open={false}
             anchorEl={openColumnSelectionAnchorEl}
             onClose={() => {
               setOpenColumnSelection(false);
@@ -257,6 +259,19 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
             {`${showGridFilters ? "Hide" : "Show"} filters`}
         </Button> */}
       </Box>
+
+      {openColumnSelection && 
+        <ArrangeViewDialog 
+          columns={columns} 
+          onClose={() => setOpenColumnSelection(false)}
+          updateGridHiddenColumns={updateGridHiddenColumns}
+          saveColumnOptions={saveColumnOptions}
+          setColumns={setColumns}
+          columnApi={columnApi}
+          isClientSideGrid={isClientSideGrid}
+          renderedFrom={renderedFrom}
+        />
+      }
     </>
   );
 }
