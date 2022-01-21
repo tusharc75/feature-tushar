@@ -18,7 +18,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { useHistory } from "react-router-dom";
-import { getObjKeys, yupSchema, setFieldsInAscendingOrder, getObjKeysWithValues, formFieldNames, getUniqueCurrencies, initializeDropdownById } from "../../constants/helpers";
+import { getObjKeys, yupSchema, setFieldsInAscendingOrder, getObjKeysWithValues, formFieldNames, getUniqueCurrencies, initializeDropdownById, RESOURCE_LABEL } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "../../StateProvider/Provider";
 import FormTypes from "../../components/Helpers/FormTypes";
@@ -336,7 +336,7 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
           if (isFieldNotTouched(initialData, formValues)) close()
           else setShowConfirmDialog(true)
         }}
-        title={`${isClone ? "Clone" : projectSalesId ? `Update ${productSalesName}` : "Create New Project Sales"}`}
+        title={`${isClone ? "Clone" : projectSalesId ? `Update ${productSalesName}` : `New ${RESOURCE_LABEL.projectStrategy}`}`}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
           setFullScreen(prevState => !prevState)

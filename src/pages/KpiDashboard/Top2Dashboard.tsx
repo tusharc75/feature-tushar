@@ -10,6 +10,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import Loader from '../../components/Loader';
 import { Autocomplete } from '@material-ui/lab';
 import Countries from "../../constants/Country.json"
+import Currencies from '../../constants/currency_with_country.json';
 
 const Top2Dashboard = (props) => {
   const { currency,
@@ -341,6 +342,10 @@ const Top2Dashboard = (props) => {
     setOpenFilter((prev) => !prev);
   };
 
+  const currrencySymbol = (currencyCode) => {
+    return Currencies.find((obj) => obj?.currencyCode === currencyCode).symbolNative;
+  }
+
   return allEntitySalesData.labels.length > 0 && (
     <Paper elevation={2}>
       <Popover
@@ -431,7 +436,7 @@ const Top2Dashboard = (props) => {
                   setEntityFilter({ ...entityFilter, marketSegment: val })
                   : setBookedFilter({ ...bookedfilter, marketSegment: val });
                 if (val) {
-                  setSubMarketSegments(marketSegments.salesFilter((d) => d?.parentSegment === val?.id));
+                  setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
                 } else {
                   setSubMarketSegments([]);
                 }
@@ -539,7 +544,7 @@ const Top2Dashboard = (props) => {
                           <TableRow key={index}>
                             {Object.keys(data).map((label, i) => (
                               <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                                {data[label].toLocaleString()}
+                                {['Budget', 'Total Offer Value', 'Total Cost'].includes(label) ? `${currrencySymbol(filterCurrency ?? currency)} ${data[label].toLocaleString()}` : `${data[label].toLocaleString()}`}
                               </TableCell>
                             ))}
                           </TableRow>
@@ -597,7 +602,7 @@ const Top2Dashboard = (props) => {
                           {Object.keys(tableDataRawBookedValue[0]).map((label, i) => (
                             <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
                               {label}
-                            </TableCell>
+                              </TableCell>
                           ))}
                         </TableRow>
                       </TableHead>
@@ -606,7 +611,7 @@ const Top2Dashboard = (props) => {
                           <TableRow key={index}>
                             {Object.keys(data).map((label, i) => (
                               <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                                {data[label].toLocaleString()}
+                              {['Total Offer Value', 'Total Booked Value'].includes(label) ? `${currrencySymbol(filterCurrency ?? currency)} ${data[label].toLocaleString()}` : `${data[label].toLocaleString()}`}                            
                               </TableCell>
                             ))}
                           </TableRow>

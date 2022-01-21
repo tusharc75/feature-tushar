@@ -11,6 +11,8 @@ import { formatAmountWithCurrency } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import { FilterList } from '@material-ui/icons';
 import Countries from "../../constants/Country.json"
+import Currencies from '../../constants/currency_with_country.json';
+import { startCase } from 'lodash';
 
 const OpportunityTable = ({ filterCurrency, currency, salesReps, customerAccounts, marketSegments, selectedEntity, getExchangeRates, moment }) => {
   const [topProducts, setTopProducts] = useState([]);
@@ -191,6 +193,10 @@ const OpportunityTable = ({ filterCurrency, currency, salesReps, customerAccount
     setOpenFilter((prev) => !prev);
   };
 
+  const currrencySymbol = (currencyCode) => {
+    return Currencies.find((obj) => obj?.currencyCode === currencyCode).symbolNative;
+  }
+
 
   return (
     <div>
@@ -262,7 +268,7 @@ const OpportunityTable = ({ filterCurrency, currency, salesReps, customerAccount
                 onChange={(_, val) => {
                   setSalesFilter({ ...salesFilter, marketSegment: val });
                   if (val) {
-                    setSubMarketSegments(marketSegments.salesFilter((d) => d?.parentSegment === val?.id));
+                    setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
                   } else {
                     setSubMarketSegments([]);
                   }
@@ -338,7 +344,7 @@ const OpportunityTable = ({ filterCurrency, currency, salesReps, customerAccount
                 <TableRow>
                   {Object.keys(topProducts[0]).reverse().map((label, i) => (
                     <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                      {label.toUpperCase()}
+                      {startCase(label)}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -348,21 +354,21 @@ const OpportunityTable = ({ filterCurrency, currency, salesReps, customerAccount
                   <TableRow key={index}>
                     {Object.keys(data).reverse().map((label, i) => (
                       <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                        {data[label].toLocaleString()}
+                        {['Total Cost', 'Total Sell'].includes(label) ? `${currrencySymbol(filterCurrency ?? currency)} ${data[label].toLocaleString()}` : `${data[label].toLocaleString()}`}
                       </TableCell>
-                    ))}
-                  </TableRow>
                 ))}
-              </TableBody>
-            </Table>
+              </TableRow>
+                ))}
+            </TableBody>
+          </Table>
           </TableContainer>)
-          : (
-            <Typography variant="h6" color="textSecondary">
-              {loading ? 'Loading Data...' : 'No Data'}
-            </Typography>
+      : (
+      <Typography variant="h6" color="textSecondary">
+        {loading ? 'Loading Data...' : 'No Data'}
+      </Typography>
           )}
-      </Paper>
-    </div>
+    </Paper>
+    </div >
   );
 };
 
