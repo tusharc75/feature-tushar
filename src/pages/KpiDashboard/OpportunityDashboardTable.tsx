@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Box, Paper, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, MenuItem, Menu, Button, FormControl, InputLabel, Popover, Select, TextField } from '@material-ui/core';
+import { Box, Paper, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, MenuItem, Menu, Button, FormControl, InputLabel, Popover, Select, TextField, TableContainer, Table, TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
 import { ToggleButtonGroup, ToggleButton, Autocomplete } from '@material-ui/lab';
 import { ImportExport } from '@material-ui/icons';
 import jsPDF from 'jspdf';
@@ -13,7 +13,6 @@ import { FilterList } from '@material-ui/icons';
 import Countries from "../../constants/Country.json"
 
 const OpportunityTable = ({ filterCurrency, currency, salesReps, customerAccounts, marketSegments, selectedEntity, getExchangeRates, moment }) => {
-  const [toggleButtonValue, setToggleButtonValue] = useState('totalSell');
   const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [anchorElTable, setAnchorElTable] = useState(null);
@@ -74,7 +73,7 @@ const OpportunityTable = ({ filterCurrency, currency, salesReps, customerAccount
         for (const d of data) {
           let totalSell = 0;
           let totalCost = 0;
-          if (d.totalSell && d.totalCost && filterCurrency !== currency) {
+          if (d.totalSell && d.totalCost && filterCurrency && filterCurrency !== currency) {
             const sellRateData = await getExchangeRates(moment().format('YYYY-MM-DD'), d.totalSell);
             const costRateData = await getExchangeRates(moment().format('YYYY-MM-DD'), d.totalCost);
             totalSell = sellRateData.rates[filterCurrency];
@@ -332,27 +331,36 @@ const OpportunityTable = ({ filterCurrency, currency, salesReps, customerAccount
           </Typography>
           <Box mt={1} />
         </Box>
-
-        <List style={{ overflow: 'auto', height: "100%" }}>
-          {topProducts.length && !loading ? (
-            topProducts.map((product, i) => (
-              <ListItem divider key={i}>
-                <ListItemText primary={product.productCategory} />
-                <ListItemSecondaryAction>
-                  <Typography>
-                    {product[toggleButtonValue]
-                      ? formatAmountWithCurrency(filterCurrency || currency, product[toggleButtonValue].toFixed(2)).fullFormatAmount
-                      : 0}
-                  </Typography>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))
-          ) : (
-            <ListItem>
-              <ListItemText primary={loading ? 'Loading Data...' : 'No Data'} />
-            </ListItem>
+        {topProducts.length && !loading ? (
+          <TableContainer style={{ height: '400px' }}>
+            <Table stickyHeader aria-label="caption table">
+              <TableHead>
+                <TableRow>
+                  {Object.keys(topProducts[0]).reverse().map((label, i) => (
+                    <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                      {label.toUpperCase()}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {topProducts.map((data, index) => (
+                  <TableRow key={index}>
+                    {Object.keys(data).reverse().map((label, i) => (
+                      <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
+                        {data[label].toLocaleString()}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>)
+          : (
+            <Typography variant="h6" color="textSecondary">
+              {loading ? 'Loading Data...' : 'No Data'}
+            </Typography>
           )}
-        </List>
       </Paper>
     </div>
   );

@@ -85,7 +85,11 @@ const OpportunityDashboards = (props) => {
         const datasets = [];
 
         for (let d of data) {
+          if (d?.user?.firstName && d?.user?.lastName){
           labels.push(`${d.user.firstName} ${d.user.lastName}`);
+          }else {
+            labels.push('Deleted User')
+          }
           datasets.push(d.count);
         }
 
