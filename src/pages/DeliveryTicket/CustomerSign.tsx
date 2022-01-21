@@ -160,6 +160,7 @@ const CustomerSign = () => {
             .then(async ({ data }) => {
                 setOpenSignatureDialog(false)
                 setSubmittingSign(false)
+                fetchDeliveryTicketData()
                 toastConfig.setToastConfig({
                     open: true,
                     type: "success",

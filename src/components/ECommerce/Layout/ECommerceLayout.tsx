@@ -3,6 +3,7 @@ import ECommerceHeader from '../Header/ECommerceHeader'
 import ECommerceFooter from '../Footer/ECommerceFooter'
 import "./ECommerce.scss"
 import { useLocation, useHistory } from "react-router-dom";
+import { ECommerceProvider } from './ECommerceContext/ECommerceContext';
 
 export default function ECommerceLayout({ children }) {
 
@@ -18,13 +19,15 @@ export default function ECommerceLayout({ children }) {
 
     return (
         <div className="ecommerce" ref={contentRef}>
-            <ECommerceHeader />
+            <ECommerceProvider>
+                <ECommerceHeader />
 
-            <div className='mb-3' style={{ paddingTop: "3.5rem" }}>
-                {children}
-            </div>
+                <div className='mb-3' style={{ paddingTop: "3.5rem" }}>
+                    {children}
+                </div>
 
-            <ECommerceFooter />
+                <ECommerceFooter />
+            </ECommerceProvider>
         </div>
     )
 }

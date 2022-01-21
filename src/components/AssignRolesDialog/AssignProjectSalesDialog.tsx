@@ -133,10 +133,10 @@ const AssignProjectSalesDialog = ({
             onClose={handleCloseDialog}
             aria-labelledby="assign-roles-dialog"
         >
-            <CustomDialogHeader title="Assign Project Sales" />
+            <CustomDialogHeader title="Assign Project List" />
             <CustomDialogContent>
                 {loadingProjectSales ? (
-                    <Loader text="Loading ProjectSales" />
+                    <Loader text="Loading Project List" />
                 ) : projectSalesConst.length ? (
                     <>
                         <Grid container>
@@ -197,7 +197,7 @@ const AssignProjectSalesDialog = ({
                         </List>
                     </>
                 ) : (
-                    <Typography>All Project Sales has been assigned</Typography>
+                    <Typography>All Project List has been assigned</Typography>
                 )}
             </CustomDialogContent>
             <CustomDialogFooter>

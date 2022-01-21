@@ -130,11 +130,11 @@ const routes = {
     path: "/profile",
   },
   projectSales: {
-    title: storedRoutes ? storedRoutes.projectStrategy?.title : RESOURCE_LABEL.projectStrategy,
+    title: RESOURCE_LABEL.projectStrategy,
     path: "/project-sales",
   },
   projectSalesDetail: {
-    title: storedRoutes ? storedRoutes.projectStrategy?.title : RESOURCE_LABEL.projectStrategy,
+    title: RESOURCE_LABEL.projectStrategy,
     path: "/project-sales/detail",
   },
   priceTemplate: {
@@ -312,6 +312,14 @@ const routes = {
   addressDetail: {
     title: storedRoutes && storedRoutes.address ? storedRoutes.address?.title : RESOURCE_LABEL.address,
     path: "/address/detail",
+  },
+  reports: {
+    title: storedRoutes && storedRoutes.reports ? storedRoutes.reports?.title : "Reports",
+    path: "/reports",
+  },
+  eCommercePolicy: {
+    title: storedRoutes && storedRoutes.eCommercePolicy ? storedRoutes.eCommercePolicy?.title : "e-Commerce Policy",
+    path: "/e-commerce-policy",
   },
   eCommerce: {
     title: storedRoutes ? storedRoutes.eCommerce?.title : RESOURCE_LABEL.eCommerce,
