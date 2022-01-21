@@ -124,6 +124,7 @@ export default function ProductDetails() {
   }, []);
 
   useEffect(() => {
+    setProductDetails(null);
 
     dispatchData({ type: TYPES.updateWholePayload, payload: { ...initialData } })
 
@@ -416,7 +417,7 @@ export default function ProductDetails() {
                 >
                   {
                     Object.keys(ORDER_TYPES).map((key) => (
-                      <ToggleButton value={ORDER_TYPES[key].value} aria-label="left aligned">
+                      <ToggleButton style={orderType === ORDER_TYPES[key].value ? { "background": "var(--primary)", "color": "white" } : {}} value={ORDER_TYPES[key].value} aria-label="left aligned">
                         {ORDER_TYPES[key].key}
                       </ToggleButton>
                     ))
@@ -469,7 +470,7 @@ export default function ProductDetails() {
                       </Grid>
                       <Grid item xs={productDetails.unit ? 6 : 12}>
                         {
-                          orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase() && productDetails.pricingMethod && <FormControl variant="outlined" margin="dense" fullWidth error={hasError && !data.selectedPricingMethod}>
+                          orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase() && data.selectedPricingMethod && <FormControl variant="outlined" margin="dense" fullWidth error={hasError && !data.selectedPricingMethod}>
                             <InputLabel id="pricing-method-label">Pricing Method</InputLabel>
                             <Select
                               required={orderType === ORDER_TYPES.rent.key}
@@ -763,6 +764,6 @@ export default function ProductDetails() {
           />
         ) : null
       }
-    </div>
+    </div >
   );
 }

@@ -342,7 +342,7 @@ const ProductTemplate = () => {
                             }
                             else history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.productTemplate.path })
                         }
-                        else history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.productTemplate.path })
+                        else history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : path })
                     }}
                 />
             </Grid>

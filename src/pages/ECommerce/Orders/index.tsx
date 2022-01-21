@@ -16,14 +16,18 @@ import routes from '../../../components/Helpers/Routes';
 export default function Orders() {
 
     const toastConfig = useContext(CustomToastContext);
+    const [loading, setLoading] = useState(false);
     const [orders, setOrders] = useState([]);
     const history = useHistory();
 
     useEffect(() => {
+        setLoading(true);
         axiosInstance().get("/ecommerce/order").then(({ data: { data } }) => {
             setOrders([...data])
         }).catch((error) => {
             toastConfig.setToastConfig(error);
+        }).finally(() => {
+            setLoading(false);
         })
     }, [])
 
@@ -32,8 +36,9 @@ export default function Orders() {
             <ECommerceBreadCrumbs routes={[{ title: "Orders" }]} />
         </div>
         <Box className="d-flex flex-column gap-3">
+
             {
-                orders.map((order) => (
+                !loading && orders.length > 0 ? orders.map((order) => (
                     <Fragment key={order._id}>
                         <Card className="cursor-pointer" onClick={() => {
                             history.push(`${routes.orderDetails.path}/${order._id}`)
@@ -46,7 +51,13 @@ export default function Orders() {
                             </CardContent>
                         </Card>
                     </Fragment>
-                ))
+                )) : <Card>
+                    <CardContent className="pb-0">
+                        <Typography variant="h5" color="textSecondary" component="p" className="d-flex align-items-center justify-content-center" style={{ height: 300 }}>
+                            {loading ? "Loading Orders..." : "No orders placed yet."}
+                        </Typography>
+                    </CardContent>
+                </Card>
             }
 
         </Box>
