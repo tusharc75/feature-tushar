@@ -148,7 +148,7 @@ const ProjectStrategyHeader = (props) => {
               value={searchVal}
               searchbox={styles.search_box_input}
               size="small"
-              placeholder="Search Project Sales"
+              placeholder="Search Project List"
               width={isMobile ? '200px' : '242px'}
               style={isMobile ? { flex: 1 } : {}}
             />

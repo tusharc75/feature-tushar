@@ -235,7 +235,7 @@ const CreateFormBuilder = () => {
                         if ((!isEqual(orisection, section)) && formBuilderPermissions.isUpdate) {
                             setShowConfirmDialog(true)
                         }
-                        else history.push({ pathname: routes.formBuilder.path })
+                        else history.push({ pathname: path })
                     }}
                 />
             </Grid>

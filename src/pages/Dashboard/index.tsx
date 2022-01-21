@@ -104,7 +104,7 @@ function Dashboard() {
 
         case 'Product Setup':
           icon = <RiFolderSettingsFill size={32} />;
-          text = 'Product and Pricing Setup.';
+          text = 'Product and Category Setup.';
           break;
 
         case 'Admin Portal':
@@ -116,6 +116,9 @@ function Dashboard() {
         case 'ROM':
           icon = <FaRegistered size={32} />;
           text = 'Fulfill Rental Orders Faster.';
+          break;
+        case 'Dynamic Forms':
+          text = 'Setup Dynamic Forms & Templates';
           break;
       }
 

@@ -324,7 +324,7 @@ const OpportunityDashboards = (props) => {
                 onChange={(_, val) => {
                   setSalesFilter({ ...salesFilter, marketSegment: val });
                   if (val) {
-                    setSubMarketSegments(marketSegments.salesFilter((d) => d?.parentSegment === val?.id));
+                    setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
                   } else {
                     setSubMarketSegments([]);
                   }

@@ -170,7 +170,7 @@ export const sidebarResource = {
   pricing: 'Pricing',
   priceBuilder: 'Price Builder',
   flags: 'Flags',
-  projectSales: 'Project Sales',
+  projectSales: 'Target Projects List',
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
   address: 'Address'
@@ -263,7 +263,7 @@ export const RESOURCE_LABEL = {
   doa: 'DOA',
   termsAndConditions: 'T&Cs',
   equiptmentRentalMaster: 'Equiptment Rental Master',
-  projectStrategy: 'Project Sales',
+  projectStrategy: 'Target Projects List',
   productBuilder: 'Price Builder',
   formBuilder: 'Form Builder',
   currencyConverter: 'Currency Converter',
