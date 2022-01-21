@@ -48,6 +48,7 @@ import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 import CreateProjectSales from "../../ProjectSales/CreateProjectSales"
 import { FaDiceOne } from "react-icons/fa";
 import ManageAddressDialog from "../../../components/Address/ManageAddressDialog";
+import { isArray } from "lodash";
 
 const arr = [...Array(9).keys()];
 export default function ManageQuoteDialog({
@@ -726,7 +727,7 @@ export default function ManageQuoteDialog({
   const onCountrySellToDropDownOpen = (selectedAccount) => {
     let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.shippingAddress
 
-    if (filterAddress) {
+    if (isArray(filterAddress)) {
       setCountrySellToDropDown(
         countrySellToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue))
       );
@@ -739,7 +740,7 @@ export default function ManageQuoteDialog({
   const onCountryBillToDropDownOpen = (selectedAccount) => {
     let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.billingAddress
 
-    if (filterAddress) {
+    if (isArray(filterAddress)) {
       setCountryBillToDropDown(
         countryBillToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue))
       );
