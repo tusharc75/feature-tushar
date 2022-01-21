@@ -302,7 +302,7 @@ const AssignEntityDialog = ({
     //   aria-labelledby="assign-roles-dialog"
     // >
     <>
-      {!isRenderedFromUserSetUp && <CustomDialogHeader title={regionalRole ? `Assign  Region wide functional role` : type === "entity" ? 'Assign Entities - Roles' : `Assign  ${startCase(type)}`} />}
+      {!isRenderedFromUserSetUp && <CustomDialogHeader title={regionalRole ? `Assign role` : type === "entity" ? 'Assign Entities - Roles' : `Assign  ${startCase(type)}`} />}
       <CustomDialogContent>
         {!regionalRole ? (loadingData ? (
           <Loader text={`Loading ${startCase(type)}`} />
