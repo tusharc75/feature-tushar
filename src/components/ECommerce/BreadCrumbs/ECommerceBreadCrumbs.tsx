@@ -10,11 +10,11 @@ const ECommerceBreadCrumbs = ({
     {
       isConfirmBeforeClick ?
         <Typography
-          className="cursor-pointer setLink"
+          className="cursor-pointer setLink font-weight-bold"
           onClick={() => onBreadCrumbClick(mainRoutes.eCommerce.path)}>
           Home
         </Typography>
-        : <Link to={mainRoutes.eCommerce.path} className="cursor-pointer setLink">
+        : <Link to={mainRoutes.eCommerce.path} className="cursor-pointer setLink font-weight-bold">
           Home
         </Link>
     }
@@ -33,7 +33,7 @@ const ECommerceBreadCrumbs = ({
             <Link
               key={index}
               to={route.path}
-              className="cursor-pointer setLink"
+              className="cursor-pointer setLink font-weight-bold"
             >
               {route.title}
             </Link>
@@ -43,7 +43,7 @@ const ECommerceBreadCrumbs = ({
             if (route?.hasOnClick) {
               onRouteClick()
             }
-          }} key={index} className="setLink text-truncate detail-heading-bread-crumb">
+          }} key={index} className="setLink detail-heading-bread-crumb">
           {route.title}
         </Typography>
 

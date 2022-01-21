@@ -4,7 +4,7 @@ import { Box, Avatar, makeStyles, IconButton, Dialog, Button, Grid, MenuItem, In
 import { Rating, Skeleton } from "@material-ui/lab";
 import styles from './product-card.module.scss'
 import { useHistory, useParams } from "react-router-dom";
-import { eProduct, formatAmountWithCurrency, ORDER_TYPES, CustomDialogTransition, dateFormatForInputControl } from "../../../constants/helpers";
+import { eProduct, formatAmountWithCurrency, CustomDialogTransition, dateFormatForInputControl } from "../../../constants/helpers";
 import { BsImage } from 'react-icons/bs';
 import { MdAddShoppingCart, MdModeEdit } from 'react-icons/md';
 import routes from "../../Helpers/Routes";
@@ -30,6 +30,7 @@ import PlusMinusTextboxComponent from "../../PlusMinusTextboxComponent/PlusMinus
 import AddShoppingCartIcon from "@material-ui/icons/AddShoppingCart";
 import { SET_CART } from "../../../StateProvider/actionTypes";
 import RemoveShoppingCartIcon from '@material-ui/icons/RemoveShoppingCart';
+import { ECommerceContext } from "../../ECommerce/Layout/ECommerceContext/ECommerceContext";
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -88,6 +89,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
   const classes = useStyles();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const { ORDER_TYPES, firstOrderType } = useContext(ECommerceContext);
   const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
   const [data, dispatchData] = useReducer(reducer, initialData);
   const { state: { cartItems }, dispatch }: any = useData();
@@ -185,7 +187,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
       currency: rateCurrency.currency
     }
 
-    if (orderTypeInLowerCase === ORDER_TYPES.rent.value.toLocaleLowerCase()) {
+    if (orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLocaleLowerCase()) {
       product["pricingMethod"] = data.selectedPricingMethod;
       product["startDate"] = data.startDate;
       product["endDate"] = data.endDate;
@@ -502,7 +504,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
 
                     <Grid item xs={12}>
                       {
-                        orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase() && product.pricingMethod && <FormControl variant="outlined" margin="dense" fullWidth error={hasError && !data.selectedPricingMethod}>
+                        orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase() && product.pricingMethod && <FormControl variant="outlined" margin="dense" fullWidth error={hasError && !data.selectedPricingMethod}>
                           <InputLabel id="pricing-method-label">Pricing Method</InputLabel>
                           <Select
                             required={orderTypeInLowerCase === ORDER_TYPES.rent.key.toLocaleLowerCase()}
@@ -528,13 +530,13 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
                 }
 
                 {
-                  orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase() && <Grid item xs={12} sm={12} md={12}>
+                  orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase() && <Grid item xs={12} sm={12} md={12}>
                     <MuiPickersUtilsProvider utils={DateUtils}>
                       <Grid container spacing={3}>
 
                         <Grid item xs={12}>
                           <KeyboardDatePicker
-                            required={orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase()}
+                            required={orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase()}
                             inputVariant="outlined"
                             variant="inline"
                             fullWidth
@@ -558,7 +560,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
 
                         <Grid item xs={12}>
                           <KeyboardDatePicker
-                            required={orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase()}
+                            required={orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase()}
                             inputVariant="outlined"
                             variant="inline"
                             fullWidth
@@ -650,7 +652,7 @@ const ProductCard = ({ product, selectedOrderType, showSkeleton = false }) => {
                   type="button"
                   color="primary"
                   variant="outlined"
-                  disabled={!rateCurrency.rateWithCurrency || addToCartBtnLoading || (orderTypeInLowerCase === ORDER_TYPES.rent.value.toLowerCase() ? !(data.startDate && data.endDate && data.selectedUnit && data.selectedPricingMethod) : !data.selectedUnit)}
+                  disabled={!rateCurrency.rateWithCurrency || addToCartBtnLoading || (orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase() ? !(data.startDate && data.endDate && data.selectedUnit && data.selectedPricingMethod) : !data.selectedUnit)}
                   loading={addToCartBtnLoading}
                   startIcon={addToCartBtnLoading ? null : <AddShoppingCartIcon />}
                   onClick={() => {
