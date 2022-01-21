@@ -5,7 +5,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import ProductCard from '../../../components/ProductList/ProductCard/ProductCard';
-import { eProduct, ORDER_TYPES } from '../../../constants/helpers';
+import { eProduct } from '../../../constants/helpers';
 import { SET_CART } from '../../../StateProvider/actionTypes';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -16,6 +16,7 @@ import Filters from '../Filters';
 import { useLocation, useHistory } from 'react-router-dom';
 import ECommerceBreadCrumbs from '../../../components/ECommerce/BreadCrumbs/ECommerceBreadCrumbs';
 import useQuery from '../../../hooks/useQuery';
+import { ECommerceContext } from '../../../components/ECommerce/Layout/ECommerceContext/ECommerceContext';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -42,6 +43,8 @@ export default function Products() {
 
     const limit = 21;
     const toastConfig = useContext(CustomToastContext);
+    const { ORDER_TYPES, firstOrderType }= useContext(ECommerceContext);
+
     const history = useHistory();
 
     const [page, setPage] = useState(0);
@@ -58,7 +61,7 @@ export default function Products() {
     const [productCategories, setProductCategories] = useState({ flatDataSource: [], treeDataSource: [] });
     const [selected, setSelected] = useState([]);
 
-    // const [selectedOrderType, setSelectedOrderType] = useState(orderType ?? ORDER_TYPES.rent.value)
+    // const [selectedOrderType, setSelectedOrderType] = useState(orderType ?? firstOrderType?.value)
 
     let query = useQuery();
     const orderTypeFromUrl = query.get("orderType")
@@ -73,9 +76,9 @@ export default function Products() {
     //     if (orderTypeFromUrl) {
 
     //         if (!orderTypeFromUrl) {
-    //             return ORDER_TYPES.rent.value;
+    //             return firstOrderType?.value;
     //         }
-    //         return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+    //         return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : firstOrderType?.value;
 
     //     }
     // }, [orderTypeFromUrl]);
@@ -169,10 +172,10 @@ export default function Products() {
     const getOrderType = () => {
 
         if (orderTypeFromUrl) {
-            return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : ORDER_TYPES.rent.value;
+            return Object.keys(ORDER_TYPES).some(s => s.toLowerCase() === orderTypeInLowerCase) && ORDER_TYPES[orderTypeInLowerCase] ? ORDER_TYPES[orderTypeInLowerCase].value : firstOrderType?.value;
         }
 
-        return ORDER_TYPES.rent.value;
+        return firstOrderType?.value;
     }
 
     const handleSelect = (_, nodeId) => {

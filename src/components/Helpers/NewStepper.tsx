@@ -247,7 +247,7 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
                     </StepLabel>
                   </Step>
                 )))
-                : (steps.map((label) => (
+                : (steps.filter((item) => !item?.disable).map((label) => (
                   <Step key={label}>
                     <StepLabel StepIconComponent={QontoStepIcon}>
                       <>

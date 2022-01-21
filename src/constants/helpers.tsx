@@ -23,17 +23,17 @@ import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
 import { kebabCase, orderBy, uniqBy } from 'lodash';
 
-export const ORDER_TYPES =
-{
-  rent: {
-    key: 'Rent',  //  Just to display in UI
-    value: "Rent"
-  },
-  sale: {
-    key: 'Buy',  //  Just to display in UI
-    value: "Sale"
-  }
-};
+// export const ORDER_TYPES =
+// {
+//   rent: {
+//     key: 'Rent',  //  Just to display in UI
+//     value: "Rent"
+//   },
+//   sale: {
+//     key: 'Buy',  //  Just to display in UI
+//     value: "Sale"
+//   }
+// };
 
 export const defaultActivityShow = false;
 
