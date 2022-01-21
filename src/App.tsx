@@ -112,6 +112,7 @@ import CustomerSign from './pages/DeliveryTicket/CustomerSign';
 import CheckoutSuccess from './pages/ECommerce/Success';
 import Orders from './pages/ECommerce/Orders';
 import OrderDetails from './pages/ECommerce/Orders/OrderDetails';
+import EcommercePolicy from './pages/EcommercePolicy';
 
 var notificationInterval: any = null;
 
@@ -553,11 +554,14 @@ function App() {
             <PrivateRoute exact path={`${routes.addressDetail.path}/:id`}>
               <AddressDetailPage />
             </PrivateRoute>
-            <PrivateRoute exact path={`/reports`}>
+            <PrivateRoute exact path={`${routes.reports.path}`}>
               <ReportMaster />
             </PrivateRoute>
-            <PrivateRoute exact path={`/reports/:resource`}>
+            <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
               <Report />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.eCommercePolicy.path}`}>
+              <EcommercePolicy />
             </PrivateRoute>
 
 
