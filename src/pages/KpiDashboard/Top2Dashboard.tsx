@@ -431,7 +431,7 @@ const Top2Dashboard = (props) => {
                   setEntityFilter({ ...entityFilter, marketSegment: val })
                   : setBookedFilter({ ...bookedfilter, marketSegment: val });
                 if (val) {
-                  setSubMarketSegments(marketSegments.salesFilter((d) => d?.parentSegment === val?.id));
+                  setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
                 } else {
                   setSubMarketSegments([]);
                 }
