@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.46.0](https://github.com/vebholic/oms_frontend/compare/v2.45.0...v2.46.0) (2022-01-22)
+
+
+### Features
+
+* - ECommerce header changed ([c4eb9b5](https://github.com/vebholic/oms_frontend/commit/c4eb9b5f9cef0b77653a92433bb62c68db180e0c))
+* - Product details screen changes done ([5020551](https://github.com/vebholic/oms_frontend/commit/502055148266879b416acb5601239f518c75ec84))
+* **grid:** column view change ([cb43dd4](https://github.com/vebholic/oms_frontend/commit/cb43dd43ba1d508c17a5f65796d6b195df203a10))
+* oat-471 ([c0eb750](https://github.com/vebholic/oms_frontend/commit/c0eb7505a8cf63d98ff7bae1bcd91571c1cc0bee))
+* **Project Sales:** Name changes to Target Project List ([c4c4d8f](https://github.com/vebholic/oms_frontend/commit/c4c4d8fbc70240d926d23083eb752a2d8b526a1e))
+* top selling product category changes in dashboard ([3bd6237](https://github.com/vebholic/oms_frontend/commit/3bd62372cecee99799022cccf1935c7abda3d73e))
+
+
+### Bug Fixes
+
+* **BreadCrump:** path issue fixed ([f2ed198](https://github.com/vebholic/oms_frontend/commit/f2ed198bab6925c67d9fa2d4afa395e0367bee36))
+* **Dashboard:** Currency symbol added ([559cec1](https://github.com/vebholic/oms_frontend/commit/559cec1017d2b5a4a74f2a1197533173cc0060bf))
+* **Homepage:** Text changes ([1cbaa3c](https://github.com/vebholic/oms_frontend/commit/1cbaa3c6f383d84ca3aeb680d38baff26ef7f37e))
+* **OpportunityDashboards:** If user deleted then show as User deleted ([19ab530](https://github.com/vebholic/oms_frontend/commit/19ab530fbb9a9a0fc654b61f51c99c122cd2a900))
+* policy ([f94be3d](https://github.com/vebholic/oms_frontend/commit/f94be3d474bd1e2c3efed4668fc8f730aa7e044f))
+* **role:** collapse table and only let permitted resource to select ([f704317](https://github.com/vebholic/oms_frontend/commit/f7043179fe77144596edbe66a846d23ad2c7fa11))
+
 ## [2.45.0](https://github.com/vebholic/oms_frontend/compare/v2.44.0...v2.45.0) (2022-01-21)
 
 
