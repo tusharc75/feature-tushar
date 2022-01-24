@@ -37,6 +37,7 @@ import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialo
 import { useData } from "../../StateProvider/Provider";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { FaDiceOne } from "react-icons/fa";
+import moment from "moment";
 
 const budgetMonths = ["januaryBudget", "februaryBudget", "marchBudget", "aprilBudget", "mayBudget", "juneBudget",
     "julyBudget", "augustBudget", "septemberBudget", "octoberBudget", "novemberBudget", "decemberBudget"]
@@ -802,6 +803,7 @@ export default function ManageBudgetDialog({
                                                                                         isTooltip={field?.isTooltip || false}
                                                                                         tooltipMessage={field?.tooltipMessage}
                                                                                         size="small"
+                                                                                        minDate={field.fieldName === "year" ? new Date(moment().subtract('1', 'year').calendar()) : undefined}
                                                                                         imageOrFileUploadCompletePercentage={null}
                                                                                     />
                                                                                 )}
@@ -881,7 +883,7 @@ export default function ManageBudgetDialog({
                                 {
                                     showConfirmDialog ?
                                         <ConfirmCancelDialog
-                                            close={()=>setShowConfirmDialog(false)}
+                                            close={() => setShowConfirmDialog(false)}
                                             open={showConfirmDialog}
                                             onSave={() => {
                                                 setShowConfirmDialog(false)
