@@ -39,7 +39,6 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, products: [] });
-  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchFields()
@@ -47,13 +46,8 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
 
   const fetchFields = async () => {
     var data = []
-    if (isOffline) {
-      data = await findOne(objectStore.resource, "salesOrderProduct")
-    }
-    else {
-      const response = await axiosInstance().get(`/field/child?resource=Sales Order Product`)
-      data = response?.data?.data
-    }
+    const response = await axiosInstance().get(`/field/child?resource=Sales Order Product`)
+    data = response?.data?.data
     data = CURReplaceByCurrencySingle(data, salesOrderData.currency)
     const coloum: any = [{
       accessor: 'detail',
@@ -62,14 +56,14 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate" title={row.original.detail}  >
-            {(row.original?.type === "asset" && !isOffline) ?
+            {(row.original?.type === "asset") ?
               <a className="link text-truncate" href={`${productInventory.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
               row.original.detail}
           </p>
           {row.original?.type === "asset" &&
             <span className="d-flex align-items-center gap-2">
               <Chip label="Asset" size="small" color="primary" />
-              {(row.original.status === "Reserved" && !isOffline) &&
+              {(row.original.status === "Reserved") &&
                 <IconButton size="small" onClick={() => {
                   setShowConfirmBox(true)
                   setDeleteData([row.original.inventory])
@@ -177,14 +171,8 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
     setNextStep(false)
     try {
       var data: any = []
-      if (isOffline) {
-        data = await findOne(objectStore.salesOrder, salesOrderData._id)
-        data.inventory = data.productInventory;
-      }
-      else {
-        const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`)
-        data = response?.data?.data
-      }
+      const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`)
+      data = response?.data?.data
       const rows = data.material.filter((e) => e.parentId === null)
       rows.forEach((parent, i) => {
         parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
@@ -447,7 +435,6 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
-              hideSelection={isOffline}
             />
           </Box>
           : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>

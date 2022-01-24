@@ -23,8 +23,6 @@ import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import SalesOrderQtyDialog from './SalesOrderQtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
 import InfoIcon from "@material-ui/icons/Info";
-import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
-import { objectStore, findOne } from '../../../constants/indexdbhelper';
 
 const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
 
@@ -51,7 +49,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
     const [rowsData, setRowsData] = useState(null);
     const [allFields, setAllFields] = useState([]);
 
-    const { isOffline } = useContext(CustomOfflineContext);
 
     useEffect(() => {
         fetchFields()
@@ -59,13 +56,8 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
 
     const fetchFields = async () => {
         var data = []
-        if (isOffline) {
-            data = await findOne(objectStore.resource, "salesOrderProduct")
-        }
-        else {
-            const response = await axiosInstance().get(`/field/child?resource=Sales Order Product`)
-            data = response?.data?.data
-        }
+        const response = await axiosInstance().get(`/field/child?resource=Sales Order Product`)
+        data = response?.data?.data
         data = CURReplaceByCurrencySingle(data, salesOrderData.currency)
         setAllFields(JSON.parse(JSON.stringify(data)))
         const coloum: any = [{
@@ -75,17 +67,15 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
             width: 300,
             Cell: ({ row }) => (
                 <div style={{ display: "flex", alignItems: 'center' }}>
-                    {isOffline ? <p> {row.original.detail}</p>
-                        :
-                        <p
-                            onClick={() => {
-                                handleOpen(row.original)
-                            }}
-                            className="link text-truncate"
-                            title={row.original.detail}
-                        >
-                            {row.original.detail}
-                        </p>}
+                    {<p
+                        onClick={() => {
+                            handleOpen(row.original)
+                        }}
+                        className="link text-truncate"
+                        title={row.original.detail}
+                    >
+                        {row.original.detail}
+                    </p>}
                     {row.original?.type === 'package' &&
                         <Box ml={1} className="d-flex align-items-center">
                             <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
@@ -96,18 +86,17 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
                             </HtmlTooltip>
                         </Box>
                     }
-                    {!isOffline &&
-                        <HtmlTooltip title="Details">
-                            <IconButton
-                                size="small"
-                                aria-label="Details"
-                                onClick={() => {
-                                    window.open(`${row.original.type === "product" ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`);
-                                }}
-                            >
-                                <InfoIcon fontSize="small" />
-                            </IconButton>
-                        </HtmlTooltip>}
+                    <HtmlTooltip title="Details">
+                        <IconButton
+                            size="small"
+                            aria-label="Details"
+                            onClick={() => {
+                                window.open(`${row.original.type === "product" ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`);
+                            }}
+                        >
+                            <InfoIcon fontSize="small" />
+                        </IconButton>
+                    </HtmlTooltip>
                 </div>
             )
         }]
@@ -204,16 +193,10 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
         setNextStep(false)
         var data: any = []
         var inventory: any = []
-        if (isOffline) {
-            data = await findOne(objectStore.salesOrder, salesOrderData._id)
-            inventory = data.productInventory;
-        }
-        else {
-            const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`)
-            data = response?.data?.data
-            setMaterial(JSON.parse(JSON.stringify(data.material)))
-            inventory = data.inventory;
-        }
+        const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`)
+        data = response?.data?.data
+        setMaterial(JSON.parse(JSON.stringify(data.material)))
+        inventory = data.inventory;
         const rows = data.material.filter((e) => e.parentId === null)
         rows.forEach((parent, i) => {
             parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
@@ -369,7 +352,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
                     variant="contained"
                     color="primary"
                     size="small"
-                    disabled={isOffline}
                     onClick={() => {
                         setAddExistingProductDialog({ open: true, type: "product", parentId: null });
                     }}
@@ -381,7 +363,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
                     variant="contained"
                     color="primary"
                     size="small"
-                    disabled={isOffline}
                     onClick={() => {
                         setAddExistingProductDialog({ open: true, type: "package", parentId: null });
                     }}
@@ -449,7 +430,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
                         onSelect={setSelectedProducts}
                         childrenProperty="subRows"
                         uniqueKey="_id"
-                        hideSelection={isOffline}
                     />
                 </Box>
             </>

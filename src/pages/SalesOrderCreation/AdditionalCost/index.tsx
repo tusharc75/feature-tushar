@@ -19,8 +19,6 @@ import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { prepareDataForGrid, CHILD_RESOURCE } from "../../../constants/helpers";
 import { getFrameworkComponents, genrateColoum } from "../../../constants/columns"
 import { GrBusinessService } from "react-icons/all";
-import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
-import { objectStore, findOne } from '../../../constants/indexdbhelper';
 
 const AdditionalCost = ({ salesOrderData, setNextStep }) => {
 
@@ -35,7 +33,6 @@ const AdditionalCost = ({ salesOrderData, setNextStep }) => {
 
     const [showCostDialog, setShowCostDialog] = useState(false)
     const [selectedCostData, setSelectedCostData] = useState(null)
-    const { isOffline } = useContext(CustomOfflineContext);
 
     useEffect(() => {
         fetchFields()
@@ -43,13 +40,9 @@ const AdditionalCost = ({ salesOrderData, setNextStep }) => {
 
     const fetchFields = async () => {
         var data = []
-        if (isOffline) {
-            data = await findOne(objectStore.resource, "salesOrderCost")
-        }
-        else {
-            const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.salesOrderCost}`)
-            data = response?.data?.data
-        }
+        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.salesOrderCost}`)
+        data = response?.data?.data
+
         const fields = CURReplaceByCurrencySingle(data, salesOrderData.currency)
         let rendererNames = [];
         genrateColoum(fields, columns, rendererNames, false);
@@ -71,14 +64,8 @@ const AdditionalCost = ({ salesOrderData, setNextStep }) => {
                 gridApi.setRowData([]);
             }
             var data: any = []
-            if (isOffline) {
-                data = await findOne(objectStore.salesOrder, salesOrderData._id)
-                data = data?.additionalCost
-            }
-            else {
-                const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/additionalcost/${salesOrderData._id}`)
-                data = response?.data?.data
-            }
+            const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/additionalcost/${salesOrderData._id}`)
+            data = response?.data?.data
             let rows = data?.map((item) => {
                 let res: any = {
                     ...prepareDataForGrid(item),
@@ -96,7 +83,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep }) => {
     };
 
     const ActionsRenderer = (params) => (
-        !isOffline && <Fragment>
+        <Fragment>
             <HtmlTooltip title="Edit">
                 <IconButton
                     size="small"
@@ -158,7 +145,6 @@ const AdditionalCost = ({ salesOrderData, setNextStep }) => {
                         variant={isMobile ? "outlined" : "contained"}
                         color="primary"
                         size="small"
-                        disabled={isOffline}
                         onClick={() => {
                             setShowCostDialog(true);
                             setSelectedCostData(null)
