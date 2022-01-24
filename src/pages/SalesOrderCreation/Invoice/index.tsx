@@ -21,8 +21,6 @@ import { prepareDataForGrid } from "../../../constants/helpers";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import { Link } from "react-router-dom";
 import { startCase } from "lodash";
-import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
-import { objectStore, findOne } from '../../../constants/indexdbhelper';
 
 
 const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobStatus, statusOptions }) => {
@@ -46,7 +44,6 @@ const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobSt
 
   const [downlodingFile, setDownlodingFile] = useState(null)
   const [emailAttachments, setEmailAttachments] = useState([]);
-  const { isOffline } = useContext(CustomOfflineContext);
 
   const NameRenderer = (params) => (
     <Link
@@ -60,31 +57,22 @@ const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobSt
 
   useEffect(() => {
     if (statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice") > statusOptions.findIndex(d => d.optionLabel === salesOrderData?.status)) {
-      if (!isOffline) {
-        updateJobStatus("Ready to Invoice")
-      }
+      updateJobStatus("Ready to Invoice")
     }
   }, []);
 
   useEffect(() => {
     fetchFields()
-  }, [isOffline]);
+  }, []);
 
   const fetchFields = async () => {
     try {
       let fields = []
-      if (isOffline) {
-        const resultProduct = await findOne(objectStore.resource, "salesOrderProduct")
-        fields = CURReplaceByCurrencySingle(resultProduct, salesOrderData.currency)
-        const resultCost = await findOne(objectStore.resource, "salesOrderCost")
-        fields = [...fields, ...CURReplaceByCurrencySingle(resultCost, salesOrderData.currency)]
-      }
-      else {
-        const resultProduct = await axiosInstance().get("/field/child?resource=Sales Order Product")
-        fields = CURReplaceByCurrencySingle(resultProduct?.data?.data, salesOrderData.currency)
-        const resultCost = await axiosInstance().get("/field/child?resource=Sales Order Cost")
-        fields = [...fields, ...CURReplaceByCurrencySingle(resultCost?.data?.data, salesOrderData.currency)]
-      }
+      const resultProduct = await axiosInstance().get("/field/child?resource=Sales Order Product")
+      fields = CURReplaceByCurrencySingle(resultProduct?.data?.data, salesOrderData.currency)
+      const resultCost = await axiosInstance().get("/field/child?resource=Sales Order Cost")
+      fields = [...fields, ...CURReplaceByCurrencySingle(resultCost?.data?.data, salesOrderData.currency)]
+
       let rendererNames = [];
       genrateColoum(fields, columns, rendererNames, false);
       let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
@@ -107,17 +95,10 @@ const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobSt
     let material: any = []
     let additionalcost: any = []
     try {
-      if (isOffline) {
-        const result= await findOne(objectStore.salesOrder, salesOrderData._id);
-        material = result?.material;
-        additionalcost = result?.additionalCost;
-      }
-      else {
-        const resultMaterial = await axiosInstance().get(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`)
-        material = resultMaterial?.data?.data?.material;
-        const resultCost = await axiosInstance().get(`${salesOrder.salesOrderApi}/additionalcost/${salesOrderData._id}`)
-        additionalcost = resultCost?.data?.data;
-      }
+      const resultMaterial = await axiosInstance().get(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`)
+      material = resultMaterial?.data?.data?.material;
+      const resultCost = await axiosInstance().get(`${salesOrder.salesOrderApi}/additionalcost/${salesOrderData._id}`)
+      additionalcost = resultCost?.data?.data;
       material?.forEach((item) => {
         if (!item.parentId) {
           item.description = `${item.type === "product" ? item.productDetail?.productName : item.packageDetail?.packageName}`

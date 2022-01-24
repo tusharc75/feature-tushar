@@ -3,7 +3,6 @@ const DB_NAME = "OMS";
 
 export const objectStore = {
     rentalManagement: 'rentalManagement',
-    salesOrder: 'salesOrder',
     deliveryTicket: 'deliveryTicket',
     resource: 'resource',
     repairJob: "Repair Job",
@@ -11,23 +10,31 @@ export const objectStore = {
 };
 
 export const setUpindexDB = () => {
-    if (!window.indexedDB) {
-        alert(`Your browser doesn't support Offline`);
-        return;
-    }
-    const request = window.indexedDB.open(DB_NAME, 1);
-    request.onupgradeneeded = (event: any) => {
-        var db = event.target.result;
-        for (const store in objectStore) {
-            db.createObjectStore(store);
+    try {
+        if (!window.indexedDB) {
+            alert(`Your browser doesn't support Offline`);
+            return;
         }
-        return true;
-    };
+        const request = window.indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = (event: any) => {
+            var db = event.target.result;
+            for (const store in objectStore) {
+                db.createObjectStore(store);
+            }
+            return true;
+        };
+    }
+    catch (e) {
+        console.log(e)
+    }
 };
 
 export const findAll = async (store) => {
     try {
         const db = await openDB(DB_NAME, 1)
+        if (!db?.objectStoreNames?.contains(store)) {
+            return [];
+        }
         var transaction = db.transaction([store], "readwrite");
         const result = await transaction.objectStore(store).getAll();
         return result;
@@ -50,25 +57,40 @@ export const findOne = async (store, key) => {
 };
 
 export const insertUpdate = async (store, key, value) => {
-    const db = await openDB(DB_NAME, 1)
-    var transaction = db.transaction([store], "readwrite");
-    transaction.objectStore(store).put(value, key);
+    try {
+        const db = await openDB(DB_NAME, 1)
+        var transaction = db.transaction([store], "readwrite");
+        transaction.objectStore(store).put(value, key);
+    }
+    catch (e) {
+        console.log(e)
+    }
 };
 
 export const deleteOne = (store, key) => {
-    var db = indexedDB.open(DB_NAME, 1);
-    db.onsuccess = function (event: any) {
-        var db = event.target.result;
-        var transaction = db.transaction([store], "readwrite");
-        transaction.objectStore(store).delete(key);
-    };
+    try {
+        var db = indexedDB.open(DB_NAME, 1);
+        db.onsuccess = function (event: any) {
+            var db = event.target.result;
+            var transaction = db.transaction([store], "readwrite");
+            transaction.objectStore(store).delete(key);
+        };
+    }
+    catch (e) {
+        console.log(e)
+    }
 };
 
 export const clearAll = (store) => {
-    var db = indexedDB.open(DB_NAME, 1);
-    db.onsuccess = function (event: any) {
-        var db = event.target.result;
-        var transaction = db.transaction([store], "readwrite");
-        transaction.objectStore(store).clear();
-    };
+    try {
+        var db = indexedDB.open(DB_NAME, 1);
+        db.onsuccess = function (event: any) {
+            var db = event.target.result;
+            var transaction = db.transaction([store], "readwrite");
+            transaction.objectStore(store).clear();
+        };
+    }
+    catch (e) {
+        console.log(e)
+    }
 };
