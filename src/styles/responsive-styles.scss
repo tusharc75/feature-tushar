@@ -332,6 +332,12 @@
         gap: 10px;
         grid-template-columns: none;
     }
+    .grid-with-activity-user {
+        display: grid;
+        grid-template-columns: 100% ;
+        column-gap: 10px;
+      }
+
     .activityHide {
         display: none;
     }
