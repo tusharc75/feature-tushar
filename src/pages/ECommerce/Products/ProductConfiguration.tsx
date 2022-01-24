@@ -63,7 +63,7 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
               size="small"
             />
 
-            <List component="nav">
+            {/* <List component="nav">
               <ListItem button onClick={handleClick}>
                 <ListItemText inset primary={field.fieldLabel} />
                 {!open ? <ExpandLess /> : <ExpandMore />}
@@ -88,7 +88,7 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
 
 
 
-            </List>
+            </List> */}
           </Grid>
         ))}
       </Grid>
