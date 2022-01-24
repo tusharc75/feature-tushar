@@ -28,7 +28,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog/ManageSalesOrderDialog';
 
@@ -73,7 +72,6 @@ const SalesOrder = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
   const { getColumnData } = useColumns();
   const [frameworkComponent, setFrameworkComponent] = useState({});
   const [columns, setColumns] = useState([]);
@@ -113,18 +111,8 @@ const SalesOrder = () => {
 
   const fetchGridColumns = async () => {
     let data;
-    if (isOffline) {
-      data = offlineFieldsData[salesOrderResource] ?? [];
-    } else {
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource[salesOrderResource]}`);
-
-      data = response?.data?.data;
-      try {
-        updateFieldsData(salesOrderResource, data);
-      } catch (ex) {
-        console.error(`Sales order: Error while storing data for Offline context. Error: ${ex.message}`);
-      }
-    }
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource[salesOrderResource]}`);
+    data = response?.data?.data;
 
     let columns = [];
     let rendererNames = [];
