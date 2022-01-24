@@ -1,10 +1,24 @@
-import { Grid, Typography, Box, List, ListItem, ListItemText, Collapse } from '@material-ui/core';
+import { Grid, Typography, Box, List, ListItem, ListItemText, Collapse, makeStyles } from '@material-ui/core';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import React from 'react';
 import FormTypes from '../../../components/Helpers/FormTypes';
 
+
+const useStyles = makeStyles(() => ({
+  
+  listOpen:{
+    backgroundColor:"#F7F7F7",
+    borderBottom:"1px solid grey"
+  },
+  listClose:{
+    backgroundColor:"#555555",
+    color:"white"
+  }
+}));
+
 const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) => {
   const { values, fields, error } = data;
+  const classes = useStyles();
 
   const [open, setOpen] = React.useState(true);
 
@@ -30,41 +44,23 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
 
   return (
     <>
-      <div className="d-flex gap-2 my-2 flex-column">
+
+    
+      {/* <div className="d-flex gap-2 my-2 flex-column">
         <h4>Product Configuration</h4>
         {error && (
           <Typography variant="body1" color="error">
             {error}
           </Typography>
         )}
-      </div>
-      <Grid container spacing={2}>
+      </div> */}
+      <Grid container>
         {' '}
         {fields.map((field) => (
           <Grid item xs={12} key={field._id}>
-            <Box pb={1}>
-              <Typography variant="body1">{field.fieldLabel}</Typography>
-            </Box>
-            <FormTypes
-              isNew={true}
-              fieldData={field}
-              values={values}
-              errors={{}}
-              touched={{}}
-              label={''}
-              name={field.fieldName}
-              type={field.type}
-              options={field.option}
-              setFieldValue={onChange}
-              required={field.required}
-              fullWidth
-              isTooltip={field?.isTooltip || false}
-              tooltipMessage={field?.tooltipMessage}
-              size="small"
-            />
 
-            {/* <List component="nav">
-              <ListItem button onClick={handleClick}>
+<List component="nav" style={{padding:"0px"}}>
+              <ListItem button onClick={handleClick} style={{padding:"5px 16px"}} className={!open ? classes.listClose : classes.listOpen}>
                 <ListItemText inset primary={field.fieldLabel} />
                 {!open ? <ExpandLess /> : <ExpandMore />}
               </ListItem>
@@ -88,7 +84,31 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
 
 
 
-            </List> */}
+            </List>
+
+
+            {/* <Box pb={1}>
+              <Typography variant="body1">{field.fieldLabel}</Typography>
+            </Box>
+            <FormTypes
+              isNew={true}
+              fieldData={field}
+              values={values}
+              errors={{}}
+              touched={{}}
+              label={''}
+              name={field.fieldName}
+              type={field.type}
+              options={field.option}
+              setFieldValue={onChange}
+              required={field.required}
+              fullWidth
+              isTooltip={field?.isTooltip || false}
+              tooltipMessage={field?.tooltipMessage}
+              size="small"
+            /> */}
+
+          
           </Grid>
         ))}
       </Grid>

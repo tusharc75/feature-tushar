@@ -4,7 +4,13 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { formatAmountWithCurrency, eProduct, dateFormatForInputControl, getObjKeysWithValues } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { Rating, ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
-import { Box, Chip, Grid, makeStyles, Typography, IconButton } from "@material-ui/core";
+import { Box, Chip, Grid, makeStyles, Typography, IconButton , Button ,  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  ListSubheader,
+  Collapse
+ } from "@material-ui/core";
 import AddShoppingCartIcon from "@material-ui/icons/AddShoppingCart";
 import RemoveShoppingCartIcon from '@material-ui/icons/RemoveShoppingCart';
 import { BsImage } from "react-icons/bs";
@@ -35,6 +41,8 @@ import FrequentlyBought from "../../../components/ProductList/FrequentlyBought/F
 import ProductConfiguration from "./ProductConfiguration";
 import ECommerceBreadCrumbs from "../../../components/ECommerce/BreadCrumbs/ECommerceBreadCrumbs";
 import { ECommerceContext } from "../../../components/ECommerce/Layout/ECommerceContext/ECommerceContext";
+import React from "react";
+import { ExpandLess, ExpandMore } from "@material-ui/icons";
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -45,6 +53,14 @@ const useStyles = makeStyles(() => ({
   // img: {
   //   maxWidth: "500px",
   // },
+  listOpen:{
+    backgroundColor:"#F7F7F7",
+    borderBottom:"1px solid grey"
+  },
+  listClose:{
+    backgroundColor:"#555555",
+    color:"white"
+  }
 }));
 
 const TYPES = {
@@ -88,6 +104,13 @@ const reducer = (data = initialData, action) => {
 export default function ProductDetails() {
 
   const [data, dispatchData] = useReducer(reducer, initialData);
+
+  const [open, setOpen] = React.useState(true);
+
+  const handleClick = () => {
+    setOpen(!open);
+  };
+
 
   const classes = useStyles();
   const [productDetails, setProductDetails] = useState(null);
@@ -317,13 +340,16 @@ export default function ProductDetails() {
       </div>
       <Box>
         {productDetails ?
-          <Grid container className="py-4 px-2">
-            <Grid item xs={5} className="d-flex flex-column align-items-center">
-              <Box display="flex" justifyContent="center" alignItems="center">
-                <div>
+          <Grid container className="py-4 px-2" spacing={1}>
+            <Grid item xs={6} md={7} sm={7} className="d-flex flex-column align-items-center">
+              <Box display="flex" justifyContent="center" alignItems="center" className='w-100' >
+                
+              <div className='position-relative w-100'>
+
                   {
                     wishlistState.wishlist.length === 0 || !wishlistState.wishlist.find(s => s._id === id) ? <IconButton
                       disabled={wishlist.disabled}
+                      style={{position:"absolute" , zIndex:1 }}
                       onClick={() => {
                         setWishlist({ disabled: true, loading: true });
                         axiosInstance().put(`${eProduct.api}/wishlist`, { productId: id }).then(({ data }) => {
@@ -345,6 +371,7 @@ export default function ProductDetails() {
                       {wishlist.disabled ? <AutorenewIcon className="rotate" /> : <BookmarkBorderIcon />}
                     </IconButton> : <IconButton
                       disabled={wishlist.disabled}
+                      style={{position:"absolute" , zIndex:1 }}
                       onClick={() => {
                         setWishlist({ disabled: true, loading: true });
 
@@ -398,15 +425,19 @@ export default function ProductDetails() {
                 </div>
               </Box>
             </Grid>
-            <Grid item xs={5}>
+
+
+            <Grid item xs={12} md={5} sm={5} className="px-3">
+              
               <h5>{productDetails.productCategory?.optionLabel}</h5>
-              <div className="w-100 d-flex align-items-center gap-2 justify-content-space-between">
-                <h2>{productDetails.productName}</h2>
+              <div className="w-100 d-flex align-items-center gap-2 justify-content-space-between" >
+                <h2 style={{color:"var(--primary-light)" , fontSize:"1.5rem"}}>{productDetails.productName}</h2>
 
                 <ToggleButtonGroup
                   size="small"
                   value={orderType}
                   exclusive
+                  
                   onChange={(_, value) => {
                     if (value) {
                       setOrderType(value);
@@ -417,7 +448,7 @@ export default function ProductDetails() {
                 >
                   {
                     Object.keys(ORDER_TYPES).map((key) => (
-                      <ToggleButton style={orderType === ORDER_TYPES[key].value ? { "background": "var(--primary)", "color": "white" } : {}} value={ORDER_TYPES[key].value} aria-label="left aligned">
+                      <ToggleButton className={"buy-rent-switch"} style={orderType === ORDER_TYPES[key].value ? { "background": "var(--primary)", "color": "white" } : {}} value={ORDER_TYPES[key].value} aria-label="left aligned">
                         {ORDER_TYPES[key].key}
                       </ToggleButton>
                     ))
@@ -425,6 +456,16 @@ export default function ProductDetails() {
                 </ToggleButtonGroup>
 
               </div>
+              
+              <div className="d-flex gap-2 pt-1">
+                <h4 style={{color:"var(--primary-light)" , opacity:"0.8"}}> Available - </h4>
+              { 
+                productDetails?.available && <h4 className="mb-2"> {productDetails?.available}</h4>
+                
+              }
+              </div>
+              
+              
               <Rating
                 name="half-rating-read"
                 defaultValue={4.5}
@@ -433,15 +474,63 @@ export default function ProductDetails() {
                 readOnly
                 size="small"
               />
-              {
-                productDetails?.available && <h4 className="mb-2">Available - {productDetails?.available}</h4>
-              }
+              
               <hr></hr>
               {
                 productDetails?.productShortDetail && <div className="mt-3 px-3" dangerouslySetInnerHTML={{ __html: productDetails?.productShortDetail }}></div>
               }
+
               <Grid className="mt-3" container>
-                <Grid item xs={12} className="d-flex flex-column gap-3">
+                <Grid item xs={12} className="d-flex flex-column" style={{border:"1px solid grey"}} >
+
+                  <h2 className={styles.product_type_heading} > Product Type</h2>
+
+                  <List component="nav" style={{padding:"0px"}} >
+                          <ListItem button onClick={handleClick} style={{padding:"5px 16px"}} className={!open ? classes.listClose : classes.listOpen}>
+                            <ListItemText inset primary={'Units'} />
+                            
+                            {!open ? <ExpandLess /> : <ExpandMore />}
+                          </ListItem>
+
+                          <Collapse in={!open} timeout="auto" unmountOnExit>
+                            <List component="div" disablePadding>
+                              {productDetails.unit.map((m) => (
+                                <ListItem button>
+                                  <ListItemText inset primary={m} key={m} />
+                                </ListItem>
+                              ))}
+                            </List>
+                          </Collapse>
+                        </List>
+
+
+                      <h2 className={styles.product_type_heading} > Product Configuration</h2>
+
+
+                        <ProductConfiguration
+                    initializeProductConfig={() => {
+                      const items = [...cartItems];
+                      const productIndex = getIndexOfProductInCart(items)
+                      if (productIndex !== -1 && productConfigData.fields.length > 0) {
+                        const productConfiguration = items[productIndex].productConfiguration;
+                        setProductConfigData({
+                          ...productConfigData,
+                          values: productConfiguration
+                        })
+                      }
+                    }}
+                    data={productConfigData}
+                    handleChange={(values: any) => {
+                      setProductConfigData({
+                        ...productConfigData,
+                        values
+                      })
+                    }}
+                  />
+   
+                      
+                  
+
                   {
                     productDetails.unit || productDetails.pricingMethod ? <Grid container spacing={2}>
                       <Grid item xs={productDetails.pricingMethod ? 6 : 12}>
@@ -553,7 +642,7 @@ export default function ProductDetails() {
                       </MuiPickersUtilsProvider>
                     </Grid>
                   }
-                  <ProductConfiguration
+                  {/* <ProductConfiguration
                     initializeProductConfig={() => {
                       const items = [...cartItems];
                       const productIndex = getIndexOfProductInCart(items)
@@ -572,7 +661,7 @@ export default function ProductDetails() {
                         values
                       })
                     }}
-                  />
+                  /> */}
 
                   <Box className="my-3 d-flex gap-4 align-items-baseline">
                     {
