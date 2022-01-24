@@ -57,6 +57,9 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const [sortedColumns, setSortedColumns] = React.useState([]);
   const [oldData, setOldDate] = React.useState('');
   const [newData, setNewData] = React.useState('');
+  const [allChecked, setAllChecked] = React.useState(false);
+  const [hasChanged, setHasChanged] = React.useState(false);
+
   const [lockedItem, setLockedItem] = React.useState({
     index: 0,
     column: {}
@@ -76,11 +79,23 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       }
     });
 
-    newCols = newCols
     setSortedColumns(newCols);
     setOldDate(JSON.stringify(newCols));
     setNewData(JSON.stringify(newCols));
   }, [columns]);
+
+
+  React.useEffect(() => {
+    if(oldData === newData) {
+      setHasChanged(false)
+    } else {
+      setHasChanged(true)
+    }
+
+    const allColumnShow = sortedColumns.filter(col => col.show === false).length === 0;
+    setAllChecked(allColumnShow)
+
+  },[oldData, newData, sortedColumns])
 
   const handleToggle = (column: any) => (event: React.ChangeEvent<HTMLInputElement>) => {
     const newColumns = [...sortedColumns];
@@ -91,19 +106,30 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     setNewData(JSON.stringify(newColumns));
   };
 
+  const handleToggleAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newColumns = [...sortedColumns];
+    newColumns?.forEach((e: any) => {
+      if (!e.disabled) {
+        e.show = event.target.checked;
+      }
+    });
+    setSortedColumns(newColumns);
+    setNewData(JSON.stringify(newColumns));
+  };
+
   const handleSaveChange = () => {
     const newColumns = [...sortedColumns];
     // newColumns.splice(lockedItem.index, 0, lockedItem.column);
     setColumns(newColumns);
-    const colIds = newColumns.map(col => col.field)
+    const colIds = newColumns.map((col) => col.field);
     const oldColumnState = columnApi.getColumnState();
-    let newColumnsState = new Array()
+    let newColumnsState = new Array();
 
-    for(const d of oldColumnState) {
+    for (const d of oldColumnState) {
       const index = colIds.indexOf(d.colId);
-      newColumnsState.splice(index, 0, {...d });
+      newColumnsState.splice(index, 0, { ...d });
     }
-    columnApi.setColumnState(newColumnsState)
+    columnApi.setColumnState(newColumnsState);
 
     const hiddenColumns = newColumns.filter((d) => !d.show).map((m) => m.field);
     const nonHiddenColumns = newColumns.filter((d) => d.show).map((m) => m.field);
@@ -144,16 +170,28 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
       <CustomDialogHeader title="Arrange View" onClose={onClose} showRequiredLabel={false} />
       <CustomDialogContent>
-        <DndProvider backend={HTML5Backend}>
-          <List
-            disablePadding
-            subheader={
-              <ListSubheader disableGutters disableSticky>
-                Toggle and Drag & Drop to arrange
-              </ListSubheader>
-            }
-            className={classes.root}
-          >
+        <List
+          disablePadding
+          subheader={
+            <ListSubheader disableGutters disableSticky>
+              Toggle and Drag & Drop to arrange
+            </ListSubheader>
+          }
+          className={classes.root}
+        >
+          <ListItem disableGutters dense>
+            <ListItemText primary="Column Name" />
+            <ListItemSecondaryAction>
+              <ListItemText primary="Toggle (hide/show)" />
+            </ListItemSecondaryAction>
+          </ListItem>
+          <ListItem disableGutters>
+            <ListItemText primary="All Columns" />
+            <ListItemSecondaryAction>
+              <Switch size="small" checked={allChecked} onChange={handleToggleAll} />
+            </ListItemSecondaryAction>
+          </ListItem>
+          <DndProvider backend={HTML5Backend}>
             {sortedColumns.map((column, index) => (
               <RenderListItem
                 key={column.field}
@@ -165,14 +203,14 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
                 columns={sortedColumns}
               />
             ))}
-          </List>
-        </DndProvider>
+          </DndProvider>
+        </List>
       </CustomDialogContent>
       <CustomDialogFooter>
         <Button variant="outlined" color="primary" onClick={onClose}>
           Close
         </Button>
-        <Button variant="contained" color="primary" disableElevation disabled={oldData === newData} onClick={handleSaveChange}>
+        <Button variant="contained" color="primary" disableElevation disabled={!hasChanged} onClick={handleSaveChange}>
           Save changes
         </Button>
       </CustomDialogFooter>
@@ -218,40 +256,23 @@ const RenderListItem = (props: ItemProps) => {
       if (dragIndex === hoverIndex) {
         return;
       }
-
       // Determine rectangle on screen
       const hoverBoundingRect = ref.current?.getBoundingClientRect();
-
       // Get vertical middle
       const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-
       // Determine mouse position
       const clientOffset = monitor.getClientOffset();
-
       // Get pixels to the top
       const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-
-      // Only perform the move when the mouse has crossed half of the items height
-      // When dragging downwards, only move when the cursor is below 50%
-      // When dragging upwards, only move when the cursor is above 50%
-
       // Dragging downwards
       if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
         return;
       }
-
       // Dragging upwards
       if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
         return;
       }
-
-      // Time to actually perform the action
       moveItem(dragIndex, hoverIndex);
-
-      // Note: we're mutating the monitor item here!
-      // Generally it's better to avoid mutations,
-      // but it's good here for the sake of performance
-      // to avoid expensive index searches.
       item.index = hoverIndex;
     }
   });
