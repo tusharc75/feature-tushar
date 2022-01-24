@@ -37,7 +37,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const [deleting, setDeleting] = useState(false)
   const [isAdding, setAdding] = useState(false)
   const [showConfirmBox, setShowConfirmBox] = useState(false)
-  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, type: "" })
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false })
   const [selectedProducts, setSelectedProducts] = useState([])
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([])
 
@@ -304,7 +304,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       setAdding(true)
       axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`, { "products": data })
         .then(({ data }) => {
-          setAddSerializedAssetDialog({ open: false, type: "" })
+          setAddSerializedAssetDialog({ open: false })
           fetchProductInventory()
           setSelectedProducts([])
           setAssetAssignedProduct([])
@@ -315,7 +315,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             message: data.message,
           });
         }).catch((error) => {
-          setAddSerializedAssetDialog({ open: false, type: "" })
+          setAddSerializedAssetDialog({ open: false })
           setAdding(false)
           toastConfig.setToastConfig(error)
         });
@@ -388,24 +388,10 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
           disabled={disableAssignSerializedAssets()}
           onClick={() => {
-            setAddSerializedAssetDialog({ open: true, type: "plantWise" })
+            setAddSerializedAssetDialog({ open: true })
           }}
         >
           {isMobile && !isTablet ? <CgAssign size={20} /> : `Assign ${routes.productInventory.title}`}
-        </Button>
-        <Box mx={1} />
-        <Button
-          variant={isMobile && !isTablet ? "text" : "contained"}
-          color="primary"
-          type="button"
-          size="small"
-          style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
-          disabled={disableAssignSerializedAssets()}
-          onClick={() => {
-            setAddSerializedAssetDialog({ open: true, type: "all" })
-          }}
-        >
-          {isMobile && !isTablet ? <CgAssign size={20} /> : `All ${routes.productInventory.title}`}
         </Button>
         <Box mx={1} />
         <Button
@@ -481,15 +467,14 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       <AddSerializedAsset
         addSerializedAsset={handleAddSerializedAsset}
         handleSerializedAssetClose={() => {
-          setAddSerializedAssetDialog({ open: false, type: "" });
+          setAddSerializedAssetDialog({ open: false });
         }}
-        refrenceType={addSerializedAssetDialog.type === "plantWise" ? "Rental Job" : "Rental Job All"}
+        refrenceType={"Rental Job"}
         refrenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue }}
         isAdding={isAdding}
         selectedProducts={assetAssignedProduct}
-        queryString={addSerializedAssetDialog.type === "all" ? `notInPlant=${rentalManagementData?.warehouse?.optionValue}&availableAssets=true` : ``}
-        filterByPlant={addSerializedAssetDialog.type === "plantWise" ?
-          rentalManagementData?.warehouse?.optionValue ? rentalManagementData?.warehouse?.optionValue : null : null}
+        //queryString={addSerializedAssetDialog.type === "all" ? `notInPlant=${rentalManagementData?.warehouse?.optionValue}&availableAssets=true` : ``}
+        filterByPlant={rentalManagementData?.warehouse?.optionValue}
       />
     }
     {showConfirmBox && (
