@@ -201,6 +201,7 @@ const Dashboard = () => {
 
                   <Top2Dashboard
                     getExchangeRates={getExchangeRates}
+                    filterCurrency={filterCurrency}
                     salesFilter={salesFilter}
                     currency={currency}
                     setCurrency={setCurrency}
@@ -216,6 +217,7 @@ const Dashboard = () => {
 
                   <OpportunityDashboards
                     getExchangeRates={getExchangeRates}
+                    filterCurrency={filterCurrency}
                     salesFilter={salesFilter}
                     currency={currency}
                     setCurrency={setCurrency}
@@ -231,6 +233,7 @@ const Dashboard = () => {
 
                   <OpportunityTrends
                     getExchangeRates={getExchangeRates}
+                    filterCurrency={filterCurrency}
                     currency={currency}
                     setCurrency={setCurrency}
                     moment={moment}
