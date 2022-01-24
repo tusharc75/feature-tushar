@@ -25,8 +25,6 @@ import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import { isMobile } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
-import { getSalesOrderProductAssets, getSalesOrderDeliveryTicket } from '../salesOrderOfflineHelper';
 
 
 const renderedFrom = "salesOrderPageDeliveryTicket"
@@ -47,7 +45,6 @@ const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNe
 
   const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
-  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchRecords();
@@ -63,20 +60,15 @@ const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNe
       var productAssets: any = []
       var deliveryTicketList: any = []
       dispatch({ type: "loading", loading: true });
-      if (isOffline) {
-        productAssets = await getSalesOrderProductAssets(salesOrderData._id)
-        productAssets = productAssets?.map(u => ({ ...u, productName: u?.product?.optionLabel }))
-        deliveryTicketList = await getSalesOrderDeliveryTicket(salesOrderData._id)
-      }
-      else {
-        const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/${salesOrderData._id}/inventory`)
-        setAssignedSerializedAsset(response?.data?.data)
-        productAssets = response?.data?.data
-        productAssets = productAssets.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
 
-        const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=Sales Order&refrenceId=${salesOrderData._id}`)
-        deliveryTicketList = result?.data?.data
-      }
+      const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/${salesOrderData._id}/inventory`)
+      setAssignedSerializedAsset(response?.data?.data)
+      productAssets = response?.data?.data
+      productAssets = productAssets.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
+
+      const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=Sales Order&refrenceId=${salesOrderData._id}`)
+      deliveryTicketList = result?.data?.data
+
       deliveryTicketList.map(obj => {
         if (obj.ticketType === "Loading") {
           productAssets.map((d, index) => {
