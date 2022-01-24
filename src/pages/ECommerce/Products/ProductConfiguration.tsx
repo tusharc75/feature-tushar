@@ -1,9 +1,30 @@
-import { Grid, Typography, Box } from '@material-ui/core';
+import { Grid, Typography, Box, List, ListItem, ListItemText, Collapse, makeStyles } from '@material-ui/core';
+import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import React from 'react';
 import FormTypes from '../../../components/Helpers/FormTypes';
 
+
+const useStyles = makeStyles(() => ({
+  
+  listOpen:{
+    backgroundColor:"#F7F7F7",
+    borderBottom:"1px solid grey"
+  },
+  listClose:{
+    backgroundColor:"#555555",
+    color:"white"
+  }
+}));
+
 const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) => {
   const { values, fields, error } = data;
+  const classes = useStyles();
+
+  const [open, setOpen] = React.useState(true);
+
+  const handleClick = () => {
+    setOpen(!open);
+  };
 
   const onChange = (name, value) => {
     let newValues = {
@@ -15,27 +36,58 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
 
   React.useEffect(() => {
     if (fields) {
-      initializeProductConfig()
+      initializeProductConfig();
     }
-  }, [fields])
+  }, [fields]);
 
   if (!data || data.fields.length === 0 || !data.hasOwnProperty('fields')) return null;
 
   return (
     <>
-      <div className="d-flex gap-2 my-2 flex-column">
+
+    
+      {/* <div className="d-flex gap-2 my-2 flex-column">
         <h4>Product Configuration</h4>
         {error && (
           <Typography variant="body1" color="error">
             {error}
           </Typography>
         )}
-      </div>
-      <Grid container spacing={2}>
+      </div> */}
+      <Grid container>
         {' '}
         {fields.map((field) => (
           <Grid item xs={12} key={field._id}>
-            <Box pb={1}>
+
+<List component="nav" style={{padding:"0px"}}>
+              <ListItem button onClick={handleClick} style={{padding:"5px 16px"}} className={!open ? classes.listClose : classes.listOpen}>
+                <ListItemText inset primary={field.fieldLabel} />
+                {!open ? <ExpandLess /> : <ExpandMore />}
+              </ListItem>
+
+              <Collapse in={!open} timeout="auto" unmountOnExit>
+                            <List component="div" disablePadding>
+                            {field.option.map((option) => (
+                                <ListItem button>
+                               
+                                   <ListItemText inset primary={option.optionLabel} />
+                               
+
+                                
+                                </ListItem>
+                                 ))}
+                            </List>
+                          </Collapse>
+
+
+
+
+
+
+            </List>
+
+
+            {/* <Box pb={1}>
               <Typography variant="body1">{field.fieldLabel}</Typography>
             </Box>
             <FormTypes
@@ -44,7 +96,7 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
               values={values}
               errors={{}}
               touched={{}}
-              label={""}
+              label={''}
               name={field.fieldName}
               type={field.type}
               options={field.option}
@@ -54,7 +106,9 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
               isTooltip={field?.isTooltip || false}
               tooltipMessage={field?.tooltipMessage}
               size="small"
-            />
+            /> */}
+
+          
           </Grid>
         ))}
       </Grid>
