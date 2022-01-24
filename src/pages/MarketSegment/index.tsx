@@ -290,6 +290,14 @@ const MarketSegment = () => {
             afterImportCompleted={() => {
               fetchMarketSegment();
             }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll();
+              else fetchMarketSegment();
+            }}
           />
         </Grid>
       </Grid>
