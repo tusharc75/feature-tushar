@@ -219,7 +219,7 @@ export default function ManageBudgetDialog({
 
     const onSubmit = (values) => {
         setLoading(true);
-
+        values["year"] = moment(values["year"]).format("YYYY")
         if (budgetId && !isClone) {
             values._id = budgetId;
             axiosInstance().put(budgetApi, values).then(({ data }) => {
