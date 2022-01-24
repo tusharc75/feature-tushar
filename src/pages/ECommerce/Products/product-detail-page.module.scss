@@ -9,6 +9,17 @@ $bgt: #e2e2e2;
         @content;
     }
 }
+
+.detail_screen_layout{
+    display: grid;
+    grid-template-columns: minmax(200px , 270px) minmax(400px , 1fr);
+}
+
+
+
+
+
+
 .product_container {
     margin-top: 20px !important;
     margin: 30px;

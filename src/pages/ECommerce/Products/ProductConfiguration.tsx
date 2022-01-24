@@ -1,9 +1,16 @@
-import { Grid, Typography, Box } from '@material-ui/core';
+import { Grid, Typography, Box, List, ListItem, ListItemText, Collapse } from '@material-ui/core';
+import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import React from 'react';
 import FormTypes from '../../../components/Helpers/FormTypes';
 
 const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) => {
   const { values, fields, error } = data;
+
+  const [open, setOpen] = React.useState(true);
+
+  const handleClick = () => {
+    setOpen(!open);
+  };
 
   const onChange = (name, value) => {
     let newValues = {
@@ -15,9 +22,9 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
 
   React.useEffect(() => {
     if (fields) {
-      initializeProductConfig()
+      initializeProductConfig();
     }
-  }, [fields])
+  }, [fields]);
 
   if (!data || data.fields.length === 0 || !data.hasOwnProperty('fields')) return null;
 
@@ -44,7 +51,7 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
               values={values}
               errors={{}}
               touched={{}}
-              label={""}
+              label={''}
               name={field.fieldName}
               type={field.type}
               options={field.option}
@@ -55,6 +62,33 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
               tooltipMessage={field?.tooltipMessage}
               size="small"
             />
+
+            {/* <List component="nav">
+              <ListItem button onClick={handleClick}>
+                <ListItemText inset primary={field.fieldLabel} />
+                {!open ? <ExpandLess /> : <ExpandMore />}
+              </ListItem>
+
+              <Collapse in={!open} timeout="auto" unmountOnExit>
+                            <List component="div" disablePadding>
+                            {field.option.map((option) => (
+                                <ListItem button>
+                               
+                                   <ListItemText inset primary={option.optionLabel} />
+                               
+
+                                
+                                </ListItem>
+                                 ))}
+                            </List>
+                          </Collapse>
+
+
+
+
+
+
+            </List> */}
           </Grid>
         ))}
       </Grid>
