@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import axiosInstance from "../../axios/axiosInstance";
 import { deliveryTicket, sidebarResource, asyncForEach } from "../../constants/helpers";
 import { CustomToastContext } from "../CustomToastContext/CustomToastContext";
-import { objectStore, findAll, deleteOne } from "../../constants/indexdbhelper";
+import { objectStore, findAll, deleteOne, setUpindexDB } from "../../constants/indexdbhelper";
 import { rentalJobOfflineUpdate } from "../../pages/RentalManagement/rentalOfflineHelper";
 import { sortBy } from 'lodash';
 
@@ -53,6 +53,7 @@ export const CustomOfflineProvider = ({ children }) => {
 
     const synchronizationData = async () => {
         if (!isOffline) {
+            await setUpindexDB()
             var data = await findAll(objectStore.offlineDataSync);
             if (data?.length) {
                 setIsSynch(true)

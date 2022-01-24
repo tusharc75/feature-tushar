@@ -24,8 +24,6 @@ import AdditionalCost from './AdditionalCost';
 import SerializedAsset from './SerializedAsset';
 import LoadingTicket from './LoadingTicket';
 import Invoice from './Invoice';
-import { findOne, objectStore } from '../../constants/indexdbhelper';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { isMobile } from "react-device-detect";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { GrStatusInfo } from "react-icons/all";
@@ -35,7 +33,6 @@ import Activity from '../../components/Activity';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
-  const { isOffline, updateOfflineGridData } = useContext(CustomOfflineContext);
 
   const { id } = useParams();
   const history = useHistory();
@@ -109,7 +106,7 @@ const SalesOrderDetails = () => {
   }, [id]);
 
   useEffect(() => {
-    if (!isOffline && currentStep !== null && currentStep >= 0 && currentStep <= 5) {
+    if ( currentStep !== null && currentStep >= 0 && currentStep <= 5) {
       updateProcessStatus(salesOrderProcessSteps[currentStep])
     }
   }, [currentStep]);
@@ -129,19 +126,15 @@ const SalesOrderDetails = () => {
 
   const getRessourceFields = async () => {
     try {
-      if (!isOffline) {
-        const response: any = await axiosInstance().get('/field?resource=Sales Order');
-        response?.data?.data.some(o => {
-          if (o?.fieldData?.fieldName === "status") {
-            setStatusOptions([...o.fieldData.option])
-            return true
-          }
-        })
-        setSalesOrderFields(response?.data?.data);
-      } else {
-        const response: any = await findOne(objectStore.resource, objectStore.salesOrder)
-        setSalesOrderFields(response);
-      }
+      const response: any = await axiosInstance().get('/field?resource=Sales Order');
+      response?.data?.data.some(o => {
+        if (o?.fieldData?.fieldName === "status") {
+          setStatusOptions([...o.fieldData.option])
+          return true
+        }
+      })
+      setSalesOrderFields(response?.data?.data);
+
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -152,12 +145,9 @@ const SalesOrderDetails = () => {
 
     try {
       let data;
-      if (!isOffline) {
-        const response: any = await axiosInstance().get(`${salesOrder.salesOrderApi}/${id}`);
-        data = response?.data?.data;
-      } else {
-        data = await findOne(objectStore.salesOrder, id)
-      }
+      const response: any = await axiosInstance().get(`${salesOrder.salesOrderApi}/${id}`);
+      data = response?.data?.data;
+
 
       setCurrentStep(salesOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? salesOrderProcessSteps.indexOf(data?.processStatus) : 0);
       setHeadingLabel(data.salesOrderNo);
@@ -240,7 +230,7 @@ const SalesOrderDetails = () => {
                 ) : (
                   <DetailsPageHeader heading={headingLabel} mainPoints={[]} showHeading={true}>
 
-                    {(permissions?.salesOrder?.isUpdate && allowedToEdit && !isOffline) && (
+                    {(permissions?.salesOrder?.isUpdate && allowedToEdit) && (
                       <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                         Edit
                       </Button>
