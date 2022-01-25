@@ -280,7 +280,11 @@ export default function ECommerceHeader() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem> */}
+            <MenuItem onClick={() => {
+                handleMenuClose()
+                history.push(`${routes.orders.path}`)
+            }
+            }>Wallet</MenuItem>
             <MenuItem onClick={() => {
                 handleMenuClose()
                 history.push(`${routes.orders.path}`)
@@ -405,12 +409,12 @@ export default function ECommerceHeader() {
                             />
 
                             {
-                                loading ? <div className="position-absolute border mt-2 d-flex align-items-center justify-content-center"
-                                    style={{ background: "white", zIndex: 10, height: 150, width: 450, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}>
+                                loading ? <div className="position-absolute border d-flex align-items-center justify-content-center"
+                                    style={{ background: "white", zIndex: 10, marginTop: "2.5rem", height: 150, width: 450, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}>
                                     <h4 className="loading-dots">Loading</h4>
                                 </div> : (
-                                    open && <div className={`position-absolute border mt-2 ${searchItems.length === 0 ? "d-flex align-items-center justify-content-center" : ""}`}
-                                        style={{ background: "white", zIndex: 10, height: searchItems.length > 0 ? 500 : 150, width: 450, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}
+                                    open && <div className={`position-absolute border ${searchItems.length === 0 ? "d-flex align-items-center justify-content-center" : ""}`}
+                                        style={{ background: "white", zIndex: 10, marginTop: "2.5rem", height: searchItems.length > 0 ? 500 : 150, width: 450, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}
                                     >
 
                                         {
