@@ -1,6 +1,6 @@
 {
   "name": "oms_frontend",
-  "version": "2.46.2",
+  "version": "2.47.0",
   "private": true,
   "dependencies": {
     "@azure/msal-browser": "^2.14.1",
@@ -126,6 +126,7 @@
     "ts-pnp": "1.2.0",
     "typescript": "^4.2.3",
     "url-loader": "4.1.1",
+    "uuidv4": "^6.2.12",
     "vis-react": "^0.5.1",
     "web-vitals": "^0.2.4",
     "webpack": "4.44.2",

@@ -1,11 +1,14 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from "@material-ui/core/Grid";
+import Button from "@material-ui/core/Button";
 import { Link } from "react-router-dom";
+import {MdSort, MdFilterList} from "react-icons/all";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import { GiAbstract055 } from "react-icons/gi";
+import styles from '../Leads/Header.module.scss';
 import CustomContainer from "../../components/CustomContainer";
 import { gridLoadingTimeout, gridPageSizes } from "../../constants/helpers";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
@@ -13,12 +16,15 @@ import routes from "../../components/Helpers/Routes";
 import { useHistory } from 'react-router-dom'
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import MobileSortDialog from '../../components/MobileSortDialog';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
 
 const DOARequest = () => {
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const history = useHistory()
-
+  const [isOpenDialog, setisOpenDialog] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
   const [state, dispatch] = useReducer(reducer, intialState);
   const {
     dataRows,
@@ -67,6 +73,24 @@ const DOARequest = () => {
       });
     });
   }
+
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+
+  const handleClickOpen = () => {
+    setSortOpen(true);
+  };
+
+  const handleClickClose = () => {
+    setSortOpen(false);
+  };
+
+  const handleFilterClose = () => {
+    setisOpenDialog(false);
+  };
+
+
 
   useEffect(() => {
     fetchProductBuilder();
@@ -152,16 +176,73 @@ const DOARequest = () => {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={12} sm={12} xs={12}>
+      <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+              <div className="d-flex align-items-center">
           <CustomBreadCrumbs routes={[{ title: routes.DOARequest.title }]} />
+          </div>
         </Grid>
       </Grid>
       <CustomContainer>
         <div className="header-panel">
           <Grid container>
-            <Grid item xs={6} className="d-flex align-items-center gap-1">
+          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+              <div className="d-flex align-items-center">
               <GiAbstract055 />{" "}
               <span className="listingHeader">{routes.DOARequest.title}</span>
+              </div>
+              {isMobile && (
+                <>
+                  <Grid style={{ display: 'inline-flex' }}>
+                    <Button
+                      onClick={handleClickOpen}
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      color="secondary"
+                      variant="text"
+                      disableElevation
+                      startIcon={<MdSort />}
+                      className={'sort-filter-tablet'}
+                      style={isTablet ? { marginLeft: '50px' } : {}}
+                    >
+                      Sort
+                    </Button>
+                    <MobileSortDialog
+                      isOpen={sortOpen}
+                      handleClose={handleClickClose}
+                      contentPart={null}
+                      secHeading={['Sort DOA Requests']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+
+                    <Button
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      variant="text"
+                      color="secondary"
+                      disableElevation
+                      className={'sort-filter-tablet'}
+                      startIcon={<MdFilterList />}
+                      onClick={handleOpen}
+                    >
+                      Filter
+                    </Button>
+
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleFilterClose}
+                      contentPart={null}
+                      secHeading={['Filter DOA Request']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+                  </Grid>
+                </>
+              )}
             </Grid>
           </Grid>
         </div>

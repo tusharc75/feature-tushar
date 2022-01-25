@@ -44,6 +44,7 @@ import ECommerceBreadCrumbs from "../../../components/ECommerce/BreadCrumbs/ECom
 import { ECommerceContext } from "../../../components/ECommerce/Layout/ECommerceContext/ECommerceContext";
 import React from "react";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
+import ProductBOM from "../../../components/ProductList/BOM/ProductBOM";
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -53,9 +54,10 @@ const useStyles = makeStyles(() => ({
     minHeight:"300px",
     height:"70vh"
   },
-  // img: {
-  //   maxWidth: "500px",
-  // },
+  img: {
+    height: "500px",
+    maxWidth: "500px",
+  },
   listOpen: {
     backgroundColor: "#F7F7F7",
     borderBottom: "1px solid grey"
@@ -749,9 +751,16 @@ export default function ProductDetails() {
         }
         <hr />
 
+        {
+          productDetails?.bom && productDetails?.bom.length > 0 && <>
+            <div className="my-3 px-4">
+              <ProductBOM bom={productDetails?.bom} orderType={orderType} />
+            </div>
+            <hr />
+          </>
+        }
 
         <div className="my-3 px-4">
-
           <FrequentlyBought id={id} orderType={orderType} mainProductMrp={Number(rateCurrency.mrp)} mainProductWithCurrency={rateCurrency.rateWithCurrency} />
         </div>
         <hr />
