@@ -82,7 +82,7 @@ export default function OrderDetails() {
         <Container component="main" style={{ marginBottom: 32 }}>
 
             <div className="p-2">
-                <ECommerceBreadCrumbs routes={[routes.orders, { title: order?.name }]} />
+                <ECommerceBreadCrumbs routes={[routes.orders, { title: order?.orderNumber }]} />
             </div>
 
             <Grid container className="mt-3 d-flex gap-3">
@@ -95,7 +95,7 @@ export default function OrderDetails() {
 
                     <Paper style={{ padding: '24px 16px' }}>
                         <Typography component="h2" variant="h5" align="center">
-                            Order Id : {order?.name}
+                            Order Id : {order?.orderNumber}
                         </Typography>
 
                         <Divider className="my-2" />
