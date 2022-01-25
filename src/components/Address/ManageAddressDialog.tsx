@@ -125,7 +125,11 @@ const ManageAddressDialog = (props) => {
           }
 
           // if (type === 'administrative_area_level_1') {
-          //   fullAddress['state/Province'] = address.long_name;
+          //   if(initialData.values.hasOwnProperty("state")) {
+          //     fullAddress['state'] = address.long_name;
+          //   } else {
+          //     fullAddress['state/Province'] = address.long_name;
+          //   }
           // }
 
           if (type === 'administrative_area_level_2') {
@@ -137,7 +141,11 @@ const ManageAddressDialog = (props) => {
           }
 
           // if (type === 'postal_code') {
-          //   fullAddress['zipCode/PostalCode'] = address.long_name;
+          //   if(initialData.values.hasOwnProperty("zipCode")) {
+          //     fullAddress['zipCode'] = address.long_name;
+          //   } else {
+          //     fullAddress['zipCode/PostalCode'] = address.long_name;
+          //   }
           // }
         });
 
