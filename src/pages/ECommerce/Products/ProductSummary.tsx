@@ -1,16 +1,10 @@
-import { Grid, Typography, Box, List, ListItem, ListItemText, Collapse, makeStyles } from '@material-ui/core';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
-import React from 'react';
-import styles from "./product-detail-page.module.scss";
-import Chip from '@material-ui/core/Chip';
-import DoneIcon from '@material-ui/icons/Done';
+import DetailsPage from '../../../components/Shared/DetailsPage';
 
-const ProductSummary = ({ }) => {
+const ProductSummary = ({ data }) => {
 
-    return (<div>
-        
-    </div>
-    );
+    const { values, fields } = data;
+
+    return (fields.length > 0 && <DetailsPage data={values} fields={fields.map((d) => { return { fieldData: { ...d, sectionName: "Product Summary" } } })} />);
 };
 
 export default ProductSummary;

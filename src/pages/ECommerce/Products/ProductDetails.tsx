@@ -744,8 +744,9 @@ export default function ProductDetails() {
         {
           <>
             <div className="my-3 px-4">
-              <ProductSummary />
+              <ProductSummary data={productConfigData} />
             </div>
+            <hr />
           </>
         }
         {
