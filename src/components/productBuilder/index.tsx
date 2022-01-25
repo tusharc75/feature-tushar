@@ -130,9 +130,13 @@ const ProductBuilder = (props) => {
         fields = [...fields, ...ele.fields]
         ele.fields.map((item) => {
           if(item.type === 'converter') {
-            item.displayUnits.map((unit) => {
+            item?.displayUnits.map((unit) => {
               priceTemplateField.push(`${item.fieldName}_${unit.toLowerCase()}`)
             })
+          
+          }
+          if(item?.type === 'decimal') {
+            priceTemplateField.push(`${item.fieldName}`)
           }
         })
         
