@@ -153,40 +153,46 @@ const ManageAddressDialog = (props) => {
   useEffect(() => {
     if (formikRef.current && addressData) {
       const setFieldValue = formikRef.current.setFieldValue;
-      if (addressData?.streetAddress) {
-        setFieldValue('streetAddress', addressData.streetAddress);
-      } else {
-        setFieldValue('city', '');
-      }
-      if (addressData?.city) {
-        setFieldValue('city', addressData.city);
-      } else {
-        setFieldValue('city', '');
-      }
-      // if (addressData['state/Province']) {
-      //   setFieldValue('state/Province', addressData['state/Province']);
+      // if (addressData?.streetAddress) {
+      //   setFieldValue('streetAddress', addressData.streetAddress);
       // } else {
-      //   setFieldValue('state/Province', '');
+      //   setFieldValue('city', '');
       // }
-      if (addressData?.country) {
-        setFieldValue('country', addressData.country);
-      } else {
-        setFieldValue('country', '');
-      }
-      // if (addressData['zipCode/PostalCode']) {
-      //   setFieldValue('zipCode/PostalCode', addressData['zipCode/PostalCode']);
+      // if (addressData?.city) {
+      //   setFieldValue('city', addressData.city);
       // } else {
-      //   setFieldValue('zipCode/PostalCode', '');
+      //   setFieldValue('city', '');
       // }
-      if (addressData?.latitude) {
-        setFieldValue('latitude', addressData.latitude);
-      } else {
-        setFieldValue('latitude', '');
-      }
-      if (addressData?.longitude) {
-        setFieldValue('longitude', addressData.longitude);
-      } else {
-        setFieldValue('longitude', '');
+      // // if (addressData['state/Province']) {
+      // //   setFieldValue('state/Province', addressData['state/Province']);
+      // // } else {
+      // //   setFieldValue('state/Province', '');
+      // // }
+      // if (addressData?.country) {
+      //   setFieldValue('country', addressData.country);
+      // } else {
+      //   setFieldValue('country', '');
+      // }
+      // // if (addressData['zipCode/PostalCode']) {
+      // //   setFieldValue('zipCode/PostalCode', addressData['zipCode/PostalCode']);
+      // // } else {
+      // //   setFieldValue('zipCode/PostalCode', '');
+      // // }
+      // if (addressData?.latitude) {
+      //   setFieldValue('latitude', addressData.latitude);
+      // } else {
+      //   setFieldValue('latitude', '');
+      // }
+      // if (addressData?.longitude) {
+      //   setFieldValue('longitude', addressData.longitude);
+      // } else {
+      //   setFieldValue('longitude', '');
+      // }
+      const keys = Object.keys(addressData)
+      if(keys.length > 0) {
+        keys.forEach(k => {
+          setFieldValue(k, addressData[k])
+        })
       }
     }
   }, [addressData]);

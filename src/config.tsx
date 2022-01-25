@@ -8,7 +8,4 @@ export const azureConfig = {
 export const TRACKING_ID = 'UA-196035023-2'; //Google analytics tracking id
 
 export const backendApi = 
-// localStorage.getItem('backendApi') ??
-//  (process?.env?.REACT_APP_API_URL || 
-  'https://master.oms-backend.vebholic.com'
-  // );
+localStorage.getItem('backendApi') ?? (process?.env?.REACT_APP_API_URL || 'https://master.oms-backend.vebholic.com');
