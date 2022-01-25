@@ -32,9 +32,6 @@ import { FaSuitcase } from "react-icons/fa";
 import MobileSortDialog from "../../components/MobileSortDialog";
 import MobileFilterDialog from "../../components/MobileFilterDialog"
 
-
-const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
-
 const Subleasing = () => {
 
     const toastConfig = useContext(CustomToastContext)
@@ -571,7 +568,7 @@ const Subleasing = () => {
             showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.subleasing?.title?.toLowerCase() : RESOURCE_LABEL.subleasing?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
+                message={`Are you sure you want to delete the ${routes.subleasing?.title} ? `}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />

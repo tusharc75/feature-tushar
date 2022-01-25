@@ -770,10 +770,9 @@ body::-webkit-scrollbar-thumb {
   font-weight: 600 !important;
 }
 
-.first-content-Layout {
-  background-color: var(--primary);
-  color: white !important;
-  border-radius: 10px 10px 1px 1px;
+.first-content-Layout{
+   background-color: var(--primary);
+   color: white !important;
 }
 
 .quote-tab {
@@ -1367,12 +1366,16 @@ body::-webkit-scrollbar-thumb {
   box-shadow: 0 0 5px #dfdfdf;
 }
 
-.buy-rent-switch {
-  padding: 0 8px !important;
+
+
+.rating-design{
+  .MuiRating-iconEmpty{
+    color: white;
+  }
 }
 
-@media only screen and (max-width: 960px) {
-  .filter-side-header-serialized {
+@media only screen and (max-width: 960px){
+  .filter-side-header-serialized{
     justify-content: space-between;
     flex: 1;
   }

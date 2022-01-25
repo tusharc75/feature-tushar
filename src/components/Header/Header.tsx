@@ -960,6 +960,9 @@ const Header = ({ toggleDrawer }) => {
     if (history.location.pathname.includes(routes.pricingConditionDetail.path)) {
       history.push({ pathname: routes.pricingCondition.path })
     }
+    if (history.location.pathname.includes('/dashboards')) {
+      history.push({ pathname: '/dashboards' })
+    }
   }
 
   const startTour = () => {

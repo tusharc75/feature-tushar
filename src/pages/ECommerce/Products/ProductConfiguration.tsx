@@ -4,18 +4,45 @@ import React from 'react';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import styles from "./product-detail-page.module.scss";
 import Chip from '@material-ui/core/Chip';
+import DoneIcon from '@material-ui/icons/Done';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 
 const useStyles = makeStyles(() => ({
 
   listOpen: {
     backgroundColor: "#F7F7F7",
-    borderBottom: "1px solid grey"
+    borderBottom: "1px solid grey",
+    "&:focus":{
+       backgroundColor:"#F7F7F7"
+    },
+    padding:"5px 8px"
   },
+
   listClose: {
+    "&.MuiButtonBase-root":{
+      "&:hover":{
+        backgroundColor: "#555555",
+       },
+    },
     backgroundColor: "#555555",
-    color: "white"
+    color: "white",
+    padding:"5px 8px"
+  },
+  listText:{
+    paddingLeft:"20px"
+  },
+  chipLayout:{
+   backgroundColor:"#D8FCE5 !important",
+   fontWeight:"bold",
+   color:"var(--secondary)",
+   borderRadius:"8px",
+   border:"1px solid var(--secondary)",
+   "&:hover":{
+    backgroundColor:"#D8FCE5 !important",
+   }
   }
+  
 }));
 
 const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) => {
@@ -46,7 +73,7 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
     setExpanded(temp)
   }
 
-  return (<Box mt={2}>
+  return (<Box mt={0} style={{ borderRadius:"3px"}} >
     <h3 className={styles.product_type_heading} > Product Configuration</h3>
     {error && (
       <Typography variant="body1" color="error">
@@ -56,13 +83,13 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
     <Grid container>
       {fields.map((field, index) => (
         <Grid item xs={12} key={field._id}>
-          <List>
-            <ListItem button onClick={() => { handleExpand(index) }} >
-              <ListItemText inset primary={field.fieldLabel} />
+          <List className='p-0'>
+            <ListItem button onClick={() => { handleExpand(index) }} className={!expanded[index] ? classes.listOpen : classes.listClose }>
+              <ListItemText inset primary={field.fieldLabel} className={classes.listText}/>
               {expanded[index] ? <ExpandLess /> : <ExpandMore />}
             </ListItem>
-            <Collapse in={expanded[index]} timeout="auto" unmountOnExit className={!expanded[index] ? classes.listClose : classes.listOpen}>
-              <Box display="flex" p={1}>
+            <Collapse in={expanded[index]} timeout="auto" unmountOnExit >
+              <Box display="flex" p={1} flexWrap="wrap" className="gap-1" >
                 {field.option.map((option) => (
                   <Box pl={1}>
                     {values[field.fieldName] === option.optionLabel ?
@@ -71,7 +98,12 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
                         onClick={() => { onChange(field.fieldName, option.optionLabel) }}
                         label={option.optionLabel}
                         size="medium"
-                        color="primary" />
+                        // color="primary" 
+                        className={classes.chipLayout}
+                        icon={<DoneIcon fontSize='small' style={{color:"var(--secondary)"}}/>}
+                        variant='outlined'
+                        />
+                        
                       :
                       <Chip
                         clickable
@@ -79,7 +111,10 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
                         label={option.optionLabel}
                         size="medium"
                         variant={"outlined"}
-                        color="primary" />
+                        color="primary"
+                        style={{borderRadius: "8px"}}
+                         />
+                        
                     }
                   </Box>
                 ))}
