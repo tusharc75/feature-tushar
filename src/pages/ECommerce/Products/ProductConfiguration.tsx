@@ -2,17 +2,19 @@ import { Grid, Typography, Box, List, ListItem, ListItemText, Collapse, makeStyl
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import React from 'react';
 import FormTypes from '../../../components/Helpers/FormTypes';
+import styles from "./product-detail-page.module.scss";
+import Chip from '@material-ui/core/Chip';
 
 
 const useStyles = makeStyles(() => ({
-  
-  listOpen:{
-    backgroundColor:"#F7F7F7",
-    borderBottom:"1px solid grey"
+
+  listOpen: {
+    backgroundColor: "#F7F7F7",
+    borderBottom: "1px solid grey"
   },
-  listClose:{
-    backgroundColor:"#555555",
-    color:"white"
+  listClose: {
+    backgroundColor: "#555555",
+    color: "white"
   }
 }));
 
@@ -20,11 +22,7 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
   const { values, fields, error } = data;
   const classes = useStyles();
 
-  const [open, setOpen] = React.useState(true);
-
-  const handleClick = () => {
-    setOpen(!open);
-  };
+  const [expanded, setExpanded] = React.useState({});
 
   const onChange = (name, value) => {
     let newValues = {
@@ -42,52 +40,53 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
 
   if (!data || data.fields.length === 0 || !data.hasOwnProperty('fields')) return null;
 
-  return (
-    <>
+  const handleExpand = (index) => {
+    const temp = { ...expanded };
+    temp[index] = !temp[index]
+    setExpanded(temp)
+  }
 
-    
-      {/* <div className="d-flex gap-2 my-2 flex-column">
-        <h4>Product Configuration</h4>
-        {error && (
-          <Typography variant="body1" color="error">
-            {error}
-          </Typography>
-        )}
-      </div> */}
-      <Grid container>
-        {' '}
-        {fields.map((field) => (
-          <Grid item xs={12} key={field._id}>
-
-<List component="nav" style={{padding:"0px"}}>
-              <ListItem button onClick={handleClick} style={{padding:"5px 16px"}} className={!open ? classes.listClose : classes.listOpen}>
-                <ListItemText inset primary={field.fieldLabel} />
-                {!open ? <ExpandLess /> : <ExpandMore />}
-              </ListItem>
-
-              <Collapse in={!open} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                            {field.option.map((option) => (
-                                <ListItem button>
-                               
-                                   <ListItemText inset primary={option.optionLabel} />
-                               
-
-                                
-                                </ListItem>
-                                 ))}
-                            </List>
-                          </Collapse>
-
-
-
-
-
-
-            </List>
-
-
-            {/* <Box pb={1}>
+  return (<Box mt={2}>
+    <h3 className={styles.product_type_heading} > Product Configuration</h3>
+    {error && (
+      <Typography variant="body1" color="error">
+        {error}
+      </Typography>
+    )}
+    <Grid container>
+      {fields.map((field, index) => (
+        <Grid item xs={12} key={field._id}>
+          <List>
+            <ListItem button onClick={() => { handleExpand(index) }} >
+              <ListItemText inset primary={field.fieldLabel} />
+              {expanded[index] ? <ExpandLess /> : <ExpandMore />}
+            </ListItem>
+            <Collapse in={expanded[index]} timeout="auto" unmountOnExit className={!expanded[index] ? classes.listClose : classes.listOpen}>
+              <Box display="flex" p={1}>
+                {field.option.map((option) => (
+                  <Box pl={1}>
+                    {values[field.fieldName] === option.optionLabel ?
+                      <Chip
+                        clickable
+                        onClick={() => { onChange(field.fieldName, option.optionLabel) }}
+                        label={option.optionLabel}
+                        size="medium"
+                        color="primary" />
+                      :
+                      <Chip
+                        clickable
+                        onClick={() => { onChange(field.fieldName, option.optionLabel) }}
+                        label={option.optionLabel}
+                        size="medium"
+                        variant={"outlined"}
+                        color="primary" />
+                    }
+                  </Box>
+                ))}
+              </Box>
+            </Collapse>
+          </List>
+          {/* <Box pb={1}>
               <Typography variant="body1">{field.fieldLabel}</Typography>
             </Box>
             <FormTypes
@@ -107,12 +106,10 @@ const ProductConfiguration = ({ data, handleChange, initializeProductConfig }) =
               tooltipMessage={field?.tooltipMessage}
               size="small"
             /> */}
-
-          
-          </Grid>
-        ))}
-      </Grid>
-    </>
+        </Grid>
+      ))}
+    </Grid>
+  </Box>
   );
 };
 
