@@ -3,11 +3,12 @@ import { Box, Grid, MenuItem, Button, Menu, Chip } from "@material-ui/core";
 import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import SearchBox from "../../components/Helpers/SearchBox";
 import { FaUsers } from "react-icons/fa";
-
+import MobileSortDialog from '../../components/MobileSortDialog';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import {isMobile, isTablet} from "react-device-detect";
-import {MdAdd} from "react-icons/all";
+import {MdAdd,MdSort, MdFilterList} from "react-icons/all";
 
 const Header = (props) => {
   const {
@@ -34,10 +35,13 @@ const Header = (props) => {
     handleAssignBrandAdmin,
     isUserSetupPermission,
     isUnAssignBrandAdmin,
-    handleUnAssignBrandAdmin
+    handleUnAssignBrandAdmin,
+    columns,
+    dispatch
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
-
+  const [isOpenDialog, setisOpenDialog] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -45,12 +49,87 @@ const Header = (props) => {
   const closeActions = () => {
     setAnchorEl(null);
   };
+  
+    
+  const handleClickOpen = () => {
+    setSortOpen(true);
+  };
+
+  const handleFilterClose = () => {
+    setisOpenDialog(false);
+  };
+
+ 
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+
+  const handleClickClose = () => {
+    setSortOpen(false);
+  };
 
   return (
     <Grid container className={styles.filter_side_container}>
-      <Grid item xs={6} className="d-flex align-items-center gap-1">
+        <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+              <div className="d-flex align-items-center">
         <FaUsers className="headerLogo" />{" "}
         <span id="resourceHeader" className="listingHeader">{routes.user.title}</span>
+        </div>
+        {isMobile && (
+                <>
+                  <Grid style={{ display: 'inline-flex' }}>
+                    <Button
+                      onClick={handleClickOpen}
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      color="secondary"
+                      variant="text"
+                      disableElevation
+                      startIcon={<MdSort />}
+                      className={'sort-filter-tablet'}
+                      style={isTablet ? { marginLeft: '50px' } : {}}
+                    >
+                      Sort
+                    </Button>
+                    <MobileSortDialog
+                      isOpen={sortOpen}
+                      handleClose={handleClickClose}
+                      contentPart={null}
+                      secHeading={['Sort Users']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+
+                    <Button
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      variant="text"
+                      color="secondary"
+                      disableElevation
+                      className={'sort-filter-tablet'}
+                      startIcon={<MdFilterList />}
+                      onClick={handleOpen}
+                    >
+                      Filter
+                    </Button>
+
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleFilterClose}
+                      contentPart={null}
+                      secHeading={['Filter Users']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+                  </Grid>
+                </>
+              )}
+        
+        
         {entityRoleRedirectDetails.id && (
           <Chip
             className="ml-3"
@@ -61,6 +140,7 @@ const Header = (props) => {
             }}
           />
         )}
+
       </Grid>
       <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
         <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} id="resourceOperations">

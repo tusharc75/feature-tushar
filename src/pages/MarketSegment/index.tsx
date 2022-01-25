@@ -29,7 +29,10 @@ import { prepareDataForGrid } from '../../constants/helpers';
 import { useLocation, useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { MdAdd } from 'react-icons/md';
+import { MdAdd,MdSort, MdFilterList} from 'react-icons/md';
+import { FaSuitcase,IoIosCreate} from 'react-icons/all';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
 
 const MarketSegment = () => {
   const location = useLocation();
@@ -46,7 +49,8 @@ const MarketSegment = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
-
+  const [sortOpen, setSortOpen] = useState(false);
+  const [isOpenDialog, setisOpenDialog] = useState(false);
   // const [selectedCategory, setSelectedCategory] = useState([]);
 
   //  Grid Variables - Start
@@ -56,6 +60,23 @@ const MarketSegment = () => {
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem(routes.marketSegment.title));
+
+
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+
+  const handleClickOpen = () => {
+    setSortOpen(true);
+  };
+
+  const handleClickClose = () => {
+    setSortOpen(false);
+  };
+
+  const handleFilterClose = () => {
+    setisOpenDialog(false);
+  };
 
   useEffect(() => {
     const parsedParams = queryString.parse(location?.search);
@@ -304,8 +325,64 @@ const MarketSegment = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center gap-1">
+          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+              <div className="d-flex align-items-center">
               <GiAbstract055 /> <span className="listingHeader">{routes.marketSegment.title}</span>
+              </div>
+              {isMobile && (
+                <>
+                  <Grid style={{ display: 'inline-flex' }}>
+                    <Button
+                      onClick={handleClickOpen}
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      color="secondary"
+                      variant="text"
+                      disableElevation
+                      startIcon={<MdSort />}
+                      className={'sort-filter-tablet'}
+                      style={isTablet ? { marginLeft: '50px' } : {}}
+                    >
+                      Sort
+                    </Button>
+                    <MobileSortDialog
+                      isOpen={sortOpen}
+                      handleClose={handleClickClose}
+                      contentPart={null}
+                      secHeading={['Sort Market Segment']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+
+                    <Button
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      variant="text"
+                      color="secondary"
+                      disableElevation
+                      className={'sort-filter-tablet'}
+                      startIcon={<MdFilterList />}
+                      onClick={handleOpen}
+                    >
+                      Filter
+                    </Button>
+
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleFilterClose}
+                      contentPart={null}
+                      secHeading={['Filter Market Segment']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+                  </Grid>
+                </>
+              )}
+           
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -389,8 +466,23 @@ const MarketSegment = () => {
             rowCount={rowCount}
             page={page}
             loading={loading}
-            additionalDetails={[]}
-            chips={[]}
+            additionalDetails={[
+              {
+                icon:<FaSuitcase size={18}/>,
+                field:"parentMarketSegment"
+              }
+            ]}
+            chips={[
+              {
+                icon:<IoIosCreate />,
+                label:"CreatedBy: ",
+                field:"createdBy",
+              },
+              {
+                label:"UpdatedBy: ",
+                field:"updatedBy",
+              }
+            ]}
             owerCollaboratorInitialsOrImages=""
             onCreate={() => setOpen({ open: true, idToClone: null, isClone: null })}
             showClone={false}

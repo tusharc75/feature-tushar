@@ -4,13 +4,14 @@ import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import SearchBox from "../../components/Helpers/SearchBox";
 
 import { BsPersonBoundingBox } from 'react-icons/bs';
-
+import MobileSortDialog from '../../components/MobileSortDialog';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
 import styles from "../Leads/Header.module.scss";
 import { useData } from "../../StateProvider/Provider";
 import { localStorageKeys } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
 import {isMobile, isTablet} from "react-device-detect";
-import {MdAdd} from "react-icons/all";
+import {MdAdd,MdSort, MdFilterList} from "react-icons/all";
 
 const RoleHeader = (props) => {
   const {
@@ -23,12 +24,15 @@ const RoleHeader = (props) => {
     showConfirmBox,
     canDelete,
     selectedRecords,
-    userDialogOpen
+    userDialogOpen,
+    columns,
+    dispatch,
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState(localStorage.getItem(localStorageKeys.currentSelectedRoleType) ?
     localStorage.getItem(localStorageKeys.currentSelectedRoleType) : "Global");
-
+    const [sortOpen, setSortOpen] = useState(false);
+    const [isOpenDialog, setisOpenDialog] = useState(false);
   const {
     state: { selectedEntity },
   }: any = useData();
@@ -48,10 +52,84 @@ const RoleHeader = (props) => {
     setAnchorEl(null);
   };
 
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+
+  const handleClickOpen = () => {
+    setSortOpen(true);
+  };
+
+  const handleClickClose = () => {
+    setSortOpen(false);
+  };
+
+  const handleFilterClose = () => {
+    setisOpenDialog(false);
+  };
+
+
   return (
     <Grid container className={styles.filter_side_container}>
-      <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+      <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+              <div className="d-flex align-items-center">
         <BsPersonBoundingBox /> <span className="listingHeader">{routes.role.title}</span>
+        </div>
+        {isMobile && (
+                <>
+                  <Grid style={{ display: 'inline-flex' }}>
+                    <Button
+                      onClick={handleClickOpen}
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      color="secondary"
+                      variant="text"
+                      disableElevation
+                      startIcon={<MdSort />}
+                      className={'sort-filter-tablet'}
+                      style={isTablet ? { marginLeft: '50px' } : {}}
+                    >
+                      Sort
+                    </Button>
+                    <MobileSortDialog
+                      isOpen={sortOpen}
+                      handleClose={handleClickClose}
+                      contentPart={null}
+                      secHeading={['Sort Roles']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+
+                    <Button
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      variant="text"
+                      color="secondary"
+                      disableElevation
+                      className={'sort-filter-tablet'}
+                      startIcon={<MdFilterList />}
+                      onClick={handleOpen}
+                    >
+                      Filter
+                    </Button>
+
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleFilterClose}
+                      contentPart={null}
+                      secHeading={['Filter Roles']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+                  </Grid>
+                </>
+              )}
+       
+       
         {/* {options && (
           <ToggleButtonGroup
             size="small"

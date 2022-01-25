@@ -24,8 +24,13 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
+import {MdSort,MdFilterList,ImCalendar,FaSuitcase} from "react-icons/all";
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import MobileSortDialog from "../../components/MobileSortDialog";
+import MobileFilterDialog from "../../components/MobileFilterDialog"
+
+
 
 let timeout;
 function Budget() {
@@ -53,6 +58,34 @@ function Budget() {
   const toastConfig = useContext(CustomToastContext);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+
+
+  const [isOpenDialog, setisOpenDialog] = useState(false)
+
+
+
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+
+  const handleClose = () => {
+    setisOpenDialog(false);
+  };
+
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClickClose = () => {
+    setOpen(false);
+
+  };
+
+ 
+
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -332,9 +365,65 @@ function Budget() {
         <CustomContainer>
           <div className="header-panel">
             <Grid className={styles.filter_side_container} container justify="space-between">
-              <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center gap-1">
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+            <div className="d-flex align-items-center">  
                 <MdContacts className="headerLogo" />
                 <span className="listingHeader">{routes.budget.title}</span>
+                </div>
+                {isMobile && !isTablet &&
+        <div className="d-flex ">
+        <Button
+        onClick={handleClickOpen}
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        // aria-expanded={open ? 'true' : undefined}
+        color="secondary"
+        variant="text"
+        disableElevation
+        startIcon={<MdSort />}
+      >
+        Sort 
+        </Button>
+
+        <MobileSortDialog
+        isOpen={open}
+        handleClose={handleClickClose}
+        contentPart={null}
+        secHeading={["Sort Budget"]}
+        columns={columns}
+        dispatch={dispatch}
+        />
+
+
+
+        <Button
+        id="demo-customized-button"
+        aria-controls="demo-customized-menu"
+        aria-haspopup="true"
+        // aria-expanded={open ? 'true' : undefined}
+        variant="text"
+        color="secondary"
+        disableElevation
+        startIcon={<MdFilterList />}
+        onClick={handleOpen}
+      >
+        Filter 
+        </Button>
+
+
+        <MobileFilterDialog
+        isOpen={isOpenDialog}
+        handleClose={handleClose}
+        contentPart={null}
+        secHeading={["Filter Budget"]}
+        columns={columns}
+        dispatch={dispatch}
+        />
+        </div>
+        }
+
+              
               </Grid>
               <Grid className={styles.filter_side} item md={6} sm={12} xs={12}>
                 <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -399,38 +488,51 @@ function Budget() {
             </Grid>
           </div>
           <Box component="div">
-            {isMobile && !isTablet ? (
-              <CustomSwipableList
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions.budget}
-                primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(d) => {
-                  setShowManageBudgetDialog({ show: true, id: d.id, isClone: false });
-                }}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                onEdit={(d) => {
-                  setShowManageBudgetDialog({ show: true, id: d.id, isClone: false });
-                }}
-                extraParamsToCheckDelete={true}
-                onDelete={(d) => {
-                  setDeleteRecord(d);
-                  setShowDeleteConfirmBox(true);
-                }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                additionalDetails={[]}
-                chips={[]}
-                owerCollaboratorInitialsOrImages=""
-                onCreate={() => setShowManageBudgetDialog({ show: true, id: null, isClone: null })}
-                showClone={false}
-                onClone={() => {}}
-                renderedFrom={budget.resource}
-              />
-            ) : Object.keys(frameWorkComponent).length > 0 ? (
+            { Object.keys(frameWorkComponent).length > 0 ? (
+              isMobile && !isTablet ? (
+                <CustomSwipableList
+                  allowSelection={true}
+                  allowSwipe={true}
+                  permissions={permissions.budget}
+                  primaryField={columns?.find((d) => d.primaryField)}
+                  onClick={(d) => {
+                    setShowManageBudgetDialog({ show: true, id: d.id, isClone: false });
+                  }}
+                  dataRows={dataRows}
+                  selectedRecords={selectedRecords}
+                  dispatch={dispatch}
+                  onEdit={(d) => {
+                    setShowManageBudgetDialog({ show: true, id: d.id, isClone: false });
+                  }}
+                  extraParamsToCheckDelete={true}
+                  onDelete={(d) => {
+                    setDeleteRecord(d);
+                    setShowDeleteConfirmBox(true);
+                  }}
+                  rowCount={rowCount}
+                  page={page}
+                  loading={loading}
+                  additionalDetails={[
+                    {
+                      icon:<FaSuitcase />,
+                      field:"entity"
+                    }
+                  ]}
+                  chips={[
+                    {
+                      icon:<ImCalendar />,
+                      label:"Year: ",
+                      field: "year"
+                    },
+                   
+                  ]}
+                  owerCollaboratorInitialsOrImages=""
+                  onCreate={() => setShowManageBudgetDialog({ show: true, id: null, isClone: null })}
+                  showClone={false}
+                  onClone={() => {}}
+                  renderedFrom={budget.resource}
+                />
+              ) :
               <CustomAgGrid
                 columns={columns}
                 dataRows={dataRows}
