@@ -185,7 +185,7 @@ function OpportunitiesHeader(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
-      
+      handleClose();
     }
   };
  

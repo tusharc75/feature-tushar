@@ -354,7 +354,7 @@ const OpportunityTable = ({ filterCurrency, currency, salesReps, customerAccount
                   <TableRow key={index}>
                     {Object.keys(data).reverse().map((label, i) => (
                       <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                        {['Total Cost', 'Total Sell'].includes(label) ? `${currrencySymbol(filterCurrency ?? currency)} ${data[label].toLocaleString()}` : `${data[label].toLocaleString()}`}
+                        {['totalCost', 'totalSell'].includes(label) ? `${currrencySymbol(filterCurrency ?? currency)} ${data[label].toLocaleString()}` : `${data[label].toLocaleString()}`}
                       </TableCell>
                 ))}
               </TableRow>

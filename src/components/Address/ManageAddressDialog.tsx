@@ -20,7 +20,7 @@ import { FaDiceOne } from 'react-icons/fa';
 
 const ManageAddressDialog = (props) => {
   const toastConfig = useContext(CustomToastContext);
-  const { onClose, onSuccess, isEdit, isClone, addressData: oldData, title, saveAddress = true } = props;
+  const { onClose, onSuccess, isEdit, isClone, addressData: oldData, title } = props;
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [formsData, setFormsData] = useState([]);
@@ -83,28 +83,23 @@ const ManageAddressDialog = (props) => {
 
   const handleSubmit = (values) => {
     // const {zipCodePostalCode, stateProvince, ...restValues} = values
-    if (saveAddress) {
-      setLoading(true);
-      axiosInstance()
-        .post(`${address.addressApi}`, values)
-        .then(({ data: { data } }) => {
-          setLoading(false);
-          onSuccess(data);
-        })
-        .catch((error) => {
-          setLoading(false);
-          if (error?.data?.isAlreadyExist) {
-            values["isAlreadyExist"] = true
-            onSuccess(values);
-          }
-          else {
-            toastConfig.setToastConfig(error);
-          }
-        });
-    }
-    else {
-      onSuccess(values);
-    }
+    setLoading(true);
+    axiosInstance()
+      .post(`${address.addressApi}`, values)
+      .then(({ data: { data } }) => {
+        setLoading(false);
+        onSuccess(data);
+      })
+      .catch((error) => {
+        setLoading(false);
+        if (error?.data?.isAlreadyExist) {
+          values["isAlreadyExist"] = true
+          onSuccess(values);
+        }
+        else {
+          toastConfig.setToastConfig(error);
+        }
+      });
   };
 
   const getFullAddress = (placeId) => {

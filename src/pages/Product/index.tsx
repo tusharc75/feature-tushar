@@ -175,6 +175,7 @@ const Product = () => {
                 finalObject["canDelete"] = permissions.product.isDelete;
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
                 finalObject["allowedToEdit"] = permissions.product.isUpdate;
+                finalObject["unit"] = finalObject["unit"].join(" , ");
                 return {
                     ...finalObject,
                 };

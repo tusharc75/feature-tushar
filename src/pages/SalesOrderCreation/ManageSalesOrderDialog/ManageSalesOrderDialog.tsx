@@ -31,7 +31,6 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
 
     const history = useHistory()
     const toastConfig = useContext(CustomToastContext);
-    const { isOffline, offlineFieldsData, offlineGridData } = useContext(CustomOfflineContext);
 
     const [loading, setLoading] = useState(false);
     const [salesData, setSalesData] = useState({ fields: [], initialValues: {} });
@@ -188,13 +187,8 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
     const fetchFields = async () => {
         try {
             let fieldData;
-            if (navigator.onLine) {
-                const response: any = await axiosInstance().get("/field?resource=Sales Order");
-                fieldData = response?.data?.data;
-            }
-            else {
-                fieldData = offlineFieldsData?.salesOrder || [];
-            }
+            const response: any = await axiosInstance().get("/field?resource=Sales Order");
+            fieldData = response?.data?.data;
             fieldData?.forEach((e: any) => {
                 if (e?.fieldData?.fieldName === "warehouse" && e?.fieldData?.option) {
                     e.fieldData.option = e?.fieldData?.option?.filter((a) => a.entity?.includes(selectedEntity));
@@ -206,12 +200,9 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
             if (salesOrderId) {
                 try {
                     let data;
-                    if (!isOffline) {
-                        const response: any = await axiosInstance().get(`${salesOrder.salesOrderApi}/` + salesOrderId);
-                        data = response?.data?.data;
-                    } else {
-                        data = offlineGridData?.salesOrder?.find(d => d._id === salesOrderId)
-                    }
+                    const response: any = await axiosInstance().get(`${salesOrder.salesOrderApi}/` + salesOrderId);
+                    data = response?.data?.data;
+
                     if (isClone) {
                         const { _id, brand, createdBy, entity, history, products, status, salesOrderNo, updatedBy, ...rest } = data
                         rest.status = "New"
@@ -273,76 +264,34 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
         setLoading(true);
         if (salesOrderId && isClone === false) {
             values._id = salesOrderId
-            if (!isOffline) {
-                axiosInstance().put(`${salesOrder.salesOrderApi}`, values).then(({ data }) => {
-                    setLoading(false);
-                    onSuccess()
-                    toastConfig.setToastConfig({
-                        open: true,
-                        type: "success",
-                        message: data.message,
-                    });
-                }).catch((error) => {
-                    setLoading(false);
-                    toastConfig.setToastConfig(error);
-                });
-            } else {
-                let storedData = {};
-                if (localStorage.getItem("offlineDataToSave")) {
-                    storedData = JSON.parse(localStorage.getItem("offlineDataToSave"));
-                }
-                const dataToSave = {
-                    api: salesOrder.salesOrderApi,
-                    method: "put",
-                    values: values
-                };
-                if (!storedData["salesOrder"]) {
-                    storedData["salesOrder"] = [];
-                }
-                storedData["salesOrder"].push(dataToSave)
-                localStorage.setItem("offlineDataToSave", JSON.stringify(storedData));
+            axiosInstance().put(`${salesOrder.salesOrderApi}`, values).then(({ data }) => {
                 setLoading(false);
+                onSuccess()
                 toastConfig.setToastConfig({
                     open: true,
-                    type: "info",
-                    message: "Updates are in offline state, it will be affected once you will be in network",
+                    type: "success",
+                    message: data.message,
                 });
-                onSuccess();
-            }
+            }).catch((error) => {
+                setLoading(false);
+                toastConfig.setToastConfig(error);
+            });
+
         }
         else {
-            if (!isOffline) {
-                axiosInstance().post(`${salesOrder.salesOrderApi}`, values).then(({ data: { data, message } }) => {
-                    history.push(`${routes.salesOrderDetail.path}/${data._id}`)
-                    setLoading(false);
-                    onSuccess(data)
-                    toastConfig.setToastConfig({
-                        open: true,
-                        type: "success",
-                        message: message,
-                    });
-                }).catch((error) => {
-                    setLoading(false);
-                    toastConfig.setToastConfig(error);
+            axiosInstance().post(`${salesOrder.salesOrderApi}`, values).then(({ data: { data, message } }) => {
+                history.push(`${routes.salesOrderDetail.path}/${data._id}`)
+                setLoading(false);
+                onSuccess(data)
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: message,
                 });
-            }
-            else {
-                let storedData = {};
-                if (localStorage.getItem("offlineDataToSave")) {
-                    storedData = JSON.parse(localStorage.getItem("offlineDataToSave"));
-                }
-                const dataToSave = {
-                    api: salesOrder.salesOrderApi,
-                    method: "post",
-                    values: values
-                };
-                if (!storedData["salesOrder"]) {
-                    storedData["salesOrder"] = [];
-                }
-                storedData["salesOrder"].push(dataToSave)
-                localStorage.setItem("offlineDataToSave", JSON.stringify(storedData));
-                onSuccess();
-            }
+            }).catch((error) => {
+                setLoading(false);
+                toastConfig.setToastConfig(error);
+            });
         }
     };
 

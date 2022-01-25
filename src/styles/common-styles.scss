@@ -49,7 +49,7 @@
 .align-items-stretch {
     align-items: stretch !important;
 }
-.align-self-center{
+.align-self-center {
     align-self: center;
 }
 
@@ -333,7 +333,6 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
     padding-bottom: 3rem !important;
 }
 
-
 .light-grey-bg {
     background-color: var(--lightgrey) !important;
 }
@@ -341,7 +340,6 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
 .bg-primary {
     background-color: var(--primary) !important;
 }
-
 
 .bg-white {
     background-color: var(--white) !important;
@@ -454,9 +452,15 @@ $sizes: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10;
     text-decoration: line-through !important;
 }
 
-
 .container {
     margin-right: auto;
     margin-left: auto;
     width: calc(100% - 10%);
-  }
+}
+
+.line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}

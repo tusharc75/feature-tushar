@@ -23,11 +23,40 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.paper
   },
   nested: {
-    paddingLeft: theme.spacing(4)
+    paddingLeft: theme.spacing(4),
+    "& .MuiListItemIcon-root":{
+      justifyContent:"center"
+    }
+    
   },
   nestedDeep: {
     paddingLeft: theme.spacing(6)
+  },
+  list_layout:{
+
+    "& .MuiListItem-container":{
+      padding:"0 10px 0 12px"
+    }
+  },
+  expand_icon_box:{
+    right:"24px "
+  },
+  list_button_hidden_layout :{
+    "&:hover":{
+      backgroundColor:"rgba(67, 174, 170 , 0.1)",
+    }
+    
+   
+  },
+  list_button_open_layout:{
+    "&:hover":{
+      backgroundColor:"rgba(67, 174, 170 , 0.1)",
+    },
+    backgroundColor:"rgba(67, 174, 170 , 0.3)",
+    borderRadius:"3px"
+
   }
+  
 }));
 
 // type CategoriesList = {
@@ -172,17 +201,19 @@ const Filters = (props: any) => {
       disablePadding
       dense
       subheader={
-        <ListSubheader component="div" id="nested-list-categories">
-          {!loadingFilter && filters.length > 0 ? 'Filters' : 'Loading Filters...'}
+        <ListSubheader component="div" id="nested-list-categories" style={{textTransform:"uppercase" , color:"var(--primary-light)"}}>
+          {!loadingFilter && filters.length > 0 ? 'Product Type' : 'Loading Filters...'}
         </ListSubheader>
+      
       }
+      className={classes.list_layout}
     >
       {!loadingFilter && filters.length > 0 ? (
         filters.map((filter: FiltersList) => (
-          <React.Fragment key={filter.fieldName}>
-            <ListItem>
-              <ListItemText primary={filter.fieldLabel} />
-              <ListItemSecondaryAction>
+          <React.Fragment key={filter.fieldName} >
+            <ListItem button onClick={() => handleClickExpand(filter.fieldName)} className={filter.open ? classes.list_button_open_layout : classes.list_button_hidden_layout}>
+              <ListItemText primary={filter.fieldLabel}  />
+              <ListItemSecondaryAction className={classes.expand_icon_box}>
                 <IconButton size="small" edge="end" onClick={() => handleClickExpand(filter.fieldName)}>
                   {filter.open ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
                 </IconButton>
@@ -191,19 +222,20 @@ const Filters = (props: any) => {
             <Collapse in={filter.open} timeout="auto" unmountOnExit>
               <List component="div" disablePadding dense>
                 {filter.option.map((opt) => (
-                  <ListItem key={opt.optionValue} className={classes.nested} role={undefined} dense>
+                  <ListItem key={opt.optionValue} className={classes.nested}  role={undefined} dense>
                     <ListItemIcon>
                       <Checkbox
                         size="small"
                         edge="start"
                         checked={opt.checked}
                         tabIndex={-1}
+                        style={{padding:"0 9px" }}
                         disableRipple
                         onClick={() => handleClickFilter(filter.fieldName, opt.optionValue)}
                         inputProps={{ 'aria-labelledby': opt.optionValue }}
                       />
                     </ListItemIcon>
-                    <ListItemText id={opt.optionValue} primary={opt.optionLabel} />
+                    <ListItemText id={opt.optionValue} primary={opt.optionLabel} className="mt-0" />
                   </ListItem>
                 ))}
               </List>
