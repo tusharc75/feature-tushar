@@ -38,6 +38,7 @@ const ProductConfiguration = (props: ConfigProps) => {
   const [specFields, setSpecFields] = React.useState([]);
   const [configData, setConfigData] = React.useState([]);
   const [openDialog, setOpenDialog] = React.useState(false);
+  const [removing, setRemoving] = React.useState(false);
   const [showConfirmBox, setShowConfirmBox] = React.useState({
     open: false,
     ids: []
@@ -145,6 +146,7 @@ const ProductConfiguration = (props: ConfigProps) => {
   };
 
   const removeData = () => {
+    setRemoving(true);
     axiosInstance()
       .put(`${routes.product.path}/${id}/images/remove`, {
         ids: showConfirmBox.ids
@@ -154,13 +156,15 @@ const ProductConfiguration = (props: ConfigProps) => {
           open: false,
           ids: []
         });
-        getConfigurationData()
+        getConfigurationData();
+        setRemoving(false);
       })
       .catch(() => {
         setShowConfirmBox({
           open: false,
           ids: []
         });
+        setRemoving(false);
       });
   };
 
@@ -217,7 +221,7 @@ const ProductConfiguration = (props: ConfigProps) => {
           data={Object.values(editConfig.values).length > 0 ? editConfig : null}
           close={() => setOpenDialog(false)}
           id={id}
-          fetchData={ getConfigurationData}
+          fetchData={getConfigurationData}
         />
       )}
       {carouselDialog.open && (
@@ -236,6 +240,7 @@ const ProductConfiguration = (props: ConfigProps) => {
       {showConfirmBox.open && (
         <ConfirmationDialog
           open={true}
+          okBtnLoading={removing}
           message={`Are you sure you want to delete?`}
           onClose={() => {
             setShowConfirmBox({
