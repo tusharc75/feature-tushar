@@ -21,6 +21,7 @@ import AssignRegionalRolesUserDialog from "../../components/AssignRolesDialog/As
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from 'react-router-dom'
 import { isMobile, isTablet } from 'react-device-detect';
+import {FaSuitcase,MdDescription,IoCreateSharp} from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 
 function reducer(state, action) {
@@ -440,6 +441,8 @@ const Roles: FC = () => {
               canDelete={!disableDelete}
               selectedRecords={selectedRecords}
               userDialogOpen={userDialogOpen}
+              dispatch={dispatch}
+              columns={columns}
             />
           </div>
 
@@ -464,8 +467,24 @@ const Roles: FC = () => {
             rowCount={rowCount}
             page={page}
             loading={loading}
-            additionalDetails={[]}
-            chips={[]}
+            additionalDetails={[
+              {
+                icon:<FaSuitcase size={18} />,
+                field:"type"
+              }
+            ]}
+            chips={[
+              {
+                icon:<MdDescription />,
+                label:"Description: ",
+                field:"description"
+              },
+              {
+                icon:<IoCreateSharp />,
+                label:"Created By: ",
+                field:"createdBy"
+              }
+            ]}
             owerCollaboratorInitialsOrImages=""
             onCreate={false}
             showClone={false}

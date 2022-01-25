@@ -16,7 +16,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
+import { FaUserCheck, FaUserAltSlash,FaSuitcase,IoCreateSharp,MdEmail} from "react-icons/all";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
@@ -752,6 +752,8 @@ const User: FC = () => {
               isUserSetupPermission={isUserSetupPermission}
               isUnAssignBrandAdmin={selectedRecords.length > 0 && selectedRecords.filter((records) => 'userType' in records).length === selectedRecords.length}
               handleUnAssignBrandAdmin={handleUnAssignBrandAdmin}
+              columns={columns}
+              dispatch={dispatch}
             />
           </div>
 
@@ -777,8 +779,28 @@ const User: FC = () => {
             rowCount={rowCount}
             page={page}
             loading={loading}
-            additionalDetails={[]}
-            chips={[]}
+            additionalDetails={[
+              {
+                icon:<FaSuitcase size={18} />,
+                field:"regionalWideRole"
+              }
+            ]}
+            chips={[
+              {
+                icon:<MdEmail />,
+                label:"Email: ",
+                field:"email"
+              },
+              {
+                label:"Status",
+                field:"status"
+              },
+              { 
+                icon:<IoCreateSharp />,
+                label:"Created By: ",
+                field:"createdBy"
+              }
+            ]}
             owerCollaboratorInitialsOrImages=""
             onCreate={false}
             showClone={false}

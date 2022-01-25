@@ -300,13 +300,13 @@ export default function CustomSwipableList({
         </div>
       </div>
 
-      {permissions?.isCreate && isMobile && onCreate && (
+      {/* {permissions?.isCreate && isMobile && onCreate && (
         <Tooltip title="Create">
           <Fab size="small" onClick={onCreate} className="fab-position-b-r" color="primary" aria-label="add">
             <AddIcon />
           </Fab>
         </Tooltip>
-      )}
+      )} */}
     </>
   );
 }

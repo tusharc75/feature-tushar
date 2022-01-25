@@ -35,29 +35,29 @@ import { IoIosArrowDropdown } from "react-icons/io";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-      width: "100%",
-      flexGrow: 1,
-      display: "flex",
-      justifyContent: "flex-end",
+    width: "100%",
+    flexGrow: 1,
+    display: "flex",
+    justifyContent: "flex-end",
   },
   linksContainer: {
-      display: "flex",
-      justifyContent: "flex-end",
-      ["@media (max-width: 960px)"]: {
-          display: "none",
-      },
+    display: "flex",
+    justifyContent: "flex-end",
+    ["@media (max-width: 960px)"]: {
+      display: "none",
+    },
   },
-  menuButtonList:{
-      alignItems:"flex-start",
-      padding: "1px"
+  menuButtonList: {
+    alignItems: "flex-start",
+    padding: "1px"
   },
   delBtn: {
-      color: "red",
+    color: "red",
   },
   expandIcon: {
-      position: "absolute",
-      right: "0",
-      color: "white"
+    position: "absolute",
+    right: "0",
+    color: "white"
   }
 
 }));
@@ -125,17 +125,17 @@ const PriceTemplate = () => {
     }
   }
 
-  
+
 
 
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClick = (event) => {
-      setAnchorEl(event.currentTarget);
+    setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
-      setAnchorEl(null);
+    setAnchorEl(null);
   };
 
 
@@ -356,7 +356,7 @@ const PriceTemplate = () => {
                 path: routes.priceTemplate.path,
               },
               {
-                title: id === "0" ? "New" : initialValues && initialValues.name,
+                title: id === "0" || isClone ? "New" : initialValues && initialValues.name,
               },
             ]}
             isConfirmBeforeClick={hasPermissionToUpdate}
@@ -378,77 +378,77 @@ const PriceTemplate = () => {
         </Grid>
         <Grid container justify="flex-end" item md={8} sm={1} xs={2} className="pr-3">
 
-        <div className={classes.linksContainer}>
-          <label
-            htmlFor="importField"
-            style={{ color: "white" }}
-            className="cursor-pointer mr-3"
-          >
-            Import Fields
-            <input
-              onClick={(e: any) => (e.target.value = null)}
-              id="importField"
-              name="importField"
-              onChange={handleImportFields}
-              style={{
-                opacity: "0",
-                position: "absolute",
-                zIndex: -1,
-              }}
-              type="file"
-            />
-          </label>
-          <label
-            style={{ color: "white" }}
-            className="cursor-pointer"
-            onClick={handleExportFields}
-          >
-            Export Fields
-          </label>
-          <a id="downloadAnchorElem" style={{ display: "none" }}></a>
+          <div className={classes.linksContainer}>
+            <label
+              htmlFor="importField"
+              style={{ color: "white" }}
+              className="cursor-pointer mr-3"
+            >
+              Import Fields
+              <input
+                onClick={(e: any) => (e.target.value = null)}
+                id="importField"
+                name="importField"
+                onChange={handleImportFields}
+                style={{
+                  opacity: "0",
+                  position: "absolute",
+                  zIndex: -1,
+                }}
+                type="file"
+              />
+            </label>
+            <label
+              style={{ color: "white" }}
+              className="cursor-pointer"
+              onClick={handleExportFields}
+            >
+              Export Fields
+            </label>
+            <a id="downloadAnchorElem" style={{ display: "none" }}></a>
           </div>
 
           <Menu
-                    id="importField"
-                    anchorEl={anchorEl}
-                    keepMounted
-                    open={Boolean(anchorEl)}
-                    onClose={handleClose}
-                >
-                    <MenuItem
-                    >
-                        <label
-                            htmlFor="importField"
-                            className="cursor-pointer"
-                        >
-                            Import Fields
-                            <input
-                                onClick={(e: any) => (e.target.value = null)}
-                                id="importField"
-                                name="importField"
-                                onChange={handleImportFields}
-                                style={{
-                                    opacity: "0",
-                                    position: "absolute",
-                                    zIndex: -1,
-                                }}
-                                type="file"
-                            />
-                        </label>
+            id="importField"
+            anchorEl={anchorEl}
+            keepMounted
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+          >
+            <MenuItem
+            >
+              <label
+                htmlFor="importField"
+                className="cursor-pointer"
+              >
+                Import Fields
+                <input
+                  onClick={(e: any) => (e.target.value = null)}
+                  id="importField"
+                  name="importField"
+                  onChange={handleImportFields}
+                  style={{
+                    opacity: "0",
+                    position: "absolute",
+                    zIndex: -1,
+                  }}
+                  type="file"
+                />
+              </label>
 
-                    </MenuItem>
-                    <MenuItem
-                        onClick={handleExportFields}
-                    >
-                        Export Fields
-                    </MenuItem>
-                    {/* <MenuItem>Email a Link</MenuItem> */}
-                </Menu>
-                {isMobile && (
-                    <IconButton onClick={handleClick} className={classes.menuButtonList}>
-                        <IoIosArrowDropdown className={classes.expandIcon} />
-                    </IconButton>
-                )}
+            </MenuItem>
+            <MenuItem
+              onClick={handleExportFields}
+            >
+              Export Fields
+            </MenuItem>
+            {/* <MenuItem>Email a Link</MenuItem> */}
+          </Menu>
+          {isMobile && (
+            <IconButton onClick={handleClick} className={classes.menuButtonList}>
+              <IoIosArrowDropdown className={classes.expandIcon} />
+            </IconButton>
+          )}
 
         </Grid>
       </Grid>

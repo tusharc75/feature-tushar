@@ -173,7 +173,8 @@ export const sidebarResource = {
   projectSales: 'Target Projects List',
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
-  address: 'Address'
+  address: 'Address',
+  subleasing: 'Subleasing'
 };
 
 export const resourceNames = {
@@ -229,7 +230,8 @@ export const resourceNames = {
   flags: 'Flags',
   projectSales: 'Project Sales',
   purchaseOrder: 'Purchase Order',
-  transferAsset: 'Transfer Asset'
+  transferAsset: 'Transfer Asset',
+  subleasing: 'Subleasing'
 
 };
 
@@ -292,6 +294,7 @@ export const RESOURCE_LABEL = {
   purchaseOrder: 'Purchase Orders',
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
+  subleasing: 'Subleasing',
 };
 
 export const CHILD_RESOURCE = {
@@ -481,6 +484,13 @@ export const purchaseOrder = {
   route: '/purchase-order',
   permission: 'purchaseOrder',
   resource: 'purchaseOrder'
+};
+
+export const subleasing = {
+  api: '/subleasing',
+  route: '/subleasing',
+  permission: 'subleasing',
+  resource: 'subleasing'
 };
 
 export const transferAsset = {

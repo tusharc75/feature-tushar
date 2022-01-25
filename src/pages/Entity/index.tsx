@@ -17,7 +17,7 @@ import AssignUsersDialog from "../../components/AssignRolesDialog/AssignEntityDi
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
-import { FaUser } from "react-icons/fa";
+import { FaUser,FaSuitcase,BsCurrencyExchange,FaAddressCard,IoCreate} from "react-icons/all";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { prepareDataForGrid } from "../../constants/helpers"
 import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
@@ -335,6 +335,8 @@ const Entity: FC = () => {
                 setShowDeleteDialog(true)
               }
             }}
+            dispatch={dispatch}
+            columns={columns}
             openUserDialog={handleOpenDialog}
             anyEntitySelected={selectedRecords.length > 0} //single select entity can assign user
           />
@@ -362,8 +364,30 @@ const Entity: FC = () => {
             rowCount={rowCount}
             page={page}
             loading={loading}
-            additionalDetails={[]}
-            chips={[]}
+            additionalDetails={[
+              {
+                icon:<FaSuitcase />,
+                field:"parentEntity"
+              },
+              
+            ]}
+            chips={[
+              {
+                icon:<BsCurrencyExchange />,
+                label:"Currency: ",
+                field:"currency"
+              },
+              {
+                icon:<FaAddressCard />,
+                label:"Address: ",
+                field:"address"
+              },
+              {
+                icon:<IoCreate />,
+                label:"Created By: ",
+                field:"createdBy"
+              }
+            ]}
             owerCollaboratorInitialsOrImages=""
             onCreate={false}
             showClone={false}

@@ -113,6 +113,8 @@ import CheckoutSuccess from './pages/ECommerce/Success';
 import Orders from './pages/ECommerce/Orders';
 import OrderDetails from './pages/ECommerce/Orders/OrderDetails';
 import EcommercePolicy from './pages/EcommercePolicy';
+import Subleasing from './pages/Subleasing';
+import SubleasingDetailsPage from './pages/Subleasing/SubleasingDetailsPage';
 
 var notificationInterval: any = null;
 
@@ -420,6 +422,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.rentalManagementDetail.path + '/:id'}>
               <RentalManagementDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.subleasing.path}>
+              <Subleasing />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.subleasingDetail.path + '/:id'}>
+              <SubleasingDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.productCategory.path}>
               <ProductCategory />
