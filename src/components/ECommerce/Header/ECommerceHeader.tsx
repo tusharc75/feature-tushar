@@ -478,7 +478,7 @@ export default function ECommerceHeader() {
 
                     {user?.brandLogo ? <img src={user.brandLogo} alt="brand" className={classes.brandLogo} /> : null}
 
-                    <Button className="text-white mx-4" style={{ width: 150 }} endIcon={<ExpandMoreIcon />} aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
+                    {/* <Button className="text-white mx-4" style={{ width: 150 }} endIcon={<ExpandMoreIcon />} aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
                         Menu
                     </Button>
                     <Menu
@@ -491,7 +491,7 @@ export default function ECommerceHeader() {
                         <MenuItem onClick={handleClose}>Menu 1</MenuItem>
                         <MenuItem onClick={handleClose}>Menu 2</MenuItem>
                         <MenuItem onClick={handleClose}>Menu 3</MenuItem>
-                    </Menu>
+                    </Menu> */}
 
                     <div className={classes.grow} />
                     <div className={classes.sectionDesktop}>
