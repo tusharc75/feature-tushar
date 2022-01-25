@@ -538,6 +538,9 @@ const TopDashboard = (props) => {
         <Paper elevation={2}>
           <Box p={2}>
             <Box display="flex" justifyContent="space-between">
+              <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+                Filters
+              </Button>
               <Button onClick={handleClickChart} startIcon={<ImportExport />}>
                 Export to
               </Button>
