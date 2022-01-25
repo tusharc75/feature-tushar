@@ -777,7 +777,6 @@ body::-webkit-scrollbar-thumb {
 .first-content-Layout{
    background-color: var(--primary);
    color: white !important;
-   border-radius: 10px 10px 1px 1px;
 }
 
 
@@ -1379,11 +1378,13 @@ body::-webkit-scrollbar-thumb {
   box-shadow: 0 0 5px #DFDFDF;
 }
 
-.buy-rent-switch{
-    padding: 0 8px !important;
-  
-}
 
+
+.rating-design{
+  .MuiRating-iconEmpty{
+    color: white;
+  }
+}
 
 @media only screen and (max-width: 960px){
   .filter-side-header-serialized{
