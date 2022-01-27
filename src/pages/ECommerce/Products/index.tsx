@@ -1,4 +1,4 @@
-import { Grid, makeStyles } from '@material-ui/core';
+import { Paper, Grid, makeStyles, Divider } from '@material-ui/core';
 import { TreeItem, TreeView } from '@material-ui/lab';
 import { useEffect, useState, useContext, useMemo } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -22,7 +22,28 @@ const useStyles = makeStyles((theme) => ({
     root: {
         // width: '100%',
         backgroundColor: theme.palette.background.paper,
-        marginBottom: "10px"
+        marginBottom: "10px",
+        paddingTop: "10px",
+        padding: "0 6px",
+        "& .MuiTreeItem-label:hover": {
+            backgroundColor: "white !important",
+            color: "var(--secondary) !important"
+        },
+        "& .MuiTreeItem-root.Mui-selected:focus > .MuiTreeItem-content .MuiTreeItem-label": {
+            backgroundColor: "white !important",
+            color: "var(--secondary) !important",
+
+        },
+        "& .MuiTreeItem-root:focus": {
+            backgroundColor: "white !important"
+        },
+        "& .MuiTreeItem-root.Mui-selected > .MuiTreeItem-content .MuiTreeItem-label": {
+            backgroundColor: "white !important",
+            color: "var(--secondary) !important",
+
+        }
+
+
     },
     nested: {
         paddingLeft: theme.spacing(4)
@@ -43,7 +64,7 @@ export default function Products() {
 
     const limit = 21;
     const toastConfig = useContext(CustomToastContext);
-    const { ORDER_TYPES, firstOrderType }= useContext(ECommerceContext);
+    const { ORDER_TYPES, firstOrderType } = useContext(ECommerceContext);
 
     const history = useHistory();
 
@@ -240,13 +261,24 @@ export default function Products() {
     return (
         <>
             <div className={classes.flexGrow1}>
-                <Grid container className="mt-2">
+                <Grid className={`${styles.detail_screen_layout} mt-2 `}>
 
-                    <Grid item xs={3} className="border">
+                    <Grid className="border">
                         <div className={styles.sidebar_nav}>
 
-                            <div className="d-flex align-items-center justify-content-space-between my-2 px-1">
-                                <h3>Categories</h3>
+                            <div className="d-flex align-items-center justify-content-space-between py-2 px-3" style={{ background: "var(--primary)", borderRadius: "5px" }}>
+                                <h3 style={{ color: "white" }}> Filters</h3>
+
+                            </div>
+
+                            <div className='px-2'>  <Divider />  </div>
+
+                            <div className="d-flex align-items-center justify-content-space-between px-3 pt-1" >
+
+                                <h4 style={{ textTransform: "uppercase", color: "var(--primary-light)" }} className='pt-2'>
+                                    Catagories
+                                </h4>
+
                                 {
                                     selected && selected.length !== 0 ? <span className="link cursor-pointer" onClick={() => {
                                         setSelected([]);
@@ -276,7 +308,7 @@ export default function Products() {
                                 }
                             </div>
 
-                            <hr />
+
 
                             <TreeView
                                 className={`${classes.root} d-flex flex-column gap-1`}
@@ -292,6 +324,9 @@ export default function Products() {
                                     })
                                 }
                             </TreeView>
+                            <div className='px-2 pt-2'>
+                                <Divider style={{ opacity: "0.7" }} />
+                            </div>
                             <Filters
                                 setToastConfig={toastConfig.setToastConfig}
                             />
@@ -299,7 +334,7 @@ export default function Products() {
 
                     </Grid>
 
-                    <Grid item xs={9} className="px-2">
+                    <Grid className="px-2">
 
                         <div className="p-2">
                             <ECommerceBreadCrumbs routes={selectedCategory.id ? [{ title: selectedCategory.name }] : []} />
@@ -308,6 +343,7 @@ export default function Products() {
                         <div className="position-relative">
 
                             <InfiniteScroll
+                                className='pb-3'
                                 dataLength={totalCount}
                                 next={() => {
                                     setTimeout(() => {

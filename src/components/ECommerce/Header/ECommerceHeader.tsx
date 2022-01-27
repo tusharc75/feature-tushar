@@ -15,7 +15,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import { Link, useHistory, useParams } from 'react-router-dom'
 import { useData } from '../../../StateProvider/Provider';
-import { alpha, makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import BookmarkIcon from '@material-ui/icons/Bookmark';
@@ -39,11 +39,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import useQuery from '../../../hooks/useQuery';
 import { ECommerceContext } from '../Layout/ECommerceContext/ECommerceContext';
 import LocationOnOutlinedIcon from '@material-ui/icons/LocationOnOutlined';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import Dialog from '@material-ui/core/Dialog';
-import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
-import ManageAddressDialog from '../../Address/ManageAddressDialog';
+import OnlyAddressDropdownInDialog from '../../Address/OnlyAddressDropdownInDialog';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -119,6 +115,12 @@ const useStyles = makeStyles((theme) => ({
     },
     inline: {
         display: 'inline',
+    },
+    brandLogo: {
+        maxWidth: '10%',
+        height: '45px',
+        borderRadius: '4px',
+        marginRight: '5px'
     },
 }));
 
@@ -278,7 +280,11 @@ export default function ECommerceHeader() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem> */}
+            <MenuItem onClick={() => {
+                handleMenuClose()
+                history.push(`${routes.orders.path}`)
+            }
+            }>Wallet</MenuItem>
             <MenuItem onClick={() => {
                 handleMenuClose()
                 history.push(`${routes.orders.path}`)
@@ -349,11 +355,11 @@ export default function ECommerceHeader() {
                         <img className={classes.logo} src={SVG('LogoPng')} alt="equip logo" title="eQuipt Logo" />
                     </Link>
 
-                    <div className="d-flex align-items-center gap-2 mx-3">
+                    <div className="d-flex align-items-center gap-2 ml-3 mr-2">
 
                         {
                             Object.keys(ORDER_TYPES).map((key) => (
-                                <Button key={key} style={orderType === ORDER_TYPES[key]?.value ? { background: "white", color: "var(--primary)" } : { color: "white" }}
+                                <Button key={key} style={orderType === ORDER_TYPES[key]?.value ? { background: "#40AC99", color: "var(--primary)" } : { color: "white" }}
                                     onClick={() => {
                                         setOrderType(ORDER_TYPES[key]?.value);
                                         let queryString = [];
@@ -384,7 +390,7 @@ export default function ECommerceHeader() {
                     <ClickAwayListener onClickAway={() => {
                         setOpen(false);
                     }}>
-                        <div className={`${classes.search} position-relative`}>
+                        <div className={`${classes.search} position-relative d-flex`}>
                             <div className={classes.searchIcon}>
                                 <SearchIcon />
                             </div>
@@ -403,12 +409,12 @@ export default function ECommerceHeader() {
                             />
 
                             {
-                                loading ? <div className="position-absolute border mt-2 d-flex align-items-center justify-content-center"
-                                    style={{ background: "white", zIndex: 10, height: 150, width: 450, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}>
+                                loading ? <div className="position-absolute border d-flex align-items-center justify-content-center"
+                                    style={{ background: "white", zIndex: 10, marginTop: "2.5rem", height: 150, width: 450, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}>
                                     <h4 className="loading-dots">Loading</h4>
                                 </div> : (
-                                    open && <div className={`position-absolute border mt-2 ${searchItems.length === 0 ? "d-flex align-items-center justify-content-center" : ""}`}
-                                        style={{ background: "white", zIndex: 10, height: searchItems.length > 0 ? 500 : 150, width: 450, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}
+                                    open && <div className={`position-absolute border ${searchItems.length === 0 ? "d-flex align-items-center justify-content-center" : ""}`}
+                                        style={{ background: "white", zIndex: 10, marginTop: "2.5rem", height: searchItems.length > 0 ? 500 : 150, width: 450, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}
                                     >
 
                                         {
@@ -456,25 +462,27 @@ export default function ECommerceHeader() {
                                 )
                             }
 
+                            <div className="cursor-pointer d-flex gap-2 px-2 align-items-center"
+                                onClick={() => {
+                                    setOpenLocationDialog(true)
+                                }}
+                                style={{ width: "200px", border: "1px solid white", fontSize: "0.7rem", borderRadius: "5px", color: "Var(--primary)" }}
+                            >
+                                <LocationOnOutlinedIcon />
+                                <div className="d-flex flex-column" title={location ? location : "Select Address"}>
+                                    <div className="line-clamp-1">Deliver to {user?.user?.firstName}</div>
+                                    <div className="line-clamp-1">
+                                        <b>{location ? location : "Select Address"}</b>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </ClickAwayListener>
 
-                    <div className="cursor-pointer d-flex gap-2 px-2 py-1 align-items-center"
-                        onClick={() => {
-                            setOpenLocationDialog(true)
-                        }}
-                        style={{ width: "245px", border: "1px solid white", fontSize: "0.7rem", borderRadius: "5px" }}
-                    >
-                        <LocationOnOutlinedIcon />
-                        <div className="d-flex flex-column">
-                            <div>Deliver to {user?.user?.firstName}</div>
-                            <div>
-                                <b className="text-truncate">{location ? location : "Select Address"}</b>
-                            </div>
-                        </div>
-                    </div>
+                    {user?.brandLogo ? <img src={user.brandLogo} alt="brand" className={classes.brandLogo} /> : null}
 
-                    <Button className="text-white mx-4" style={{ width: 150 }} endIcon={<ExpandMoreIcon />} aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
+                    {/* <Button className="text-white mx-4" style={{ width: 150 }} endIcon={<ExpandMoreIcon />} aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
                         Menu
                     </Button>
                     <Menu
@@ -487,7 +495,7 @@ export default function ECommerceHeader() {
                         <MenuItem onClick={handleClose}>Menu 1</MenuItem>
                         <MenuItem onClick={handleClose}>Menu 2</MenuItem>
                         <MenuItem onClick={handleClose}>Menu 3</MenuItem>
-                    </Menu>
+                    </Menu> */}
 
                     <div className={classes.grow} />
                     <div className={classes.sectionDesktop}>
@@ -533,7 +541,7 @@ export default function ECommerceHeader() {
             {renderMenu}
 
             {
-                openLocationDialog && <ManageAddressDialog
+                openLocationDialog && <OnlyAddressDropdownInDialog
                     title="Search Location"
                     onClose={() => {
                         setOpenLocationDialog(false);

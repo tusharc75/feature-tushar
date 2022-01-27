@@ -21,6 +21,8 @@ import { MdAdd } from "react-icons/md";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import { groupBy, orderBy, sortBy, uniq, map } from "lodash";
 import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
+import { Autocomplete } from "@material-ui/lab";
+import TextField from "@material-ui/core/TextField";
 
 const addSerializedAssetsRenderedFrom = "addSerializedAssets";
 const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
@@ -38,16 +40,29 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
     const { state: { permissions } }: any = useData();
-    const history = useHistory();
 
     const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
 
+    const [plantList, setPlantList] = useState([]);
+    const [selectedPlant, setSelectedPlant] = useState(filterByPlant);
+
+
     useEffect(() => {
         fetchProductInventory()
-    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedPlant]);
 
     useEffect(() => {
         fetchGridColumns()
+    }, [])
+
+    useEffect(() => {
+        axiosInstance().get(`/warehouse`)
+            .then(({ data: { data, count } }) => {
+                console.log(data)
+                setPlantList(data)
+            })
+            .catch((error) => {
+            });
     }, [])
 
     const fetchGridColumns = () => {
@@ -182,10 +197,10 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         } else if (salesOrderId) {
             deepFilter = `${deepFilter}&salesOrder=${salesOrderId}&notIn=${notIn}`;
         } else {
-            if (filterByPlant == null) {
+            if (selectedPlant == null) {
                 deepFilter = `${deepFilter}&entityWise=1`;
             } else {
-                deepFilter = `${deepFilter}&entityWise=0&plant=${filterByPlant}`;
+                deepFilter = `${deepFilter}&entityWise=0&plant=${selectedPlant}`;
             }
             if (queryString) {
                 deepFilter = `${deepFilter}&${queryString}`;
@@ -226,6 +241,9 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0) {
             return true;
         } else if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), "warehouseId")).length === 1) {
+            if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), "warehouseId"))[0] === filterByPlant) {
+                return true;
+            }
             return false;
         } else {
             return true;
@@ -275,6 +293,35 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} container justify={isMobile ? "flex-start" : "flex-end"}>
                                 <Box className={isMobile ? "mobile-filter-side-header" : "filter-side-header-serialized"} component="div">
+                                    {refrenceType === "Rental Job" &&
+                                        <Autocomplete
+                                            style={{ width: "250px" }}
+                                            options={plantList}
+                                            getOptionLabel={(option: any) => option ? option?.warehouseName : ""}
+                                            getOptionSelected={(option: any, val) =>
+                                                option._id === val
+                                            }
+                                            value={plantList.filter((data) => data._id === selectedPlant).length
+                                                ? plantList.filter((data) => data._id === selectedPlant)[0]
+                                                : ""
+                                            }
+                                            onChange={(e, val) => {
+                                                setSelectedPlant(val && val._id ? val._id : null)
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="plant"
+                                                    placeholder="Plant"
+                                                    label="Plant"
+                                                    variant="outlined"
+                                                    fullWidth
+                                                    className="m-0"
+                                                />
+                                            )}
+                                        />
+                                    }
                                     <SearchBox
                                         onSearch={handleSearch}
                                         searchbox="terms_header_search_bar"
@@ -282,21 +329,20 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                         width={isMobile ? '200px' : '242px'}
                                         style={isMobile ? { flex: 1 } : {}}
                                     />
-                                    {refrenceType === "Rental Job All" &&
+                                    {(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length && !checkUniqWarehouse()) ?
                                         <Box ml={isMobile ? 0 : 1} mt={isMobile ? 0 : 1} className="d-flex">
                                             <Button size="small"
                                                 color="primary"
                                                 onClick={() => { setShowTransferAssetDialog(true) }}
                                                 variant={isMobile && !isTablet ? 'text' : 'contained'}
-                                                disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 || isAdding || checkUniqWarehouse() ||
-                                                    serializedProducts.some(d => d?.qty < 0)}
+                                                disabled={isAdding || serializedProducts.some(d => d?.qty < 0)}
                                                 className={isMobile && !isTablet ? 'mobile_button' : ""}
                                                 endIcon={isAdding && <CircularProgress size={20} />}
                                             >
                                                 {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? "(" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")  " : ""}
                                                 {isMobile && !isTablet ? <MdAdd size={23} /> : 'Create Transfer Asset'}</Button>
                                         </Box>
-                                    }
+                                        : null}
                                     <Box ml={isMobile ? 0 : 1} mt={isMobile ? 0 : 1} className="d-flex">
                                         <Button size="small"
                                             color="primary"
@@ -370,6 +416,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                             customGridOptions={{ getRowStyle: getRowStyleScheduled }}
                             renderedFrom={addSerializedAssetsRenderedFrom}
                             showOnlyShowFilteredRecordSwitch={true}
+                            refreshGrid={fetchProductInventory}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </div>
@@ -384,7 +431,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                 onSuccess={(data) => {
                     handleAddAssetToTransferAsset(data?._id);
                 }}
-                refrenceType={"Rental Job"}
+                refrenceType={refrenceType}
                 refrenceData={{
                     transferFromPlant: getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0]?.warehouseId,
                     transferToPlant: refrenceData?.warehouse

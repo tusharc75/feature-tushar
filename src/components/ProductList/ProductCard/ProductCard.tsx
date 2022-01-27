@@ -39,6 +39,7 @@ const useStyles = makeStyles(() => ({
     alignItems: "center",
   },
   img: {
+    height: "500px",
     maxWidth: "500px",
   }
 }));

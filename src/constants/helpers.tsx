@@ -173,7 +173,8 @@ export const sidebarResource = {
   projectSales: 'Target Projects List',
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
-  address: 'Address'
+  address: 'Address',
+  subleasing: 'Subleasing'
 };
 
 export const resourceNames = {
@@ -229,7 +230,8 @@ export const resourceNames = {
   flags: 'Flags',
   projectSales: 'Project Sales',
   purchaseOrder: 'Purchase Order',
-  transferAsset: 'Transfer Asset'
+  transferAsset: 'Transfer Asset',
+  subleasing: 'Subleasing'
 
 };
 
@@ -292,6 +294,7 @@ export const RESOURCE_LABEL = {
   purchaseOrder: 'Purchase Orders',
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
+  subleasing: 'Subleasing',
 };
 
 export const CHILD_RESOURCE = {
@@ -481,6 +484,13 @@ export const purchaseOrder = {
   route: '/purchase-order',
   permission: 'purchaseOrder',
   resource: 'purchaseOrder'
+};
+
+export const subleasing = {
+  api: '/subleasing',
+  route: '/subleasing',
+  permission: 'subleasing',
+  resource: 'subleasing'
 };
 
 export const transferAsset = {
@@ -1065,6 +1075,17 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
     amountWithouCurrencyCode: new Intl.NumberFormat(`${language}-${currencyData.countryCode}`).format(amount)
   };
 };
+
+export function b64toBlob(dataURI) {
+  var byteString = atob(dataURI.split(',')[1]);
+  var ab = new ArrayBuffer(byteString.length);
+  var ia = new Uint8Array(ab);
+  
+  for (var i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([ab], { type: 'image/jpeg' });
+}
 
 export const determineLightOrDark = (color: any) => {
   let r: number, g: number, b: number, hsp: number;

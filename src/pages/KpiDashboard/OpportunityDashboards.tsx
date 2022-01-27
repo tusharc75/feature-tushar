@@ -13,7 +13,7 @@ const OpportunityDashboards = (props) => {
   const {
     state: { selectedEntity }
   } = useData();
-  const { moment, currency, filterCurrency, getExchangeRates, setCurrency, marketSegments,
+  const { moment, currency, filterCurrency, getExchangeRates, salesFilter, marketSegments,
     productCategory,
     salesReps,
     customerAccounts } = props;
@@ -37,17 +37,13 @@ const OpportunityDashboards = (props) => {
     datasets: []
   });
 
-  const [salesFilterAnchor, setFilterAnchor] = useState(null);
+  const [filterAnchor, setFilterAnchor] = useState(null);
   const [openFilter, setOpenFilter] = useState(false);
 
-  const [salesFilter, setSalesFilter] = useState({
+  const [filter, setFilter] = useState({
     marketSegment: {},
     customerAccount: {},
     subMarketSegment: {},
-    between: {
-      from: new Date(moment().subtract(1, 'year').calendar()),
-      to: new Date()
-    },
     countrySellTo: {},
     countryBillTo: {}
   });
@@ -56,11 +52,11 @@ const OpportunityDashboards = (props) => {
     let params = {
       entity: selectedEntity || '',
       status: opp2Status,
-      marketSegment: salesFilter.marketSegment ? salesFilter.marketSegment['id'] : '',
-      subMarketSegment: salesFilter.subMarketSegment ? salesFilter.subMarketSegment['id'] : '',
-      customerAccount: salesFilter.customerAccount ? salesFilter.customerAccount['id'] : '',
-      countrySellTo: salesFilter.countrySellTo ? salesFilter.countrySellTo["optionValue"] : '',
-      countryBillTo: salesFilter.countryBillTo ? salesFilter.countryBillTo["optionValue"] : '',
+      marketSegment: filter.marketSegment ? filter.marketSegment['id'] : '',
+      subMarketSegment: filter.subMarketSegment ? filter.subMarketSegment['id'] : '',
+      customerAccount: filter.customerAccount ? filter.customerAccount['id'] : '',
+      countrySellTo: filter.countrySellTo ? filter.countrySellTo["optionValue"] : '',
+      countryBillTo: filter.countryBillTo ? filter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -85,9 +81,9 @@ const OpportunityDashboards = (props) => {
         const datasets = [];
 
         for (let d of data) {
-          if (d?.user?.firstName && d?.user?.lastName){
-          labels.push(`${d.user.firstName} ${d.user.lastName}`);
-          }else {
+          if (d?.user?.firstName && d?.user?.lastName) {
+            labels.push(`${d.user.firstName} ${d.user.lastName}`);
+          } else {
             labels.push('Deleted User')
           }
           datasets.push(d.count);
@@ -121,7 +117,7 @@ const OpportunityDashboards = (props) => {
         });
       })
       .catch((err) => { });
-  }, [selectedEntity, salesFilter.between, opp2Status]);
+  }, [selectedEntity, filter, opp2Status, salesFilter]);
 
   useEffect(() => {
     fetchOpportunitySalesRep();
@@ -131,11 +127,11 @@ const OpportunityDashboards = (props) => {
     let params = {
       entity: selectedEntity || '',
       status: opp1Status,
-      marketSegment: salesFilter.marketSegment ? salesFilter.marketSegment['id'] : '',
-      subMarketSegment: salesFilter.subMarketSegment ? salesFilter.subMarketSegment['id'] : '',
-      customerAccount: salesFilter.customerAccount ? salesFilter.customerAccount['id'] : '',
-      countrySellTo: salesFilter.countrySellTo ? salesFilter.countrySellTo["optionValue"] : '',
-      countryBillTo: salesFilter.countryBillTo ? salesFilter.countryBillTo["optionValue"] : '',
+      marketSegment: filter.marketSegment ? filter.marketSegment['id'] : '',
+      subMarketSegment: filter.subMarketSegment ? filter.subMarketSegment['id'] : '',
+      customerAccount: filter.customerAccount ? filter.customerAccount['id'] : '',
+      countrySellTo: filter.countrySellTo ? filter.countrySellTo["optionValue"] : '',
+      countryBillTo: filter.countryBillTo ? filter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -192,7 +188,7 @@ const OpportunityDashboards = (props) => {
         });
       })
       .catch((err) => { });
-  }, [selectedEntity, salesFilter.between, opp1Status]);
+  }, [selectedEntity, filter, opp1Status, salesFilter]);
 
   useEffect(() => {
     fetchOpportunityAccount();
@@ -202,11 +198,11 @@ const OpportunityDashboards = (props) => {
     let params = {
       status: quoteStatus,
       entity: selectedEntity ? selectedEntity : '',
-      marketSegment: salesFilter.marketSegment ? salesFilter.marketSegment['id'] : '',
-      subMarketSegment: salesFilter.subMarketSegment ? salesFilter.subMarketSegment['id'] : '',
-      customerAccount: salesFilter.customerAccount ? salesFilter.customerAccount['id'] : '',
-      countrySellTo: salesFilter.countrySellTo ? salesFilter.countrySellTo["optionValue"] : '',
-      countryBillTo: salesFilter.countryBillTo ? salesFilter.countryBillTo["optionValue"] : '',
+      marketSegment: filter.marketSegment ? filter.marketSegment['id'] : '',
+      subMarketSegment: filter.subMarketSegment ? filter.subMarketSegment['id'] : '',
+      customerAccount: filter.customerAccount ? filter.customerAccount['id'] : '',
+      countrySellTo: filter.countrySellTo ? filter.countrySellTo["optionValue"] : '',
+      countryBillTo: filter.countryBillTo ? filter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -235,7 +231,7 @@ const OpportunityDashboards = (props) => {
         });
       })
       .catch((err) => { });
-  }, [selectedEntity, salesFilter.between, quoteStatus]);
+  }, [selectedEntity, filter, quoteStatus, salesFilter.between]);
 
   useEffect(() => {
     fetchOpenQuote();
@@ -258,7 +254,7 @@ const OpportunityDashboards = (props) => {
       <Grid container spacing={2}>
         <Popover
           open={openFilter}
-          anchorEl={salesFilterAnchor}
+          anchorEl={filterAnchor}
           onClose={handleClickFilter}
           anchorOrigin={{
             vertical: 'bottom',
@@ -291,11 +287,11 @@ const OpportunityDashboards = (props) => {
                 fullWidth
                 options={customerAccounts}
                 autoHighlight
-                value={salesFilter.customerAccount}
+                value={filter.customerAccount}
                 getOptionLabel={(option: any) => option.name || ''}
                 getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
                 onChange={(_, val) => {
-                  let data = { ...salesFilter, customerAccount: val }
+                  let data = { ...filter, customerAccount: val }
                   if (val?.countryBillTo) {
                     let foundCountry = Countries.find(o => o.optionValue === val?.countryBillTo)
                     if (foundCountry) {
@@ -308,7 +304,7 @@ const OpportunityDashboards = (props) => {
                       data.countrySellTo = foundCountry
                     }
                   }
-                  setSalesFilter({ ...data });
+                  setFilter({ ...data });
                 }}
                 renderInput={(params) => <TextField {...params} label="Customer Account" variant="outlined" />}
               />}
@@ -318,11 +314,11 @@ const OpportunityDashboards = (props) => {
                 fullWidth
                 options={marketSegments}
                 autoHighlight
-                value={salesFilter.marketSegment}
+                value={filter.marketSegment}
                 getOptionLabel={(option: any) => option.name || ''}
                 getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
                 onChange={(_, val) => {
-                  setSalesFilter({ ...salesFilter, marketSegment: val });
+                  setFilter({ ...filter, marketSegment: val });
                   if (val) {
                     setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
                   } else {
@@ -337,10 +333,10 @@ const OpportunityDashboards = (props) => {
                 fullWidth
                 options={subMarketSegments}
                 autoHighlight
-                value={salesFilter.subMarketSegment}
+                value={filter.subMarketSegment}
                 getOptionLabel={(option: any) => option.name || ''}
                 getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-                onChange={(_, val) => setSalesFilter({ ...salesFilter, subMarketSegment: val })}
+                onChange={(_, val) => setFilter({ ...filter, subMarketSegment: val })}
                 renderInput={(params) => <TextField {...params} label="Sub-Market Segment" variant="outlined" />}
               />
               <Box mt={1} />
@@ -349,10 +345,10 @@ const OpportunityDashboards = (props) => {
                 fullWidth
                 options={Countries}
                 autoHighlight
-                value={salesFilter.countrySellTo}
+                value={filter.countrySellTo}
                 getOptionLabel={(option: any) => option.optionLabel || ''}
                 getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
-                onChange={(_, val) => setSalesFilter({ ...salesFilter, countrySellTo: val })}
+                onChange={(_, val) => setFilter({ ...filter, countrySellTo: val })}
                 renderInput={(params) => <TextField {...params} label="Country Sell To" variant="outlined" />}
               />
               <Box mt={1} />
@@ -362,10 +358,10 @@ const OpportunityDashboards = (props) => {
                 fullWidth
                 options={Countries}
                 autoHighlight
-                value={salesFilter?.countryBillTo}
+                value={filter?.countryBillTo}
                 getOptionLabel={(option: any) => option.optionLabel || ''}
                 getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
-                onChange={(_, val) => setSalesFilter({ ...salesFilter, countryBillTo: val })}
+                onChange={(_, val) => setFilter({ ...filter, countryBillTo: val })}
                 renderInput={(params) => <TextField {...params} label="Country Bill To" variant="outlined" />}
               />
             </Box>
@@ -488,6 +484,7 @@ const OpportunityDashboards = (props) => {
         </Grid>
         <Grid item xs={12} sm={4}>
           <OpportunityTable
+            salesFilter={salesFilter}
             selectedEntity={selectedEntity}
             moment={moment}
             customerAccounts={customerAccounts}

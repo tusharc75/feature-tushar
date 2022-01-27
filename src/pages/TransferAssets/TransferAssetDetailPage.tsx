@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPageHeader from '../../components/DetailsPageHeader';
@@ -19,10 +20,12 @@ import AssetsGrid from './AssetsGrid';
 import LoadingTicketGrid from './LoadingTicketGrid';
 import ReceivingTicketGrid from './ReceivingTicketGrid';
 import { MdEdit } from 'react-icons/md';
+import { defaultActivityShow } from '../../constants/helpers';
+import Activity from '../../components/Activity';
 import TabPanel from '../../components/TabPanel';
 import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-
+import HideWhenOffline from '../../components/HideWhenOffline';
 const transferSteps = ['Add Assets', 'Loading Ticket'];
 const transferSteps1 = ['Add Assets', 'Loading Ticket', 'Receiving Ticket'];
 const status = ['New', 'In Progress', 'Completed'];
@@ -41,6 +44,8 @@ const TransferAssetDetailPage = () => {
   const [transferType, setType] = useState(null);
   const [tabValue, setTabValue] = useState(parsedTab);
   const [loading, setLoading] = useState(true);
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
+  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [isDeleting, setDeleting] = useState(false);
   const [transferAssetData, setTransferAssetData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -56,31 +61,29 @@ const TransferAssetDetailPage = () => {
   const [plantId, setPlantId] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [isTransferEnded, setTransferIsEnded] = useState(false);
-  const [locationKeys, setLocationKeys] = useState([])
+  const [locationKeys, setLocationKeys] = useState([]);
 
   useEffect(() => {
-    return history.listen(location => {
+    return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
       if (history.action === 'PUSH') {
-        setLocationKeys([location.key])
+        setLocationKeys([location.key]);
       }
       if (history.action === 'POP') {
         if (locationKeys[1] === location.key) {
-          setLocationKeys(([_, ...keys]) => keys)
+          setLocationKeys(([_, ...keys]) => keys);
           // Handle forward event
-          setTabValue(tab ? parseInt(tab) : 1)
-
+          setTabValue(tab ? parseInt(tab) : 1);
         } else {
-          setLocationKeys((keys) => [location.key, ...keys])
+          setLocationKeys((keys) => [location.key, ...keys]);
           // Handle back event
-          setTabValue(tab ? parseInt(tab) : 1)
-
+          setTabValue(tab ? parseInt(tab) : 1);
         }
       }
-    })
-  }, [locationKeys,])
-
+    });
+  }, [locationKeys]);
 
   useEffect(() => {
     if (id) {
@@ -215,8 +218,8 @@ const TransferAssetDetailPage = () => {
             data = [
               ...data?.map((d: any) => ({
                 ...d,
-                productDescription: d?.product?.optionLabel ?? "",
-                productId: d?.product?.optionValue ?? "",
+                productDescription: d?.product?.optionLabel ?? '',
+                productId: d?.product?.optionValue ?? '',
                 isChecked: false
               }))
             ];
@@ -254,9 +257,16 @@ const TransferAssetDetailPage = () => {
       });
   };
 
+  
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity);
+  };
+
+
   const handleViewPdf = (download) => {
-    setFileDownloading(true)
-    axiosInstance().get(`${transferAsset.api}/${id}/pdf`)
+    setFileDownloading(true);
+    axiosInstance()
+      .get(`${transferAsset.api}/${id}/pdf`)
       .then(({ data: { data } }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.fileName}`, {
@@ -283,7 +293,6 @@ const TransferAssetDetailPage = () => {
             toastConfig.setToastConfig(err);
             setFileDownloading(false);
           });
-
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -293,11 +302,13 @@ const TransferAssetDetailPage = () => {
 
   return (
     <>
-      <Fragment>
+     
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <div className="detail-container">
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
+        <div>
+          <div>
           <Paper>
             {!transferAssetData ? (
               <div>
@@ -404,7 +415,7 @@ const TransferAssetDetailPage = () => {
                   isTransferEnded={isTransferEnded}
                   isNextStep={isNextStep}
                   isPrevStep={isPrevStep}
-                  steps={transferAssetData ? transferAssetData.transferType === 'Internal' ? transferSteps : transferSteps1 : transferSteps}
+                  steps={transferAssetData ? (transferAssetData.transferType === 'Internal' ? transferSteps : transferSteps1) : transferSteps}
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
                   updateStatus={updateStatus}
@@ -464,7 +475,52 @@ const TransferAssetDetailPage = () => {
             </TabPanel>
           </Paper>
         </div>
-      </Fragment>
+        <Box my={1} />
+        </div>
+    
+
+      <div className="position-relative">
+        <HideWhenOffline>
+          <Paper>
+            {!isSmallScreen && (
+              <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+              </span>
+            )}
+
+            <div style={{ display: showActivity ? 'block' : 'none' }}>
+            <Grid container>
+             <Grid item xs={12}>
+               {transferAssetData && (
+                 <div>
+                   <Activity
+                    resourceId={transferAssetData}
+                    resource={transferAsset.resource}
+                    restrictedAddActivities={
+                      permissions && permissions['transferAsset'] && permissions['rentalManagement'].isUpdate
+                      ? []
+                      : ['Attachment', 'Case']
+                    }
+                    relatedTo={[
+                      {
+                        type: transferAsset,
+                        referenceId: transferAssetData._id,
+                        access: true
+                      }
+                    ]}
+                    handleActivityRefresh={() => { }}
+                    emails={[]}                
+                   />
+                 </div>
+               )}
+              </Grid>
+              </Grid>
+            </div>
+          </Paper>
+        </HideWhenOffline>
+      </div>
+      </div>
+
       {/* Confirm Delete Dialog */}
       {showConfirmBox && (
         <ConfirmationDialog

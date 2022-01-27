@@ -43,7 +43,7 @@ export default function Orders() {
                         <Card className="cursor-pointer" onClick={() => {
                             history.push(`${routes.orderDetails.path}/${order._id}`)
                         }}>
-                            <CardHeader style={{ background: "color(--lightgrey" }} title={`Order #${order._id}`} subheader={`${displayDate(order.date)}`} />
+                            <CardHeader style={{ background: "color(--lightgrey" }} title={`Order Id : ${order?.orderNumber}`} subheader={`${displayDate(order.date)}`} />
                             <CardContent>
                                 <Typography variant="body2" color="textSecondary" component="p">
                                     {order.items.length} Items Included

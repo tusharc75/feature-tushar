@@ -805,7 +805,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       _id={fieldData._id}
                     />
                   )}
-                  {values['type'] === 'converter' && isCalculativeField && (
+                  {(values['type'] === 'converter' || values['type'] === 'formula') && isCalculativeField && (
                     <>
                       <br></br>
                       <FormControlLabel

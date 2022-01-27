@@ -641,7 +641,7 @@ const UserDetailsPage = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+        <div className={`detail-container ${showActivity ? 'grid-with-activity-user' : 'grid-without-activity-user'}`} >
           <div>
             <Paper>
               {!userData ? (

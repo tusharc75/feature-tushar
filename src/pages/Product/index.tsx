@@ -12,8 +12,8 @@ import CreateProduct from "../../components/Product/CreateProduct";
 import { RiShoppingBag3Fill } from 'react-icons/ri';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import {AddOutlined, ExpandMore, Search} from "@material-ui/icons";
-import {Box, InputAdornment, Menu, MenuItem} from "@material-ui/core";
+import { AddOutlined, ExpandMore, Search } from "@material-ui/icons";
+import { Box, InputAdornment, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
@@ -37,7 +37,7 @@ import useColumns, {
 import { prepareDataForGrid } from "../../constants/helpers";
 import Tooltip from '@material-ui/core/Tooltip'
 import { MdAccountCircle } from "react-icons/md";
-import {AiFillCrown, MdAdd} from "react-icons/all";
+import { AiFillCrown, MdAdd } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { IoPricetagsSharp } from 'react-icons/io5';
@@ -175,6 +175,7 @@ const Product = () => {
                 finalObject["canDelete"] = permissions.product.isDelete;
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
                 finalObject["allowedToEdit"] = permissions.product.isUpdate;
+                finalObject["unit"] = finalObject["unit"]?.join(" , ");
                 return {
                     ...finalObject,
                 };
@@ -213,12 +214,11 @@ const Product = () => {
             data.productTemplate?.forEach((ele) => {
                 GenrateColoum(ele.fields, columns, rendererNames)
             })
-
-            columns.push({ field: "inventoryCount", headerName: "Inventory Count", show: getColumnHiddenStatus(routes.product.title, "inventoryCount"), cellRenderer: "commonRenderer", leval: "price-builder-custom" })
-            columns.push({ field: "warehouses", headerName: "Plants", show: getColumnHiddenStatus(routes.product.title, "warehouses"), cellRenderer: "commonRenderer", leval: "price-builder-custom" })
-            columns = sortBy(columns, function (item: any) {
-                return levalOrderBy.indexOf(item.leval)
-            });
+            //columns.push({ field: "inventoryCount", headerName: "Inventory Count", show: getColumnHiddenStatus(routes.product.title, "inventoryCount"), cellRenderer: "commonRenderer", leval: "price-builder-custom" })
+            //columns.push({ field: "warehouses", headerName: "Plants", show: getColumnHiddenStatus(routes.product.title, "warehouses"), cellRenderer: "commonRenderer", leval: "price-builder-custom" })
+            // columns = sortBy(columns, function (item: any) {
+            //     return levalOrderBy.indexOf(item.leval)
+            // });
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
                 ...tempFrameworkComponent,
@@ -227,6 +227,7 @@ const Product = () => {
                 actionsRenderer: ActionsRenderer
             }
             setFrameWorkComponent({ ...tempFrameworkComponent })
+            setColumns(null)
             columns = [...columns, ...getStaticFields()]
             setColumns([...columns])
             dispatch({ type: "initialize", data: rows, count: data.count });
@@ -478,9 +479,9 @@ const Product = () => {
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={isMobile ? 12 : 6} className="d-flex align-items-center gap-1 layout-for-tablet">
-                    <Grid style={{display:"flex" , justifyContent:"center"}}>
-                        <RiShoppingBag3Fill size={22} style={{ paddingBottom: "3px" }} className="headerLogo" />
-                        <span className="listingHeader">{routes.product.title} </span>
+                        <Grid style={{ display: "flex", justifyContent: "center" }}>
+                            <RiShoppingBag3Fill size={22} style={{ paddingBottom: "3px" }} className="headerLogo" />
+                            <span className="listingHeader">{routes.product.title} </span>
                         </Grid>
                         <Autocomplete
                             style={{ width: "250px" }}
@@ -506,18 +507,18 @@ const Product = () => {
                                         placeholder="Product Category"
                                         variant="standard"
                                         fullWidth
-                                        className= {isMobile ? "serchBox" : "" }
+                                        className={isMobile ? "serchBox" : ""}
 
 
                                     /> :
                                     <TextField
-                                    {...params}
-                                    margin="dense"
-                                    name="productCategory"
-                                    label="Product Category"
-                                    variant="outlined"
-                                    fullWidth
-                                />
+                                        {...params}
+                                        margin="dense"
+                                        name="productCategory"
+                                        label="Product Category"
+                                        variant="outlined"
+                                        fullWidth
+                                    />
                             )}
                         />
                         {isProductTemplate &&
@@ -550,57 +551,57 @@ const Product = () => {
                     <Grid item xs={isMobile ? 12 : 6}>
                         <Grid container className={styles.filter_side} >
                             <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
-                                <Grid style={{display: "flex", flex:1}}>
+                                <Grid style={{ display: "flex", flex: 1 }}>
                                     <SearchBox
                                         onSearch={handleSearch}
                                         searchbox={styles.search_box_input}
                                         width={isMobile ? "200px" : "242px"}
-                                        style={isMobile ? {flex:1} : {}}
+                                        style={isMobile ? { flex: 1 } : {}}
                                         size="small"
                                         value={search}
                                     />
                                 </Grid>
 
-                                <Grid style={{display: "flex" , gap:"5px"}}>
-                                        {productPermissions.isCreate &&
-                                            <Button onClick={() => OpenProduct(null)}
-                                                    variant={isMobile && !isTablet ? "text" : "contained"}
-                                                    size="small"
-                                                    color="primary"
-                                                    className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
-                                                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}>
+                                <Grid style={{ display: "flex", gap: "5px" }}>
+                                    {productPermissions.isCreate &&
+                                        <Button onClick={() => OpenProduct(null)}
+                                            variant={isMobile && !isTablet ? "text" : "contained"}
+                                            size="small"
+                                            color="primary"
+                                            className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                                            startIcon={isMobile && !isTablet ? null : <AddOutlined />}>
 
-                                                {isMobile && !isTablet  ? <MdAdd size={23}/> : "Add"}
-                                            </Button>
-                                        }
-                                        {productPermissions.isDelete &&
-                                            <Button
-                                                variant={isMobile && !isTablet ? "text" : "contained"}
-                                                color="default"
-                                                size="small"
-                                                onClick={openActions}
-                                                disabled={selectedRecords.length ? false : true}
-                                                aria-controls="action-menu"
-                                                className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                                            {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
+                                        </Button>
+                                    }
+                                    {productPermissions.isDelete &&
+                                        <Button
+                                            variant={isMobile && !isTablet ? "text" : "contained"}
+                                            color="default"
+                                            size="small"
+                                            onClick={openActions}
+                                            disabled={selectedRecords.length ? false : true}
+                                            aria-controls="action-menu"
+                                            className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
 
-                                            >
-                                                {isMobile && !isTablet ? "" :  "Actions" } <ExpandMore/>
-                                            </Button>
-                                        }
-                                        <Menu
-                                            anchorEl={anchorEl}
-                                            keepMounted
-                                            getContentAnchorEl={null}
-                                            anchorOrigin={{
-                                                vertical: "bottom",
-                                                horizontal: "left",
-                                            }}
-                                            id="action-menu"
-                                            open={Boolean(anchorEl)}
-                                            onClose={closeActions}
                                         >
-                                            <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                                        </Menu>
+                                            {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                                        </Button>
+                                    }
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        getContentAnchorEl={null}
+                                        anchorOrigin={{
+                                            vertical: "bottom",
+                                            horizontal: "left",
+                                        }}
+                                        id="action-menu"
+                                        open={Boolean(anchorEl)}
+                                        onClose={closeActions}
+                                    >
+                                        <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                                    </Menu>
                                 </Grid>
 
                             </Box>
