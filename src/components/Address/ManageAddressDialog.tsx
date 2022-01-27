@@ -20,7 +20,7 @@ import { FaDiceOne } from 'react-icons/fa';
 
 const ManageAddressDialog = (props) => {
   const toastConfig = useContext(CustomToastContext);
-  const { onClose, onSuccess, isEdit, isClone, addressData: oldData, title, saveAddress = true } = props;
+  const { onClose, onSuccess, isEdit, isClone, addressData: oldData, title, detailedAddress = false } = props;
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [formsData, setFormsData] = useState([]);
@@ -83,32 +83,27 @@ const ManageAddressDialog = (props) => {
 
   const handleSubmit = (values) => {
     // const {zipCodePostalCode, stateProvince, ...restValues} = values
-    if (saveAddress) {
-      setLoading(true);
-      axiosInstance()
-        .post(`${address.addressApi}`, values)
-        .then(({ data: { data } }) => {
-          setLoading(false);
-          onSuccess(data);
-        })
-        .catch((error) => {
-          setLoading(false);
-          if (error?.data?.isAlreadyExist) {
-            values["isAlreadyExist"] = true
-            onSuccess(values);
-          }
-          else {
-            toastConfig.setToastConfig(error);
-          }
-        });
-    }
-    else {
-      onSuccess(values);
-    }
+    setLoading(true);
+    axiosInstance()
+      .post(`${address.addressApi}`, values)
+      .then(({ data: { data } }) => {
+        setLoading(false);
+        onSuccess(data);
+      })
+      .catch((error) => {
+        setLoading(false);
+        if (error?.data?.isAlreadyExist) {
+          values['isAlreadyExist'] = true;
+          onSuccess(values);
+        } else {
+          toastConfig.setToastConfig(error);
+        }
+      });
   };
 
-  const getFullAddress = (placeId) => {
-    if (placeId && window.google) {
+  const getFullAddress = (val: any) => {
+    if (val?.place_id && window.google) {
+      const { place_id: placeId } = val;
       const element = document.createElement('div');
       let placesService = new window.google.maps.places.PlacesService(element);
 
@@ -130,7 +125,11 @@ const ManageAddressDialog = (props) => {
           }
 
           // if (type === 'administrative_area_level_1') {
-          //   fullAddress['state/Province'] = address.long_name;
+          //   if(initialData.values.hasOwnProperty("state")) {
+          //     fullAddress['state'] = address.long_name;
+          //   } else {
+          //     fullAddress['state/Province'] = address.long_name;
+          //   }
           // }
 
           if (type === 'administrative_area_level_2') {
@@ -142,13 +141,18 @@ const ManageAddressDialog = (props) => {
           }
 
           // if (type === 'postal_code') {
-          //   fullAddress['zipCode/PostalCode'] = address.long_name;
+          //   if(initialData.values.hasOwnProperty("zipCode")) {
+          //     fullAddress['zipCode'] = address.long_name;
+          //   } else {
+          //     fullAddress['zipCode/PostalCode'] = address.long_name;
+          //   }
           // }
         });
 
         fullAddress.latitude = results.geometry.location.lat().toLocaleString();
         fullAddress.longitude = results.geometry.location.lng().toLocaleString();
         fullAddress.streetAddress = results.formatted_address;
+        fullAddress.fullAddress = val.description;
 
         setAddressData(fullAddress);
       });
@@ -158,49 +162,58 @@ const ManageAddressDialog = (props) => {
   useEffect(() => {
     if (formikRef.current && addressData) {
       const setFieldValue = formikRef.current.setFieldValue;
-      if (addressData?.streetAddress) {
-        setFieldValue('streetAddress', addressData.streetAddress);
-      } else {
-        setFieldValue('city', '');
-      }
-      if (addressData?.city) {
-        setFieldValue('city', addressData.city);
-      } else {
-        setFieldValue('city', '');
-      }
-      // if (addressData['state/Province']) {
-      //   setFieldValue('state/Province', addressData['state/Province']);
+      // if (addressData?.streetAddress) {
+      //   setFieldValue('streetAddress', addressData.streetAddress);
       // } else {
-      //   setFieldValue('state/Province', '');
+      //   setFieldValue('city', '');
       // }
-      if (addressData?.country) {
-        setFieldValue('country', addressData.country);
-      } else {
-        setFieldValue('country', '');
-      }
-      // if (addressData['zipCode/PostalCode']) {
-      //   setFieldValue('zipCode/PostalCode', addressData['zipCode/PostalCode']);
+      // if (addressData?.city) {
+      //   setFieldValue('city', addressData.city);
       // } else {
-      //   setFieldValue('zipCode/PostalCode', '');
+      //   setFieldValue('city', '');
       // }
-      if (addressData?.latitude) {
-        setFieldValue('latitude', addressData.latitude);
-      } else {
-        setFieldValue('latitude', '');
+      // // if (addressData['state/Province']) {
+      // //   setFieldValue('state/Province', addressData['state/Province']);
+      // // } else {
+      // //   setFieldValue('state/Province', '');
+      // // }
+      // if (addressData?.country) {
+      //   setFieldValue('country', addressData.country);
+      // } else {
+      //   setFieldValue('country', '');
+      // }
+      // // if (addressData['zipCode/PostalCode']) {
+      // //   setFieldValue('zipCode/PostalCode', addressData['zipCode/PostalCode']);
+      // // } else {
+      // //   setFieldValue('zipCode/PostalCode', '');
+      // // }
+      // if (addressData?.latitude) {
+      //   setFieldValue('latitude', addressData.latitude);
+      // } else {
+      //   setFieldValue('latitude', '');
+      // }
+      // if (addressData?.longitude) {
+      //   setFieldValue('longitude', addressData.longitude);
+      // } else {
+      //   setFieldValue('longitude', '');
+      // }
+      const keys = Object.keys(addressData);
+      if (keys.length > 0) {
+        Object.keys(initialData.values).forEach((k) => {
+          setFieldValue(k, addressData[k]);
+        });
       }
-      if (addressData?.longitude) {
-        setFieldValue('longitude', addressData.longitude);
-      } else {
-        setFieldValue('longitude', '');
-      }
+      console.log(addressData);
     }
   }, [addressData]);
 
   const onCordChange = (position: google.maps.MapMouseEvent) => {
     if (!formikRef.current) return;
-    const setFieldValue = formikRef.current.setFieldValue;
-    setFieldValue('latitude', position.latLng.lat().toLocaleString());
-    setFieldValue('longitude', position.latLng.lng().toLocaleString());
+    setAddressData((prevState) => ({
+      ...prevState,
+      longitude: position.latLng.lng().toLocaleString(),
+      latitude: position.latLng.lat().toLocaleString()
+    }));
   };
 
   return (
@@ -289,13 +302,12 @@ const ManageAddressDialog = (props) => {
                                       onChange={
                                         field.fieldName === 'fullAddress'
                                           ? (_, val) => {
-                                            if (typeof val !== 'object') return;
-                                            const placeId = val?.place_id ?? null;
-                                            getFullAddress(placeId);
-                                            if (!placeId) {
-                                              setAddressData(null);
+                                              if (typeof val !== 'object') return;
+                                              getFullAddress(val);
+                                              if (!val?.place_id) {
+                                                setAddressData(null);
+                                              }
                                             }
-                                          }
                                           : null
                                       }
                                     />
@@ -337,7 +349,7 @@ const ManageAddressDialog = (props) => {
                         disableDefaultUI: true,
                         mapTypeId: google.maps.MapTypeId.ROADMAP,
                         mapTypeControlOptions: {
-                          style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+                          style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
                         },
                         styles: [
                           {
@@ -368,17 +380,17 @@ const ManageAddressDialog = (props) => {
                       // onLoad={onLoad}
                       // onUnmount={onUnmount}
                       center={
-                        values.latitude && values.longitude
-                          ? new google.maps.LatLng(values?.latitude, values?.longitude)
+                        addressData?.latitude && addressData?.longitude
+                          ? new google.maps.LatLng(addressData?.latitude, addressData?.longitude)
                           : new google.maps.LatLng(37.09, -95.713)
                       }
                       zoom={4}
                     >
-                      {values.latitude && values.longitude && (
+                      {addressData?.latitude && addressData?.longitude && (
                         <Marker
                           draggable
                           onDragEnd={(position) => onCordChange(position)}
-                          position={new google.maps.LatLng(values?.latitude, values?.longitude)}
+                          position={new google.maps.LatLng(addressData?.latitude, addressData?.longitude)}
                         />
                       )}
                     </GoogleMap>

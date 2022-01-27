@@ -20,7 +20,7 @@ import { useData } from '../../StateProvider/Provider';
 
 const Dashboard = () => {
   const {
-    state: { userLoading, user }
+    state: { userLoading, user, selectedEntity }
   } = useData();
   const [currency, setCurrency] = useState('');
   const [filterCurrency, setFilterCurrency] = useState('');
@@ -102,7 +102,7 @@ const Dashboard = () => {
 
   const fetchSalesReps = () => {
     axiosInstance()
-      .get(`/user?limit=0`)
+      .get(`/user?filterById=[{"field": "entities.entity", "term": "${selectedEntity}"}]`)
       .then(({ data: { data } }) => {
         data = data.map((d) => ({
           id: d._id,
@@ -201,6 +201,7 @@ const Dashboard = () => {
 
                   <Top2Dashboard
                     getExchangeRates={getExchangeRates}
+                    filterCurrency={filterCurrency}
                     salesFilter={salesFilter}
                     currency={currency}
                     setCurrency={setCurrency}
@@ -216,6 +217,7 @@ const Dashboard = () => {
 
                   <OpportunityDashboards
                     getExchangeRates={getExchangeRates}
+                    filterCurrency={filterCurrency}
                     salesFilter={salesFilter}
                     currency={currency}
                     setCurrency={setCurrency}
@@ -231,6 +233,8 @@ const Dashboard = () => {
 
                   <OpportunityTrends
                     getExchangeRates={getExchangeRates}
+                    filterCurrency={filterCurrency}
+                    salesFilter={salesFilter}
                     currency={currency}
                     setCurrency={setCurrency}
                     moment={moment}

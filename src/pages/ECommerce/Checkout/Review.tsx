@@ -11,7 +11,7 @@ const Review = (props: ReviewProps) => {
   const { totalAmount, cartItems } = props;
   return (
     <React.Fragment>
-      <Typography variant="h6" gutterBottom>
+      <Typography component="h2" variant="h5" gutterBottom>
         Order summary
       </Typography>
 
@@ -19,7 +19,7 @@ const Review = (props: ReviewProps) => {
         {cartItems.length > 0 ? (
           cartItems.map((item: any) => (
             <ListItem>
-              <ListItemText primary={`${item.itemName} - `} />
+              <ListItemText primary={`${item.itemName}`} />
               <Typography variant="subtitle1" style={{ fontWeight: 700 }}>
                 {item.formattedAmount}
               </Typography>

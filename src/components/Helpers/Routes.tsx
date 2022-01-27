@@ -321,6 +321,14 @@ const routes = {
     title: storedRoutes && storedRoutes.eCommercePolicy ? storedRoutes.eCommercePolicy?.title : "e-Commerce Policy",
     path: "/e-commerce-policy",
   },
+  subleasing: {
+    title: storedRoutes && storedRoutes.subleasing ? storedRoutes.subleasing?.title : RESOURCE_LABEL.subleasing,
+    path: "/subleasing",
+  },
+  subleasingDetail: {
+    title: storedRoutes && storedRoutes.subleasing ? storedRoutes.subleasing?.title : RESOURCE_LABEL.subleasing,
+    path: "/subleasing/detail",
+  },
   eCommerce: {
     title: storedRoutes ? storedRoutes.eCommerce?.title : RESOURCE_LABEL.eCommerce,
     path: "/e-commerce",
