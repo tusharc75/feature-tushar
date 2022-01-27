@@ -146,7 +146,6 @@ const Roles: FC = () => {
   const columns = [
     { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "description", headerName: "Description", show: true, cellRenderer: "commonRenderer" },
-    { field: "type", headerName: "Type", show: true, sortable: false, filter: false, cellRenderer: "commonRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
   ];

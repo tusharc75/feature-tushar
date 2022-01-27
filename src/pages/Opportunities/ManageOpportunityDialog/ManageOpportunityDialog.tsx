@@ -36,6 +36,7 @@ import ManageMarketSegmentDialog from '../../MarketSegment/ManageMarketSegmentDi
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import ManageAddressDialog from '../../../components/Address/ManageAddressDialog';
+import { isArray } from 'lodash';
 
 const arr = [...Array(9).keys()];
 export default function ManageOpportunityDialog({
@@ -351,7 +352,7 @@ export default function ManageOpportunityDialog({
   const onCountrySellToDropDownOpen = (selectedAccount) => {
     let filterAddress = accountData.find((d) => d.optionValue === selectedAccount)?.shippingAddress;
 
-    if (filterAddress) {
+    if (isArray(filterAddress)) {
       setCountrySellToDropDown(countrySellToMainData.filter((d) => filterAddress?.some((u) => u === d.optionValue)));
     } else {
       setCountrySellToDropDown([]);
@@ -360,7 +361,7 @@ export default function ManageOpportunityDialog({
   const onCountryBillToDropDownOpen = (selectedAccount) => {
     let filterAddress = accountData.find((d) => d.optionValue === selectedAccount)?.billingAddress;
 
-    if (filterAddress) {
+    if (isArray(filterAddress)) {
       setCountryBillToDropDown(countryBillToMainData.filter((d) => filterAddress?.some((u) => u === d.optionValue)));
     } else {
       setCountryBillToDropDown([]);
