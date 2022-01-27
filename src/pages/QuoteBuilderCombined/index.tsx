@@ -54,6 +54,7 @@ import { AiFillCrown, BiDollar } from "react-icons/all";
 import IconButton from "@material-ui/core/IconButton";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { styles } from "@material-ui/pickers/views/Calendar/Calendar";
+import { camelCase } from "lodash";
 
 let quoteTimeout;
 const QuoteType = [
@@ -144,56 +145,8 @@ const QuoteBuilders = () => {
     showFilteredRecordsOnly
   } = state;
 
-  // const columns = [
-  //   {
-  //     field: "quoteName",
-  //     headerName: "Quote Name",
-  //     show: true,
-  //     disabled: true,
-  //     cellRenderer: "quoteNameRenderer",
-  //   },
-  //   {
-  //     field: "customerAccountName",
-  //     headerName: "Customer Account Name",
-  //     show: true,
-  //     cellRenderer: "customerAccountNameRenderer",
-  //   },
-  //   {
-  //     field: "relatedOpportunity",
-  //     headerName: "Related Opportunity",
-  //     show: true,
-  //     cellRenderer: "relatedOpportunityRenderer"
-  //   },
-
-  //   {
-  //     field: "createdBy",
-  //     headerName: "Created By",
-  //     show: true,
-  //     cellRenderer: "createdByRenderer",
-  //   },
-  //   {
-  //     field: "updatedBy",
-  //     headerName: "Updated By",
-  //     show: true,
-  //     cellRenderer: "updatedByRenderer",
-  //   },
-  //   {
-  //     field: "expiryDate",
-  //     headerName: "Expiry Date",
-  //     show: true,
-  //     filter: false,
-  //     cellRenderer: "commonRenderer",
-  //   },
-  //   {
-  //     field: "owner",
-  //     headerName: "Quote Owner",
-  //     show: true,
-  //     cellRenderer: "commonRenderer",
-  //   },
-  // ];
-  //  Grid Variables - End
-
-  const localStorageSelectedRecords = `${quoteResource}_selected`;
+  const pageTitle = camelCase(`${routes.quoteBuilder.title}`)
+  const localStorageSelectedRecords = `${pageTitle}_selected`;
 
   useEffect(() => {
     fetchGridColumns()
@@ -221,7 +174,7 @@ const QuoteBuilders = () => {
         }]
       }
       else {
-        let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
+        let currentColumn = getColumnData(pageTitle, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData]
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -942,7 +895,7 @@ const QuoteBuilders = () => {
                 onCreate={false}
                 showClone={false}
                 onClone={() => { }}
-                renderedFrom={quoteResource}
+                renderedFrom={pageTitle}
               /> : (
                 Object.keys(frameWorkComponent).length > 0 ?
                   <CustomAgGrid
@@ -957,7 +910,7 @@ const QuoteBuilders = () => {
                     page={page}
                     actionWidth={100}
                     loading={loading}
-                    renderedFrom={quoteResource}
+                    renderedFrom={pageTitle}
                     refreshGrid={fetchQuoteBuilder}
                     showOnlyShowFilteredRecordSwitch={true}
                   /> : null

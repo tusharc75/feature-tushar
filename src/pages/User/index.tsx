@@ -178,7 +178,7 @@ const User: FC = () => {
       </p>
     ) : (
       <>
-        {/* <Tooltip
+        <Tooltip
           className={permissions.user.isCreate ? "" : "cursor-stop"}
           title={permissions.user.isCreate ? "Clone" : "You do not have permission to clone/create"} >
           <IconButton
@@ -190,7 +190,7 @@ const User: FC = () => {
           >
             <FileCopyIcon fontSize="small" color="primary" />
           </IconButton>
-        </Tooltip> */}
+        </Tooltip>
         {permissions.user.isDelete ? (
 
           params.data.isBrandAdmin ? (
@@ -588,13 +588,16 @@ const User: FC = () => {
 
   return (
     <>
-      {
+      {                         
         isOpen?.open && (
           <ManageUserDialog
             open={isOpen?.open}
             isClone={isOpen?.isClone}
-            close={handleClose} onSuccess={(obj) => { setUserList([]); fetchUsers() }}
-            userId={isOpen?.idToClone} dataToUpdate={null} isNew={true} 
+            close={handleClose} 
+            onSuccess={(obj) => { setUserList([]); fetchUsers() }}
+            userId={isOpen?.idToClone} 
+            dataToUpdate={null} 
+            isNew={isOpen?.isClone ? false : true} 
             isUserSetupPermission = {isUserSetupPermission}
             />
           // <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
@@ -805,7 +808,10 @@ const User: FC = () => {
             onCreate={false}
             showClone={false}
             onClone={() => { }}
-            renderedFrom={"user"} /> : <CustomAgGrid
+            renderedFrom={"user"} /> 
+            
+            : 
+            <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
             frameworkComponents={frameworkComponents}
@@ -817,7 +823,7 @@ const User: FC = () => {
             page={page}
             actionWidth={110}
             loading={loading}
-            renderedFrom="userPage"
+            renderedFrom={routes.user.title}
             refreshGrid={fetchUsers}
           />}
 
