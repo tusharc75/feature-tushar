@@ -36,7 +36,7 @@ interface EditDialogProps {
 
 const rateChangeFields = ["unit", "pricingMethod"]
 
-const RentalJobQtyDialog: FC<EditDialogProps> = (
+const QtyDialog: FC<EditDialogProps> = (
   {
     calculatePrice,
     onClose,
@@ -234,7 +234,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   }
 
   const handleSubmit = async (values) => {
-    const currency = rentalManagementData?.currency?.toLowerCase();
     if (isBulkedit) {
       for (const x in values) {
         if (values[x] === "" || (Array.isArray(values[x]) && values[x].length === 0)) {
@@ -314,19 +313,17 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           rows = [...rows, ...product]
         }
         else if (rowData.type === "product" && rowData.parentId) {
-          if (values[`totalPrice_${currency}`] !== rowData[`totalPrice_${currency}`]) {
-            const packages: any = material.filter((e) => e._id === rowData.parentId)
-            const product: any = material.filter((e) => e.parentId === rowData.parentId)
-            product.forEach((element) => {
-              if (element._id === rowData._id) {
-                for (var key in values) {
-                  element[key] = values[key];
-                }
+          const packages: any = material.filter((e) => e._id === rowData.parentId)
+          const product: any = material.filter((e) => e.parentId === rowData.parentId)
+          product.forEach((element) => {
+            if (element._id === rowData._id) {
+              for (var key in values) {
+                element[key] = values[key];
               }
-            })
-            sumOnParent(packages, product)
-            rows = [...rows, ...packages]
-          }
+            }
+          })
+          sumOnParent(packages, product)
+          rows = [...rows, ...packages]
         }
         handleSaveData(rows)
         setShowConfirmationDialog(false);
@@ -620,4 +617,4 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   </Dialog>);
 };
 
-export default RentalJobQtyDialog;
+export default QtyDialog;

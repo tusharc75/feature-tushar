@@ -2005,7 +2005,7 @@ const FormTypes = (props) => {
           setImage("")
         }
       }}>
-        <CustomDialogHeader onClose={() => {
+        <CustomDialogHeader showRequiredLabel={false} onClose={() => {
           if (!isImgUploading) {
             setImage("")
           }

@@ -1,31 +1,34 @@
-import * as React from 'react';
-import { Container, Paper, Typography, Box } from '@material-ui/core';
-import { CheckCircle, Cancel } from '@material-ui/icons';
+import { Container, Paper, Typography, Box, Grid, Divider } from '@material-ui/core';
 import { useLocation, useHistory } from 'react-router-dom';
 import { parse } from 'query-string';
 import Loader from '../../../components/Loader';
 import routes from '../../../components/Helpers/Routes';
+import axiosInstance from '../../../axios/axiosInstance';
+import { formatAmountWithCurrency } from '../../../constants/helpers';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useContext, useState, useEffect } from 'react';
+import ECommerceBreadCrumbs from '../../../components/ECommerce/BreadCrumbs/ECommerceBreadCrumbs';
+import Review from '../Checkout/Review';
+import MuiAlert from '@material-ui/lab/Alert';
+
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 const getIcon = (status: string) => {
   switch (status) {
     case 'success': {
       return (
-        <Box textAlign={'center'} mt={2}>
-          <CheckCircle fontSize="large" color="secondary" />
-          <Typography variant='h6' align='center' color='secondary' gutterBottom>
-            Thank you, your order was processed successfully
-          </Typography>
-        </Box>
+        <Alert severity="success">
+          Thank you, your order was placed successfully
+        </Alert>
       );
     }
     case 'failed': {
       return (
-        <Box textAlign={'center'} mt={2}>
-          <Cancel fontSize="large" color="error" />
-          <Typography variant='h6' align='center' color='error' gutterBottom>
-            Sorry, your order couldn't be processed
-          </Typography>
-        </Box>
+        <Alert severity="error">
+          Sorry, your order couldn't be placed
+        </Alert>
       );
     }
     default:
@@ -38,27 +41,129 @@ const statuses = ['success', 'failed'];
 const CheckoutSuccess = () => {
   const location = useLocation();
   const history = useHistory();
+
   const { status, orderId }: any = parse(location.search);
+  const toastConfig = useContext(CustomToastContext);
+
+  const [order, setOrder] = useState(null);
+  const [totalAmount, setTotalAmount] = useState('');
+  const [cartItems, setCartItems] = useState([]);
+
+  useEffect(() => {
+    axiosInstance().get(`/ecommerce/order/${orderId}`).then(({ data: { data } }) => {
+      setOrder(data)
+      setCartItems(
+        data.products.map((d: any) => ({
+          ...d,
+          formattedAmount: formatAmountWithCurrency(d?.currency, d.rate)?.fullFormatAmount,
+          itemName: d.productName
+        }))
+      );
+      if (data.products.length > 0) {
+        const tempTotalPrice = data.products.reduce((acc: any, curr: any) => {
+          return acc + curr.qty * curr.rate;
+        }, 0);
+        setTotalAmount(formatAmountWithCurrency(data.products[0].currency, tempTotalPrice)?.fullFormatAmount);
+      } else {
+        setTotalAmount('');
+      }
+
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    })
+  }, [orderId])
 
   if (!status || !statuses.includes(status)) return <Loader noLoader text={'Nothing is here'} minHeight={'100%'} />;
 
   return (
-    <Container component="main" maxWidth="sm" style={{ marginBottom: 32, marginTop: 40 }}>
-      <Paper style={{ padding: '24px 16px' }}>
-        <Typography component="h1" variant="h4" align="center">
-          Order {status}
-        </Typography>
+    <Container component="main" style={{ marginBottom: 32 }}>
 
-        {getIcon(status)}
+      <div className="p-2">
+        <ECommerceBreadCrumbs routes={[routes.orders, { title: order?.orderNumber }]} />
+      </div>
 
-        <Typography component="h5" variant="h6" align="center" className="cursor-pointer link" onClick={() => {
-          history.push(`${routes.orderDetails.path}/${orderId}`)
-        }}>
-          Click here to check order details
-        </Typography>
+      <Grid container className="mt-3 d-flex gap-3">
 
-      </Paper>
+        <Grid item xs={12}>
+          {getIcon(status)}
+        </Grid>
+
+        <Grid item xs={12}>
+
+          <Paper style={{ padding: '24px 16px' }}>
+            <Typography component="h1" variant="h4" align="center">
+              Order Id : {order?.orderNumber}
+            </Typography>
+
+            <Divider className="my-2" />
+
+            <Box mt={2}>
+              <Box my={2}>
+                {
+                  order && <Review totalAmount={totalAmount} cartItems={cartItems} />
+                }
+              </Box>
+            </Box>
+          </Paper>
+
+        </Grid>
+
+      </Grid>
+
+      <Grid container className="mt-3" spacing={2}>
+
+        <Grid item xs={6}>
+
+          <Paper style={{ padding: '24px 16px' }}>
+            <Typography component="h1" variant="h4" align="center" className="pt-0">
+              Billing Address
+            </Typography>
+
+            <Divider className="my-2" />
+
+            <Box mt={2}>
+              <Typography component="h5" variant="h6">
+                {order?.billingAddress?.fullAddress}
+              </Typography>
+              <Typography component="h5" variant="h6">
+                {order?.billingAddress?.streetAddress}
+              </Typography>
+              <Typography component="h5" variant="h6">
+                {order?.billingAddress?.city}
+              </Typography>
+            </Box>
+          </Paper>
+
+        </Grid>
+
+        <Grid item xs={6}>
+
+          <Paper style={{ padding: '24px 16px' }}>
+            <Typography component="h1" variant="h4" align="center" className="pt-0">
+              Shipping Address
+            </Typography>
+
+            <Divider className="my-2" />
+
+            <Box mt={2}>
+              <Typography component="h5" variant="h6">
+                {order?.shippingAddress?.fullAddress}
+              </Typography>
+              <Typography component="h5" variant="h6">
+                {order?.shippingAddress?.streetAddress}
+              </Typography>
+              <Typography component="h5" variant="h6">
+                {order?.shippingAddress?.city}
+              </Typography>
+            </Box>
+          </Paper>
+
+        </Grid>
+
+      </Grid>
+
     </Container>
+
   );
 };
 

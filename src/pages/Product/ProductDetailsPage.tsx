@@ -29,6 +29,7 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import queryString from 'query-string';
+import ProductConfiguration from './ProductConfiguration';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -436,6 +437,7 @@ const ProductDetailsPage = () => {
                 <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
                 <Tab label="Packages" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
                 <Tab label="Parent Product" aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
+                <Tab label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />
               </Tabs>
               <TabPanel value={tabValue} index={0}>
                 <Box>
@@ -487,6 +489,13 @@ const ProductDetailsPage = () => {
                   renderedFrom="productMasterDetailsPage"
                   refreshGrid={getColumns}
                 />
+              </TabPanel>
+              <TabPanel value={tabValue} index={3}>
+                {tabValue === 3 && <ProductConfiguration
+                  productFields={productFields.map((_f:any) => _f.fieldData)}
+                  productData={productData}
+                  id={id}
+                />}
               </TabPanel>
             </Paper>
           </Grid>

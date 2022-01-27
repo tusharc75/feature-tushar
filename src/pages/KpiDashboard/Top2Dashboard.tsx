@@ -11,6 +11,7 @@ import Loader from '../../components/Loader';
 import { Autocomplete } from '@material-ui/lab';
 import Countries from "../../constants/Country.json"
 import Currencies from '../../constants/currency_with_country.json';
+import { useData } from '../../StateProvider/Provider';
 
 const Top2Dashboard = (props) => {
   const { currency,
@@ -24,6 +25,9 @@ const Top2Dashboard = (props) => {
     setSubMarketSegments,
     salesReps,
     customerAccounts, } = props;
+  const {
+    state: { selectedEntity }
+  } = useData();
   const [anchorEl, setAnchorEl] = useState(null);
   const [tableView, setTableView] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -66,6 +70,7 @@ const Top2Dashboard = (props) => {
 
   const fetchAllEntitiesData = useCallback(() => {
     let params = {
+      entity: selectedEntity || "",
       marketSegment: entityFilter.marketSegment ? entityFilter.marketSegment['id'] : '',
       subMarketSegment: entityFilter.subMarketSegment ? entityFilter.subMarketSegment['id'] : '',
       customerAccount: entityFilter.customerAccount ? entityFilter.customerAccount['id'] : '',
@@ -184,6 +189,7 @@ const Top2Dashboard = (props) => {
 
   const fetchBookedValueData = useCallback(() => {
     let params = {
+      entity: selectedEntity || "",
       marketSegment: bookedfilter.marketSegment ? bookedfilter.marketSegment['id'] : '',
       subMarketSegment: bookedfilter.subMarketSegment ? bookedfilter.subMarketSegment['id'] : '',
       productCategory: bookedfilter.productCategory ? bookedfilter.productCategory['id'] : '',
@@ -602,7 +608,7 @@ const Top2Dashboard = (props) => {
                           {Object.keys(tableDataRawBookedValue[0]).map((label, i) => (
                             <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
                               {label}
-                              </TableCell>
+                            </TableCell>
                           ))}
                         </TableRow>
                       </TableHead>
@@ -611,7 +617,7 @@ const Top2Dashboard = (props) => {
                           <TableRow key={index}>
                             {Object.keys(data).map((label, i) => (
                               <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                              {['Total Offer Value', 'Total Booked Value'].includes(label) ? `${currrencySymbol(filterCurrency ?? currency)} ${data[label].toLocaleString()}` : `${data[label].toLocaleString()}`}                            
+                                {['Total Offer Value', 'Total Booked Value'].includes(label) ? `${currrencySymbol(filterCurrency ?? currency)} ${data[label].toLocaleString()}` : `${data[label].toLocaleString()}`}
                               </TableCell>
                             ))}
                           </TableRow>

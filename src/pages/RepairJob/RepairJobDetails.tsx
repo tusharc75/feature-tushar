@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useReducer } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Tab, Tabs,useMediaQuery, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -18,6 +18,8 @@ import {
   INVENTORY_STATUS,
   CHILD_RESOURCE
 } from '../../constants/helpers';
+import Activity from '../../components/Activity';
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRepairJob from './ManageRepairJob';
 import queryString from "query-string";
 import { BiFoodMenu } from 'react-icons/bi';
@@ -43,8 +45,8 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import { MdAdd, MdDelete } from 'react-icons/md';
 import { GiAutoRepair } from 'react-icons/gi';
 import { RiEditCircleLine, RiExchangeFundsLine } from 'react-icons/ri';
-
-
+import HideWhenOffline from '../../components/HideWhenOffline';
+import { defaultActivityShow } from '../../constants/helpers';
 const renderedFrom = "repairJobDetails"
 const step1RenderedFrom = `${renderedFrom}_assets`
 const completedStatus = repairJobStatus[2];
@@ -103,9 +105,12 @@ const RepairJobDetails = () => {
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer", required: false },
   ];
 
+ 
   const [showEditAssetDialog, setShowEditAssetDialog] = useState({ open: false, asset: null, selectedRecords: [] })
   const [serializedAssetFields, setSerializedAssetFields] = useState(null)
-
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
+  const isTabletScreen = useMediaQuery('(max-width:960px)');
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [disableNextStep, setDisableNextStep] = useState(false)
   const [disablePreviousStep, setDisablePreviousStep] = useState(false)
 
@@ -123,6 +128,10 @@ const RepairJobDetails = () => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity);
   };
 
   useEffect(() => {
@@ -549,8 +558,9 @@ const RepairJobDetails = () => {
         <CustomBreadCrumbs routes={customizedRoutes} />
       </Grid>
 
-      <Grid container spacing={1} className="detail-container">
-        <Grid item xs={12} sm={12} spacing={2}>
+      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
+      <div>
+        <div>
           <Paper style={{ height: "650px" }}>
             {!repairJobData ? (
               <div>
@@ -872,9 +882,52 @@ const RepairJobDetails = () => {
             </TabPanel>
 
           </Paper>
-        </Grid>
+          </div>
         <Box my={1} />
-      </Grid>
+        </div>
+   
+
+
+      <div className="position-relative">
+       <HideWhenOffline>
+       <Paper>
+       {!isSmallScreen && (
+                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+                </span>
+              )}
+       <div style={{ display: showActivity ? 'block' : 'none' }}>
+       <Grid container>
+      <Grid item xs={12}>
+        {repairJobData && (
+          <div>
+            <Activity 
+              resourceId={repairJobData._id}
+              resource={repairJobData.resource}
+              restrictedAddActivities={
+                permissions && permissions['repairJob'] && permissions['repairJob'].isUpdate
+                  ? []
+                  : ['Attachment', 'Case']
+              }
+              relatedTo={[
+                {
+                  type: repairJob,
+                  referenceId: repairJobData._id,
+                  access: true
+                }
+              ]}
+              handleActivityRefresh={() => { }}
+              emails={[]}
+            />
+          </div>
+        )}
+        </Grid>
+        </Grid>
+       </div>      
+       </Paper>
+       </HideWhenOffline>
+      </div>
+      </div>
 
 
       {showConfirmBox && (
