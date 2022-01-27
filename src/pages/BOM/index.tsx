@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Chip } from '@material-ui/core';
+import { Avatar, Box, Chip } from '@material-ui/core';
 import { Link, useParams, useLocation } from 'react-router-dom';
 import { materialTableIcons } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
@@ -50,7 +50,9 @@ const BOMTable = () => {
       field: 'productImage',
       render: (rowData: any) => (
         <div style={{ width: 100 }}>
-          <span className="text-truncate">{rowData?.productDetail.productImage || '- - -'}</span>
+          <span className="text-truncate"><Avatar src={rowData?.productDetail.productImage}>
+              {rowData?.productName.charAt(0)}
+            </Avatar></span>
         </div>
       )
     },
@@ -142,15 +144,15 @@ const BOMTable = () => {
       </div>
       <div className="main-container">
         {BOMData.length === 1 ? (
-          <MaterialTable icons={materialTableIcons} data={BOMData} columns={columns}
+          <MaterialTable style={{height: "calc(100vh - 105px)"}} title={"Parts"} icons={materialTableIcons} data={BOMData} columns={columns}
             options={{
               search: true,
-              filtering: true
+              filtering: true,
             }} />
         ) : (
-          <Box margin={1}>
+          <Box margin={1} height={"calc(100vh - 105px)"}>
             <MaterialTable
-
+              title={"Parts"}
               isLoading={loadingBOMData}
               icons={materialTableIcons}
               data={BOMData}
@@ -158,9 +160,10 @@ const BOMTable = () => {
               parentChildData={(row, rows) => {
                 return rows.find((a) => a.treeId  === row.parent);
               }}
+              style={{height: "100%"}}
               options={{
                 search: true,
-                filtering: true
+                filtering: true,
               }}
             // options={options}
             />
