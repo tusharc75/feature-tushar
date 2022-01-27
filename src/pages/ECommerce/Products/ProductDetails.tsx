@@ -45,6 +45,7 @@ import { ECommerceContext } from "../../../components/ECommerce/Layout/ECommerce
 import React from "react";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 import ProductBOM from "../../../components/ProductList/BOM/ProductBOM";
+import { isTablet } from "react-device-detect";
 import ProductSummary from "./ProductSummary";
 
 const useStyles = makeStyles(() => ({
@@ -52,8 +53,11 @@ const useStyles = makeStyles(() => ({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    minHeight: "300px",
-    height: "70vh"
+    minHeight:"300px",
+    height:"70vh",
+    "@media screen and (max-width: 960px)":{
+      height:"30vh"
+    }
   },
   img: {
     height: "500px",
@@ -343,14 +347,14 @@ export default function ProductDetails() {
   }
 
   return (
-    <div className="container">
+    <div className="containerNew">
       <div className="p-2">
         <ECommerceBreadCrumbs routes={[{ path: `${routes.eCommerce.path}?category=${productDetails?.productCategory?.optionValue}&orderType=${orderType}`, title: productDetails?.productCategory?.optionLabel }, { title: productDetails?.productName }]} />
       </div>
       <Box>
         {productDetails ?
           <Grid container className="py-4 px-2" spacing={4}>
-            <Grid item xs={6} md={7} sm={7} className="d-flex flex-column align-items-center">
+            <Grid item xs={6} md={7} sm={isTablet ? 12 : 7} className="d-flex flex-column align-items-center">
               <Box display="flex" justifyContent="center" alignItems="center" className='w-100' >
 
                 <div className='position-relative w-100'>
@@ -434,7 +438,7 @@ export default function ProductDetails() {
                 </div>
               </Box>
             </Grid>
-            <Grid item xs={12} md={5} sm={5} className="px-0 py-0 my-3" style={{ border: "1px solid grey" }}>
+            <Grid item xs={12} md={5} sm={isTablet ? 12 : 5} className="px-0 py-0 my-3" style={{ border: "1px solid grey" }}>
               <Grid className=' px-2 py-2 first-content-Layout'>
                 <h5>{productDetails.productCategory?.optionLabel}</h5>
                 <div className="w-100 d-flex align-items-center gap-2 justify-content-space-between" >
@@ -491,7 +495,7 @@ export default function ProductDetails() {
                 />
               </Grid>
               {
-                productDetails?.productShortDetail && <div className="mt-3 mb-3 px-5" dangerouslySetInnerHTML={{ __html: productDetails?.productShortDetail }}></div>
+                productDetails?.productShortDetail && <div className="my-3 px-5" dangerouslySetInnerHTML={{ __html: productDetails?.productShortDetail }}></div>
               }
 
               <ProductConfiguration
