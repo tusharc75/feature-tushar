@@ -503,7 +503,7 @@ const ProductDetailsPage = () => {
             <Grid item xs={12} sm={12} md={4} lg={4}>
               <Paper style={{ overflow: 'hidden' }}>
                 <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="subtitle2">BOM</Typography>
+                  <Typography variant="subtitle2">Parts</Typography>
 
                   {permissions.product.isUpdate && (
                     <IconButton

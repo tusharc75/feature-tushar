@@ -239,6 +239,8 @@ const AssignProductDialog = ({
                     setFullScreen(prevState => !prevState)
                 }}
                 showManimizeMaximize={true}
+                showRequiredLabel={false}
+                onClose={handleCloseDialog}
             />
             <CustomDialogContent>
                 <>
