@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates, productCategory, salesReps, customerAccounts, marketSegments }) => {
+const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates, productCategory, salesReps, customerAccounts, marketSegments, salesFilter }) => {
   const {
     state: { selectedEntity }
   } = useData();
@@ -41,10 +41,6 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates,
     customerAccount: {},
     subMarketSegment: {},
     productCategory: {},
-    between: {
-      from: new Date(moment().subtract(1, 'year').calendar()),
-      to: new Date()
-    },
     countrySellTo: {},
     countryBillTo: {}
   });
@@ -59,8 +55,8 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates,
       salesRep: filter.salesRep ? filter.salesRep['id'] : '',
       customerAccount: filter.customerAccount ? filter.customerAccount['id'] : '',
       between: JSON.stringify({
-        from: new Date(filter.between.from).toISOString().split('T')[0],
-        to: new Date(filter.between.to).toISOString().split('T')[0]
+        from: new Date(salesFilter.between.from).toISOString().split('T')[0],
+        to: new Date(salesFilter.between.to).toISOString().split('T')[0]
       })
     };
 
@@ -68,7 +64,7 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates,
 
     for (const k of Object.keys(params)) {
       if (params[k]) {
-        if (k === 'between' && filter.between.from && filter.between.to) {
+        if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
           url = `${url}${k}=${params[k]}&`;
         }
         if (k !== 'between') {

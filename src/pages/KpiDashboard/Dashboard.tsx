@@ -234,6 +234,7 @@ const Dashboard = () => {
                   <OpportunityTrends
                     getExchangeRates={getExchangeRates}
                     filterCurrency={filterCurrency}
+                    salesFilter={salesFilter}
                     currency={currency}
                     setCurrency={setCurrency}
                     moment={moment}
