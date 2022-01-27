@@ -780,36 +780,6 @@ const FormTypes = (props) => {
         }
       />
     </InfoLabel>
-  ) : type === 'formula' ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
-      <TextField
-        {...rest}
-        disabled={fieldData?.isUneditable || rest?.disabled}
-        variant="outlined"
-        type={fieldData.returnType === 'decimal' ? 'number' : 'text'}
-        label={getLabel(label)}
-        name={name}
-        required={required}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={
-          onChange
-            ? onChange
-            : (e) => {
-              if (fieldData.returnType === 'decimal') {
-                handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-              } else {
-                handleChange(name, e.target.value);
-              }
-            }
-        }
-        InputProps={{
-          inputProps: { min: 0 },
-          readOnly: fieldData && fieldData.isUneditable ? true : false
-        }}
-      />
-    </InfoLabel>
   ) : type === 'email' ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
       <TextField
@@ -902,7 +872,8 @@ const FormTypes = (props) => {
         }}
       />
     </InfoLabel>
-  ) : type === 'dropDown' || type === 'lookup' || (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse) ? (
+  ) : type === 'dropDown' || type === 'lookup' || (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse)
+    || (type === 'formula' && fieldData && fieldData.isDropdown) ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip}>
       <Grid container spacing={1} alignItems="center">
         <Grid item xs={!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12}>
@@ -1414,6 +1385,36 @@ const FormTypes = (props) => {
             ? onChange
             : (e) => {
               handleChange(name, e.target.value === "" ? "" : parseFloat(e.target.value));
+            }
+        }
+        InputProps={{
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData.isUneditable ? true : false
+        }}
+      />
+    </InfoLabel>
+  ) : type === 'formula' ? (
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
+      <TextField
+        {...rest}
+        disabled={fieldData?.isUneditable || rest?.disabled}
+        variant="outlined"
+        type={fieldData.returnType === 'decimal' ? 'number' : 'text'}
+        label={getLabel(label)}
+        name={name}
+        required={required}
+        value={values[name]}
+        error={touched[name] && Boolean(errors[name])}
+        helperText={touched[name] && errors[name]}
+        onChange={
+          onChange
+            ? onChange
+            : (e) => {
+              if (fieldData.returnType === 'decimal') {
+                handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+              } else {
+                handleChange(name, e.target.value);
+              }
             }
         }
         InputProps={{
