@@ -405,7 +405,7 @@ const ProductCategory = () => {
 
   const isContrastRatioLow = (hexColor) => {
    
-    let rgb = hexToRgb(hexColor.length === 0 ? '#E0E0E0' : hexColor  );
+    let rgb = hexToRgb(hexColor.length === 0 || hexColor.length === undefined ? '#E0E0E0' : hexColor  );
     let splitRgb = rgb.split(",");
     let rgbNum = splitRgb.map(function (x) {
       return parseInt(x, 10);

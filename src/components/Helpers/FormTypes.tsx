@@ -1027,13 +1027,13 @@ const FormTypes = (props) => {
               {fieldData.isDropdown ?
                 <Autocomplete
                   {...rest}
-                  options={optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit)}
+                  options={optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit, fieldData.decimalPlaces)}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => option.optionValue === val}
                   value={
-                    optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit)
+                    optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit, fieldData.decimalPlaces)
                       .filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString()).length
-                      ? optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit)
+                      ? optionConverter(option, fieldData.units, fieldData.unitoption, fieldData.dropdownOnConverter, _unit, fieldData.decimalPlaces)
                         .filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString())[0] : ''
                   }
                   onChange={onChange ? onChange : (e, val) =>
