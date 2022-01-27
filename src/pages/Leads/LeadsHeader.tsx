@@ -107,7 +107,7 @@ function LeadsHeader(props) {
     </ToggleButtonGroup>
   );
 
-    return <Grid className={`${styles.filter_side_container} gap-1`} container>
+    return <Grid className={styles.filter_side_container} container >
         <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
         <div className="d-flex align-items-center">
             {icon} <span className="listingHeader">{heading}
@@ -203,8 +203,8 @@ function LeadsHeader(props) {
                         value={searchVal}
                         size="small"
                         placeholder="Search Leads"
-                        width='242px'
-                        style={isMobile ? {flex:1} : {}}
+                        width={isMobile && !isTablet ? "200px" : "242px"}
+                        style={isMobile && !isTablet ? {flex:1} : {}}
                     />
 
                     </Grid>
