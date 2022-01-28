@@ -45,12 +45,15 @@ import { ECommerceContext } from "../../../components/ECommerce/Layout/ECommerce
 import React from "react";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 import ProductBOM from "../../../components/ProductList/BOM/ProductBOM";
+import ProductSummary from "./ProductSummary";
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    minHeight: "300px",
+    height: "70vh"
   },
   img: {
     height: "500px",
@@ -63,6 +66,12 @@ const useStyles = makeStyles(() => ({
   listClose: {
     backgroundColor: "#555555",
     color: "white"
+  },
+  buyRentSwitch: {
+    padding: "0 8px",
+  },
+  toggle_layout: {
+    backgroundColor: "white"
   }
 }));
 
@@ -340,7 +349,7 @@ export default function ProductDetails() {
       </div>
       <Box>
         {productDetails ?
-          <Grid container className="py-4 px-2" spacing={1}>
+          <Grid container className="py-4 px-2" spacing={4}>
             <Grid item xs={6} md={7} sm={7} className="d-flex flex-column align-items-center">
               <Box display="flex" justifyContent="center" alignItems="center" className='w-100' >
 
@@ -413,7 +422,7 @@ export default function ProductDetails() {
                     >
                       {productImages.map((image: any, i) => (
                         <div key={i} className={classes.imageContainer}>
-                          <img src={image} style={{ width: "100%" }} />
+                          <img src={image} style={{ width: "40vw", height: "100%", backgroundRepeat: "no-repeat" }} />
                         </div>
                       ))}
                     </Carousel>
@@ -425,52 +434,89 @@ export default function ProductDetails() {
                 </div>
               </Box>
             </Grid>
-            <Grid item xs={12} md={5} sm={5} className="px-3">
-              <h5>{productDetails.productCategory?.optionLabel}</h5>
-              <div className="w-100 d-flex align-items-center gap-2 justify-content-space-between" >
-                <h2 style={{ color: "var(--primary-light)", fontSize: "1.5rem" }}>{productDetails.productName}</h2>
-                <ToggleButtonGroup
-                  size="small"
-                  value={orderType}
-                  exclusive
+            <Grid item xs={12} md={5} sm={5} className="px-0 py-0 my-3" style={{ border: "1px solid grey" }}>
+              <Grid className=' px-2 py-2 first-content-Layout'>
+                <h5>{productDetails.productCategory?.optionLabel}</h5>
+                <div className="w-100 d-flex align-items-center gap-2 justify-content-space-between" >
+                  <h2 style={{ color: "white", fontSize: "1.5rem" }}>{productDetails.productName}</h2>
+                  <ToggleButtonGroup
+                    size="small"
+                    value={orderType}
+                    exclusive
+                    className={classes.toggle_layout}
 
-                  onChange={(_, value) => {
-                    if (value) {
-                      setOrderType(value);
-                      history.push(`${routes.eCommerceDetail.path}/${id}/${value}`)
+                    onChange={(_, value) => {
+                      if (value) {
+                        setOrderType(value);
+                        history.push(`${routes.eCommerceDetail.path}/${id}/${value}`)
+                      }
+                    }}
+                    aria-label="text alignment"
+                  >
+                    {
+                      Object.keys(ORDER_TYPES).map((key) => (
+                        <ToggleButton className={classes.buyRentSwitch} style={orderType === ORDER_TYPES[key].value ? { "background": "#40AC99", "color": "white" } : {}} value={ORDER_TYPES[key].value} aria-label="left aligned">
+                          {ORDER_TYPES[key].key}
+                        </ToggleButton>
+                      ))
                     }
-                  }}
-                  aria-label="text alignment"
-                >
-                  {
-                    Object.keys(ORDER_TYPES).map((key) => (
-                      <ToggleButton className={"buy-rent-switch"} style={orderType === ORDER_TYPES[key].value ? { "background": "var(--primary)", "color": "white" } : {}} value={ORDER_TYPES[key].value} aria-label="left aligned">
-                        {ORDER_TYPES[key].key}
-                      </ToggleButton>
-                    ))
-                  }
-                </ToggleButtonGroup>
-              </div>
+                  </ToggleButtonGroup>
+                </div>
 
-              <div className="d-flex gap-2 pt-1">
-                <h4 style={{ color: "var(--primary-light)", opacity: "0.8" }}> Available - </h4>
-                {productDetails?.available && <h4 className="mb-2"> {productDetails?.available}</h4>}
-              </div>
-              <Rating
-                name="half-rating-read"
-                defaultValue={4.5}
-                precision={0.5}
-                value={productDetails?.averageRating}
-                readOnly
-                size="small"
-              />
-              <hr></hr>
+                <div className="d-flex justify-content-space-between">
+                  <div className="d-flex gap-2 pt-1">
+
+                    <h4 style={{ color: "white", opacity: "0.8" }}> Available - </h4>
+                    {productDetails?.available && <h4 className="mb-2"> {productDetails?.available}</h4>}
+                  </div>
+                  <Box className="pl-3 pr-1 d-flex gap-4 align-items-baseline">
+                    {
+                      rateCurrency.rateWithCurrency
+                        ? <Typography variant="h5" style={{ fontWeight: "bold" }}>{rateCurrency.rateWithCurrency}</Typography>
+                        : <Typography variant="h6" className="text-error">Price calculation not available</Typography>
+                    }
+                    {
+                      rateCurrency.isRateMrpSame === false && <Typography variant="h5" className="custom-strike">{rateCurrency.mrp}</Typography>
+                    }
+                  </Box>
+                </div>
+                <Rating
+                  name="half-rating-read"
+                  defaultValue={4.5}
+                  precision={0.5}
+                  value={productDetails?.averageRating}
+                  readOnly
+                  size="small"
+                  className={"rating-design"}
+                />
+              </Grid>
               {
-                productDetails?.productShortDetail && <div className="mt-3 px-3" dangerouslySetInnerHTML={{ __html: productDetails?.productShortDetail }}></div>
+                productDetails?.productShortDetail && <div className="mt-3 mb-3 px-5" dangerouslySetInnerHTML={{ __html: productDetails?.productShortDetail }}></div>
               }
-              <Grid className="mt-3" container>
-                <Box p={3} >
-                  {productDetails.unit || productDetails.pricingMethod ? <Grid container spacing={2}>
+
+              <ProductConfiguration
+                initializeProductConfig={() => {
+                  const items = [...cartItems];
+                  const productIndex = getIndexOfProductInCart(items)
+                  if (productIndex !== -1 && productConfigData.fields.length > 0) {
+                    const productConfiguration = items[productIndex].productConfiguration;
+                    setProductConfigData({
+                      ...productConfigData,
+                      values: productConfiguration
+                    })
+                  }
+                }}
+                data={productConfigData}
+                handleChange={(values: any) => {
+                  setProductConfigData({
+                    ...productConfigData,
+                    values
+                  })
+                }}
+              />
+              {productDetails.unit || productDetails.pricingMethod ?
+                <Box p={1}>
+                  <Grid container spacing={2}>
                     <Grid item xs={productDetails.pricingMethod ? 6 : 12}>
                       {
                         productDetails.unit && <FormControl variant="outlined" margin="dense" fullWidth error={hasError && !data.selectedUnit}>
@@ -519,9 +565,12 @@ export default function ProductDetails() {
                         </FormControl>
                       }
                     </Grid>
-                  </Grid> : ""
-                  }
-                  {orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase() && <Grid item xs={12} sm={12} md={12}>
+                  </Grid>
+                </Box> : null
+              }
+              {orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase() &&
+                <Box p={1}>
+                  <Grid item xs={12} sm={12} md={12}>
                     <MuiPickersUtilsProvider utils={DateUtils}>
                       <Grid container spacing={2}>
                         <Grid item xs={6} sm={6}>
@@ -576,96 +625,73 @@ export default function ProductDetails() {
                       </Grid>
                     </MuiPickersUtilsProvider>
                   </Grid>
-                  }
-                  <ProductConfiguration
-                    initializeProductConfig={() => {
-                      const items = [...cartItems];
-                      const productIndex = getIndexOfProductInCart(items)
-                      if (productIndex !== -1 && productConfigData.fields.length > 0) {
-                        const productConfiguration = items[productIndex].productConfiguration;
-                        setProductConfigData({
-                          ...productConfigData,
-                          values: productConfiguration
-                        })
-                      }
-                    }}
-                    data={productConfigData}
-                    handleChange={(values: any) => {
-                      setProductConfigData({
-                        ...productConfigData,
-                        values
-                      })
-                    }}
-                  />
-                  <Box className="my-3 d-flex gap-4 align-items-baseline">
-                    {
-                      rateCurrency.rateWithCurrency
-                        ? <Typography variant="h5">{rateCurrency.rateWithCurrency}</Typography>
-                        : <Typography variant="h6" className="text-error">Price calculation not available</Typography>
-                    }
-                    {
-                      rateCurrency.isRateMrpSame === false && <Typography variant="h5" className="custom-strike">{rateCurrency.mrp}</Typography>
-                    }
-                  </Box>
-                  <Box>
-                    {
-                      productDetails && data.indexOfProductInCart > -1 && cartItems.length > 0 && cartItems.some(s => s.orderType.toLowerCase() === orderTypeInLowerCase && s.productDetail?._id === productDetails?._id)
-                        ? <Grid container>
-                          <Grid item xs={12} md={6}>
-                            <PlusMinusTextboxComponent
-                              inputTextLabel="Quantity"
-                              value={data.indexOfProductInCart > -1 ? cartItems[data.indexOfProductInCart]?.qty?.toString() ?? "1" : "1"}
-                              isRequired={true}
-                              onChange={(value) => {
-                                let items = [...cartItems];
-                                const indexOfProduct = getIndexOfProductInCart(items); // items.findIndex(s => s.orderType.toLowerCase() === orderTypeInLowerCase && s.productDetail?._id === id);
-                                updateCart(items[indexOfProduct]._id, Number(value), data.selectedUnit, data.selectedPricingMethod, data.startDate, data.endDate);
-                              }}
-                            />
-                          </Grid>
-                        </Grid>
-                        : <CustomButton
-                          type="button"
-                          className="mt-2"
-                          color="primary"
-                          variant="outlined"
-                          disabled={addToCartBtnLoading || (orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase() ? !(data.startDate && data.endDate && data.selectedUnit && data.selectedPricingMethod) : !data.selectedUnit)}
-                          loading={addToCartBtnLoading}
-                          startIcon={addToCartBtnLoading ? null : <AddShoppingCartIcon />}
-                          onClick={() => {
-                            if (data.selectedUnit && data.selectedPricingMethod) {
-                              setAddToCartBtnLoading(true)
-                              onAddToCartItem(productDetails)
-                            } else {
-                              setHasError(true)
-                            }
-                          }}
-                        >
-                          Add to cart
-                        </CustomButton>
-                    }
-                  </Box>
-                  <Box mt={3}>
-                    {
-                      data.indexOfProductInCart !== -1 && <CustomButton
-                        type="button"
-                        color="primary"
-                        variant="outlined"
-                        disabled={deleteProductFromCartConfirmationDialog.okBtnLoading}
-                        loading={deleteProductFromCartConfirmationDialog.okBtnLoading}
-                        startIcon={addToCartBtnLoading ? null : <RemoveShoppingCartIcon />}
-                        onClick={() => {
-                          setDeleteProductFromCartConfirmationDialog({ show: true, okBtnLoading: false })
-                        }}
-                      >
-                        Remove from cart
-                      </CustomButton>
-                    }
-                  </Box>
                 </Box>
-              </Grid>
-            </Grid>
-            <Grid item xs={2}>
+              }
+              <Box p={1} className="d-flex gap-4 align-items-baseline">
+                {
+                  rateCurrency.rateWithCurrency
+                    ? <Typography variant="h5">{rateCurrency.rateWithCurrency}</Typography>
+                    : <Typography variant="h6" className="text-error">Price calculation not available</Typography>
+                }
+                {
+                  rateCurrency.isRateMrpSame === false && <Typography variant="h5" className="custom-strike">{rateCurrency.mrp}</Typography>
+                }
+              </Box>
+              <Box p={1}>
+                {
+                  productDetails && data.indexOfProductInCart > -1 && cartItems.length > 0 && cartItems.some(s => s.orderType.toLowerCase() === orderTypeInLowerCase && s.productDetail?._id === productDetails?._id)
+                    ? <Grid container >
+                      <Grid item xs={12} md={6} >
+                        <PlusMinusTextboxComponent
+                          inputTextLabel="Quantity"
+                          value={data.indexOfProductInCart > -1 ? cartItems[data.indexOfProductInCart]?.qty?.toString() ?? "1" : "1"}
+                          isRequired={true}
+                          onChange={(value) => {
+                            let items = [...cartItems];
+                            const indexOfProduct = getIndexOfProductInCart(items); // items.findIndex(s => s.orderType.toLowerCase() === orderTypeInLowerCase && s.productDetail?._id === id);
+                            updateCart(items[indexOfProduct]._id, Number(value), data.selectedUnit, data.selectedPricingMethod, data.startDate, data.endDate);
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                    : <CustomButton
+                      type="button"
+                      className="mt-2 "
+                      color="primary"
+                      variant="outlined"
+                      disabled={addToCartBtnLoading || (orderTypeInLowerCase === ORDER_TYPES.rent?.value?.toLowerCase() ? !(data.startDate && data.endDate && data.selectedUnit && data.selectedPricingMethod) : !data.selectedUnit)}
+                      loading={addToCartBtnLoading}
+                      startIcon={addToCartBtnLoading ? null : <AddShoppingCartIcon />}
+                      onClick={() => {
+                        if (data.selectedUnit && data.selectedPricingMethod) {
+                          setAddToCartBtnLoading(true)
+                          onAddToCartItem(productDetails)
+                        } else {
+                          setHasError(true)
+                        }
+                      }}
+                    >
+                      Add to cart
+                    </CustomButton>
+                }
+              </Box>
+              <Box p={1}>
+                {
+                  data.indexOfProductInCart !== -1 && <CustomButton
+                    type="button"
+                    color="primary"
+                    variant="outlined"
+                    disabled={deleteProductFromCartConfirmationDialog.okBtnLoading}
+                    loading={deleteProductFromCartConfirmationDialog.okBtnLoading}
+                    startIcon={addToCartBtnLoading ? null : <RemoveShoppingCartIcon />}
+                    onClick={() => {
+                      setDeleteProductFromCartConfirmationDialog({ show: true, okBtnLoading: false })
+                    }}
+                  >
+                    Remove from cart
+                  </CustomButton>
+                }
+              </Box>
             </Grid>
           </Grid> : <Grid container className="py-4 px-2">
             <Grid item xs={4} className="d-flex flex-column align-items-center">
@@ -681,7 +707,6 @@ export default function ProductDetails() {
               <Skeleton width={150} height={50} />
               <Grid container className="mt-4">
                 <Grid item xs={12} md={6} className="d-flex flex-column gap-3">
-
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
                       <Skeleton width="100%" height={70} />
@@ -690,7 +715,6 @@ export default function ProductDetails() {
                       <Skeleton width="100%" height={70} />
                     </Grid>
                   </Grid>
-
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
                       <Skeleton width="100%" height={70} />
@@ -699,7 +723,6 @@ export default function ProductDetails() {
                       <Skeleton width="100%" height={70} />
                     </Grid>
                   </Grid>
-
                   <Box className="my-3 d-flex gap-4 align-items-baseline">
                     {
                       <div className="d-flex align-items-center gap-2">
@@ -715,11 +738,17 @@ export default function ProductDetails() {
               </Grid>
 
             </Grid>
-
           </Grid>
         }
         <hr />
-
+        {
+          <>
+            <div className="my-3 px-4">
+              <ProductSummary data={productConfigData} />
+            </div>
+            <hr />
+          </>
+        }
         {
           productDetails?.bom && productDetails?.bom.length > 0 && <>
             <div className="my-3 px-4">

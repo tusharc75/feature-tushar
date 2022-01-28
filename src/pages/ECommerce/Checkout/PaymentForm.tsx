@@ -60,9 +60,9 @@ const PaymentForm = ({ form, setForm, error }) => {
 
   return (
     <React.Fragment>
-      <Typography variant="h6" gutterBottom>
+      {/* <Typography variant="h6" gutterBottom>
         Payment details
-      </Typography>
+      </Typography> */}
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <TextField

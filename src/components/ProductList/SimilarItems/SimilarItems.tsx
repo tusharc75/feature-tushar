@@ -3,7 +3,7 @@ import { Rating } from '@material-ui/lab';
 import styles from './similar-items.module.scss';
 import { BsImage } from 'react-icons/bs';
 import { Grid, Paper } from '@material-ui/core';
-import { useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom';
 import routes from '../../Helpers/Routes';
 import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
@@ -17,69 +17,73 @@ import { formatAmountWithCurrency } from '../../../constants/helpers';
 
 const useStyles = makeStyles({
   table: {
-    minWidth: 650,
-  },
+    minWidth: 650
+  }
 });
 
 export default function SimilarItems({ similarItems, orderType }) {
-
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
   const classes = useStyles();
   const history = useHistory();
 
   const RenderProductDetails = ({ index }) => {
-    return similarItems[index] ? <>
-      <div className="text-center cursor-pointer" style={{ height: 150 }} onClick={() => {
-        history.push(`${routes.eCommerceDetail.path}/${similarItems[index]._id}/${orderType}`)
-      }}>
-        {
-          similarItems[index]?.productImage ? (
-            <img src={similarItems[index]?.productImage} alt={similarItems[index]?.productName} style={{ objectFit: "contain", height: "100%" }} />
+    return similarItems[index] ? (
+      <>
+        <div
+          className="text-center cursor-pointer"
+          style={{ height: 150 }}
+          onClick={() => {
+            history.push(`${routes.eCommerceDetail.path}/${similarItems[index]._id}/${orderType}`);
+          }}
+        >
+          {similarItems[index]?.productImage ? (
+            <img src={similarItems[index]?.productImage} alt={similarItems[index]?.productName} style={{ objectFit: 'contain', height: '100%' }} />
           ) : (
             <BsImage className={styles.no_image} />
-          )
-        }
-      </div>
-      <h3 className="my-3 text-center text-truncate">{similarItems[index]?.productName}</h3>
-    </> : <></>
-  }
+          )}
+        </div>
+        <h3 className="my-3 text-center text-truncate">{similarItems[index]?.productName}</h3>
+      </>
+    ) : (
+      <></>
+    );
+  };
 
   const RenderRating = ({ rating, reviews }) => {
-    return <div className="d-flex align-items-center justify-content-center">
-      <Rating name="size-small" value={rating || 5} readOnly size="small" /> <span className="ml-2 mt-1">({reviews || 134})</span>
-    </div>
-  }
+    return (
+      <div className="d-flex align-items-center justify-content-center">
+        <Rating name="size-small" value={rating || 5} readOnly size="small" /> <span className="ml-2 mt-1">({reviews || 134})</span>
+      </div>
+    );
+  };
 
   const RenderData = ({ text }) => {
-    return <div className="d-flex align-items-center justify-content-center">
-      {text}
-    </div>
-  }
+    return <div className="d-flex align-items-center justify-content-center">{text}</div>;
+  };
 
   const RenderPrice = ({ index }) => {
-    return similarItems[index] ? <div className={`${styles.price} d-flex align-items-center justify-content-center`}>
-      {
-        similarItems[index] ? `${formatAmountWithCurrency(similarItems[index].currency, similarItems[index].mrp ?? 0)?.fullFormatAmount}` : ""
-      }
-    </div> : <></>
-  }
+    return similarItems[index] ? (
+      <div className={`${styles.price} d-flex align-items-center justify-content-center`}>
+        {similarItems[index] ? `${formatAmountWithCurrency(similarItems[index].currency, similarItems[index].mrp ?? 0)?.fullFormatAmount}` : ''}
+      </div>
+    ) : (
+      <></>
+    );
+  };
 
   return (
     <>
-      <div className="d-flex w-100 align-items-center justify-content-center my-3">
-        <h1>Compare with similar items</h1>
+      <div className="d-flex w-100 align-items-center my-3 px-5">
+        <h2>Compare with similar items</h2>
       </div>
 
       <TableContainer component={Paper}>
         <Table className={classes.table} aria-label="simple table">
-
           <TableBody>
-
             <TableRow>
-
-              <TableCell height={300} width="10%" component="th" scope="row">
-
-              </TableCell>
+              <TableCell height={300} width="10%" component="th" scope="row"></TableCell>
               <TableCell width="22%">
                 <RenderProductDetails index={0} />
               </TableCell>
@@ -92,11 +96,9 @@ export default function SimilarItems({ similarItems, orderType }) {
               <TableCell width="23%">
                 <RenderProductDetails index={3} />
               </TableCell>
-
             </TableRow>
 
             <TableRow>
-
               <TableCell component="th" scope="row">
                 <RenderData text="Rating" />
               </TableCell>
@@ -112,11 +114,9 @@ export default function SimilarItems({ similarItems, orderType }) {
               <TableCell component="th" scope="row">
                 <RenderRating rating={3} reviews={334} />
               </TableCell>
-
             </TableRow>
 
             <TableRow>
-
               <TableCell component="th" scope="row">
                 <RenderData text="Vendor" />
               </TableCell>
@@ -132,11 +132,9 @@ export default function SimilarItems({ similarItems, orderType }) {
               <TableCell component="th" scope="row">
                 <RenderData text={user?.user?.brandName} />
               </TableCell>
-
             </TableRow>
 
             <TableRow>
-
               <TableCell component="th" scope="row">
                 <RenderData text="Price" />
               </TableCell>
@@ -152,16 +150,10 @@ export default function SimilarItems({ similarItems, orderType }) {
               <TableCell component="th" scope="row">
                 <RenderPrice index={3} />
               </TableCell>
-
             </TableRow>
-
           </TableBody>
         </Table>
       </TableContainer>
-
-
-
-
 
       {/* <Grid container>
 
@@ -208,7 +200,6 @@ export default function SimilarItems({ similarItems, orderType }) {
         }
 
       </Grid> */}
-
     </>
   );
 }
