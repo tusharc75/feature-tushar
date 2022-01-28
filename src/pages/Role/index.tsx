@@ -14,105 +14,18 @@ import CreateRole from "./CreateRole";
 import { PERMISSION } from "../../constants/Roles";
 import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid } from "../../constants/helpers";
 import RoleHeader from "./RoleHeader";
-import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import CustomAgGrid, {
+  reducer,
+  intialState,
+} from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
 import AssignRegionalRolesUserDialog from "../../components/AssignRolesDialog/AssignRegionalRolesUserDialog";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from 'react-router-dom'
 import { isMobile, isTablet } from 'react-device-detect';
-import {FaSuitcase,MdDescription,IoCreateSharp} from "react-icons/all";
+import { FaSuitcase, MdDescription, IoCreateSharp } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-
-function reducer(state, action) {
-  switch (action.type) {
-    case "loading":
-      return {
-        ...state,
-        loading: action.loading
-      }
-
-    case "initialize":
-      return {
-        ...state,
-        dataRows: action.data,
-        rowCount: action.count
-      }
-
-    case "selection":
-      return {
-        ...state,
-        selectedRecords: action.selectedRecords,
-      }
-
-    case "update":
-      return {
-        ...state,
-        dataRows: action.data,
-        loading: false
-      }
-
-    case "filter":
-      return {
-        ...state,
-        loading: true,
-        filters: action.filters,
-        page: 0
-      }
-
-    case "sort":
-      return {
-        ...state,
-        sorting: action.sorting,
-        loading: true
-      }
-
-    case "search":
-      return {
-        ...state,
-        search: action.search,
-        loading: true
-      }
-
-    case "pageChange":
-      return {
-        ...state,
-        page: action.page
-      }
-
-    case "pageSizeChange":
-      return {
-        ...state,
-        limit: action.limit,
-        page: 0,
-        loading: true
-      }
-
-    case "complete":
-      return {
-        ...state,
-        loading: false
-      }
-
-    default:
-      break;
-  }
-
-  return state;
-}
-
-const intialState = {
-  dataRows: [],
-  rowCount: 0,
-  loading: false,
-  page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
-  search: "",
-  filters: {},
-  sorting: [],
-  selectedRecords: []
-}
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 let roleTimeout;
@@ -136,7 +49,7 @@ const Roles: FC = () => {
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
-
+  const renderedFrom = routes.role.title
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -146,10 +59,20 @@ const Roles: FC = () => {
   const columns = [
     { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "description", headerName: "Description", show: true, cellRenderer: "commonRenderer" },
-    { field: "type", headerName: "Type", show: true, sortable: false, filter: false, cellRenderer: "commonRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
   ];
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+
+  if (columnState) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId === item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
   //  Grid Variables - End
 
   useEffect(() => {
@@ -470,20 +393,20 @@ const Roles: FC = () => {
             loading={loading}
             additionalDetails={[
               {
-                icon:<FaSuitcase size={18} />,
-                field:"type"
+                icon: <FaSuitcase size={18} />,
+                field: "type"
               }
             ]}
             chips={[
               {
-                icon:<MdDescription />,
-                label:"Description: ",
-                field:"description"
+                icon: <MdDescription />,
+                label: "Description: ",
+                field: "description"
               },
               {
-                icon:<IoCreateSharp />,
-                label:"Created By: ",
-                field:"createdBy"
+                icon: <IoCreateSharp />,
+                label: "Created By: ",
+                field: "createdBy"
               }
             ]}
             owerCollaboratorInitialsOrImages=""
@@ -494,7 +417,7 @@ const Roles: FC = () => {
               dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
               loading={loading}
               refreshGrid={fetchRoles}
-              renderedFrom={routes.role.title}
+              renderedFrom={renderedFrom}
           />}
 
         </CustomContainer>

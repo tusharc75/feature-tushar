@@ -39,6 +39,7 @@ const CreateRole = ({
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState({ name: "", description: "" });
+  const [cloneHeading, setCloneHeading] = useState("")
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -60,6 +61,7 @@ const CreateRole = ({
         data: { data },
       } = await axiosInstance().get(`/role/${roleId}`);
       setValues({ name: "", description: data.description });
+      setCloneHeading(data.name)
       setField(data.field);
       setResource(data.resource);
       setLoading(false);
@@ -174,7 +176,7 @@ const CreateRole = ({
         }
       }}
     >
-      <CustomDialogHeader title={isClone ? "Clone Role" : "Create New Role"}
+      <CustomDialogHeader title={isClone ? `Clone Role - [${cloneHeading}]` : "Create New Role"}
         onClose={() => setShowConfirmDialog(true)}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {

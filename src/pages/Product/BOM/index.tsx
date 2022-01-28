@@ -1,9 +1,24 @@
+import React from 'react';
 import MaterialTable from 'material-table';
 import { Link } from 'react-router-dom'
-import { materialTableIcons } from '../../constants/helpers';
+import { materialTableIcons, product } from '../../../constants/helpers';
 import { Box } from '@material-ui/core';
+import axiosInstance from '../../../axios/axiosInstance';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
-export default function ProductHierarchy({ data, permissions, unassignProduct }) {
+
+function ProductHierarchy({ data, permissions, unassignProduct,  fetchData= () => {}}) {
+    const {setToastConfig} = React.useContext(CustomToastContext);
+    const [showConfirmBox, setShowConfirmBox] = React.useState({open: false, data: null})
+    const [isDeleting, setIsDeleting] = React.useState(false)
+
+    const actions: any = [{
+        icon: "delete",
+        tooltip: "Delete product",
+        onClick: (_, rowData) => setShowConfirmBox({open: true, data: rowData})                      
+    }]
+
     const options: any = {
         search: false,
         paging: false,
@@ -11,7 +26,8 @@ export default function ProductHierarchy({ data, permissions, unassignProduct })
         draggable: false,
         padding: "dense",
         defaultExpanded: true,
-        toolbar: false
+        toolbar: false,
+        actionsColumnIndex: -1
     };
 
     const columns = [
@@ -51,6 +67,25 @@ export default function ProductHierarchy({ data, permissions, unassignProduct })
         // }
     ];
 
+
+    const handleRemove = () => {
+        setIsDeleting(true)
+        const {data} = showConfirmBox
+        axiosInstance().put(`${product.api}/${data.productId}/bom/remove`, {
+            ids: [data._id]
+        })
+        .then(({data}) => {
+            setIsDeleting(false)
+            setShowConfirmBox({open: false, data: null});
+            setToastConfig({open:true, message: "Successfully Deleted", type:"success"})
+            fetchData()
+        })
+        .catch(err => {
+            setToastConfig(err)
+            setIsDeleting(false)
+        })
+    }
+
     return (
         <>
             {
@@ -59,19 +94,32 @@ export default function ProductHierarchy({ data, permissions, unassignProduct })
                     data={data}
                     columns={columns}
                     options={options}
+                    actions={actions}
                 /> :
                     <Box margin={1}>
                         <MaterialTable
                             icons={materialTableIcons}
                             data={data}
                             columns={columns}
-                            parentChildData={(row, rows) => {
-                                return rows.find(a => (a._id === row.parent) || (a.treeId === row.parent) )
-                            }}
+                            actions={actions}
+                            // parentChildData={(row, rows) => {
+                            //     return rows.find(a => (a._id === row.parent) || (a.treeId === row.parent) )
+                            // }}
                             options={options}
                         />
                     </Box>
             }
+           {showConfirmBox.open &&  <ConfirmationDialog
+              open={true}
+              message={`Are you sure you want to delete this product?`}
+              okBtnLoading={isDeleting}
+              onClose={() => {
+                setShowConfirmBox({open: false, data: null});
+              }}
+              onOk={handleRemove}
+            />}
         </>
     );
 }
+
+export default ProductHierarchy

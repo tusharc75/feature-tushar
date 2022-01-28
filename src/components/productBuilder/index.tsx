@@ -129,13 +129,17 @@ const ProductBuilder = (props) => {
       data.priceTemplate?.forEach((ele) => {
         fields = [...fields, ...ele.fields]
         ele.fields.map((item) => {
-          if(item.type === 'converter') {
-            item.displayUnits.map((unit) => {
+          if (item.type === 'converter') {
+            item?.displayUnits.map((unit) => {
               priceTemplateField.push(`${item.fieldName}_${unit.toLowerCase()}`)
             })
+
+          }
+          if (item?.type === 'decimal') {
+            priceTemplateField.push(`${item.fieldName}`)
           }
         })
-        
+
       })
       setPriceTemplateField(priceTemplateField)
       GenrateColoum(fields, columns, rendererNames);
@@ -244,6 +248,7 @@ const ProductBuilder = (props) => {
               col.headerName = fieldLabel
               col.width = 180
               col.show = true
+              col.disabled = false
               col.leval = ele.leval
               if (!ele.isFormula && !ele.isUneditable && Editable) {
                 col.cellRenderer = "commonRenderer";
@@ -267,6 +272,7 @@ const ProductBuilder = (props) => {
                 col.headerName = fieldLabel
                 col.width = 180
                 col.show = true
+                col.disabled = false
                 col.leval = ele.leval
                 if (!ele.isFormula && !ele.isUneditable && Editable) {
                   col.cellRenderer = "commonRenderer";
@@ -290,6 +296,7 @@ const ProductBuilder = (props) => {
               col.headerName = fieldLabel
               col.width = 180
               col.show = true
+              col.disabled = false
               col.leval = ele.leval
               if (!ele.isFormula && !ele.isUneditable && Editable) {
                 col.cellRenderer = "commonRenderer";
