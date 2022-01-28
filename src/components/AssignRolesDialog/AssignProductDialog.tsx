@@ -72,14 +72,22 @@ const AssignProductDialog = ({
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
         }
         if (!isObjectEmpty(filters)) {
-            const updatedFilters = [];
-
+            const updatedFilters = [{
+                field: "productType",
+                term: "Part"
+            }];
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: field,
                     term: filters[field].filter
                 })
             });
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
+        } else {
+            const updatedFilters = [{
+                field: "productType",
+                term: "Part"
+            }];
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
 
@@ -107,7 +115,7 @@ const AssignProductDialog = ({
         }
 
         const queryString = getQueryString();
-        axiosInstance().get(`${product.api}/bom/${productId}/available-products`).then(({ data }) => {
+        axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
             // let tData = data.filter(o => o._id !== productId)
             // tData = tData.map(obj => ({ ...obj, isChecked: assignedProducts.some(item => item?._id === obj?._id) ? true : false }))
             data.data = data.data?.map((u) => ({
@@ -175,34 +183,31 @@ const AssignProductDialog = ({
 
 
     const handleAssignProduct = async () => {
-        if (selectedRecords.length > 0) {
-            setAssigning(true);
-            const dataObj = {
-                "_id": productId,
-                "bom": selectedRecords.filter(d => d.quantity > 0).map(d => {
-                    return ({
-                        "product": d.id,
-                        "qty": Number(d.quantity)
-                    })
+        setAssigning(true);
+        const dataObj = selectedRecords.filter(d => d.quantity > 0)
+            .map(d => {
+                return ({
+                    "childProduct": d.id,
+                    "qty": Number(d.quantity)
                 })
-            };
+            })
 
-            await axiosInstance().post(`/product/bom`, dataObj)
-                .then(({ data }) => {
-                    setAssigning(false);
-                    toastConfig.setToastConfig({
-                        message: data.message,
-                        type: "success",
-                        open: true,
-                    });
-
-                    onSuccess();
-                })
-                .catch((error) => {
-                    setAssigning(false);
-                    toastConfig.setToastConfig(error);
+        await axiosInstance().post(`/product/${productId}/bom`, dataObj)
+            .then(({ data }) => {
+                setAssigning(false);
+                toastConfig.setToastConfig({
+                    message: data.message,
+                    type: "success",
+                    open: true,
                 });
-        }
+
+                onSuccess();
+            })
+            .catch((error) => {
+                setAssigning(false);
+                toastConfig.setToastConfig(error);
+            });
+        
     };
 
     const handleSearch = (e) => {
@@ -306,7 +311,7 @@ const AssignProductDialog = ({
                     Cancel
                 </Button>
                 <Button
-                    disabled={isAssigning || disableSaveButton}
+                    disabled={isAssigning || disableSaveButton || selectedRecords.length === 0}
                     onClick={handleAssignProduct}
                     color="primary"
                     size="small"
