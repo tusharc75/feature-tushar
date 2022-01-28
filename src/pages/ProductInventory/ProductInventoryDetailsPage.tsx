@@ -23,7 +23,7 @@ import ManageRepairJob from '../RepairJob/ManageRepairJob'
 import { Link } from 'react-router-dom'
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import BoxWithBorder from "../../components/BoxWithBorder";
-import ProductHierarchy from "../Product/ProductHierarchy";
+import ProductHierarchy from "../Product/BOM";
 import { FaDiceOne, FaWpforms } from "react-icons/fa";
 import { isMobile, isTablet } from "react-device-detect";
 import { BiFoodMenu } from "react-icons/bi";

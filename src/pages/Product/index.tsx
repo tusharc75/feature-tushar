@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
+import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import AddIcon from "@material-ui/icons/Add";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { Link, useHistory } from 'react-router-dom'
@@ -12,47 +11,29 @@ import CreateProduct from "../../components/Product/CreateProduct";
 import { RiShoppingBag3Fill } from 'react-icons/ri';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import { AddOutlined, ExpandMore, Search } from "@material-ui/icons";
-import { Box, InputAdornment, Menu, MenuItem } from "@material-ui/core";
+import { AddOutlined, ExpandMore } from "@material-ui/icons";
+import { Box, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import ImportExportLinks from "../../components/Product/ImportExportLinks";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { product, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
-import {
-    CommonRenderer
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useData } from "../../StateProvider/Provider";
-import { sortBy } from 'lodash';
 import { RiBillLine } from "react-icons/ri";
 import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
-import useColumns, {
-    getStaticFields, getFrameworkComponents,
-    getColumnHiddenStatus, getSortedColumns
-} from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers";
 import Tooltip from '@material-ui/core/Tooltip'
-import { MdAccountCircle } from "react-icons/md";
-import { AiFillCrown, MdAdd } from "react-icons/all";
+import { MdAdd } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { IoPricetagsSharp } from 'react-icons/io5';
 
 const ignoreField = ["qty", "priceTemplate"]
-
-var levalOrderBy = [
-    "product",
-    "product-custom",
-    "product-template",
-    "price-template",
-    "product-builder-custom",
-    "price-builder-custom",
-];
-
 
 const Product = () => {
 
@@ -79,6 +60,11 @@ const Product = () => {
     const [productCategory, setProductCategory] = useState(null);
     const [productTemplate, setProductTemplate] = useState(null);
     const [isProductTemplate, setIsProductTemplate] = useState(true);
+
+    const [productType, setProductType] = useState(null);
+    const [productTypeList, setProductTypeList] = useState([]);
+    const [isProductType, setIsProductType] = useState(true);
+
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
     const localStorageSelectedRecords = `${routes.product.title}_selected`;
@@ -122,13 +108,22 @@ const Product = () => {
         if (productColoums && productColoums.length) {
             fetchProduct()
         }
-    }, [page, limit, filters, sorting, search, selectedEntity, productColoums, productCategory, productTemplate]);
+    }, [page, limit, filters, sorting, search, selectedEntity, productColoums, productCategory, productTemplate, productType]);
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Product&view=true").then(({ data: { data } }) => {
             if (data.filter((e) => e.fieldData.fieldName === "productTemplate").length === 0) {
                 setIsProductTemplate(false)
             }
+
+            const productTypes = data.find((e) => e.fieldData.fieldName === "productType")
+
+            if (productTypes) {
+                setProductTypeList([...productTypes.fieldData.option]);
+            } else {
+                setIsProductType(false)
+            }
+
             let columns = []
             let rendererNames = []
             data.forEach(o => {
@@ -311,15 +306,15 @@ const Product = () => {
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
         }
+
+        const updatedFilters = [];
         if (!isObjectEmpty(filters)) {
-            const updatedFilters = [];
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
                     term: filters[field].filter
                 })
             });
-            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
@@ -334,9 +329,16 @@ const Product = () => {
         if (productTemplate && productTemplate !== "") {
             filterById.push({ field: 'productTemplate', term: productTemplate });
         }
+        if (productType && productType !== "") {
+            updatedFilters.push({ field: 'productType', term: productType });
+        }
         if (filterById.length) {
             deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + "&filterType=and"
         }
+
+        if (updatedFilters.length > 0)
+            return `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
+
         return deepFilter;
     };
 
@@ -478,11 +480,39 @@ const Product = () => {
         <div className="main-container">
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={isMobile ? 12 : 6} className="d-flex align-items-center gap-1 layout-for-tablet">
+                    <Grid item xs={isMobile ? 12 : 8} className="d-flex align-items-center gap-1 layout-for-tablet">
                         <Grid style={{ display: "flex", justifyContent: "center" }}>
                             <RiShoppingBag3Fill size={22} style={{ paddingBottom: "3px" }} className="headerLogo" />
                             <span className="listingHeader">{routes.product.title} </span>
                         </Grid>
+
+                        {isProductType &&
+                            <Autocomplete
+                                style={{ width: "250px" }}
+                                options={productTypeList}
+                                getOptionLabel={(option: any) => option ? option.optionLabel : ""}
+                                getOptionSelected={(option: any, val) =>
+                                    option.optionValue === val
+                                }
+                                value={productTypeList.filter((data) => data.optionValue === productType).length
+                                    ? productTypeList.filter((data) => data.optionValue === productType)[0]
+                                    : ""
+                                }
+                                onChange={(e, val) => {
+                                    setProductType(val && val.optionValue ? val.optionValue : "")
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        margin="dense"
+                                        name="productType"
+                                        label="Product Type"
+                                        variant="outlined"
+                                        fullWidth
+                                    />
+                                )}
+                            />}
+
                         <Autocomplete
                             style={{ width: "250px" }}
                             options={productCategoryList}
@@ -548,7 +578,7 @@ const Product = () => {
                                 )}
                             />}
                     </Grid>
-                    <Grid item xs={isMobile ? 12 : 6}>
+                    <Grid item xs={isMobile ? 12 : 4}>
                         <Grid container className={styles.filter_side} >
                             <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
                                 <Grid style={{ display: "flex", flex: 1 }}>
