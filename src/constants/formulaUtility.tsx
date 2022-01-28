@@ -766,12 +766,12 @@ export const checkFieldDependency = (fieldId, sectionId, section) => {
     }
 }
 
-export const optionConverter = (option, units, unitoption, dropdownOnConverter, _unit) => {
+export const optionConverter = (option, units, unitoption, dropdownOnConverter, _unit, decimalPlaces) => {
     const result = JSON.parse(JSON.stringify(option))
     let indexConverter = units.indexOf(dropdownOnConverter);
-    if (indexConverter >= 0 && unitoption) {
+    if (indexConverter >= 0 && unitoption && unitoption.length) {
         result.forEach((ele) => {
-            const calValue = (ele.optionValue * unitoption[indexConverter][_unit]).toString()
+            const calValue = (parseFloat((ele.optionValue * unitoption[indexConverter]?.[_unit])?.toFixed(decimalPlaces)))?.toString()
             ele.optionLabel = calValue
             ele.optionValue = calValue
         })

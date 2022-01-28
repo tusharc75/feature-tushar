@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import {
   Button,
   Checkbox,
+  Chip,
   CircularProgress,
   FormControl,
   FormControlLabel,
@@ -27,6 +28,8 @@ import StepContent from "@material-ui/core/StepContent";
 import { roleTypes } from "../../constants/helpers";
 import SearchBox from "../Helpers/SearchBox";
 import { useData } from "../../StateProvider/Provider";
+import CustomReactTable from "../CustomReactTable/CustomReactTable";
+import NoDataCell from "../Helpers/NoDataCell";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -57,6 +60,9 @@ const AssignEntityDialog = ({
   contactResource = '',
 }) => {
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { user },
+  }: any = useData();
   const [data, setData] = useState([]);
   const [dataConst, setDataConst] = useState([]);
   const [role, setRole] = useState([]);
@@ -70,6 +76,28 @@ const AssignEntityDialog = ({
   const steps = [`Select ${type}`, 'Select Role']
   const [search, setSearch] = useState("");
   const classes = useStyles();
+
+  const columns = [{
+    accessor: 'detail',
+    Header: 'Detail',
+    minWidth: 150,
+    width: 150,
+    sticky: "left",
+    Cell: ({ row }) => (
+      row.original.detail ?
+        <>
+          {row.original.detail}
+          <Chip
+            className="ml-3"
+            color="primary"
+            size="small"
+            label={`${startCase(row.original.type)}`}
+          />
+        </> : <NoDataCell />
+    )
+  }]
+  const [rowsData, setRowsData] = useState(null);
+  const [selectedEntity, setSelectedEntity] = useState([])
 
   const handleNext = () => {
     setSearch('')
@@ -96,9 +124,25 @@ const AssignEntityDialog = ({
         });
     }
     else {
-      setLoadingData(false);
-      setData(JSON.parse(localStorage.getItem("mappedEntities")).map(obj => ({ ...obj, entityName: obj.optionLabel, _id: obj.optionValue, isChecked: false, show: true })));
-      setDataConst(JSON.parse(localStorage.getItem("mappedEntities")).map(obj => ({ ...obj, entityName: obj.optionLabel, _id: obj.optionValue, isChecked: false, show: true })));
+      axiosInstance()
+        .get(`/user/${user?.user?._id}`)
+        .then(({ data: { data } }) => {
+          let row = []
+          data.entities.forEach(d => {
+            d.entity["detail"] = d.entity?.entityName
+            d.entity["type"] = "entity"
+            d.entity["customId"] = d.entity._id
+            d.entity["subRows"] = d.role.map(({ _id, ...r }) => ({ ...r, detail: r.name, parentId: d.entity._id, type: "role", customId: _id }))
+            const { _id, ...rest } = d.entity
+            row.push({ ...rest })
+          })
+          setRowsData(row)
+          setLoadingData(false);
+        })
+        .catch((error) => {
+          setLoadingData(false);
+          toastConfig.setToastConfig(error);
+        });
     }
 
     axiosInstance()
@@ -124,13 +168,13 @@ const AssignEntityDialog = ({
 
   const handleAccessPortal = () => {
     let payLoad = {
-      [contactResource] : ids,
+      [contactResource]: ids,
       entities: selectedData,
       roles: selectedRole
     }
     axiosInstance()
       .put('/user/create-user-from-contact', payLoad)
-      .then(({data}) => {
+      .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -146,43 +190,38 @@ const AssignEntityDialog = ({
 
 
   const handleAssignEntity = async () => {
+    setAssigning(true);
+    let dataObj: any;
     if (selectedData.length) {
-      setAssigning(true);
-      let dataObj: any;
-
-      if (type === "entity") {
-        dataObj = {
-          users: ids,
-          entities: selectedData,
-          roles: selectedRole
-        };
-      }
-
-      else {
-        dataObj = {
-          users: selectedData,
-          entities: ids,
-          roles: selectedRole
-        };
-
-      }
-      await axiosInstance()
-        .put(type === "entity" ? `/user/assign-multiple-entities` : `/user/assign-regional-role`, dataObj)
-        .then(() => {
-          setAssigning(false);
-          toastConfig.setToastConfig({
-            message: `${startCase(type)} assigned successfully`,
-            type: "success",
-            open: true,
-          });
-
-          onSuccess();
-        })
-        .catch((error) => {
-          setAssigning(false);
-          toastConfig.setToastConfig(error);
-        });
+      dataObj = {
+        users: selectedData,
+        entities: ids,
+        roles: selectedRole
+      };
     }
+    if (selectedEntity.length && type === "entity") {
+      let tempEntity = selectedEntity.filter(d => d.type === "entity").map(d => ({ entity: d?.customId, role: d?.subRows?.map(r => r.customId) }))
+      dataObj = {
+        users: ids,
+        entities: tempEntity
+      };
+    }
+    await axiosInstance()
+      .put(type === "entity" ? `/user/assign-multiple-entities` : `/user/assign-regional-role`, dataObj)
+      .then(() => {
+        setAssigning(false);
+        toastConfig.setToastConfig({
+          message: `${startCase(type)} assigned successfully`,
+          type: "success",
+          open: true,
+        });
+
+        onSuccess();
+      })
+      .catch((error) => {
+        setAssigning(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleSearch = (e) => {
@@ -302,9 +341,23 @@ const AssignEntityDialog = ({
     //   aria-labelledby="assign-roles-dialog"
     // >
     <>
-      {!isRenderedFromUserSetUp && <CustomDialogHeader title={regionalRole ? `Assign role` : type === "entity" ? 'Assign Entities - Roles' : `Assign  ${startCase(type)}`} />}
+      {!isRenderedFromUserSetUp && <CustomDialogHeader
+        title={regionalRole ? `Assign role` : type === "entity" ? 'Assign Entities - Roles' : `Assign  ${startCase(type)}`}
+        onClose={handleCloseDialog}
+      />}
       <CustomDialogContent>
-        {!regionalRole ? (loadingData ? (
+        {type === "entity" && columns && rowsData && (
+          <CustomReactTable
+            height="calc(100vh - 345px)"
+            columns={columns}
+            data={rowsData}
+            onSelect={setSelectedEntity}
+            childrenProperty="subRows"
+            uniqueKey="customId"
+          />
+        )
+        }
+        {type !== "entity" && (!regionalRole ? (loadingData ? (
           <Loader text={`Loading ${startCase(type)}`} />
         ) : dataConst.length ? (
           <>
@@ -408,7 +461,7 @@ const AssignEntityDialog = ({
           ))}
         </List>) : (
           <Typography>{`All Region wide functional role has been assigned`}</Typography>
-        )}
+        ))}
       </CustomDialogContent>
       <CustomDialogFooter>
         {!isRenderedFromUserSetUp &&
@@ -422,7 +475,7 @@ const AssignEntityDialog = ({
           </Button>
         }
         <Button
-          disabled={!selectedData?.length || !selectedRole?.length}
+          disabled={type === "entity" ? !selectedEntity?.length : (!selectedData?.length || !selectedRole?.length)}
           onClick={isRenderedFromContact ? handleAccessPortal : handleAssignEntity}
           color="primary"
           size="small"

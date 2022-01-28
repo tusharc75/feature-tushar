@@ -46,8 +46,19 @@ const TopDashboard = (props) => {
     salesReps,
     customerAccounts, } = props;
   const [anchorElChart, setAnchorElChart] = useState(null);
+  const [currentFilter, setCurrentFilter] = useState('');
 
   const [filter, setFilter] = useState<any>({
+    marketSegment: {},
+    salesRep: {},
+    customerAccount: {},
+    subMarketSegment: {},
+    productCategory: {},
+    countrySellTo: {},
+    countryBillTo: {}
+  });
+
+  const [filterBookedValue, setFilterBookedValue] = useState<any>({
     marketSegment: {},
     salesRep: {},
     customerAccount: {},
@@ -172,13 +183,38 @@ const TopDashboard = (props) => {
           profitValue: profitValue
         });
 
+        setLoadingChart(false);
+      })
+      .catch((err) => {
+        setLoadingChart(false);
+      });
+  }, [salesFilter, filter, filterCurrency, selectedEntity]);
+
+  const fetchSalesDataBookedValue = useCallback(() => {
+    setLoadingChart(true);
+    let url = getURL()
+    axiosInstance()
+      .get(`dashboard/sales${url}`)
+      .then(async ({ data: { data } }) => {
+        const saleData = [];
+        const costData = [];
+        const labels = [];
+        const budget = [];
+
+        data = data.sort((a, b) => {
+          const aDate = new Date(a.date).getTime();
+          const bDate = new Date(b.date).getTime();
+
+          return aDate - bDate;
+        });
+
         setSalesData({
           allData: data,
           labels,
           datasets: [
             {
               type: 'line',
-              label: 'Total offered value',
+              label: 'Total booked value',
               borderColor: 'rgb(54, 162, 235)',
               borderWidth: 2,
               fill: true,
@@ -199,11 +235,15 @@ const TopDashboard = (props) => {
       .catch((err) => {
         setLoadingChart(false);
       });
-  }, [salesFilter, filter, filterCurrency, selectedEntity]);
+  }, [salesFilter, filterBookedValue, filterCurrency, selectedEntity]);
 
   useEffect(() => {
     fetchSalesData();
   }, [fetchSalesData]);
+
+  useEffect(() => {
+    fetchSalesDataBookedValue();
+  }, [fetchSalesDataBookedValue]);
 
   useEffect(() => {
     let url = getURL()
@@ -325,11 +365,13 @@ const TopDashboard = (props) => {
               fullWidth
               options={salesReps}
               autoHighlight
-              value={filter.salesRep}
-              getOptionLabel={(option) => option.name || ''}
+              value={currentFilter === "sale" ? filter.salesRep : filterBookedValue.salesRep}
+              getOptionLabel={(option: any) => option.name || ''}
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
               onChange={(_, val) => {
-                setFilter({ ...filter, salesRep: val });
+                currentFilter === "sale" ?
+                  setFilter({ ...filter, salesRep: val })
+                  : setFilterBookedValue({ ...filterBookedValue, salesRep: val });
               }}
               renderInput={(params) => <TextField {...params} label="Sales Rep" variant="outlined" />}
             />
@@ -339,11 +381,11 @@ const TopDashboard = (props) => {
               fullWidth
               options={customerAccounts}
               autoHighlight
-              value={filter.customerAccount}
-              getOptionLabel={(option) => option.name || ''}
+              value={currentFilter === "sale" ? filter.customerAccount : filterBookedValue.customerAccount}
+              getOptionLabel={(option: any) => option.name || ''}
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
               onChange={(_, val) => {
-                let data = { ...filter, customerAccount: val }
+                let data = currentFilter === "sale" ? { ...filter, customerAccount: val } : { ...filterBookedValue, customerAccount: val }
                 if (val?.countryBillTo) {
                   let foundCountry = Countries.find(o => o.optionValue === val?.countryBillTo)
                   if (foundCountry) {
@@ -356,7 +398,9 @@ const TopDashboard = (props) => {
                     data.countrySellTo = foundCountry
                   }
                 }
-                setFilter({ ...data });
+                currentFilter === "sale" ?
+                  setFilter({ ...data })
+                  : setFilterBookedValue({ ...data })
               }}
               renderInput={(params) => <TextField {...params} label="Customer Account" variant="outlined" />}
             />
@@ -366,11 +410,13 @@ const TopDashboard = (props) => {
               fullWidth
               options={marketSegments}
               autoHighlight
-              value={filter.marketSegment}
-              getOptionLabel={(option) => option.name || ''}
+              value={currentFilter === "sale" ? filter.marketSegment : filterBookedValue.marketSegment}
+              getOptionLabel={(option: any) => option.name || ''}
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
               onChange={(_, val) => {
-                setFilter({ ...filter, marketSegment: val });
+                currentFilter === "sale" ?
+                  setFilter({ ...filter, marketSegment: val })
+                  : setFilterBookedValue({ ...filterBookedValue, marketSegment: val });
                 if (val) {
                   setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
                 } else {
@@ -385,10 +431,12 @@ const TopDashboard = (props) => {
               fullWidth
               options={subMarketSegments}
               autoHighlight
-              value={filter.subMarketSegment}
-              getOptionLabel={(option) => option.name || ''}
+              value={currentFilter === "sale" ? filter.subMarketSegment : filterBookedValue.subMarketSegment}
+              getOptionLabel={(option: any) => option.name || ''}
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-              onChange={(_, val) => setFilter({ ...filter, subMarketSegment: val })}
+              onChange={(_, val) => currentFilter === "sale" ?
+                setFilter({ ...filter, subMarketSegment: val })
+                : setFilterBookedValue({ ...filterBookedValue, subMarketSegment: val })}
               renderInput={(params) => <TextField {...params} label="Sub-Market Segment" variant="outlined" />}
             />
             <Box mt={1} />
@@ -397,10 +445,12 @@ const TopDashboard = (props) => {
               fullWidth
               options={productCategory}
               autoHighlight
-              value={filter.productCategory}
+              value={currentFilter === "sale" ? filter.productCategory : filterBookedValue.productCategory}
               getOptionLabel={(option) => option.name || ''}
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-              onChange={(_, val) => setFilter({ ...filter, productCategory: val })}
+              onChange={(_, val) => currentFilter === "sale" ?
+                setFilter({ ...filter, productCategory: val })
+                : setFilterBookedValue({ ...filterBookedValue, productCategory: val })}
               renderInput={(params) => <TextField {...params} label="Product Category" variant="outlined" />}
             />
             <Box mt={1} />
@@ -410,10 +460,12 @@ const TopDashboard = (props) => {
               fullWidth
               options={Countries}
               autoHighlight
-              value={filter.countrySellTo}
-              getOptionLabel={(option) => option.optionLabel || ''}
+              value={currentFilter === "sale" ? filter.countrySellTo : filterBookedValue.countrySellTo}
+              getOptionLabel={(option: any) => option.optionLabel || ''}
               getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
-              onChange={(_, val) => setFilter({ ...filter, countrySellTo: val })}
+              onChange={(_, val) => currentFilter === "sale" ?
+                setFilter({ ...filter, countrySellTo: val })
+                : setFilterBookedValue({ ...filterBookedValue, countrySellTo: val })}
               renderInput={(params) => <TextField {...params} label="Country Sell To" variant="outlined" />}
             />
             <Box mt={1} />
@@ -423,10 +475,12 @@ const TopDashboard = (props) => {
               fullWidth
               options={Countries}
               autoHighlight
-              value={filter?.countryBillTo}
-              getOptionLabel={(option) => option.optionLabel || ''}
+              value={currentFilter === "sale" ? filter?.countryBillTo : filterBookedValue?.countryBillTo}
+              getOptionLabel={(option: any) => option.optionLabel || ''}
               getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
-              onChange={(_, val) => setFilter({ ...filter, countryBillTo: val })}
+              onChange={(_, val) => currentFilter === "sale" ?
+                setFilter({ ...filter, countryBillTo: val })
+                : setFilterBookedValue({ ...filterBookedValue, countryBillTo: val })}
               renderInput={(params) => <TextField {...params} label="Country Bill To" variant="outlined" />}
             />
           </Box>
@@ -434,7 +488,13 @@ const TopDashboard = (props) => {
       </Popover>
       <Grid item xs={12} sm={12} md={12} lg={8}>
         <Grid item xs={12} sm={4} md={2}>
-          <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+          <Button
+            onClick={(event) => {
+              handleClickFilter(event)
+              setCurrentFilter("sale")
+            }}
+            color="primary"
+            endIcon={<FilterList />}>
             Filters
           </Button>
         </Grid>
@@ -538,7 +598,13 @@ const TopDashboard = (props) => {
         <Paper elevation={2}>
           <Box p={2}>
             <Box display="flex" justifyContent="space-between">
-              <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
+              <Button
+                onClick={(event) => {
+                  handleClickFilter(event)
+                  setCurrentFilter("bookedValue")
+                }}
+                color="primary"
+                endIcon={<FilterList />}>
                 Filters
               </Button>
               <Button onClick={handleClickChart} startIcon={<ImportExport />}>
@@ -620,6 +686,7 @@ const TopDashboard = (props) => {
           currency={currency}
           getExchangeRates={getExchangeRates}
           salesReps={salesReps}
+          salesFilter={salesFilter}
           productCategory={productCategory}
           customerAccounts={customerAccounts}
           marketSegments={marketSegments} />

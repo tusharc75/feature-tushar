@@ -12,7 +12,7 @@ const OpportunityTrends = (props) => {
   const {
     state: { selectedEntity }
   } = useData();
-  const { customerAccounts, marketSegments, salesReps, moment } = props;
+  const { customerAccounts, marketSegments, salesReps, moment, salesFilter } = props;
   const [oppTrends, setOppTrends] = useState({
     labels: [],
     datasets: []
@@ -22,7 +22,7 @@ const OpportunityTrends = (props) => {
     datasets: []
   });
 
-  const [salesFilterAnchor, setFilterAnchor] = useState(null);
+  const [filterAnchor, setFilterAnchor] = useState(null);
   const [openFilter, setOpenFilter] = useState(false);
   const [subMarketSegments, setSubMarketSegments] = useState([]);
   const [currentFilter, setCurrentFilter] = useState('');
@@ -33,10 +33,6 @@ const OpportunityTrends = (props) => {
     customerAccount: {},
     subMarketSegment: {},
     productCategory: {},
-    between: {
-      from: new Date(moment().subtract(1, 'year').calendar()),
-      to: new Date()
-    },
     countrySellTo: {},
     countryBillTo: {}
   });
@@ -47,10 +43,6 @@ const OpportunityTrends = (props) => {
     customerAccount: {},
     subMarketSegment: {},
     productCategory: {},
-    between: {
-      from: new Date(moment().subtract(1, 'year').calendar()),
-      to: new Date()
-    },
     countrySellTo: {},
     countryBillTo: {}
   });
@@ -64,15 +56,15 @@ const OpportunityTrends = (props) => {
       countrySellTo: oppurtunityFilter.countrySellTo ? oppurtunityFilter.countrySellTo["optionValue"] : '',
       countryBillTo: oppurtunityFilter.countryBillTo ? oppurtunityFilter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
-        from: new Date(oppurtunityFilter.between.from).toISOString().split('T')[0],
-        to: new Date(oppurtunityFilter.between.to).toISOString().split('T')[0]
+        from: new Date(salesFilter.between.from).toISOString().split('T')[0],
+        to: new Date(salesFilter.between.to).toISOString().split('T')[0]
       })
     };
 
     let url = '?';
     for (const k of Object.keys(params)) {
       if (params[k]) {
-        if (k === 'between' && oppurtunityFilter.between.from && oppurtunityFilter.between.to) {
+        if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
           url = `${url}${k}=${params[k]}&`;
         }
         if (k !== 'between') {
@@ -145,7 +137,7 @@ const OpportunityTrends = (props) => {
         });
       })
       .catch((err) => { });
-  }, [oppurtunityFilter, selectedEntity]);
+  }, [oppurtunityFilter, selectedEntity, salesFilter]);
 
   useEffect(() => {
     fetchOppTrends();
@@ -160,15 +152,15 @@ const OpportunityTrends = (props) => {
       countrySellTo: leadFilter.countrySellTo ? leadFilter.countrySellTo["optionValue"] : '',
       countryBillTo: leadFilter.countryBillTo ? leadFilter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
-        from: new Date(leadFilter.between.from).toISOString().split('T')[0],
-        to: new Date(leadFilter.between.to).toISOString().split('T')[0]
+        from: new Date(salesFilter.between.from).toISOString().split('T')[0],
+        to: new Date(salesFilter.between.to).toISOString().split('T')[0]
       })
     };
 
     let url = '?';
     for (const k of Object.keys(params)) {
       if (params[k]) {
-        if (k === 'between' && leadFilter.between.from && leadFilter.between.to) {
+        if (k === 'between' && salesFilter.between.from && salesFilter.between.to) {
           url = `${url}${k}=${params[k]}&`;
         }
         if (k !== 'between') {
@@ -210,7 +202,7 @@ const OpportunityTrends = (props) => {
         });
       })
       .catch((err) => { });
-  }, [selectedEntity, leadFilter]);
+  }, [selectedEntity, leadFilter, salesFilter]);
 
   useEffect(() => {
     fetctCreatedLeads();
@@ -225,7 +217,7 @@ const OpportunityTrends = (props) => {
     <Grid container spacing={2}>
       <Popover
         open={openFilter}
-        anchorEl={salesFilterAnchor}
+        anchorEl={filterAnchor}
         onClose={handleClickFilter}
         anchorOrigin={{
           vertical: 'bottom',
