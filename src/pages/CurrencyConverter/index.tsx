@@ -181,7 +181,7 @@ const CurrencyConverter = () => {
           <CustomBreadCrumbs routes={[routes.currencyConverter]} />
         </Grid>
       </Grid>
-      <CustomContainer>
+      <CustomContainer styles={{overflowY:"auto"}}>
         <div className="header-panel">
           <Grid container>
             <Grid item xs={6} md={6} sm={6} className="d-flex align-items-center gap-1">
@@ -257,7 +257,7 @@ const CurrencyConverter = () => {
                     > Fetch Rates</CustomButton>
                   </Grid>
                 </Grid>
-                <Box mt={1} border={1} p={1} borderColor="grey.300"  >
+                <Box mt={1} border={1} p={1} borderColor="grey.300" style={{overflowX:"auto"}} >
                   <table>
                     <thead>
                       <tr>

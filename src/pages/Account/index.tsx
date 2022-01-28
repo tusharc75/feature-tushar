@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState, useReducer } from 'react';
 import { useData } from '../../StateProvider/Provider';
 import { Button, Menu, MenuItem, Tooltip, IconButton, Grid, Chip, MenuList } from '@material-ui/core';
-import ReactGa from 'react-ga';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { ExpandMore, AddOutlined } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -785,10 +784,6 @@ export default function Account(props) {
   };
 
   const clickCreateNew = () => {
-    ReactGa.event({
-      category: 'Account Button',
-      action: 'clicked'
-    });
     setIsAccDialogVisible(true);
   };
 

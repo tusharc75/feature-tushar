@@ -251,7 +251,7 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
                   <Step key={label}>
                     <StepLabel StepIconComponent={QontoStepIcon}>
                       <>
-                        {label?.user?.slice(0, 3).map((obj) => (
+                        {label?.user?.slice(0, 3).filter(user => user?.firstName && user?.lastName).map((obj) => (
                           <div style={{ color: "#09445A" }}>
                             <Link
                               title={obj?.firstName}

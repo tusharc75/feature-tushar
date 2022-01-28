@@ -64,6 +64,7 @@ export default function ManageUserDialog({
     useState(0);
   const [formValues, setFormValues] = useState(dataToUpdate ? dataToUpdate : {})
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [cloneHeadingName,setCloneHeadingName] = useState('');
 
   const getInitialData = useCallback(() => {
     setLoading(true);
@@ -87,6 +88,7 @@ export default function ManageUserDialog({
                 : getObjKeysWithValues({ ...rest }, newFields),
             });
             setFormValues(isNew ? getObjKeys("", newFields) : getObjKeysWithValues({ ...rest }, newFields))
+            setCloneHeadingName(firstName)
           })
         }
         else {
@@ -174,6 +176,7 @@ export default function ManageUserDialog({
           });
           setSubmitting(false);
           onSuccess(data);
+              
         })
         .catch((error) => {
           setToastConfig(error);
@@ -217,7 +220,7 @@ export default function ManageUserDialog({
     >
       <CustomDialogHeader
         title={
-          isClone ? "Clone" :
+          isClone ? `Clone User - [${cloneHeadingName}]` :
             isNew
               ? "Create New User"
               : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName]

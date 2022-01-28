@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.49.0](https://github.com/vebholic/oms_frontend/compare/v2.48.1...v2.49.0) (2022-01-28)
+
+
+### Features
+
+* **feat_avisekh:** feat_avisekh ([7cf158f](https://github.com/vebholic/oms_frontend/commit/7cf158f197edb9f4779bd70c41ebe0a0a20b818b))
+* **Product:** Inventory count, plants removed ([b8dc2d8](https://github.com/vebholic/oms_frontend/commit/b8dc2d86ca50ad2d7edda80a4fa0c6583773f73f))
+
+
+### Bug Fixes
+
+* assign entity dialog changes ([4c6fe46](https://github.com/vebholic/oms_frontend/commit/4c6fe46257c0f551a99c6082feef53486b49de57))
+* **bom:** name changes and style fix ([aa1ef5a](https://github.com/vebholic/oms_frontend/commit/aa1ef5a0ab60adbc7fad2c60e74b72ee6d638f23))
+* bug fix ([22c8a0b](https://github.com/vebholic/oms_frontend/commit/22c8a0bebf9657b2c9be0c33fb27cb5cdb2d4984))
+* bug fix ([97f0929](https://github.com/vebholic/oms_frontend/commit/97f0929071cceeef53fa3af6850d795fd3ca4d72))
+* bug fix ([c03143c](https://github.com/vebholic/oms_frontend/commit/c03143c8cc624d37e340028802bfdbc3b69120e8))
+* dashboard fixes ([5d93e07](https://github.com/vebholic/oms_frontend/commit/5d93e07ac644e4f13d5d4e8a350f57e17ed50b59))
+* **DOA:** deleted user not to be shown ([794d755](https://github.com/vebholic/oms_frontend/commit/794d75508afe1c5957e545d279c4987e02d43cac))
+* **feature/avisekh:** feature/avisekh ([cb1b487](https://github.com/vebholic/oms_frontend/commit/cb1b487847e85a4b758846792b4c76c541f83266))
+* fix ([99d5a62](https://github.com/vebholic/oms_frontend/commit/99d5a6250e480d94c9d048d77cd905414140204a))
+* rental fix ([cb24d72](https://github.com/vebholic/oms_frontend/commit/cb24d7221b6b4d54cf92211950785b6bb7c2f377))
+
 ### [2.48.1](https://github.com/vebholic/oms_frontend/compare/v2.48.0...v2.48.1) (2022-01-27)
 
 ## [2.48.0](https://github.com/vebholic/oms_frontend/compare/v2.47.0...v2.48.0) (2022-01-26)

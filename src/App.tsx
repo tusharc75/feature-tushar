@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState, lazy } from 'react';
 import { ThemeProvider } from '@material-ui/core';
-import ReactGA from 'react-ga';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { theme } from './constants/AppConfig';
@@ -149,7 +148,6 @@ function App() {
       localStorage.setItem('slowInternetConnection', 'false');
     }
   });
-  // ReactGA.initialize(TRACKING_ID);
 
   useEffect(() => {
     if (!mappedEntities) {
@@ -172,10 +170,6 @@ function App() {
       if (!isOffline) {
         getNotification();
         getChatNotification();
-        history.listen((location, action) => {
-          ReactGA.set({ page: location.pathname });
-          ReactGA.pageview(location.pathname);
-        });
       }
       if (isOffline) {
         if (notificationInterval) {

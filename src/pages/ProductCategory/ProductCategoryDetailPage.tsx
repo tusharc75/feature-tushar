@@ -94,7 +94,7 @@ const ProductCategoryDetailPage = () => {
       });
   };
 
-  const handleDeleteWarehouse = () => {
+  const handleDeleteProductCategory = () => {
     if (id) {
       if (permissions?.address?.isDelete) {
         axiosInstance()
@@ -131,11 +131,12 @@ const ProductCategoryDetailPage = () => {
       {openUpdateDialog && (
         <CreateProductCategory
           open={openUpdateDialog}
-          close={closeUpdateDialog}
-          fetchData={() => {
-            fetchProductCategoryData();
-          }}
-          productCategoryResource={productCategoryResource}
+          onClose={closeUpdateDialog}
+          // fetchData={() => {
+          //   fetchProductCategoryData();
+          // }}
+          productCategoryId={id}
+          isUpdateDisabled = {false}
           isClone={false}
           onSuccess={() => {
             fetchProductCategoryData();
@@ -152,7 +153,7 @@ const ProductCategoryDetailPage = () => {
           onClose={() => {
             setShowConfirmBox(false)
           }}
-          onOk={handleDeleteWarehouse}
+          onOk={handleDeleteProductCategory}
         />
       )}
       <Fragment>

@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
   },
   addOnProducts: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, minmax(200px, 1fr)) minmax(250px, 350px)',
+    gridTemplateColumns: 'minmax(200px, 1fr) minmax(15px , 25px) minmax(200px, 1fr) minmax(15px , 25px) minmax(200px, 1fr) minmax(15px , 25px) minmax(250px, 350px)',
     justifyContent: 'center',
     backgroundColor: '#F9F9F9',
     padding: '20px 30px',
@@ -27,20 +27,21 @@ const useStyles = makeStyles((theme) => ({
     gridWrap: 'wrap',
 
     '@media screen and (max-width: 960px)': {
-      gridTemplateColumns: 'repeat(3, minmax(200px, 1fr)) ',
-      gridTemplateRow: '1fr 1fr'
+      gridTemplateColumns: 'minmax(180px, 1fr) minmax(15px , 20px) minmax(180px, 1fr) minmax(15px , 20px) minmax(180px, 1fr) minmax(15px , 20px) ',
+      gridTemplateRow: '1fr 1fr',
+      padding:"20px 10px",
     },
-    '@media screen and (max-width: 768px)': {
-      gridTemplateColumns: 'repeat(2, minmax(200px, 1fr)) ',
-      gridTemplateRow: '1fr 1fr'
-    }
+    // '@media screen and (max-width: 768px)': {
+    //   gridTemplateColumns: 'repeat(2, minmax(200px, 1fr)) ',
+    //   gridTemplateRow: '1fr 1fr'
+    // }
   },
   gridLayout: {
     '@media screen and (max-width: 960px)': {
       gridColumn: '1/-1'
     },
     '@media screen and (max-width: 768px)': {
-      gridColumn: 'auto'
+      gridColumn: '1/-1'
     }
   },
 
@@ -56,10 +57,10 @@ const useStyles = makeStyles((theme) => ({
   addIcon: {
     backgroundColor: '#F9F9F9'
   },
-  imgLayout:{
-    display:"grid",
-    gridTemplateRows: 'minmax(100px , 200px)'
-  }
+  // imgLayout:{
+  //   display:"grid",
+  //   gridTemplateRows: 'minmax(100px , 200px)'
+  // }
 }));
 
 function FrequentlyBought({ mainProductMrp, mainProductWithCurrency, id, orderType }) {
@@ -209,7 +210,7 @@ function FrequentlyBought({ mainProductMrp, mainProductWithCurrency, id, orderTy
         <Grid container className="d-flex justify-content-center align-item-center" style={{ backgroundColor: 'white' }}>
           {frequentData[index]?.productImage ? (
             
-              <Grid xs={12}  className={`${classes.imgLayout} position-relative`}>
+              <Grid xs={12}  className={` position-relative`}>
               <img
                 src={frequentData[index]?.productImage}
                 className={`${classes.logoAlign} cursor-pointer`}
@@ -270,37 +271,37 @@ function FrequentlyBought({ mainProductMrp, mainProductWithCurrency, id, orderTy
       <Grid className={classes.addOnProducts}>
         
           <Grid container className="d-flex justify-content-center align-item-center" style={{ backgroundColor: 'white' }}>
-            <Grid item xs={11}>
+            
               <RenderProductDetails index={0} />
-            </Grid>
 
-            <Grid item xs={1} className={`${classes.addIcon} d-flex justify-content-center align-item-center`}>
+          </Grid>
+
+          <Grid className={`${classes.addIcon} d-flex justify-content-center align-item-center`}>
               <h2 className='align-self-center'>+</h2>
             </Grid>
-          </Grid>
 
 
           <Grid container className="d-flex justify-content-center align-item-center" style={{ backgroundColor: 'white' }}>
-          <Grid item xs={11}>
+          
             <RenderProductDetails index={1} />
+
           </Grid>
 
-          <Grid item xs={1} className={`${classes.addIcon} d-flex justify-content-center align-item-center`}>
+          <Grid className={`${classes.addIcon} d-flex justify-content-center align-item-center`}>
             <h2 className='align-self-center'>+</h2>
           </Grid>
-          </Grid>
 
 
           <Grid container className="d-flex justify-content-center align-item-center" style={{ backgroundColor: 'white' }}>
-          <Grid item xs={11}>
+
             <RenderProductDetails index={2} />
+
           </Grid>
-          <Grid item xs={1} className={`${classes.addIcon} d-flex justify-content-center align-item-center`}>
+ 
+          <Grid className={`${classes.addIcon} d-flex justify-content-center align-item-center`}>
             <h2 className='align-self-center'>=</h2>
           </Grid>
           
-          </Grid>
-
 
 
           <Grid
