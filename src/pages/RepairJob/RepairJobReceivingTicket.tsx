@@ -308,7 +308,15 @@ const RepairJobReceivingTicket = (props) => {
                 >
                     <Tooltip
                         title="Create Receiving Ticket">
-                        <AddBoxRoundedIcon />
+                        {/* <AddBoxRoundedIcon /> */}
+                        <Button
+                            variant="contained"
+                            size="small"
+                            color="primary"
+                            disabled={selectedRecords.length === 0 || !selectedRecords.every(f => f.deliveryTicketId && f.isDeliveryTicketDelivered) || selectedRecords.some(f => f.hasOwnProperty("receivingTicketId"))}
+                        >
+                            Create Recieving Ticket
+                        </Button>
                     </Tooltip>
                 </IconButton>
             }
@@ -325,7 +333,15 @@ const RepairJobReceivingTicket = (props) => {
                 >
                     <Tooltip
                         title="Remove Assets From Receiving Ticket(s)">
-                        <RemoveCircleRoundedIcon />
+                        {/* <RemoveCircleRoundedIcon /> */}
+                        <Button
+                            variant="contained"
+                            size="small"
+                            color="primary"
+                            disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId"))}
+                        >
+                            Remove Assets
+                        </Button>
                     </Tooltip>
                 </IconButton>
             }

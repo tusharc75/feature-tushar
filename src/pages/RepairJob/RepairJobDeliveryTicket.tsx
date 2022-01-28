@@ -401,7 +401,20 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
             size="small"
           >
             <Tooltip title="Create Loading Ticket">
-              <AddBoxRoundedIcon />
+              {/* <AddBoxRoundedIcon /> */}
+              <Button
+                variant="contained"
+                size="small"
+                color="primary"
+                disabled={
+                  selectedRecords.length === 0 ||
+                  selectedRecords.some((f) => f.hasOwnProperty('deliveryTicketId')) ||
+                  selectedRecords.some((f) => f.repaired === true) ||
+                  selectedRecords.some((f) => f.status === 'Lost')
+                }
+                >
+                  Create Loading Ticket
+                </Button>
             </Tooltip>
           </IconButton>
         )}
@@ -420,7 +433,19 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
             size="small"
           >
             <Tooltip title="Remove Assets From Loading Ticket(s)">
-              <RemoveCircleRoundedIcon />
+              {/* <RemoveCircleRoundedIcon /> */}
+              <Button
+                variant="contained"
+                size="small"
+                color="primary"
+                disabled={
+                  selectedRecords.length === 0 ||
+                  selectedRecords.some((f) => f.hasOwnProperty('deliveryTicketId') === false) ||
+                  selectedRecords.some((f) => f.isDelivered === true)
+                }
+                >
+                  Remove Assets
+                </Button>
             </Tooltip>
           </IconButton>
         )}
