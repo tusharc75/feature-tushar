@@ -22,7 +22,7 @@ import AssignedFrequentlyBoughtProduct from './AssignedFrequentlyBoughtProduct';
 import AssignProductDialog from '../../components/AssignRolesDialog/AssignProductDialog';
 import ManageProductInventory from '../ProductInventory/ManageProductInventory';
 import { extractFieldsForDisplay } from '../../constants/formulaUtility';
-import ProductHierarchy from './ProductHierarchy';
+import ProductHierarchy from './BOM';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
@@ -204,16 +204,16 @@ const ProductDetailsPage = () => {
   };
 
   const getProductTree = () => {
-    if (productData?._id) {
       setLoadingBOMData(true);
       axiosInstance()
-        .get(`/product/bom/${productData?._id}`)
+        .get(`/product/${id}/bom`)
         .then(({ data: { data } }) => {
           data = data.map((o) => {
-            if (o?.parent) {
-              o.type = 'child';
-            }
-            return o;
+            return {
+              ...o, 
+              productName: o.childProductDetail.productName, 
+              productId: o.childProductDetail._id
+            };
           });
           setBOMData([...data]);
           setLoadingBOMData(false);
@@ -221,19 +221,19 @@ const ProductDetailsPage = () => {
         .catch((err) => {
           setLoadingBOMData(false);
         });
-    }
+
   };
 
-  const getFrequentlyBoughtProduct = () => {
-    axiosInstance()
-      .get(`${product.api}/frequent/` + id)
-      .then(({ data }) => {
-        setFrequentlyBoughtProduct(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
+  // const getFrequentlyBoughtProduct = () => {
+  //   axiosInstance()
+  //     .get(`${product.api}/frequent/` + id)
+  //     .then(({ data }) => {
+  //       setFrequentlyBoughtProduct(data.data);
+  //     })
+  //     .catch((err) => {
+  //       toastConfig.setToastConfig(err);
+  //     });
+  // };
 
   const unassignProduct = async (obj) => {
     if (obj) {
@@ -542,7 +542,12 @@ const ProductDetailsPage = () => {
                                                 product={frequentlyBoughtProduct}
                                                 unassignProduct={unassignProduct}
                                             /> */}
-                        <ProductHierarchy data={BOMData} permissions={permissions.product} unassignProduct={unassignProduct} />
+                        <ProductHierarchy 
+                          fetchData={getProductTree}
+                          data={BOMData}
+                          permissions={permissions.product} 
+                          unassignProduct={unassignProduct}
+                        />
                         <Box px={1} my={1}>
                           <Button
                             fullWidth
@@ -756,7 +761,7 @@ const ProductDetailsPage = () => {
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
           assignedProducts={BOMData}
           onSuccess={() => {
-            getFrequentlyBoughtProduct();
+            // getFrequentlyBoughtProduct();
             if (process.env.REACT_APP_ENV !== 'staging') {
               getProductTree();
             }
