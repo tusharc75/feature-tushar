@@ -314,7 +314,7 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
           }) => (
             <Fragment>
               <CustomDialogHeader
-                title={`Edit Product - ${values?.productName}`}
+                title={`${isClone ? "Clone" : "Edit"} Product - ${values?.productName}`}
                 onClose={handleClose}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
