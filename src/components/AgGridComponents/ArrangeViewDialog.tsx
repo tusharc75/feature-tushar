@@ -79,6 +79,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       }
     });
 
+    newCols = newCols.filter(item => item)
     setSortedColumns(newCols);
     setOldDate(JSON.stringify(newCols));
     setNewData(JSON.stringify(newCols));
@@ -86,7 +87,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
 
 
   React.useEffect(() => {
-    if(oldData === newData) {
+    if (oldData === newData) {
       setHasChanged(false)
     } else {
       setHasChanged(true)
@@ -95,7 +96,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     const allColumnShow = sortedColumns.filter(col => col.show === false).length === 0;
     setAllChecked(allColumnShow)
 
-  },[oldData, newData, sortedColumns])
+  }, [oldData, newData, sortedColumns])
 
   const handleToggle = (column: any) => (event: React.ChangeEvent<HTMLInputElement>) => {
     const newColumns = [...sortedColumns];
