@@ -1,46 +1,27 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { Grid, Button, TextField, Box, CircularProgress, useTheme, useMediaQuery } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
-import { List } from '@material-ui/icons';
+import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
 import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
+import { MdDescription, MdChevronLeft } from 'react-icons/md';
 import styles from '../Leads/Header.module.scss';
 
 import routes from './../../components/Helpers/Routes';
 import axiosInstance from '../../axios/axiosInstance';
-import HideWhenOffline from '../../components/HideWhenOffline';
 import CustomContainer from '../../components/CustomContainer';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import VirtualizedList from '../../components/VirtualizedList';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import {
-  resourceNames,
-  RENTAL_STATUS,
-  INVENTORY_STATUS,
-  prepareDataForGrid,
-  gridLoadingTimeout,
-  downloadExcel,
-  primaryFields,
-  dateFormat
-} from './../../constants/helpers';
+import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource } from './../../constants/helpers';
 import Loader from '../../components/Loader';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-
-const resourcesSelect = {
-  rentalManagement: ['customerAccount', 'customerContact', 'warehouse', 'status'],
-  productInventory: ['productCategory', 'product', 'warehouse', 'status']
-};
+import ReportFilters from './ReportFilters';
 
 let cancelTokenSource = null;
-
-const simplifyStatus = (statusType: any) => Object.values(statusType).map((status: string) => status);
 
 const Report = () => {
   const theme = useTheme();
@@ -53,22 +34,20 @@ const Report = () => {
   let { resource } = useParams();
   let history = useHistory();
 
-  const status = {
-    rentalManagement: simplifyStatus(RENTAL_STATUS),
-    productInventory: simplifyStatus(INVENTORY_STATUS)
-  };
   let resourceCamelCase = camelCase(resource);
   let resourceStartCase = startCase(resource);
   const renderedFrom = `${resource}-report`;
 
-  const [dropdownList, setDropdownList] = React.useState([]);
-  const [selectedData, setSelectedData] = React.useState([]);
-  const [betweenDate, setBetweenDate] = React.useState({
-    startDate: new Date(),
-    endDate: new Date(),
-  });
-  const [selectedResource, setSelectedResource] = React.useState([]);
+  const [showGrid, setShowGrid] = React.useState(false);
+  const [selectedData, setSelectedData] = React.useState(null);
+  const [betweenDate, setBetweenDate] = React.useState(null);
+  const [filterOptions, setFilterOptions] = React.useState([]);
+  const [selectedResources, setSelectedResources] = React.useState([]);
+  const [resourceOptions, setResourceOptions] = React.useState(null);
+  const [formValues, setFormValues] = React.useState({});
+  const [resourceColumns, setResourceColumns] = React.useState([]);
   const [isExporting, setExporting] = React.useState(false);
+  const [loadingColumns, setLoadingColumns] = React.useState(false);
 
   // Grid Configs
   const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
@@ -78,22 +57,13 @@ const Report = () => {
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
-  const [resourceOptions, setResourceOptions] = React.useState([]);
-  React.useEffect(() => {
-    if (resource === "rental-management") {
-      setResourceOptions(["Date", ...resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : resourceNames[_r]))])
-    }
-    else {
-      setResourceOptions(resourcesSelect[resourceCamelCase].map((_r: string) => (_r === 'status' ? 'Status' : resourceNames[_r])))
-    }
-    fetchResourceData()
-    // eslint-disable-next-line
-  }, []);
-
   const fetchGridColumns = () => {
+    setLoadingColumns(true)
     axiosInstance()
       .get(`/field?resource=${resourceStartCase}`)
       .then(({ data: { data } }) => {
+        setResourceColumns(data);
+        setLoadingColumns(false)
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
@@ -118,7 +88,10 @@ const Report = () => {
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns]);
       })
-      .catch((error) => toastConfig.setToastConfig(error));
+      .catch((error) => {
+        setLoadingColumns(false)
+        toastConfig.setToastConfig(error)
+      });
   };
 
   React.useEffect(() => {
@@ -126,32 +99,12 @@ const Report = () => {
       fetchGridColumns();
       initialRender.current = false;
     }
-
-    let timeout = setTimeout(fetchDropdownData, 400);
-    if (!selectedResource) setSelectedData(null);
-    return () => clearTimeout(timeout);
-  }, [selectedResource]);
-
-  const fetchDropdownData = () => {
-    if (!selectedResource) return;
-    const lookup = selectedResource
-      .filter((s: string) => s !== 'Status')
-      .map((r: string) => (r === 'Plant' ? 'Warehouse' : r))
-      .join();
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=${lookup}`)
-      .then(({ data: { data } }) => {
-        setDropdownList(data);
-      })
-      .catch((error) => toastConfig.setToastConfig(error));
-  };
-
+  }, []);
   /**
    * Fetch resource data for selected filters,
    * @returns none if no data selected
    */
   const fetchResourceData = () => {
-
     if (cancelTokenSource) {
       cancelTokenSource.cancel();
     }
@@ -160,6 +113,7 @@ const Report = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
+    setShowGrid(true);
     let filterQuery = getFilter();
 
     axiosInstance()
@@ -179,6 +133,9 @@ const Report = () => {
       })
       .catch((err) => {
         if (!axios.isCancel(err)) {
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
           toastConfig.setToastConfig(err);
         }
       });
@@ -187,40 +144,48 @@ const Report = () => {
   // Create and return query for filters
   const getFilter = () => {
     let filterQuery = '';
-    if (((selectedData && Object.keys(selectedData).length === 0) || !selectedData) && !selectedResource.includes("Date")) return filterQuery;
-    let filterById = Object.keys(selectedData)
-      .filter((d) => d !== 'Status')
-      .map((_d) => {
-        const field = camelCase(_d);
+    if (selectedData) {
+      const keys = Object.keys(selectedData);
+      const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
+      const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
+
+      let filterById = idFilter.map((key) => {
+        const options = selectedData[key].value;
         return {
-          field,
+          field: key,
           term: {
-            $in: selectedData[_d === 'Plant' ? 'Warehouse' : _d].map((d: any) => d.optionValue)
+            $in: options.map((d: any) => d.optionValue)
           }
         };
       });
 
-    let deepFilter = selectedData['Status']
-      ? selectedData['Status'].map((_d) => ({
-        field: 'status',
-        term: _d
-      }))
-      : [];
+      let deepFilter = [];
+      forDeepFilter.forEach((key) => {
+        const options = selectedData[key].value;
+        const filters = options.map((o: any) => ({
+          field: key,
+          term: o.optionValue
+        }));
+        deepFilter = [...deepFilter, ...filters];
+      });
 
-    if (filterById.length > 0) {
-      filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
-    }
 
-    if (deepFilter && deepFilter.length > 0) {
-      filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
-    }
-    if (betweenDate) {
-      let tempBetween = {
-        from: betweenDate.startDate,
-        to: betweenDate.endDate
+      if (filterById.length > 0) {
+        filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
       }
+
+      if (deepFilter && deepFilter.length > 0) {
+        filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
+      }
+    }
+    if (betweenDate && (betweenDate.actualStartDate || betweenDate.actualEndDate) && (betweenDate.EstimateStartDate || betweenDate.EstimateEndDate)) {
+      let tempBetween = {
+        from: betweenDate.actualStartDate || betweenDate.actualEndDate,
+        to: betweenDate.actualStartDate || betweenDate.actualEndDate
+      };
       filterQuery = `${filterQuery}between=${JSON.stringify(tempBetween)}&`;
     }
+
     return `?${filterQuery}`;
   };
 
@@ -251,45 +216,73 @@ const Report = () => {
       });
   };
 
-  const workingPage = ['productInventory', 'rentalManagement'];
-
-  if (!workingPage.includes(resourceCamelCase)) {
-    history.goBack();
-  }
-
   return (
-    <div>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: 'Reports', path: '/reports' }, { title: routes[resourceCamelCase]?.title, path: '' }]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justifyContent="flex-end">
-                <div id="importExportLinks" style={{ minWidth: 80 }}>
-                  <span
-                    aria-disabled={isExporting}
-                    onClick={exportData}
-                    className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
-                    style={{ color: theme.palette.info.light, }}
-                  >
-                    Export All
-                  </span>
-                </div>
+    <MuiPickersUtilsProvider utils={MomentUtils}>
+      <div>
+        <Grid container className="headerbox">
+          <Grid item md={4} sm={11} xs={10}>
+            <CustomBreadCrumbs
+              routes={[
+                { title: 'Reports', path: '/reports' },
+                { title: routes[resourceCamelCase]?.title, path: '' }
+              ]}
+            />
+          </Grid>
+
+          <Grid item md={8} sm={1} xs={2}>
+            <Grid container direction="row">
+              <Grid item xs={12} sm={12}>
+                <Grid container justifyContent="flex-end">
+                  <div id="importExportLinks" style={{ minWidth: 80 }}>
+                    <span
+                      aria-disabled={isExporting}
+                      onClick={exportData}
+                      className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
+                      style={{ color: theme.palette.info.light }}
+                    >
+                      Export All
+                    </span>
+                  </div>
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
         </Grid>
-      </Grid>
-      <CustomContainer styles={{ paddingTop: 10 }}>
-        {workingPage.includes(resourceCamelCase) && (
+        <CustomContainer>
           <>
             <div className="header-panel">
+              <Grid container className={styles.filter_side_container}>
+                <Grid item xs={12} className="d-flex align-items-center gap-1 layout-for-tablet">
+                  <Box display="flex" justifyContent="center" alignItems="center">
+                    {showGrid && (
+                      <Box mr={1}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="primary"
+                          disableElevation
+                          onClick={() => {
+                            setSelectedData(null);
+                            setShowGrid(false);
+                          }}
+                          startIcon={<MdChevronLeft />}
+                        >
+                          Go Back
+                        </Button>
+                      </Box>
+                    )}
+                    <MdDescription size={22} className="headerLogo" />
+                    <span className="listingHeader">Reports</span>
+                  </Box>
+                </Grid>
+              </Grid>
+            </div>
+            <hr />
+            {/* <div className="header-panel">
               <Grid container className={styles.rental_header_layout} spacing={1}>
                 <Grid item xs={12} md={3}>
                   <Autocomplete
-                    options={["All", ...resourceOptions]}
+                    options={['All', ...resourceOptions]}
                     limitTags={2}
                     disableListWrap
                     ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
@@ -297,10 +290,9 @@ const Report = () => {
                     multiple
                     value={selectedResource ?? []}
                     onChange={(_, val) => {
-                      if (val.includes("All")) {
+                      if (val.includes('All')) {
                         setSelectedResource(resourceOptions);
-                      }
-                      else {
+                      } else {
                         setSelectedResource(val);
                       }
                       if (selectedData) {
@@ -330,7 +322,7 @@ const Report = () => {
                       selectedResource.map((data: string) => {
                         data = data === 'Plant' ? 'Warehouse' : data;
                         const options = data === 'Status' ? status[resourceCamelCase] : dropdownList && dropdownList[data] ? dropdownList[data] : [];
-                        if (data === "Date") {
+                        if (data === 'Date') {
                           return (
                             <MuiPickersUtilsProvider utils={MomentUtils}>
                               <KeyboardDatePicker
@@ -349,9 +341,9 @@ const Report = () => {
                                 }}
                                 format={dateFormat}
                                 InputLabelProps={{
-                                  shrink: true,
+                                  shrink: true
                                 }}
-                                margin='dense'
+                                margin="dense"
                               />
                               <Box mx={1} />
                               <KeyboardDatePicker
@@ -370,14 +362,13 @@ const Report = () => {
                                 }}
                                 format={dateFormat}
                                 InputLabelProps={{
-                                  shrink: true,
+                                  shrink: true
                                 }}
-                                margin='dense'
+                                margin="dense"
                               />
                             </MuiPickersUtilsProvider>
                           );
-                        }
-                        else {
+                        } else {
                           return (
                             <Grid item xs={12} sm={4} key={data}>
                               <Autocomplete
@@ -399,7 +390,6 @@ const Report = () => {
                             </Grid>
                           );
                         }
-
                       })}
                   </Grid>
                 </Grid>
@@ -419,69 +409,90 @@ const Report = () => {
                   </Box>
                 </Grid>
               </Grid>
-            </div>
-            <div>
-              {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                isSmall ? (
-                  <CustomSwipableList
-                    allowSelection={false}
-                    allowSwipe={false}
-                    permissions={permissions[resourceCamelCase]}
-                    primaryField={columns?.find((d) => d.primaryField)}
-                    onClick={(data) => {
-                      history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
-                    }}
-                    selectedRecords={[]}
-                    dataRows={dataRows}
-                    dispatch={dispatch}
-                    onEdit={() => { }}
-                    extraParamsToCheckDelete={false}
-                    rowCount={rowCount}
-                    page={page}
-                    loading={loading}
-                    chips={columns.filter(
-                      (col) => col.hasOwnProperty('cellRendererParams')
-                    ).map(col => ({
-                      field: col.field,
-                      label: col.headerName
-                    }))}
-                    additionalDetails={[]}
-                    owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                    onCreate={false}
-                    showClone={false}
-                    onDelete={(data) => { }}
-                    onClone={(data) => { }}
-                    renderedFrom={routes.transferAsset?.title}
-                  />
+            </div> */}
+            {!showGrid ? (
+              <ReportFilters
+                resourceColumns={resourceColumns}
+                betweenDate={betweenDate}
+                setBetweenDate={setBetweenDate}
+                resource={sidebarResource[resourceCamelCase]}
+                setSelectedData={setSelectedData}
+                loading={loading}
+                fetchReportData={fetchResourceData}
+                filterOptions={filterOptions}
+                setFilterOptions={setFilterOptions}
+                selectedResources={selectedResources}
+                setSelectedResources={setSelectedResources}
+                resourceOptions={resourceOptions}
+                setResourceOptions={setResourceOptions}
+                formValues={formValues}
+                setFormValues={setFormValues}
+                loadingColumns={loadingColumns}
+              />
+            ) : (
+              <div>
+                {Object.keys(frameWorkComponent).length > 0 && columns ? (
+                  isSmall ? (
+                    <CustomSwipableList
+                      allowSelection={false}
+                      allowSwipe={false}
+                      permissions={permissions[resourceCamelCase]}
+                      primaryField={columns?.find((d) => d.primaryField)}
+                      onClick={(data) => {
+                        history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
+                      }}
+                      selectedRecords={[]}
+                      dataRows={dataRows}
+                      dispatch={dispatch}
+                      onEdit={() => {}}
+                      extraParamsToCheckDelete={false}
+                      rowCount={rowCount}
+                      page={page}
+                      loading={loading}
+                      chips={columns
+                        .filter((col) => col.hasOwnProperty('cellRendererParams'))
+                        .map((col) => ({
+                          field: col.field,
+                          label: col.headerName
+                        }))}
+                      additionalDetails={[]}
+                      owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                      onCreate={false}
+                      showClone={false}
+                      onDelete={(data) => {}}
+                      onClone={(data) => {}}
+                      renderedFrom={routes.transferAsset?.title}
+                    />
+                  ) : (
+                    <CustomAgGrid
+                      columns={columns}
+                      dataRows={dataRows}
+                      frameworkComponents={frameWorkComponent}
+                      setGridApi={setGridApi}
+                      dispatch={dispatch}
+                      rowCount={rowCount}
+                      limit={limit}
+                      pageSizes={pageSizes}
+                      page={page}
+                      actionWidth={100}
+                      loading={loading}
+                      renderedFrom={renderedFrom}
+                      allowSelection={false}
+                      isClientSideGrid={true}
+                      allowAction={false}
+                      refreshGrid={fetchResourceData}
+                      showOnlyShowFilteredRecordSwitch={false}
+                    />
+                  )
                 ) : (
-                  <CustomAgGrid
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameWorkComponent}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    actionWidth={100}
-                    loading={loading}
-                    renderedFrom={renderedFrom}
-                    allowSelection={false}
-                    isClientSideGrid={true}
-                    allowAction={false}
-                    refreshGrid={fetchResourceData}
-                    showOnlyShowFilteredRecordSwitch={false}
-                  />
-                )
-              ) : (
-                <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
-              )}
-            </div>
+                  <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
+                )}
+              </div>
+            )}
           </>
-        )}
-      </CustomContainer>
-    </div>
+        </CustomContainer>
+      </div>
+    </MuiPickersUtilsProvider>
   );
 };
 

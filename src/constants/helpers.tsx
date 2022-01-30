@@ -1112,7 +1112,7 @@ export const determineLightOrDark = (color: any) => {
     b = color & 255;
   }
 
-  // HSP (Highly Sensitive Poo) equation from http://alienryderflex.com/hsp.html
+  // HSP (Highly Sensitive Poo) equation
   hsp = Math.sqrt(
     0.299 * (r * r) +
     0.587 * (g * g) +
@@ -1562,7 +1562,14 @@ export const resourceOptions = [
 ];
 
 
-export const REPORT_LIST = [sidebarResource.rentalManagement, sidebarResource.productInventory]
+export const REPORT_LIST = [
+  {title: sidebarResource.rentalManagement, key: "rentalManagement"}, 
+  {title: sidebarResource.productInventory, key: "productInventory"}, 
+  {title: sidebarResource.lead, key: "lead"}, 
+  {title: sidebarResource.opportunity, key: "opportunity"}, 
+  {title: sidebarResource.quoteBuilder, key: "quoteBuilder"}, 
+  {title: sidebarResource.projectSales, key: "projectSales"}
+]
 
 
 export const getApi = (resource: string) => {
