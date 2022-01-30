@@ -6,9 +6,10 @@ import { REPORT_LIST } from './../../constants/helpers';
 import { MdDescription } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { camelCase } from 'lodash';
+import { useData } from '../../StateProvider/Provider';
 
 const ReportMaster = () => {
-
+    const  {state: {permissions}} = useData()
 
     return (<div>
         <Grid container className="headerbox">
@@ -30,17 +31,17 @@ const ReportMaster = () => {
             <hr />
             <Box p={3}>
                 <Grid container spacing={2}>
-                    {REPORT_LIST.map((report, index) =>
-                        <Grid item xs={3}>
-                            <Link to={`/reports${routes[`${camelCase(report)}`]?.path}`}>
+                    {REPORT_LIST.map((report:any) =>{
+                       return permissions[report.key]?.isRead && <Grid key={report.key} item xs={12} sm={3}>
+                            <Link to={`/reports${routes[report.key]?.path}`}>
                                 <Box border={1} borderColor='grey.300' bgcolor='grey.100' borderRadius={1} p={2} >
                                     <Typography variant="h6">
                                         <MdDescription size={25} className='headerLogo mr-2 pt-1' />
-                                        {routes[camelCase(report)]?.title}</Typography>
+                                        {report.title}</Typography>
                                 </Box>
                             </Link>
                         </Grid>
-                    )}
+                    })}
                 </Grid>
             </Box>
         </div>
