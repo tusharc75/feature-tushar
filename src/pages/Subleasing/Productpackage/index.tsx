@@ -12,11 +12,8 @@ import CustomReactTable from "../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import Add from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
-
 import moment from "moment";
-import {
-    rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency, CHILD_RESOURCE
-} from "../../../constants/helpers";
+import { subleasing, dateFormat, pricingCondition, formatAmountWithCurrency, CHILD_RESOURCE } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import QtyDialog from './QtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
@@ -225,16 +222,10 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
         setNextStep(false)
         var data: any = []
         var inventory: any = []
-        if (isOffline) {
-            data = await findOne(objectStore.rentalManagement, subleaseData._id)
-            inventory = data.productInventory;
-        }
-        else {
-            const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${subleaseData._id}`)
-            data = response?.data?.data
-            setMaterial(JSON.parse(JSON.stringify(data.material)))
-            inventory = data.inventory;
-        }
+        const response = await axiosInstance().get(`${subleasing.api}/productpackage/${subleaseData._id}`)
+        data = response?.data?.data
+        setMaterial(JSON.parse(JSON.stringify(data.material)))
+        inventory = data.inventory;
         const rows = data.material.filter((e) => e.parentId === null)
         rows.forEach((parent, i) => {
             parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
@@ -302,7 +293,7 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
             }
         })
 
-        axiosInstance().post(`${rentalManagement.rentalManagementApi}/productpackage/${subleaseData._id}`, { material })
+        axiosInstance().post(`${subleasing.api}/productpackage/${subleaseData._id}`, { material })
             .then(() => {
                 setAddExistingProductDialog({ open: false, type: "", parentId: null })
                 fetchProductInventory()
@@ -326,7 +317,7 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
             delete element.subRows
         });
         setUpdating(true);
-        axiosInstance().put(`${rentalManagement.rentalManagementApi}/productpackage/${subleaseData._id}`, { material: rows }).then(() => {
+        axiosInstance().put(`${subleasing.api}/productpackage/${subleaseData._id}`, { material: rows }).then(() => {
             setUpdating(false)
             setIsProductEdit({ open: false, isBulkedit: false })
             fetchProductInventory()
@@ -338,7 +329,7 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
 
     const handleDelete = (rows) => {
         setDeleting(true)
-        axiosInstance().put(`${rentalManagement.rentalManagementApi}/productpackage/${subleaseData?._id}/delete`, { ids: rows })
+        axiosInstance().put(`${subleasing.api}/productpackage/${subleaseData?._id}/delete`, { ids: rows })
             .then(() => {
                 setDeleting(false)
                 fetchProductInventory()
@@ -356,8 +347,6 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
     }
 
     const calculatePrice = (arr: any[]) => {
-        //materialType can be =["product","packages","productCategory"]
-        //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
         if (subleaseData) {
             const data: any = {}
             data.conditionType = ["Rent"]
@@ -506,9 +495,7 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
                 isAddingProducts={isAddingProducts}
                 addProductInventory={handleAdd}
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
-                productInventory={[]}
                 type={addExistingProductDialog.type}
-                rentalManagementData={subleaseData}
             />
         }
     </Fragment>
