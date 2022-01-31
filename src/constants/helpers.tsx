@@ -1539,6 +1539,12 @@ export const DELIVERY_TICKET_REFRENCE_TYPE = {
   salesOrder: 'Sales Order',
 };
 
+export const DELIVERY_FROM_TO_TYPE = {
+  plant: 'Plant',
+  customer: 'Customer',
+  supplier: 'Supplier',
+};
+
 export const asyncForEach = async (
   array: any[],
   callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>
