@@ -6,7 +6,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { Box, CircularProgress, TextField } from "@material-ui/core";
 import SearchBox from '../../../components/Helpers/SearchBox'
 import { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
-import { gridLoadingTimeout, CustomDialogTransition, packages, isObjectEmpty, prepareDataForGrid } from '../../../constants/helpers';
+import { gridLoadingTimeout, CustomDialogTransition, packages, product, isObjectEmpty, prepareDataForGrid } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import Dialog from "@material-ui/core/Dialog/Dialog";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -19,20 +19,13 @@ import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 
 
-const renderedFrom = "rentalJobManagementAddProducts";
+const renderedFrom = "subleasingAddProducts";
 const localStorageSelectedRecords = `${renderedFrom}_selected`
 
-
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, rentalManagementData }) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, isAddingProducts }) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const {
-        state: { selectedEntity }
-    }: any = useData();
-    const [packageDialog, setPackageDialog] = useState(false);
-    const [productData, setProductData] = useState([]);
-    const [packageProductData, setPackageProductData] = useState([]);
-    const [selectedProduct, setSelectedProduct] = useState({ name: "", id: "", quantity: 0 });
+    const { state: { selectedEntity } }: any = useData();
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -40,14 +33,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [materialList, setMaterialList] = useState([]);
 
-    const defaultColumns = type === "product" ?
-        [
-            { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-            { field: "inventoryInWarehouseCount", headerName: "Available Asset", show: true, disabled: true, cellRenderer: "commonRenderer", editable: false }
-        ]
-        : [
-            { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        ]
+    const defaultColumns = [{ field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true }]
 
     useEffect(() => {
         fetchMaterial()
@@ -63,7 +49,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(`${type === "product" ? `/rental-management/product-with-inventory` : packages.packageApi}${queryString}`).then(({ data: { data, count } }) => {
+        axiosInstance().get(type === "product" ? product.api + queryString : packages.packageApi + queryString).then(({ data: { data, count } }) => {
             setMaterialList(JSON.parse(JSON.stringify(data)));
             let rows = data.map((u) => {
                 let finalObject = prepareDataForGrid(u);
@@ -77,7 +63,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                     ...finalObject,
                 };
             });
-
             dispatch({ type: "initialize", data: rows, count: count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {
@@ -87,8 +72,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     };
 
     const getQueryString = () => {
-        let deepFilter = type === "product" ? `?warehouse=${rentalManagementData?.warehouse?.optionValue}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'serializedProduct', term: 'yes' }]))}&page=${page}&limit=${limit}` : `?page=${page}&limit=${limit}`;
-
+        let deepFilter = '';
         if (type !== "product") {
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'packageType', term: 'product' }]))}&filterType=and`
         }
@@ -120,8 +104,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         return deepFilter;
     };
 
-
-
     const fetchGridColumns = () => {
         axiosInstance()
             .get(type === "product" ? "/field?resource=Product&view=true" : `/field?resource=Packages&entity=${selectedEntity}&view=true`)
@@ -150,48 +132,11 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             })
     }
 
-    const fetchPackageProduct = (packageId) => {
-        if (type === "package") {
-            axiosInstance().get(`${packages.packageApi}/get-products/${packageId}`).then(({ data: { data } }) => {
-                const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productName, qty: product.qty })) : [];
-                setPackageProductData(newArr);
-            })
-                .catch((err) => {
-                    toastConfig.setToastConfig(err);
-                });
-        }
-    };
-
-    const NameRenderer = (params) => (
-        <span
-            className="cursor-pointer link ml-1"
-            onClick={() => {
-                setPackageDialog(true)
-                fetchPackageProduct(params.data.id)
-                setSelectedProduct({ name: params.data.packageName, id: params.data.id, quantity: params.data.quantity })
-            }}>{params.value}</span>
-    );
-
     const handleSearch = (e) => {
         dispatch({ type: "search", search: e.target.value });
     };
 
     const onCellValueChanged = (row) => {
-    }
-
-    const handleSubmit = () => {
-        dispatch({ type: "loading", loading: true });
-        let tempProduct = productData
-        tempProduct.find(d => d.id === selectedProduct.id).quantity = selectedProduct.quantity
-        setProductData(tempProduct)
-        setPackageDialog(false)
-        if (gridApi) {
-            gridApi.setRowData(productData);
-        }
-        // dispatch({ type: "update", data: productData, count: productData.length });
-        setTimeout(() => {
-            dispatch({ type: "loading", loading: false });
-        }, gridLoadingTimeout);
     }
 
     return (<Fragment>
@@ -257,60 +202,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                     : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
             </div>
         </Dialog>
-        {
-            packageDialog &&
-            <Dialog open fullWidth maxWidth="md" onClose={() => setPackageDialog(false)}>
-                <CustomDialogHeader title={"Package Details"} onClose={() => setPackageDialog(false)} />
-                <CustomDialogContent>
-                    <Box p={2}>
-                        <Grid container spacing={2}>
-                            {packageProductData?.length > 0 && packageProductData?.map((obj) => (
-                                <Fragment key={obj.id}>
-                                    <Grid item xs={5} sm={5}>
-                                        <TextField
-                                            size="small"
-                                            fullWidth
-                                            value={obj?.product}
-                                            type="text"
-                                            disabled
-                                            variant="outlined"
-                                            label="Product"
-                                        />
-                                    </Grid>
-                                    <Grid item xs={5} sm={5}>
-                                        <TextField
-                                            size="small"
-                                            fullWidth
-                                            value={obj?.qty}
-                                            disabled
-                                            type="number"
-                                            onChange={(e) => {
-                                                const val = parseInt(e.target.value);
-                                            }}
-                                            variant="outlined"
-                                            required
-                                            label="Quantity"
-                                        />
-                                    </Grid>
-                                </Fragment>
-                            ))}
-                        </Grid>
-                    </Box>
-                </CustomDialogContent>
-                <CustomDialogFooter>
-                    <Button variant="outlined" color="primary" onClick={() => setPackageDialog(false)}>
-                        Cancel
-                    </Button>
-                    {/* <Button
-                        onClick={handleSubmit}
-                        variant="contained"
-                        color="primary"
-                    >
-                        Save
-                    </Button> */}
-                </CustomDialogFooter>
-            </Dialog>
-        }
     </Fragment >
     );
 }
