@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.51.0](https://github.com/vebholic/oms_frontend/compare/v2.50.1...v2.51.0) (2022-01-31)
+
+
+### Features
+
+* **report:** changes for more resource ([5690dcf](https://github.com/vebholic/oms_frontend/commit/5690dcf5d1997eff00d1f61fba77c9f604373c20))
+
+### [2.50.1](https://github.com/vebholic/oms_frontend/compare/v2.50.0...v2.50.1) (2022-01-30)
+
+## [2.50.0](https://github.com/vebholic/oms_frontend/compare/v2.49.0...v2.50.0) (2022-01-29)
+
+
+### Features
+
+* - Product Type Dropdown Added ([3804d94](https://github.com/vebholic/oms_frontend/commit/3804d9489d7e595ea74021af4f9cb1e0aeaf6359))
+* **feat/avisekh:** feat/avisekh ([1784db7](https://github.com/vebholic/oms_frontend/commit/1784db7660d90191d543fb638a9efc7b98edd6eb))
+
+
+### Bug Fixes
+
+* 27 jan bug ([0b45f04](https://github.com/vebholic/oms_frontend/commit/0b45f04ee5f1ea387030979545c6268b6bde089a))
+* oat-492 and 564 ([1c16d1d](https://github.com/vebholic/oms_frontend/commit/1c16d1d0ba99461b480be07c24a511ee9f7c5659))
+* **productbom:** bom changes ([e8a5bea](https://github.com/vebholic/oms_frontend/commit/e8a5beaaf93473d045885d64f1def877f7451d39))
+* **topdashboard table data issue:** data ([eb5e9f5](https://github.com/vebholic/oms_frontend/commit/eb5e9f51118369e99e8bec986693cea2f3c37186))
+
 ## [2.49.0](https://github.com/vebholic/oms_frontend/compare/v2.48.1...v2.49.0) (2022-01-28)
 
 

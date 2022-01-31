@@ -208,6 +208,27 @@ const TopDashboard = (props) => {
           return aDate - bDate;
         });
 
+        for (let d of data) {
+          if (filterCurrency && filterCurrency !== currency) {
+            const totalSelldata = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalSell);
+            const totalCostData = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalCost);
+            const budgetData = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget);
+
+            saleData.push(totalSelldata ? totalSelldata.rates[filterCurrency] : d.totalSell);
+            costData.push(totalCostData ? totalCostData.rates[filterCurrency] : d.totalCost);
+            budget.push(budgetData ? budgetData.rates[filterCurrency] : d.budget);
+          } else {
+            saleData.push(d.totalSell);
+            costData.push(d.totalCost);
+            budget.push(d.budget);
+          }
+          labels.push(moment(d.date).format('MMM/YY'));
+
+          if (d.currency) {
+            setCurrency(d.currency);
+          }
+        }
+
         setSalesData({
           allData: data,
           labels,

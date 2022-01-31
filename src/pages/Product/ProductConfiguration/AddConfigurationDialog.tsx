@@ -1,13 +1,13 @@
 import React from 'react';
 import { Dialog, Box, Button, Grid, CircularProgress } from '@material-ui/core';
 
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import { getObjKeys } from '../../constants/helpers';
-import FormTypes from '../../components/Helpers/FormTypes';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import { getObjKeys } from '../../../constants/helpers';
+import FormTypes from '../../../components/Helpers/FormTypes';
+import axiosInstance from '../../../axios/axiosInstance';
+import routes from '../../../components/Helpers/Routes';
 
 // POST /product/61cad683bcce3823a24211d8/images
 // {
