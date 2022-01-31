@@ -261,7 +261,7 @@ const TopDashboardTable = ({ moment, filterCurrency, currency, getExchangeRates,
             <Autocomplete
               size="small"
               fullWidth
-              options={marketSegments}
+              options={marketSegments.filter(d => !d.parentSegment)}
               autoHighlight
               value={filter.marketSegment}
               getOptionLabel={(option: any) => option.name || ''}

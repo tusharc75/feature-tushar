@@ -1819,7 +1819,7 @@ export default function QuoteProcess(props) {
                     getOptionLabel={(option) => option}
                     renderOption={(option, { selected }) => (
                       <React.Fragment>
-                        <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumnsExcel].sort().toString() || ["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumns].sort().toString() ? true : selected} />
+                        <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={(showExcelArrangeColumns && ["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumnsExcel].sort().toString()) ||(showPDFArrangeColumns && ["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumns].sort().toString()) ? true : selected} />
                         {option}
                       </React.Fragment>
                     )}

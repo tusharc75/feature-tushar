@@ -96,13 +96,13 @@ const TopDashboard = (props) => {
   const getURL = () => {
     let params = {
       entity: selectedEntity || "",
-      marketSegment: filter.marketSegment ? filter.marketSegment['id'] : '',
-      subMarketSegment: filter.subMarketSegment ? filter.subMarketSegment['id'] : '',
-      productCategory: filter.productCategory ? filter.productCategory['id'] : '',
-      salesRep: filter.salesRep ? filter.salesRep['id'] : '',
-      customerAccount: filter.customerAccount ? filter.customerAccount['id'] : '',
-      countrySellTo: filter.countrySellTo ? filter.countrySellTo["optionValue"] : '',
-      countryBillTo: filter.countryBillTo ? filter.countryBillTo["optionValue"] : '',
+      marketSegment: currentFilter==="sale"? filter.marketSegment ? filter.marketSegment['id']: '':filterBookedValue.marketSegment ? filterBookedValue.marketSegment['id'] : '',
+      subMarketSegment: currentFilter==="sale"? filter.subMarketSegment ? filter.subMarketSegment['id'] : '' : filterBookedValue.subMarketSegment ? filterBookedValue.subMarketSegment['id'] : '',
+      productCategory: currentFilter==="sale"? filter.productCategory ? filter.productCategory['id'] : '' : filterBookedValue.productCategory ? filterBookedValue.productCategory['id'] : '',
+      salesRep: currentFilter==="sale"? filter.salesRep ? filter.salesRep['id'] : '' : filterBookedValue.salesRep ? filterBookedValue.salesRep['id'] : '',
+      customerAccount: currentFilter==="sale"? filter.customerAccount ? filter.customerAccount['id'] : '' : filterBookedValue.customerAccount ? filterBookedValue.customerAccount['id'] : '',
+      countrySellTo: currentFilter==="sale"? filter.countrySellTo ? filter.countrySellTo["optionValue"] : '' : filterBookedValue.countrySellTo ? filterBookedValue.countrySellTo["optionValue"] : '',
+      countryBillTo: currentFilter==="sale"? filter.countryBillTo ? filter.countryBillTo["optionValue"] : '' : filterBookedValue.countryBillTo ? filterBookedValue.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -429,7 +429,7 @@ const TopDashboard = (props) => {
             <Autocomplete
               size="small"
               fullWidth
-              options={marketSegments}
+              options={marketSegments.filter(d => !d.parentSegment)}
               autoHighlight
               value={currentFilter === "sale" ? filter.marketSegment : filterBookedValue.marketSegment}
               getOptionLabel={(option: any) => option.name || ''}
@@ -668,7 +668,7 @@ const TopDashboard = (props) => {
                     data={salesData}
                   />
                 ) : (
-                  <TableContainer style={{ height: '400px' }}>
+                  <TableContainer style={{ height: '400px' }} >
                     <Table stickyHeader aria-label="caption table">
                       <TableHead>
                         <TableRow>
