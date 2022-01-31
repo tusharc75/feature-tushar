@@ -193,7 +193,7 @@ const ManageDeliveryTicket = (props) => {
                             }
                         })
                     }
-                    tempInitialData["pick-UpDate"] = moment(refrenceData?.estimateStartDate).subtract(1, 'days');
+                    tempInitialData["pickUpDate"] = moment(refrenceData?.estimateStartDate).subtract(1, 'days');
                     tempInitialData["deliveryDate"] = moment(refrenceData?.estimateStartDate).subtract(1, 'days');
                 }
                 else if (productInventory && refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.repairJob && refrenceData) {
@@ -410,10 +410,10 @@ const ManageDeliveryTicket = (props) => {
 
     function validate(values) {
         const errors = {};
-        let startDate = moment(values?.["pick-UpDate"]);
+        let startDate = moment(values?.["pickUpDate"]);
         let endDate = moment(values?.deliveryDate);
         if (endDate.diff(startDate, 'days') < 0) {
-            errors['pick-UpDate'] = 'Please enter valid pick-Up  date';
+            errors['pickUpDate'] = 'Please enter valid pick-Up  date';
         }
         return errors;
     }
@@ -474,7 +474,7 @@ const ManageDeliveryTicket = (props) => {
                                                             ["repairJob", "transferAsset", "rentalJob", "salesOrder", "type", "productInventory"].includes(field.fieldName) ? null :
                                                                 (["returnReason"].includes(field.fieldName) && values["ticketType"] !== DELIVERY_TICKET_TYPE.return) ? null :
                                                                     <Grid key={index2} item xs={12} sm={6} md={6}>
-                                                                        {field.fieldName === "pick-UpDate" ? (
+                                                                        {field.fieldName === "pickUpDate" ? (
                                                                             <FormTypes
                                                                                 {...field}
                                                                                 fieldData={field}
@@ -522,7 +522,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                 isTooltip={field?.isTooltip || false}
                                                                                 tooltipMessage={field?.tooltipMessage}
                                                                                 size="small"
-                                                                                minDate={moment(values["pick-UpDate"])} // Please, whoever changing this ask Gagan before any change 
+                                                                                minDate={moment(values["pickUpDate"])} // Please, whoever changing this ask Gagan before any change 
                                                                             //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
                                                                             // maxDate={refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob ? refrenceData.estimateStartDate ? moment(refrenceData?.estimateStartDate) : moment().add(1, 'years').calendar() :
                                                                             //     refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset ? moment().add(1, 'years').calendar() : moment().add(1, 'years').calendar()}

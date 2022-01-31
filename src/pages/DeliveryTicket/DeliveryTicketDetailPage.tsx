@@ -321,7 +321,7 @@ export default function DeliveryTicketDetail(props) {
   const getMainPoints = useMemo(() => {
     let mainPoint = {};
     if (deliveryTicketData) {
-      mainPoint["Pick-Up Date:"] = yyyyMMDD(deliveryTicketData?.["pick-UpDate"]) || "";
+      mainPoint["Pick-Up Date:"] = yyyyMMDD(deliveryTicketData?.["pickUpDate"]) || "";
       mainPoint["Delivery Date"] = yyyyMMDD(deliveryTicketData?.deliveryDate) || "";
       mainPoint["delivery Person"] = deliveryTicketData?.deliveryPerson?.optionLabel || ""
     }
