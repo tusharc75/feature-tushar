@@ -398,8 +398,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
         {(selectedRecords.length && selectedRecords?.filter(f =>
           ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-            (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
-          && [INVENTORY_STATUS.underReview].includes(f.status)
+            (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)
+            || f.status === INVENTORY_STATUS.scrap)
+          && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap].includes(f.status)
         )?.length === selectedRecords?.length) ?
           <Fragment>
             <Box mx={1} />
