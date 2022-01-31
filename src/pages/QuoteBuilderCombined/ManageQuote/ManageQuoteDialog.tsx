@@ -931,7 +931,7 @@ export default function ManageQuoteDialog({
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-                                        disabled={!isClone ? (isRenderedFromOpportunity || (!isNew && field.disableOnEdit)) : false}
+                                        disabled={(field.isUneditable || isRenderedFromOpportunity || (!isNew && field.disableOnEdit))}
                                         options={field.option}
                                         setFieldValue={(name, value) => {
                                           handleValuesChange({ [name]: value })
