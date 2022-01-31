@@ -280,9 +280,9 @@ const TopDashboard = (props) => {
   useEffect(() => {
     const tableD = salesData.allData.map((d) => ({
       Month: moment(d.date).format('MMM/YY'),
-      ['Total Sell']: d.totalSell ? d.totalSell.toLocaleString() : 0,
-      ['Total Cost']: d.totalSell ? d.totalCost.toLocaleString() : 0,
-      Budget: d.budget ? d.budget.toLocaleString() : 0
+      ['Total Sell']: d.totalSell ? d.totalSell : 0,
+      ['Total Cost']: d.totalSell ? d.totalCost : 0,
+      Budget: d.budget ? d.budget : 0
     }));
     setTableDataRaw(tableD);
   }, [salesData]);
@@ -348,6 +348,7 @@ const TopDashboard = (props) => {
     setFilterAnchor(event.currentTarget);
     setOpenFilter((prev) => !prev);
   };
+
 
   return (
     <Grid container spacing={2}>
@@ -684,7 +685,7 @@ const TopDashboard = (props) => {
                           <TableRow key={index}>
                             {Object.keys(data).map((label, i) => (
                               <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                                {data[label].toLocaleString()}
+                                {(i < 1 || data[label] === 0) ? data[label] : formatAmountWithCurrency(filterCurrency || currency, data[label]).fullFormatAmount}
                               </TableCell>
                             ))}
                           </TableRow>
