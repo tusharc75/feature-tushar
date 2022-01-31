@@ -8,6 +8,11 @@ export const resActivityColors = {
   user: "#990033",
   quote: "#CC33CC",
   projectSales: "#003333",
+  rentalManagement:"#041562",
+  repairJob: "#B33030",
+  transferAsset:"#1572A1",
+  purchaseOrder:"#11468F",
+  deliveryTicket:"#91C483",
   my: "#990033",
 
   task: "#3949ab",
