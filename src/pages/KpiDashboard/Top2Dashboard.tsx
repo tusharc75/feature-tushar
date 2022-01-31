@@ -428,7 +428,7 @@ const Top2Dashboard = (props) => {
             <Autocomplete
               size="small"
               fullWidth
-              options={marketSegments}
+              options={marketSegments.filter(d => !d.parentSegment)}
               autoHighlight
               value={currentFilter === "entity" ? entityFilter.marketSegment : bookedfilter.marketSegment}
               getOptionLabel={(option: any) => option.name || ''}
