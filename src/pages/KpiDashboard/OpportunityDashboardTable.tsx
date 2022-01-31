@@ -86,7 +86,7 @@ const OpportunityTable = ({ filterCurrency, salesFilter, currency, salesReps, cu
         setTopProducts(topProductsData.map(d => {
           return {
             productCategory: d.productCategory,
-            totalAmount: d.totalSell
+            totalAmount: d.totalSell ?? 0
           }
         }));
         setLoading(false);
@@ -194,10 +194,6 @@ const OpportunityTable = ({ filterCurrency, salesFilter, currency, salesReps, cu
     setOpenFilter((prev) => !prev);
   };
 
-  const currrencySymbol = (currencyCode) => {
-    return Currencies.find((obj) => obj?.currencyCode === currencyCode)?.symbolNative;
-  }
-
 
   return (
     <div>
@@ -261,7 +257,7 @@ const OpportunityTable = ({ filterCurrency, salesFilter, currency, salesReps, cu
               <Autocomplete
                 size="small"
                 fullWidth
-                options={marketSegments}
+                options={marketSegments.filter(d => !d.parentSegment)}
                 autoHighlight
                 value={filter.marketSegment}
                 getOptionLabel={(option: any) => option.name || ''}
@@ -355,7 +351,7 @@ const OpportunityTable = ({ filterCurrency, salesFilter, currency, salesReps, cu
                   <TableRow key={index}>
                     {Object.keys(data).map((label, i) => (
                       <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                        {['totalAmount'].includes(label) ? `${currrencySymbol(filterCurrency ?? currency)} ${data[label].toLocaleString()}` : `${data[label].toLocaleString()}`}
+                        {(i < 1 || data[label] === 0) ? data[label] : formatAmountWithCurrency(filterCurrency || currency, data[label]).fullFormatAmount}
                       </TableCell>
                     ))}
                   </TableRow>

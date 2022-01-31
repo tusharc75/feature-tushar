@@ -96,13 +96,13 @@ const TopDashboard = (props) => {
   const getURL = () => {
     let params = {
       entity: selectedEntity || "",
-      marketSegment: filter.marketSegment ? filter.marketSegment['id'] : '',
-      subMarketSegment: filter.subMarketSegment ? filter.subMarketSegment['id'] : '',
-      productCategory: filter.productCategory ? filter.productCategory['id'] : '',
-      salesRep: filter.salesRep ? filter.salesRep['id'] : '',
-      customerAccount: filter.customerAccount ? filter.customerAccount['id'] : '',
-      countrySellTo: filter.countrySellTo ? filter.countrySellTo["optionValue"] : '',
-      countryBillTo: filter.countryBillTo ? filter.countryBillTo["optionValue"] : '',
+      marketSegment: currentFilter==="sale"? filter.marketSegment ? filter.marketSegment['id']: '':filterBookedValue.marketSegment ? filterBookedValue.marketSegment['id'] : '',
+      subMarketSegment: currentFilter==="sale"? filter.subMarketSegment ? filter.subMarketSegment['id'] : '' : filterBookedValue.subMarketSegment ? filterBookedValue.subMarketSegment['id'] : '',
+      productCategory: currentFilter==="sale"? filter.productCategory ? filter.productCategory['id'] : '' : filterBookedValue.productCategory ? filterBookedValue.productCategory['id'] : '',
+      salesRep: currentFilter==="sale"? filter.salesRep ? filter.salesRep['id'] : '' : filterBookedValue.salesRep ? filterBookedValue.salesRep['id'] : '',
+      customerAccount: currentFilter==="sale"? filter.customerAccount ? filter.customerAccount['id'] : '' : filterBookedValue.customerAccount ? filterBookedValue.customerAccount['id'] : '',
+      countrySellTo: currentFilter==="sale"? filter.countrySellTo ? filter.countrySellTo["optionValue"] : '' : filterBookedValue.countrySellTo ? filterBookedValue.countrySellTo["optionValue"] : '',
+      countryBillTo: currentFilter==="sale"? filter.countryBillTo ? filter.countryBillTo["optionValue"] : '' : filterBookedValue.countryBillTo ? filterBookedValue.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -280,9 +280,9 @@ const TopDashboard = (props) => {
   useEffect(() => {
     const tableD = salesData.allData.map((d) => ({
       Month: moment(d.date).format('MMM/YY'),
-      ['Total Sell']: d.totalSell ? d.totalSell.toLocaleString() : 0,
-      ['Total Cost']: d.totalSell ? d.totalCost.toLocaleString() : 0,
-      Budget: d.budget ? d.budget.toLocaleString() : 0
+      ['Total Sell']: d.totalSell ? d.totalSell : 0,
+      ['Total Cost']: d.totalSell ? d.totalCost : 0,
+      Budget: d.budget ? d.budget : 0
     }));
     setTableDataRaw(tableD);
   }, [salesData]);
@@ -348,6 +348,7 @@ const TopDashboard = (props) => {
     setFilterAnchor(event.currentTarget);
     setOpenFilter((prev) => !prev);
   };
+
 
   return (
     <Grid container spacing={2}>
@@ -429,7 +430,7 @@ const TopDashboard = (props) => {
             <Autocomplete
               size="small"
               fullWidth
-              options={marketSegments}
+              options={marketSegments.filter(d => !d.parentSegment)}
               autoHighlight
               value={currentFilter === "sale" ? filter.marketSegment : filterBookedValue.marketSegment}
               getOptionLabel={(option: any) => option.name || ''}
@@ -668,7 +669,7 @@ const TopDashboard = (props) => {
                     data={salesData}
                   />
                 ) : (
-                  <TableContainer style={{ height: '400px' }}>
+                  <TableContainer style={{ height: '400px' }} >
                     <Table stickyHeader aria-label="caption table">
                       <TableHead>
                         <TableRow>
@@ -684,7 +685,7 @@ const TopDashboard = (props) => {
                           <TableRow key={index}>
                             {Object.keys(data).map((label, i) => (
                               <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                                {data[label].toLocaleString()}
+                                {(i < 1 || data[label] === 0) ? data[label] : formatAmountWithCurrency(filterCurrency || currency, data[label]).fullFormatAmount}
                               </TableCell>
                             ))}
                           </TableRow>
