@@ -10,8 +10,8 @@ import axiosInstance from '../../axios/axiosInstance';
 import Loader from '../../components/Loader';
 import { Autocomplete } from '@material-ui/lab';
 import Countries from "../../constants/Country.json"
-import Currencies from '../../constants/currency_with_country.json';
 import { useData } from '../../StateProvider/Provider';
+import { formatAmountWithCurrency } from '../../constants/helpers';
 
 const Top2Dashboard = (props) => {
   const { currency,
@@ -177,11 +177,11 @@ const Top2Dashboard = (props) => {
 
   useEffect(() => {
     const tableD = allEntitySalesData.allData.map((d) => ({
-      ['Period']: d.period,
-      ['Entity Name']: d.entityName,
-      ['Budget']: d.budget.toLocaleString(),
-      ['Total Offer Value']: d.totalOfferValue.toLocaleString(),
-      ['Total Cost']: d.totalCost.toLocaleString()
+      ['Period']: d?.period,
+      ['Entity Name']: d?.entityName,
+      ['Budget']: d.budget ?? 0,
+      ['Total Offer Value']: d.totalOfferValue ?? 0,
+      ['Total Cost']: d.totalCost ?? 0
     }));
     setTableDataRawEntity(tableD);
   }, [allEntitySalesData]);
@@ -348,10 +348,6 @@ const Top2Dashboard = (props) => {
     setOpenFilter((prev) => !prev);
   };
 
-  const currrencySymbol = (currencyCode) => {
-    return Currencies.find((obj) => obj?.currencyCode === currencyCode).symbolNative;
-  }
-
   return allEntitySalesData.labels.length > 0 && (
     <Paper elevation={2}>
       <Popover
@@ -432,7 +428,7 @@ const Top2Dashboard = (props) => {
             <Autocomplete
               size="small"
               fullWidth
-              options={marketSegments}
+              options={marketSegments.filter(d => !d.parentSegment)}
               autoHighlight
               value={currentFilter === "entity" ? entityFilter.marketSegment : bookedfilter.marketSegment}
               getOptionLabel={(option: any) => option.name || ''}
@@ -550,7 +546,7 @@ const Top2Dashboard = (props) => {
                           <TableRow key={index}>
                             {Object.keys(data).map((label, i) => (
                               <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                                {['Budget', 'Total Offer Value', 'Total Cost'].includes(label) ? `${currrencySymbol(filterCurrency ?? currency)} ${data[label].toLocaleString()}` : `${data[label].toLocaleString()}`}
+                                {(i < 2 || data[label] === 0) ? data[label] : formatAmountWithCurrency(filterCurrency || currency, data[label]).fullFormatAmount}
                               </TableCell>
                             ))}
                           </TableRow>
@@ -617,7 +613,7 @@ const Top2Dashboard = (props) => {
                           <TableRow key={index}>
                             {Object.keys(data).map((label, i) => (
                               <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                                {['Total Offer Value', 'Total Booked Value'].includes(label) ? `${currrencySymbol(filterCurrency ?? currency)} ${data[label].toLocaleString()}` : `${data[label].toLocaleString()}`}
+                                {(i < 1 || data[label] === 0) ? data[label] : formatAmountWithCurrency(filterCurrency || currency, data[label]).fullFormatAmount}
                               </TableCell>
                             ))}
                           </TableRow>
