@@ -174,7 +174,7 @@ export const sidebarResource = {
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
   address: 'Address',
-  subleasing: 'Subleasing'
+  sublease: 'Sublease'
 };
 
 export const resourceNames = {
@@ -231,7 +231,7 @@ export const resourceNames = {
   projectSales: 'Project Sales',
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
-  subleasing: 'Subleasing'
+  sublease: 'Sublease'
 
 };
 
@@ -294,7 +294,7 @@ export const RESOURCE_LABEL = {
   purchaseOrder: 'Purchase Orders',
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
-  subleasing: 'Subleasing',
+  sublease: 'Sublease',
 };
 
 export const CHILD_RESOURCE = {
@@ -486,11 +486,11 @@ export const purchaseOrder = {
   resource: 'purchaseOrder'
 };
 
-export const subleasing = {
-  api: '/subleasing',
-  route: '/subleasing',
-  permission: 'subleasing',
-  resource: 'subleasing'
+export const sublease = {
+  api: '/sublease',
+  route: '/sublease',
+  permission: 'sublease',
+  resource: 'sublease'
 };
 
 export const transferAsset = {
@@ -1536,6 +1536,7 @@ export const DELIVERY_TICKET_TYPE = {
   loading: 'Loading',
   receiving: 'Receiving',
   return: 'Return',
+  delivery: 'Delivery',
 };
 
 export const DELIVERY_TICKET_REFRENCE_TYPE = {
@@ -1543,6 +1544,7 @@ export const DELIVERY_TICKET_REFRENCE_TYPE = {
   transferAsset: 'Transfer Asset',
   repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
+  sublease: 'Sublease',
 };
 
 export const DELIVERY_FROM_TO_TYPE = {

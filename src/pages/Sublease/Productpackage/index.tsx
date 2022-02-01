@@ -13,7 +13,7 @@ import NoDataCell from "../../../components/Helpers/NoDataCell";
 import Add from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import moment from "moment";
-import { subleasing, dateFormat, pricingCondition, formatAmountWithCurrency, CHILD_RESOURCE } from "../../../constants/helpers";
+import { sublease, dateFormat, pricingCondition, formatAmountWithCurrency, CHILD_RESOURCE } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import QtyDialog from './QtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
@@ -223,7 +223,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
         setNextStep(false)
         var data: any = []
         var inventory: any = []
-        const response = await axiosInstance().get(`${subleasing.api}/productpackage/${subleaseData._id}`)
+        const response = await axiosInstance().get(`${sublease.api}/productpackage/${subleaseData._id}`)
         data = response?.data?.data
         setMaterial(JSON.parse(JSON.stringify(data.material)))
         inventory = data.inventory;
@@ -294,7 +294,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             }
         })
 
-        axiosInstance().post(`${subleasing.api}/productpackage/${subleaseData._id}`, { material })
+        axiosInstance().post(`${sublease.api}/productpackage/${subleaseData._id}`, { material })
             .then(() => {
                 setAddExistingProductDialog({ open: false, type: "", parentId: null })
                 fetchProductInventory()
@@ -318,7 +318,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             delete element.subRows
         });
         setUpdating(true);
-        axiosInstance().put(`${subleasing.api}/productpackage/${subleaseData._id}`, { material: rows }).then(() => {
+        axiosInstance().put(`${sublease.api}/productpackage/${subleaseData._id}`, { material: rows }).then(() => {
             setUpdating(false)
             setIsProductEdit({ open: false, isBulkedit: false })
             fetchProductInventory()
@@ -330,7 +330,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
 
     const handleDelete = (rows) => {
         setDeleting(true)
-        axiosInstance().put(`${subleasing.api}/productpackage/${subleaseData?._id}/delete`, { ids: rows })
+        axiosInstance().put(`${sublease.api}/productpackage/${subleaseData?._id}/delete`, { ids: rows })
             .then(() => {
                 setDeleting(false)
                 fetchProductInventory()
@@ -349,7 +349,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
 
     const issueSublease = () => {
         setIssueing(true);
-        axiosInstance().put(`${subleasing.api}/${subleaseData._id}/issue-sublease`).then(() => {
+        axiosInstance().put(`${sublease.api}/${subleaseData._id}/issue-sublease`).then(() => {
             setIssueing(false);
             fetchData()
         }).catch((error) => {
