@@ -102,6 +102,8 @@ const TransferAssetDetailPage = () => {
       });
   };
 
+
+ 
   const handleMainPoints = (data) => {
     let mainPoint = {};
     mainPoint['Transfer Asset Number'] = data.transferAssetNumber;
@@ -494,18 +496,19 @@ const TransferAssetDetailPage = () => {
                {transferAssetData && (
                  <div>
                    <Activity
-                    resourceId={transferAssetData}
+                    resourceId={transferAssetData?._id}
                     resource={transferAsset.resource}
-                    restrictedAddActivities={
-                      permissions && permissions['transferAsset'] && permissions['rentalManagement'].isUpdate
-                      ? []
-                      : ['Attachment', 'Case']
-                    }
+                    // restrictedAddActivities={
+                    //   permissions && permissions['transferAsset'] && permissions['rentalManagement'].isUpdate
+                    //   ? []
+                    //   : ['Attachment', 'Case']
+                    // }
                     relatedTo={[
                       {
-                        type: transferAsset,
-                        referenceId: transferAssetData._id,
-                        access: true
+                                 
+                        access: true,
+                        referenceId: transferAssetData?._id,
+                        type: "transferAsset",
                       }
                     ]}
                     handleActivityRefresh={() => { }}
