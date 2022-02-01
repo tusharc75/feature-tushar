@@ -91,7 +91,6 @@ export default function ManageQuoteDialog({
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
-
   const [entityData, setEntityData] = useState({
     fields: [],
     initialValues: {},
@@ -493,6 +492,7 @@ export default function ManageQuoteDialog({
         } else {
           if (isNew) {
             const selectedEntityDetails = user?.entity?.find(d => d?._id === selectedEntity)
+            const defaultQuotePdfTemplateId = user.user?.quotePDFTemplate ?? '';
 
             if (selectedEntityDetails) {
               initialData["currency"] = selectedEntityDetails.currency || "";
@@ -502,6 +502,7 @@ export default function ManageQuoteDialog({
                 )?.symbolNative
               );
             }
+            initialData["pDFTemplate"] = defaultQuotePdfTemplateId;
           }
         }
 
@@ -931,7 +932,7 @@ export default function ManageQuoteDialog({
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-                                        disabled={!isClone ? (isRenderedFromOpportunity || (!isNew && field.disableOnEdit)) : false}
+                                        disabled={(field.isUneditable || isRenderedFromOpportunity || (!isNew && field.disableOnEdit))}
                                         options={field.option}
                                         setFieldValue={(name, value) => {
                                           handleValuesChange({ [name]: value })

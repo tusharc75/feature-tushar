@@ -29,7 +29,9 @@ const Top2Dashboard = (props) => {
     state: { selectedEntity }
   } = useData();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorElTwo, setAnchorElTwo] = useState(null);
   const [tableView, setTableView] = useState(false);
+  const [tableViewTwo, setTableViewTwo] = useState(false);
   const [loading, setLoading] = useState(false);
   const [tableDataRawEntity, setTableDataRawEntity] = useState([]);
   const [tableDataRawBookedValue, setTableDataRawBookedValue] = useState([]);
@@ -286,11 +288,13 @@ const Top2Dashboard = (props) => {
     setTableDataRawBookedValue(tableD);
   }, [allBookedValueSalesData]);
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
+  const handleClick = (event, type) => {
+    type === 1 ? setAnchorEl(event.currentTarget) : setAnchorElTwo(event.currentTarget);
   };
 
-  const handleClose = (exportType, tableData, id = "") => () => {
+
+
+  const handleClose = (exportType, tableData, id = "", anchorType) => () => {
     switch (exportType) {
       case 'ppt': {
         const canvas = document.getElementById(id) as HTMLCanvasElement;
@@ -340,7 +344,7 @@ const Top2Dashboard = (props) => {
         break;
     }
 
-    setAnchorEl(null);
+    anchorType === 1 ? setAnchorEl(null) : setAnchorElTwo(null);
   };
 
   const handleClickFilter = (event) => {
@@ -503,7 +507,7 @@ const Top2Dashboard = (props) => {
                 endIcon={<FilterList />}>
                 Filters
               </Button>
-              <Button onClick={handleClick} startIcon={<ImportExport />}>
+              <Button onClick={(e) => handleClick(e, 1)} startIcon={<ImportExport />}>
                 Export to
               </Button>
               <Button
@@ -514,12 +518,15 @@ const Top2Dashboard = (props) => {
               >
                 {!tableView ? 'Table' : 'Chart'} View
               </Button>
-              <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('', "")}>
-                <MenuItem onClick={handleClose('ppt', tableDataRawEntity, "allEntityChart")}>Powerpoint</MenuItem>
-                <MenuItem onClick={handleClose('pdf', tableDataRawEntity, "allEntityChart")}>PDF</MenuItem>
-                <MenuItem onClick={handleClose('excel', tableDataRawEntity)}>Excel</MenuItem>
-                <MenuItem onClick={handleClose('json', tableDataRawEntity)}>Raw JSON</MenuItem>
-              </Menu>
+              {<Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('', "", '', 1)}>
+                {!tableView && <>
+                  <MenuItem onClick={handleClose('ppt', tableDataRawEntity, "allEntityChart", 1)}>Powerpoint</MenuItem>
+                  <MenuItem onClick={handleClose('pdf', tableDataRawEntity, "allEntityChart", 1)}>PDF</MenuItem>
+                </>
+                }
+                <MenuItem onClick={handleClose('excel', tableDataRawEntity, '', 1)}>Excel</MenuItem>
+                <MenuItem onClick={handleClose('json', tableDataRawEntity, '', 1)}>Raw JSON</MenuItem>
+              </Menu>}
             </Box>
             <Box textAlign="center">
               <Typography variant="h5">Total offered value in {filterCurrency || currency} vs Entities</Typography>
@@ -570,23 +577,29 @@ const Top2Dashboard = (props) => {
                 endIcon={<FilterList />}>
                 Filters
               </Button>
-              <Button onClick={handleClick} startIcon={<ImportExport />}>
+              <Button onClick={(e) => handleClick(e, 2)} startIcon={<ImportExport />}>
                 Export to
               </Button>
               <Button
                 onClick={() => {
-                  setTableView(!tableView);
+                  setTableViewTwo(!tableViewTwo);
                 }}
-                startIcon={!tableView ? <TableChart /> : <Timeline />}
+                startIcon={!tableViewTwo ? <TableChart /> : <Timeline />}
               >
-                {!tableView ? 'Table' : 'Chart'} View
+                {!tableViewTwo ? 'Table' : 'Chart'} View
               </Button>
-              <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('', "")}>
-                <MenuItem onClick={handleClose('ppt', tableDataRawBookedValue, "allBookedValueChart")}>Powerpoint</MenuItem>
-                <MenuItem onClick={handleClose('pdf', tableDataRawBookedValue, "allBookedValueChart")}>PDF</MenuItem>
-                <MenuItem onClick={handleClose('excel', tableDataRawBookedValue)}>Excel</MenuItem>
-                <MenuItem onClick={handleClose('json', tableDataRawBookedValue)}>Raw JSON</MenuItem>
-              </Menu>
+              {
+                <Menu id="export-menu" anchorEl={anchorElTwo} keepMounted open={Boolean(anchorElTwo)} onClose={handleClose('', "", '', 2)}>
+                  {!tableViewTwo &&
+                    <>
+                      <MenuItem onClick={handleClose('ppt', tableDataRawBookedValue, "allBookedValueChart", 2)}>Powerpoint</MenuItem>
+                      <MenuItem onClick={handleClose('pdf', tableDataRawBookedValue, "allBookedValueChart", 2)}>PDF</MenuItem>
+                    </>
+                  }
+                  <MenuItem onClick={handleClose('excel', tableDataRawBookedValue, '', 2)}>Excel</MenuItem>
+                  <MenuItem onClick={handleClose('json', tableDataRawBookedValue, '', 2)}>Raw JSON</MenuItem>
+                </Menu>
+              }
             </Box>
             <Box textAlign="center">
               <Typography variant="h5">Total Offered Value {filterCurrency || currency} VS Total Booked Value {filterCurrency || currency} </Typography>
@@ -594,7 +607,7 @@ const Top2Dashboard = (props) => {
 
             {!loading ? tableDataRawBookedValue.length === 0 ? <Box height={400}>No Data</Box> : (
               <Box>
-                {!tableView ? (
+                {!tableViewTwo ? (
                   <Chart id="allBookedValueChart" type="bar" data={allBookedValueSalesData} />
                 ) : (
                   <TableContainer style={{ height: '400px' }}>
