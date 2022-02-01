@@ -10,8 +10,8 @@ import axiosInstance from '../../axios/axiosInstance';
 import Loader from '../../components/Loader';
 import { Autocomplete } from '@material-ui/lab';
 import Countries from "../../constants/Country.json"
-import Currencies from '../../constants/currency_with_country.json';
 import { useData } from '../../StateProvider/Provider';
+import { formatAmountWithCurrency } from '../../constants/helpers';
 
 const Top2Dashboard = (props) => {
   const { currency,
@@ -29,7 +29,9 @@ const Top2Dashboard = (props) => {
     state: { selectedEntity }
   } = useData();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorElTwo, setAnchorElTwo] = useState(null);
   const [tableView, setTableView] = useState(false);
+  const [tableViewTwo, setTableViewTwo] = useState(false);
   const [loading, setLoading] = useState(false);
   const [tableDataRawEntity, setTableDataRawEntity] = useState([]);
   const [tableDataRawBookedValue, setTableDataRawBookedValue] = useState([]);
@@ -177,11 +179,11 @@ const Top2Dashboard = (props) => {
 
   useEffect(() => {
     const tableD = allEntitySalesData.allData.map((d) => ({
-      ['Period']: d.period,
-      ['Entity Name']: d.entityName,
-      ['Budget']: d.budget.toLocaleString(),
-      ['Total Offer Value']: d.totalOfferValue.toLocaleString(),
-      ['Total Cost']: d.totalCost.toLocaleString()
+      ['Period']: d?.period,
+      ['Entity Name']: d?.entityName,
+      ['Budget']: d.budget ?? 0,
+      ['Total Offer Value']: d.totalOfferValue ?? 0,
+      ['Total Cost']: d.totalCost ?? 0
     }));
     setTableDataRawEntity(tableD);
   }, [allEntitySalesData]);
@@ -286,11 +288,13 @@ const Top2Dashboard = (props) => {
     setTableDataRawBookedValue(tableD);
   }, [allBookedValueSalesData]);
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
+  const handleClick = (event, type) => {
+    type === 1 ? setAnchorEl(event.currentTarget) : setAnchorElTwo(event.currentTarget);
   };
 
-  const handleClose = (exportType, tableData, id = "") => () => {
+
+
+  const handleClose = (exportType, tableData, id = "", anchorType) => () => {
     switch (exportType) {
       case 'ppt': {
         const canvas = document.getElementById(id) as HTMLCanvasElement;
@@ -340,17 +344,13 @@ const Top2Dashboard = (props) => {
         break;
     }
 
-    setAnchorEl(null);
+    anchorType === 1 ? setAnchorEl(null) : setAnchorElTwo(null);
   };
 
   const handleClickFilter = (event) => {
     setFilterAnchor(event.currentTarget);
     setOpenFilter((prev) => !prev);
   };
-
-  const currrencySymbol = (currencyCode) => {
-    return Currencies.find((obj) => obj?.currencyCode === currencyCode).symbolNative;
-  }
 
   return allEntitySalesData.labels.length > 0 && (
     <Paper elevation={2}>
@@ -432,7 +432,7 @@ const Top2Dashboard = (props) => {
             <Autocomplete
               size="small"
               fullWidth
-              options={marketSegments}
+              options={marketSegments.filter(d => !d.parentSegment)}
               autoHighlight
               value={currentFilter === "entity" ? entityFilter.marketSegment : bookedfilter.marketSegment}
               getOptionLabel={(option: any) => option.name || ''}
@@ -507,7 +507,7 @@ const Top2Dashboard = (props) => {
                 endIcon={<FilterList />}>
                 Filters
               </Button>
-              <Button onClick={handleClick} startIcon={<ImportExport />}>
+              <Button onClick={(e) => handleClick(e, 1)} startIcon={<ImportExport />}>
                 Export to
               </Button>
               <Button
@@ -518,12 +518,15 @@ const Top2Dashboard = (props) => {
               >
                 {!tableView ? 'Table' : 'Chart'} View
               </Button>
-              <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('', "")}>
-                <MenuItem onClick={handleClose('ppt', tableDataRawEntity, "allEntityChart")}>Powerpoint</MenuItem>
-                <MenuItem onClick={handleClose('pdf', tableDataRawEntity, "allEntityChart")}>PDF</MenuItem>
-                <MenuItem onClick={handleClose('excel', tableDataRawEntity)}>Excel</MenuItem>
-                <MenuItem onClick={handleClose('json', tableDataRawEntity)}>Raw JSON</MenuItem>
-              </Menu>
+              {<Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('', "", '', 1)}>
+                {!tableView && <>
+                  <MenuItem onClick={handleClose('ppt', tableDataRawEntity, "allEntityChart", 1)}>Powerpoint</MenuItem>
+                  <MenuItem onClick={handleClose('pdf', tableDataRawEntity, "allEntityChart", 1)}>PDF</MenuItem>
+                </>
+                }
+                <MenuItem onClick={handleClose('excel', tableDataRawEntity, '', 1)}>Excel</MenuItem>
+                <MenuItem onClick={handleClose('json', tableDataRawEntity, '', 1)}>Raw JSON</MenuItem>
+              </Menu>}
             </Box>
             <Box textAlign="center">
               <Typography variant="h5">Total offered value in {filterCurrency || currency} vs Entities</Typography>
@@ -550,7 +553,7 @@ const Top2Dashboard = (props) => {
                           <TableRow key={index}>
                             {Object.keys(data).map((label, i) => (
                               <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                                {['Budget', 'Total Offer Value', 'Total Cost'].includes(label) ? `${currrencySymbol(filterCurrency ?? currency)} ${data[label].toLocaleString()}` : `${data[label].toLocaleString()}`}
+                                {(i < 2 || data[label] === 0) ? data[label] : formatAmountWithCurrency(filterCurrency || currency, data[label]).fullFormatAmount}
                               </TableCell>
                             ))}
                           </TableRow>
@@ -574,23 +577,29 @@ const Top2Dashboard = (props) => {
                 endIcon={<FilterList />}>
                 Filters
               </Button>
-              <Button onClick={handleClick} startIcon={<ImportExport />}>
+              <Button onClick={(e) => handleClick(e, 2)} startIcon={<ImportExport />}>
                 Export to
               </Button>
               <Button
                 onClick={() => {
-                  setTableView(!tableView);
+                  setTableViewTwo(!tableViewTwo);
                 }}
-                startIcon={!tableView ? <TableChart /> : <Timeline />}
+                startIcon={!tableViewTwo ? <TableChart /> : <Timeline />}
               >
-                {!tableView ? 'Table' : 'Chart'} View
+                {!tableViewTwo ? 'Table' : 'Chart'} View
               </Button>
-              <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('', "")}>
-                <MenuItem onClick={handleClose('ppt', tableDataRawBookedValue, "allBookedValueChart")}>Powerpoint</MenuItem>
-                <MenuItem onClick={handleClose('pdf', tableDataRawBookedValue, "allBookedValueChart")}>PDF</MenuItem>
-                <MenuItem onClick={handleClose('excel', tableDataRawBookedValue)}>Excel</MenuItem>
-                <MenuItem onClick={handleClose('json', tableDataRawBookedValue)}>Raw JSON</MenuItem>
-              </Menu>
+              {
+                <Menu id="export-menu" anchorEl={anchorElTwo} keepMounted open={Boolean(anchorElTwo)} onClose={handleClose('', "", '', 2)}>
+                  {!tableViewTwo &&
+                    <>
+                      <MenuItem onClick={handleClose('ppt', tableDataRawBookedValue, "allBookedValueChart", 2)}>Powerpoint</MenuItem>
+                      <MenuItem onClick={handleClose('pdf', tableDataRawBookedValue, "allBookedValueChart", 2)}>PDF</MenuItem>
+                    </>
+                  }
+                  <MenuItem onClick={handleClose('excel', tableDataRawBookedValue, '', 2)}>Excel</MenuItem>
+                  <MenuItem onClick={handleClose('json', tableDataRawBookedValue, '', 2)}>Raw JSON</MenuItem>
+                </Menu>
+              }
             </Box>
             <Box textAlign="center">
               <Typography variant="h5">Total Offered Value {filterCurrency || currency} VS Total Booked Value {filterCurrency || currency} </Typography>
@@ -598,7 +607,7 @@ const Top2Dashboard = (props) => {
 
             {!loading ? tableDataRawBookedValue.length === 0 ? <Box height={400}>No Data</Box> : (
               <Box>
-                {!tableView ? (
+                {!tableViewTwo ? (
                   <Chart id="allBookedValueChart" type="bar" data={allBookedValueSalesData} />
                 ) : (
                   <TableContainer style={{ height: '400px' }}>
@@ -617,7 +626,7 @@ const Top2Dashboard = (props) => {
                           <TableRow key={index}>
                             {Object.keys(data).map((label, i) => (
                               <TableCell key={label} align={i < 1 ? 'left' : 'right'}>
-                                {['Total Offer Value', 'Total Booked Value'].includes(label) ? `${currrencySymbol(filterCurrency ?? currency)} ${data[label].toLocaleString()}` : `${data[label].toLocaleString()}`}
+                                {(i < 1 || data[label] === 0) ? data[label] : formatAmountWithCurrency(filterCurrency || currency, data[label]).fullFormatAmount}
                               </TableCell>
                             ))}
                           </TableRow>

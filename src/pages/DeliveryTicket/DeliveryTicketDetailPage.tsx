@@ -5,7 +5,7 @@ import { Skeleton } from "@material-ui/lab";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import queryString from 'query-string';
-import { yyyyMMDD, deliveryTicket, sidebarResource, getObjKeysWithValues, defaultActivityShow, dateTimeFormat } from "../../constants/helpers";
+import { yyyyMMDD, deliveryTicket, getObjKeysWithValues, defaultActivityShow, dateTimeFormat } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import routes from "../../components/Helpers/Routes";
@@ -26,7 +26,7 @@ import moment from 'moment';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 import { FaFileSignature, FaMailchimp, FaSignature, FaWpforms } from "react-icons/fa";
 import { BiEdit, BiFoodMenu } from "react-icons/bi";
-import { prepareDataForGrid, DELIVERY_TICKET_MAPPED_STATUS, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE } from "../../constants/helpers"
+import { prepareDataForGrid, DELIVERY_TICKET_MAPPED_STATUS, sidebarResource, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_FROM_TO_TYPE } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -143,77 +143,48 @@ export default function DeliveryTicketDetail(props) {
         const response = await axiosInstance().get(`/field?resource=${sidebarResource["deliveryTicket"]}&showHiddenFields=true`)
         data = response?.data?.data
       }
-      if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-        data = data.filter((fields: any) => {
-          if (ticket?.typeDetails?.transferType === "Internal") {
-            if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Supplier")) {
-              return false
-            }
-          }
-          if (ticket?.typeDetails?.transferType.includes("External Supplier")) {
-            if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes(ticket?.ticketType === "Loading" ? "Receiving Plant" : "Pickup Plant")) {
-              return false
-            }
-          }
-          if (ticket?.typeDetails?.transferType.includes("External Customer")) {
-            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes(ticket?.ticketType === "Loading" ? "Receiving Plant" : "Pickup Plant")) {
-              return false
-            }
-          }
+      data = data.filter((fields: any) => {
+        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
           if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "rentalJob" || fields.fieldData.fieldName === "productInventory") {
             return false
           }
-          return true
-        })
-      }
-      else if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
-        data = data.filter((fields: any) => {
-          if (ticket?.typeDetails?.typeOfRepair === "Internal") {
-            if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Supplier")) {
-              return false
-            }
-          }
-          if (ticket.ticketType === DELIVERY_TICKET_TYPE.loading) {
-            if (ticket?.typeDetails?.typeOfRepair === "External") {
-              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Receiving Plant")) {
-                return false
-              }
-            }
-          }
-          else {
-            if (ticket?.typeDetails?.typeOfRepair === "External") {
-              if (fields.fieldData.sectionName.includes("Customer") || fields.fieldData.sectionName.includes("Pickup Plant")) {
-                return false
-              }
-            }
-          }
+        }
+        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
           if (fields.fieldData.fieldName === "rentalJob" || fields.fieldData.fieldName === "transferAsset" || fields.fieldData.fieldName === "productInventory") {
             return false
           }
-          return true
-        })
-      }
-      else if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
-        data = data.filter((fields: any) => {
-          if (ticket.ticketType === DELIVERY_TICKET_TYPE.loading) {
-            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Receiving Plant")) {
-              return false
-            }
-          }
-          else {
-            if (fields.fieldData.sectionName.includes("Supplier") || fields.fieldData.sectionName.includes("Pickup Plant")) {
-              return false
-            }
-          }
+        }
+        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
           if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "transferAsset" || fields.fieldData.fieldName === "productInventory") {
             return false
           }
-          return true
-        })
-      }
+        }
+        if (fields.fieldData.sectionName.includes("Fields")) {
+          return false
+        }
+        return true
+      })
       if (ticket?.ticketType !== DELIVERY_TICKET_TYPE.return) {
         data = data.filter((fields: any) => fields.fieldData.fieldName !== "returnReason")
       }
+      data.forEach(element => {
+        if (element?.fieldData.fieldName === "pickupFrom") {
+          if (ticket?.pickupFromType === DELIVERY_FROM_TO_TYPE.customer) {
+            element.fieldData.lookupResource = sidebarResource.customerAccount
+          }
+          if (ticket?.pickupFromType === DELIVERY_FROM_TO_TYPE.supplier) {
+            element.fieldData.lookupResource = sidebarResource.supplierAccount
+          }
+        }
+        if (element?.fieldData.fieldName === "deliveryFrom") {
+          if (ticket?.deliveryFromType === DELIVERY_FROM_TO_TYPE.customer) {
+            element.fieldData.lookupResource = sidebarResource.customerAccount
+          }
+          if (ticket?.deliveryFromType === DELIVERY_FROM_TO_TYPE.supplier) {
+            element.fieldData.lookupResource = sidebarResource.supplierAccount
+          }
+        }
+      });
       setDeliveryTicketFields(data);
       setLoading(false);
     }
@@ -350,7 +321,7 @@ export default function DeliveryTicketDetail(props) {
   const getMainPoints = useMemo(() => {
     let mainPoint = {};
     if (deliveryTicketData) {
-      mainPoint["Pick-Up Date:"] = yyyyMMDD(deliveryTicketData?.["pick-UpDate"]) || "";
+      mainPoint["Pick-Up Date:"] = yyyyMMDD(deliveryTicketData?.["pickUpDate"]) || "";
       mainPoint["Delivery Date"] = yyyyMMDD(deliveryTicketData?.deliveryDate) || "";
       mainPoint["delivery Person"] = deliveryTicketData?.deliveryPerson?.optionLabel || ""
     }

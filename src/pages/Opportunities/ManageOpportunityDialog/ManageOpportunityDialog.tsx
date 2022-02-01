@@ -494,6 +494,9 @@ export default function ManageOpportunityDialog({
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
                                                 setFieldValue('marketSegment', value?.marketSegment ?? '');
                                                 setFieldValue('subMarketSegment', value?.subMarketSegment ?? '');
+                                                setFieldValue('countryBillTo', value?.billingAddress ?? '');
+                                                setFieldValue('countrySellTo', value?.shippingAddress ?? '');
+                                               
                                                 marketSegmentChange(value?.marketSegment ?? '');
                                                 onCountryBillToDropDownOpen(value && value.optionValue ? value.optionValue : '');
                                                 onCountrySellToDropDownOpen(value && value.optionValue ? value.optionValue : '');
@@ -1149,7 +1152,8 @@ export default function ManageOpportunityDialog({
                           ]
                         });
 
-                        setFieldValue('supplierAccount', data._id);
+                    
+                        setFieldValue('supplierAccount', [...values['supplierAccount'], data._id]);
                         handleValuesChange('supplierAccount', data._id);
                       }}
                       isRedirectToDetailPage={false}
@@ -1181,6 +1185,10 @@ export default function ManageOpportunityDialog({
                         });
                         setFieldValue('customerAccount', data._id);
                         handleValuesChange('customerAccount', data._id);
+                        setFieldValue('marketSegment', data?.marketSegment ?? '');
+                        setFieldValue('subMarketSegment', data?.subMarketSegment ?? '');
+                        setFieldValue('countryBillTo', data?.billingAddress ?? '');
+                        setFieldValue('countrySellTo', data?.shippingAddress ?? '');
                       }}
                       isRedirectToDetailPage={false}
                     />

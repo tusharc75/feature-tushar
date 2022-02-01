@@ -14,7 +14,7 @@ import {
 } from "./../../constants/helpers";
 import {
     getObjKeysWithValues, getObjKeys, yupSchema, deliveryTicket, sidebarResource, DELIVERY_TICKET_TYPE,
-    DELIVERY_TICKET_REFRENCE_TYPE
+    DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_FROM_TO_TYPE
 } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import FormTypes from "../../components/Helpers/FormTypes";
@@ -63,66 +63,9 @@ const ManageDeliveryTicket = (props) => {
             }
             const modifiedData = setFieldsInAscendingOrder(fields)
 
-            let type = deliveryTicketData ? deliveryTicketData?.type : refrenceType
-            let ticket_type = deliveryTicketData ? deliveryTicketData?.ticketType : ticketType
-            let transferType = deliveryTicketData ? deliveryTicketData?.typeDetails?.transferType : refrenceData.transferType
-            let typeOfRepair = deliveryTicketData ? deliveryTicketData?.typeDetails?.typeOfRepair : refrenceData.typeOfRepair
-
             const newFilteredData = modifiedData.filter((formData) => {
-                if (type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-                    if (transferType === "Internal") {
-                        if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
-                            return false
-                        }
-                    }
-                    if (transferType.includes("External Supplier")) {
-                        if (formData.name.includes("Customer") || formData.name.includes(ticket_type === DELIVERY_TICKET_TYPE.loading ? "Receiving Plant" : "Pickup Plant")) {
-                            return false
-                        }
-                    }
-                    if (transferType.includes("External Customer")) {
-                        if (formData.name.includes("Supplier") || formData.name.includes(ticket_type === DELIVERY_TICKET_TYPE.loading ? "Receiving Plant" : "Pickup Plant")) {
-                            return false
-                        }
-                    }
-                }
-                if (type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
-                    if (ticket_type === DELIVERY_TICKET_TYPE.loading) {
-                        if (typeOfRepair === "Internal") {
-                            if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
-                                return false
-                            }
-                        }
-                        if (typeOfRepair === "External") {
-                            if (formData.name.includes("Customer") || formData.name.includes("Receiving Plant")) {
-                                return false
-                            }
-                        }
-                    }
-                    else if (ticket_type === DELIVERY_TICKET_TYPE.receiving) {
-                        if (typeOfRepair === "Internal") {
-                            if (formData.name.includes("Customer") || formData.name.includes("Supplier")) {
-                                return false
-                            }
-                        }
-                        if (typeOfRepair === "External") {
-                            if (formData.name.includes("Customer") || formData.name.includes("Pickup Plant")) {
-                                return false
-                            }
-                        }
-                    }
-                }
-                if (type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
-                    if (ticket_type === DELIVERY_TICKET_TYPE.loading) {
-                        if (formData.name.includes("Supplier") || formData.name.includes("Receiving Plant")) {
-                            return false
-                        }
-                    }
-                    else if (ticket_type === DELIVERY_TICKET_TYPE.receiving || ticket_type === DELIVERY_TICKET_TYPE.return) {
-                        if (formData.name.includes("Supplier") || formData.name.includes("Pickup Plant")) {
-                            return false
-                        }
-                    }
+                if (formData.name.includes("Fields")) {
+                    return false
                 }
                 return true
             })
@@ -130,41 +73,40 @@ const ManageDeliveryTicket = (props) => {
         }
     }, [initialData.fields, refrenceData]);
 
-    const updateFieldProperty = (fields, _type, _ticketType, _transferType, _typeOfRepair) => {
+    const updateFieldProperty = (fields, pickupFromType, deliveryToType) => {
+        var warehouse = [];
+        var customerAccount = [];
+        var supplierAccount = [];
+        if (fields.filter(f => f.fieldName === "warehouse").length) {
+            warehouse = fields.filter(f => f.fieldName === "warehouse")[0]?.option
+        }
+        if (fields.filter(f => f.fieldName === "customerAccount").length) {
+            customerAccount = fields.filter(f => f.fieldName === "customerAccount")[0]?.option
+        }
+        if (fields.filter(f => f.fieldName === "supplierAccount").length) {
+            supplierAccount = fields.filter(f => f.fieldName === "supplierAccount")[0]?.option
+        }
         fields.forEach((element: any) => {
-            if (_type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || _type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
-                if (_ticketType === DELIVERY_TICKET_TYPE.loading && (element.sectionName?.includes("Pickup Plant") || element.sectionName?.includes("Customer"))) {
-                    element.required = true;
+            if (element.fieldName === "pickupFrom") {
+                if (pickupFromType === DELIVERY_FROM_TO_TYPE.plant) {
+                    element.option = warehouse
                 }
-                else if (_ticketType === DELIVERY_TICKET_TYPE.receiving && (element.sectionName?.includes("Receiving Plant") || element.sectionName?.includes("Customer"))) {
-                    element.required = true;
+                if (pickupFromType === DELIVERY_FROM_TO_TYPE.customer) {
+                    element.option = customerAccount
                 }
-            }
-            else if (_type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
-                if (_typeOfRepair === "External") {
-                    if (_ticketType === DELIVERY_TICKET_TYPE.loading && (element.sectionName?.includes("Pickup Plant") || element.sectionName?.includes("Supplier"))) {
-                        element.required = true;
-                    }
-                    else if (_ticketType === DELIVERY_TICKET_TYPE.receiving && (element.sectionName?.includes("Receiving Plant") || element.sectionName?.includes("Supplier"))) {
-                        element.required = true;
-                    }
+                if (pickupFromType === DELIVERY_FROM_TO_TYPE.supplier) {
+                    element.option = supplierAccount
                 }
             }
-            else if (_type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-                if (_transferType === "Internal") {
-                    if (element.sectionName?.includes("Pickup Plant") || element.sectionName?.includes("Receiving Plant")) {
-                        element.required = true;
-                    }
+            else if (element.fieldName === "deliveryTo") {
+                if (deliveryToType === DELIVERY_FROM_TO_TYPE.plant) {
+                    element.option = warehouse
                 }
-                else if (_transferType?.includes("External Supplier")) {
-                    if (element.sectionName?.includes("Supplier") || element.sectionName?.includes(_ticketType === DELIVERY_TICKET_TYPE.loading ? "Pickup Plant" : "Receiving Plant")) {
-                        element.required = true;
-                    }
+                if (deliveryToType === DELIVERY_FROM_TO_TYPE.customer) {
+                    element.option = customerAccount
                 }
-                else if (_transferType?.includes("External Customer")) {
-                    if (element.sectionName?.includes("Customer") || element.sectionName?.includes(_ticketType === DELIVERY_TICKET_TYPE.loading ? "Pickup Plant" : "Receiving Plant")) {
-                        element.required = true;
-                    }
+                if (deliveryToType === DELIVERY_FROM_TO_TYPE.supplier) {
+                    element.option = supplierAccount
                 }
             }
         });
@@ -198,14 +140,13 @@ const ManageDeliveryTicket = (props) => {
                 }
                 setDeliveryTicketData(data)
                 setDisableOwnerSelection(deliveryTicketId && user.user._id !== data?.owner?.optionValue);
-                fieldsDataForUpdate = updateFieldProperty(fieldsDataForUpdate, data?.type, data?.ticketType, data?.typeDetails?.transferType, data?.typeDetails?.typeOfRepair);
+                fieldsDataForUpdate = updateFieldProperty(fieldsDataForUpdate, data?.pickupFromType, data?.deliveryToType);
                 setInitialData({
                     fields: fieldsDataForUpdate,
                     values: getObjKeysWithValues(data, fieldsDataForUpdate),
                 });
             }
             else {
-                fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, refrenceType, ticketType, refrenceData?.transferType, refrenceData?.typeOfRepair);
                 const tempInitialData = getObjKeys("", fieldsDataForCreate)
                 if (productInventory && refrenceData && (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder)) {
 
@@ -222,30 +163,37 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
 
                     if (ticketType === DELIVERY_TICKET_TYPE.loading) {
-                        tempInitialData["pickupPlant"] = warehouseId
+                        tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
+                        tempInitialData["pickupFrom"] = warehouseId;
                         fieldsDataForCreate?.forEach((e) => {
-                            if (e.fieldName === "pickupPlant") {
+                            if (e.fieldName === "warehouse") {
                                 const plantAddress = e?.option?.filter((e) => e.optionValue === warehouseId)
                                 if (plantAddress.length) {
-                                    tempInitialData["pickupPlantAddress"] = plantAddress[0].address
+                                    tempInitialData["pickupFromAddress"] = plantAddress[0].address
                                 }
                             }
                         })
+                        tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.customer;
+                        tempInitialData["deliveryTo"] = refrenceData.customerAccount?.optionValue
+                        tempInitialData["deliveryToAddress"] = refrenceData.shippingAddress?.optionValue
                     }
                     else if (ticketType === DELIVERY_TICKET_TYPE.receiving || ticketType === DELIVERY_TICKET_TYPE.return) {
-                        tempInitialData["receivingPlant"] = refrenceData?.warehouse?.optionValue
+                        tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
+                        tempInitialData["pickupFrom"] = refrenceData.customerAccount?.optionValue
+                        tempInitialData["pickupFromAddress"] = refrenceData.shippingAddress?.optionValue
+
+                        tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                        tempInitialData["deliveryTo"] = refrenceData?.warehouse?.optionValue
                         fieldsDataForCreate?.forEach((e) => {
-                            if (e.fieldName === "pickupPlant") {
+                            if (e.fieldName === "warehouse") {
                                 const plantAddress = e?.option?.filter((e) => e.optionValue === refrenceData?.warehouse?.optionValue)
                                 if (plantAddress.length) {
-                                    tempInitialData["receivingPlantAddress"] = plantAddress[0].address
+                                    tempInitialData["deliveryToAddress"] = plantAddress[0].address
                                 }
                             }
                         })
                     }
-                    tempInitialData["customerAccount"] = refrenceData.customerAccount?.optionValue
-                    tempInitialData["customerShippingAddress"] = refrenceData.shippingAddress?.optionValue
-                    tempInitialData["pick-UpDate"] = moment(refrenceData?.estimateStartDate).subtract(1, 'days');
+                    tempInitialData["pickUpDate"] = moment(refrenceData?.estimateStartDate).subtract(1, 'days');
                     tempInitialData["deliveryDate"] = moment(refrenceData?.estimateStartDate).subtract(1, 'days');
                 }
                 else if (productInventory && refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.repairJob && refrenceData) {
@@ -258,64 +206,49 @@ const ManageDeliveryTicket = (props) => {
 
                     const plant = refrenceData["plant"] ?? refrenceData["warehouse"];
 
-                    if (refrenceData?.typeOfRepair === "Internal") {
-
-                        if (ticketType === DELIVERY_TICKET_TYPE.loading) {
-                            tempInitialData["pickupPlant"] = warehouseId;
-
-                            const pickupPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "pickupPlant")?.option;
-                            if (pickupPlantAddresses && plant) {
-                                const address = pickupPlantAddresses.find(f => f.optionValue === plant?.optionValue);
-                                if (address) {
-                                    tempInitialData["pickupPlantAddress"] = address.address;
+                    if (ticketType === DELIVERY_TICKET_TYPE.loading) {
+                        tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
+                        tempInitialData["pickupFrom"] = plant?.optionValue
+                        fieldsDataForCreate?.forEach((e) => {
+                            if (e.fieldName === "warehouse") {
+                                const plantAddress = e?.option?.filter((e) => e.optionValue === plant?.optionValue)
+                                if (plantAddress.length) {
+                                    tempInitialData["pickupFromAddress"] = plantAddress[0].address
                                 }
                             }
-
-                            tempInitialData["receivingPlant"] = refrenceData?.repairPlant?.optionValue;
-                            tempInitialData["receivingPlantAddress"] = refrenceData?.plantShipTo?.optionValue;
-
-                        } else {
-                            tempInitialData["receivingPlant"] = warehouseId;
-
-                            const receivingPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "receivingPlant")?.option;
-                            if (receivingPlantAddresses && plant) {
-                                const address = receivingPlantAddresses.find(f => f.optionValue === plant?.optionValue);
-                                if (address) {
-                                    tempInitialData["receivingPlantAddress"] = address.address;
-                                }
-                            }
-
-                            tempInitialData["pickupPlant"] = refrenceData?.repairPlant?.optionValue;
-                            tempInitialData["pickupPlantAddress"] = refrenceData?.plantShipTo?.optionValue;
+                        })
+                        if (refrenceData?.typeOfRepair === "Internal") {
+                            tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                            tempInitialData["deliveryTo"] = refrenceData?.repairPlant?.optionValue;
+                            tempInitialData["deliveryToAddress"] = refrenceData?.plantShipTo?.optionValue;
                         }
-
-                    } else if (refrenceData?.typeOfRepair === "External") {
-
-                        if (ticketType === DELIVERY_TICKET_TYPE.loading) {
-                            tempInitialData["pickupPlant"] = warehouseId;
-
-                            const pickupPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "pickupPlant")?.option;
-                            if (pickupPlantAddresses && plant) {
-                                const address = pickupPlantAddresses.find(f => f.optionValue === plant?.optionValue);
-                                if (address) {
-                                    tempInitialData["pickupPlantAddress"] = address.address;
-                                }
-                            }
-
-                        } else {
-                            tempInitialData["receivingPlant"] = warehouseId;
-
-                            const receivingPlantAddresses = fieldsDataForCreate.find(d => d.fieldName === "receivingPlant")?.option;
-                            if (receivingPlantAddresses && plant) {
-                                const address = receivingPlantAddresses.find(f => f.optionValue === plant?.optionValue);
-                                if (address) {
-                                    tempInitialData["receivingPlantAddress"] = address.address;
-                                }
-                            }
+                        else if (refrenceData?.typeOfRepair === "External") {
+                            tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.supplier;
+                            tempInitialData["deliveryTo"] = refrenceData?.supplier?.optionValue;
+                            tempInitialData["deliveryToAddress"] = refrenceData?.supplierShipTo?.optionValue;
                         }
-
-                        tempInitialData["supplierAccount"] = refrenceData?.supplier?.optionValue;
-                        tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo?.optionValue;
+                    }
+                    else {
+                        if (refrenceData?.typeOfRepair === "Internal") {
+                            tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
+                            tempInitialData["pickupFrom"] = refrenceData?.repairPlant?.optionValue;
+                            tempInitialData["pickupFromAddress"] = refrenceData?.plantShipTo?.optionValue;
+                        }
+                        else if (refrenceData?.typeOfRepair === "External") {
+                            tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
+                            tempInitialData["pickupFrom"] = refrenceData?.supplier?.optionValue;
+                            tempInitialData["pickupFromAddress"] = refrenceData?.supplierShipTo?.optionValue;
+                        }
+                        tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                        tempInitialData["deliveryTo"] = warehouseId
+                        fieldsDataForCreate?.forEach((e) => {
+                            if (e.fieldName === "warehouse") {
+                                const plantAddress = e?.option?.filter((e) => e.optionValue === warehouseId)
+                                if (plantAddress.length) {
+                                    tempInitialData["deliveryToAddress"] = plantAddress[0].address
+                                }
+                            }
+                        })
                     }
                 }
                 else if (productInventory && refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset && refrenceData) {
@@ -325,29 +258,49 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
                     tempInitialData["transferAsset"] = refrenceData?._id;
                     tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
+
                     if (ticketType === DELIVERY_TICKET_TYPE.loading) {
-                        tempInitialData["pickupPlant"] = warehouseId;
-                        tempInitialData["pickupPlantAddress"] = refrenceData?.transferFromPlant.address ?? "";
+                        tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
+                        tempInitialData["pickupFrom"] = warehouseId;
+                        tempInitialData["pickupFromAddress"] = refrenceData?.transferFromPlant.address ?? "";
                         if (refrenceData?.transferType === "Internal") {
-                            tempInitialData["receivingPlant"] = refrenceData?.transfertoPlant?.optionValue;
-                            tempInitialData["receivingPlantAddress"] = refrenceData?.plantShipTo?.optionValue;
+                            tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                            tempInitialData["deliveryTo"] = refrenceData?.transfertoPlant?.optionValue;
+                            tempInitialData["deliveryToAddress"] = refrenceData?.plantShipTo?.optionValue;
                         }
-
-                    } else {
-                        tempInitialData["receivingPlant"] = warehouseId;
-                        tempInitialData["receivingPlantAddress"] = refrenceData?.transferFromPlant.address
+                        else if (refrenceData?.transferType === "External Customer") {
+                            tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.customer;
+                            tempInitialData["deliveryTo"] = refrenceData?.transfertoCustomer?.optionValue;
+                            tempInitialData["deliveryToAddress"] = refrenceData?.customerShipTo?.optionValue;
+                        }
+                        else if (refrenceData?.transferType === "External Supplier") {
+                            tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.supplier;
+                            tempInitialData["deliveryTo"] = refrenceData?.transfertoSupplier?.optionValue;
+                            tempInitialData["deliveryToAddress"] = refrenceData?.supplierShipTo?.optionValue;
+                        }
                     }
-
-                    if (refrenceData?.transferType === "External Customer") {
-                        tempInitialData["customerAccount"] = refrenceData?.transfertoCustomer?.optionValue;
-                        tempInitialData["customerShippingAddress"] = refrenceData?.customerShipTo?.optionValue;
+                    else {
+                        if (refrenceData?.transferType === "Internal") {
+                            tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
+                            tempInitialData["pickupFrom"] = refrenceData?.transfertoPlant?.optionValue;
+                            tempInitialData["pickupFromAddress"] = refrenceData?.plantShipTo?.optionValue;
+                        }
+                        else if (refrenceData?.transferType === "External Customer") {
+                            tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
+                            tempInitialData["pickupFrom"] = refrenceData?.transfertoCustomer?.optionValue;
+                            tempInitialData["pickupFromAddress"] = refrenceData?.customerShipTo?.optionValue;
+                        }
+                        else if (refrenceData?.transferType === "External Supplier") {
+                            tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
+                            tempInitialData["pickupFrom"] = refrenceData?.transfertoSupplier?.optionValue;
+                            tempInitialData["pickupFromAddress"] = refrenceData?.supplierShipTo?.optionValue;
+                        }
+                        tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                        tempInitialData["deliveryTo"] = warehouseId;
+                        tempInitialData["deliveryToAddress"] = refrenceData?.transferFromPlant.address
                     }
-                    if (refrenceData?.transferType === "External Supplier") {
-                        tempInitialData["supplierAccount"] = refrenceData?.transfertoSupplier?.optionValue;
-                        tempInitialData["supplierShippingAddress"] = refrenceData?.supplierShipTo?.optionValue;
-                    }
-
                 }
+                fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, tempInitialData["pickupFromType"], tempInitialData["deliveryToType"]);
                 setInitialData({
                     fields: fieldsDataForCreate,
                     values: tempInitialData,
@@ -437,7 +390,6 @@ const ManageDeliveryTicket = (props) => {
             else {
                 setSubmitting(true);
                 let updatedValues = { ...values }
-                updatedValues["status"] = "New";
                 axiosInstance().post(`${deliveryTicketApi}`, updatedValues).then(({ data }) => {
                     setLoading(false);
                     onSuccess()
@@ -458,10 +410,10 @@ const ManageDeliveryTicket = (props) => {
 
     function validate(values) {
         const errors = {};
-        let startDate = moment(values?.["pick-UpDate"]);
+        let startDate = moment(values?.["pickUpDate"]);
         let endDate = moment(values?.deliveryDate);
         if (endDate.diff(startDate, 'days') < 0) {
-            errors['pick-UpDate'] = 'Please enter valid pick-Up  date';
+            errors['pickUpDate'] = 'Please enter valid pick-Up  date';
         }
         return errors;
     }
@@ -522,7 +474,7 @@ const ManageDeliveryTicket = (props) => {
                                                             ["repairJob", "transferAsset", "rentalJob", "salesOrder", "type", "productInventory"].includes(field.fieldName) ? null :
                                                                 (["returnReason"].includes(field.fieldName) && values["ticketType"] !== DELIVERY_TICKET_TYPE.return) ? null :
                                                                     <Grid key={index2} item xs={12} sm={6} md={6}>
-                                                                        {field.fieldName === "pick-UpDate" ? (
+                                                                        {field.fieldName === "pickUpDate" ? (
                                                                             <FormTypes
                                                                                 {...field}
                                                                                 fieldData={field}
@@ -570,7 +522,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                 isTooltip={field?.isTooltip || false}
                                                                                 tooltipMessage={field?.tooltipMessage}
                                                                                 size="small"
-                                                                                minDate={moment(values["pick-UpDate"])} // Please, whoever changing this ask Gagan before any change 
+                                                                                minDate={moment(values["pickUpDate"])} // Please, whoever changing this ask Gagan before any change 
                                                                             //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
                                                                             // maxDate={refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob ? refrenceData.estimateStartDate ? moment(refrenceData?.estimateStartDate) : moment().add(1, 'years').calendar() :
                                                                             //     refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset ? moment().add(1, 'years').calendar() : moment().add(1, 'years').calendar()}

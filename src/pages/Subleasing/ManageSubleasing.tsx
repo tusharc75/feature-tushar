@@ -28,7 +28,8 @@ import ManageAccountDialog from "../Account/ManageAccount";
 import ManageContactDialog from "../Contact/ManageContact";
 import { isEqual } from 'lodash';
 
-const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuccess, currency = null }) => {
+const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuccess, currency = null,
+    refrenceType = null, refrenceId = null, refrenceData = null }) => {
 
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
@@ -80,9 +81,11 @@ const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuc
             else {
                 let createValues: any = getObjKeys("", fieldsDataForCreate)
                 createValues["subleaseName"] = `SL_${generateUniqueIdOnly()}`
-                createValues["status"] = "New"
                 if (currency) {
                     createValues["currency"] = currency
+                }
+                if (refrenceType === "rentalJob") {
+                    createValues["rentalJob"] = refrenceId
                 }
                 setInitialData({
                     fields: fieldsDataForCreate,
@@ -135,7 +138,27 @@ const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuc
         else {
             axiosInstance().post(`${subleasing.api}`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                history.push(`${subleasing.api}/detail/${data._id}`);
+                if (refrenceType) {
+                    const material: any = []
+                    refrenceData.material.forEach(d => {
+                        const element: any = {};
+                        element.materialId = d._id;
+                        element.type = "product";
+                        element.unit = d.unit;
+                        element.qty = d.assetsCount;
+                        element.parentId = null;
+                        material.push(element);
+                    });
+                    axiosInstance().post(`${subleasing.api}/productpackage/${data._id}`, { material })
+                        .then(() => {
+                            onSuccess()
+                        }).catch((error) => {
+                            toastConfig.setToastConfig(error)
+                        });
+                }
+                else {
+                    history.push(`${subleasing.api}/detail/${data._id}`);
+                }
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
@@ -233,6 +256,7 @@ const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuc
                                                                     >
                                                                         <FormTypes
                                                                             {...field}
+                                                                            fieldData={field}
                                                                             values={values}
                                                                             errors={errors}
                                                                             touched={touched}
@@ -303,6 +327,7 @@ const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuc
                                                                             <FormTypes
                                                                                 isNew={Boolean(subleasingId)}
                                                                                 {...field}
+                                                                                fieldData={field}
                                                                                 values={values}
                                                                                 errors={errors}
                                                                                 touched={touched}
@@ -355,6 +380,7 @@ const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuc
                                                                     <FormTypes
                                                                         {...field}
                                                                         values={values}
+                                                                        fieldData={field}
                                                                         errors={errors}
                                                                         touched={touched}
                                                                         label={field.fieldLabel}
@@ -409,6 +435,7 @@ const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuc
                                                                         {...field}
                                                                         values={values}
                                                                         errors={errors}
+                                                                        fieldData={field}
                                                                         touched={touched}
                                                                         label={field.fieldLabel}
                                                                         name={field.fieldName}
@@ -432,6 +459,7 @@ const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuc
                                                                     : <FormTypes
                                                                         isNew={Boolean(subleasingId)}
                                                                         {...field}
+                                                                        fieldData={field}
                                                                         disabled={(Boolean(subleasingId) && field.disableOnEdit && !isClone)}
                                                                         values={values}
                                                                         errors={errors}

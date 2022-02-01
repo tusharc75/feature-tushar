@@ -529,10 +529,16 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       value = key?.type === "multiSelect" ? [selectedEntity] : selectedEntity
     }
     if (key.type === 'dropDown') {
-      const option = key.option?.find((data: any) => data.default === true);
+      let option = key.option?.find((data: any) => data.default === true);
+      if (!option && key.required && key.option?.length === 1) {
+        option = key.option[0];
+      }
       obj[key.fieldName] = value ? value : option ? option.optionValue : '';
     } else if (key.type === 'multiSelect') {
-      const defaultOptions = key.option?.filter((item: any) => item.default === true);
+      let defaultOptions = key.option?.filter((item: any) => item.default === true);
+      if (defaultOptions?.length === 0 && key.required && key.option?.length === 1) {
+        defaultOptions = key.option;
+      }
       const options = defaultOptions?.map((data: any) => data.optionValue);
       obj[key.fieldName] = value ? value : options;
     } else if (key.type === 'freeStyleMultiSelect') {
@@ -1080,9 +1086,9 @@ export function b64toBlob(dataURI) {
   var byteString = atob(dataURI.split(',')[1]);
   var ab = new ArrayBuffer(byteString.length);
   var ia = new Uint8Array(ab);
-  
+
   for (var i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
+    ia[i] = byteString.charCodeAt(i);
   }
   return new Blob([ab], { type: 'image/jpeg' });
 }
@@ -1112,7 +1118,7 @@ export const determineLightOrDark = (color: any) => {
     b = color & 255;
   }
 
-  // HSP (Highly Sensitive Poo) equation from http://alienryderflex.com/hsp.html
+  // HSP (Highly Sensitive Poo) equation
   hsp = Math.sqrt(
     0.299 * (r * r) +
     0.587 * (g * g) +
@@ -1539,6 +1545,12 @@ export const DELIVERY_TICKET_REFRENCE_TYPE = {
   salesOrder: 'Sales Order',
 };
 
+export const DELIVERY_FROM_TO_TYPE = {
+  plant: 'Plant',
+  customer: 'Customer',
+  supplier: 'Supplier',
+};
+
 export const asyncForEach = async (
   array: any[],
   callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>
@@ -1562,7 +1574,14 @@ export const resourceOptions = [
 ];
 
 
-export const REPORT_LIST = [sidebarResource.rentalManagement, sidebarResource.productInventory]
+export const REPORT_LIST = [
+  { title: sidebarResource.rentalManagement, key: "rentalManagement" },
+  { title: sidebarResource.productInventory, key: "productInventory" },
+  { title: sidebarResource.lead, key: "lead" },
+  { title: sidebarResource.opportunity, key: "opportunity" },
+  { title: sidebarResource.quoteBuilder, key: "quoteBuilder" },
+  { title: sidebarResource.projectSales, key: "projectSales" }
+]
 
 
 export const getApi = (resource: string) => {

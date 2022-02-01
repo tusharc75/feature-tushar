@@ -46,6 +46,11 @@ export const SearchFilter = ({
     { type: "opportunity", name: "All", isAll: true },
     { type: "quote", name: "All", isAll: true },
     { type: "projectSales", name: "All", isAll: true },
+    { type: "rentalManagement", name: "All", isAll: true },
+    { type: "repairJob", name: "All", isAll: true },
+    { type: "transferAsset", name: "All", isAll: true },
+    { type: "purchaseOrder", name: "All", isAll: true },
+    { type: "deliveryTicket", name: "All", isAll: true },
     { type: "my", name: user?._id, isAll: true },
   ];
 
