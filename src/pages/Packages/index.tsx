@@ -345,8 +345,6 @@ const PackageList = () => {
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
                 finalObject["allowedToEdit"] = permissions.packages.isUpdate;
                 finalObject["unit"] = finalObject["unit"].join(" , ");
-                console.log(finalObject,"finalObject")
-                console.log(finalObject["unit"],"finalObjectUnit")
                 return {
                     ...finalObject,
                 };

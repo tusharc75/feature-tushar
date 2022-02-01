@@ -25,7 +25,7 @@ import { MdAdd, MdDelete } from "react-icons/md";
 import { FiPackage } from "react-icons/fi";
 import { RiEditCircleLine } from "react-icons/ri";
 
-const Productpackage = ({ subleaseData, setNextStep }) => {
+const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -40,6 +40,7 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
 
     const [deleteData, setDeleteData] = useState(null);
     const [isDeleting, setDeleting] = useState(false);
+    const [isIssueing, setIssueing] = useState(false);
 
     const [material, setMaterial] = useState([]);
     const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: "", parentId: null });
@@ -346,6 +347,17 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
         setRecordToUpdate(rowData)
     }
 
+    const issueSublease = () => {
+        setIssueing(true);
+        axiosInstance().put(`${subleasing.api}/${subleaseData._id}/issue-sublease`).then(() => {
+            setIssueing(false);
+            fetchData()
+        }).catch((error) => {
+            setUpdating(false)
+            toastConfig.setToastConfig(error)
+        });
+    }
+
     const calculatePrice = (arr: any[]) => {
         if (subleaseData) {
             const data: any = {}
@@ -441,17 +453,16 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
                             </Button>
                         </HtmlTooltip>
                         <Box mx={1} />
-                        {material.length &&
+                        {(material.length && !isIssued) &&
                             <Fragment>
                                 <HtmlTooltip title={"Issue Sublease"}>
                                     <Button
                                         variant={isMobile && !isTablet ? "text" : "contained"}
                                         color="primary"
                                         size="small"
-                                        onClick={() => {
-
-                                        }}
-                                        endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
+                                        onClick={() => { issueSublease() }}
+                                        disabled={isIssueing}
+                                        endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
                                     >
                                         {isMobile && !isTablet ? <MdDelete size={20} /> : "Issue Sublease"}
                                     </Button>

@@ -23,7 +23,6 @@ export const createDeliveryTicketOffline = async (data, values) => {
         return true;
     }
     catch (e) {
-        console.log(e)
         return false;
     }
 };
@@ -58,7 +57,6 @@ export const updateSignatureOffline = async (id, signatures) => {
         return true;
     }
     catch (e) {
-        console.log(e)
         return false;
     }
 };
@@ -83,7 +81,6 @@ export const updateofflineDataSync = async (id, data) => {
         return true;
     }
     catch (e) {
-        console.log(e)
         return false;
     }
 };

@@ -10,22 +10,6 @@ import useColumns, { getFrameworkComponents } from '../../../constants/useColumn
 import { Delete, Edit } from '@material-ui/icons';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteButton from '../../../components/Helpers/DeleteButton';
-// POST /product/61cad683bcce3823a24211d8/images
-// {
-
-//     "product":"61cad683bcce3823a24211d8",
-
-//     "images":["https://images.unsplash.com/photo-1639242585506-d66e7f47c047?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"]
-
-// }
-//GET  /product/61cad683bcce3823a24211d8/images
-//PUT /product/61cad683bcce3823a24211d8/images  - UPDATE
-//PUT /product/61cad683bcce3823a24211d8/images/remove - DLETE
-// {
-//     "ids":["61ee69f4d14ebc59b4961ecc"]
-// }
-// GET /e-product/image/61cad683bcce3823a24211d8?fields=[{"field":"field","value":""}] - GET single image for e commerce
-
 interface ConfigProps {
   productFields: any[];
   productData: any | {};
@@ -33,6 +17,7 @@ interface ConfigProps {
 }
 
 const ProductConfiguration = (props: ConfigProps) => {
+  
   const initialRender = React.useRef(true);
   const { productData, productFields, id } = props;
   const [specFields, setSpecFields] = React.useState([]);
@@ -75,7 +60,6 @@ const ProductConfiguration = (props: ConfigProps) => {
           }
         }
       });
-
       let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
       tempFrameworkComponent = {
         ...tempFrameworkComponent,
@@ -84,7 +68,6 @@ const ProductConfiguration = (props: ConfigProps) => {
       setFrameWorkComponent({ ...tempFrameworkComponent });
       setColumns([...columns]);
     }
-
     if (initialRender) {
       getConfigurationData();
       initialRender.current = false;
@@ -142,7 +125,7 @@ const ProductConfiguration = (props: ConfigProps) => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   const removeData = () => {
@@ -192,7 +175,6 @@ const ProductConfiguration = (props: ConfigProps) => {
           </Button>
         </Box>
       </Box>
-
       <Box>
         {Object.keys(frameWorkComponent).length > 0 && (
           <CustomAgGrid
@@ -214,7 +196,6 @@ const ProductConfiguration = (props: ConfigProps) => {
           />
         )}
       </Box>
-
       {openDialog && (
         <AddConfigurationDialog
           fields={specFields}

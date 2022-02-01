@@ -25,7 +25,6 @@ export const setUpindexDB = () => {
         };
     }
     catch (e) {
-        console.log(e)
     }
 };
 
@@ -40,7 +39,6 @@ export const findAll = async (store) => {
         return result;
     }
     catch (e) {
-        console.log(e)
     }
 };
 
@@ -52,7 +50,6 @@ export const findOne = async (store, key) => {
         return result;
     }
     catch (e) {
-        console.log(e)
     }
 };
 
@@ -63,7 +60,6 @@ export const insertUpdate = async (store, key, value) => {
         transaction.objectStore(store).put(value, key);
     }
     catch (e) {
-        console.log(e)
     }
 };
 
@@ -77,7 +73,6 @@ export const deleteOne = (store, key) => {
         };
     }
     catch (e) {
-        console.log(e)
     }
 };
 
@@ -91,6 +86,5 @@ export const clearAll = (store) => {
         };
     }
     catch (e) {
-        console.log(e)
     }
 };
