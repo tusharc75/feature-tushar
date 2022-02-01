@@ -115,15 +115,12 @@ const Product = () => {
             if (data.filter((e) => e.fieldData.fieldName === "productTemplate").length === 0) {
                 setIsProductTemplate(false)
             }
-
             const productTypes = data.find((e) => e.fieldData.fieldName === "productType")
-
             if (productTypes) {
                 setProductTypeList([...productTypes.fieldData.option]);
             } else {
                 setIsProductType(false)
             }
-
             let columns = []
             let rendererNames = []
             data.forEach(o => {

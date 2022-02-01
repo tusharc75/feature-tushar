@@ -63,6 +63,7 @@ const AssignProductDialog = ({
         { field: 'productNumber', headerName: 'Product Number', show: true, cellRenderer: 'commonRenderer' },
         { field: 'quantity', headerName: 'Quantity', show: true, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
     ]);
+
     const [filter, setFilter] = useState(`All ${routes.product.title}`);
 
     const getQueryString = () => {
@@ -109,28 +110,20 @@ const AssignProductDialog = ({
 
     const fetchProduct = () => {
         dispatch({ type: "loading", loading: true });
-
         if (gridApi) {
             gridApi.setRowData([]);
         }
-
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            // let tData = data.filter(o => o._id !== productId)
-            // tData = tData.map(obj => ({ ...obj, isChecked: assignedProducts.some(item => item?._id === obj?._id) ? true : false }))
+            data.data = data.data.filter(obj => !assignedProducts.some(item => item?.childProduct === obj?._id))
             data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
-                quantity: assignedProducts.some(item => item?._id === u?._id) ? assignedProducts.find(item => item?._id === u?._id).qty : 0,
+                quantity: 0,
             }));
             setProductsConst(data.data)
-            // setSelectedProducts(assignedProducts.map(obj => obj._id))
             dispatch({ type: "initialize", data: data.data, count: data.data.length });
-            setTimeout(() => {
-                dispatch({ type: "loading", loading: false });
-                dispatch({ type: "selection", selectedRecords: data.data.filter(obj => assignedProducts.some(item => item?._id === obj?._id)) });
-            }, gridLoadingTimeout);
-
+            setTimeout(() => { dispatch({ type: "loading", loading: false }) }, gridLoadingTimeout);
         })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -139,9 +132,7 @@ const AssignProductDialog = ({
 
     const ActionsRenderer = params => {
         const rowNode = params.node.gridApi.getRowNode(params.data.id)
-
         return <>
-            {/* {selectedRecords.find(d => d._id === params.data._id) && */}
             {
                 <ButtonGroup size="small" aria-label="small outlined button group">
                     <IconButton
@@ -152,17 +143,6 @@ const AssignProductDialog = ({
                         }}>
                         <RemoveOutlined fontSize="small" color="primary" />
                     </IconButton>
-                    {/* <TextField
-                        type="number"
-                        name={params.data.id}
-                        margin="dense"
-                        size="small"
-                        value={rowNode.data.quantity ? rowNode.data.quantity : 110}
-                        onChange={(e) => {
-
-                         }
-                        }
-                    /> */}
                     <IconButton
                         size="small"
                         aria-label="Clone"
@@ -207,7 +187,7 @@ const AssignProductDialog = ({
                 setAssigning(false);
                 toastConfig.setToastConfig(error);
             });
-        
+
     };
 
     const handleSearch = (e) => {
@@ -225,6 +205,7 @@ const AssignProductDialog = ({
     const onCellValueChanged = (row) => {
         setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
     }
+
     useEffect(() => {
         setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
     }, [selectedRecords])

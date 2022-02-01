@@ -62,7 +62,6 @@ function Roadmap({ type, filter }) {
   const taskScroolRef = React.useRef(null);
   const onscroll = (event) => {
     var target = event.nativeEvent.target;
-    console.log(target.scrollTop)
     taskScroolRef.current.scrollTop = target.scrollTop;
   };
 

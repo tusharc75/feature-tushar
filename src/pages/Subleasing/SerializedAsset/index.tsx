@@ -14,9 +14,9 @@ import useColumns, { getStaticFields, getFrameworkComponents } from "../../../co
 import { prepareDataForGrid } from "../../../constants/helpers"
 import { useData } from "../../../StateProvider/Provider";
 
-const renderedFrom = 'SubleasingTickets';
+const renderedFrom = 'SubleasingSerializedAsset';
 
-const Tickets = ({ subleaseData }) => {
+const SerializedAsset = ({ subleaseData }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
@@ -35,7 +35,7 @@ const Tickets = ({ subleaseData }) => {
 
     const fetchGridColumns = () => {
         axiosInstance()
-            .get("/field?resource=Delivery Ticket")
+            .get("/field?resource=Product Inventory")
             .then(({ data: { data } }) => {
                 let columns = []
                 let rendererNames = []
@@ -60,7 +60,29 @@ const Tickets = ({ subleaseData }) => {
     }
 
     const fetchRecords = async () => {
-     
+        const productInventories = []
+        subleaseData?.productInventory?.forEach(element => {
+            productInventories.push(element.inventory)
+        });
+        if (productInventories.length) {
+            dispatch({ type: "loading", loading: true });
+            if (gridApi) {
+                gridApi.setRowData([]);
+            }
+            let data;
+            let ids = JSON.stringify(productInventories)
+            const queryString = `?getById=${ids}`
+            const response = await axiosInstance().get(`${productInventory.api}${queryString}`)
+            data = response?.data?.data
+            let rows = data.map((u) => {
+                let res = {
+                    ...prepareDataForGrid(u, user)
+                };
+                return res;
+            });
+            dispatch({ type: "initialize", data: rows, count: rows.length });
+            setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
+        }
     };
 
     return (<>
@@ -92,11 +114,6 @@ const Tickets = ({ subleaseData }) => {
                             {
                                 label: "Status : ",
                                 field: "status",
-                            },
-                            {
-                                label: "Loading Ticket : ",
-                                field: "loadingTicket",
-                                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`)
                             }
                         ]}
                         owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
@@ -129,4 +146,4 @@ const Tickets = ({ subleaseData }) => {
     );
 };
 
-export default Tickets;
+export default SerializedAsset;

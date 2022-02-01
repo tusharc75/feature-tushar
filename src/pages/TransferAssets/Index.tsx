@@ -164,7 +164,6 @@ const TransferAsset = () => {
     });
   }
 
-  console.log(columns, "columns")
 
   const handleDelete = () => {
     let ids = [];

@@ -204,23 +204,23 @@ const ProductDetailsPage = () => {
   };
 
   const getProductTree = () => {
-      setLoadingBOMData(true);
-      axiosInstance()
-        .get(`/product/${id}/bom`)
-        .then(({ data: { data } }) => {
-          data = data.map((o) => {
-            return {
-              ...o, 
-              productName: o.childProductDetail.productName, 
-              productId: o.childProductDetail._id
-            };
-          });
-          setBOMData([...data]);
-          setLoadingBOMData(false);
-        })
-        .catch((err) => {
-          setLoadingBOMData(false);
+    setLoadingBOMData(true);
+    axiosInstance()
+      .get(`/product/${id}/bom`)
+      .then(({ data: { data } }) => {
+        data = data.map((o) => {
+          return {
+            ...o,
+            productName: o.childProductDetail.productName,
+            productId: o.childProductDetail._id
+          };
         });
+        setBOMData([...data]);
+        setLoadingBOMData(false);
+      })
+      .catch((err) => {
+        setLoadingBOMData(false);
+      });
 
   };
 
@@ -492,7 +492,7 @@ const ProductDetailsPage = () => {
               </TabPanel>
               <TabPanel value={tabValue} index={3}>
                 {tabValue === 3 && <ProductConfiguration
-                  productFields={productFields.map((_f:any) => _f.fieldData)}
+                  productFields={productFields.map((_f: any) => _f.fieldData)}
                   productData={productData}
                   id={id}
                 />}
@@ -504,7 +504,6 @@ const ProductDetailsPage = () => {
               <Paper style={{ overflow: 'hidden' }}>
                 <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
                   <Typography variant="subtitle2">Parts</Typography>
-
                   {permissions.product.isUpdate && (
                     <IconButton
                       title="Manage Product(s)"
@@ -542,10 +541,10 @@ const ProductDetailsPage = () => {
                                                 product={frequentlyBoughtProduct}
                                                 unassignProduct={unassignProduct}
                                             /> */}
-                        <ProductHierarchy 
+                        <ProductHierarchy
                           fetchData={getProductTree}
                           data={BOMData}
-                          permissions={permissions.product} 
+                          permissions={permissions.product}
                           unassignProduct={unassignProduct}
                         />
                         <Box px={1} my={1}>
