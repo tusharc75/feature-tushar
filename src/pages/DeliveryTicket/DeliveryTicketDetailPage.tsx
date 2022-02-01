@@ -145,17 +145,27 @@ export default function DeliveryTicketDetail(props) {
       }
       data = data.filter((fields: any) => {
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-          if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "rentalJob" || fields.fieldData.fieldName === "productInventory") {
+          if (["repairJob", "rentalJob", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-          if (fields.fieldData.fieldName === "rentalJob" || fields.fieldData.fieldName === "transferAsset" || fields.fieldData.fieldName === "productInventory") {
+          if (["rentalJob", "transferAsset", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
-        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
-          if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "transferAsset" || fields.fieldData.fieldName === "productInventory") {
+        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob) {
+          if (["repairJob", "transferAsset", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
+            return false
+          }
+        }
+        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
+          if (["repairJob", "transferAsset", "sublease", "productInventory"].includes(fields.fieldData.fieldName)) {
+            return false
+          }
+        }
+        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.sublease) {
+          if (["rentalJob", "repairJob", "transferAsset", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
