@@ -275,20 +275,12 @@ const ProductInventoryDetailsPage = () => {
   const getProductTree = () => {
     if (productId) {
       setLoadingBOMData(true)
-      axiosInstance()
-        .get(`/product/bom/${productId}`)
-        .then(({ data: { data } }) => {
-          data = data.map(o => {
-            if (o?.parent) {
-              o.type = "child"
-            }
-            return o
-          })
-          setBOMData([...data])
-          setLoadingBOMData(false)
-        }).catch(err => {
-          setLoadingBOMData(false)
-        })
+      axiosInstance().get(`/product/${productId}/bom`).then(({ data: { data } }) => {
+        setBOMData([...data])
+        setLoadingBOMData(false)
+      }).catch(err => {
+        setLoadingBOMData(false)
+      })
     }
   }
 
@@ -466,7 +458,6 @@ const ProductInventoryDetailsPage = () => {
 
                 </DetailsPageHeader>
               )}
-
               {/*For Desktop*/}
               <Box display={isMobile ? "none" : ""}>
                 {loadingProductInventory || !productInventoryFields.length ? (
@@ -520,17 +511,9 @@ const ProductInventoryDetailsPage = () => {
                         </Box>
                       }
                     </Grid>
-
                   </div>
                 </Grid>
-
               </Grid>
-
-
-              {/*For Mobile*/}
-
-
-
               <Tabs
                 className="quote-tab"
                 value={tabValue}
@@ -654,7 +637,6 @@ const ProductInventoryDetailsPage = () => {
               </TabPanel>
             </Paper>
           </Grid>
-
           <Grid item xs={12} sm={12} md={4} lg={4}>
             <Paper style={{ overflow: 'hidden' }}>
               <Box
@@ -716,8 +698,6 @@ const ProductInventoryDetailsPage = () => {
             </Paper>
           </Grid>
         </Grid>
-
-
       </Fragment>
       {showConfirmBox && (
         <ConfirmationDialog

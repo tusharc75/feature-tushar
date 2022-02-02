@@ -21,6 +21,7 @@ import CustomAgGridEditable, { reducer, intialState } from "../../components/AgG
 import { CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import BulkEditDialog from "./BulkEditDialog";
 import Loader from "../Loader";
+import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { handleAutoCalculation, extractFields } from "../../constants/formulaUtility";
 import { CustomDialogTransition, gridLoadingTimeout } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
@@ -66,9 +67,10 @@ const ProductBuilder = (props) => {
   const [productData, setProductData] = useState(null);
   const [productId, setProductId] = useState(null);
   const [productDataList, setproductDataList] = useState([]);
-
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null);
   const [isAddField, setIsAddField] = useState(false);
+  const [showCloseConfirmBox,setShowCloseConfirmBox] = useState(false);
   const [addFieldData, setaddFieldData] = useState({ section: [], fields: [] });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -692,7 +694,7 @@ const ProductBuilder = (props) => {
         <CreateProduct
           isClone={false}
           productId={null}
-          handleClose={() => setIsAddNewProduct(false)}
+          handleClose={() =>  setIsAddNewProduct(false)}
           isAddInBuilder={true}
           addProductInBuilder={addProductInBuilder}
           openFrom="builder"
@@ -713,6 +715,7 @@ const ProductBuilder = (props) => {
           handleSaveProduct={handleSaveProduct}
           handleClose={() => {
             setProductId(null);
+          
           }}
           stage={stage}
         />
@@ -745,6 +748,54 @@ const ProductBuilder = (props) => {
           onOk={handleDelete}
         />
       )}
+
+{showCloseConfirmBox && (
+        <ConfirmationDialog
+          open={showCloseConfirmBox}
+          message={`Are you sure you want to leave this dialouge?`}
+          onClose={() => {
+            setShowCloseConfirmBox(false);                 
+          }}
+          onOk={()=>{
+            setProductId(null);
+          }}
+        />
+      )}
+
+
+
+
+
+{
+                    showConfirmDialog ?
+                      <ConfirmCancelDialog
+                        open={showConfirmDialog}
+                        close={() => setShowConfirmDialog(false)}
+                        onSave={() => {
+                          setShowConfirmDialog(false)
+                          // e.preventDefault();
+                          // const err = Object.keys(errors);
+                          // if (err.length) {
+                            // const input = document.querySelector(
+                            //   `input[name=${err[0]}]`,
+                            // );
+
+                            // input.scrollIntoView({
+                            //   behavior: 'smooth',
+                            //   block: 'center',
+                            //   inline: 'start',
+                            // });
+
+                          }
+                         
+                        }
+                        onClose={() => {
+                          setShowConfirmDialog(false)
+                          
+                          setProductId(null);
+                        }}
+                      /> : null
+                  }
 
       {/* {
         showProductNumberOrProductNameUpdate.open && <Dialog

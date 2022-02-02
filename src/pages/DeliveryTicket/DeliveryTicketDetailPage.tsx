@@ -535,7 +535,7 @@ export default function DeliveryTicketDetail(props) {
                       </Button>
                       : null
                     : null}
-                  {(deliveryTicketData?.status === "In-Transit" || deliveryTicketData?.status === "Delivered") ?
+                  {(deliveryTicketData?.signatures?.length > 0) ?
                     <Button
                       variant={isMobile && !isTablet ? "text" : "contained"}
                       color="primary"
@@ -546,7 +546,8 @@ export default function DeliveryTicketDetail(props) {
                       {isMobile && !isTablet ? <FaSignature size={20} /> : "View Signatures"}
                     </Button> : null
                   }
-                  {(deliveryTicketData?.ticketType === "Loading" && deliveryTicketData?.type === "Rental Job" && deliveryTicketData?.signatures?.length === 4) ?
+                  {(deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading
+                    && deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob && deliveryTicketData?.status === DELIVERY_TICKET_STATUS.delivered) ?
                     <Button
                       variant={isMobile && !isTablet ? "text" : "contained"}
                       color="primary"
@@ -559,7 +560,6 @@ export default function DeliveryTicketDetail(props) {
                   }
                 </DetailsPageHeader>
               )}
-
               {loading ? (
                 <Box padding={2}>
                   <Grid container spacing={2}>
@@ -782,10 +782,10 @@ export default function DeliveryTicketDetail(props) {
                     <Activity
                       resourceId={deliveryTicketData?._id}
                       resource={deliveryTicket.deliveryTicketResource}
-                      restrictedAddActivities={["Attachment", "Case"]}
+                      // restrictedAddActivities={["Attachment", "Case"]}
                       relatedTo={[
                         {
-                          type: deliveryTicket.deliveryTicketResource,
+                          type: "deliveryTicket",
                           referenceId: deliveryTicketData?._id,
                           access: true,
                         },

@@ -50,6 +50,18 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
   const { isOffline } = useContext(CustomOfflineContext);
   const [showCostDialog, setShowCostDialog] = useState(false)
 
+  useEffect(() => {
+    if (statusOptions.findIndex(d => d.optionLabel === RENTAL_STATUS.readyToInvoice) > statusOptions.findIndex(d => d.optionLabel === rentalManagementData?.status)) {
+      if (!isOffline && rentalManagementData?.status !== RENTAL_STATUS.canceled) {
+        updateJobStatus(RENTAL_STATUS.readyToInvoice)
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchFields()
+  }, [isOffline]);
+
   const NameRenderer = (params) => (
     <Link
       className="link"
@@ -59,18 +71,6 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
       {params.value}
     </Link>
   );
-
-  useEffect(() => {
-    if (statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice") > statusOptions.findIndex(d => d.optionLabel === rentalManagementData?.status)) {
-      if (!isOffline) {
-        updateJobStatus("Ready to Invoice")
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchFields()
-  }, [isOffline]);
 
   const fetchFields = async () => {
     try {

@@ -903,7 +903,7 @@ const RepairJobDetails = () => {
           <div>
             <Activity 
               resourceId={repairJobData._id}
-              resource={repairJobData.resource}
+              resource={repairJobData.  repairJobResource }
               restrictedAddActivities={
                 permissions && permissions['repairJob'] && permissions['repairJob'].isUpdate
                   ? []
@@ -911,7 +911,7 @@ const RepairJobDetails = () => {
               }
               relatedTo={[
                 {
-                  type: repairJob,
+                  type: 'repairJob',
                   referenceId: repairJobData._id,
                   access: true
                 }
