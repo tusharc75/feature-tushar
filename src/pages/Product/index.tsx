@@ -118,15 +118,17 @@ const Product = () => {
             if (data.filter((e) => e.fieldData.fieldName === "productTemplate").length === 0) {
                 setIsProductTemplate(false)
             }
-
             const productTypes = data.find((e) => e.fieldData.fieldName === "productType")
-
             if (productTypes) {
+                setIsProductType(true)
                 setProductTypeList([...productTypes.fieldData.option]);
+                let defaultOptions = productTypes.fieldData?.option?.filter((item: any) => item.default === true);
+                if (defaultOptions.length) {
+                    setProductType(defaultOptions[0].optionValue)
+                }
             } else {
                 setIsProductType(false)
             }
-
             let columns = []
             let rendererNames = []
             data.forEach(o => {
@@ -173,7 +175,6 @@ const Product = () => {
                 finalObject["canDelete"] = permissions.product.isDelete;
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
                 finalObject["allowedToEdit"] = permissions.product.isUpdate;
-                finalObject["unit"] = finalObject["unit"]?.join(" , ");
                 return {
                     ...finalObject,
                 };

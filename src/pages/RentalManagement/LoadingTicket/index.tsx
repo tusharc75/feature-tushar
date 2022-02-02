@@ -132,7 +132,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           });
         }
       });
-      console.log(productAssets)
       productAssets.forEach((d) => {
         d['isChecked'] = false;
         d['hideSelection'] =

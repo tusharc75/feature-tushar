@@ -21,8 +21,10 @@ import queryString from 'query-string';
 import { isMobile, isTablet } from "react-device-detect";
 import accountClass from "../Account/account.module.scss";
 import Productpackage from './Productpackage';
+import SerializedAsset from './SerializedAsset';
+import Tickets from './Tickets';
 
-const processSteps = ["Add Products", "Tickets"]
+const processSteps = ["Add Products", "Serialized Asset", "Tickets"]
 
 const SubleasingDetailsPage = () => {
 
@@ -39,11 +41,12 @@ const SubleasingDetailsPage = () => {
     const [fields, setFields] = useState([]);
     const [statusOptions, setStatusOptions] = useState([])
     const [allowedToEdit, setAllowedToEdit] = useState(false);
-    const [currentStep, setCurrentStep] = useState(0);
+    const [currentStep, setCurrentStep] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
     const [nextStep, setNextStep] = useState(true);
 
     const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
+    const [isIssued, setIsIssued] = useState(false);
 
     function a11yProps(index: any) {
         return {
@@ -56,6 +59,19 @@ const SubleasingDetailsPage = () => {
         setTabValue(newValue);
         history.replace(`?tab=${newValue}`);
     };
+
+    useEffect(() => {
+        if (currentStep >= 0 && currentStep <= 2) {
+            updateProcessStatus(processSteps[currentStep])
+        }
+    }, [currentStep]);
+
+    const updateProcessStatus = (processStatus) => {
+        axiosInstance().put(`${subleasing.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+    }
 
     useEffect(() => {
         if (parsed) {
@@ -89,7 +105,11 @@ const SubleasingDetailsPage = () => {
     const fetchData = async () => {
         try {
             const { data: { data } } = await axiosInstance().get(`${subleasing.api}/${id}`);
+            setCurrentStep(processSteps.indexOf(data?.processStatus) !== -1 ? processSteps.indexOf(data?.processStatus) : 0);
             const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+            if (data?.productInventory?.length) {
+                setIsIssued(true)
+            }
             setAllowedToEdit(isAllowedToEdit);
             setSubleaseData(data);
         } catch (error) {
@@ -218,6 +238,18 @@ const SubleasingDetailsPage = () => {
                                                         <Productpackage
                                                             subleaseData={subleaseData}
                                                             setNextStep={setNextStep}
+                                                            fetchData={fetchData}
+                                                            isIssued={isIssued}
+                                                        />
+                                                    )}
+                                                    {currentStep === 1 && subleaseData && (
+                                                        <SerializedAsset
+                                                            subleaseData={subleaseData}
+                                                        />
+                                                    )}
+                                                    {currentStep === 2 && subleaseData && (
+                                                        <Tickets
+                                                            subleaseData={subleaseData}
                                                         />
                                                     )}
                                                 </Paper>

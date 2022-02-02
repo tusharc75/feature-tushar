@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.52.0](https://github.com/vebholic/oms_frontend/compare/v2.51.0...v2.52.0) (2022-02-01)
+
+
+### Features
+
+* bug ([4e614da](https://github.com/vebholic/oms_frontend/commit/4e614daf06c7bf8be66b58940c4076effc579b10))
+
+
+### Bug Fixes
+
+* bug fix ([fb8dbb2](https://github.com/vebholic/oms_frontend/commit/fb8dbb2f41931b9fafde90dad9e64cf825455dfd))
+* bug fix ([47670c8](https://github.com/vebholic/oms_frontend/commit/47670c884cef34886014faaaa0f78c4427a4427e))
+* dashboard bugs and view columns excel quote fix ([91eedb8](https://github.com/vebholic/oms_frontend/commit/91eedb8515c37fb73d9a472c7867bd406afd5777))
+* **DashBoard:** currency symbol added ([34d50ba](https://github.com/vebholic/oms_frontend/commit/34d50baee5a48750dfb4e29f4d2f318e55133620))
+* rental changes ([abe382a](https://github.com/vebholic/oms_frontend/commit/abe382af87f4b3b497496da5401035eac7012dcc))
+
 ## [2.51.0](https://github.com/vebholic/oms_frontend/compare/v2.50.1...v2.51.0) (2022-01-31)
 
 

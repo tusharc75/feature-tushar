@@ -640,12 +640,18 @@ const TopDashboard = (props) => {
               >
                 {!tableView ? 'Table' : 'Chart'} View
               </Button>
+              {
               <Menu id="export-chart-menu" anchorEl={anchorElChart} keepMounted open={Boolean(anchorElChart)} onClose={handleCloseChart('')}>
-                <MenuItem onClick={handleCloseChart('ppt')}>Powerpoint</MenuItem>
-                <MenuItem onClick={handleCloseChart('pdf')}>PDF</MenuItem>
+                {!tableView && 
+                <>                
+                  <MenuItem onClick={handleCloseChart('ppt')}>Powerpoint</MenuItem>
+                  <MenuItem onClick={handleCloseChart('pdf')}>PDF</MenuItem>
+                </>
+                }
                 <MenuItem onClick={handleCloseChart('excel')}>Excel</MenuItem>
                 <MenuItem onClick={handleCloseChart('json')}>Raw JSON</MenuItem>
               </Menu>
+              }
             </Box>
             <Box textAlign="center" mb={2}>
               <Typography variant="h5">Total Booked value in {filterCurrency || currency} vs Budget</Typography>
