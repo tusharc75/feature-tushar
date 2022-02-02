@@ -28,10 +28,12 @@ import TextField from "@material-ui/core/TextField";
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers";
 import Tooltip from '@material-ui/core/Tooltip'
-import { MdAdd } from "react-icons/all";
+import { MdAdd,MdSort,MdFilterList} from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { IoPricetagsSharp } from 'react-icons/io5';
+import MobileSortDialog from "../../components/MobileSortDialog";
+import MobileFilterDialog from "../../components/MobileFilterDialog"
 
 const ignoreField = ["qty", "priceTemplate"]
 
@@ -64,7 +66,8 @@ const Product = () => {
     const [productType, setProductType] = useState(null);
     const [productTypeList, setProductTypeList] = useState([]);
     const [isProductType, setIsProductType] = useState(true);
-
+    const [isOpenDialog, setisOpenDialog] = useState(false)
+    const [sortOpen, setSortOpen]= useState(false);
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
     const localStorageSelectedRecords = `${routes.product.title}_selected`;
@@ -437,6 +440,24 @@ const Product = () => {
         setAnchorEl(null);
     };
 
+    const handleOpen = () => {
+        setisOpenDialog(true);
+      };
+      
+      const handleClickOpen = () => {
+        setSortOpen(true);
+      };
+    
+      const handleClickClose = () => {
+        setSortOpen(false);
+    
+      };
+    
+      const handleFilterClose = () => {
+        setisOpenDialog(false);
+      };
+      
+
     const replaceFieldName = (field) => {
         switch (field) {
             case "createdBy":
@@ -449,6 +470,49 @@ const Product = () => {
                 return field;
         }
     };
+
+    const searchInnner = (
+        
+                        <Autocomplete
+                            style={{ width: "250px" }}
+                            options={productCategoryList}
+                            getOptionLabel={(option: any) => option ? option.name : ""}
+                            getOptionSelected={(option: any, val) =>
+                                option._id === val
+                            }
+                            value={productCategoryList.filter((data) => data._id === productCategory).length
+                                ? productCategoryList.filter((data) => data._id === productCategory)[0]
+                                : ""
+                            }
+                            onChange={(e, val) => {
+                                setProductCategory(val && val._id ? val._id : "")
+                                handleFilterClose();
+                            }}
+                            renderInput={(params) => (
+
+                                isMobile && !isTablet ?
+                                    <TextField
+                                        {...params}
+                                        margin="dense"
+                                        name="productCategory"
+                                        placeholder="Product Category"
+                                        variant="standard"
+                                        fullWidth
+                                        className={isMobile ? "serchBox" : ""}
+
+
+                                    /> :
+                                    <TextField
+                                        {...params}
+                                        margin="dense"
+                                        name="productCategory"
+                                        label="Product Category"
+                                        variant="outlined"
+                                        fullWidth
+                                    />
+                            )}
+                        /> 
+    )
 
     return (<Fragment>
         <Grid container className="headerbox">
@@ -485,8 +549,61 @@ const Product = () => {
                             <RiShoppingBag3Fill size={22} style={{ paddingBottom: "3px" }} className="headerLogo" />
                             <span className="listingHeader">{routes.product.title} </span>
                         </Grid>
+                        {isMobile && (
+                  <>
+                    <Grid style={{ display: 'inline-flex'}}>
+                      <Button
+                        onClick={handleClickOpen}
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        aria-expanded={ 'true'}
+                        color="secondary"
+                        variant="text"
+                        disableElevation
+                        startIcon={<MdSort />}
+                        className={'sort-filter-tablet'}
+                        style={isTablet ? { marginLeft: '50px' } : {}}
+                      >
+                        Sort
+                      </Button>
+                      <MobileSortDialog
+                        isOpen={sortOpen}
+                        handleClose={handleClickClose}
+                        contentPart={null}
+                        secHeading={['Sort Purchase Order']}
+                        columns={columns}
+                        dispatch={dispatch}
+                      />
 
-                        {isProductType &&
+                      <Button
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        aria-expanded={'true'}
+                        variant="text"
+                        color="secondary"
+                        disableElevation
+                        className={'sort-filter-tablet'}
+                        startIcon={<MdFilterList />}
+                        onClick={handleOpen}
+                      >
+                        Filter
+                      </Button>
+
+                      <MobileFilterDialog
+                        isOpen={isOpenDialog}
+                        handleClose={handleFilterClose}
+                        contentPart={searchInnner}
+                        secHeading={['Filter Purchase Order']}
+                        columns={columns}
+                        dispatch={dispatch}
+                      />
+                    </Grid>
+                  </>
+                )}
+
+                        {isProductType && !isMobile &&
                             <Autocomplete
                                 style={{ width: "250px" }}
                                 options={productTypeList}
@@ -513,45 +630,7 @@ const Product = () => {
                                 )}
                             />}
 
-                        <Autocomplete
-                            style={{ width: "250px" }}
-                            options={productCategoryList}
-                            getOptionLabel={(option: any) => option ? option.name : ""}
-                            getOptionSelected={(option: any, val) =>
-                                option._id === val
-                            }
-                            value={productCategoryList.filter((data) => data._id === productCategory).length
-                                ? productCategoryList.filter((data) => data._id === productCategory)[0]
-                                : ""
-                            }
-                            onChange={(e, val) => {
-                                setProductCategory(val && val._id ? val._id : "")
-                            }}
-                            renderInput={(params) => (
-
-                                isMobile && !isTablet ?
-                                    <TextField
-                                        {...params}
-                                        margin="dense"
-                                        name="productCategory"
-                                        placeholder="Product Category"
-                                        variant="standard"
-                                        fullWidth
-                                        className={isMobile ? "serchBox" : ""}
-
-
-                                    /> :
-                                    <TextField
-                                        {...params}
-                                        margin="dense"
-                                        name="productCategory"
-                                        label="Product Category"
-                                        variant="outlined"
-                                        fullWidth
-                                    />
-                            )}
-                        />
-                        {isProductTemplate &&
+                        {isProductTemplate && !isMobile &&
                             <Autocomplete
                                 style={{ width: "250px" }}
                                 options={productTemplateList}

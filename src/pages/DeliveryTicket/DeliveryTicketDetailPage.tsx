@@ -772,10 +772,10 @@ export default function DeliveryTicketDetail(props) {
                     <Activity
                       resourceId={deliveryTicketData?._id}
                       resource={deliveryTicket.deliveryTicketResource}
-                      restrictedAddActivities={["Attachment", "Case"]}
+                      // restrictedAddActivities={["Attachment", "Case"]}
                       relatedTo={[
                         {
-                          type: deliveryTicket.deliveryTicketResource,
+                          type: "deliveryTicket",
                           referenceId: deliveryTicketData?._id,
                           access: true,
                         },

@@ -546,7 +546,7 @@ const PurchaseOrderDetailsPage = () => {
                           }
                           relatedTo={[
                             {
-                              type: purchaseOrder,
+                              type: "purchaseOrder",
                               referenceId: purchaseOrderData._id,
                               access: true
                             }
