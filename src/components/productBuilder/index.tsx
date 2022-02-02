@@ -70,6 +70,7 @@ const ProductBuilder = (props) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null);
   const [isAddField, setIsAddField] = useState(false);
+  const [showCloseConfirmBox,setShowCloseConfirmBox] = useState(false);
   const [addFieldData, setaddFieldData] = useState({ section: [], fields: [] });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -713,7 +714,7 @@ const ProductBuilder = (props) => {
           productId={productId}
           handleSaveProduct={handleSaveProduct}
           handleClose={() => {
-             setShowConfirmDialog(true)
+            setProductId(null);
           
           }}
           stage={stage}
@@ -748,6 +749,23 @@ const ProductBuilder = (props) => {
         />
       )}
 
+{showCloseConfirmBox && (
+        <ConfirmationDialog
+          open={showCloseConfirmBox}
+          message={`Are you sure you want to leave this dialouge?`}
+          onClose={() => {
+            setShowCloseConfirmBox(false);                 
+          }}
+          onOk={()=>{
+            setProductId(null);
+          }}
+        />
+      )}
+
+
+
+
+
 {
                     showConfirmDialog ?
                       <ConfirmCancelDialog
@@ -767,8 +785,9 @@ const ProductBuilder = (props) => {
                             //   block: 'center',
                             //   inline: 'start',
                             // });
+
                           }
-                          // submitForm();
+                         
                         }
                         onClose={() => {
                           setShowConfirmDialog(false)
