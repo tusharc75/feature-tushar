@@ -1517,12 +1517,13 @@ export const DELIVERY_TICKET_STATUS = {
 
 export const RENTAL_STATUS = {
   new: 'New',
+  canceled: 'Canceled',
   inProgress: 'In-Progress',
   jobPartiallyStarted: 'Job Partially Started',
   jobStarted: 'Job Started',
   jobPartiallyEnded: 'Job Partially Ended',
   jobEnded: 'Job Ended',
-  readyToInvoice: 'Ready To Invoice',
+  readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
   closed: 'Closed',
 };

@@ -11,7 +11,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow } from '../../constants/helpers';
+import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow, RENTAL_STATUS } from '../../constants/helpers';
 import Steps from './Steps';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { MdEdit, MdDelete } from 'react-icons/md';
@@ -54,14 +54,12 @@ const RentalManagementDetailsPage = () => {
   const { state: { user, permissions } }: any = useData();
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
-  const [headingLbl, setHeadingLbl] = useState('');
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [rentalManagementFields, setRentalManagementFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
-  const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
@@ -69,10 +67,12 @@ const RentalManagementDetailsPage = () => {
   const [statusOptions, setStatusOptions] = useState([])
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false);
   const [nextStep, setNextStep] = useState(true);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [locationKeys, setLocationKeys] = useState([])
+
+  const [showCancelConfirmBox, setShowCancelConfirmBox] = useState(false);
+
 
   useEffect(() => {
     return history.listen(location => {
@@ -144,22 +144,9 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id)
       }
-      // if (localStorage.getItem('offlineDataToSave')) {
-      //   const offlineDataToSave = JSON.parse(localStorage.getItem('offlineDataToSave'));
-      //   if (offlineDataToSave['rentalManagement']) {
-      //     setIsInOfflineSaveQueue(offlineDataToSave['rentalManagement'].some((d) => d.values._id === id));
-      //   }
-      // }
-      // try {
-      //   updateOfflineGridData('rentalManagement', [data], []);
-      // } catch (ex) {
-      //   console.error(`Rental Management: Error while adding/updating data for Offline context. Error: ${ex.message}`);
-      // }
+      setRentalManagementData(data);
       setCurrentStep(rentalProcessSteps.indexOf(data?.processStatus) !== -1 ? rentalProcessSteps.indexOf(data?.processStatus) : 0);
       handleMainPoints(data);
-      setHeadingLbl(data.rentalJobName);
-      setCustomizedRoutes([routes.rentalManagement, { title: `${data.rentalJobName}` }]);
-      setRentalManagementData(data);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
@@ -182,7 +169,7 @@ const RentalManagementDetailsPage = () => {
         const response: any = await axiosInstance().get('/field?resource=Rental Management');
         response?.data?.data.some(o => {
           if (o?.fieldData?.fieldName === "status") {
-            setStatusOptions([...o.fieldData.option])
+            setStatusOptions([...o.fieldData.option?.filter(e => ![RENTAL_STATUS.canceled].includes(e.optionLabel))])
             return true
           }
         })
@@ -198,6 +185,23 @@ const RentalManagementDetailsPage = () => {
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
+  };
+
+  const handleCancelRentalJob = () => {
+    axiosInstance()
+      .put(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/cancel`)
+      .then(() => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `${routes.rentalManagement.title} canceled successfully`
+        });
+        fetchRentalManagementData();
+        setShowCancelConfirmBox(false)
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleDelete = () => {
@@ -254,7 +258,7 @@ const RentalManagementDetailsPage = () => {
   return (
     <>
       <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={customizedRoutes} />
+        <CustomBreadCrumbs routes={[routes.rentalManagement, { title: `${rentalManagementData?.rentalJobName}` }]} />
       </Grid>
       <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
         <div>
@@ -270,37 +274,30 @@ const RentalManagementDetailsPage = () => {
                   </Box>
                 </div>
               ) : (
-                <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true}>
-                  {(permissions?.rentalManagement?.isUpdate && allowedToEdit && !isOffline && rentalManagementData?.status !== "Closed") && (
-                    <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                      Edit
+                <DetailsPageHeader heading={rentalManagementData?.rentalJobName} mainPoints={mainPoints} showHeading={true}>
+                  {(permissions?.rentalManagement?.isUpdate && allowedToEdit && !isOffline
+                    && ![RENTAL_STATUS.canceled, RENTAL_STATUS.closed].includes(rentalManagementData?.status)) && (
+                      <Fragment>
+                        <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                          Edit
+                        </Button>
+                        <Button className="buttonStyleSmallScreen" variant="text" color="primary" size="small" onClick={handleOpenUpdateDialog} style={isMobile ? { color: "#43aeaa" } : {}}>
+                          <BiEdit size={20} />
+                        </Button>
+                      </Fragment>
+                    )}
+                  {(permissions?.rentalManagement?.isUpdate && ![RENTAL_STATUS.canceled, RENTAL_STATUS.invoiced, RENTAL_STATUS.closed].includes(rentalManagementData?.status)) && (
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      onClick={() => setShowCancelConfirmBox(true)}
+                    >
+                      {'Cancel ' + routes.rentalManagement.title}
                     </Button>
                   )}
-                  {(permissions?.rentalManagement?.isUpdate && allowedToEdit && !isOffline) && (
-                    <Button className="buttonStyleSmallScreen" variant="text" color="primary" size="small" onClick={handleOpenUpdateDialog} style={isMobile ? { color: "#43aeaa" } : {}}>
-                      <BiEdit size={20} />
-                    </Button>
-                  )}
-                  {/* <HideWhenOffline>
-                    {permissions?.rentalManagement?.isDelete &&
-                      rentalManagementData?.owner?.optionValue &&
-                      user?.user?._id &&
-                      rentalManagementData.owner.optionValue === user.user._id ? (
-                      <DeleteButton text="Delete" className="buttonDeleteBigScreen" onClick={() => setShowConfirmBox(true)} />
-                    ) : null}
-                  </HideWhenOffline>
-                  <HideWhenOffline>
-                    {permissions?.rentalManagement?.isDelete &&
-                      rentalManagementData?.owner?.optionValue &&
-                      user?.user?._id &&
-                      rentalManagementData.owner.optionValue === user.user._id ? (
-                      <Button variant="text" className="buttonDeleteSmallScreen" onClick={() => setShowConfirmBox(true)}>
-                        <MdDelete size={20} />
-                      </Button>
-                    ) : null}
-                  </HideWhenOffline> */}
-                  {permissions?.rentalManagement?.isUpdate && (["Ready to Invoice", "Invoiced"].includes(rentalManagementData?.status)) && (
-                    <>
+                  {permissions?.rentalManagement?.isUpdate && ([RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status)) && (
+                    <Fragment>
                       <Button
                         variant="outlined"
                         color="default"
@@ -332,7 +329,7 @@ const RentalManagementDetailsPage = () => {
                             value={o}>{o?.optionLabel}</MenuItem>
                         })}
                       </Menu>
-                    </>
+                    </Fragment>
                   )}
                 </DetailsPageHeader>
               )}
@@ -347,20 +344,6 @@ const RentalManagementDetailsPage = () => {
                   }
                 }}
               >
-                {/* <Tab
-                        className={"tabLayout"}
-                      style={{
-                        background: tabValue === 0 ? "white" : "",
-                        color: tabValue === 0 ? "blue" : "#163340",
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font ">
-                          <InfoIcon className="mr-1" fontSize="inherit" /> All
-                          Version Status
-                        </div>
-                      }
-                      {...a11yProps(0)}
-                    /> */}
                 <Tab
                   className={'tabLayout'}
                   style={{
@@ -396,20 +379,9 @@ const RentalManagementDetailsPage = () => {
                       <CommonSkeleton lenArray={[...Array(7).keys()]} />
                     </Grid>
                   ) : (
-                    <>
-                      {isInOfflineSaveQueue && (
-                        <div className="px-3">
-                          <Alert variant="filled" severity="info">
-                            Updates are in offline state, it will be affected once you will be in network
-                          </Alert>
-                        </div>
-                      )}
-
-                      <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
-                    </>
+                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
                   )}
                 </Box>
-
               </TabPanel>
               <TabPanel value={tabValue} index={1}>
                 <Paper>
@@ -419,7 +391,7 @@ const RentalManagementDetailsPage = () => {
                     steps={rentalProcessSteps}
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
-                    isStepEnded={["Invoiced", "Closed"].includes(rentalManagementData?.status)}
+                    isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.canceled].includes(rentalManagementData?.status)}
                   />
                   {currentStep === 0 && rentalManagementData && (
                     <Productpackage
@@ -561,6 +533,16 @@ const RentalManagementDetailsPage = () => {
             setShowConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {showCancelConfirmBox && (
+        <ConfirmationDialog
+          open={showCancelConfirmBox}
+          message={`Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`}
+          onClose={() => {
+            setShowCancelConfirmBox(false);
+          }}
+          onOk={handleCancelRentalJob}
         />
       )}
       {openUpdateDialog && (
