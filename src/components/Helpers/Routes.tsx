@@ -329,22 +329,6 @@ const routes = {
     title: storedRoutes && storedRoutes.sublease ? storedRoutes.sublease?.title : RESOURCE_LABEL.sublease,
     path: "/sublease/detail",
   },
-  eCommerce: {
-    title: storedRoutes ? storedRoutes.eCommerce?.title : RESOURCE_LABEL.eCommerce,
-    path: "/e-commerce",
-  },
-  eCommerceDetail: {
-    title: storedRoutes ? storedRoutes.eCommerce?.title : RESOURCE_LABEL.eCommerce,
-    path: "/e-commerce/detail",
-  },
-  orders: {
-    title: "Orders",
-    path: "/e-commerce/order",
-  },
-  orderDetails: {
-    title: "Orders",
-    path: "/e-commerce/order/detail",
-  },
 };
 
 export default routes;
