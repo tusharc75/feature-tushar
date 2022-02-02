@@ -1579,6 +1579,7 @@ export const resourceOptions = [
 
 export const REPORT_LIST = [
   { title: sidebarResource.rentalManagement, key: "rentalManagement" },
+  { title: sidebarResource.salesOrder, key: "salesOrder" },
   { title: sidebarResource.productInventory, key: "productInventory" },
   { title: sidebarResource.lead, key: "lead" },
   { title: sidebarResource.opportunity, key: "opportunity" },
