@@ -210,7 +210,7 @@ export default function ManageOpportunityDialog({
         filterData.map((_f) => {
           //  If this dialog opens from account details screen, make that account preselected
 
-          if (accountId && ['customerAccountName', 'supplierAccountName'].some((d) => d === _f.fieldData.fieldName)) {
+          if (accountId && ['customerAccount', 'supplierAccount'].some((d) => d === _f.fieldData.fieldName)) {
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
           }
 
