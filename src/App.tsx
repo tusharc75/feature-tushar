@@ -103,14 +103,7 @@ import Logout from './pages/Auth/Logout';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import Report from './pages/Report';
 import ReportMaster from './pages/ReportMaster';
-import Products from './pages/ECommerce/Products';
-import ProductDetails from './pages/ECommerce/Products/ProductDetails';
-import MyOwnCart from './pages/ECommerce/MyCart/MyOwnCart';
-import Checkout from './pages/ECommerce/Checkout';
 import CustomerSign from './pages/DeliveryTicket/CustomerSign';
-import CheckoutSuccess from './pages/ECommerce/Success';
-import Orders from './pages/ECommerce/Orders';
-import OrderDetails from './pages/ECommerce/Orders/OrderDetails';
 import EcommercePolicy from './pages/EcommercePolicy';
 import Sublease from './pages/Sublease';
 import SubleaseDetailsPage from './pages/Sublease/SubleaseDetailsPage';
@@ -565,31 +558,6 @@ function App() {
             <PrivateRoute exact path={`${routes.eCommercePolicy.path}`}>
               <EcommercePolicy />
             </PrivateRoute>
-
-
-            <PrivateRoute exact path={`${routes.eCommerce.path}`} isEcommerceRoute={true}>
-              <Products />
-            </PrivateRoute>
-
-            <PrivateRoute exact path={`${routes.eCommerceDetail.path}/:id/:orderType`} isEcommerceRoute={true}>
-              <ProductDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.eCommerceDetail.path}/cart`} isEcommerceRoute={true}>
-              <MyOwnCart />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.eCommerce.path}/cart/checkout`} isEcommerceRoute={true}>
-              <Checkout />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.eCommerce.path}/cart/finish`} isEcommerceRoute={true}>
-              <CheckoutSuccess />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.orders.path}`} isEcommerceRoute={true}>
-              <Orders />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.orderDetails.path}/:id`} isEcommerceRoute={true}>
-              <OrderDetails />
-            </PrivateRoute>
-
 
             <Route exact path={'/customer-sign/:id'}>
               <CustomerSign />
