@@ -156,45 +156,22 @@ const ManageDeliveryTicket = (props) => {
 
                     if ((refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder)) {
                         if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob) {
-                            tempInitialData["ticketName"] = `${refrenceData?.rentalJobName}_${generateUniqueIdOnly()}`
-                            tempInitialData["rentalJob"] = refrenceData?._id
+                            tempInitialData["ticketName"] = `${refrenceData?.ticketName}_${generateUniqueIdOnly()}`
+                            tempInitialData["rentalJob"] = refrenceData?.refrenceId
                         } else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
                             tempInitialData["ticketName"] = `${refrenceData?.salesOrderNo}_${generateUniqueIdOnly()}`
                             tempInitialData["salesOrder"] = refrenceData?._id
                         }
-                        if (ticketType === DELIVERY_TICKET_TYPE.loading) {
-                            tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
-                            tempInitialData["pickupFrom"] = warehouseId;
-                            fieldsDataForCreate?.forEach((e) => {
-                                if (e.fieldName === "warehouse") {
-                                    const plantAddress = e?.option?.filter((e) => e.optionValue === warehouseId)
-                                    if (plantAddress.length) {
-                                        tempInitialData["pickupFromAddress"] = plantAddress[0].address
-                                    }
-                                }
-                            })
-                            tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.customer;
-                            tempInitialData["deliveryTo"] = refrenceData.customerAccount?.optionValue
-                            tempInitialData["deliveryToAddress"] = refrenceData.shippingAddress?.optionValue
-                        }
-                        else if (ticketType === DELIVERY_TICKET_TYPE.receiving || ticketType === DELIVERY_TICKET_TYPE.return) {
-                            tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
-                            tempInitialData["pickupFrom"] = refrenceData.customerAccount?.optionValue
-                            tempInitialData["pickupFromAddress"] = refrenceData.shippingAddress?.optionValue
 
-                            tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
-                            tempInitialData["deliveryTo"] = refrenceData?.warehouse?.optionValue
-                            fieldsDataForCreate?.forEach((e) => {
-                                if (e.fieldName === "warehouse") {
-                                    const plantAddress = e?.option?.filter((e) => e.optionValue === refrenceData?.warehouse?.optionValue)
-                                    if (plantAddress.length) {
-                                        tempInitialData["deliveryToAddress"] = plantAddress[0].address
-                                    }
-                                }
-                            })
-                        }
-                        tempInitialData["pickUpDate"] = moment(refrenceData?.estimateStartDate).subtract(1, 'days');
-                        tempInitialData["deliveryDate"] = moment(refrenceData?.estimateStartDate).subtract(1, 'days');
+                        tempInitialData["pickupFromType"] = refrenceData?.pickupFromType;
+                        tempInitialData["pickupFrom"] = refrenceData?.pickupFrom;
+                        tempInitialData["pickupFromAddress"] = refrenceData?.pickupFromAddress;
+                        tempInitialData["deliveryToType"] = refrenceData?.deliveryToType;
+                        tempInitialData["deliveryTo"] = refrenceData?.deliveryTo;
+                        tempInitialData["deliveryToAddress"] = refrenceData?.deliveryToAddress;
+
+                        tempInitialData["pickUpDate"] = moment(refrenceData?.startDate).subtract(1, 'days');
+                        tempInitialData["deliveryDate"] = moment(refrenceData?.endDate).subtract(1, 'days');
                     }
                     else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
                         tempInitialData["ticketName"] = `${refrenceData?.repairJobName}_${generateUniqueIdOnly()}`

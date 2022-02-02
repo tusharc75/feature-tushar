@@ -6,7 +6,7 @@ import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { gridLoadingTimeout, productInventory } from '../../../constants/helpers';
+import { gridLoadingTimeout, deliveryTicket, productInventory, DELIVERY_TICKET_REFRENCE_TYPE } from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
@@ -60,7 +60,21 @@ const Tickets = ({ subleaseData }) => {
     }
 
     const fetchRecords = async () => {
-     
+        dispatch({ type: "loading", loading: true });
+        if (gridApi) {
+            gridApi.setRowData([]);
+        }
+        let data;
+        const response = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.sublease}&refrenceId=${subleaseData._id}`)
+        data = response?.data?.data
+        let rows = data.map((u) => {
+            let res = {
+                ...prepareDataForGrid(u, user)
+            };
+            return res;
+        });
+        dispatch({ type: "initialize", data: rows, count: rows.length });
+        setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
     };
 
     return (<>

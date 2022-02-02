@@ -124,16 +124,14 @@ const ManageRepairJob = (props) => {
                       setDisableFields(true);
                     } else {
                       let isLoadingTicketFound = false;
-
                       axiosInstance()
-                        .get(`${repairJob.repairJobApi}/${repairJobId}/delivery-ticket`)
+                        .get(`${routes.deliveryTicket.path}/typewise?refrenceType=Repair Job&refrenceId=${repairJobId}`)
                         .then(({ data }) => {
                           data.data.map(obj => {
                             tempProductInventory.map((d, index) => {
                               if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
                                 tempProductInventory[index]["deliveryTicket"] = obj?.deliveryJobName
                                 tempProductInventory[index]["deliveryTicketId"] = obj?._id
-
                                 if (isLoadingTicketFound === false) {
                                   isLoadingTicketFound = true;
                                 }
