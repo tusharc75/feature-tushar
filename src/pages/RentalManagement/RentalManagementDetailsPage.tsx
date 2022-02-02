@@ -528,7 +528,7 @@ const RentalManagementDetailsPage = () => {
                       <div>
                         <Activity
                           resourceId={rentalManagementData._id}
-                          resource={rentalManagement.resource}
+                          resource={rentalManagement.rentalManagementResource}
                           restrictedAddActivities={
                             permissions && permissions['rentalManagement'] && permissions['rentalManagement'].isUpdate
                               ? []
@@ -536,7 +536,7 @@ const RentalManagementDetailsPage = () => {
                           }
                           relatedTo={[
                             {
-                              type: rentalManagement,
+                              type: "rentalManagement",
                               referenceId: rentalManagementData._id,
                               access: true
                             }
