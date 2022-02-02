@@ -111,7 +111,7 @@ const SerializedAsset = ({ subleaseData }) => {
                         data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
                         setShowTicketDialog({ open: true, data: data });
                     }}
-                    disabled={(selectedRecords.length === 0)}
+                    disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse"))))}
                 >
                     {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Transfer to Plant'}
                 </Button>
