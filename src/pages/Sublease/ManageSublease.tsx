@@ -12,7 +12,7 @@ import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import {
     CustomDialogTransition, generateUniqueIdOnly, getCollaboratorDropdownDataSource,
-    getOwnerDropdownDataSource, subleasing, setFieldsInAscendingOrder, supplierAccount, supplierContact
+    getOwnerDropdownDataSource, sublease, setFieldsInAscendingOrder, supplierAccount, supplierContact
 } from "../../constants/helpers";
 import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
@@ -28,7 +28,7 @@ import ManageAccountDialog from "../Account/ManageAccount";
 import ManageContactDialog from "../Contact/ManageContact";
 import { isEqual } from 'lodash';
 
-const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuccess, currency = null,
+const ManageSublease = ({ isClone = false, subleasingId = null, onClose, onSuccess, currency = null,
     refrenceType = null, refrenceId = null, refrenceData = null }) => {
 
     const history = useHistory();
@@ -53,11 +53,11 @@ const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuc
     const [showAddSupplierContactDialog, setShowAddSupplierContactDialog] = useState(false);
 
     useEffect(() => {
-        axiosInstance().get("/field?resource=Subleasing").then(({ data: { data } }) => {
+        axiosInstance().get("/field?resource=Sublease").then(({ data: { data } }) => {
             let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             if (subleasingId) {
-                axiosInstance().get(`${subleasing.api}/` + subleasingId).then(({ data: { data } }) => {
+                axiosInstance().get(`${sublease.api}/` + subleasingId).then(({ data: { data } }) => {
                     setSubleaseData(data)
                     if (isClone) {
                         const { _id, createdBy, updatedBy, serialNumber, ...rest } = data
@@ -127,7 +127,7 @@ const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuc
         setLoading(true)
         if (subleasingId && isClone === false) {
             values._id = subleasingId
-            axiosInstance().put(`${subleasing.api}`, values).then(({ data: { data } }) => {
+            axiosInstance().put(`${sublease.api}`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess()
             }).catch((error) => {
@@ -136,7 +136,7 @@ const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuc
             });
         }
         else {
-            axiosInstance().post(`${subleasing.api}`, values).then(({ data: { data } }) => {
+            axiosInstance().post(`${sublease.api}`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 if (refrenceType) {
                     const material: any = []
@@ -149,7 +149,7 @@ const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuc
                         element.parentId = null;
                         material.push(element);
                     });
-                    axiosInstance().post(`${subleasing.api}/productpackage/${data._id}`, { material })
+                    axiosInstance().post(`${sublease.api}/productpackage/${data._id}`, { material })
                         .then(() => {
                             onSuccess()
                         }).catch((error) => {
@@ -157,7 +157,7 @@ const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuc
                         });
                 }
                 else {
-                    history.push(`${subleasing.api}/detail/${data._id}`);
+                    history.push(`${sublease.api}/detail/${data._id}`);
                 }
             }).catch((error) => {
                 setLoading(false);
@@ -220,7 +220,7 @@ const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuc
                     setFieldValue,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={subleasingId ? (isClone ? "Clone" : `Update ${subleaseData?.subleaseName}`) : "Create " + routes.subleasing.title}
+                        <CustomDialogHeader title={subleasingId ? (isClone ? "Clone" : `Update ${subleaseData?.subleaseName}`) : "Create " + routes.sublease.title}
                             onClose={() => {
                                 if (!isEqual(ref.current.values, initialData.values)) {
                                     setShowConfirmDialog(true)
@@ -599,4 +599,4 @@ const ManageSubleasing = ({ isClone = false, subleasingId = null, onClose, onSuc
     );
 }
 
-export default ManageSubleasing;
+export default ManageSublease;

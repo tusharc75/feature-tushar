@@ -11,8 +11,14 @@ import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
-import { prepareDataForGrid } from "../../../constants/helpers"
+import { prepareDataForGrid, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, DELIVERY_FROM_TO_TYPE } from "../../../constants/helpers"
 import { useData } from "../../../StateProvider/Provider";
+import {
+    Button, Tooltip, IconButton, Menu, MenuItem,
+    Dialog, TextField, CircularProgress
+} from "@material-ui/core";
+import { AiFillFilePdf, AiOutlineDeliveredProcedure } from 'react-icons/ai';
+import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 
 const renderedFrom = 'SubleasingSerializedAsset';
 
@@ -28,6 +34,8 @@ const SerializedAsset = ({ subleaseData }) => {
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [columns, setColumns] = useState(null)
     const { state: { user, permissions, selectedEntity } }: any = useData();
+
+    const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
 
     useEffect(() => {
         fetchGridColumns()
@@ -87,6 +95,28 @@ const SerializedAsset = ({ subleaseData }) => {
 
     return (<>
         <Box display="flex" justifyContent="flex-end" pt={1}>
+            <Tooltip title="Transfer to Plant">
+                <Button
+                    variant={isMobile && !isTablet ? "text" : "contained"}
+                    color="primary"
+                    size="small"
+                    style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
+                    onClick={() => {
+                        const data = {}
+                        data["ticketName"] = subleaseData.subleaseName;
+                        data["refrenceId"] = subleaseData._id;
+                        data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
+                        data["pickupFrom"] = subleaseData?.supplierAccount?.optionValue;
+                        data["pickupFromAddress"] = subleaseData?.shippingAddress?.optionValue;
+                        data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                        setShowTicketDialog({ open: true, data: data });
+                    }}
+                    disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse"))))}
+                >
+                    {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Transfer to Plant'}
+                </Button>
+            </Tooltip>
+            <Box mx={1} />
         </Box>
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns ?
@@ -142,6 +172,19 @@ const SerializedAsset = ({ subleaseData }) => {
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
             }
         </Grid>
+        {showTicketDialog.open && (
+            <ManageDeliveryTicket
+                ticketType={DELIVERY_TICKET_TYPE.delivery}
+                refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.sublease}
+                refrenceData={showTicketDialog.data}
+                productInventory={selectedRecords}
+                onClose={() => setShowTicketDialog({ open: false, data: {} })}
+                onSuccess={() => {
+                    setShowTicketDialog({ open: false, data: {} });
+                    fetchRecords();
+                }}
+            />
+        )}
     </>
     );
 };
