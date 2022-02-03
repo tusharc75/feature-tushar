@@ -6,17 +6,19 @@ import { Box } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import { Delete } from '@material-ui/icons';
 
 
-function ProductHierarchy({ data, permissions, unassignProduct,  fetchData= () => {}}) {
-    const {setToastConfig} = React.useContext(CustomToastContext);
-    const [showConfirmBox, setShowConfirmBox] = React.useState({open: false, data: null})
+function ProductHierarchy({ data, permissions, unassignProduct, fetchData = () => { } }) {
+
+    const { setToastConfig } = React.useContext(CustomToastContext);
+    const [showConfirmBox, setShowConfirmBox] = React.useState({ open: false, data: null })
     const [isDeleting, setIsDeleting] = React.useState(false)
 
     const actions: any = [{
-        icon: "delete",
+        icon: () => <Delete fontSize='small' color='error' />,
         tooltip: "Delete product",
-        onClick: (_, rowData) => setShowConfirmBox({open: true, data: rowData})                      
+        onClick: (_, rowData) => setShowConfirmBox({ open: true, data: rowData })
     }]
 
     const options: any = {
@@ -39,7 +41,6 @@ function ProductHierarchy({ data, permissions, unassignProduct,  fetchData= () =
                     to={`/product/detail/${rowData?._id}`} >
                     {rowData?.productName || ""}
                 </Link>
-
             </div>
         },
         {
@@ -48,42 +49,25 @@ function ProductHierarchy({ data, permissions, unassignProduct,  fetchData= () =
                 {rowData?.qty || ""}
             </div>
         },
-        // {
-        //     title: 'Actions',
-        //     field: 'actions',
-        //     render: (rowData: any) => (
-        //         <> {
-        //             permissions?.isUpdate &&
-        //             <div style={{ width: 250 }}>
-        //                 <Tooltip title="Delete">
-        //                     <IconButton size="small" aria-label="Delete"
-        //                         onClick={() => unassignProduct(rowData)} >
-        //                         <DeleteIcon color="error" />
-        //                     </IconButton>
-        //                 </Tooltip >
-        //             </div >
-        //         }
-        //         </>)
-        // }
     ];
 
 
     const handleRemove = () => {
         setIsDeleting(true)
-        const {data} = showConfirmBox
-        axiosInstance().put(`${product.api}/${data.productId}/bom/remove`, {
+        const { data } = showConfirmBox
+        axiosInstance().put(`${product.api}/${data.product}/bom/remove`, {
             ids: [data._id]
         })
-        .then(({data}) => {
-            setIsDeleting(false)
-            setShowConfirmBox({open: false, data: null});
-            setToastConfig({open:true, message: "Successfully Deleted", type:"success"})
-            fetchData()
-        })
-        .catch(err => {
-            setToastConfig(err)
-            setIsDeleting(false)
-        })
+            .then(({ data }) => {
+                setIsDeleting(false)
+                setShowConfirmBox({ open: false, data: null });
+                setToastConfig({ open: true, message: "Successfully Deleted", type: "success" })
+                fetchData()
+            })
+            .catch(err => {
+                setToastConfig(err)
+                setIsDeleting(false)
+            })
     }
 
     return (
@@ -109,14 +93,14 @@ function ProductHierarchy({ data, permissions, unassignProduct,  fetchData= () =
                         />
                     </Box>
             }
-           {showConfirmBox.open &&  <ConfirmationDialog
-              open={true}
-              message={`Are you sure you want to delete this product?`}
-              okBtnLoading={isDeleting}
-              onClose={() => {
-                setShowConfirmBox({open: false, data: null});
-              }}
-              onOk={handleRemove}
+            {showConfirmBox.open && <ConfirmationDialog
+                open={true}
+                message={`Are you sure you want to delete this product?`}
+                okBtnLoading={isDeleting}
+                onClose={() => {
+                    setShowConfirmBox({ open: false, data: null });
+                }}
+                onOk={handleRemove}
             />}
         </>
     );

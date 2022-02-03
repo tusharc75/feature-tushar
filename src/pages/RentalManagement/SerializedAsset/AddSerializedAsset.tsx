@@ -58,7 +58,6 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     useEffect(() => {
         axiosInstance().get(`/warehouse`)
             .then(({ data: { data, count } }) => {
-                console.log(data)
                 setPlantList(data)
             })
             .catch((error) => {
@@ -148,9 +147,6 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         }
         axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
             data.data = data.data
-                // ?.filter(u => (u?.status === "Available" || u?.status === "New")
-                // && selectedProducts.some(d => d._id === u?.product?.optionValue || d.products?.some(obj => obj?.productId === u?.product?.optionValue))
-                // )
                 .map((u) => {
                     let finalObject = prepareDataForGrid(u);
                     finalObject["isChecked"] = false;
@@ -241,6 +237,10 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0) {
             return true;
         } else if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), "warehouseId")).length === 1) {
+            if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), "warehouseId"))[0] === null ||
+                uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), "warehouseId"))[0] === undefined) {
+                return true;
+            }
             if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), "warehouseId"))[0] === filterByPlant) {
                 return true;
             }

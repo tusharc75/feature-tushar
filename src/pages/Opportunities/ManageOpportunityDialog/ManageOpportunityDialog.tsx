@@ -15,7 +15,8 @@ import {
   customerAccount,
   setFieldsInAscendingOrder,
   getUniqueCurrencies,
-  formFieldNames
+  formFieldNames,
+  supplierAccount
 } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -210,7 +211,7 @@ export default function ManageOpportunityDialog({
         filterData.map((_f) => {
           //  If this dialog opens from account details screen, make that account preselected
 
-          if (accountId && ['customerAccountName', 'supplierAccountName'].some((d) => d === _f.fieldData.fieldName)) {
+          if (accountId && [customerAccount.accountResource, supplierAccount.accountResource].some((d) => d === _f.fieldData.fieldName)) {
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
           }
 

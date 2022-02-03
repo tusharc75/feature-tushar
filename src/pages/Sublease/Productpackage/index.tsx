@@ -13,7 +13,7 @@ import NoDataCell from "../../../components/Helpers/NoDataCell";
 import Add from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import moment from "moment";
-import { subleasing, dateFormat, pricingCondition, formatAmountWithCurrency, CHILD_RESOURCE } from "../../../constants/helpers";
+import { sublease, dateFormat, pricingCondition, formatAmountWithCurrency, CHILD_RESOURCE } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import QtyDialog from './QtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
@@ -25,7 +25,7 @@ import { MdAdd, MdDelete } from "react-icons/md";
 import { FiPackage } from "react-icons/fi";
 import { RiEditCircleLine } from "react-icons/ri";
 
-const Productpackage = ({ subleaseData, setNextStep }) => {
+const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -40,6 +40,7 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
 
     const [deleteData, setDeleteData] = useState(null);
     const [isDeleting, setDeleting] = useState(false);
+    const [isIssueing, setIssueing] = useState(false);
 
     const [material, setMaterial] = useState([]);
     const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: "", parentId: null });
@@ -222,7 +223,7 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
         setNextStep(false)
         var data: any = []
         var inventory: any = []
-        const response = await axiosInstance().get(`${subleasing.api}/productpackage/${subleaseData._id}`)
+        const response = await axiosInstance().get(`${sublease.api}/productpackage/${subleaseData._id}`)
         data = response?.data?.data
         setMaterial(JSON.parse(JSON.stringify(data.material)))
         inventory = data.inventory;
@@ -293,7 +294,7 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
             }
         })
 
-        axiosInstance().post(`${subleasing.api}/productpackage/${subleaseData._id}`, { material })
+        axiosInstance().post(`${sublease.api}/productpackage/${subleaseData._id}`, { material })
             .then(() => {
                 setAddExistingProductDialog({ open: false, type: "", parentId: null })
                 fetchProductInventory()
@@ -317,7 +318,7 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
             delete element.subRows
         });
         setUpdating(true);
-        axiosInstance().put(`${subleasing.api}/productpackage/${subleaseData._id}`, { material: rows }).then(() => {
+        axiosInstance().put(`${sublease.api}/productpackage/${subleaseData._id}`, { material: rows }).then(() => {
             setUpdating(false)
             setIsProductEdit({ open: false, isBulkedit: false })
             fetchProductInventory()
@@ -329,7 +330,7 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
 
     const handleDelete = (rows) => {
         setDeleting(true)
-        axiosInstance().put(`${subleasing.api}/productpackage/${subleaseData?._id}/delete`, { ids: rows })
+        axiosInstance().put(`${sublease.api}/productpackage/${subleaseData?._id}/delete`, { ids: rows })
             .then(() => {
                 setDeleting(false)
                 fetchProductInventory()
@@ -344,6 +345,17 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
     const handleOpen = (rowData) => {
         setIsProductEdit({ open: true, isBulkedit: false })
         setRecordToUpdate(rowData)
+    }
+
+    const issueSublease = () => {
+        setIssueing(true);
+        axiosInstance().put(`${sublease.api}/${subleaseData._id}/issue-sublease`).then(() => {
+            setIssueing(false);
+            fetchData()
+        }).catch((error) => {
+            setUpdating(false)
+            toastConfig.setToastConfig(error)
+        });
     }
 
     const calculatePrice = (arr: any[]) => {
@@ -441,17 +453,16 @@ const Productpackage = ({ subleaseData, setNextStep }) => {
                             </Button>
                         </HtmlTooltip>
                         <Box mx={1} />
-                        {material.length &&
+                        {(material.length && !isIssued) &&
                             <Fragment>
                                 <HtmlTooltip title={"Issue Sublease"}>
                                     <Button
                                         variant={isMobile && !isTablet ? "text" : "contained"}
                                         color="primary"
                                         size="small"
-                                        onClick={() => {
-
-                                        }}
-                                        endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
+                                        onClick={() => { issueSublease() }}
+                                        disabled={isIssueing}
+                                        endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
                                     >
                                         {isMobile && !isTablet ? <MdDelete size={20} /> : "Issue Sublease"}
                                     </Button>

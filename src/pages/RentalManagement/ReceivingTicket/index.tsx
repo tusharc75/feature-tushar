@@ -18,7 +18,7 @@ import {
   gridLoadingTimeout, deliveryTicket, rentalManagement,
   sidebarResource, productInventory as productInventoryHelperObject, INVENTORY_STATUS, DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE,
-  repairJob
+  repairJob, DELIVERY_FROM_TO_TYPE
 } from "../../../constants/helpers";
 import { groupBy } from "lodash";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -68,8 +68,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const [productInventoryForTicket, setProductInventoryForTicket] = useState<any[]>([]);
-  const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: "" });
+  const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: "", data: {} });
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -229,9 +228,19 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     });
   }
 
-  const handleTicketDialog = (selectedProductInventory, ticketType) => {
-    setProductInventoryForTicket(selectedProductInventory);
-    setShowTicketDialog({ open: true, ticketType: ticketType });
+  const handleTicketDialog = (ticketType) => {
+    const data = {}
+    data["ticketName"] = rentalManagementData.rentalJobName;
+    data["refrenceId"] = rentalManagementData._id;
+    data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
+    data["pickupFrom"] = rentalManagementData?.customerAccount?.optionValue;
+    data["pickupFromAddress"] = rentalManagementData.shippingAddress?.optionValue;
+    data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+    data["deliveryTo"] = rentalManagementData?.warehouse?.optionValue;
+    data["deliveryToAddress"] = rentalManagementData?.warehouse?.address;
+    data["startDate"] = rentalManagementData?.estimateStartDate;
+    data["endDate"] = rentalManagementData?.estimateStartDate;
+    setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
   };
 
   const handleAddAssetToRepairJob = (repairJobId) => {
@@ -243,7 +252,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         toastConfig.setToastConfig(error);
       })
   }
-
 
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
@@ -345,7 +353,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             size="small"
             style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
             onClick={() => {
-              handleTicketDialog(selectedRecords, DELIVERY_TICKET_TYPE.receiving)
+              handleTicketDialog(DELIVERY_TICKET_TYPE.receiving)
             }}
             disabled={(selectedRecords.length === 0)
               || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
@@ -385,7 +393,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             size="small"
             style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
             onClick={() => {
-              handleTicketDialog(selectedRecords, DELIVERY_TICKET_TYPE.return)
+              handleTicketDialog(DELIVERY_TICKET_TYPE.return)
             }}
             disabled={(selectedRecords.length === 0)
               || (selectedRecords.some(f =>
@@ -520,15 +528,14 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     {showTicketDialog.open && (
       <ManageDeliveryTicket
         ticketType={showTicketDialog.ticketType}
-        refrenceType="Rental Job"
-        refrenceData={rentalManagementData}
-        productInventory={productInventoryForTicket}
-        onClose={() => setShowTicketDialog({ open: false, ticketType: "" })}
+        refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
+        refrenceData={showTicketDialog.data}
+        productInventory={selectedRecords}
+        onClose={() => setShowTicketDialog({ open: false, ticketType: "", data: {} })}
         onSuccess={() => {
-          setShowTicketDialog({ open: false, ticketType: "" });
+          setShowTicketDialog({ open: false, ticketType: "", data: {} });
           fetchRecords();
         }}
-        warehouseId={rentalManagementData?.warehouse}
       />
     )}
     {showRemoveAssetFromReceivingTicketDialog && (

@@ -145,17 +145,27 @@ export default function DeliveryTicketDetail(props) {
       }
       data = data.filter((fields: any) => {
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-          if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "rentalJob" || fields.fieldData.fieldName === "productInventory") {
+          if (["repairJob", "rentalJob", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-          if (fields.fieldData.fieldName === "rentalJob" || fields.fieldData.fieldName === "transferAsset" || fields.fieldData.fieldName === "productInventory") {
+          if (["rentalJob", "transferAsset", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
-        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
-          if (fields.fieldData.fieldName === "repairJob" || fields.fieldData.fieldName === "transferAsset" || fields.fieldData.fieldName === "productInventory") {
+        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob) {
+          if (["repairJob", "transferAsset", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
+            return false
+          }
+        }
+        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
+          if (["repairJob", "transferAsset", "sublease", "productInventory"].includes(fields.fieldData.fieldName)) {
+            return false
+          }
+        }
+        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.sublease) {
+          if (["rentalJob", "repairJob", "transferAsset", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
@@ -525,7 +535,7 @@ export default function DeliveryTicketDetail(props) {
                       </Button>
                       : null
                     : null}
-                  {(deliveryTicketData?.status === "In-Transit" || deliveryTicketData?.status === "Delivered") ?
+                  {(deliveryTicketData?.signatures?.length > 0) ?
                     <Button
                       variant={isMobile && !isTablet ? "text" : "contained"}
                       color="primary"
@@ -536,7 +546,8 @@ export default function DeliveryTicketDetail(props) {
                       {isMobile && !isTablet ? <FaSignature size={20} /> : "View Signatures"}
                     </Button> : null
                   }
-                  {(deliveryTicketData?.ticketType === "Loading" && deliveryTicketData?.type === "Rental Job" && deliveryTicketData?.signatures?.length === 4) ?
+                  {(deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading
+                    && deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob && deliveryTicketData?.status === DELIVERY_TICKET_STATUS.delivered) ?
                     <Button
                       variant={isMobile && !isTablet ? "text" : "contained"}
                       color="primary"
@@ -549,7 +560,6 @@ export default function DeliveryTicketDetail(props) {
                   }
                 </DetailsPageHeader>
               )}
-
               {loading ? (
                 <Box padding={2}>
                   <Grid container spacing={2}>
@@ -772,10 +782,10 @@ export default function DeliveryTicketDetail(props) {
                     <Activity
                       resourceId={deliveryTicketData?._id}
                       resource={deliveryTicket.deliveryTicketResource}
-                      restrictedAddActivities={["Attachment", "Case"]}
+                      // restrictedAddActivities={["Attachment", "Case"]}
                       relatedTo={[
                         {
-                          type: deliveryTicket.deliveryTicketResource,
+                          type: "deliveryTicket",
                           referenceId: deliveryTicketData?._id,
                           access: true,
                         },

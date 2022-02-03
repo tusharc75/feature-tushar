@@ -15,7 +15,7 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { subleasing, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
+import { sublease, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -23,7 +23,7 @@ import HtmlTooltip from "../../components/CustomTooltipTitle";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
-import ManageSubleasing from "./ManageSubleasing";
+import ManageSublease from "./ManageSublease";
 import { AiFillCrown, MdAdd, MdSort, MdFilterList } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
@@ -32,7 +32,7 @@ import { FaSuitcase } from "react-icons/fa";
 import MobileSortDialog from "../../components/MobileSortDialog";
 import MobileFilterDialog from "../../components/MobileFilterDialog"
 
-const Subleasing = () => {
+const Sublease = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
@@ -48,7 +48,7 @@ const Subleasing = () => {
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
-    const localStorageSelectedRecords = `${routes.subleasing?.title}_selected`;
+    const localStorageSelectedRecords = `${routes.sublease?.title}_selected`;
     const [isOpenDialog, setisOpenDialog] = useState(false)
 
     const [fromRental, setFromRental] = useState(history.location?.state?.rental);
@@ -68,12 +68,12 @@ const Subleasing = () => {
 
     const fetchGridColumns = () => {
         axiosInstance()
-            .get("/field?resource=Subleasing")
+            .get("/field?resource=Sublease")
             .then(({ data: { data } }) => {
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = getColumnData(routes.subleasing?.title, o?.fieldData, routes.subleasingDetail.path)
+                    let currentColumn = getColumnData(routes.sublease?.title, o?.fieldData, routes.subleaseDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -99,7 +99,7 @@ const Subleasing = () => {
         }
         const queryString = getQueryString();
         let dataToProcess, count;
-        axiosInstance().get(`${subleasing.api}${queryString}`).then(({ data }) => {
+        axiosInstance().get(`${sublease.api}${queryString}`).then(({ data }) => {
             dataToProcess = data?.data;
             count = data?.count;
             let rows = dataToProcess.map((u) => {
@@ -199,7 +199,7 @@ const Subleasing = () => {
         return deepFilter;
     };
 
-    const columnState = JSON.parse(localStorage.getItem(routes.subleasing?.title));
+    const columnState = JSON.parse(localStorage.getItem(routes.sublease?.title));
 
 
     if (columnState) {
@@ -222,7 +222,7 @@ const Subleasing = () => {
         else {
             ids = selectedRecords.map(d => d._id);
         }
-        axiosInstance().put(`${subleasing.api}/remove`, { "ids": ids }).then(() => {
+        axiosInstance().put(`${sublease.api}/remove`, { "ids": ids }).then(() => {
             fetchData();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
@@ -237,7 +237,7 @@ const Subleasing = () => {
     const ActionsRenderer = params => (
         <>
             {
-                permissions?.subleasing?.isCreate &&
+                permissions?.sublease?.isCreate &&
                 <HtmlTooltip title="Clone">
                     <IconButton
                         size="small"
@@ -250,7 +250,7 @@ const Subleasing = () => {
                     </IconButton>
                 </HtmlTooltip>
             }
-            {/* {permissions?.subleasing?.isDelete &&
+            {/* {permissions?.sublease?.isDelete &&
                 <HtmlTooltip title="Delete">
                     <IconButton size="small" aria-label="Delete" onClick={() => {
                         setDeleteRecord(params.data);
@@ -309,13 +309,13 @@ const Subleasing = () => {
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[routes.subleasing]} />
+                <CustomBreadCrumbs routes={[routes.sublease]} />
             </Grid>
             <Grid item md={8} sm={1} xs={2}>
                 <ImportExportLinks
-                    permissions={permissions?.subleasing}
+                    permissions={permissions?.sublease}
                     module="purchase order"
-                    api={subleasing.api}
+                    api={sublease.api}
                     afterImportCompleted={() => {
                         fetchData();
                     }}
@@ -329,7 +329,6 @@ const Subleasing = () => {
                     }}
                 />
             </Grid>
-
         </Grid>
         <div className="main-container">
             <div className="header-panel">
@@ -337,7 +336,7 @@ const Subleasing = () => {
                     <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
                         <div className="d-flex align-items-center">
                             <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
-                            <span className="listingHeader">{routes.subleasing?.title} </span>
+                            <span className="listingHeader">{routes.sublease?.title} </span>
                         </div>
                         {isMobile && (
                             <>
@@ -392,9 +391,6 @@ const Subleasing = () => {
                                 </Grid>
                             </>
                         )}
-
-
-
                         {fromRental && (
                             <Chip
                                 className="ml-3"
@@ -405,7 +401,6 @@ const Subleasing = () => {
                                 }}
                             />
                         )}
-
                     </Grid>
                     <Grid xs={12} sm={12} md={6} container className={styles.filter_side} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
@@ -418,17 +413,14 @@ const Subleasing = () => {
                                     value={search}
                                     style={isMobile ? { flex: 1 } : {}}
                                 />
-
                             </Grid>
-
                             <Grid style={{ display: "flex", gap: "5px" }}>
-                                {permissions?.subleasing?.isCreate &&
+                                {permissions?.sublease?.isCreate &&
                                     <Button onClick={() => {
                                         setShowManageDialog({ open: true, isClone: false, idToClone: null })
                                     }} variant={isMobile && !isTablet ? "text" : "contained"} size="small" color="primary" className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
                                         startIcon={isMobile && !isTablet ? null : <AddOutlined />}> {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}</Button>
                                 }
-
                                 {/* <HtmlTooltip title="Please select some purchase orders">
                                     <span>
                                         <Button
@@ -457,7 +449,7 @@ const Subleasing = () => {
                                     open={Boolean(anchorEl)}
                                     onClose={closeActions}
                                 >
-                                    {permissions?.subleasing?.isDelete && <MenuItem onClick={() => {
+                                    {permissions?.sublease?.isDelete && <MenuItem onClick={() => {
                                         closeActions()
                                         setShowDeleteConfirmBox(true)
                                     }}>Delete</MenuItem>}
@@ -473,7 +465,7 @@ const Subleasing = () => {
                         <CustomSwipableList
                             allowSelection={true}
                             allowSwipe={true}
-                            permissions={permissions.subleasing}
+                            permissions={permissions.sublease}
                             primaryField={columns?.find(d => d.primaryField)}
                             onClick={(data) => {
                                 history.push(`${routes.purchaseOrderDetail.path}/${data._id}`)
@@ -532,7 +524,7 @@ const Subleasing = () => {
                             onCreate={false}
                             showClone={true}
                             onClone={(data) => { setShowManageDialog({ open: true, isClone: true, idToClone: data._id }); }}
-                            renderedFrom={routes.subleasing?.title}
+                            renderedFrom={routes.sublease?.title}
                         /> :
                         <CustomAgGrid
                             columns={columns}
@@ -546,14 +538,14 @@ const Subleasing = () => {
                             page={page}
                             actionWidth={150}
                             loading={loading}
-                            renderedFrom={routes.subleasing?.title}
+                            renderedFrom={routes.sublease?.title}
                             refreshGrid={fetchData}
                         /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
         {
             showManageDialog.open &&
-            <ManageSubleasing
+            <ManageSublease
                 isClone={showManageDialog.isClone}
                 subleasingId={showManageDialog.idToClone}
                 onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
@@ -568,7 +560,7 @@ const Subleasing = () => {
             showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the ${routes.subleasing?.title} ? `}
+                message={`Are you sure you want to delete the ${routes.sublease?.title} ? `}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />
@@ -577,4 +569,4 @@ const Subleasing = () => {
     );
 }
 
-export default Subleasing;
+export default Sublease;

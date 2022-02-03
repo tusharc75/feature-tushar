@@ -508,7 +508,6 @@ const RentalManagement = () => {
               )}
             </RentalManagementHeader>
           </div>
-
           {
             Object.keys(frameWorkComponent).length > 0 ?
               isMobile && !isTablet ?
@@ -585,7 +584,6 @@ const RentalManagement = () => {
                   showOnlyShowFilteredRecordSwitch={true}
                 /> : null
           }
-
           {showDeleteWarningConfirmBox ? (
             <MessageDialog
               open={showDeleteWarningConfirmBox}

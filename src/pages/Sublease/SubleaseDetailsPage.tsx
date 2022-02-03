@@ -11,8 +11,8 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { subleasing } from "../../constants/helpers";
-import ManageSubleasing from "./ManageSubleasing";
+import { sublease } from "../../constants/helpers";
+import ManageSublease from "./ManageSublease";
 import Steps from "../RentalManagement/Steps";
 import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from "react-icons/fa";
 import { BiEdit, BiFoodMenu } from "react-icons/bi";
@@ -21,10 +21,12 @@ import queryString from 'query-string';
 import { isMobile, isTablet } from "react-device-detect";
 import accountClass from "../Account/account.module.scss";
 import Productpackage from './Productpackage';
+import SerializedAsset from './SerializedAsset';
+import Tickets from './Tickets';
 
-const processSteps = ["Add Products", "Tickets"]
+const processSteps = ["Add Products", "Serialized Asset", "Tickets"]
 
-const SubleasingDetailsPage = () => {
+const SubleaseDetailsPage = () => {
 
     const toastConfig = useContext(CustomToastContext);
 
@@ -39,11 +41,12 @@ const SubleasingDetailsPage = () => {
     const [fields, setFields] = useState([]);
     const [statusOptions, setStatusOptions] = useState([])
     const [allowedToEdit, setAllowedToEdit] = useState(false);
-    const [currentStep, setCurrentStep] = useState(0);
+    const [currentStep, setCurrentStep] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
     const [nextStep, setNextStep] = useState(true);
 
     const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
+    const [isIssued, setIsIssued] = useState(false);
 
     function a11yProps(index: any) {
         return {
@@ -58,6 +61,19 @@ const SubleasingDetailsPage = () => {
     };
 
     useEffect(() => {
+        if (currentStep >= 0 && currentStep <= 2) {
+            updateProcessStatus(processSteps[currentStep])
+        }
+    }, [currentStep]);
+
+    const updateProcessStatus = (processStatus) => {
+        axiosInstance().put(`${sublease.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+    }
+
+    useEffect(() => {
         if (parsed) {
             history.replace(`?tab=${tabValue}`);
         }
@@ -69,7 +85,7 @@ const SubleasingDetailsPage = () => {
     }, [id]);
 
     const getFields = () => {
-        axiosInstance().get("/field?resource=Subleasing")
+        axiosInstance().get("/field?resource=Sublease")
             .then(({ data }) => {
                 setFields(data.data);
                 if (data.data && data.data.length) {
@@ -88,8 +104,12 @@ const SubleasingDetailsPage = () => {
 
     const fetchData = async () => {
         try {
-            const { data: { data } } = await axiosInstance().get(`${subleasing.api}/${id}`);
+            const { data: { data } } = await axiosInstance().get(`${sublease.api}/${id}`);
+            setCurrentStep(processSteps.indexOf(data?.processStatus) !== -1 ? processSteps.indexOf(data?.processStatus) : 0);
             const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+            if (data?.productInventory?.length) {
+                setIsIssued(true)
+            }
             setAllowedToEdit(isAllowedToEdit);
             setSubleaseData(data);
         } catch (error) {
@@ -98,7 +118,7 @@ const SubleasingDetailsPage = () => {
     };
 
     const handleDelete = () => {
-        axiosInstance().put(`${subleasing.api}/remove`, { "ids": [] }).then(() => {
+        axiosInstance().put(`${sublease.api}/remove`, { "ids": [] }).then(() => {
             setShowConfirmBox(false);
             history.goBack();
         }).catch((error) => {
@@ -119,7 +139,7 @@ const SubleasingDetailsPage = () => {
         <>
             <Fragment>
                 <Grid container className="headerbox">
-                    <CustomBreadCrumbs routes={[routes.subleasing, { title: subleaseData?.subleaseName }]} />
+                    <CustomBreadCrumbs routes={[routes.sublease, { title: subleaseData?.subleaseName }]} />
                 </Grid>
                 <Grid container spacing={1} className="detail-container">
                     <Grid item xs={12} sm={12} spacing={2}>
@@ -129,7 +149,7 @@ const SubleasingDetailsPage = () => {
                                 mainPoints={null}
                                 showHeading={true}
                             >
-                                {permissions?.subleasing?.isUpdate && (
+                                {permissions?.sublease?.isUpdate && (
                                     <>
                                         <Button
                                             variant={isMobile && !isTablet ? "text" : "contained"}
@@ -218,6 +238,18 @@ const SubleasingDetailsPage = () => {
                                                         <Productpackage
                                                             subleaseData={subleaseData}
                                                             setNextStep={setNextStep}
+                                                            fetchData={fetchData}
+                                                            isIssued={isIssued}
+                                                        />
+                                                    )}
+                                                    {currentStep === 1 && subleaseData && (
+                                                        <SerializedAsset
+                                                            subleaseData={subleaseData}
+                                                        />
+                                                    )}
+                                                    {currentStep === 2 && subleaseData && (
+                                                        <Tickets
+                                                            subleaseData={subleaseData}
                                                         />
                                                     )}
                                                 </Paper>
@@ -235,7 +267,7 @@ const SubleasingDetailsPage = () => {
             {showConfirmBox && (
                 <ConfirmationDialog
                     open={showConfirmBox}
-                    message={`Are you sure you want to delete this ${routes.subleasing?.title} ?`
+                    message={`Are you sure you want to delete this ${routes.sublease?.title} ?`
                     }
                     onClose={() => {
                         setShowConfirmBox(false);
@@ -244,7 +276,7 @@ const SubleasingDetailsPage = () => {
                 />
             )}
             {openUpdateDialog &&
-                <ManageSubleasing
+                <ManageSublease
                     isClone={false}
                     subleasingId={id}
                     onClose={() => setOpenUpdateDialog(false)}
@@ -258,4 +290,4 @@ const SubleasingDetailsPage = () => {
     );
 };
 
-export default SubleasingDetailsPage;
+export default SubleaseDetailsPage;
