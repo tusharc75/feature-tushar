@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Chip, Grid, IconButton, Tooltip, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { FaRegistered,FaSuitcase } from 'react-icons/fa';
-import {MdContactPhone,RiContactsBookUploadFill,RiShip2Fill,FaWarehouse,SiStatuspage } from 'react-icons/all';
+import { FaRegistered, FaSuitcase } from 'react-icons/fa';
+import { MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, FaWarehouse, SiStatuspage } from 'react-icons/all';
 import {
   isObjectEmpty,
   customerAccount,
@@ -21,7 +21,6 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import NoDataCell from '../../components/Helpers/NoDataCell';
 import SalesOrderHeader from './SalesOrderHeader';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
@@ -30,6 +29,7 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog/ManageSalesOrderDialog';
+import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 
 let salesOrderTimeout;
 const SalesOrderType = [
@@ -74,36 +74,7 @@ const SalesOrder = () => {
 
   const { getColumnData } = useColumns();
   const [frameworkComponent, setFrameworkComponent] = useState({});
-  const [columns, setColumns] = useState([]);
-
-  // const columns = [
-  //   {
-  //     field: 'salesOrderNo',
-  //     headerName: 'Sales Order No.',
-  //     show: true,
-  //     disabled: true,
-  //     cellRenderer: 'salesOrderNoRenderer'
-  //   },
-  //   {
-  //     field: 'createdBy',
-  //     headerName: 'Created By',
-  //     show: true,
-  //     cellRenderer: 'createdByRenderer'
-  //   },
-  //   {
-  //     field: 'updatedBy',
-  //     headerName: 'Updated By',
-  //     show: true,
-  //     cellRenderer: 'updatedByRenderer'
-  //   },
-  //   {
-  //     field: 'owner',
-  //     headerName: 'Sales Order Owner',
-  //     show: true,
-  //     cellRenderer: 'OwnerRenderer'
-  //   }
-  // ];
-  //  Grid Variables - End
+  const [columns, setColumns] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -113,31 +84,14 @@ const SalesOrder = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource[salesOrderResource]}`);
     data = response?.data?.data;
-
     let columns = [];
     let rendererNames = [];
-
     data.forEach((o) => {
-      // if (['accountName'].indexOf(o?.fieldData?.fieldName) === 0) {
-      if (o?.fieldData?.primaryField === true) {
-        columns = [
-          ...columns,
-          {
-            pivotIndex: 0,
-            field: o?.fieldData?.fieldName,
-            headerName: o?.fieldData?.fieldLabel,
-            show: true,
-            disabled: true,
-            cellRenderer: 'salesOrderNoRenderer'
-          }
-        ];
-      } else {
-        let currentColumn = getColumnData(salesOrderResource, o?.fieldData, routes.salesOrderDetail.path);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName);
-          }
+      let currentColumn = getColumnData(salesOrderResource, o?.fieldData, routes.salesOrderDetail.path);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName);
         }
       }
       return o?.fieldData;
@@ -145,11 +99,9 @@ const SalesOrder = () => {
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
-      salesOrderNoRenderer: SalesOrderNoRenderer,
       actionsRenderer: ActionsRenderer
     };
     setFrameworkComponent({ ...tempFrameworkComponent });
-
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
       columns.push(checkStaticField(routes.projectSales.title, field));
@@ -203,26 +155,6 @@ const SalesOrder = () => {
       });
   };
 
-  const SalesOrderNoRenderer = (params) => (
-    <>
-      <Link className="text-truncate link" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.id}`}>
-        {params.value}
-      </Link>
-    </>
-  );
-
-  const OwnerRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" to={`${routes.userDetail.path}/${params.data.ownerId}`} title={params.owner}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
   const ActionsRenderer = (params) => (
     <>
       {permissions.salesOrder.isCreate ? (
@@ -260,16 +192,6 @@ const SalesOrder = () => {
       />
     </>
   );
-
-  // const frameworkComponents = {
-  //   salesOrderNoRenderer: SalesOrderNoRenderer,
-  //   ownerRenderer: OwnerRenderer,
-  //   createdByRenderer: CreatedByRenderer,
-  //   updatedByRenderer: UpdatedByRenderer,
-  //   actionsRenderer: ActionsRenderer,
-  //   commonRenderer: CommonRenderer,
-  //   dateRenderer: DateRenderer
-  // };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -479,7 +401,7 @@ const SalesOrder = () => {
                   permissions={permissions.salesOrder}
                   module="salesOrder"
                   api={salesOrder.salesOrderApi}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportAllOrSomeFeature={true}
                   total={rowCount}
                   recordsToExport={selectedRecords.length}
@@ -494,113 +416,107 @@ const SalesOrder = () => {
           </Grid>
         </Grid>
       </Grid>
-
-      {/* Tables Begins Here */}
       <CustomContainer>
         <div className="header-panel">
-          <SalesOrderHeader
-            selectedRecords={selectedRecords}
-            onTypeChange={handleSalesOrderTypeSel}
-            options={SalesOrderType}
-            onSearch={handleSearch}
-            searchVal={search}
-            SalesOrderPermissions={permissions.salesOrder}
-            onCreate={clickCreateNew}
-            showConfirmBox={showConfirmBox}
-            canDelete={selectedRecords.length === 0}
-            icon={<FaRegistered className="headerLogo" />}
-            heading={routes.salesOrder.title}
-            showTransferEntityDialog={handleTransferEntityDialog}
-            columns={columns}
-            dispatch={dispatch}
-            // showCloneSalesOrderDialog={() => {
-            //   handleShowCloneSalesOrderDialog()
-            // }}
-          >
-            {accountDetails.accountId && (
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`Account: ${accountDetails.accountName}`}
-                onDelete={() => {
-                  setAccountDetails({
-                    accountId: null,
-                    accountName: null,
-                    resource: null
-                  });
-                }}
-              />
-            )}
-          </SalesOrderHeader>
+          {columns &&
+            <SalesOrderHeader
+              selectedRecords={selectedRecords}
+              onTypeChange={handleSalesOrderTypeSel}
+              options={SalesOrderType}
+              onSearch={handleSearch}
+              searchVal={search}
+              SalesOrderPermissions={permissions.salesOrder}
+              onCreate={clickCreateNew}
+              showConfirmBox={showConfirmBox}
+              canDelete={selectedRecords.length === 0}
+              icon={<FaRegistered className="headerLogo" />}
+              heading={routes.salesOrder.title}
+              showTransferEntityDialog={handleTransferEntityDialog}
+              columns={columns}
+              dispatch={dispatch}
+            >
+              {accountDetails.accountId && (
+                <Chip
+                  className="ml-3"
+                  color="primary"
+                  label={`Account: ${accountDetails.accountName}`}
+                  onDelete={() => {
+                    setAccountDetails({
+                      accountId: null,
+                      accountName: null,
+                      resource: null
+                    });
+                  }}
+                />
+              )}
+            </SalesOrderHeader>
+          }
         </div>
-
-        {Object.keys(frameworkComponent).length > 0 &&
+        {(Object.keys(frameworkComponent).length > 0 && columns) ?
           isMobile && !isTablet ? (
-            <CustomSwipableList 
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={permissions.salesOrder}
-            primaryField={columns?.find(d=>d.field==="salesOrderNo")}
-            onClick={(data) => {
-              history.push(`${routes.salesOrderDetail.path}/${data._id}`)
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(data) => {
-              history.push(`${routes.salesOrderDetail.path}/${data._id}?openEdit=true`)
-            }}
-            extraParamsToCheckDelete={true}
-            onDelete={(data) => {
-              setSingleSalesOrderDelete({
-                show: true,
-                id: data._id,
-                salesOrderName: `${data.salesOrderNo}`
-              })
-            }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[
-              {
-                icon: <FaSuitcase size={18} />,
-                field: "customerAccount"
-              },
-            ]}
-            chips={[
-              {
-                icon:<MdContactPhone />,
-                label: "Customer Contact: ",
-                field: "customerContact"  
-              },
-              {
-                icon:<RiContactsBookUploadFill />,
-                label:"Billing Address: ",
-                field:"billingAddress"
-              },
-              {
-                icon:<RiShip2Fill />,
-                label:"Shipping Address: ",
-                field:"shippingAddress"
-              },
-              { 
-                icon:<FaWarehouse />,
-                label:"Plants: ",
-                field:"plants"
-              },
-              {
-                icon:<SiStatuspage/>,
-                label:"Status: ",
-                field:"status:"
-              }
-            ]}
-            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-            onCreate={false}
-            showClone={true}
-            onClone={(data) => {  setShowManageSalesOrderDialog({ open: true, isClone: true, idToClone: data._id })}}
-            renderedFrom={salesOrderResource}
-            
-            
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions.salesOrder}
+              primaryField={columns?.find(d => d.field === "salesOrderNo")}
+              onClick={(data) => {
+                history.push(`${routes.salesOrderDetail.path}/${data._id}`)
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(data) => {
+                history.push(`${routes.salesOrderDetail.path}/${data._id}?openEdit=true`)
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(data) => {
+                setSingleSalesOrderDelete({
+                  show: true,
+                  id: data._id,
+                  salesOrderName: `${data.salesOrderNo}`
+                })
+              }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              additionalDetails={[
+                {
+                  icon: <FaSuitcase size={18} />,
+                  field: "customerAccount"
+                },
+              ]}
+              chips={[
+                {
+                  icon: <MdContactPhone />,
+                  label: "Customer Contact: ",
+                  field: "customerContact"
+                },
+                {
+                  icon: <RiContactsBookUploadFill />,
+                  label: "Billing Address: ",
+                  field: "billingAddress"
+                },
+                {
+                  icon: <RiShip2Fill />,
+                  label: "Shipping Address: ",
+                  field: "shippingAddress"
+                },
+                {
+                  icon: <FaWarehouse />,
+                  label: "Plants: ",
+                  field: "plants"
+                },
+                {
+                  icon: <SiStatuspage />,
+                  label: "Status: ",
+                  field: "status:"
+                }
+              ]}
+              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+              onCreate={false}
+              showClone={true}
+              onClone={(data) => { setShowManageSalesOrderDialog({ open: true, isClone: true, idToClone: data._id }) }}
+              renderedFrom={salesOrderResource}
             />
           ) : (
             <CustomAgGrid
@@ -618,8 +534,7 @@ const SalesOrder = () => {
               renderedFrom={'salesOrderPage'}
               refreshGrid={fetchSalesOrder}
             />
-          )}
-
+          ) : null}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -630,9 +545,8 @@ const SalesOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.salesOrderName ? 'Sales Order' : 'Sales Orders'}   ${
-              deleteRecord.salesOrderName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.salesOrderName ? 'Sales Order' : 'Sales Orders'}   ${deleteRecord.salesOrderName || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
@@ -641,7 +555,6 @@ const SalesOrder = () => {
             onOk={handleDeleteSalesOrder}
           />
         ) : null}
-
         {singleSalesOrderDelete.show ? (
           <ConfirmationDialog
             open={singleSalesOrderDelete.show}
@@ -655,7 +568,7 @@ const SalesOrder = () => {
             }
             onOk={handleSingleDeleteSalesOrder}
           />
-        ) : null}
+        ) : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
       </CustomContainer>
       {showManageSalesOrderDialog.open && (
         <ManageSalesOrderDialog
