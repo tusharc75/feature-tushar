@@ -1513,11 +1513,12 @@ export const DELIVERY_TICKET_STATUS = {
   new: 'New',
   indTransit: 'In-Transit',
   delivered: 'Delivered',
+  cancelled: 'Cancelled',
 };
 
 export const RENTAL_STATUS = {
   new: 'New',
-  canceled: 'Canceled',
+  cancelled: 'Cancelled',
   inProgress: 'In-Progress',
   jobPartiallyStarted: 'Job Partially Started',
   jobStarted: 'Job Started',
@@ -1572,7 +1573,7 @@ export const resourceOptions = [
   'Opportunity',
   'Quote',
   'Rental Management',
-  'Loading Ticket',
+  'Delivery Ticket',
   'Project Sales'
 ];
 
@@ -1590,8 +1591,6 @@ export const REPORT_LIST = [
 
 export const getApi = (resource: string) => {
   switch (kebabCase(resource)) {
-    case 'loading-ticket':
-      return 'delivery-ticket';
     case 'quote':
       return 'quote-builder';
     default:
@@ -1631,7 +1630,7 @@ export const getData = (resource: string, data: any) => {
         name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
         id: data._id
       };
-    case 'loading-ticket':
+    case 'delivery-ticket':
       return {
         name: `${data.ticketName}`,
         id: data._id

@@ -65,8 +65,8 @@ export default function ManageAccountDialog(props) {
             .then(({ data: dataToClone }) => {
               if (dataToClone) {
                 dataToClone.data.accountName = "";
-                dataToClone.data.billingAddress = [];
-                dataToClone.data.shippingAddress = [];
+                // dataToClone.data.billingAddress = [];
+                // dataToClone.data.shippingAddress = [];
 
               }
               setAccountData({

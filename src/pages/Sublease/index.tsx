@@ -391,9 +391,6 @@ const Sublease = () => {
                                 </Grid>
                             </>
                         )}
-
-
-
                         {fromRental && (
                             <Chip
                                 className="ml-3"
@@ -404,7 +401,6 @@ const Sublease = () => {
                                 }}
                             />
                         )}
-
                     </Grid>
                     <Grid xs={12} sm={12} md={6} container className={styles.filter_side} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
@@ -417,9 +413,7 @@ const Sublease = () => {
                                     value={search}
                                     style={isMobile ? { flex: 1 } : {}}
                                 />
-
                             </Grid>
-
                             <Grid style={{ display: "flex", gap: "5px" }}>
                                 {permissions?.sublease?.isCreate &&
                                     <Button onClick={() => {
@@ -427,7 +421,6 @@ const Sublease = () => {
                                     }} variant={isMobile && !isTablet ? "text" : "contained"} size="small" color="primary" className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
                                         startIcon={isMobile && !isTablet ? null : <AddOutlined />}> {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}</Button>
                                 }
-
                                 {/* <HtmlTooltip title="Please select some purchase orders">
                                     <span>
                                         <Button
