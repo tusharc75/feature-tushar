@@ -209,25 +209,11 @@ const Header = ({ toggleDrawer }) => {
   const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
 
   useEffect(() => {
-    fetchCart();
-  }, []);
-
-  useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       saveEntity()
     }
   }, [selectedEntity])
-
-  const fetchCart = () => {
-    axiosInstance()
-      .get(`/ecommerce/cart`)
-      .then(({ data: { data } }) => {
-        if (data) {
-          dispatch({ type: SET_CART, payload: [...data] });
-        }
-      });
-  };
 
   const saveEntity = () => {
     axiosInstance()
@@ -864,40 +850,6 @@ const Header = ({ toggleDrawer }) => {
         <Box component="span" mx={1} my={2} />
         <p>Help</p>
       </MenuItem>
-
-      {/* {
-        permissions?.eCommerce?.isRead && <MenuItem
-          id="shoppingCartButton"
-          onClick={() => {
-            history.push({
-              pathname: '/product/my-cart'
-            });
-          }}
-        >
-          <Badge color="secondary" badgeContent={wishlistState.wishlist.length}>
-            <FavoriteIcon className="setIcon" />
-          </Badge>
-          <Box component="span" mx={1} />
-          <p>Wishlist</p>
-        </MenuItem>
-      } */}
-
-      {/* {
-        permissions?.eCommerce?.isRead && <MenuItem
-          id="shoppingCartButton"
-          onClick={() => {
-            history.push({
-              pathname: '/product/my-cart'
-            });
-          }}
-        >
-          <Badge color="secondary" badgeContent={cartItems.length}>
-            <ShoppingCartIcon className="setIcon" />
-          </Badge>
-          <Box component="span" mx={1} />
-          <p>Cart</p>
-        </MenuItem>
-      } */}
     </Menu>
   );
 
@@ -1099,48 +1051,6 @@ const Header = ({ toggleDrawer }) => {
                   </Tooltip>
                 </IconButton>
               )}
-              {/* {
-                permissions?.eCommerce?.isRead && <IconButton
-                  id="shoppingCartButton"
-                  title="Wishlist"
-                  aria-describedby={fullScreenNotificationId}
-                  aria-label="settings"
-                  color="inherit"
-                  onClick={() => {
-                    history.push({
-                      pathname: '/product/my-cart'
-                    });
-                  }}
-                  className="showIconLayout"
-                >
-                  <Badge color="secondary" badgeContent={wishlistState.wishlist.length}>
-                    <FavoriteIcon className="setIcon" />
-                  </Badge>
-                </IconButton>
-              } */}
-
-              {/*Only show cart icon if environment is local || development*/}
-              {/* {
-                permissions?.eCommerce?.isRead && (
-                  <IconButton
-                    id="shoppingCartButton"
-                    title={'My Cart'}
-                    aria-describedby={fullScreenNotificationId}
-                    aria-label="settings"
-                    color="inherit"
-                    onClick={() => {
-                      history.push({
-                        pathname: '/product/my-cart'
-                      });
-                    }}
-                    className="showIconLayout"
-                  >
-                    <Badge color="secondary" badgeContent={cartItems.length}>
-                      <ShoppingCartIcon className="setIcon" />
-                    </Badge>
-                  </IconButton>
-                )
-              } */}
 
               <IconButton
                 id="notificationButton"

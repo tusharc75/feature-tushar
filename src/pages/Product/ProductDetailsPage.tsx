@@ -22,7 +22,7 @@ import AssignedFrequentlyBoughtProduct from './AssignedFrequentlyBoughtProduct';
 import AssignProductDialog from '../../components/AssignRolesDialog/AssignProductDialog';
 import ManageProductInventory from '../ProductInventory/ManageProductInventory';
 import { extractFieldsForDisplay } from '../../constants/formulaUtility';
-import ProductHierarchy from './ProductHierarchy';
+import ProductHierarchy from './BOM';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
@@ -204,36 +204,36 @@ const ProductDetailsPage = () => {
   };
 
   const getProductTree = () => {
-    if (productData?._id) {
-      setLoadingBOMData(true);
-      axiosInstance()
-        .get(`/product/bom/${productData?._id}`)
-        .then(({ data: { data } }) => {
-          data = data.map((o) => {
-            if (o?.parent) {
-              o.type = 'child';
-            }
-            return o;
-          });
-          setBOMData([...data]);
-          setLoadingBOMData(false);
-        })
-        .catch((err) => {
-          setLoadingBOMData(false);
-        });
-    }
-  };
-
-  const getFrequentlyBoughtProduct = () => {
+    setLoadingBOMData(true);
     axiosInstance()
-      .get(`${product.api}/frequent/` + id)
-      .then(({ data }) => {
-        setFrequentlyBoughtProduct(data.data);
+      .get(`/product/${id}/bom`)
+      .then(({ data: { data } }) => {
+        data = data.map((o) => {
+          return {
+            ...o,
+            productName: o.childProductDetail.productName,
+            productId: o.childProductDetail._id
+          };
+        });
+        setBOMData([...data]);
+        setLoadingBOMData(false);
       })
       .catch((err) => {
-        toastConfig.setToastConfig(err);
+        setLoadingBOMData(false);
       });
+
   };
+
+  // const getFrequentlyBoughtProduct = () => {
+  //   axiosInstance()
+  //     .get(`${product.api}/frequent/` + id)
+  //     .then(({ data }) => {
+  //       setFrequentlyBoughtProduct(data.data);
+  //     })
+  //     .catch((err) => {
+  //       toastConfig.setToastConfig(err);
+  //     });
+  // };
 
   const unassignProduct = async (obj) => {
     if (obj) {
@@ -492,7 +492,7 @@ const ProductDetailsPage = () => {
               </TabPanel>
               <TabPanel value={tabValue} index={3}>
                 {tabValue === 3 && <ProductConfiguration
-                  productFields={productFields.map((_f:any) => _f.fieldData)}
+                  productFields={productFields.map((_f: any) => _f.fieldData)}
                   productData={productData}
                   id={id}
                 />}
@@ -504,7 +504,6 @@ const ProductDetailsPage = () => {
               <Paper style={{ overflow: 'hidden' }}>
                 <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
                   <Typography variant="subtitle2">Parts</Typography>
-
                   {permissions.product.isUpdate && (
                     <IconButton
                       title="Manage Product(s)"
@@ -542,7 +541,12 @@ const ProductDetailsPage = () => {
                                                 product={frequentlyBoughtProduct}
                                                 unassignProduct={unassignProduct}
                                             /> */}
-                        <ProductHierarchy data={BOMData} permissions={permissions.product} unassignProduct={unassignProduct} />
+                        <ProductHierarchy
+                          fetchData={getProductTree}
+                          data={BOMData}
+                          permissions={permissions.product}
+                          unassignProduct={unassignProduct}
+                        />
                         <Box px={1} my={1}>
                           <Button
                             fullWidth
@@ -756,7 +760,7 @@ const ProductDetailsPage = () => {
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
           assignedProducts={BOMData}
           onSuccess={() => {
-            getFrequentlyBoughtProduct();
+            // getFrequentlyBoughtProduct();
             if (process.env.REACT_APP_ENV !== 'staging') {
               getProductTree();
             }

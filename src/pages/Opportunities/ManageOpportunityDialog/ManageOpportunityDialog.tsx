@@ -15,7 +15,8 @@ import {
   customerAccount,
   setFieldsInAscendingOrder,
   getUniqueCurrencies,
-  formFieldNames
+  formFieldNames,
+  supplierAccount
 } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -36,6 +37,7 @@ import ManageMarketSegmentDialog from '../../MarketSegment/ManageMarketSegmentDi
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import ManageAddressDialog from '../../../components/Address/ManageAddressDialog';
+import { isArray } from 'lodash';
 
 const arr = [...Array(9).keys()];
 export default function ManageOpportunityDialog({
@@ -73,9 +75,11 @@ export default function ManageOpportunityDialog({
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerData, setOwnerData] = useState([]);
   const [collaboratorData, setCollaboratorData] = useState([]);
+  const [supplierData, setSupplierData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
+  const [showAddSupplierAccountDialog, setShowAddSupplierAccountDialog] = useState(false);
   const [accountData, setAccountData] = useState([]);
   const [additionalFieldName, setAdditionalFieldName] = useState('');
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
@@ -90,6 +94,7 @@ export default function ManageOpportunityDialog({
   const [countryBillToMainData, setCountryBillToMainData] = useState([]);
   const [countrySellToMainData, setCountrySellToMainData] = useState([]);
   const [showAddressDialog, setShowAddressDialog] = useState(false);
+
   const [addressType, setAddressType] = useState('');
 
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
@@ -129,9 +134,14 @@ export default function ManageOpportunityDialog({
       setCollaboratorData(ownerCollaboratorOptions[0].option);
     }
 
-    let customerAccountOptions = entityData.fields.find((d) => d.fieldName === 'customerAccountName');
+    let customerAccountOptions = entityData.fields.find((d) => d.fieldName === 'customerAccount');
     if (customerAccountOptions) {
       setAccountData(customerAccountOptions.option);
+    }
+
+    let supplierAccountOptions = entityData.fields.find((d) => d.fieldName === 'supplierAccount');
+    if (supplierAccountOptions) {
+      setSupplierData(supplierAccountOptions.option);
     }
 
     setFormsData(setFieldsInAscendingOrder(entityData.fields));
@@ -141,6 +151,7 @@ export default function ManageOpportunityDialog({
       setOwnerData([]);
       setCollaboratorData([]);
       setAccountData([]);
+      setSupplierData([]);
     };
   }, [entityData.fields]);
 
@@ -200,7 +211,7 @@ export default function ManageOpportunityDialog({
         filterData.map((_f) => {
           //  If this dialog opens from account details screen, make that account preselected
 
-          if (accountId && ['customerAccountName', 'supplierAccountName'].some((d) => d === _f.fieldData.fieldName)) {
+          if (accountId && [customerAccount.accountResource, supplierAccount.accountResource].some((d) => d === _f.fieldData.fieldName)) {
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
           }
 
@@ -351,7 +362,7 @@ export default function ManageOpportunityDialog({
   const onCountrySellToDropDownOpen = (selectedAccount) => {
     let filterAddress = accountData.find((d) => d.optionValue === selectedAccount)?.shippingAddress;
 
-    if (filterAddress) {
+    if (isArray(filterAddress)) {
       setCountrySellToDropDown(countrySellToMainData.filter((d) => filterAddress?.some((u) => u === d.optionValue)));
     } else {
       setCountrySellToDropDown([]);
@@ -360,7 +371,7 @@ export default function ManageOpportunityDialog({
   const onCountryBillToDropDownOpen = (selectedAccount) => {
     let filterAddress = accountData.find((d) => d.optionValue === selectedAccount)?.billingAddress;
 
-    if (filterAddress) {
+    if (isArray(filterAddress)) {
       setCountryBillToDropDown(countryBillToMainData.filter((d) => filterAddress?.some((u) => u === d.optionValue)));
     } else {
       setCountryBillToDropDown([]);
@@ -450,7 +461,7 @@ export default function ManageOpportunityDialog({
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field, index2) => (
                                     <Grid key={index2} item xs={12} sm={6} md={6}>
-                                      {field.fieldName == 'customerAccountName' ? (
+                                      {field.fieldName == 'customerAccount' ? (
                                         <Grid container spacing={1}>
                                           <Grid
                                             item
@@ -484,6 +495,9 @@ export default function ManageOpportunityDialog({
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
                                                 setFieldValue('marketSegment', value?.marketSegment ?? '');
                                                 setFieldValue('subMarketSegment', value?.subMarketSegment ?? '');
+                                                setFieldValue('countryBillTo', value?.billingAddress ?? '');
+                                                setFieldValue('countrySellTo', value?.shippingAddress ?? '');
+                                               
                                                 marketSegmentChange(value?.marketSegment ?? '');
                                                 onCountryBillToDropDownOpen(value && value.optionValue ? value.optionValue : '');
                                                 onCountrySellToDropDownOpen(value && value.optionValue ? value.optionValue : '');
@@ -521,6 +535,64 @@ export default function ManageOpportunityDialog({
                                             </Grid>
                                           ) : null}
                                         </Grid>
+                                      ) : field.fieldName === 'supplierAccount' ? (
+                                        <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                          <Grid container spacing={1}>
+                                            <Grid
+                                              item
+                                              xs={permissions.supplierAccount?.isCreate ? 11 : 11}
+                                              sm={permissions.supplierAccount?.isCreate ? 11 : 11}
+                                              md={permissions.supplierAccount?.isCreate ? 11 : 11}
+                                            >
+                                              <FormTypes
+                                                isNew={isNew}
+                                                {...field}
+                                                disabled={!isNew && field.disableOnEdit}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={supplierData}
+                                                setFieldValue={(name, value) => {
+                                                  handleValuesChange(name, value);
+                                                  setFieldValue(name, value);
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                                // onOpen={() => {
+                                                //   onCollabOwnerMultiselectOpen(values['owner']);
+                                                // }}
+                                              />
+                                            </Grid>
+                                            {permissions.supplierAccount?.isCreate && (
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip title="Add Supplier Account" className="mt-1">
+                                                  <IconButton
+                                                    onClick={() => {
+                                                      setShowAddSupplierAccountDialog(true);
+                                                    }}
+                                                    disabled={!isNew && field.disableOnEdit}
+                                                    size="small"
+                                                  >
+                                                    <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
+                                                  </IconButton>
+                                                </Tooltip>
+                                              </Grid>
+                                            )}
+                                            {field?.tooltipMessage ? (
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip title={field?.tooltipMessage ?? ''}>
+                                                  <InfoIcon color="disabled" />
+                                                </Tooltip>
+                                              </Grid>
+                                            ) : null}
+                                          </Grid>
+                                        </Grid>
                                       ) : field.fieldName === 'countryBillTo' ? (
                                         <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                           <Grid container spacing={1}>
@@ -553,24 +625,22 @@ export default function ManageOpportunityDialog({
                                                 onOpen={() => onCountryBillToDropDownOpen(values.customerAccountName)}
                                               />
                                             </Grid>
-                                            {
-                                              permissions.address?.isCreate && (
-                                                <Grid item xs={1} sm={1} md={1}>
-                                                  <Tooltip title="Add Country Bill to Address" className="mt-1">
-                                                    <IconButton
-                                                      onClick={() => {
-                                                        setShowAddressDialog(true);
-                                                        setAddressType('countryBillTo');
-                                                      }}
-                                                      disabled={!isNew && field.disableOnEdit}
-                                                      size="small"
-                                                    >
-                                                      <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                    </IconButton>
-                                                  </Tooltip>
-                                                </Grid>
-                                              )
-                                            }
+                                            {permissions.address?.isCreate && (
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip title="Add Country Bill to Address" className="mt-1">
+                                                  <IconButton
+                                                    onClick={() => {
+                                                      setShowAddressDialog(true);
+                                                      setAddressType('countryBillTo');
+                                                    }}
+                                                    disabled={!isNew && field.disableOnEdit}
+                                                    size="small"
+                                                  >
+                                                    <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
+                                                  </IconButton>
+                                                </Tooltip>
+                                              </Grid>
+                                            )}
                                             {field?.tooltipMessage ? (
                                               <Grid item xs={1} sm={1} md={1}>
                                                 <Tooltip title={field?.tooltipMessage ?? ''}>
@@ -612,25 +682,22 @@ export default function ManageOpportunityDialog({
                                                 onOpen={() => onCountrySellToDropDownOpen(values.customerAccountName)}
                                               />
                                             </Grid>
-                                            {
-                                              permissions.marketSegment?.isCreate && (
-                                                <Grid item xs={1} sm={1} md={1}>
-                                                  <Tooltip title="Add Country Sell to Address" className="mt-1">
-                                                    <IconButton
-                                                      onClick={() => {
-                                                        setShowAddressDialog(true);
-                                                        setAddressType('countrySellTo');
-
-                                                      }}
-                                                      disabled={!isNew && field.disableOnEdit}
-                                                      size="small"
-                                                    >
-                                                      <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                    </IconButton>
-                                                  </Tooltip>
-                                                </Grid>
-                                              )
-                                            }
+                                            {permissions.marketSegment?.isCreate && (
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip title="Add Country Sell to Address" className="mt-1">
+                                                  <IconButton
+                                                    onClick={() => {
+                                                      setShowAddressDialog(true);
+                                                      setAddressType('countrySellTo');
+                                                    }}
+                                                    disabled={!isNew && field.disableOnEdit}
+                                                    size="small"
+                                                  >
+                                                    <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
+                                                  </IconButton>
+                                                </Tooltip>
+                                              </Grid>
+                                            )}
                                             {field?.tooltipMessage ? (
                                               <Grid item xs={1} sm={1} md={1}>
                                                 <Tooltip title={field?.tooltipMessage ?? ''}>
@@ -982,8 +1049,8 @@ export default function ManageOpportunityDialog({
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                                  setUploadingImageOrFileProgress(completePercentage);
+                                                }
                                               : null
                                           }
                                         />
@@ -1022,8 +1089,7 @@ export default function ManageOpportunityDialog({
                           );
                         })}
                   </Form>
-                  {
-                    showAddressDialog &&
+                  {showAddressDialog && (
                     <ManageAddressDialog
                       onClose={() => {
                         setShowAddressDialog(false);
@@ -1032,34 +1098,68 @@ export default function ManageOpportunityDialog({
                         if (obj) {
                           setShowAddressDialog(false);
                           if (obj?.isAlreadyExist === true) {
-                            let tempAddress = addressType === 'countryBillTo' ? countrySellToDropDown.find(d => d?.optionLabel === obj?.fullAddress) : countrySellToDropDown.find(d => d?.optionLabel === obj?.fullAddress)
+                            let tempAddress =
+                              addressType === 'countryBillTo'
+                                ? countrySellToDropDown.find((d) => d?.optionLabel === obj?.fullAddress)
+                                : countrySellToDropDown.find((d) => d?.optionLabel === obj?.fullAddress);
                             setFieldValue(addressType, [...values[`${addressType}`], tempAddress?.optionValue]);
-                            
-                          }
-                          else {
-                           addressType === 'countryBillTo' ?  setCountryBillToDropDown((prevState) => [...prevState,
-                            {
-                              default: false,
-                              optionLabel: obj?.fullAddress,
-                              optionValue: obj._id,
-                              order: countryBillToDropDown.length + 1,
-                            }])
-                            :
-                            setCountrySellToDropDown((prevState) => [...prevState,
-                              {
-                                default: false,
-                                optionLabel: obj?.fullAddress,
-                                optionValue: obj._id,
-                                order: countrySellToDropDown.length + 1,
-                              }]) ;
+                          } else {
+                            addressType === 'countryBillTo'
+                              ? setCountryBillToDropDown((prevState) => [
+                                  ...prevState,
+                                  {
+                                    default: false,
+                                    optionLabel: obj?.fullAddress,
+                                    optionValue: obj._id,
+                                    order: countryBillToDropDown.length + 1
+                                  }
+                                ])
+                              : setCountrySellToDropDown((prevState) => [
+                                  ...prevState,
+                                  {
+                                    default: false,
+                                    optionLabel: obj?.fullAddress,
+                                    optionValue: obj._id,
+                                    order: countrySellToDropDown.length + 1
+                                  }
+                                ]);
                             setFieldValue(addressType, [...values[`${addressType}`], obj._id]);
-                           
                           }
                         }
-                      }
-                      }
+                      }}
                     />
-                  }
+                  )}
+
+                  {showAddSupplierAccountDialog && (
+                    <ManageAccountDialog
+                      open={showAddSupplierAccountDialog}
+                      onClose={() => {
+                        setShowAddSupplierAccountDialog(false);
+                      }}
+                      id={null}
+                      accountResource='supplierAccount'
+                      accountApi='supplier-account'
+                      isGetAccountData={true}
+                      onGetAddedAccount={({ data }) => {
+                        setSupplierData((prevState)=>{
+                          return [
+                            ...prevState,
+                            {
+                              optionValue: data._id,
+                                optionLabel: data.accountName,
+                                order: supplierData.length,
+                                default: false
+                            }
+                          ]
+                        });
+
+                    
+                        setFieldValue('supplierAccount', [...values['supplierAccount'], data._id]);
+                        handleValuesChange('supplierAccount', data._id);
+                      }}
+                      isRedirectToDetailPage={false}
+                    />
+                  )}
 
                   {showAddCustomerAccountDialog && (
                     <ManageAccountDialog
@@ -1072,10 +1172,24 @@ export default function ManageOpportunityDialog({
                       accountApi={customerAccount.accountApi}
                       isGetAccountData={true}
                       onGetAddedAccount={({ data }) => {
-                        updateAccountDropdown(data);
-
-                        setFieldValue('customerAccountName', data._id);
-                        handleValuesChange('customerAccountName', data._id);
+                        
+                        setAccountData((prevState)=>{
+                          return [
+                            ...prevState,
+                            {
+                              optionValue: data._id,
+                                optionLabel: data.accountName,
+                                order: accountData.length,
+                                default: false
+                            }
+                          ]
+                        });
+                        setFieldValue('customerAccount', data._id);
+                        handleValuesChange('customerAccount', data._id);
+                        setFieldValue('marketSegment', data?.marketSegment ?? '');
+                        setFieldValue('subMarketSegment', data?.subMarketSegment ?? '');
+                        setFieldValue('countryBillTo', data?.billingAddress ?? '');
+                        setFieldValue('countrySellTo', data?.shippingAddress ?? '');
                       }}
                       isRedirectToDetailPage={false}
                     />
@@ -1223,7 +1337,6 @@ export default function ManageOpportunityDialog({
           }}
         />
       )}
-
     </>
   );
 }

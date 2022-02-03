@@ -24,7 +24,6 @@ export const rentalJobOfflineUpdate = async (ids) => {
         return true
     }
     catch (e) {
-        console.log(e)
     }
 };
 
@@ -45,7 +44,6 @@ export const getRentalDeliveryTicket = async (id) => {
         return result
     }
     catch (e) {
-        console.log(e)
     }
 };
 
@@ -61,7 +59,6 @@ export const updateRentalAssetStatus = async (id, status, asset) => {
         return true;
     }
     catch (e) {
-        console.log(e)
         return false;
     }
 }

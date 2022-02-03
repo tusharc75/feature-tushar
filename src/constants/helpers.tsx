@@ -174,7 +174,7 @@ export const sidebarResource = {
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
   address: 'Address',
-  subleasing: 'Subleasing'
+  sublease: 'Sublease'
 };
 
 export const resourceNames = {
@@ -231,7 +231,7 @@ export const resourceNames = {
   projectSales: 'Project Sales',
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
-  subleasing: 'Subleasing'
+  sublease: 'Sublease'
 
 };
 
@@ -294,7 +294,7 @@ export const RESOURCE_LABEL = {
   purchaseOrder: 'Purchase Orders',
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
-  subleasing: 'Subleasing',
+  sublease: 'Sublease',
 };
 
 export const CHILD_RESOURCE = {
@@ -486,11 +486,11 @@ export const purchaseOrder = {
   resource: 'purchaseOrder'
 };
 
-export const subleasing = {
-  api: '/subleasing',
-  route: '/subleasing',
-  permission: 'subleasing',
-  resource: 'subleasing'
+export const sublease = {
+  api: '/sublease',
+  route: '/sublease',
+  permission: 'sublease',
+  resource: 'sublease'
 };
 
 export const transferAsset = {
@@ -529,10 +529,16 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       value = key?.type === "multiSelect" ? [selectedEntity] : selectedEntity
     }
     if (key.type === 'dropDown') {
-      const option = key.option?.find((data: any) => data.default === true);
+      let option = key.option?.find((data: any) => data.default === true);
+      if (!option && key.required && key.option?.length === 1) {
+        option = key.option[0];
+      }
       obj[key.fieldName] = value ? value : option ? option.optionValue : '';
     } else if (key.type === 'multiSelect') {
-      const defaultOptions = key.option?.filter((item: any) => item.default === true);
+      let defaultOptions = key.option?.filter((item: any) => item.default === true);
+      if (defaultOptions?.length === 0 && key.required && key.option?.length === 1) {
+        defaultOptions = key.option;
+      }
       const options = defaultOptions?.map((data: any) => data.optionValue);
       obj[key.fieldName] = value ? value : options;
     } else if (key.type === 'freeStyleMultiSelect') {
@@ -1080,9 +1086,9 @@ export function b64toBlob(dataURI) {
   var byteString = atob(dataURI.split(',')[1]);
   var ab = new ArrayBuffer(byteString.length);
   var ia = new Uint8Array(ab);
-  
+
   for (var i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
+    ia[i] = byteString.charCodeAt(i);
   }
   return new Blob([ab], { type: 'image/jpeg' });
 }
@@ -1112,7 +1118,7 @@ export const determineLightOrDark = (color: any) => {
     b = color & 255;
   }
 
-  // HSP (Highly Sensitive Poo) equation from http://alienryderflex.com/hsp.html
+  // HSP (Highly Sensitive Poo) equation
   hsp = Math.sqrt(
     0.299 * (r * r) +
     0.587 * (g * g) +
@@ -1378,7 +1384,7 @@ export const prepareDataForGrid = (data, user = {}) => {
           restProperties[`${key}Id`] = first["optionValue"];
           restProperties[`rest${key}`] = rest
         }
-        else if (typeof data[key][0] !== "object" && key != "unit") {
+        else if (typeof data[key][0] !== "object") {
           restProperties[key] = data[key].join(" , ")
         }
         else {
@@ -1511,12 +1517,13 @@ export const DELIVERY_TICKET_STATUS = {
 
 export const RENTAL_STATUS = {
   new: 'New',
+  canceled: 'Canceled',
   inProgress: 'In-Progress',
   jobPartiallyStarted: 'Job Partially Started',
   jobStarted: 'Job Started',
   jobPartiallyEnded: 'Job Partially Ended',
   jobEnded: 'Job Ended',
-  readyToInvoice: 'Ready To Invoice',
+  readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
   closed: 'Closed',
 };
@@ -1530,6 +1537,7 @@ export const DELIVERY_TICKET_TYPE = {
   loading: 'Loading',
   receiving: 'Receiving',
   return: 'Return',
+  delivery: 'Delivery',
 };
 
 export const DELIVERY_TICKET_REFRENCE_TYPE = {
@@ -1537,6 +1545,13 @@ export const DELIVERY_TICKET_REFRENCE_TYPE = {
   transferAsset: 'Transfer Asset',
   repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
+  sublease: 'Sublease',
+};
+
+export const DELIVERY_FROM_TO_TYPE = {
+  plant: 'Plant',
+  customer: 'Customer',
+  supplier: 'Supplier',
 };
 
 export const asyncForEach = async (
@@ -1562,7 +1577,15 @@ export const resourceOptions = [
 ];
 
 
-export const REPORT_LIST = [sidebarResource.rentalManagement, sidebarResource.productInventory]
+export const REPORT_LIST = [
+  { title: sidebarResource.rentalManagement, key: "rentalManagement" },
+  { title: sidebarResource.salesOrder, key: "salesOrder" },
+  { title: sidebarResource.productInventory, key: "productInventory" },
+  { title: sidebarResource.lead, key: "lead" },
+  { title: sidebarResource.opportunity, key: "opportunity" },
+  { title: sidebarResource.quoteBuilder, key: "quoteBuilder" },
+  { title: sidebarResource.projectSales, key: "projectSales" }
+]
 
 
 export const getApi = (resource: string) => {

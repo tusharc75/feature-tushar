@@ -2,6 +2,94 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.53.0](https://github.com/vebholic/oms_frontend/compare/v2.52.1...v2.53.0) (2022-02-03)
+
+
+### Features
+
+* - e-commerce code removed ([4e60417](https://github.com/vebholic/oms_frontend/commit/4e60417ab638f1ff23e44961093e13e87c132b55))
+* **feat/avi:** feat/avi ([6db0ad5](https://github.com/vebholic/oms_frontend/commit/6db0ad5a2202449593677273a3ca876677733da1))
+
+
+### Bug Fixes
+
+* bug fix ([cee9f28](https://github.com/vebholic/oms_frontend/commit/cee9f28e5f9e2139efae9ad021873d11f076423e))
+* bug fix ([498c7d9](https://github.com/vebholic/oms_frontend/commit/498c7d9c46df0b78325d1c3a7c6fe62f73b3c157))
+* bug fix ([02b7b6e](https://github.com/vebholic/oms_frontend/commit/02b7b6e40239761e2ac3194b533576118c1c3392))
+* **bug/avi:** bug/avi ([e6d1543](https://github.com/vebholic/oms_frontend/commit/e6d1543cea990c3b30570bdf2a7f06a8ad7c0e7c))
+
+### [2.52.1](https://github.com/vebholic/oms_frontend/compare/v2.52.0...v2.52.1) (2022-02-02)
+
+
+### Bug Fixes
+
+* bug fix ([24645aa](https://github.com/vebholic/oms_frontend/commit/24645aa00d66e1f9d746514fd03c87eaa3fc3eb7))
+* bug fix ([512691c](https://github.com/vebholic/oms_frontend/commit/512691cad0bd1e2c20fb5e60e4eb8f969172c53a))
+* bug fix ([18b190f](https://github.com/vebholic/oms_frontend/commit/18b190f96416d2cc128c6a77750700aed9a343a4))
+
+## [2.52.0](https://github.com/vebholic/oms_frontend/compare/v2.51.0...v2.52.0) (2022-02-01)
+
+
+### Features
+
+* bug ([4e614da](https://github.com/vebholic/oms_frontend/commit/4e614daf06c7bf8be66b58940c4076effc579b10))
+
+
+### Bug Fixes
+
+* bug fix ([fb8dbb2](https://github.com/vebholic/oms_frontend/commit/fb8dbb2f41931b9fafde90dad9e64cf825455dfd))
+* bug fix ([47670c8](https://github.com/vebholic/oms_frontend/commit/47670c884cef34886014faaaa0f78c4427a4427e))
+* dashboard bugs and view columns excel quote fix ([91eedb8](https://github.com/vebholic/oms_frontend/commit/91eedb8515c37fb73d9a472c7867bd406afd5777))
+* **DashBoard:** currency symbol added ([34d50ba](https://github.com/vebholic/oms_frontend/commit/34d50baee5a48750dfb4e29f4d2f318e55133620))
+* rental changes ([abe382a](https://github.com/vebholic/oms_frontend/commit/abe382af87f4b3b497496da5401035eac7012dcc))
+
+## [2.51.0](https://github.com/vebholic/oms_frontend/compare/v2.50.1...v2.51.0) (2022-01-31)
+
+
+### Features
+
+* **report:** changes for more resource ([5690dcf](https://github.com/vebholic/oms_frontend/commit/5690dcf5d1997eff00d1f61fba77c9f604373c20))
+
+### [2.50.1](https://github.com/vebholic/oms_frontend/compare/v2.50.0...v2.50.1) (2022-01-30)
+
+## [2.50.0](https://github.com/vebholic/oms_frontend/compare/v2.49.0...v2.50.0) (2022-01-29)
+
+
+### Features
+
+* - Product Type Dropdown Added ([3804d94](https://github.com/vebholic/oms_frontend/commit/3804d9489d7e595ea74021af4f9cb1e0aeaf6359))
+* **feat/avisekh:** feat/avisekh ([1784db7](https://github.com/vebholic/oms_frontend/commit/1784db7660d90191d543fb638a9efc7b98edd6eb))
+
+
+### Bug Fixes
+
+* 27 jan bug ([0b45f04](https://github.com/vebholic/oms_frontend/commit/0b45f04ee5f1ea387030979545c6268b6bde089a))
+* oat-492 and 564 ([1c16d1d](https://github.com/vebholic/oms_frontend/commit/1c16d1d0ba99461b480be07c24a511ee9f7c5659))
+* **productbom:** bom changes ([e8a5bea](https://github.com/vebholic/oms_frontend/commit/e8a5beaaf93473d045885d64f1def877f7451d39))
+* **topdashboard table data issue:** data ([eb5e9f5](https://github.com/vebholic/oms_frontend/commit/eb5e9f51118369e99e8bec986693cea2f3c37186))
+
+## [2.49.0](https://github.com/vebholic/oms_frontend/compare/v2.48.1...v2.49.0) (2022-01-28)
+
+
+### Features
+
+* **feat_avisekh:** feat_avisekh ([7cf158f](https://github.com/vebholic/oms_frontend/commit/7cf158f197edb9f4779bd70c41ebe0a0a20b818b))
+* **Product:** Inventory count, plants removed ([b8dc2d8](https://github.com/vebholic/oms_frontend/commit/b8dc2d86ca50ad2d7edda80a4fa0c6583773f73f))
+
+
+### Bug Fixes
+
+* assign entity dialog changes ([4c6fe46](https://github.com/vebholic/oms_frontend/commit/4c6fe46257c0f551a99c6082feef53486b49de57))
+* **bom:** name changes and style fix ([aa1ef5a](https://github.com/vebholic/oms_frontend/commit/aa1ef5a0ab60adbc7fad2c60e74b72ee6d638f23))
+* bug fix ([22c8a0b](https://github.com/vebholic/oms_frontend/commit/22c8a0bebf9657b2c9be0c33fb27cb5cdb2d4984))
+* bug fix ([97f0929](https://github.com/vebholic/oms_frontend/commit/97f0929071cceeef53fa3af6850d795fd3ca4d72))
+* bug fix ([c03143c](https://github.com/vebholic/oms_frontend/commit/c03143c8cc624d37e340028802bfdbc3b69120e8))
+* dashboard fixes ([5d93e07](https://github.com/vebholic/oms_frontend/commit/5d93e07ac644e4f13d5d4e8a350f57e17ed50b59))
+* **DOA:** deleted user not to be shown ([794d755](https://github.com/vebholic/oms_frontend/commit/794d75508afe1c5957e545d279c4987e02d43cac))
+* **feature/avisekh:** feature/avisekh ([cb1b487](https://github.com/vebholic/oms_frontend/commit/cb1b487847e85a4b758846792b4c76c541f83266))
+* fix ([99d5a62](https://github.com/vebholic/oms_frontend/commit/99d5a6250e480d94c9d048d77cd905414140204a))
+* rental fix ([cb24d72](https://github.com/vebholic/oms_frontend/commit/cb24d7221b6b4d54cf92211950785b6bb7c2f377))
+
 ### [2.48.1](https://github.com/vebholic/oms_frontend/compare/v2.48.0...v2.48.1) (2022-01-27)
 
 ## [2.48.0](https://github.com/vebholic/oms_frontend/compare/v2.47.0...v2.48.0) (2022-01-26)

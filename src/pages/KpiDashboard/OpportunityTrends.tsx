@@ -278,7 +278,7 @@ const OpportunityTrends = (props) => {
             <Autocomplete
               size="small"
               fullWidth
-              options={marketSegments}
+              options={marketSegments.filter(d => !d.parentSegment)}
               autoHighlight
               value={currentFilter === "lead" ? leadFilter.marketSegment : oppurtunityFilter.marketSegment}
               getOptionLabel={(option: any) => option.name || ''}

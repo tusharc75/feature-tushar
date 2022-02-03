@@ -147,10 +147,6 @@ function Dashboard() {
   }, [user, selectedEntity]);
 
   const handleRoutes = (item) => {
-    if (item.name === 'Product List') {
-      return routes.eCommerce.path;
-    }
-
     return `/${kebabCase(item.name)}`;
 
     //  Use below code to handle special route cases

@@ -20,7 +20,8 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   DELIVERY_TICKET_REFRENCE_TYPE,
-  productInventory
+  productInventory,
+  DELIVERY_FROM_TO_TYPE
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { useHistory } from 'react-router-dom';
@@ -55,6 +56,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const classes = useStyles();
@@ -63,16 +65,15 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [downlodingFile, setDownlodingFile] = useState(false);
-  const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
 
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
-
-  const [productInventoryForTicket, setProductInventoryForTicket] = useState<any[]>([]);
-  const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
   const { isOffline } = useContext(CustomOfflineContext);
 
+
+  const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
+  const [showRemoveTicketDialog, setShowRemoveTicketDialog] = useState(false);
 
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
@@ -108,7 +109,9 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           ...u,
           productName: u?.product?.optionLabel,
           warehouse: u?.warehouse?.optionLabel,
-          warehouseId: u?.warehouse?.optionValue
+          warehouseId: u?.warehouse?.optionValue,
+          currentOwner: u?.currentOwner,
+          currentLocation: u?.currentLocation?.optionValue,
         }))
         const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
         deliveryTicketList = result?.data?.data
@@ -132,7 +135,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           });
         }
       });
-      console.log(productAssets)
       productAssets.forEach((d) => {
         d['isChecked'] = false;
         d['hideSelection'] =
@@ -213,9 +215,31 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     });
   }
 
-  const handleDeliveryTicketDialog = (selectedProductInventory) => {
-    setProductInventoryForTicket(selectedProductInventory);
-    setShowDeliveryTicketDialog(true);
+  const handleDeliveryTicketDialog = () => {
+    if (selectedRecords.length) {
+      const data = {}
+      data["ticketName"] = rentalManagementData.rentalJobName;
+      data["refrenceId"] = rentalManagementData._id;
+
+      if (selectedRecords[0].warehouse) {
+        data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
+        data["pickupFrom"] = selectedRecords[0].warehouseId;
+        data["pickupFromAddress"] = selectedRecords[0].currentLocation;
+      }
+      else {
+        data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
+        data["pickupFrom"] = selectedRecords[0].currentOwner;
+        data["pickupFromAddress"] = selectedRecords[0].currentLocation;
+      }
+      data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.customer;
+      data["deliveryTo"] = rentalManagementData?.customerAccount?.optionValue;
+      data["deliveryToAddress"] = rentalManagementData.shippingAddress?.optionValue;
+
+      data["startDate"] = rentalManagementData?.estimateStartDate;
+      data["endDate"] = rentalManagementData?.estimateStartDate;
+
+      setShowTicketDialog({ open: true, data: data });
+    }
   };
 
   const handleClick = (event) => {
@@ -315,9 +339,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         <Tooltip
           title="Create Loading Ticket">
           <Button
-            onClick={() => {
-              handleDeliveryTicketDialog(selectedRecords)
-            }}
+            onClick={() => { handleDeliveryTicketDialog() }}
             variant={isMobile && !isTablet ? "text" : "outlined"}
             color="primary"
             size="small"
@@ -336,7 +358,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
               title="Remove Assets From Loading Ticket(s)">
               <Button
                 onClick={() => {
-                  setShowRemoveAssetFromLoadingTicketDialog(true)
+                  setShowRemoveTicketDialog(true)
                 }}
                 variant={isMobile && !isTablet ? "text" : "outlined"}
                 color="primary"
@@ -434,27 +456,26 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
       }
     </Grid>
-    {showDeliveryTicketDialog && (
+    {showTicketDialog.open && (
       <ManageDeliveryTicket
         ticketType={DELIVERY_TICKET_TYPE.loading}
         refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
-        refrenceData={rentalManagementData}
-        onClose={() => setShowDeliveryTicketDialog(false)}
-        productInventory={productInventoryForTicket}
-        warehouseId={productInventoryForTicket.length ? productInventoryForTicket[0].warehouseId : rentalManagementData?.warehouse}
+        refrenceData={showTicketDialog.data}
+        onClose={() => setShowTicketDialog({ open: false, data: {} })}
+        productInventory={selectedRecords}
         onSuccess={() => {
-          setShowDeliveryTicketDialog(false);
+          setShowTicketDialog({ open: false, data: {} });
           fetchRecords();
         }}
       />
     )}
     {
-      showRemoveAssetFromLoadingTicketDialog && (
+      showRemoveTicketDialog && (
         <ConfirmationDialog
-          open={showRemoveAssetFromLoadingTicketDialog}
+          open={showRemoveTicketDialog}
           message={`Are you sure you want to remove selected records from Loading Ticket?`}
           onClose={() => {
-            setShowRemoveAssetFromLoadingTicketDialog(false);
+            setShowRemoveTicketDialog(false);
           }}
           onOk={() => {
             setOkBtnLoading(true);
@@ -482,7 +503,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
               })
               .finally(() => {
                 setOkBtnLoading(false);
-                setShowRemoveAssetFromLoadingTicketDialog(false);
+                setShowRemoveTicketDialog(false);
               });
           }}
           okBtnLoading={okBtnLoading}

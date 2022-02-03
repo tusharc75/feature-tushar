@@ -156,7 +156,7 @@ const GreenSwitch = withStyles({
   track: {}
 })(Switch);
 
-const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, name, handleChange }) => {
+const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, name, handleChange, isMultiple = false }) => {
   //const [values, setValues] = React.useState([]);
   const [inputVal, setInputVal] = React.useState("")
   const [error, setError] = React.useState(null)
@@ -172,7 +172,6 @@ const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, 
 
   const onSave = () => {
     const val = inputVal.trimEnd().toLowerCase()
-
     const foundSame = options.find(o => o.optionLabel.toLowerCase() === val) || null;
     if (foundSame) {
       setError(`"${val}" already exists in the options`)
@@ -182,7 +181,7 @@ const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, 
       const newOption = { order: order, default: false, optionLabel: inputVal, optionValue: inputVal }
       addFieldOption([newOption])
       setOptions([...options, newOption])
-      handleChange(name, inputVal);
+      handleChange(name, isMultiple ? [inputVal] : inputVal);
       setOpen(false)
     }
   }
@@ -1603,7 +1602,7 @@ const FormTypes = (props) => {
             <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
               <AddCircleIcon />
             </IconButton>
-            {optionSaveDialog && <AddOptionDialog handleChange={handleChange} name={name} label={label} addFieldOption={addFieldOption} options={option} setOptions={setOptionsList} setOpen={setOptionSaveDialog} />}
+            {optionSaveDialog && <AddOptionDialog handleChange={handleChange} name={name} label={label} addFieldOption={addFieldOption} options={option} setOptions={setOptionsList} setOpen={setOptionSaveDialog} isMultiple={Boolean(type === 'multiSelect')} />}
           </Grid>
         )}
       </Grid>

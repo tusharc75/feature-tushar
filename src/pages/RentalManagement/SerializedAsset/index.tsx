@@ -17,6 +17,7 @@ import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
 import ManagePurchaseOrder from "../../PurchaseOrder/ManagePurchaseOrder";
+import ManageSublease from "../../Sublease/ManageSublease";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { uniqBy } from 'lodash';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
@@ -28,6 +29,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CgAssign } from "react-icons/cg";
 import { IoCreate } from "react-icons/io5";
 import { MdDeleteSweep } from "react-icons/md";
+import { useData } from "../../../StateProvider/Provider";
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
 
@@ -45,8 +47,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, products: [] });
+  const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], type: "" });
   const [poCount, setPoCount] = useState(0);
+  const { state: { user, permissions, selectedEntity } }: any = useData();
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -343,7 +346,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty !== f.subRows?.length);
     flatArray = uniqBy(flatArray, '_id')
     const products = flatArray.map(m => { return { _id: m.materialId, unit: m.unit, assetsCount: m.qty - (m.subRows?.length ?? 0) } })
-    setShowManagePurchaseOrderDialog(prevState => {
+    setOrderDialog(prevState => {
       return {
         ...prevState,
         products: products
@@ -400,13 +403,31 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           type="button"
           size="small"
           style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-          disabled={showManagePurchaseOrderDialog.products.length === 0}
+          disabled={showOrderDialog.products.length === 0}
           onClick={() => {
-            setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: true }))
+            setOrderDialog(prevState => ({ ...prevState, open: true, type: "purchaseOrder" }))
           }}
         >
           {isMobile && !isTablet ? <IoCreate size={20} /> : `Create ${routes.purchaseOrder.title}`}
         </Button>
+        {permissions?.sublease?.isCreate &&
+          <Fragment>
+            <Box mx={1} />
+            <Button
+              variant={isMobile && !isTablet ? "text" : "contained"}
+              color="primary"
+              type="button"
+              size="small"
+              style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
+              disabled={showOrderDialog.products.length === 0}
+              onClick={() => {
+                setOrderDialog(prevState => ({ ...prevState, open: true, type: "sublease" }))
+              }}
+            >
+              {isMobile && !isTablet ? <IoCreate size={20} /> : `Create ${routes.sublease.title}`}
+            </Button>
+          </Fragment>
+        }
         {poCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
           <IconButton size="small" onClick={() => {
             history.push(routes.purchaseOrder.path, {
@@ -490,13 +511,13 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       />
     )
     }
-    {showManagePurchaseOrderDialog.open &&
+    {(showOrderDialog.open && showOrderDialog.type === "purchaseOrder") &&
       <ManagePurchaseOrder
         isClone={false}
         purchaseOrderId={null}
-        onClose={() => setShowManagePurchaseOrderDialog(prevState => ({ ...prevState, open: false }))}
+        onClose={() => setOrderDialog(prevState => ({ ...prevState, open: false, type: "" }))}
         onSuccess={() => {
-          setShowManagePurchaseOrderDialog(({ open: false, products: [] }))
+          setOrderDialog(({ open: false, products: [], type: "" }))
           setSelectedProducts([])
           fetchProductInventory()
           fetchPurchaseOrder()
@@ -506,12 +527,34 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             message: `${sidebarResource.purchaseOrder} has been created successfully`,
           });
         }}
-        productsToSave={[...showManagePurchaseOrderDialog.products]}
+        productsToSave={[...showOrderDialog.products]}
         isFromSerializedAssetStepFromRental={true}
         currency={rentalManagementData.currency}
         rentalManagementId={rentalManagementData._id}
         warehouseId={rentalManagementData?.warehouse?.optionValue}
         deliveryDateMax={rentalManagementData.estimateStartDate}
+      />
+    }
+    {(showOrderDialog.open && showOrderDialog.type === "sublease") &&
+      <ManageSublease
+        isClone={false}
+        subleasingId={null}
+        onClose={() => setOrderDialog(prevState => ({ ...prevState, open: false, type: "" }))}
+        onSuccess={() => {
+          setOrderDialog(({ open: false, products: [], type: "" }))
+          setSelectedProducts([])
+          fetchProductInventory()
+          fetchPurchaseOrder()
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: `${sidebarResource.sublease} has been created successfully`,
+          });
+        }}
+        currency={rentalManagementData.currency}
+        refrenceType="rentalJob"
+        refrenceId={rentalManagementData._id}
+        refrenceData={{ material: [...showOrderDialog.products] }}
       />
     }
   </Fragment>
