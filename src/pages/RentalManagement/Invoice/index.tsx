@@ -52,7 +52,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
 
   useEffect(() => {
     if (statusOptions.findIndex(d => d.optionLabel === RENTAL_STATUS.readyToInvoice) > statusOptions.findIndex(d => d.optionLabel === rentalManagementData?.status)) {
-      if (!isOffline && rentalManagementData?.status !== RENTAL_STATUS.canceled) {
+      if (!isOffline && rentalManagementData?.status !== RENTAL_STATUS.cancelled) {
         updateJobStatus(RENTAL_STATUS.readyToInvoice)
       }
     }

@@ -1513,12 +1513,12 @@ export const DELIVERY_TICKET_STATUS = {
   new: 'New',
   indTransit: 'In-Transit',
   delivered: 'Delivered',
-  canceled: 'Canceled',
+  cancelled: 'Cancelled',
 };
 
 export const RENTAL_STATUS = {
   new: 'New',
-  canceled: 'Canceled',
+  cancelled: 'Cancelled',
   inProgress: 'In-Progress',
   jobPartiallyStarted: 'Job Partially Started',
   jobStarted: 'Job Started',

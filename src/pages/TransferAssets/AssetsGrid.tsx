@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from '../../components/AgGridComponents/CustomAgGrid';
 import axiosInstance from '../../axios/axiosInstance';
-import { prepareDataForGrid } from "../../constants/helpers"
+import { prepareDataForGrid, deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { FaSuitcase } from "react-icons/fa";
@@ -48,7 +48,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   const history = useHistory();
 
   useEffect(() => {
-    if(currentStep === 0) {
+    if (currentStep === 0) {
       if (transferAssetData) {
         fetchGridColumns()
       }
@@ -101,7 +101,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   );
 
   useEffect(() => {
-    if(currentStep === 0) {
+    if (currentStep === 0) {
 
       if (transferAssetData) {
         fetchAssetsData(true);
@@ -112,8 +112,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
   const fetchLoadingTickets = () =>
     new Promise((resolve, reject) => {
-      axiosInstance()
-        .get(`${routes.transferAsset.path}/${transferAssetData?._id}/loading-ticket?limit=0`)
+      axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${transferAssetData?._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
         .then(({ data: { data } }) => {
           resolve(data);
         })
@@ -193,8 +192,8 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   }
 
   useEffect(() => {
-    if(currentStep === 0) {
-      if (dataRows.length > 0 ) {
+    if (currentStep === 0) {
+      if (dataRows.length > 0) {
         setNextStep(true)
       } else {
         setNextStep(false)
@@ -209,18 +208,18 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           variant={isMobile ? 'text' : 'contained'}
           color="primary"
           size="small"
-          style={isMobile && !isTablet ? {color:"var(--secondary)"} : {}}
+          style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
           onClick={() => {
             setOpenAddNewAssets(true);
           }}
         >
-          {isMobile && !isTablet ? <MdAdd size={22}/> :  `Add ${routes.productInventory.title}`}
+          {isMobile && !isTablet ? <MdAdd size={22} /> : `Add ${routes.productInventory.title}`}
         </Button>}
         {permissions?.transferAsset.isUpdate && <Button
           variant={isMobile ? 'text' : 'contained'}
           size="small"
           color="primary"
-          style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
+          style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
           disabled={selectedRecords.length === 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0}
           onClick={() => {
             setShowConfirmBox(true);
@@ -228,7 +227,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           }}
         >
 
-{isMobile && !isTablet ? <IoRemoveCircleOutline size={22}/> :  "Remove Assets" }
+          {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : "Remove Assets"}
 
         </Button>}
       </Box>

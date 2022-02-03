@@ -629,7 +629,7 @@ const ProductDetailsPage = () => {
                                         className="d-flex align-items-center"
                                         style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
                                       >
-                                        {warehouse.optionLabel} ({count || 0})
+                                        {warehouse?.optionLabel} ({count || 0})
                                       </Typography>
                                       <Box mx={1} />
                                       <HtmlTooltip
