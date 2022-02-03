@@ -18,7 +18,6 @@ import { SiMicrosoftoffice } from 'react-icons/si';
 import { SVG } from '../../assets';
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import { entity, eProduct } from '../../constants/helpers';
-import { WishlistContext } from '../../StateProvider/WishlistContext/WishlistProvider';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -46,7 +45,6 @@ const useStyles = makeStyles(() => ({
 const Login = () => {
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
-  const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
 
   const toastConfig = useContext(CustomToastContext);
   const { dispatch }: any = useData();
@@ -156,12 +154,6 @@ const Login = () => {
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
-
-        axiosInstance().get(`${eProduct.api}/wishlist`).then(({ data: { data } }) => {
-          wishlistDispatch({ type: "INITIALIZE", payload: data });
-        }).catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
 
         axiosInstance()
           .get(`user/meta-grid/${data?.user?._id}`)
