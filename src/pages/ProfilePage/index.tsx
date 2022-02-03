@@ -3,12 +3,13 @@ import { Grid, Paper } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ProfileSidebar from './components/ProfileSidebar'
-import { profileMenuItems } from '../../constants/helpers'
+import { profileMenuItems, quotePdfTemplate } from '../../constants/helpers'
 import ManageProfile from './components/ManageProfile'
 import NotificationPreference from './components/NotificationPreference'
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomContainer from '../../components/CustomContainer';
+import { useData } from '../../StateProvider/Provider';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -36,6 +37,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 export default function ProfilePage(props) {
 
+    const {
+        state: { user, selectedEntity, permissions }
+      }: any = useData();
     const { profileBreadCrumbs } = props
     const [activeItem, setActiveItem] = useState(profileMenuItems.profile)
     const [userData, setUserData] = useState(null)
@@ -56,6 +60,7 @@ export default function ProfilePage(props) {
         if (userFields.length === 0) {
             getUserFields()
             fetchUserData()
+            getLoggedInUserData()
         }
     }, [])
 
@@ -99,6 +104,17 @@ export default function ProfilePage(props) {
                 setLoading(false)
             });
     };
+
+    const getLoggedInUserData = async () => {
+        axiosInstance()
+        .get(`user/${user.user?._id}`)
+        .then(({ data: { data } }) => {
+            if(data?.quotePDFTemplate){
+                setUserData((prevState) => ({...prevState, 'quotePDFTemplate': data?.quotePDFTemplate }))
+
+            }
+        })
+    }
 
     return <Fragment>
         <Grid container className="headerbox">
