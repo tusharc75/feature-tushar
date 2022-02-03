@@ -40,7 +40,7 @@ const Tickets = ({ subleaseData }) => {
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
+                    let currentColumn = getColumnData(routes.deliveryTicket.title, o?.fieldData, routes.deliveryTicketDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

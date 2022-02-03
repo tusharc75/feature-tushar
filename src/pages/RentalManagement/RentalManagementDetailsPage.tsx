@@ -169,7 +169,7 @@ const RentalManagementDetailsPage = () => {
         const response: any = await axiosInstance().get('/field?resource=Rental Management');
         response?.data?.data.some(o => {
           if (o?.fieldData?.fieldName === "status") {
-            setStatusOptions([...o.fieldData.option?.filter(e => ![RENTAL_STATUS.canceled].includes(e.optionLabel))])
+            setStatusOptions([...o.fieldData.option?.filter(e => ![RENTAL_STATUS.cancelled].includes(e.optionLabel))])
             return true
           }
         })
@@ -194,7 +194,7 @@ const RentalManagementDetailsPage = () => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `${routes.rentalManagement.title} canceled successfully`
+          message: `${routes.rentalManagement.title} cancelled successfully`
         });
         fetchRentalManagementData();
         setShowCancelConfirmBox(false)
@@ -276,7 +276,7 @@ const RentalManagementDetailsPage = () => {
               ) : (
                 <DetailsPageHeader heading={rentalManagementData?.rentalJobName} mainPoints={mainPoints} showHeading={true}>
                   {(permissions?.rentalManagement?.isUpdate && allowedToEdit && !isOffline
-                    && ![RENTAL_STATUS.canceled, RENTAL_STATUS.closed].includes(rentalManagementData?.status)) && (
+                    && ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status)) && (
                       <Fragment>
                         <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                           Edit
@@ -286,7 +286,7 @@ const RentalManagementDetailsPage = () => {
                         </Button>
                       </Fragment>
                     )}
-                  {(permissions?.rentalManagement?.isUpdate && ![RENTAL_STATUS.canceled, RENTAL_STATUS.invoiced, RENTAL_STATUS.closed].includes(rentalManagementData?.status)) && (
+                  {(permissions?.rentalManagement?.isUpdate && ![RENTAL_STATUS.cancelled, RENTAL_STATUS.invoiced, RENTAL_STATUS.closed].includes(rentalManagementData?.status)) && (
                     <Button
                       variant="outlined"
                       color="primary"
@@ -391,7 +391,7 @@ const RentalManagementDetailsPage = () => {
                     steps={rentalProcessSteps}
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
-                    isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.canceled].includes(rentalManagementData?.status)}
+                    isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
                   />
                   {currentStep === 0 && rentalManagementData && (
                     <Productpackage

@@ -511,7 +511,7 @@ export default function DeliveryTicketDetail(props) {
                   mainPoints={deliveryTicketData ? getMainPoints : ""}
                   showHeading={true}
                 >
-                  {permissions?.deliveryTicket?.isUpdate && canEdit && ![DELIVERY_TICKET_STATUS.delivered, DELIVERY_TICKET_STATUS.canceled].includes(deliveryTicketData?.status) && (
+                  {permissions?.deliveryTicket?.isUpdate && canEdit && ![DELIVERY_TICKET_STATUS.delivered, DELIVERY_TICKET_STATUS.cancelled].includes(deliveryTicketData?.status) && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
