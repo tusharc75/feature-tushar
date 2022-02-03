@@ -38,11 +38,7 @@ import { displayCardDate } from '../../constants/helpers';
 import ChatIcon from '@material-ui/icons/Chat';
 import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { backendApi } from '../../config';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import { SET_CART } from '../../StateProvider/actionTypes';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import FavoriteIcon from '@material-ui/icons/Favorite';
-import { WishlistContext } from '../../StateProvider/WishlistContext/WishlistProvider';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -203,7 +199,6 @@ const Header = ({ toggleDrawer }) => {
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [notificationList, setNotificationList] = useState([]);
 
-  const { wishlistState, wishlistDispatch } = useContext(WishlistContext);
 
   // For FullScreen Notification - Start
   const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
@@ -461,12 +456,8 @@ const Header = ({ toggleDrawer }) => {
           history.push('/');
           dispatch({ type: SET_USER, payload: null });
           dispatch({ type: SET_SELECTED_ENTITY, payload: null });
-
           // localStorage.removeItem("token");
           localStorage.clear();
-
-          wishlistDispatch({ type: "INITIALIZE", payload: [] });
-
           history.push('/login');
         })
         .catch((error) => {

@@ -25,7 +25,6 @@ import { GlobalChatProvider } from './StateProvider/GlobalChatContext';
 import { CustomOfflineProvider } from './StateProvider/OfflineContext/OfflineContext';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import { version } from '../package.json';
-import { WishlistProvider } from './StateProvider/WishlistContext/WishlistProvider';
 
 // @ts-ignore
 if (process.env.REACT_APP_ENV !== 'local') {
@@ -52,9 +51,7 @@ ReactDOM.render(
               <MsalProvider instance={AzureInstance}>
                 <GlobalChatProvider>
                   <CustomOfflineProvider>
-                    <WishlistProvider>
                       <App />
-                    </WishlistProvider>
                   </CustomOfflineProvider>
                 </GlobalChatProvider>
               </MsalProvider>
