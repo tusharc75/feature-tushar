@@ -574,7 +574,7 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
               {showCloseConfirmBox && (
                 <ConfirmationDialog
                   open={showCloseConfirmBox}
-                  message={`Are you sure you want to leave this dialouge?`}
+                  message={`Are you sure you want to leave?`}
                   onClose={() => {
                     setShowCloseConfirmBox(false);
                   }}
