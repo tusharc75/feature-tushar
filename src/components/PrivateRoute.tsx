@@ -4,9 +4,8 @@ import { Redirect, Route, useLocation } from 'react-router-dom';
 import { useData } from '../StateProvider/Provider';
 import Unauthorized from '../pages/Unauthorized';
 import Layout from './Layout';
-import ECommerceLayout from './ECommerce/Layout/ECommerceLayout';
 
-const ProtectedRoute = ({ children, isEcommerceRoute = false, ...rest }) => {
+const ProtectedRoute = ({ children, ...rest }) => {
   const {
     state: { user, permissions, userLoading }
   }: any = useData();
@@ -55,8 +54,6 @@ const ProtectedRoute = ({ children, isEcommerceRoute = false, ...rest }) => {
         'brand-configuration',
         'project-sales',
         'doa-request',
-        'e-commerce',
-        'e-commerce/details',
         'quote-pdf-template',
         'product-inventory',
         'equiptment-rental-master',
@@ -91,14 +88,9 @@ const ProtectedRoute = ({ children, isEcommerceRoute = false, ...rest }) => {
               <p>Checking Credentials...</p>
             </div>
           ) : access ? (
-
-            isEcommerceRoute
-              ? <ECommerceLayout>
-                {children}
-              </ECommerceLayout>
-              : <Layout>
-                {children}
-              </Layout>
+            <Layout>
+              {children}
+            </Layout>
           ) : (
             <Unauthorized />
           )

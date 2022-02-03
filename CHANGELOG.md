@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.53.0](https://github.com/vebholic/oms_frontend/compare/v2.52.1...v2.53.0) (2022-02-03)
+
+
+### Features
+
+* - e-commerce code removed ([4e60417](https://github.com/vebholic/oms_frontend/commit/4e60417ab638f1ff23e44961093e13e87c132b55))
+* **feat/avi:** feat/avi ([6db0ad5](https://github.com/vebholic/oms_frontend/commit/6db0ad5a2202449593677273a3ca876677733da1))
+
+
+### Bug Fixes
+
+* bug fix ([cee9f28](https://github.com/vebholic/oms_frontend/commit/cee9f28e5f9e2139efae9ad021873d11f076423e))
+* bug fix ([498c7d9](https://github.com/vebholic/oms_frontend/commit/498c7d9c46df0b78325d1c3a7c6fe62f73b3c157))
+* bug fix ([02b7b6e](https://github.com/vebholic/oms_frontend/commit/02b7b6e40239761e2ac3194b533576118c1c3392))
+* **bug/avi:** bug/avi ([e6d1543](https://github.com/vebholic/oms_frontend/commit/e6d1543cea990c3b30570bdf2a7f06a8ad7c0e7c))
+
 ### [2.52.1](https://github.com/vebholic/oms_frontend/compare/v2.52.0...v2.52.1) (2022-02-02)
 
 
