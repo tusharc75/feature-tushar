@@ -22,7 +22,6 @@ import MomentUtils from "@date-io/moment";
 import { object, string } from "yup";
 import moment from "moment";
 import { camelCase, isEmpty, kebabCase } from "lodash";
-
 import {
   GetEventDetail,
   CreateNewEvent,
@@ -40,7 +39,7 @@ import { useAccount, useMsal } from "@azure/msal-react";
 import axiosInstance from "../../../axios/axiosInstance";
 import { useData } from "../../../StateProvider/Provider";
 import Loader from "../../Loader";
-import { dateFormat, getData } from "../../../constants/helpers";
+import { dateFormat, getData, resourceOptions } from "../../../constants/helpers";
 
 const EventSchema = object().shape({
   name: string().required("Please enter event name").min(3, "Too Short"),
@@ -211,15 +210,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
 
     return errors;
   }
-
-  const resourceOptions = [
-    "Customer Account",
-    "Customer Contact",
-    "Supplier Account",
-    "Supplier Contact",
-    "Lead",
-    "Opportunity",
-  ];
 
   return (
     <>
