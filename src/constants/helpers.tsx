@@ -1513,6 +1513,7 @@ export const DELIVERY_TICKET_STATUS = {
   new: 'New',
   indTransit: 'In-Transit',
   delivered: 'Delivered',
+  canceled: 'Canceled',
 };
 
 export const RENTAL_STATUS = {
