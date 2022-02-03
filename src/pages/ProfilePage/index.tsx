@@ -3,7 +3,7 @@ import { Grid, Paper } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ProfileSidebar from './components/ProfileSidebar'
-import { profileMenuItems, quotePdfTemplate } from '../../constants/helpers'
+import { profileMenuItems } from '../../constants/helpers'
 import ManageProfile from './components/ManageProfile'
 import NotificationPreference from './components/NotificationPreference'
 import axiosInstance from "../../axios/axiosInstance";
@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
 export default function ProfilePage(props) {
 
     const {
-        state: { user, selectedEntity, permissions }
+        state: { user }
       }: any = useData();
     const { profileBreadCrumbs } = props
     const [activeItem, setActiveItem] = useState(profileMenuItems.profile)
