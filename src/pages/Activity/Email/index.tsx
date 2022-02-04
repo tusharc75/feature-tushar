@@ -264,7 +264,7 @@ const Email = () => {
             className="link text-truncate"
             onClick={() => history.push(`${routes[d?.type].path}/detail/${d?.referenceId}`)}
           >
-            {d.name}
+            {d?.salutation ? `${d?.saluation} ${d?.name}`: d?.name }
           </Link>
           <Chip
             className="ml-3"
