@@ -8,7 +8,7 @@ import { GetReferenceName, GetEmails } from '../../../axios/activity';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import { useData } from '../../../StateProvider/Provider';
 import CustomContainer from '../../../components/CustomContainer';
-import { Button, MenuItem, Menu, Typography, Tooltip, IconButton, TextField, Chip } from '@material-ui/core';
+import { Button, MenuItem, Menu, Typography, Tooltip, IconButton, TextField, Chip, Link } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import axiosInstance from '../../../axios/axiosInstance';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -260,7 +260,12 @@ const Email = () => {
     <>{params.value && params.value?.length > 0 ? params.value.map(d => {
       return (
         <>
-          <span >{d.name}</span>
+          <Link
+            className="link text-truncate"
+            onClick={() => history.push(`${routes[d?.type].path}/detail/${d?.referenceId}`)}
+          >
+            {d.name}
+          </Link>
           <Chip
             className="ml-3"
             color="primary"
