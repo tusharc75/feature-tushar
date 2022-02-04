@@ -18,7 +18,8 @@ import {
   customerAccount,
   processFieldName,
   defaultActivityShow,
-  userType
+  userType,
+  customerContact
 } from './../../constants/helpers';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -617,6 +618,25 @@ const ContactDetailsPage = (props) => {
     setShowEntityRoleDialog(true)
   }
 
+  const handleEcommerceAccess = async () => {
+    axiosInstance()
+      .put('/user/eCommerce-access', {
+        "eCommerceAccess": true,
+        "ids": [id]
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchContactData()
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err)
+      })
+  }
+
   let filteredContactFields = contactFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
 
   const tourPaths = ['/customer-contact/detail', '/supplier-contact/detail'];
@@ -713,6 +733,17 @@ const ContactDetailsPage = (props) => {
               // style={{ marginTop: "150px", minHeight: "200px" }}
               showHeading={true}
             >
+              {
+                contactResource === customerContact.contactResource && !contactData.relatedUser?.eCommerceAccess &&
+                <Button
+                  color="primary"
+                  size="small"
+                  variant={isMobile ? "text" : "contained"}
+                  onClick={handleEcommerceAccess}
+                >
+                  E-Commerce Access
+                </Button>
+              }
               {
                 user.user?.userType === userType.brandAdmin && !contactData?.isUserExist &&
                 <Button

@@ -2025,6 +2025,7 @@ const FormTypes = (props) => {
   ) : type === 'richTextEditor' ? (
     <RichTextEditor
       name={name}
+      label={label}
       setFieldValue={setFieldValue}
       value={values[name]}
     />
