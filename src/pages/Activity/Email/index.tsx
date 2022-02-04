@@ -89,13 +89,13 @@ const Email = () => {
       primaryField: true,
       cellRenderer: 'subjectRenderer'
     },
-    {
-      field: 'message',
-      headerName: 'Message',
-      show: true,
-      // sortable: false,
-      cellRenderer: 'messageRenderer'
-    },
+    // {
+    //   field: 'message',
+    //   headerName: 'Message',
+    //   show: true,
+    //   // sortable: false,
+    //   cellRenderer: 'messageRenderer'
+    // },
     {
       field: 'createdBy',
       headerName: 'Created At',
