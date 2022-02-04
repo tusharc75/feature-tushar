@@ -1,55 +1,105 @@
-import React from 'react';
+import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import MaterialTable from 'material-table';
 import { Link } from 'react-router-dom'
-import { materialTableIcons, product } from '../../../constants/helpers';
+import {IconButton,Tooltip} from "@material-ui/core"
+import { materialTableIcons,  product } from '../../../constants/helpers';
 import { Box } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { Delete } from '@material-ui/icons';
-
+import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
 
 function ProductHierarchy({ data, permissions, unassignProduct, fetchData = () => { } }) {
 
-    const { setToastConfig } = React.useContext(CustomToastContext);
-    const [showConfirmBox, setShowConfirmBox] = React.useState({ open: false, data: null })
-    const [isDeleting, setIsDeleting] = React.useState(false)
-
+    const [state, dispatch] = useReducer(reducer, intialState);
+    const { setToastConfig } = useContext(CustomToastContext);
+    const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null })
+    const [isDeleting, setIsDeleting] =useState(false)
+    const [gridApi, setGridApi] = useState(null);
+    const [columns, setColumns] = useState([]);
+    const { dataRows, rowCount, loading: gridLoading, page,  pageSizes, search, filters, sorting, selectedRecords,limit } = state;
     const actions: any = [{
         icon: () => <Delete fontSize='small' color='error' />,
         tooltip: "Delete product",
         onClick: (_, rowData) => setShowConfirmBox({ open: true, data: rowData })
     }]
+ 
+   
+  
+    useEffect(() => {
+       
+          getColumns();
+        
+      }, []);
+    
 
-    const options: any = {
-        search: false,
-        paging: false,
-        sorting: false,
-        draggable: false,
-        padding: "dense",
-        defaultExpanded: true,
-        toolbar: false,
-        actionsColumnIndex: -1
-    };
 
-    const columns = [
-        {
-            title: 'Product Description', field: 'productName',
-            render: (rowData: any) => <div style={{ width: 250 }}>
-                <Link
-                    className="link"
-                    to={`/product/detail/${rowData?._id}`} >
-                    {rowData?.productName || ""}
-                </Link>
-            </div>
-        },
-        {
-            title: 'Quantity', field: 'qty',
-            render: (rowData: any) => <div style={{ width: 50 }}>
-                {rowData?.qty || ""}
-            </div>
-        },
-    ];
+    const getColumns = () => {
+        if (gridApi) {
+            gridApi.setRowData([]);
+          }
+          dispatch({ type: 'loading', loading: true });
+          let newColumns = [];
+          let rowsData = [];
+
+          if(data){
+             rowsData = data ?  data.map((p)=>({
+                  ...p,
+                  productName: p?.productName, 
+                  qty:p?.qty,
+              }))
+              :[];
+
+              newColumns=[
+                { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer' },
+                { field: 'qty', headerName: 'Quantity', show: true, disabled: false, cellRenderer: 'commonRenderer' },
+                
+                
+              ];
+
+              setColumns(newColumns);
+              dispatch({ type: 'initialize', data: rowsData, count: rowsData.length });
+              dispatch({ type: 'loading', loading: false });
+
+              
+          }
+    }
+
+
+
+    const ActionsRenderer = (params) => (
+        <Tooltip title="Delete">
+        <IconButton
+            onClick={()=>{
+                setShowConfirmBox({ open: true, data: params.data })
+            }}
+        >
+             <Delete fontSize='small' color='error' />
+        </IconButton>
+        </Tooltip>
+    )
+
+
+    const ProductNameRenderer = (params) => (
+        
+        <Link className="link" title={params.value} to={`/product/detail/${params.data._id}`}>
+        {params.value}
+        </Link>
+      
+    )
+
+  
+    
+  const frameworkComponents = {
+    actionsRenderer: ActionsRenderer,
+    productNameRenderer: ProductNameRenderer,
+    commonRenderer: CommonRenderer,
+   
+   
+  };
+  
 
 
     const handleRemove = () => {
@@ -70,29 +120,34 @@ function ProductHierarchy({ data, permissions, unassignProduct, fetchData = () =
             })
     }
 
+
+
+
+  
+
     return (
         <>
-            {
-                data.length === 1 ? <MaterialTable
-                    icons={materialTableIcons}
-                    data={data}
-                    columns={columns}
-                    options={options}
-                    actions={actions}
-                /> :
-                    <Box margin={1}>
-                        <MaterialTable
-                            icons={materialTableIcons}
-                            data={data}
-                            columns={columns}
-                            actions={actions}
-                            // parentChildData={(row, rows) => {
-                            //     return rows.find(a => (a._id === row.parent) || (a.treeId === row.parent) )
-                            // }}
-                            options={options}
-                        />
-                    </Box>
-            }
+           
+
+             <CustomAgGrid
+                  allowSelection={true}
+                  allowAction={true}
+                  columns={columns}
+                  dataRows={dataRows}
+                  frameworkComponents={frameworkComponents}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={rowCount}
+                  limit={limit}
+                  pageSizes={pageSizes}
+                  page={page}
+                  actionWidth={100}
+                  loading={gridLoading}
+                  renderedFrom="productMasterDetailsPage"
+                  refreshGrid={getColumns}
+                />
+
+
             {showConfirmBox.open && <ConfirmationDialog
                 open={true}
                 message={`Are you sure you want to delete this product?`}
