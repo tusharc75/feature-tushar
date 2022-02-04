@@ -2,13 +2,14 @@ import React, { useRef } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
 import { Box } from "@material-ui/core"
 
-function RichTextEditor({ value, name, setFieldValue }) {
+function RichTextEditor({ value, label, name, setFieldValue }) {
 
     const editorRef = useRef(null);
     const [isUpdate, setIsUpdate] = React.useState(true);
 
     return (
         <Box>
+            {label}
             <Editor
                 id={name}
                 onInit={(evt, editor) => editorRef.current = editor}
@@ -31,7 +32,7 @@ function RichTextEditor({ value, name, setFieldValue }) {
                         'insertdatetime media table paste code wordcount'
                     ],
                     menubar: true,
-                    toolbar: 'undo redo | formatselect  | ' +
+                    toolbar: 'fullscreen | undo redo | formatselect  | ' +
                         'bold italic backcolor | alignleft aligncenter ' +
                         'alignright alignjustify | bullist numlist outdent indent ',
                     content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
