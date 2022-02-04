@@ -1602,7 +1602,7 @@ export const getData = (resource: string, data: any) => {
   switch (kebabCase(resource)) {
     case 'lead':
       return {
-        name: `${data.company}`,
+        name: `${data.concatedName}`,
         id: data._id
       };
     case 'opportunity':

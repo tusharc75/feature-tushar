@@ -12,7 +12,7 @@ import CustomContainer from '../../../components/CustomContainer';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { GoNote } from 'react-icons/go';
 import { ExpandMore } from '@material-ui/icons';
-import { Button, Chip, Dialog, Menu, MenuItem, TextField } from '@material-ui/core';
+import { Button, Chip, Dialog, Link, Menu, MenuItem, TextField } from '@material-ui/core';
 import { AddOutlined } from '@material-ui/icons';
 import { CreateNote } from '../../../components/Activity/Note/CreateNote';
 import { camelCase, CustomDialogTransition, getApi, getData, gridLoadingTimeout, resourceOptions } from '../../../constants/helpers';
@@ -154,7 +154,12 @@ const Note = () => {
     <>{params.value && params.value?.length > 0 ? params.value.map(d => {
       return (
         <>
-          <span >{d.name}</span>
+          <Link
+            className="link text-truncate"
+            onClick={() => history.push(`${routes[d?.type].path}/detail/${d?.referenceId}`)}
+          >
+            {d.name}
+          </Link>
           <Chip
             className="ml-3"
             color="primary"
