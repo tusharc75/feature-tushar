@@ -15,7 +15,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import styles from '../../Leads/Header.module.scss';
 import { AiOutlinePaperClip } from 'react-icons/ai';
 import { AddOutlined } from '@material-ui/icons';
-import { Button, Tooltip, IconButton, MenuItem, Menu, TextField, Chip } from '@material-ui/core';
+import { Button, Tooltip, IconButton, MenuItem, Menu, TextField, Chip, Link } from '@material-ui/core';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, getApi, getData, gridLoadingTimeout, resourceOptions } from '../../../constants/helpers';
@@ -225,7 +225,12 @@ export default function Attachment() {
     <>{params.value && params.value?.length > 0 ? params.value.map(d => {
       return (
         <>
-          <span >{d.name}</span>
+          <Link
+            className="link text-truncate"
+            onClick={() => history.push(`${routes[d?.type].path}/detail/${d?.referenceId}`)}
+          >
+            {d.name}
+          </Link>
           <Chip
             className="ml-3"
             color="primary"

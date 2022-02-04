@@ -55,7 +55,6 @@ export const termsAndConditionDocumentUploadMaxSize = {
 };
 
 export const repairJobProcessSteps = ["Serialized Assets", "Loading Ticket", "Receiving Ticket", "End"];
-export const repairJobStatus = ["New", "In Progress", "Completed"];
 
 export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 
@@ -1529,6 +1528,12 @@ export const RENTAL_STATUS = {
   closed: 'Closed',
 };
 
+export const REPAIR_JOB_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  completed: 'Completed'
+};
+
 export const DELIVERY_TICKET_MAPPED_STATUS = {
   "Sign-off - Dispatch": DELIVERY_TICKET_STATUS.indTransit,
   "Sign-off - Delivery": DELIVERY_TICKET_STATUS.delivered
@@ -1602,7 +1607,7 @@ export const getData = (resource: string, data: any) => {
   switch (kebabCase(resource)) {
     case 'lead':
       return {
-        name: `${data.company}`,
+        name: `${data.concatedName}`,
         id: data._id
       };
     case 'opportunity':
