@@ -3,7 +3,7 @@ import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core'
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog'
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent'
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader'
-import { CustomDialogTransition, getObjKeysWithValues, repairJob, yupSchema, repairJobStatus } from '../../constants/helpers'
+import { CustomDialogTransition, getObjKeysWithValues, repairJob, yupSchema, REPAIR_JOB_STATUS } from '../../constants/helpers'
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter'
 import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext'
@@ -13,8 +13,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import FormTypes from '../../components/Helpers/FormTypes'
 import { uniq, map, orderBy } from 'lodash'
 import moment from 'moment'
-
-const completedStatus = repairJobStatus[2];
 
 export default function ManageAssetDialog({ open, fields, asset, selectedRecords, onSuccess, onClose, repairJobData }) {
 
@@ -151,7 +149,7 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
                                                                                 minDate={repairJobData["startDate"] ? moment(repairJobData["startDate"]) : undefined}
                                                                             /> : <FormTypes
                                                                                 {...field}
-                                                                                disabled={repairJobData["status"] === completedStatus ? true : field.disableOnEdit}
+                                                                                disabled={repairJobData["status"] === REPAIR_JOB_STATUS.completed ? true : field.disableOnEdit}
                                                                                 fields={initialData.fields}
                                                                                 fieldData={field}
                                                                                 values={values}
@@ -189,7 +187,7 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
                                     </Button>
 
                                     {
-                                        repairJobData["status"] === completedStatus ? "" : <Button
+                                        repairJobData["status"] === REPAIR_JOB_STATUS.completed ? "" : <Button
                                             size="small"
                                             onClick={() => {
                                                 setIsUpdating(true);

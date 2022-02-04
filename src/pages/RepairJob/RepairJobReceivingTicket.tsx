@@ -16,7 +16,8 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import {
     gridLoadingTimeout, repairJob,
-    sidebarResource, productInventory as productInventoryHelperObject, repairJobStatus, deliveryTicket, INVENTORY_STATUS
+    sidebarResource, productInventory as productInventoryHelperObject, REPAIR_JOB_STATUS, deliveryTicket, INVENTORY_STATUS,
+    DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE
 } from "../../constants/helpers";
 import { groupBy } from "lodash";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -90,7 +91,7 @@ const RepairJobReceivingTicket = (props) => {
 
             let repairedAssetsLength = dataRows.length - lostAssets.length
 
-            if (repairJobData && repairJobData.status === repairJobStatus[2]) {
+            if (repairJobData && repairJobData.status === REPAIR_JOB_STATUS.completed) {
                 setRepairEnded(true)
             } else if (repairedAssets.length === repairedAssetsLength && assetsWithReceivingTicket.length === repairedAssetsLength) {
                 setRepairEnded(true)
@@ -221,134 +222,130 @@ const RepairJobReceivingTicket = (props) => {
     }
 
     return (<>
-
-        <Box display="flex" justifyContent="flex-end" className="gap-1 px-2">
-            <Button
-                onClick={() => {
-                    setDownlodingFile(true);
-
-                    axiosInstance().get(`/repair-job/${repairJobData._id}/pdf`)
-                        .then(({ data }) => {
-                            axiosInstance()
-                                .get(`user/download?fileName=${data.data.fileName}`, {
-                                    responseType: "blob",
-                                })
-                                .then(({ data }) => {
-                                    const file = new Blob([data], { type: "application/pdf" });
-                                    const fileURL = URL.createObjectURL(file);
-                                    const pdfWindow = window.open();
-                                    pdfWindow.location.href = fileURL;
-                                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-                                    setDownlodingFile(false);
-                                })
-                                .catch((err) => {
-                                    toastConfig.setToastConfig(err);
-                                    setDownlodingFile(false);
-                                });
-                        }).catch((err) => {
-                            toastConfig.setToastConfig(err);
-                            setDownlodingFile(false);
-                        })
-                }}
-                variant="outlined"
-                color="primary"
-                type="button"
-                size="small"
-                disabled={downlodingFile}
-                startIcon={<AiFillFilePdf />}
-            >
-                {downlodingFile ? "Please wait..." : "Preview"}
-            </Button>
-
-            {
-                repairJobData && repairJobData["status"] !== repairJobStatus[2] && <Button variant="outlined" color="primary" aria-controls="simple-menu"
-                    aria-haspopup="true"
-                    disabled={selectedRecords.length === 0}
+        <Box display="flex" justifyContent="flex-end" pt={1}>
+            <Box display="flex" alignItems="center">
+                <Button
+                    onClick={() => {
+                        setDownlodingFile(true);
+                        axiosInstance().get(`/repair-job/${repairJobData._id}/pdf`)
+                            .then(({ data }) => {
+                                axiosInstance()
+                                    .get(`user/download?fileName=${data.data.fileName}`, {
+                                        responseType: "blob",
+                                    })
+                                    .then(({ data }) => {
+                                        const file = new Blob([data], { type: "application/pdf" });
+                                        const fileURL = URL.createObjectURL(file);
+                                        const pdfWindow = window.open();
+                                        pdfWindow.location.href = fileURL;
+                                        toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                                        setDownlodingFile(false);
+                                    })
+                                    .catch((err) => {
+                                        toastConfig.setToastConfig(err);
+                                        setDownlodingFile(false);
+                                    });
+                            }).catch((err) => {
+                                toastConfig.setToastConfig(err);
+                                setDownlodingFile(false);
+                            })
+                    }}
+                    variant="outlined"
+                    color="primary"
+                    type="button"
                     size="small"
-                    onClick={handleClick}
-                    endIcon={<ArrowDropDownIcon />}>
-                    Change Status
+                    disabled={downlodingFile}
+                    startIcon={<AiFillFilePdf />}
+                >
+                    {downlodingFile ? "Please wait..." : "Preview"}
                 </Button>
-            }
-
-            <Menu
-                id="simple-menu"
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right',
-                }}
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}
-            >
-                <MenuItem onClick={() => {
-                    setAnchorEl(null)
-                    setStatusToUpdate({ open: true, isUpdating: false, status: "Scrap", message: "" })
-                }}>Scrap</MenuItem>
-                <MenuItem onClick={() => {
-                    setAnchorEl(null)
-                    setStatusToUpdate({ open: true, isUpdating: false, status: "Lost", message: "" })
-                }}>Lost</MenuItem>
-            </Menu>
-            {
-                repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
-                <IconButton
-                    disabled={selectedRecords.length === 0 || !selectedRecords.every(f => f.deliveryTicketId && f.isDeliveryTicketDelivered) || selectedRecords.some(f => f.hasOwnProperty("receivingTicketId"))}
-                    onClick={() => {
-                        handleReceivingTicketDialog(selectedRecords)
+                <Box mx={1} />
+                {repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed &&
+                    <Button variant="outlined" color="primary" aria-controls="simple-menu"
+                        aria-haspopup="true"
+                        disabled={selectedRecords.length === 0}
+                        size="small"
+                        onClick={handleClick}
+                        endIcon={<ArrowDropDownIcon />}>
+                        Change Status
+                    </Button>
+                }
+                <Menu
+                    id="simple-menu"
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
                     }}
-                    color='primary'
-                    size="small"
-                >
-                    <Tooltip
-                        title="Create Receiving Ticket">
-                        {/* <AddBoxRoundedIcon /> */}
-                        <Button
-                            variant="contained"
-                            size="small"
-                            color="primary"
-                            disabled={selectedRecords.length === 0 || !selectedRecords.every(f => f.deliveryTicketId && f.isDeliveryTicketDelivered) || selectedRecords.some(f => f.hasOwnProperty("receivingTicketId"))}
-                        >
-                            Create Recieving Ticket
-                        </Button>
-                    </Tooltip>
-                </IconButton>
-            }
-
-            {
-                repairJobData && repairJobData["status"] !== repairJobStatus[2] &&
-                <IconButton
-                    disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId"))}
-                    onClick={() => {
-                        setShowRemoveAssetFromReceivingTicketDialog(true)
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
                     }}
-                    color='primary'
-                    size="small"
                 >
-                    <Tooltip
-                        title="Remove Assets From Receiving Ticket(s)">
-                        {/* <RemoveCircleRoundedIcon /> */}
-                        <Button
-                            variant="contained"
-                            size="small"
-                            color="primary"
-                            disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId"))}
-                        >
-                            Remove Assets
-                        </Button>
-                    </Tooltip>
-                </IconButton>
-            }
+                    <MenuItem onClick={() => {
+                        setAnchorEl(null)
+                        setStatusToUpdate({ open: true, isUpdating: false, status: "Scrap", message: "" })
+                    }}>Scrap</MenuItem>
+                    <MenuItem onClick={() => {
+                        setAnchorEl(null)
+                        setStatusToUpdate({ open: true, isUpdating: false, status: "Lost", message: "" })
+                    }}>Lost</MenuItem>
+                </Menu>
+                {
+                    repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed &&
+                    <IconButton
+                        disabled={selectedRecords.length === 0 || !selectedRecords.every(f => f.deliveryTicketId && f.isDeliveryTicketDelivered) || selectedRecords.some(f => f.hasOwnProperty("receivingTicketId"))}
+                        onClick={() => {
+                            handleReceivingTicketDialog(selectedRecords)
+                        }}
+                        color='primary'
+                        size="small"
+                    >
+                        <Tooltip
+                            title="Create Receiving Ticket">
+                            {/* <AddBoxRoundedIcon /> */}
+                            <Button
+                                variant="contained"
+                                size="small"
+                                color="primary"
+                                disabled={selectedRecords.length === 0 || !selectedRecords.every(f => f.deliveryTicketId && f.isDeliveryTicketDelivered) || selectedRecords.some(f => f.hasOwnProperty("receivingTicketId"))}
+                            >
+                                Create Recieving Ticket
+                            </Button>
+                        </Tooltip>
+                    </IconButton>
+                }
+                {
+                    repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed &&
+                    <IconButton
+                        disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId"))}
+                        onClick={() => {
+                            setShowRemoveAssetFromReceivingTicketDialog(true)
+                        }}
+                        color='primary'
+                        size="small"
+                    >
+                        <Tooltip
+                            title="Remove Assets From Receiving Ticket(s)">
+                            {/* <RemoveCircleRoundedIcon /> */}
+                            <Button
+                                variant="contained"
+                                size="small"
+                                color="primary"
+                                disabled={selectedRecords.length === 0 || selectedRecords.some(f => !f.hasOwnProperty("receivingTicketId"))}
+                            >
+                                Remove Assets
+                            </Button>
+                        </Tooltip>
+                    </IconButton>
+                }
+            </Box>
         </Box>
-
         <Grid item xs={12} md={12} sm={12} className="mt-3">
-
             {columns ?
                 isMobile && !isTablet ? <CustomSwipableList
                     allowSelection={true}
@@ -405,7 +402,7 @@ const RepairJobReceivingTicket = (props) => {
                     limit={limit}
                     pageSizes={pageSizes}
                     page={page}
-                    allowSelection={repairJobData && repairJobData["status"] === repairJobStatus[2] ? false : true}
+                    allowSelection={repairJobData && repairJobData["status"] === REPAIR_JOB_STATUS.completed ? false : true}
                     allowAction={false}
                     loading={loading}
                     renderedFrom={renderedFrom}
@@ -418,10 +415,8 @@ const RepairJobReceivingTicket = (props) => {
                     isClientSideGrid={true}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-
             }
         </Grid>
-
         {
             showRemoveAssetFromReceivingTicketDialog && (
                 <ConfirmationDialog
@@ -432,14 +427,11 @@ const RepairJobReceivingTicket = (props) => {
                     }}
                     onOk={() => {
                         setOkBtnLoading(true);
-
                         const groupByCalls = groupBy(selectedRecords, "receivingTicketId");
                         let apiCalls = [];
-
                         Object.keys(groupByCalls).forEach((key) => {
                             apiCalls.push(axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
                         })
-
                         Promise.all(apiCalls).then(() => {
                             toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged Receiving Ticket(s)` });
                             fetchRecords();
@@ -449,13 +441,11 @@ const RepairJobReceivingTicket = (props) => {
                             setOkBtnLoading(false);
                             setShowRemoveAssetFromReceivingTicketDialog(false);
                         });
-
                     }}
                     okBtnLoading={okBtnLoading}
                 />
             )
         }
-
         {
             statusToUpdate.open && <AssetScrapRepairDialog
                 statusToUpdate={statusToUpdate}
@@ -470,11 +460,10 @@ const RepairJobReceivingTicket = (props) => {
                 }}
             />
         }
-
         {
             showReceivingTicketDialog.open && <ManageDeliveryTicket
-                ticketType="Receiving"
-                refrenceType="Repair Job"
+                ticketType={DELIVERY_TICKET_TYPE.receiving}
+                refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.repairJob}
                 refrenceData={repairJobData}
                 productInventory={showReceivingTicketDialog.selectedAssets}
                 onClose={() => setShowReceivingTicketDialog({ open: false, selectedAssets: [] })}
@@ -485,27 +474,7 @@ const RepairJobReceivingTicket = (props) => {
                 warehouseId={repairJobData?.plant?.optionValue}
                 repairJobData={repairJobData}
             />
-
-
-            // <ManageReceivingTicket
-            //     open={showReceivingTicketDialog.open}
-            //     isClone={false}
-            //     receivingTicketId={null}
-            //     productInventoryForReceivingTicket={showReceivingTicketDialog.selectedAssets}
-            //     repairJobData={repairJobData}
-            //     onClose={() => setShowReceivingTicketDialog({ open: false, selectedAssets: [] })}
-            //     onSuccess={() => {
-            //         setShowReceivingTicketDialog({ open: false, selectedAssets: [] })
-            //         fetchRecords();
-            //     }}
-            //     // onSuccess={() => {
-            //     //     setShowReceivingTicketDialog(false)
-            //     //     fetchProductInventory()
-            //     // }}
-            //     isRedirectToDetailPage={false}
-            // />
         }
-
     </>
     );
 }

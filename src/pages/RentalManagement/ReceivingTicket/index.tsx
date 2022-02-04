@@ -330,10 +330,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
                 setAnchorEl(null)
                 setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: "" })
               }}>{INVENTORY_STATUS.available}</MenuItem>
-              <MenuItem onClick={() => {
-                setAnchorEl(null)
-                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.repair, message: "" })
-              }}>{INVENTORY_STATUS.repair}</MenuItem>
             </Fragment>
           }
           <MenuItem onClick={() => {
@@ -408,7 +404,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
             (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)
             || f.status === INVENTORY_STATUS.scrap)
-          && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap].includes(f.status)
+          && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.available].includes(f.status)
         )?.length === selectedRecords?.length) ?
           <Fragment>
             <Box mx={1} />
