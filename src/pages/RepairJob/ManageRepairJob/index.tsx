@@ -17,7 +17,7 @@ import {
   setFieldsInAscendingOrder,
   yupSchema,
   repairJobProcessSteps,
-  repairJobStatus,
+  REPAIR_JOB_STATUS,
   generateUniqueIdOnly
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -99,7 +99,7 @@ const ManageRepairJob = (props) => {
 
                 setRepairJobData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  initialValues: { ...getObjKeysWithValues(rest, fieldsDataForCreate), status: repairJobStatus[0] }
+                  initialValues: { ...getObjKeysWithValues(rest, fieldsDataForCreate), status: REPAIR_JOB_STATUS.new }
                 });
                 setAllFields(fieldsDataForCreate);
                 setDisableFields(false);

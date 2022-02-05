@@ -14,22 +14,19 @@ import NoDataCell from '../../components/Helpers/NoDataCell';
 import {
   deliveryTicket,
   gridLoadingTimeout,
-  rentalManagement,
   repairJob,
-  repairJobStatus,
+  REPAIR_JOB_STATUS,
   sidebarResource,
-  INVENTORY_STATUS
+  INVENTORY_STATUS,
+  DELIVERY_TICKET_TYPE,
+  DELIVERY_TICKET_REFRENCE_TYPE
 } from '../../constants/helpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { groupBy } from 'lodash';
-import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
-import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
-import InfoIcon from '@material-ui/icons/Info';
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import AssetScrapRepairDialog from '../../components/AssetScrapRepairDialog/AssetScrapRepairDialog';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
@@ -52,9 +49,9 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
   const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState({ open: false, selectedAssets: [] });
   const [repairAssetDialog, setRepairAssetDialog] = useState({ open: false, assetId: null, assetName: null, assetIds: [] });
 
-  const [showActions, setShowActions] = useState(
-    repairJobData['typeOfRepair'] === 'Internal' && repairJobData['plant'] !== repairJobData['repairPlant']
-  );
+  // const [showActions, setShowActions] = useState(
+  //   repairJobData['typeOfRepair'] === 'Internal' && repairJobData['plant'] !== repairJobData['repairPlant']
+  // );
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
@@ -102,7 +99,6 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
           repaired: u?.repaired ?? false,
           isDelivered: false
         }));
-
         if (repairJobData['typeOfRepair'] === 'Internal' && repairJobData['plant']?.optionValue !== repairJobData['repairPlant']?.optionValue) {
           tempProductInventory.forEach((obj) => {
             obj['typeOfRepair'] = repairJobData['typeOfRepair'];
@@ -110,25 +106,10 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
             obj['repairPlant'] = obj['typeOfRepair'] === 'Internal' ? repairJobData['repairPlant']?.optionValue : '';
           });
         }
-
         dispatch({ type: 'loading', loading: true });
         axiosInstance()
           .get(`${routes.deliveryTicket.path}/typewise?refrenceType=Repair Job&refrenceId=${repairJobData._id}`)
           .then(({ data }) => {
-            // let disableNextButtonIfNonDeliveredFound = true;
-
-            // data.data.map(obj => {
-            //   if (obj.ticketType === "Loading") {
-            //     productAssets.map((d, index) => {
-            //       if (obj?.productInventory?.some(p => d?._id === p?.optionValue)) {
-            //         productAssets[index]["type"] = obj?.type
-            //         productAssets[index]["deliveryTicket"] = obj?.ticketName
-            //         productAssets[index]["deliveryTicketId"] = obj?._id
-            //       }
-            //     })
-            //   }
-            // })
-
             data.data.map((obj) => {
               if (obj.ticketType === 'Loading') {
                 tempProductInventory.map((d, index) => {
@@ -141,15 +122,12 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
                 });
               }
             });
-
             tempProductInventory.forEach((d) => {
               if (!d.hasOwnProperty('isDelivered')) {
                 d['isDelivered'] = false;
               }
             });
-
-            setShowActions(!data.data.some((s) => s['ticketType'] === 'Receiving'));
-
+            //setShowActions(!data.data.some((s) => s['ticketType'] === 'Receiving'));
             tempProductInventory.forEach((d) => {
               d['_id'] = d['id'];
               d['hideSelection'] = d.status === INVENTORY_STATUS.indTransit || d.status === INVENTORY_STATUS.lost; // || (d.hasOwnProperty("isDelivered") && d["isDelivered"] === true) || d["repaired"];
@@ -161,7 +139,6 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
               tempProductInventory.some((s) => s['repaired'] === true)
             ) {
               hideReceivingTicketStep(true);
-
               if (tempProductInventory.some((f) => f['repaired'] === true)) {
                 setNextButtonDisabled(
                   !tempProductInventory
@@ -174,7 +151,6 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
                 !tempProductInventory.filter((f) => f.status !== 'Lost').some((e) => e.hasOwnProperty('isDelivered') && e.isDelivered === true)
               );
             }
-
             dispatch({
               type: 'initialize',
               data: [...tempProductInventory],
@@ -225,32 +201,32 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
       <NoDataCell />
     );
 
-  const ActionsRenderer = (params) => {
-    return (
-      params.data['isDelivered'] &&
-      !params.data['repaired'] && (
-        <HtmlTooltip title="Repair Asset">
-          <IconButton
-            size="small"
-            aria-label="Repair Asset"
-            color="primary"
-            onClick={() => {
-              setRepairAssetDialog({ open: true, assetId: params.data._id, assetName: params.data.assetNumber, assetIds: [] });
-            }}
-          >
-            <CheckCircleOutlineIcon fontSize="small" />
-          </IconButton>
-        </HtmlTooltip>
-      )
-    );
-  };
+  // const ActionsRenderer = (params) => {
+  //   return (
+  //     params.data['isDelivered'] &&
+  //     !params.data['repaired'] && (
+  //       <HtmlTooltip title="Repair Asset">
+  //         <IconButton
+  //           size="small"
+  //           aria-label="Repair Asset"
+  //           color="primary"
+  //           onClick={() => {
+  //             setRepairAssetDialog({ open: true, assetId: params.data._id, assetName: params.data.assetNumber, assetIds: [] });
+  //           }}
+  //         >
+  //           <CheckCircleOutlineIcon fontSize="small" />
+  //         </IconButton>
+  //       </HtmlTooltip>
+  //     )
+  //   );
+  // };
 
   const frameworkComponents = {
     inventoryRenderer: InventoryRenderer,
     ticketRenderer: TicketRenderer,
     productNameRenderer: ProductNameRenderer,
     commonRenderer: CommonRenderer,
-    actionsRenderer: ActionsRenderer
+    //actionsRenderer: ActionsRenderer
   };
 
   const columns = [
@@ -275,195 +251,178 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
 
   return (
     <>
-      <Box display="flex" justifyContent="flex-end" className="gap-1 px-2">
-        <Button
-          onClick={() => {
-            setDownlodingFile(true);
-
-            axiosInstance()
-              .get(`/repair-job/${repairJobData._id}/pdf`)
-              .then(({ data }) => {
-                axiosInstance()
-                  .get(`user/download?fileName=${data.data.fileName}`, {
-                    responseType: 'blob'
-                  })
-                  .then(({ data }) => {
-                    const file = new Blob([data], { type: 'application/pdf' });
-                    const fileURL = URL.createObjectURL(file);
-                    const pdfWindow = window.open();
-                    pdfWindow.location.href = fileURL;
-                    toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-                    setDownlodingFile(false);
-                  })
-                  .catch((err) => {
-                    toastConfig.setToastConfig(err);
-                    setDownlodingFile(false);
-                  });
-              })
-              .catch((err) => {
-                toastConfig.setToastConfig(err);
-                setDownlodingFile(false);
-              });
-          }}
-          variant={isMobile && !isTablet ? 'text' : 'outlined'}
-          color="primary"
-          type="button"
-          size="small"
-          style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-          disabled={downlodingFile}
-          startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
-        >
-          {isMobile && !isTablet ? <AiFillFilePdf size={18}/> : downlodingFile ? 'Please wait...' : 'Preview'}
-        </Button>
-
-        {showActions && (
+      <Box display="flex" justifyContent="flex-end" pt={1}>
+        <Box display="flex" alignItems="center">
           <Button
-            variant={isMobile && !isTablet ? 'text' : 'contained'}
+            onClick={() => {
+              setDownlodingFile(true);
+              axiosInstance()
+                .get(`/repair-job/${repairJobData._id}/pdf`)
+                .then(({ data }) => {
+                  axiosInstance()
+                    .get(`user/download?fileName=${data.data.fileName}`, {
+                      responseType: 'blob'
+                    })
+                    .then(({ data }) => {
+                      const file = new Blob([data], { type: 'application/pdf' });
+                      const fileURL = URL.createObjectURL(file);
+                      const pdfWindow = window.open();
+                      pdfWindow.location.href = fileURL;
+                      toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+                      setDownlodingFile(false);
+                    })
+                    .catch((err) => {
+                      toastConfig.setToastConfig(err);
+                      setDownlodingFile(false);
+                    });
+                })
+                .catch((err) => {
+                  toastConfig.setToastConfig(err);
+                  setDownlodingFile(false);
+                });
+            }}
+            variant={isMobile && !isTablet ? 'text' : 'outlined'}
             color="primary"
             type="button"
             size="small"
-            style={isMobile && !isTablet ? { color: '#FFFF5C' } : {}}
-            disabled={
-              selectedRecords.length === 0 ||
-              selectedRecords.some((s) => s.repaired === true) ||
-              !selectedRecords.some((s) => s['isDelivered'] && !s['repaired'])
-            }
-            onClick={() => {
-              setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...selectedRecords.map((m) => m._id)] });
-            }}
+            style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+            disabled={downlodingFile}
+            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
           >
-            {isMobile && !isTablet ? <GiAutoRepair size={18}/> : 'Complete Repair'}
+            {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? 'Please wait...' : 'Preview'}
           </Button>
-        )}
-
-        {repairJobData && repairJobData['status'] !== repairJobStatus[2] && (
-          <Button
-            variant={isMobile && !isTablet ? 'text' : 'outlined'}
-            color="primary"
-            aria-controls="simple-menu"
-            aria-haspopup="true"
-            style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
-            disabled={selectedRecords.length === 0}
-            size="small"
-            onClick={handleClick}
-            endIcon={<ArrowDropDownIcon />}
-          >
-            {isMobile && !isTablet ? <RiExchangeFundsLine size={20} /> : 'Change Status'}
-          </Button>
-        )}
-
-        <Menu
-          id="simple-menu"
-          anchorEl={anchorEl}
-          keepMounted
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-          getContentAnchorEl={null}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right'
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right'
-          }}
-        >
-          <MenuItem
-            onClick={() => {
-              setAnchorEl(null);
-              setStatusToUpdate({ open: true, isUpdating: false, status: 'Scrap', message: '' });
+          <Box mx={1} />
+          {/* {showActions && (
+            <Button
+              variant={isMobile && !isTablet ? 'text' : 'contained'}
+              color="primary"
+              type="button"
+              size="small"
+              style={isMobile && !isTablet ? { color: '#FFFF5C' } : {}}
+              disabled={
+                selectedRecords.length === 0 ||
+                selectedRecords.some((s) => s.repaired === true) ||
+                !selectedRecords.some((s) => s['isDelivered'] && !s['repaired'])
+              }
+              onClick={() => {
+                setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...selectedRecords.map((m) => m._id)] });
+              }}
+            >
+              {isMobile && !isTablet ? <GiAutoRepair size={18} /> : 'Complete Repair'}
+            </Button>
+          )} 
+          <Box mx={1} />
+          */}
+          {repairJobData && repairJobData['status'] !== REPAIR_JOB_STATUS.completed && (
+            <Button
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              color="primary"
+              aria-controls="simple-menu"
+              aria-haspopup="true"
+              style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
+              disabled={selectedRecords.length === 0}
+              size="small"
+              onClick={handleClick}
+              endIcon={<ArrowDropDownIcon />}
+            >
+              {isMobile && !isTablet ? <RiExchangeFundsLine size={20} /> : 'Change Status'}
+            </Button>
+          )}
+          <Menu
+            id="simple-menu"
+            anchorEl={anchorEl}
+            keepMounted
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right'
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right'
             }}
           >
-            Scrap
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setAnchorEl(null);
-              setStatusToUpdate({ open: true, isUpdating: false, status: 'Lost', message: '' });
-            }}
-          >
-            Lost
-          </MenuItem>
-        </Menu>
-
-        {repairJobData && repairJobData['status'] !== repairJobStatus[2] && (
-          <IconButton
-            disabled={
-              selectedRecords.length === 0 ||
-              selectedRecords.some((f) => f.hasOwnProperty('deliveryTicketId')) ||
-              selectedRecords.some((f) => f.repaired === true) ||
-              selectedRecords.some((f) => f.status === 'Lost')
-            }
-            onClick={() => {
-              handleDeliveryTicketDialog(selectedRecords);
-            }}
-            color="primary"
-            size="small"
-          >
-            <Tooltip title="Create Loading Ticket">
-              {/* <AddBoxRoundedIcon /> */}
-              <Button
-                variant="contained"
-                size="small"
-                color="primary"
-                disabled={
-                  selectedRecords.length === 0 ||
-                  selectedRecords.some((f) => f.hasOwnProperty('deliveryTicketId')) ||
-                  selectedRecords.some((f) => f.repaired === true) ||
-                  selectedRecords.some((f) => f.status === 'Lost')
-                }
+            <MenuItem
+              onClick={() => {
+                setAnchorEl(null);
+                setStatusToUpdate({ open: true, isUpdating: false, status: 'Scrap', message: '' });
+              }}
+            >
+              Scrap
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAnchorEl(null);
+                setStatusToUpdate({ open: true, isUpdating: false, status: 'Lost', message: '' });
+              }}
+            >
+              Lost
+            </MenuItem>
+          </Menu>
+          {repairJobData && repairJobData['status'] !== REPAIR_JOB_STATUS.completed && (
+            <IconButton
+              disabled={
+                selectedRecords.length === 0 ||
+                selectedRecords.some((f) => f.hasOwnProperty('deliveryTicketId')) ||
+                selectedRecords.some((f) => f.repaired === true) ||
+                selectedRecords.some((f) => f.status === 'Lost')
+              }
+              onClick={() => {
+                handleDeliveryTicketDialog(selectedRecords);
+              }}
+              color="primary"
+              size="small"
+            >
+              <Tooltip title="Create Loading Ticket">
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="primary"
+                  disabled={
+                    selectedRecords.length === 0 ||
+                    selectedRecords.some((f) => f.hasOwnProperty('deliveryTicketId')) ||
+                    selectedRecords.some((f) => f.repaired === true) ||
+                    selectedRecords.some((f) => f.status === 'Lost')
+                  }
                 >
                   Create Loading Ticket
                 </Button>
-            </Tooltip>
-          </IconButton>
-        )}
-
-        {repairJobData && repairJobData['status'] !== repairJobStatus[2] && (
-          <IconButton
-            disabled={
-              selectedRecords.length === 0 ||
-              selectedRecords.some((f) => f.hasOwnProperty('deliveryTicketId') === false) ||
-              selectedRecords.some((f) => f.isDelivered === true)
-            }
-            onClick={() => {
-              setShowRemoveAssetFromLoadingTicketDialog(true);
-            }}
-            color="primary"
-            size="small"
-          >
-            <Tooltip title="Remove Assets From Loading Ticket(s)">
-              {/* <RemoveCircleRoundedIcon /> */}
-              <Button
-                variant="contained"
-                size="small"
-                color="primary"
-                disabled={
-                  selectedRecords.length === 0 ||
-                  selectedRecords.some((f) => f.hasOwnProperty('deliveryTicketId') === false) ||
-                  selectedRecords.some((f) => f.isDelivered === true)
-                }
+              </Tooltip>
+            </IconButton>
+          )}
+          {repairJobData && repairJobData['status'] !== REPAIR_JOB_STATUS.completed && (
+            <IconButton
+              disabled={
+                selectedRecords.length === 0 ||
+                selectedRecords.some((f) => f.hasOwnProperty('deliveryTicketId') === false) ||
+                selectedRecords.some((f) => f.isDelivered === true)
+              }
+              onClick={() => {
+                setShowRemoveAssetFromLoadingTicketDialog(true);
+              }}
+              color="primary"
+              size="small"
+            >
+              <Tooltip title="Remove Assets From Loading Ticket(s)">
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="primary"
+                  disabled={
+                    selectedRecords.length === 0 ||
+                    selectedRecords.some((f) => f.hasOwnProperty('deliveryTicketId') === false) ||
+                    selectedRecords.some((f) => f.isDelivered === true)
+                  }
                 >
                   Remove Assets
                 </Button>
-            </Tooltip>
-          </IconButton>
-        )}
-
-        {/* <Button
-        variant="contained"
-        color="primary"
-        type="button"
-        size="small"
-        disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("deliveryTicketId")))}
-        onClick={() => {
-          setShowRemoveAssetFromLoadingTicketDialog(true)
-        }}
-      >
-        Remove From Assigned Loading Tickets
-      </Button> */}
+              </Tooltip>
+            </IconButton>
+          )}
+        </Box>
       </Box>
-
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns ? (
           isMobile && !isTablet ? (
@@ -514,7 +473,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -528,14 +487,14 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
               limit={limit}
               pageSizes={pageSizes}
               page={page}
-              allowSelection={repairJobData && repairJobData['status'] === repairJobStatus[2] ? false : true}
-              allowAction={showActions}
+              allowSelection={repairJobData && repairJobData['status'] === REPAIR_JOB_STATUS.completed ? false : true}
+              allowAction={false}
               loading={loading}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
               rowClassRules={{
                 'red-data-row': function (params) {
-                  return ['Scrap', 'Lost'].some((s) => s === params.data.status);
+                  return [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some((s) => s === params.data.status);
                 }
               }}
             />
@@ -546,7 +505,6 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
           </Box>
         )}
       </Grid>
-
       {showRemoveAssetFromLoadingTicketDialog && (
         <ConfirmationDialog
           open={showRemoveAssetFromLoadingTicketDialog}
@@ -586,11 +544,10 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
           okBtnLoading={okBtnLoading}
         />
       )}
-
       {showDeliveryTicketDialog.open && (
         <ManageDeliveryTicket
-          ticketType="Loading"
-          refrenceType="Repair Job"
+          ticketType={DELIVERY_TICKET_TYPE.loading}
+          refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.repairJob}
           refrenceData={repairJobData}
           onClose={() => setShowDeliveryTicketDialog({ open: false, selectedAssets: [] })}
           productInventory={showDeliveryTicketDialog.selectedAssets}
@@ -601,7 +558,6 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
           }}
         />
       )}
-
       {repairAssetDialog.open && (
         <ConfirmationDialog
           open={true}
@@ -634,7 +590,6 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
           okBtnLoading={okBtnLoading}
         />
       )}
-
       {statusToUpdate.open && (
         <AssetScrapRepairDialog
           statusToUpdate={statusToUpdate}
