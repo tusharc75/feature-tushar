@@ -81,6 +81,7 @@ export default function ManageLeadDialog({
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [formValues, setFormValues] = useState({})
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [cloneHeading,setCloneHeading] = useState('')
 
   useEffect(() => {
     if (isNew) {
@@ -240,8 +241,9 @@ export default function ManageLeadDialog({
           axiosInstance()
             .get(`${leadApi}/${leadId}?entity=${selectedEntity}`)
             .then(({ data: { data } }) => {
-
-              const { _id, firstName, lastName, middleName, email, ...rest } = data
+              
+              const { _id, firstName, lastName, middleName, ...rest } = data
+              setCloneHeading(data.firstName)
               let tempData = { ...rest }
               if (marketSegmentDropdownData) {
                 setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data?.marketSegment?.optionValue));
@@ -391,7 +393,7 @@ export default function ManageLeadDialog({
       >
         <CustomDialogHeader
           title={
-            isClone ? "Clone" :
+            isClone ? `Clone-[${cloneHeading}]` :
               isNew
                 ? "Create Lead"
                 : `Editing ${[dataToUpdate.firstName, dataToUpdate.lastName]
