@@ -40,7 +40,7 @@ const OpportunityDashboards = (props) => {
   const [filterAnchor, setFilterAnchor] = useState(null);
   const [openFilter, setOpenFilter] = useState(false);
 
-  const [filter, setFilter] = useState({
+  const [salesRepFilter, setSalesRepFilter] = useState({
     marketSegment: {},
     customerAccount: {},
     subMarketSegment: {},
@@ -48,15 +48,30 @@ const OpportunityDashboards = (props) => {
     countryBillTo: {}
   });
 
+  const [customerAccountFilter, setCustomerAccountFilter] = useState({
+    marketSegment: {},
+    customerAccount: {},
+    subMarketSegment: {},
+    countrySellTo: {},
+    countryBillTo: {}
+  });
+
+  const [qouteFilter, setQouteFilter] = useState({
+    marketSegment: {},
+    customerAccount: {},
+    subMarketSegment: {},
+    countrySellTo: {},
+    countryBillTo: {}
+  });
   const fetchOpportunitySalesRep = useCallback(() => {
     let params = {
       entity: selectedEntity || '',
       status: opp2Status,
-      marketSegment: filter.marketSegment ? filter.marketSegment['id'] : '',
-      subMarketSegment: filter.subMarketSegment ? filter.subMarketSegment['id'] : '',
-      customerAccount: filter.customerAccount ? filter.customerAccount['id'] : '',
-      countrySellTo: filter.countrySellTo ? filter.countrySellTo["optionValue"] : '',
-      countryBillTo: filter.countryBillTo ? filter.countryBillTo["optionValue"] : '',
+      marketSegment: salesRepFilter.marketSegment ? salesRepFilter.marketSegment['id'] : '',
+      subMarketSegment: salesRepFilter.subMarketSegment ? salesRepFilter.subMarketSegment['id'] : '',
+      customerAccount: salesRepFilter.customerAccount ? salesRepFilter.customerAccount['id'] : '',
+      countrySellTo: salesRepFilter.countrySellTo ? salesRepFilter.countrySellTo["optionValue"] : '',
+      countryBillTo: salesRepFilter.countryBillTo ? salesRepFilter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -117,7 +132,7 @@ const OpportunityDashboards = (props) => {
         });
       })
       .catch((err) => { });
-  }, [selectedEntity, filter, opp2Status, salesFilter]);
+  }, [selectedEntity, salesRepFilter, opp2Status, salesFilter]);
 
   useEffect(() => {
     fetchOpportunitySalesRep();
@@ -127,11 +142,11 @@ const OpportunityDashboards = (props) => {
     let params = {
       entity: selectedEntity || '',
       status: opp1Status,
-      marketSegment: filter.marketSegment ? filter.marketSegment['id'] : '',
-      subMarketSegment: filter.subMarketSegment ? filter.subMarketSegment['id'] : '',
-      customerAccount: filter.customerAccount ? filter.customerAccount['id'] : '',
-      countrySellTo: filter.countrySellTo ? filter.countrySellTo["optionValue"] : '',
-      countryBillTo: filter.countryBillTo ? filter.countryBillTo["optionValue"] : '',
+      marketSegment: customerAccountFilter.marketSegment ? customerAccountFilter.marketSegment['id'] : '',
+      subMarketSegment: customerAccountFilter.subMarketSegment ? customerAccountFilter.subMarketSegment['id'] : '',
+      customerAccount: customerAccountFilter.customerAccount ? customerAccountFilter.customerAccount['id'] : '',
+      countrySellTo: customerAccountFilter.countrySellTo ? customerAccountFilter.countrySellTo["optionValue"] : '',
+      countryBillTo: customerAccountFilter.countryBillTo ? customerAccountFilter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -188,7 +203,7 @@ const OpportunityDashboards = (props) => {
         });
       })
       .catch((err) => { });
-  }, [selectedEntity, filter, opp1Status, salesFilter]);
+  }, [selectedEntity, customerAccountFilter, opp1Status, salesFilter]);
 
   useEffect(() => {
     fetchOpportunityAccount();
@@ -198,11 +213,11 @@ const OpportunityDashboards = (props) => {
     let params = {
       status: quoteStatus,
       entity: selectedEntity ? selectedEntity : '',
-      marketSegment: filter.marketSegment ? filter.marketSegment['id'] : '',
-      subMarketSegment: filter.subMarketSegment ? filter.subMarketSegment['id'] : '',
-      customerAccount: filter.customerAccount ? filter.customerAccount['id'] : '',
-      countrySellTo: filter.countrySellTo ? filter.countrySellTo["optionValue"] : '',
-      countryBillTo: filter.countryBillTo ? filter.countryBillTo["optionValue"] : '',
+      marketSegment: qouteFilter.marketSegment ? qouteFilter.marketSegment['id'] : '',
+      subMarketSegment: qouteFilter.subMarketSegment ? qouteFilter.subMarketSegment['id'] : '',
+      customerAccount: qouteFilter.customerAccount ? qouteFilter.customerAccount['id'] : '',
+      countrySellTo: qouteFilter.countrySellTo ? qouteFilter.countrySellTo["optionValue"] : '',
+      countryBillTo: qouteFilter.countryBillTo ? qouteFilter.countryBillTo["optionValue"] : '',
       between: JSON.stringify({
         from: new Date(salesFilter.between.from).toISOString().split('T')[0],
         to: new Date(salesFilter.between.to).toISOString().split('T')[0]
@@ -231,7 +246,7 @@ const OpportunityDashboards = (props) => {
         });
       })
       .catch((err) => { });
-  }, [selectedEntity, filter, quoteStatus, salesFilter.between]);
+  }, [selectedEntity, qouteFilter, quoteStatus, salesFilter.between]);
 
   useEffect(() => {
     fetchOpenQuote();
@@ -287,11 +302,12 @@ const OpportunityDashboards = (props) => {
                 fullWidth
                 options={customerAccounts}
                 autoHighlight
-                value={filter.customerAccount}
+                value={currentFilter === "customerAccount" ? customerAccountFilter.customerAccount : currentFilter === "quote" ? qouteFilter.customerAccount : salesRepFilter.customerAccount}
                 getOptionLabel={(option: any) => option.name || ''}
                 getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
                 onChange={(_, val) => {
-                  let data = { ...filter, customerAccount: val }
+                  let tempFilter = currentFilter === "customerAccount" ? customerAccountFilter : currentFilter === "quote" ? qouteFilter : salesRepFilter
+                  let data = { ...tempFilter, customerAccount: val }
                   if (val?.countryBillTo) {
                     let foundCountry = Countries.find(o => o.optionValue === val?.countryBillTo)
                     if (foundCountry) {
@@ -304,7 +320,7 @@ const OpportunityDashboards = (props) => {
                       data.countrySellTo = foundCountry
                     }
                   }
-                  setFilter({ ...data });
+                  currentFilter === "customerAccount" ? setCustomerAccountFilter({ ...data }) : currentFilter === "quote" ? setQouteFilter({ ...data }) : setSalesRepFilter({ ...data })
                 }}
                 renderInput={(params) => <TextField {...params} label="Customer Account" variant="outlined" />}
               />}
@@ -314,11 +330,12 @@ const OpportunityDashboards = (props) => {
                 fullWidth
                 options={marketSegments.filter(d => !d.parentSegment)}
                 autoHighlight
-                value={filter.marketSegment}
+                value={currentFilter === "customerAccount" ? customerAccountFilter.customerAccount : currentFilter === "quote" ? qouteFilter.customerAccount : salesRepFilter.marketSegment}
                 getOptionLabel={(option: any) => option.name || ''}
                 getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
                 onChange={(_, val) => {
-                  setFilter({ ...filter, marketSegment: val });
+                  let tempFilter = currentFilter === "customerAccount" ? customerAccountFilter : currentFilter === "quote" ? qouteFilter : salesRepFilter
+                  currentFilter === "customerAccount" ? setCustomerAccountFilter({ ...tempFilter, marketSegment: val }) : currentFilter === "quote" ? setQouteFilter({ ...tempFilter, marketSegment: val }) : setSalesRepFilter({ ...tempFilter, marketSegment: val })
                   if (val) {
                     setSubMarketSegments(marketSegments.filter((d) => d?.parentSegment === val?.id));
                   } else {
@@ -333,10 +350,13 @@ const OpportunityDashboards = (props) => {
                 fullWidth
                 options={subMarketSegments}
                 autoHighlight
-                value={filter.subMarketSegment}
+                value={currentFilter === "customerAccount" ? customerAccountFilter.subMarketSegment : currentFilter === "quote" ? qouteFilter.subMarketSegment : salesRepFilter.subMarketSegment}
                 getOptionLabel={(option: any) => option.name || ''}
                 getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
-                onChange={(_, val) => setFilter({ ...filter, subMarketSegment: val })}
+                onChange={(_, val) => {
+                  let tempFilter = currentFilter === "customerAccount" ? customerAccountFilter : currentFilter === "quote" ? qouteFilter : salesRepFilter
+                  currentFilter === "customerAccount" ? setCustomerAccountFilter({ ...tempFilter, subMarketSegment: val }) : currentFilter === "quote" ? setQouteFilter({ ...tempFilter, subMarketSegment: val }) : setSalesRepFilter({ ...tempFilter, subMarketSegment: val })
+                }}
                 renderInput={(params) => <TextField {...params} label="Sub-Market Segment" variant="outlined" />}
               />
               <Box mt={1} />
@@ -345,10 +365,13 @@ const OpportunityDashboards = (props) => {
                 fullWidth
                 options={Countries}
                 autoHighlight
-                value={filter.countrySellTo}
+                value={currentFilter === "customerAccount" ? customerAccountFilter.countrySellTo : currentFilter === "quote" ? qouteFilter.countrySellTo : salesRepFilter.countrySellTo}
                 getOptionLabel={(option: any) => option.optionLabel || ''}
                 getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
-                onChange={(_, val) => setFilter({ ...filter, countrySellTo: val })}
+                onChange={(_, val) => {
+                  let tempFilter = currentFilter === "customerAccount" ? customerAccountFilter : currentFilter === "quote" ? qouteFilter : salesRepFilter
+                  currentFilter === "customerAccount" ? setCustomerAccountFilter({ ...tempFilter, countrySellTo: val }) : currentFilter === "quote" ? setQouteFilter({ ...tempFilter, countrySellTo: val }) : setSalesRepFilter({ ...tempFilter, countrySellTo: val })
+                }}
                 renderInput={(params) => <TextField {...params} label="Country Sell To" variant="outlined" />}
               />
               <Box mt={1} />
@@ -358,10 +381,13 @@ const OpportunityDashboards = (props) => {
                 fullWidth
                 options={Countries}
                 autoHighlight
-                value={filter?.countryBillTo}
+                value={currentFilter === "customerAccount" ? customerAccountFilter.countryBillTo : currentFilter === "quote" ? qouteFilter.countryBillTo : salesRepFilter.countryBillTo}
                 getOptionLabel={(option: any) => option.optionLabel || ''}
                 getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
-                onChange={(_, val) => setFilter({ ...filter, countryBillTo: val })}
+                onChange={(_, val) => {
+                  let tempFilter = currentFilter === "customerAccount" ? customerAccountFilter : currentFilter === "quote" ? qouteFilter : salesRepFilter
+                  currentFilter === "customerAccount" ? setCustomerAccountFilter({ ...tempFilter, countryBillTo: val }) : currentFilter === "quote" ? setQouteFilter({ ...tempFilter, countryBillTo: val }) : setSalesRepFilter({ ...tempFilter, countryBillTo: val })
+                }}
                 renderInput={(params) => <TextField {...params} label="Country Bill To" variant="outlined" />}
               />
             </Box>
