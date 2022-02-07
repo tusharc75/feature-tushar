@@ -24,7 +24,10 @@ interface FiltersProps {
   setResourceOptions: any;
   formValues: any;
   setFormValues: any;
-  loadingColumns?:boolean
+  loadingColumns?: boolean
+  setSelectedReport: any;
+  selectedReport: any;
+  reportList: any;
 }
 
 const ReportFilters = (props: FiltersProps) => {
@@ -43,7 +46,10 @@ const ReportFilters = (props: FiltersProps) => {
     setResourceOptions,
     formValues,
     setFormValues,
-    loadingColumns
+    loadingColumns,
+    setSelectedReport,
+    selectedReport,
+    reportList,
   } = props;
 
   React.useEffect(() => {
@@ -94,6 +100,18 @@ const ReportFilters = (props: FiltersProps) => {
 
   return (
     <Container maxWidth="sm">
+      <Box height={'100%'} my={2}>
+        {reportList.length !== 0 && <Autocomplete
+          options={reportList}
+          value={selectedReport}
+          onChange={(_, val) => {
+            setSelectedReport(val);
+          }}
+          fullWidth
+          getOptionLabel={(option) => option.name}
+          renderInput={(params) => <TextField {...params} variant="outlined" label="Select Report" size="small" />}
+        />}
+      </Box>
       <Box height={'100%'} my={2}>
         <Autocomplete
           loading={loadingColumns}

@@ -36,7 +36,7 @@ const Report = () => {
 
   let resourceCamelCase = camelCase(resource);
   let resourceStartCase = startCase(resource);
-  const renderedFrom = `${resource}-report`;
+  const renderedFrom = `${resource}_report`;
 
   const [showGrid, setShowGrid] = React.useState(false);
   const [selectedData, setSelectedData] = React.useState(null);
@@ -48,7 +48,8 @@ const Report = () => {
   const [resourceColumns, setResourceColumns] = React.useState([]);
   const [isExporting, setExporting] = React.useState(false);
   const [loadingColumns, setLoadingColumns] = React.useState(false);
-
+  const [reportList, setReportList] = React.useState([]);
+  const [selectedReport, setSelectedReport] = React.useState(null);
   // Grid Configs
   const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
   const { getColumnData } = useColumns();
@@ -100,6 +101,20 @@ const Report = () => {
       initialRender.current = false;
     }
   }, []);
+
+  React.useEffect(() => {
+    axiosInstance().get(`/report-colum-setting?type=${resource}`).then(({ data: { data } }) => {
+      setReportList(data)
+    }).catch((error) => {
+      toastConfig.setToastConfig(error)
+    });
+  }, []);
+  //columns state changes
+  React.useEffect(() => {
+    if (selectedReport?.columnState) {
+      localStorage.setItem(selectedReport ? `${renderedFrom}_${selectedReport?.name}_${selectedReport?._id}` : renderedFrom, selectedReport?.columnState);;
+    }
+  }, [selectedReport]);
   /**
    * Fetch resource data for selected filters,
    * @returns none if no data selected
@@ -272,7 +287,7 @@ const Report = () => {
                       </Box>
                     )}
                     <MdDescription size={22} className="headerLogo" />
-                    <span className="listingHeader">Reports</span>
+                    <span className="listingHeader">{` ${selectedReport?.name ?? "Reports"}`}</span>
                   </Box>
                 </Grid>
               </Grid>
@@ -428,6 +443,9 @@ const Report = () => {
                 formValues={formValues}
                 setFormValues={setFormValues}
                 loadingColumns={loadingColumns}
+                setSelectedReport={setSelectedReport}
+                selectedReport={selectedReport}
+                reportList={reportList}
               />
             ) : (
               <div>
@@ -444,7 +462,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => {}}
+                      onEdit={() => { }}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -459,8 +477,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => {}}
-                      onClone={(data) => {}}
+                      onDelete={(data) => { }}
+                      onClone={(data) => { }}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (
@@ -476,7 +494,7 @@ const Report = () => {
                       page={page}
                       actionWidth={100}
                       loading={loading}
-                      renderedFrom={renderedFrom}
+                      renderedFrom={selectedReport ? `${renderedFrom}_${selectedReport?.name}_${selectedReport?._id}` : renderedFrom}
                       allowSelection={false}
                       isClientSideGrid={true}
                       allowAction={false}
