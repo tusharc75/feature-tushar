@@ -157,6 +157,13 @@ const Email = () => {
     // eslint-disable-next-line
   }, [resource]);
 
+  const redirectToResource = (type, id) => {
+    history.push(
+      type === "quote" ? `${routes["quoteBuilder"].path}/detail/${id}`
+        : `${routes[type].path}/detail/${id}`
+    )
+  }
+
   const fetchEmails = async () => {
     const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
@@ -262,9 +269,10 @@ const Email = () => {
         <>
           <Link
             className="link text-truncate"
-            onClick={() => history.push(`${routes[d?.type].path}/detail/${d?.referenceId}`)}
+            onClick={() => redirectToResource(d?.type, d?.referenceId)}
+
           >
-            {d?.salutation ? `${d?.saluation} ${d?.name}`: d?.name }
+            {d?.salutation ? `${d?.saluation} ${d?.name}` : d?.name}
           </Link>
           <Chip
             className="ml-3"
