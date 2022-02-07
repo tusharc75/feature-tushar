@@ -286,7 +286,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
 
   const handleAddSerializedAsset = (assets) => {
     let data = [];
-    selectedProducts?.forEach((e: any) => {
+    let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" );
+    flatArray?.forEach((e: any) => {
       if (e.type === "product") {
         let qty = e.qty - e.subRows.length;
         while (qty) {
