@@ -15,6 +15,10 @@ function ProductHierarchy({ data, permissions, unassignProduct, fetchData = () =
     const [showConfirmBox, setShowConfirmBox] = React.useState({ open: false, data: null })
     const [isDeleting, setIsDeleting] = React.useState(false)
 
+
+
+
+    let newData = data.slice(0,5);
     const actions: any = [{
         icon: () => <Delete fontSize='small' color='error' />,
         tooltip: "Delete product",
@@ -75,7 +79,7 @@ function ProductHierarchy({ data, permissions, unassignProduct, fetchData = () =
             {
                 data.length === 1 ? <MaterialTable
                     icons={materialTableIcons}
-                    data={data}
+                    data={newData}
                     columns={columns}
                     options={options}
                     actions={actions}
@@ -83,7 +87,7 @@ function ProductHierarchy({ data, permissions, unassignProduct, fetchData = () =
                     <Box margin={1}>
                         <MaterialTable
                             icons={materialTableIcons}
-                            data={data}
+                            data={newData}
                             columns={columns}
                             actions={actions}
                             // parentChildData={(row, rows) => {
