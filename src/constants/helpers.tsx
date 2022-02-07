@@ -55,7 +55,6 @@ export const termsAndConditionDocumentUploadMaxSize = {
 };
 
 export const repairJobProcessSteps = ["Serialized Assets", "Loading Ticket", "Receiving Ticket", "End"];
-export const repairJobStatus = ["New", "In Progress", "Completed"];
 
 export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 
@@ -1527,6 +1526,12 @@ export const RENTAL_STATUS = {
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
   closed: 'Closed',
+};
+
+export const REPAIR_JOB_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  completed: 'Completed'
 };
 
 export const DELIVERY_TICKET_MAPPED_STATUS = {

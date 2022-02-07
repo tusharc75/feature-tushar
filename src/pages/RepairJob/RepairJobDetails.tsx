@@ -14,7 +14,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import {
   gridLoadingTimeout, prepareDataForGrid, repairJob, sidebarResource,
   repairJobProcessSteps,
-  repairJobStatus,
+  REPAIR_JOB_STATUS,
   INVENTORY_STATUS,
   CHILD_RESOURCE
 } from '../../constants/helpers';
@@ -49,7 +49,6 @@ import HideWhenOffline from '../../components/HideWhenOffline';
 import { defaultActivityShow } from '../../constants/helpers';
 const renderedFrom = "repairJobDetails"
 const step1RenderedFrom = `${renderedFrom}_assets`
-const completedStatus = repairJobStatus[2];
 
 function a11yProps(index: any) {
   return {
@@ -177,7 +176,7 @@ const RepairJobDetails = () => {
       const lostAssets = step1DataRows.filter((asset:any) => asset?.status === "Lost");
       let repairedAssetsLength = step1DataRows.length - lostAssets.length
 
-      if(repairJobData && repairJobData.status === completedStatus) {
+      if(repairJobData && repairJobData.status === REPAIR_JOB_STATUS.completed) {
         setRepairEnded(true);
       } else if (repairedAssets.length === repairedAssetsLength) {
         setRepairEnded(true)
@@ -186,7 +185,7 @@ const RepairJobDetails = () => {
   },[repairJobData, step1DataRows])
 
   useEffect(() => {
-    if(repairJobData && repairJobData.status !== completedStatus) {
+    if(repairJobData && repairJobData.status !== REPAIR_JOB_STATUS.completed) {
       if(isRepairEnded) {
         onNextButtonClick(repairJobProcessSteps.length - 2, repairJobProcessSteps.length - 1, false)
       }
@@ -513,7 +512,7 @@ const RepairJobDetails = () => {
         .then(() => {
           //  Update status to Complete when finished steps
           if (repairJobProcessSteps[nextStep] === repairJobProcessSteps[repairJobProcessSteps.length - 1]) {
-            axiosInstance().put(`${repairJob.repairJobApi}/${id}/status`, { "status": completedStatus }).then(() => {
+            axiosInstance().put(`${repairJob.repairJobApi}/${id}/status`, { "status": REPAIR_JOB_STATUS.completed }).then(() => {
               setCurrentStep(nextStep);
               fetchRepairJobData();
 
@@ -568,7 +567,7 @@ const RepairJobDetails = () => {
               </div>
             ) : (
               <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
-                {permissions?.repairJob?.isUpdate && repairJobData?.status !== completedStatus && (
+                {permissions?.repairJob?.isUpdate && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
                   <Button disabled={showLoading} variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                     Edit
                   </Button>
@@ -658,7 +657,7 @@ const RepairJobDetails = () => {
                         disableNextStep={disableNextStep || isRepairEnded}
                         disablePreviousStep={isRepairEnded}
                         steps={steps}
-                        currentStep={repairJobData?.status === completedStatus ? steps.length + 1 : currentStep}
+                        currentStep={repairJobData?.status === REPAIR_JOB_STATUS.completed ? steps.length + 1 : currentStep}
                         setCurrentStep={setCurrentStep}
                         onNextButtonClick={onNextButtonClick}
                         onPreviousButtonClick={onPreviousButtonClick}
@@ -670,7 +669,7 @@ const RepairJobDetails = () => {
                           {(currentStep === 0) && (
                             <>
                               {
-                                repairJobData && repairJobData["status"] !== completedStatus && <Box display="flex" mt={2} mb={2} pr={1} justifyContent="flex-end" alignItems="center" className="gap-2">
+                                repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed && <Box display="flex" mt={2} mb={2} pr={1} justifyContent="flex-end" alignItems="center" className="gap-2">
                                   <Button
                                     disabled={showLoading}
                                     variant={isMobile && !isTablet ? "text" : "contained"}
@@ -684,7 +683,6 @@ const RepairJobDetails = () => {
                                   >
                                     {isMobile && !isTablet ? <MdAdd size={23}/> : `Add ${routes.productInventory.title}`}
                                   </Button>
-
                                   {
                                     repairJobData && repairJobData["typeOfRepair"] === "Internal" &&
                                     repairJobData["plant"].optionValue === repairJobData["repairPlant"].optionValue && <Button
@@ -701,9 +699,8 @@ const RepairJobDetails = () => {
                                       {isMobile && !isTablet ? <GiAutoRepair/> :  "Complete Repair" }  
                                     </Button>
                                   }
-
                                   {
-                                    repairJobData && repairJobData["status"] !== repairJobStatus[2] && 
+                                    repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed && 
                                     <Button 
                                     variant={isMobile && !isTablet ? "text" : "outlined"}
                                     color="primary" 
@@ -829,10 +826,10 @@ const RepairJobDetails = () => {
                                       limit={step1Limit}
                                       pageSizes={step1PageSizes}
                                       page={step1Page}
-                                      allowAction={repairJobData && repairJobData["status"] === completedStatus ? false : true}
+                                      allowAction={repairJobData && repairJobData["status"] === REPAIR_JOB_STATUS.completed ? false : true}
                                       actionWidth={150}
                                       loading={step1Loading}
-                                      allowSelection={repairJobData && repairJobData["status"] === completedStatus ? false : true}
+                                      allowSelection={repairJobData && repairJobData["status"] === REPAIR_JOB_STATUS.completed ? false : true}
                                       renderedFrom={step1RenderedFrom}
                                       isClientSideGrid={true}
                                       rowClassRules={{
@@ -1031,8 +1028,8 @@ const RepairJobDetails = () => {
                 });
 
                 //  Update status from new to In Progress when assets are created
-                if (repairJobData.status === repairJobStatus[0]) {
-                  axiosInstance().put(`${repairJob.repairJobApi}/${id}/status`, { "status": repairJobStatus[1] })
+                if (repairJobData.status === REPAIR_JOB_STATUS.new) {
+                  axiosInstance().put(`${repairJob.repairJobApi}/${id}/status`, { "status": REPAIR_JOB_STATUS.inProgress })
                 }
 
               }).catch((error) => {

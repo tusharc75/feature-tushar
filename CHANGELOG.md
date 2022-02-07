@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.54.2](https://github.com/vebholic/oms_frontend/compare/v2.54.1...v2.54.2) (2022-02-07)
+
+### [2.54.1](https://github.com/vebholic/oms_frontend/compare/v2.54.0...v2.54.1) (2022-02-06)
+
+## [2.54.0](https://github.com/vebholic/oms_frontend/compare/v2.53.1...v2.54.0) (2022-02-05)
+
+
+### Features
+
+* **Email:** Message column header removed ([af065e0](https://github.com/vebholic/oms_frontend/commit/af065e0e37ec4b37afac05344883793a9b3603bb))
+* **feat/avi:** feat/avi ([29b5fc7](https://github.com/vebholic/oms_frontend/commit/29b5fc76064893cd3ef11930466ab96a2a978548))
+
+
+### Bug Fixes
+
+* bug fix ([188e3d3](https://github.com/vebholic/oms_frontend/commit/188e3d3fa16de65f0d0bd9d0b754bb3639c84ef5))
+* bug fix ([eb99503](https://github.com/vebholic/oms_frontend/commit/eb99503f9fce1f928b03c4321b639542c97d20d7))
+* bug fix ([8ffbac9](https://github.com/vebholic/oms_frontend/commit/8ffbac9a191ea5871e1f503ad890b0150e94ac30))
+* bug fix ([3d8a1c0](https://github.com/vebholic/oms_frontend/commit/3d8a1c05fb09aa8bde328fa6477760207c79f745))
+* bug fix ([7f7fa9d](https://github.com/vebholic/oms_frontend/commit/7f7fa9d7a581220acec4f24f62df5864d476c175))
+
 ### [2.53.1](https://github.com/vebholic/oms_frontend/compare/v2.53.0...v2.53.1) (2022-02-04)
 
 
