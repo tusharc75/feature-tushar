@@ -4,7 +4,7 @@ import { Add } from "@material-ui/icons";
 import moment from "moment";
 import { useHistory } from "react-router-dom";
 import queryString from "query-string";
-
+import {useData} from "../../../StateProvider/Provider"
 import MyCalendar from "../Calendar/MyCalendar";
 import { GetBoard, GetReferenceName } from "../../../axios/activity";
 import Layout from "../../../components/Layout";
@@ -17,6 +17,11 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 const Event = () => {
   const history = useHistory();
   const { setToastConfig } = useContext(CustomToastContext);
+  const {
+    state: {
+      user: { user ,permissions},
+    },
+  } = useData();
   const [filter, setFilter] = useState([]);
   const [activityData, setActivityData] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -96,6 +101,7 @@ const Event = () => {
                 filter={filter}
                 chip={{ variant: "default", size: "small", color: "default" }}
                 activityName="event"
+                permissions={permissions}
               />
             </Box>
 

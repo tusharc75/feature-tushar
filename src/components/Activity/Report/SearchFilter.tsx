@@ -28,6 +28,7 @@ export const SearchFilter = ({
   chip,
   dontShowMyActivity = false,
   activityName,
+  permissions
 }) => {
   const { state: { user: { user }, }, } = useData();
   const [options, setOptions] = React.useState([]);
@@ -54,15 +55,20 @@ export const SearchFilter = ({
     { type: "my", name: user?._id, isAll: true },
   ];
 
+
+  let permissionsSearch =  allSearch.filter((item) => permissions[item.type]?.isRead === true)
+
+  
+
   const activityType = ["task", "event", "case", "note", "email", "attachment"]
 
   useEffect(() => {
-    setValue(filter.filter(d => allSearch.some(f => f.type === d.type)));
+    setValue(filter.filter(d => permissionsSearch.some(f => f.type === d.type)));
   }, [filter]);
 
   useEffect(() => {
     if (inputValue === "") {
-      let filteredSearch = dontShowMyActivity ? allSearch.filter((_o) => _o.type !== "my") : allSearch; setOptions(filteredSearch);
+      let filteredSearch = dontShowMyActivity ? permissionsSearch .filter((_o) => _o.type !== "my") : permissionsSearch ; setOptions(filteredSearch);
     } else {
       setLoading(true);
       let _activityName = activityName;
@@ -86,8 +92,8 @@ export const SearchFilter = ({
       setSelectedActivityId(filterActivity._id)
       setSelectedActivityType(filterActivity.type)
     }
-    setValue(newValue.filter(d => allSearch.some(f => f.type === d.type)));
-    handleChangeFilter(newValue.filter(d => allSearch.some(f => f.type === d.type)));
+    setValue(newValue.filter(d => permissionsSearch.some(f => f.type === d.type)));
+    handleChangeFilter(newValue.filter(d => permissionsSearch.some(f => f.type === d.type)));
   };
 
   return (

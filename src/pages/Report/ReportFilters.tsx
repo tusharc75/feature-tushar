@@ -1,12 +1,14 @@
 import React from 'react';
-import { Box, Container, TextField, Grid, Button, CircularProgress, Typography } from '@material-ui/core';
+import { Box, Container, TextField, Grid, Button, CircularProgress, Typography, IconButton } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
-import { List } from '@material-ui/icons';
+import { Delete, List } from '@material-ui/icons';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 
 import VirtualizedList from '../../components/VirtualizedList';
 import { getObjKeys, dateFormat } from '../../constants/helpers';
 import FormTypes from '../../components/Helpers/FormTypes';
+import ConfirmDialog from '../../components/Helpers/ConfirmationDialog';
+import axiosInstance from '../../axios/axiosInstance';
 
 interface FiltersProps {
   resource: string;
@@ -24,7 +26,11 @@ interface FiltersProps {
   setResourceOptions: any;
   formValues: any;
   setFormValues: any;
-  loadingColumns?:boolean
+  loadingColumns?: boolean;
+  setSelectedReportView: any;
+  selectedReportView: any;
+  reportList: any;
+  setReportList: any;
 }
 
 const ReportFilters = (props: FiltersProps) => {
@@ -43,8 +49,14 @@ const ReportFilters = (props: FiltersProps) => {
     setResourceOptions,
     formValues,
     setFormValues,
-    loadingColumns
+    loadingColumns,
+    setSelectedReportView,
+    selectedReportView,
+    reportList,
+    setReportList
   } = props;
+  const [showConfirmDialog, setShowConfirmDialog] = React.useState({ open: false, id: null });
+  const [isDeleting, setDeleting] = React.useState(false);
 
   React.useEffect(() => {
     if (!resourceColumns && resourceColumns.length === 0) return;
@@ -63,7 +75,7 @@ const ReportFilters = (props: FiltersProps) => {
         return d.fieldData;
       });
     setResourceOptions(optionsData);
-    setFormValues({ ...getObjKeys('', filteredData), status: '', owner: "" });
+    setFormValues({ ...getObjKeys('', filteredData), status: '', owner: '' });
     setFilterOptions([{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...filteredData]);
   }, [resourceColumns]);
 
@@ -92,8 +104,58 @@ const ReportFilters = (props: FiltersProps) => {
     setFormValues((prevState) => ({ ...prevState, [name]: value }));
   };
 
+  const handleRemoveOption = () => {
+    setDeleting(true);
+    setReportList((prevList) => prevList.filter((list) => list._id === showConfirmDialog.id));
+    axiosInstance()
+      .put(`report-colum-setting/remove`, {
+        ids: [showConfirmDialog.id]
+      })
+      .then(() => {
+        setDeleting(false);
+        setShowConfirmDialog({ open: false, id: null });
+      })
+      .catch((err) => {
+        setDeleting(false);
+        setShowConfirmDialog({ open: false, id: null });
+      });
+  };
+
   return (
     <Container maxWidth="sm">
+      <Box height={'100%'} my={2}>
+        <Autocomplete
+          options={reportList}
+          value={selectedReportView}
+          noOptionsText="No views were found"
+          onChange={(_, val) => {
+            setSelectedReportView(val);
+          }}
+          fullWidth
+          renderOption={(option) => (
+            <React.Fragment>
+              <Box display={'flex'} width="100%" justifyContent="space-between">
+                {option.name}
+                {isDeleting ? (
+                  <CircularProgress size={18} color="inherit" />
+                ) : (
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowConfirmDialog({ open: true, id: option._id });
+                    }}
+                  >
+                    <Delete color="error" />
+                  </IconButton>
+                )}
+              </Box>
+            </React.Fragment>
+          )}
+          getOptionLabel={(option) => option.name}
+          renderInput={(params) => <TextField {...params} variant="outlined" label="Select View" size="small" />}
+        />
+      </Box>
       <Box height={'100%'} my={2}>
         <Autocomplete
           loading={loadingColumns}
@@ -199,6 +261,15 @@ const ReportFilters = (props: FiltersProps) => {
           </Button>
         </Box>
       </Box>
+      {showConfirmDialog.open && (
+        <ConfirmDialog
+          onClose={() => setShowConfirmDialog({ open: false, id: null })}
+          onOk={() => handleRemoveOption()}
+          open={true}
+          okBtnLoading={isDeleting}
+          message="Are you sure you want to delete this option?"
+        />
+      )}
     </Container>
   );
 };

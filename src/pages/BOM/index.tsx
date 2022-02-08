@@ -1,107 +1,44 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import MaterialTable from 'material-table';
-import { Avatar, Box, Chip } from '@material-ui/core';
+import { Avatar, Box, Chip,Grid,Button} from '@material-ui/core';
 import { Link, useParams, useLocation } from 'react-router-dom';
 import { materialTableIcons, product } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
+import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
+import {GiLetterBomb} from "react-icons/gi";
+import {MdAdd} from "react-icons/md"
+import { isMobile, isTablet } from 'react-device-detect';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import SearchBox from '../../components/Helpers/SearchBox';
+import { Delete } from '@material-ui/icons';
+import {IconButton,Tooltip} from "@material-ui/core"
+import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+
 import ConfirmationDialogRaw from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 const BOMTable = () => {
   const { id } = useParams();
-  const { state } = useLocation()
+
   const {setToastConfig} = useContext(CustomToastContext);
   const [loadingBOMData, setLoadingBOMData] = useState(false);
   const [productData, setProductData] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [BOMData, setBOMData] = useState([]);
   const [showConfirmBox, setShowConfirmBox] = useState({open: false, data: null})
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const [columns, setColumns] = useState([]);
+  const { dataRows, rowCount, loading: gridLoading, page,  pageSizes, search, filters, sorting, selectedRecords,limit } = state;
 
-  const options: any = {
-    search: true,
-    paging: false,
-    sorting: false,
-    draggable: false,
-    defaultExpanded: true,
-    toolbar: false
-  };
 
-  const columns = [
-    {
-      title: 'Product Description',
-      field: 'productName',
-      render: (rowData: any) => (
-        <div style={{ width: 150 }}>
-          <Link className="link" to={`/product/detail/${rowData?.productId}`}>
-            {rowData?.productName || '- - -'}
-          </Link>
-        </div>
-      )
-    },
-    {
-      title: 'Description',
-      field: 'description',
-      render: (rowData: any) => (
-        <div style={{ width: 250 }}>
-          <span className="text-truncate">{rowData?.childProductDetail.longDescription || '- - -'}</span>
-        </div>
-      )
-    },
-    {
-      title: 'Product Image',
-      field: 'productImage',
-      render: (rowData: any) => (
-        <div style={{ width: 100 }}>
-          <span className="text-truncate"><Avatar src={rowData?.childProductDetail.productImage}>
-              {rowData?.productName.charAt(0)}
-            </Avatar></span>
-        </div>
-      )
-    },
-    {
-      title: 'Product Number',
-      field: 'productNumber',
-      render: (rowData: any) => (
-        <div style={{ width: 100 }}>
-          <span className="text-truncate">{rowData?.childProductDetail.productNumber || '- - -'}</span>
-        </div>
-      )
-    },
-    {
-      title: 'Standard Price',
-      field: 'standardPrice',
-      render: (rowData: any) => (
-        <div style={{ width: 80 }}>
-          <span className="text-truncate">{rowData?.childProductDetail.mrp || '- - -'}</span>
-        </div>
-      )
-    },
-    {
-      title: 'Serialized Product',
-      field: 'serializedProduct',
-      render: (rowData: any) => (
-        <div style={{ width: 80 }}>
-          <span className="text-truncate">{rowData?.childProductDetail.serializedProduct ? 'Yes' : 'No'}</span>
-        </div>
-      )
-    },
-    {
-      title: 'Product Category',
-      field: 'productCategory',
-      render: (rowData: any) => (
-        <div style={{ width: 80 }}>
-          <Chip
-            className="ml-3"
-            style={{ backgroundColor: rowData?.childProductDetail.productCategory.chipColour }}
-            label={rowData?.childProductDetail.productCategory.optionLabel}
-          />
-        </div>
-      )
-    }
-  ];
+
+
+ 
 
   useEffect(() => {
     if (id) {
@@ -109,6 +46,14 @@ const BOMTable = () => {
       fetchProduct()
     }
   }, []);
+
+  useEffect(()=>{
+    if(BOMData){
+      getColumns();
+    }
+    
+  },[BOMData])
+  
 
   const fetchProduct = () => {
     axiosInstance().get(`${routes.product.path}/` + id)
@@ -161,44 +106,177 @@ const BOMTable = () => {
     })
 }
 
+
+
+const getColumns = () => {
+  if (gridApi) {
+      gridApi.setRowData([]);
+    }
+    dispatch({ type: 'loading', loading: true });
+    let newColumns = [];
+    let rowsData = [];
+
+    if(BOMData){
+      
+       rowsData = BOMData ?  BOMData.map((p)=>({
+         
+            ...p,
+            productName: p?.productName, 
+            qty:p?.qty,
+            productCategory: p?.childProductDetail?.productCategory?.optionLabel,
+            createdBy: p?.createdBy?.user?.concatedName
+        }))
+        :[];
+
+        newColumns=[
+          { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer' },
+          { field: 'qty', headerName: 'Quantity', show: true, disabled: false, cellRenderer: 'commonRenderer' },
+          { field: 'productCategory', headerName: 'ProductCategory', show: true, disabled: false, cellRenderer: 'commonRenderer' },
+          { field: 'createdBy', headerName: 'createdBy', show: true, disabled: false, cellRenderer: 'CreatedByRenderer' },
+
+          
+          
+        ];
+
+        setColumns(newColumns);
+        dispatch({ type: 'initialize', data: rowsData, count: rowsData.length });
+        dispatch({ type: 'loading', loading: false });
+
+        
+    }
+}
+
+
+const ActionsRenderer = (params) => (
+  <Tooltip title="Delete">
+  <IconButton
+      onClick={()=>{
+          setShowConfirmBox({ open: true, data: params.data })
+      }}
+  >
+       <Delete fontSize='small' color='error' />
+  </IconButton>
+  </Tooltip>
+)
+
+
+const ProductNameRenderer = (params) => (
+  
+  <Link className="link" title={params.value} to={`/product/detail/${params.data._id}`}>
+  {params.value}
+  </Link>
+
+)
+
+
+
+const frameworkComponents = {
+actionsRenderer: ActionsRenderer,
+productNameRenderer: ProductNameRenderer,
+commonRenderer: CommonRenderer,
+
+
+};
+
+
+
   return (
     <div>
       <div className="headerbox">
         <CustomBreadCrumbs routes={customizedRoutes} />
       </div>
       <div className="main-container">
-        {BOMData.length === 1 ? (
-          <MaterialTable style={{height: "calc(100vh - 105px)"}} title={"Parts"} icons={materialTableIcons} data={BOMData} columns={columns}
-            options={{
-              search: true,
-              filtering: true,
-            }} />
-        ) : (
-          <Box margin={1} height={"calc(100vh - 105px)"}>
-            <MaterialTable
-              title={"Parts"}
-              isLoading={loadingBOMData}
-              icons={materialTableIcons}
-              data={BOMData}
-              columns={columns}
-              // parentChildData={(row, rows) => {
-              //   return rows.find((a) => a.treeId  === row.parent);
-              // }}
-              actions={ [{
-                icon: "delete",
-                tooltip: "Delete product",
-                onClick: (_, rowData) => setShowConfirmBox({open: true, data: rowData})                      
-            }]}
-              style={{height: "100%"}}
-              options={{
-                search: true,
-                filtering: true,
-                actionsColumnIndex: -1,
-              }}
-            // options={options}
-            />
-          </Box>
-        )}
+      <div className="header-panel">
+      <Grid className={styles.filter_side_container} container justify="space-between">
+      <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+      <div className="d-flex align-items-center">  
+                <GiLetterBomb className="headerLogo" />
+                <span className="listingHeader">Bom</span>
+                </div>
+               
+
+      </Grid>
+      <Grid className={styles.filter_side} item md={6} sm={12} xs={12}>
+                <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                  <SearchBox
+                    onSearch={'condo'}
+                    searchbox={styles.search_box_input}
+                    value={search}
+                    size="small"
+                    placeholder="Search Bom"
+                    width="242px"
+                    style={isMobile ? { flex: 1 } : {}}
+                  />
+                  
+                  <Grid style={{ display: 'flex', gap: '5px' }}>
+                  <>
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      color="primary"
+                      size="small"
+                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                      onClick={() => {
+                        "condo"
+                        // setShowManageBudgetDialog({ show: true, id: null, isClone: false });
+                      }}
+                    >
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                    </Button>
+                  </>
+
+                  <>
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                      color="default"
+                      size="small"
+                      className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_new_submit_btn}`}
+                      // onClick={"condo"}
+                      disabled={selectedRecords.length ? false : true}
+                      aria-controls="action-menu"
+                    >
+                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                    </Button>
+
+                    {/* <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                    </Menu> */}
+                    
+                  </>
+                  </Grid>
+                </Box>
+              </Grid>
+
+      </Grid>
+      </div>
+      <Box component="div">
+      <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameworkComponents}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                actionWidth={100}
+                loading={gridLoading}
+                renderedFrom={routes.productDetail.title}
+                refreshGrid={fetchBOMData}
+              />
+      </Box>
       </div>
       {showConfirmBox.open &&  <ConfirmationDialogRaw
               open={true}
