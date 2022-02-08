@@ -36,7 +36,7 @@ const Report = () => {
 
   let resourceCamelCase = camelCase(resource);
   let resourceStartCase = startCase(resource);
-  const renderedFrom = `${resource}_report`;
+  const renderedFrom = `${resource}-report`;
 
   const [showGrid, setShowGrid] = React.useState(false);
   const [selectedData, setSelectedData] = React.useState(null);

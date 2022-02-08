@@ -27,7 +27,7 @@ import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField }
 import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
 import { camelCase } from 'lodash'
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import {FaSuitcase,SiStatuspage,FaWarehouse,GiAutoRepair,GrStatusInfo,BsFillPersonFill,GiCargoShip,FaShippingFast,RiSpaceShipFill} from "react-icons/all"
+import { FaSuitcase, SiStatuspage, FaWarehouse, GiAutoRepair, GrStatusInfo, BsFillPersonFill, GiCargoShip, FaShippingFast, RiSpaceShipFill } from "react-icons/all"
 
 
 let repairJobTimeout;
@@ -78,62 +78,7 @@ const RepairJob = () => {
 
   const { getColumnData } = useColumns();
 
-  // const columns = [
-  //   {
-  //     field: 'repairJobName',
-  //     headerName: 'Repair Job Name',
-  //     show: true,
-  //     disabled: true,
-  //     cellRenderer: 'repairJobNameRenderer',
-  //     primaryField: 'true'
-  //   },
-  //   {
-  //     field: 'status',
-  //     headerName: 'Status',
-  //     show: true,
-  //     disabled: false,
-  //     cellRenderer: 'commonRenderer'
-  //   },
-  //   {
-  //     field: 'productInventory',
-  //     headerName: 'Product Inventory',
-  //     show: true,
-  //     disabled: false,
-  //     cellRenderer: 'commonRenderer'
-  //   },
-  //   {
-  //     field: 'repairPerson',
-  //     headerName: 'Repair Person',
-  //     show: true,
-  //     disabled: false,
-  //     cellRenderer: 'repairPersonRenderer'
-  //   },
-  //   {
-  //     field: 'typeOfRepair',
-  //     headerName: 'Type Of Repair',
-  //     show: true,
-  //     disabled: false,
-  //     cellRenderer: 'commonRenderer'
-  //   },
-  //   {
-  //     field: 'createdBy',
-  //     headerName: 'Created By',
-  //     show: true,
-  //     cellRenderer: 'createdByRenderer'
-  //   },
-  //   {
-  //     field: 'updatedBy',
-  //     headerName: 'Updated By',
-  //     show: true,
-  //     cellRenderer: 'updatedByRenderer'
-  //   },
-  //   {
-  //     field: 'owner',
-  //     headerName: 'Repair Job Owner',
-  //     show: true,
-  //     cellRenderer: 'OwnerRenderer'
-  //   }
-  // ];
+  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
 
   useEffect(() => {
     fetchGridColumns();
@@ -243,8 +188,6 @@ const RepairJob = () => {
     // }
   };
 
-
-
   //  Grid Variables - End
   const [locationKeys, setLocationKeys] = useState([])
   useEffect(() => {
@@ -275,7 +218,6 @@ const RepairJob = () => {
     if (repairJobTimeout) {
       clearTimeout(repairJobTimeout);
     }
-
     repairJobTimeout = setTimeout(() => {
       fetchRepairJobs();
     }, millisec);
@@ -286,13 +228,12 @@ const RepairJob = () => {
     if (renderCount > 0) {
       fetchRepairJobs();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, fromRental, selectedEntity]);
 
   const handleSingleDeleteRepairJob = async () => {
     dispatch({ type: 'loading', loading: true });
-
     axiosInstance()
-      .put(`${repairJob.repairJobApi}/remove`, {
+      .put(`${repairJob.api}/remove`, {
         ids: [singleRepairJobDelete.id]
       })
       .then(({ data }) => {
@@ -330,18 +271,6 @@ const RepairJob = () => {
       )}
     </>
   );
-
-  // const ProductInventoryRenderer = (params) => (
-  //   <>
-  //     {params.value ? (
-  //       <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
-  //         {params.value}
-  //       </Link>
-  //     ) : (
-  //       <NoDataCell />
-  //     )}
-  //   </>
-  // );
 
   const OwnerRenderer = (params) => (
     <>
@@ -393,18 +322,6 @@ const RepairJob = () => {
     </>
   );
 
-  // const frameworkComponents = {
-  //   repairJobNameRenderer: RepairJobNameRenderer,
-  //   repairPersonRenderer: RepairPersonRenderer,
-  //   // productInventoryRenderer: ProductInventoryRenderer,
-  //   ownerRenderer: OwnerRenderer,
-  //   createdByRenderer: CreatedByRenderer,
-  //   updatedByRenderer: UpdatedByRenderer,
-  //   actionsRenderer: ActionsRenderer,
-  //   commonRenderer: CommonRenderer,
-  //   dateRenderer: DateRenderer
-  // };
-
   const replaceFieldName = (field) => {
     switch (field) {
       case 'createdBy':
@@ -440,27 +357,28 @@ const RepairJob = () => {
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterRepairJobs=${selectedType}`;
+    let filterById = [];
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName('customerAccount'),
-            term: accountDetails.accountId
-          }
-        ])}`;
+        filterById.push({
+          field: replaceFieldName('customerAccount'),
+          term: accountDetails.accountId
+        });
       } else if (accountDetails.resource === supplierAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName('supplierAccountName'),
-            term: { $in: [accountDetails.accountId] }
-          }
-        ])}`;
+        filterById.push({
+          field: replaceFieldName('supplierAccountName'),
+          term: { $in: [accountDetails.accountId] }
+        });
       }
     }
-
+    if (fromRental) {
+      filterById.push({ field: "rentalJob", term: fromRental?._id });
+    }
+    if (filterById.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
+    }
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
-
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
@@ -469,30 +387,25 @@ const RepairJob = () => {
       });
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
     }
-
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
-
     return deepFilter;
   };
 
   const fetchRepairJobs = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     try {
       let data: any = [], count;
       if (!isOffline) {
-        const response: any = await axiosInstance().get(`${repairJob.repairJobApi}${queryString}`);
+        const response: any = await axiosInstance().get(`${repairJob.api}${queryString}`);
         data = response?.data?.data;
         count = response?.data?.count;
       }
@@ -502,7 +415,6 @@ const RepairJob = () => {
       }
       let rows = data.map((u) => {
         let finalObject = prepareDataForGrid(u, user);
-
         finalObject["isChecked"] = false;
         finalObject["allowedToEdit"] = permissions?.repairJob?.isUpdate;
         finalObject["owerCollaboratorInitialsOrImages"] = [];
@@ -526,52 +438,6 @@ const RepairJob = () => {
       dispatch({ type: "loading", loading: false });
       toastConfig.setToastConfig(error);
     }
-
-
-    // axiosInstance()
-    //   .get(`${repairJob.repairJobApi}${queryString}`)
-    //   .then(({ data: { data, count } }) => {
-
-    //     let rows = data.map((u) => {
-    //       const { owner, collaborator, createdBy, updatedBy, customerAccount, ...restProperties } = u;
-
-    //       let res = {
-    //         ...restProperties,
-    //         id: u._id,
-    //         productInventory: u.productInventory?.map((p) => p.optionLabel).join(', '),
-    //         repairPerson: u.repairPerson?.optionLabel,
-    //         repairPersonId: u.repairPerson?.optionValue,
-    //         owner: u.createdBy?.user?.concatedName,
-    //         ownerId: u.createdBy?.user?._id,
-    //         createdBy: u.createdBy?.user?.concatedName,
-    //         createdByDate: u.createdBy?.date,
-    //         updatedBy: u.updatedBy?.user?.concatedName,
-    //         updatedByDate: u.updatedBy?.date,
-
-    //         canDelete: u.createdBy?.user?._id === user?.user._id,
-    //         isChecked: false,
-    //         allowedToEdit: permissions?.repairJob?.isUpdate
-    //       };
-    //       return res;
-    //     });
-
-    //     if (appendRows) {
-    //       dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
-    //     } else {
-    //       dispatch({ type: "initialize", data: rows, count: count });
-    //     }
-
-    //     setTimeout(() => {
-    //       dispatch({ type: 'loading', loading: false });
-    //     }, gridLoadingTimeout);
-    //   })
-    //   .catch((error) => {
-    //     dispatch({ type: 'loading', loading: false });
-    //     toastConfig.setToastConfig(error);
-    //   });
-
-
-
   };
 
   const handleSearch = (e) => {
@@ -581,7 +447,6 @@ const RepairJob = () => {
   const handleRepairJobTypeSel = (filterValues) => {
     setSelectedType(filterValues);
     history.push(`?type=${filterValues}`)
-
   };
 
   const handleTransferEntityDialog = () => {
@@ -617,7 +482,7 @@ const RepairJob = () => {
     }
     if (recordsToDelete.length > 0) {
       axiosInstance()
-        .put(`${repairJob.repairJobApi}/remove`, {
+        .put(`${repairJob.api}/remove`, {
           ids: recordsToDelete
         })
         .then(({ data }) => {
@@ -652,7 +517,7 @@ const RepairJob = () => {
                 <ImportExportLinks
                   permissions={permissions.repairJob}
                   module="repairJob"
-                  api={repairJob.repairJobApi}
+                  api={repairJob.api}
                   afterImportCompleted={() => { }}
                   isExportAllOrSomeFeature={true}
                   total={rowCount}
@@ -668,8 +533,6 @@ const RepairJob = () => {
           </Grid>
         </Grid>
       </Grid>
-
-      {/* Tables Begins Here */}
       <CustomContainer>
         <div className="header-panel">
           <RepairJobHeader
@@ -706,9 +569,18 @@ const RepairJob = () => {
                 }}
               />
             )}
+            {fromRental && (
+              <Chip
+                className="ml-3"
+                color="primary"
+                label={`Rental Job : ${fromRental?.rentalJobName}`}
+                onDelete={() => {
+                  setFromRental(null);
+                }}
+              />
+            )}
           </RepairJobHeader>
         </div>
-
         {
           Object.keys(frameworkComponents).length > 0 ?
             isMobile && !isTablet ?
@@ -742,49 +614,49 @@ const RepairJob = () => {
                 ]}
                 chips={[
                   {
-                    icon:<SiStatuspage/>,
+                    icon: <SiStatuspage />,
                     label: "Status: ",
                     field: "status",
                   },
                   {
-                    icon:<GrStatusInfo/>,
+                    icon: <GrStatusInfo />,
                     label: "Repair Status: ",
                     field: "typeOfRepair",
                   },
-                  { 
-                    icon:<BsFillPersonFill/>,
-                    label:"Repair Person: ",
-                    field:"repairPerson"
-                  },
-             
                   {
-                    icon:<FaWarehouse/>,
-                    label:"Plant: ",
-                    field:"plant"
+                    icon: <BsFillPersonFill />,
+                    label: "Repair Person: ",
+                    field: "repairPerson"
                   },
 
-                  { 
-                    icon:<GiAutoRepair/>,
-                    label:"Repair Plant: ",
-                    field:"repairPlant"
-                },
-                  
-                  { 
-                    icon:<GiCargoShip/>,
-                    label:"Plant Ship To: ",
-                    field:"plantShipTo"
+                  {
+                    icon: <FaWarehouse />,
+                    label: "Plant: ",
+                    field: "plant"
                   },
-                  { 
-                    icon:<RiSpaceShipFill/>,
-                    label:"Supplier: ",
-                    field:"supplier"
+
+                  {
+                    icon: <GiAutoRepair />,
+                    label: "Repair Plant: ",
+                    field: "repairPlant"
                   },
-                  { 
-                    icon:<FaShippingFast/>,
-                    label:"Supplier Ship To: ",
-                    field:"supplierShipTo"
+
+                  {
+                    icon: <GiCargoShip />,
+                    label: "Plant Ship To: ",
+                    field: "plantShipTo"
                   },
-                  
+                  {
+                    icon: <RiSpaceShipFill />,
+                    label: "Supplier: ",
+                    field: "supplier"
+                  },
+                  {
+                    icon: <FaShippingFast />,
+                    label: "Supplier Ship To: ",
+                    field: "supplierShipTo"
+                  },
+
                 ]}
                 onCreate={false}
                 showClone={false}

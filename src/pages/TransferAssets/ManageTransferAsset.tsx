@@ -34,6 +34,7 @@ interface Props {
   isEditable?: boolean;
   isMainInfoEditable?: boolean;
   refrenceType?: string;
+  refrenceId?: string;
   refrenceData?: any;
 }
 
@@ -42,7 +43,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
     state: { selectedEntity, permissions }
   }: any = useData();
   const { isClone = false, transferAssetId = null, onClose, onSuccess, number = '', isEditable = false, isMainInfoEditable = false,
-    refrenceType = null, refrenceData = null } = props;
+    refrenceType = null, refrenceId = null, refrenceData = null } = props;
 
   const toastConfig = useContext(CustomToastContext);
   const initialRender = useRef(true);
@@ -130,6 +131,8 @@ const ManageTransferAsset: FC<Props> = (props) => {
                 }
               }
             })
+            console.log(refrenceId)
+            createValues["rentalJob"] = refrenceId;
           }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),

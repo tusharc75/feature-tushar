@@ -112,7 +112,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
   const fetchLoadingTickets = () =>
     new Promise((resolve, reject) => {
-      axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${transferAssetData?._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
+      axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${transferAssetData?._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
         .then(({ data: { data } }) => {
           resolve(data);
         })

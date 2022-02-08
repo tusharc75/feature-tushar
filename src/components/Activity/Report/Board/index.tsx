@@ -10,6 +10,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 
 import statusList from '../../Helpers/statusList';
 import { GetBoard } from '../../../../axios/activity';
+import { useData } from '../../../../StateProvider/Provider';
 
 import { BoardList } from './BoardList';
 import axiosInstance from '../../../../axios/axiosInstance';
@@ -35,6 +36,9 @@ const Board = ({ type, filter }) => {
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState([]);
   const classes = useStyles();
+  const {
+    state: { user, permissions }
+  }: any = useData();
   const [resource, setResource] = useState('');
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
@@ -112,6 +116,68 @@ const Board = ({ type, filter }) => {
   };
 
 
+  let newResourceOptions = [];
+
+  for(let i=0; i<resourceOptions.length; i++){
+    if(resourceOptions[i] === 'Customer Account'){
+       if(permissions.customerAccount.isRead === true ){
+         newResourceOptions.push(resourceOptions[i]);
+         i++;
+       }
+    }
+    if(resourceOptions[i] === 'Customer Contact'){
+      if(permissions.customerContact.isRead === true ){
+        newResourceOptions.push(resourceOptions[i]);
+      }
+   }
+   if(resourceOptions[i] === 'Supplier Account'){
+    if(permissions.supplierAccount.isRead === true ){
+      newResourceOptions.push(resourceOptions[i]);
+    }
+ }
+ if(resourceOptions[i] === 'Supplier Contact'){
+  if(permissions.supplierContact.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+if(resourceOptions[i] === 'Lead'){
+  if(permissions.lead.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+if(resourceOptions[i] === 'Opportunity'){
+  if(permissions.opportunity.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+if(resourceOptions[i] === 'Customer Account'){
+  if(permissions.customerAccount.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+if(resourceOptions[i] === 'Quote'){
+  if(permissions.quoteBuilder.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+if(resourceOptions[i] === 'Rental Management'){
+  if(permissions.rentalManagement.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+if(resourceOptions[i] === 'Delivery Ticket'){
+  if(permissions.deliveryTicket.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+if(resourceOptions[i] === "Project Sales"){
+  if(permissions.projectSales.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+  }
+
+
 
 
 
@@ -119,7 +185,7 @@ const Board = ({ type, filter }) => {
     <>
       <Box display="flex" pb={1}>
         <Autocomplete
-          options={resourceOptions}
+          options={newResourceOptions}
           getOptionLabel={(option) => option}
           style={{ width: '50%' }}
           value={resource}

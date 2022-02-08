@@ -318,7 +318,7 @@ const ProductInventoryDetailsPage = () => {
 
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
-      .post(`${repairJob.repairJobApi}/${repairJobId}/add-assets`, { "ids": [id] })
+      .post(`${repairJob.api}/${repairJobId}/add-assets`, { "ids": [id] })
       .then(({ data }) => {
         // toastConfig.setToastConfig({
         //   type: 'success',
