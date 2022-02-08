@@ -447,6 +447,7 @@ const Report = () => {
                 setSelectedReportView={setSelectedReportView}
                 selectedReportView={selectedReportView}
                 reportList={reportList}
+                setReportList={setReportList}
               />
             ) : (
               <div>
