@@ -59,7 +59,7 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
             })
         }
 
-        axiosInstance().put(`${repairJob.repairJobApi}/${_id}/update-assets`, prepareDataToUpdate).then(() => {
+        axiosInstance().put(`${repairJob.api}/${_id}/update-assets`, prepareDataToUpdate).then(() => {
             setIsUpdating(false);
             onSuccess();
         }).catch((error) => {
