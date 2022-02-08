@@ -11,8 +11,7 @@ import {
   ListItemSecondaryAction,
   ListSubheader,
   Switch,
-  Button,
-  TextField
+  Button
 } from '@material-ui/core';
 import { DragHandle } from '@material-ui/icons';
 import { XYCoord } from 'dnd-core';
@@ -23,8 +22,6 @@ import update from 'immutability-helper';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../axios/axiosInstance';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -62,8 +59,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const [newData, setNewData] = React.useState('');
   const [allChecked, setAllChecked] = React.useState(false);
   const [hasChanged, setHasChanged] = React.useState(false);
-  const toastConfig = React.useContext(CustomToastContext);
-  const [reportName, setReportName] = React.useState(renderedFrom.split("_").length > 2 ? renderedFrom.split("_")[2] : '');
+
   const [lockedItem, setLockedItem] = React.useState({
     index: 0,
     column: {}
@@ -147,34 +143,6 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       updateGridHiddenColumns(hidedColumns);
     }
     const columnState = JSON.stringify(columnApi.getColumnState());
-    if (renderedFrom.includes("report")) {
-      let renderedFromArray = renderedFrom.split("_")
-      if (renderedFromArray.length > 2) {
-        axiosInstance().put(`/report-colum-setting/${renderedFromArray[3]}`, { type: renderedFromArray[0], columnState: columnState, name: reportName })
-          .then(({ data }) => {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: data?.message
-            });
-          }).catch((error) => {
-            toastConfig.setToastConfig(error)
-          });
-      }
-      else {
-        axiosInstance().post(`/report-colum-setting`, { type: renderedFromArray[0], columnState: columnState, name: reportName })
-          .then(({ data }) => {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: data?.message
-            });
-          }).catch((error) => {
-            toastConfig.setToastConfig(error)
-          });
-      }
-
-    }
     localStorage.setItem(renderedFrom, columnState);
     onClose();
   };
@@ -203,20 +171,6 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
       <CustomDialogHeader title="Arrange View" onClose={onClose} showRequiredLabel={false} />
       <CustomDialogContent>
-        {renderedFrom.includes("report") &&
-          <TextField
-            variant="outlined"
-            type="text"
-            label="Report Name"
-            name="reportName"
-            fullWidth
-            margin="dense"
-            value={reportName}
-            onChange={(e) => {
-              setReportName(e.target.value.trimStart())
-            }}
-          />
-        }
         <List
           disablePadding
           subheader={
