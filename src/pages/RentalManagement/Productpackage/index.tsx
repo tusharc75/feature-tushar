@@ -12,7 +12,6 @@ import CustomReactTable from "../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import Add from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
-
 import moment from "moment";
 import {
     rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency, CHILD_RESOURCE

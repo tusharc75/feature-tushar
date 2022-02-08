@@ -225,7 +225,7 @@ const RepairJobDetails = () => {
       passedColumns = [...unmodifiedColumns]
     }
 
-    axiosInstance().get(`${repairJob.repairJobApi}/${id}/get-assets`)
+    axiosInstance().get(`${repairJob.api}/${id}/get-assets`)
       .then(({ data: { data } }) => {
 
         step1Dispatch({
@@ -380,7 +380,7 @@ const RepairJobDetails = () => {
   const deleteRepairJobAssets = () => {
     setOkBtnLoading(true)
 
-    axiosInstance().put(`${repairJob.repairJobApi}/${id}/remove-assets`, { ids: showAssetRemoveConfirmationDialog.id ? [showAssetRemoveConfirmationDialog.id] : showAssetRemoveConfirmationDialog.ids })
+    axiosInstance().put(`${repairJob.api}/${id}/remove-assets`, { ids: showAssetRemoveConfirmationDialog.id ? [showAssetRemoveConfirmationDialog.id] : showAssetRemoveConfirmationDialog.ids })
       .then(({ data }) => {
         setOkBtnLoading(false);
         setShowAssetRemoveConfirmationDialog({ open: false, id: null, ids: [] });
@@ -482,7 +482,7 @@ const RepairJobDetails = () => {
 
   const handleDelete = () => {
     axiosInstance()
-      .put(`${repairJob.repairJobApi}/remove`, { ids: [id] })
+      .put(`${repairJob.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
         history.goBack();
@@ -506,13 +506,13 @@ const RepairJobDetails = () => {
       setShowRepairJobCompleteConfirmationDialog(true);
     } else {
       axiosInstance()
-        .put(`${repairJob.repairJobApi}/${id}/process-status`, {
+        .put(`${repairJob.api}/${id}/process-status`, {
           "processStatus": repairJobProcessSteps[nextStep]
         })
         .then(() => {
           //  Update status to Complete when finished steps
           if (repairJobProcessSteps[nextStep] === repairJobProcessSteps[repairJobProcessSteps.length - 1]) {
-            axiosInstance().put(`${repairJob.repairJobApi}/${id}/status`, { "status": REPAIR_JOB_STATUS.completed }).then(() => {
+            axiosInstance().put(`${repairJob.api}/${id}/status`, { "status": REPAIR_JOB_STATUS.completed }).then(() => {
               setCurrentStep(nextStep);
               fetchRepairJobData();
 
@@ -537,7 +537,7 @@ const RepairJobDetails = () => {
 
   const onPreviousButtonClick = (oldStep, previousStep) => {
     axiosInstance()
-      .put(`${repairJob.repairJobApi}/${id}/process-status`, {
+      .put(`${repairJob.api}/${id}/process-status`, {
         "processStatus": repairJobProcessSteps[previousStep]
       })
       .then(() => {
@@ -975,7 +975,7 @@ const RepairJobDetails = () => {
           }}
           onOk={() => {
             setOkBtnLoading(true)
-            axiosInstance().put(`${repairJob.repairJobApi}/${id}/assets-repaired`, { assets: repairAssetDialog.assetId ? [repairAssetDialog.assetId] : repairAssetDialog.assetIds, repaired: true }).then(({ data }) => {
+            axiosInstance().put(`${repairJob.api}/${id}/assets-repaired`, { assets: repairAssetDialog.assetId ? [repairAssetDialog.assetId] : repairAssetDialog.assetIds, repaired: true }).then(({ data }) => {
               toastConfig.setToastConfig({
                 open: true,
                 type: "success",
@@ -1016,7 +1016,7 @@ const RepairJobDetails = () => {
           addSerializedAsset={(newRecordsToAdd) => {
             setIsAdding(true);
 
-            axiosInstance().post(`${repairJob.repairJobApi}/${id}/add-assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
+            axiosInstance().post(`${repairJob.api}/${id}/add-assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
               .then(({ data }) => {
                 setAddSerializedAssetDialog(false)
                 fetchAssignedSerializedAssets();
@@ -1029,7 +1029,7 @@ const RepairJobDetails = () => {
 
                 //  Update status from new to In Progress when assets are created
                 if (repairJobData.status === REPAIR_JOB_STATUS.new) {
-                  axiosInstance().put(`${repairJob.repairJobApi}/${id}/status`, { "status": REPAIR_JOB_STATUS.inProgress })
+                  axiosInstance().put(`${repairJob.api}/${id}/status`, { "status": REPAIR_JOB_STATUS.inProgress })
                 }
 
               }).catch((error) => {

@@ -358,13 +358,13 @@ export const rentalManagement = {
 };
 
 export const deliveryTicket = {
-  deliveryTicketResource: 'deliveryTicket',
-  deliveryTicketApi: '/delivery-ticket'
+  resource: 'deliveryTicket',
+  api: '/delivery-ticket'
 };
 
 export const repairJob = {
-  repairJobResource: 'repairJob',
-  repairJobApi: '/repair-job'
+  resource: 'repairJob',
+  api: '/repair-job'
 };
 
 export const salesOrder = {
