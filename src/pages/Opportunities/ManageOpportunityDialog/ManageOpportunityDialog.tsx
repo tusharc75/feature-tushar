@@ -83,7 +83,7 @@ export default function ManageOpportunityDialog({
   const [accountData, setAccountData] = useState([]);
   const [additionalFieldName, setAdditionalFieldName] = useState('');
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
-
+  const [cloneHeading, setCloneHeading] = useState('')
   const [showAddMarketSegmentDialog, setShowAddMarketSegmentDialog] = useState(false);
   const [mainMarketSegmentDataSource, setMainMarketSegmentDataSource] = useState([]);
   const [marketSegmentDataSource, setMarketSegmentDataSource] = useState([]);
@@ -233,6 +233,7 @@ export default function ManageOpportunityDialog({
             data: { data }
           } = await axiosInstance().get(`${opportunityApi}/${opportunityId}?entity=${selectedEntity}`);
           const { opportunityName, ...rest } = data;
+          setCloneHeading(opportunityName)
           initialData = getObjKeysWithValues({ ...rest }, newFields);
           if (data?.marketSegment?.optionValue && marketSegmentDropdownData) {
             setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter((d) => d.parentMarketSegment === data?.marketSegment?.optionValue));
@@ -422,7 +423,7 @@ export default function ManageOpportunityDialog({
         open={open}
       >
         <CustomDialogHeader
-          title={isClone ? 'Clone' : isNew ? 'Create Opportunity' : `Editing ${dataToUpdate.opportunityName}`}
+          title={isClone ? `Clone - [${cloneHeading}]` : isNew ? 'Create Opportunity' : `Editing ${dataToUpdate.opportunityName}`}
           onClose={(e, reason) => {
             if (isFieldNotTouched(entityData, formValues)) onClose();
             else setShowConfirmDialog(true);

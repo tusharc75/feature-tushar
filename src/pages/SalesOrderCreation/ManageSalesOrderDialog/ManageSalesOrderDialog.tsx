@@ -58,7 +58,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
     const [newAddedAccountId, setNewAddedAccountId] = useState(null);
 
     const [salesDetails, setSalesDetails] = useState(null);
-
+    const[cloneHeading, setCloneHeading] = useState('');
     const [countryBillToDropDown, setCountryBillToDropDown] = useState([]);
     const [countrySellToDropDown, setCountrySellToDropDown] = useState([]);
     const [countryBillToMainData, setCountryBillToMainData] = useState([]);
@@ -206,6 +206,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                     if (isClone) {
                         const { _id, brand, createdBy, entity, history, products, status, salesOrderNo, updatedBy, ...rest } = data
                         rest.status = "New"
+                        setCloneHeading(salesOrderNo)
                         setSalesData({
                             fields: fieldsDataForCreate,
                             initialValues: getObjKeysWithValues(rest, fieldsDataForCreate),
@@ -359,7 +360,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                     title={
                         !salesOrderId
                             ? `Create ${routes.salesOrder.title}`
-                            : `${isClone ? "Clone" : `Update ${salesOrderData?.salesOrderNo}`}`
+                            : `${isClone ? `Clone - [${cloneHeading}]` : `Update ${salesOrderData?.salesOrderNo}`}`
                     }
                     onClose={(e, reason) => {
                         if (isFieldNotTouched(salesData, formValues)) onClose()

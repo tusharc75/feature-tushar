@@ -65,6 +65,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     const [countrySellToDropDown, setCountrySellToDropDown] = useState([]);
     const [countryBillToMainData, setCountryBillToMainData] = useState([]);
     const [countrySellToMainData, setCountrySellToMainData] = useState([]);
+    const [cloneHeading, setCloneHeading] = useState('');
 
     const [showAddWarehouseDialog, setShowAddWarehouseDialog] = useState(false);
     const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
@@ -227,6 +228,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                         rest['actualStartDate'] = new Date();
                         rest['estimateEndDate'] = "";
                         rest['actualEndDate'] = "";
+                        setCloneHeading(rentalJobName);
                         setRentalData({
                             fields: fieldsDataForCreate,
                             initialValues: getObjKeysWithValues(rest, fieldsDataForCreate),
@@ -441,7 +443,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     title={
                         !rentalManagementId
                             ? `Create ${routes.rentalManagement.title}`
-                            : `${isClone ? "Clone" : `Update ${rentalManagementData?.rentalJobName}`}`
+                            : `${isClone ? `Clone - [${cloneHeading}]` : `Update ${rentalManagementData?.rentalJobName}`}`
                     }
                     onClose={(e, reason) => {
                         if (isFieldNotTouched(rentalData, formValues)) onClose()

@@ -350,7 +350,7 @@ export default function ManageAccount(props) {
           title={
             isClone
               ?
-              `Clone ${accountNameForClone}`
+              `Clone - [${accountNameForClone}]`
               :
               isNew
                 ? accountResource === "customerAccount" ? "Add Customer Account" : "Add Supplier Account"
