@@ -48,7 +48,8 @@ const Report = () => {
   const [resourceColumns, setResourceColumns] = React.useState([]);
   const [isExporting, setExporting] = React.useState(false);
   const [loadingColumns, setLoadingColumns] = React.useState(false);
-
+  const [reportList, setReportList] = React.useState([]);
+  const [selectedReportView, setSelectedReportView] = React.useState(null);
   // Grid Configs
   const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
   const { getColumnData } = useColumns();
@@ -58,12 +59,12 @@ const Report = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
   const fetchGridColumns = () => {
-    setLoadingColumns(true)
+    setLoadingColumns(true);
     axiosInstance()
       .get(`/field?resource=${resourceStartCase}`)
       .then(({ data: { data } }) => {
         setResourceColumns(data);
-        setLoadingColumns(false)
+        setLoadingColumns(false);
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
@@ -89,8 +90,8 @@ const Report = () => {
         setColumns([...columns]);
       })
       .catch((error) => {
-        setLoadingColumns(false)
-        toastConfig.setToastConfig(error)
+        setLoadingColumns(false);
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -100,6 +101,22 @@ const Report = () => {
       initialRender.current = false;
     }
   }, []);
+
+  
+  
+  React.useEffect(() => {
+
+    axiosInstance()
+      .get(`/report-colum-setting?type=${resource}`)
+      .then(({ data: { data } }) => {
+        setReportList(data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+   
+  }, [showGrid]);
+
   /**
    * Fetch resource data for selected filters,
    * @returns none if no data selected
@@ -168,7 +185,6 @@ const Report = () => {
         }));
         deepFilter = [...deepFilter, ...filters];
       });
-
 
       if (filterById.length > 0) {
         filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
@@ -272,7 +288,7 @@ const Report = () => {
                       </Box>
                     )}
                     <MdDescription size={22} className="headerLogo" />
-                    <span className="listingHeader">Reports</span>
+                    <span className="listingHeader">{` ${selectedReportView?.name ?? 'Reports'}`}</span>
                   </Box>
                 </Grid>
               </Grid>
@@ -428,6 +444,10 @@ const Report = () => {
                 formValues={formValues}
                 setFormValues={setFormValues}
                 loadingColumns={loadingColumns}
+                setSelectedReportView={setSelectedReportView}
+                selectedReportView={selectedReportView}
+                reportList={reportList}
+                setReportList={setReportList}
               />
             ) : (
               <div>
@@ -465,6 +485,8 @@ const Report = () => {
                     />
                   ) : (
                     <CustomAgGrid
+                      setSelectedReportView={setSelectedReportView}
+                      selectedReportView={selectedReportView}
                       columns={columns}
                       dataRows={dataRows}
                       frameworkComponents={frameWorkComponent}

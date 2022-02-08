@@ -9,7 +9,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import axiosInstance from '../../axios/axiosInstance';
 import { GiStockpiles } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { Box } from '@material-ui/core';
+import { Box, Chip } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
@@ -30,9 +30,10 @@ import { FaSuitcase } from 'react-icons/fa';
 import { MdAdd, MdFilterList, MdSort, RiFileTransferFill, GiCargoShip, RiFolderTransferFill, SiStatuspage } from 'react-icons/all';
 import MobileSortDialog from "../../components/MobileSortDialog"
 import MobileFilterDialog from "../../components/MobileFilterDialog"
-const storedRoutes = localStorage.getItem('routes') ? JSON.parse(localStorage.getItem('routes')) : null;
+
 
 const TransferAsset = () => {
+  
   const toastConfig = useContext(CustomToastContext);
   const [showManageTransferAssetDialog, setShowManageTransferAssetDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -46,13 +47,14 @@ const TransferAsset = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const [open, setOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false)
+  const history = useHistory();
 
+  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
 
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const { getColumnData } = useColumns();
-  const history = useHistory();
 
   useEffect(() => {
     fetchGridColumns();
@@ -60,7 +62,7 @@ const TransferAsset = () => {
 
   useEffect(() => {
     fetchTransferAsset();
-  }, [page, limit, filters, sorting, search, selectedEntity]);
+  }, [page, limit, filters, sorting, search, fromRental, selectedEntity]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -70,7 +72,6 @@ const TransferAsset = () => {
         let rendererNames = [];
         data.forEach((o) => {
           let currentColumn = getColumnData(routes.transferAsset?.title, o?.fieldData, routes.transferAssetDetail.path);
-
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -129,9 +130,15 @@ const TransferAsset = () => {
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (fromRental) {
+      let filterById = [];
+      filterById.push({ field: "rentalJob", term: fromRental?._id });
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
+    }
+
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
-
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
@@ -153,7 +160,6 @@ const TransferAsset = () => {
   };
 
   const columnState = JSON.parse(localStorage.getItem(routes.transferAsset?.title));
-
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
@@ -163,7 +169,6 @@ const TransferAsset = () => {
       });
     });
   }
-
 
   const handleDelete = () => {
     let ids = [];
@@ -316,7 +321,6 @@ const TransferAsset = () => {
                   >
                     Sort
                   </Button>
-
                   <MobileSortDialog
                     isOpen={open}
                     handleClose={handleClickClose}
@@ -325,9 +329,6 @@ const TransferAsset = () => {
                     columns={columns}
                     dispatch={dispatch}
                   />
-
-
-
                   <Button
                     id="demo-customized-button"
                     aria-controls="demo-customized-menu"
@@ -341,8 +342,6 @@ const TransferAsset = () => {
                   >
                     Filter
                   </Button>
-
-
                   <MobileFilterDialog
                     isOpen={isOpenDialog}
                     handleClose={handleClose}
@@ -352,7 +351,16 @@ const TransferAsset = () => {
                     dispatch={dispatch}
                   />
                 </div>}
-
+              {fromRental && (
+                <Chip
+                  className="ml-3"
+                  color="primary"
+                  label={`Rental Job : ${fromRental?.rentalJobName}`}
+                  onDelete={() => {
+                    setFromRental(null);
+                  }}
+                />
+              )}
             </Grid>
             <Grid xs={12} sm={12} md={6} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -526,7 +534,7 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.transferAsset?.title?.toLowerCase() : RESOURCE_LABEL.transferAsset?.toLowerCase()
+          message={`Are you sure you want to delete the ${routes.transferAsset?.title?.toLowerCase()
             } ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''} ? `}
           onClose={() => {
             setShowDeleteConfirmBox(false);

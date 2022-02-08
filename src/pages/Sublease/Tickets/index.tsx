@@ -65,7 +65,7 @@ const Tickets = ({ subleaseData }) => {
             gridApi.setRowData([]);
         }
         let data;
-        const response = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.sublease}&refrenceId=${subleaseData._id}`)
+        const response = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.sublease}&refrenceId=${subleaseData._id}`)
         data = response?.data?.data
         let rows = data.map((u) => {
             let res = {

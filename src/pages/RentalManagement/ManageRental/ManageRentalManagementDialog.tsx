@@ -11,7 +11,7 @@ import { useData } from "../../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
 import {
     CustomDialogTransition, customerAccount, customerContact, getCollaboratorDropdownDataSource, getObjKeys, getObjKeysWithValues,
-    getOwnerDropdownDataSource, isFieldNotTouched, rentalManagement, setFieldsInAscendingOrder, yupSchema, generateUniqueIdOnly
+    getOwnerDropdownDataSource, isFieldNotTouched, rentalManagement, setFieldsInAscendingOrder, yupSchema, generateUniqueIdOnly, RENTAL_STATUS
 } from "../../../constants/helpers";
 import axiosInstance from '../../../axios/axiosInstance'
 import Dialog from "@material-ui/core/Dialog";
@@ -798,7 +798,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                         ) : ["actualStartDate", "actualEndDate"].includes(field.fieldName) ? (
                                                                             <FormTypes
                                                                                 {...field}
-                                                                                disabled={values["status"] === "Ready to Invoice" ? false : true}
+                                                                                disabled={values["status"] === RENTAL_STATUS.readyToInvoice ? false : true}
                                                                                 fieldData={field}
                                                                                 values={values}
                                                                                 errors={errors}

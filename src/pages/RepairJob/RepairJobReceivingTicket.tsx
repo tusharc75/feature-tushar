@@ -106,7 +106,7 @@ const RepairJobReceivingTicket = (props) => {
 
         localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
 
-        axiosInstance().get(`${repairJob.repairJobApi}/${repairJobData._id}/get-assets`)
+        axiosInstance().get(`${repairJob.api}/${repairJobData._id}/get-assets`)
             .then(({ data }) => {
                 let tempProductInventory = data.data.map(u => ({ ...u, _id: u?.id, productName: u?.product?.optionLabel }))
                 dispatch({ type: "loading", loading: true });
@@ -430,7 +430,7 @@ const RepairJobReceivingTicket = (props) => {
                         const groupByCalls = groupBy(selectedRecords, "receivingTicketId");
                         let apiCalls = [];
                         Object.keys(groupByCalls).forEach((key) => {
-                            apiCalls.push(axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
+                            apiCalls.push(axiosInstance().put(`${deliveryTicket.api}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
                         })
                         Promise.all(apiCalls).then(() => {
                             toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged Receiving Ticket(s)` });
