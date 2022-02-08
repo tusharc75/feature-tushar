@@ -66,7 +66,7 @@ const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNe
       productAssets = response?.data?.data
       productAssets = productAssets.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
 
-      const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=Sales Order&refrenceId=${salesOrderData._id}`)
+      const result = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=Sales Order&refrenceId=${salesOrderData._id}`)
       deliveryTicketList = result?.data?.data
 
       deliveryTicketList.map(obj => {
@@ -300,7 +300,7 @@ const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNe
             let apiCalls = [];
 
             Object.keys(groupByCalls).forEach((key) => {
-              apiCalls.push(axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
+              apiCalls.push(axiosInstance().put(`${deliveryTicket.api}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
             })
 
             Promise.all(apiCalls).then(() => {

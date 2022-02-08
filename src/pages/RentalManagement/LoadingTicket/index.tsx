@@ -113,7 +113,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           currentOwner: u?.currentOwner,
           currentLocation: u?.currentLocation?.optionValue,
         }))
-        const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
+        const result = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
         deliveryTicketList = result?.data?.data
       }
       if (deliveryTicketList.length) {
@@ -485,7 +485,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
             Object.keys(groupByCalls).forEach((key) => {
               apiCalls.push(
-                axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) })
+                axiosInstance().put(`${deliveryTicket.api}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) })
               );
             });
 
