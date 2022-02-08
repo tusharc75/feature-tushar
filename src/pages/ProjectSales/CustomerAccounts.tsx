@@ -807,7 +807,7 @@ const CustomerAccounts = (props) => {
                           {permissions?.isRead && (
                             <OpportunityAccordianProjectSales
                               opportunities={opportunities.filter(
-                                (o) => o.customerAccountName === c._id
+                                (o) => o.customerAccount === c._id
                               )}
                               onNewOpportunityAdd={(id) => {
                                 saveOppToProject(id);
@@ -834,7 +834,7 @@ const CustomerAccounts = (props) => {
                             permissions?.isRead && (
                               <QuotesAccordionInProjectSale
                                 expanded={true}
-                                quotes={quotes.filter((q) => q.customerAccountName === c._id)}
+                                quotes={quotes.filter((q) => q.customerAccount === c._id)}
                                 recordsPerLine={3}
                                 accountId={c._id}
                                 accountResource={"customerAccount"}
