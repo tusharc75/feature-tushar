@@ -330,7 +330,7 @@ const OpportunityDashboards = (props) => {
                 fullWidth
                 options={marketSegments.filter(d => !d.parentSegment)}
                 autoHighlight
-                value={currentFilter === "customerAccount" ? customerAccountFilter.customerAccount : currentFilter === "quote" ? qouteFilter.customerAccount : salesRepFilter.marketSegment}
+                value={currentFilter === "customerAccount" ? customerAccountFilter.marketSegment : currentFilter === "quote" ? qouteFilter.marketSegment : salesRepFilter.marketSegment}
                 getOptionLabel={(option: any) => option.name || ''}
                 getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
                 onChange={(_, val) => {
