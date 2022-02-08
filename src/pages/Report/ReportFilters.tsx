@@ -24,9 +24,9 @@ interface FiltersProps {
   setResourceOptions: any;
   formValues: any;
   setFormValues: any;
-  loadingColumns?: boolean
-  setSelectedReport: any;
-  selectedReport: any;
+  loadingColumns?: boolean;
+  setSelectedReportView: any;
+  selectedReportView: any;
   reportList: any;
 }
 
@@ -47,9 +47,9 @@ const ReportFilters = (props: FiltersProps) => {
     formValues,
     setFormValues,
     loadingColumns,
-    setSelectedReport,
-    selectedReport,
-    reportList,
+    setSelectedReportView,
+    selectedReportView,
+    reportList
   } = props;
 
   React.useEffect(() => {
@@ -69,7 +69,7 @@ const ReportFilters = (props: FiltersProps) => {
         return d.fieldData;
       });
     setResourceOptions(optionsData);
-    setFormValues({ ...getObjKeys('', filteredData), status: '', owner: "" });
+    setFormValues({ ...getObjKeys('', filteredData), status: '', owner: '' });
     setFilterOptions([{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...filteredData]);
   }, [resourceColumns]);
 
@@ -101,16 +101,19 @@ const ReportFilters = (props: FiltersProps) => {
   return (
     <Container maxWidth="sm">
       <Box height={'100%'} my={2}>
-        {reportList.length !== 0 && <Autocomplete
+        <Autocomplete
           options={reportList}
-          value={selectedReport}
+          value={selectedReportView}
+          noOptionsText="No views were found"
           onChange={(_, val) => {
-            setSelectedReport(val);
+            setSelectedReportView(val);
           }}
           fullWidth
           getOptionLabel={(option) => option.name}
-          renderInput={(params) => <TextField {...params} variant="outlined" label="Select Report" size="small" />}
-        />}
+          renderInput={(params) => 
+            <TextField {...params} variant="outlined" label="Select View" size="small" />
+          }
+        />
       </Box>
       <Box height={'100%'} my={2}>
         <Autocomplete

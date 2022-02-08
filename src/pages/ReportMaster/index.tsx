@@ -1,4 +1,4 @@
-import { Grid, Typography, Box } from '@material-ui/core';
+import { Grid, Typography, Box, Container } from '@material-ui/core';
 import styles from '../Leads/Header.module.scss';
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -29,10 +29,11 @@ const ReportMaster = () => {
                 </Grid>
             </div>
             <hr />
+            <Container maxWidth='lg'>
             <Box p={3}>
                 <Grid container spacing={2}>
                     {REPORT_LIST.map((report:any) =>{
-                       return permissions[report.key]?.isRead && <Grid key={report.key} item xs={12} sm={3}>
+                       return permissions[report.key]?.isRead && <Grid key={report.key} item xs={12} sm={2} md={3} lg={4}>
                             <Link to={`/reports${routes[report.key]?.path}`}>
                                 <Box border={1} borderColor='grey.300' bgcolor='grey.100' borderRadius={1} p={2} >
                                     <Typography variant="h6">
@@ -43,7 +44,8 @@ const ReportMaster = () => {
                         </Grid>
                     })}
                 </Grid>
-            </Box>
+               </Box>
+            </Container>
         </div>
     </div>
     );
