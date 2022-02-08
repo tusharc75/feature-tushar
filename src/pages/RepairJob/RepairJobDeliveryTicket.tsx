@@ -89,7 +89,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
     });
 
     axiosInstance()
-      .get(`${repairJob.repairJobApi}/${repairJobData._id}/get-assets`)
+      .get(`${repairJob.api}/${repairJobData._id}/get-assets`)
       .then(({ data }) => {
         setAssignedSerializedAsset(data.data);
         let tempProductInventory = data.data.map((u) => ({
@@ -520,7 +520,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
 
             Object.keys(groupByCalls).forEach((key) => {
               apiCalls.push(
-                axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) })
+                axiosInstance().put(`${deliveryTicket.api}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) })
               );
             });
 
@@ -568,7 +568,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
           onOk={() => {
             setOkBtnLoading(true);
             axiosInstance()
-              .put(`${repairJob.repairJobApi}/${repairJobData._id}/assets-repaired`, {
+              .put(`${repairJob.api}/${repairJobData._id}/assets-repaired`, {
                 assets: repairAssetDialog.assetId ? [repairAssetDialog.assetId] : repairAssetDialog.assetIds,
                 repaired: true
               })

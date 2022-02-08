@@ -18,11 +18,12 @@ import { ConsoleView, isMobile } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
-import { prepareDataForGrid, productTemplate } from "../../../constants/helpers";
+import { prepareDataForGrid } from "../../../constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
 import { GrBusinessService } from "react-icons/all";
 import AddExistingMaterialDialog from "../AddExistingMaterialDialog";
 import ConditionDialog from "./ConditionDialog";
+import ConditionDialogOld from "./../AddConditions/ConditionDialog";
 import { startCase } from 'lodash';
 import InfoIcon from "@material-ui/icons/Info";
 
@@ -41,6 +42,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
     const [showDialog, setShowDialog] = useState({ open: false, isBulkedit: false })
     const [conditionData, setConditionData] = useState(null)
 
+    const [showDialogOld, setShowDialogOld] = useState({ open: false, isBulkedit: false })
+
     useEffect(() => {
         fetchCondition()
     }, [pricingConditionId]);
@@ -51,7 +54,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             gridApi.setRowData([]);
         }
         setCondition(null);
-        axiosInstance().get(`${pricingCondition.api}/condition/${pricingConditionId}`).then(({ data: { data } }) => {
+        axiosInstance().get(`${pricingCondition.api}/${pricingConditionId}/condition`).then(({ data: { data } }) => {
             setCondition(JSON.parse(JSON.stringify(data)));
             data.forEach((element) => {
                 element.detail = `${element.materialType === "product" ? element.productDetail?.productName : element.packageDetail?.packageName}`
@@ -72,7 +75,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         rows.forEach(element => {
             data.push({ materialId: element._id, materialType: addMaterialDialog.materialType })
         });
-        axiosInstance().post(`${pricingCondition.api}/condition/${pricingConditionId}`, { condition: data }).then(({ data: { data } }) => {
+        axiosInstance().post(`${pricingCondition.api}/${pricingConditionId}/condition`, { condition: data }).then(({ data: { data } }) => {
             setAddMaterialDialog({ open: false, materialType: "" });
             fetchCondition()
         }).catch((error) => {
@@ -81,7 +84,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
     }
 
     const handleDelete = (ids) => {
-        axiosInstance().post(`${pricingCondition.api}/condition/remove/${pricingConditionId}`, { ids })
+        axiosInstance().post(`${pricingCondition.api}/${pricingConditionId}/condition/remove`, { ids })
             .then(() => {
                 fetchCondition()
             }).catch((error) => {
@@ -120,8 +123,30 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         </Fragment>
     );
 
+
+
+
     const ActionsRenderer = (params) => (
         <>
+            <HtmlTooltip title="Edit Old">
+                <IconButton
+                    size="small"
+                    aria-label="Edit"
+                    onClick={() => {
+
+                        const result = condition.filter((e) => e._id === params.data._id);
+
+                        if (result.length) {
+                            setShowDialogOld({ open: true, isBulkedit: false })
+                            setConditionData(result[0])
+                        }
+
+                    }}
+                >
+                    <EditIcon color="primary" />
+                </IconButton>
+            </HtmlTooltip>
+
             <HtmlTooltip title="Edit">
                 <IconButton
                     size="small"
@@ -131,12 +156,13 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                     <EditIcon color="primary" />
                 </IconButton>
             </HtmlTooltip>
+
             <GridDeleteIcon
                 hasDeletePermission={permissions?.pricingCondition?.isUpdate}
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
                 onDelete={() => {
-                    handleDelete([params.data._id])
+                    handleDelete([params.data.materialId])
                 }}
                 entity="pricingCondition"
             />
@@ -183,7 +209,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 </Button>
             </Box>
             <Box display="flex">
-                <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length > 1) ? "Buld edit selected records" : "Select records to edit"}>
+                {/* <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length > 1) ? "Buld edit selected records" : "Select records to edit"}>
                     <span>
                         <Button
                             variant="contained"
@@ -199,7 +225,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                         </Button>
                     </span>
                 </HtmlTooltip>
-                <Box mx={1} />
+                <Box mx={1} /> */}
                 <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length) ? "Delete selected records" : "Select records to delete"}>
                     <Button
                         variant="contained"
@@ -247,6 +273,24 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 handleAdd={handleAdd}
             />
         )}
+
+        {(showDialogOld.open && conditionData) && (
+            <ConditionDialogOld
+                conditionData={conditionData}
+                detailData={detailData}
+                isBulkedit={showDialogOld.isBulkedit}
+                pricingConditionId={pricingConditionId}
+                handleClose={() => {
+                    setShowDialogOld({ open: false, isBulkedit: false })
+                }}
+                handleSuccess={() => {
+                    setShowDialogOld({ open: false, isBulkedit: false })
+                    fetchCondition()
+                }}
+            />
+        )}
+
+
         {(showDialog.open && conditionData) && (
             <ConditionDialog
                 conditionData={conditionData}

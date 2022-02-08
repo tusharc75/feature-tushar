@@ -86,6 +86,10 @@ const ManageSublease = ({ isClone = false, subleasingId = null, onClose, onSucce
                 }
                 if (refrenceType === "rentalJob") {
                     createValues["rentalJob"] = refrenceId
+                    createValues["estimateStartDate"] = refrenceData.estimateStartDate
+                    createValues["actualStartDate"] = refrenceData.actualStartDate
+                    createValues["estimateEndDate"] = refrenceData.estimateEndDate
+                    createValues["actualEndDate"] = refrenceData.actualEndDate
                 }
                 setInitialData({
                     fields: fieldsDataForCreate,
@@ -147,6 +151,10 @@ const ManageSublease = ({ isClone = false, subleasingId = null, onClose, onSucce
                         element.unit = d.unit;
                         element.qty = d.assetsCount;
                         element.parentId = null;
+                        element.estimateStartDate = refrenceData?.estimateStartDate;
+                        element.estimateEndDate = refrenceData?.estimateEndDate;
+                        element.actualStartDate = refrenceData?.actualStartDate;
+                        element.actualEndDate = refrenceData?.actualEndDate;
                         material.push(element);
                     });
                     axiosInstance().post(`${sublease.api}/productpackage/${data._id}`, { material })

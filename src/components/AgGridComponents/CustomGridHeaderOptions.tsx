@@ -8,14 +8,16 @@ import { useData } from '../../StateProvider/Provider';
 import { disabledColumns, getSortedColumns } from "../../constants/columns"
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import ArrangeViewDialog from './ArrangeViewDialog';
+import ReportArrangeView from './ReportArrangeView';
 
 let timeout
 export default function CustomGridHeaderOptions({ columns, setColumns, columnApi,
   refreshGrid = null, renderedFrom = null, isClientSideGrid = false, dispatch: gridDispatch = null, showOnlyShowFilteredRecordSwitch = false,
-  saveColumnOptions = false, selectedRecords = []
+  saveColumnOptions = false, selectedRecords = [], selectedReportView = null, setSelectedReportView = null
 }) {
 
   const [disableSelectionSwitch, setDisableSelectionSwitch] = useState(true);
+
 
   useEffect(() => {
     const saved = localStorage.getItem(`${renderedFrom}_selected`);
@@ -82,6 +84,19 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
       })
   }
 
+  
+  useEffect(() => {
+    if(!selectedReportView || !columnApi) return
+
+    localStorage.removeItem(renderedFrom)
+
+    const columnView = JSON.parse(selectedReportView.columnState);
+
+    columnApi.setColumnState(columnView);
+
+  },[selectedReportView, columnApi])
+
+
   return (
     <>
       <Box className="ag-grid-listing-grid-header-options border px-2 py-1 d-flex gap-2 justify-content-space-between">
@@ -101,7 +116,7 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
             Arrange View
           </Button>
 
-          <Popover
+          {/* <Popover
             id="columnSelection"
             // open={openColumnSelection}
             open={false}
@@ -194,7 +209,7 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
                 })}
               </FormGroup>
             </FormControl>
-          </Popover>
+          </Popover> */}
           {
             showOnlyShowFilteredRecordSwitch && <>
               <Divider orientation="vertical" flexItem className="mr-2" />
@@ -261,6 +276,20 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
       </Box>
 
       {openColumnSelection && 
+      <>{ renderedFrom.includes("report") ? 
+        <ReportArrangeView
+          columns={columns} 
+          onClose={() => setOpenColumnSelection(false)}
+          updateGridHiddenColumns={updateGridHiddenColumns}
+          saveColumnOptions={saveColumnOptions}
+          setColumns={setColumns}
+          columnApi={columnApi}
+          isClientSideGrid={isClientSideGrid}
+          renderedFrom={renderedFrom}
+          selectedReportView={selectedReportView}
+          setSelectedReportView={setSelectedReportView}
+        />
+        :
         <ArrangeViewDialog 
           columns={columns} 
           onClose={() => setOpenColumnSelection(false)}
@@ -271,6 +300,8 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
           isClientSideGrid={isClientSideGrid}
           renderedFrom={renderedFrom}
         />
+      }
+      </>
       }
     </>
   );

@@ -10,6 +10,7 @@ import { GetReferenceName } from "../../axios/activity";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
+import {useData} from "../../StateProvider/Provider";
 import "./style.scss";
 import {isMobile} from "react-device-detect";
 
@@ -36,7 +37,9 @@ const Activity = ({ type }) => {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { referenceType, referenceId } = parsed;
-
+  const {
+    state: { user, permissions }
+  }: any = useData();
   const [viewType, setViewType] = useState(0);
   const [filter, setFilter] = useState([]);
 
@@ -86,6 +89,7 @@ const Activity = ({ type }) => {
                   handleChangeFilter={handleChangeFilter}
                   filter={filter}
                   activityName={type}
+                  permissions={permissions}
                 />
               </Grid>
             </Grid>

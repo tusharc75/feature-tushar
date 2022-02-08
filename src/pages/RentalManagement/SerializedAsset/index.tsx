@@ -10,7 +10,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
 import {
-  dateFormat, formatAmountWithCurrency, rentalManagement, purchaseOrder,
+  dateFormat, formatAmountWithCurrency, rentalManagement, purchaseOrder, transferAsset,
   sidebarResource, treeToFlatArray, productInventory, INVENTORY_STATUS, CHILD_RESOURCE
 } from "../../../constants/helpers";
 import moment from "moment";
@@ -49,6 +49,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const [rowsData, setRowsData] = useState(null);
   const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], type: "" });
   const [poCount, setPoCount] = useState(0);
+  const [transferAssetCount, setTransferAssetCount] = useState(0);
+
   const { state: { user, permissions, selectedEntity } }: any = useData();
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -57,6 +59,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     fetchFields()
     if (!isOffline) {
       fetchPurchaseOrder()
+      fetchTransferAsset()
     }
   }, []);
 
@@ -268,6 +271,16 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     });
   }
 
+  const fetchTransferAsset = async () => {
+    let filterById = [];
+    filterById.push({ field: "rentalJob", term: rentalManagementData?._id });
+    const queryString = `?filterById=${JSON.stringify(filterById)}`
+    axiosInstance().get(`${transferAsset.api}${queryString}`).then(({ data: { data } }) => {
+      setTransferAssetCount(data.length)
+    }).catch((error) => {
+    });
+  }
+
   const getAssetAssignedValues = (row) => {
     if (row.original?.type === "product") {
       if (row.subRows && row.subRows?.length > 0) {
@@ -286,7 +299,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
 
   const handleAddSerializedAsset = (assets) => {
     let data = [];
-    selectedProducts?.forEach((e: any) => {
+    let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product");
+    flatArray?.forEach((e: any) => {
       if (e.type === "product") {
         let qty = e.qty - e.subRows.length;
         while (qty) {
@@ -452,6 +466,15 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         >
           {isMobile && !isTablet ? <MdDeleteSweep size={20} /> : "Delete Assets"}
         </Button>
+        {transferAssetCount > 0 && <HtmlTooltip title={`Created ${routes.transferAsset.title}`}>
+          <IconButton size="small" onClick={() => {
+            history.push(routes.transferAsset.path, {
+              rental: rentalManagementData,
+            })
+          }}>
+            <InfoIcon color={"primary"} />
+          </IconButton>
+        </HtmlTooltip>}
         <Box mx={1} />
       </Box>
     </Box>
@@ -491,7 +514,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setAddSerializedAssetDialog({ open: false });
         }}
         refrenceType={"Rental Job"}
-        refrenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue }}
+        refrenceData={{ _id: rentalManagementData?._id, warehouse: rentalManagementData?.warehouse?.optionValue }}
         isAdding={isAdding}
         selectedProducts={assetAssignedProduct}
         //queryString={addSerializedAssetDialog.type === "all" ? `notInPlant=${rentalManagementData?.warehouse?.optionValue}&availableAssets=true` : ``}
@@ -554,7 +577,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         currency={rentalManagementData.currency}
         refrenceType="rentalJob"
         refrenceId={rentalManagementData._id}
-        refrenceData={{ material: [...showOrderDialog.products] }}
+        refrenceData={{ ...rentalManagementData, material: [...showOrderDialog.products] }}
       />
     }
   </Fragment>

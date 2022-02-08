@@ -440,6 +440,71 @@ export default function Attachment() {
     setAnchorEl(null);
   };
 
+
+  let newResourceOptions = [];
+
+  for(let i=0; i<resourceOptions.length; i++){
+    if(resourceOptions[i] === 'Customer Account'){
+       if(permissions.customerAccount.isRead === true ){
+         newResourceOptions.push(resourceOptions[i]);
+         i++;
+       }
+    }
+    if(resourceOptions[i] === 'Customer Contact'){
+      if(permissions.customerContact.isRead === true ){
+        newResourceOptions.push(resourceOptions[i]);
+      }
+   }
+   if(resourceOptions[i] === 'Supplier Account'){
+    if(permissions.supplierAccount.isRead === true ){
+      newResourceOptions.push(resourceOptions[i]);
+    }
+ }
+ if(resourceOptions[i] === 'Supplier Contact'){
+  if(permissions.supplierContact.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+if(resourceOptions[i] === 'Lead'){
+  if(permissions.lead.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+if(resourceOptions[i] === 'Opportunity'){
+  if(permissions.opportunity.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+if(resourceOptions[i] === 'Customer Account'){
+  if(permissions.customerAccount.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+if(resourceOptions[i] === 'Quote'){
+  if(permissions.quoteBuilder.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+if(resourceOptions[i] === 'Rental Management'){
+  if(permissions.rentalManagement.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+if(resourceOptions[i] === 'Delivery Ticket'){
+  if(permissions.deliveryTicket.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+if(resourceOptions[i] === "Project Sales"){
+  if(permissions.projectSales.isRead === true ){
+    newResourceOptions.push(resourceOptions[i]);
+  }
+}
+  }
+
+ 
+
+
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -451,7 +516,7 @@ export default function Attachment() {
             <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
               <AiOutlinePaperClip className="headerLogo" /> <span className="listingHeader">{routes.attachment.title} </span>
               <Autocomplete
-                options={resourceOptions}
+                options={newResourceOptions}
                 getOptionLabel={(option) => option}
                 style={{ width: "200px" }}
                 value={resource}
@@ -497,6 +562,7 @@ export default function Attachment() {
                     filter={filter}
                     chip={{ size: 'small' }}
                     activityName="attachment"
+                    permissions={permissions}
                   />
                 </Grid>
 

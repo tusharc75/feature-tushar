@@ -17,7 +17,7 @@ import { FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import { pricingCondition } from "../../constants/helpers";
 import { startCase } from 'lodash';
-import AddConditions from './AddConditions';
+import AddConditions from './AddConditionsNew';
 
 interface TabPanelProps {
   children?: React.ReactNode;

@@ -31,7 +31,6 @@ const ManageDeliveryTicket = (props) => {
 
     const { state: { user } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
-    const { deliveryTicketApi } = deliveryTicket;
     const { deliveryTicketId = null, ticketType, refrenceType = null, refrenceData = null, productInventory = null, onClose, onSuccess,
         warehouseId = null } = props;
 
@@ -135,7 +134,7 @@ const ManageDeliveryTicket = (props) => {
                     data = await findOne(objectStore.deliveryTicket, deliveryTicketId)
                 }
                 else {
-                    const response = await axiosInstance().get(`${deliveryTicketApi}/${deliveryTicketId}`)
+                    const response = await axiosInstance().get(`${deliveryTicket.api}/${deliveryTicketId}`)
                     data = response?.data?.data
                 }
                 setDeliveryTicketData(data)
@@ -350,7 +349,7 @@ const ManageDeliveryTicket = (props) => {
             if (deliveryTicketId) {
                 setSubmitting(true);
                 values._id = deliveryTicketId
-                axiosInstance().put(`${deliveryTicketApi}`, values).then(({ data }) => {
+                axiosInstance().put(`${deliveryTicket.api}`, values).then(({ data }) => {
                     setLoading(false);
                     onSuccess()
                     setSubmitting(false);
@@ -369,7 +368,7 @@ const ManageDeliveryTicket = (props) => {
             else {
                 setSubmitting(true);
                 let updatedValues = { ...values }
-                axiosInstance().post(`${deliveryTicketApi}`, updatedValues).then(({ data }) => {
+                axiosInstance().post(`${deliveryTicket.api}`, updatedValues).then(({ data }) => {
                     setLoading(false);
                     onSuccess()
                     setSubmitting(false);

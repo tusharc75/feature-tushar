@@ -280,21 +280,21 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 </ListItem>
               </Tooltip>
             </Link>
-            {permissions?.rentalManagement?.isRead ?
-              <Link to="/reports">
-                <Tooltip title={!toggleDrawer ? "Reports" : ""}>
-                  <ListItem
-                    button
-                    selected={location.pathname === "/reports"}
-                    className="list-item"
-                  >
-                    <ListItemIcon>
-                      <MdDescription size={16} className="sidebar-icon" />
-                    </ListItemIcon>
-                    <ListItemText primary="Reports" />
-                  </ListItem>
-                </Tooltip>
-              </Link> : null}
+           
+            <Link to="/reports">
+              <Tooltip title={!toggleDrawer ? "Reports" : ""}>
+                <ListItem
+                  button
+                  selected={location.pathname === "/reports"}
+                  className="list-item"
+                >
+                  <ListItemIcon>
+                    <MdDescription size={16} className="sidebar-icon" />
+                  </ListItemIcon>
+                  <ListItemText primary="Reports" />
+                </ListItem>
+              </Tooltip>
+            </Link>
             {user &&
               listItems().map((listItem, i) => (
                 <React.Fragment key={i}>

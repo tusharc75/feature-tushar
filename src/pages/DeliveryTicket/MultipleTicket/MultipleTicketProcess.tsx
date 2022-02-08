@@ -55,7 +55,7 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-            let currentColumn = getColumnData(deliveryTicket.deliveryTicketResource, o?.fieldData, `${routes.deliveryTicket.path}/detail`);
+            let currentColumn = getColumnData(deliveryTicket.resource, o?.fieldData, `${routes.deliveryTicket.path}/detail`);
             if (currentColumn !== null) {
                 columns = [...columns, currentColumn?.columnData];
                 if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -83,7 +83,7 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
                 }
                 let data: any = [], count;
                 if (!isOffline) {
-                    const response = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=${refrenceType}&refrenceId=${refrenceData._id}&ticketType=${ticketType?.toString()}`)
+                    const response = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${refrenceType}&refrenceId=${refrenceData._id}&ticketType=${ticketType?.toString()}`)
                     data = response?.data?.data;
                     count = data?.length;
                 }
@@ -135,7 +135,7 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
             data["_ids"] = selectedRecords.map((d) => d._id);
             data["status"] = DELIVERY_TICKET_MAPPED_STATUS[openSignatureDialog.label]
             data["signatures"] = signatures
-            axiosInstance().post(`${deliveryTicket.deliveryTicketApi}/updatebulk`, data).then(({ data: { data } }) => {
+            axiosInstance().post(`${deliveryTicket.api}/updatebulk`, data).then(({ data: { data } }) => {
                 setUpdating(false)
                 setOpenSignatureDialog({ open: false, label: "" })
                 setSignaturesToSend([])
@@ -215,7 +215,7 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
                         onCreate={null}
                         showClone={false}
                         onClone={() => { }}
-                        renderedFrom={`TicketProcess_${deliveryTicket.deliveryTicketResource}`}
+                        renderedFrom={`TicketProcess_${deliveryTicket.resource}`}
                     />
                 ) : Object.keys(frameWorkComponent).length > 0 ? (
                     <CustomAgGrid
@@ -233,7 +233,7 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
                         loading={loading}
                         allowSelection={true}
                         allowAction={false}
-                        renderedFrom={`TicketProcess_${deliveryTicket.deliveryTicketResource}`}
+                        renderedFrom={`TicketProcess_${deliveryTicket.resource}`}
                         refreshGrid={fetchDeliveryTicket}
                     />
                 ) : null :
