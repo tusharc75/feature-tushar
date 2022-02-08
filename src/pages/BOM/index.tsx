@@ -17,7 +17,7 @@ import { IconButton, Tooltip } from "@material-ui/core";
 import { useData } from "../../StateProvider/Provider";
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-
+import AssignProductDialog from '../../components/AssignRolesDialog/AssignProductDialog';
 import ConfirmationDialogRaw from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
@@ -35,6 +35,7 @@ const BOMTable = () => {
   const { state: { permissions, user, selectedEntity } }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
   const [columns, setColumns] = useState([]);
+  const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
   const [isAllChecked, setIsAllChecked] = useState(false);
   const localStorageSelectedRecords = `${routes.product.title}_selected`;
   const [anchorEl, setAnchorEl] = useState(null);
@@ -352,8 +353,8 @@ const BOMTable = () => {
                       startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
-                        "condo"
-                        // setShowManageBudgetDialog({ show: true, id: null, isClone: false });
+                        setOpenAssignProductDialog(true);
+                       
                       }}
                     >
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
@@ -422,6 +423,21 @@ const BOMTable = () => {
         }}
         onOk={handleRemove}
       />}
+           {openAssignProductDialog && (
+        <AssignProductDialog
+          productsDialogOpen={openAssignProductDialog}
+          productId={id}
+          handleCloseDialog={() => setOpenAssignProductDialog(false)}
+          assignedProducts={BOMData}
+          onSuccess={() => {
+            // getFrequentlyBoughtProduct();
+            if (process.env.REACT_APP_ENV !== 'staging') {
+              fetchBOMData();
+            }
+            setOpenAssignProductDialog(false);
+          }}
+        />
+      )}
     </div>
   );
 };
