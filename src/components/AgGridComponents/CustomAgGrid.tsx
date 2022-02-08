@@ -153,7 +153,9 @@ export default function CustomAgGrid({
   idProperty = "_id",
   allowHeaderSelection = true,
   pinnedBottomRowData = null,
-  rowClassRules = null
+  rowClassRules = null,
+  selectedReportView = null,
+  setSelectedReportView = null
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -363,6 +365,8 @@ export default function CustomAgGrid({
 
         <div style={{ opacity: loading ? 0.5 : 1 }}>
           <CustomGridHeaderOptions
+            setSelectedReportView={setSelectedReportView}
+            selectedReportView={selectedReportView}
             columns={columns}
             setColumns={setColumns}
             columnApi={columnApi}
