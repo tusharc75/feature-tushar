@@ -74,7 +74,6 @@ export default function DeliveryTicketDetail(props) {
   const [submittingSign, setSubmittingSign] = useState(false);
   const [openSignatureDialog, setOpenSignatureDialog] = useState(false);
   const [signatures, setSignatures] = useState([]);
-  const { deliveryTicketApi } = deliveryTicket;
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [deliveryTicketFields, setDeliveryTicketFields] = useState([]);
@@ -217,7 +216,7 @@ export default function DeliveryTicketDetail(props) {
           data = await findOne(objectStore.deliveryTicket, id)
         }
         else {
-          const response = await axiosInstance().get(`${deliveryTicketApi}/${id}?entity=${selectedEntity}`)
+          const response = await axiosInstance().get(`${deliveryTicket.api}/${id}?entity=${selectedEntity}`)
           data = response?.data?.data
         }
         getDeliveryTicketFields(data)
@@ -342,7 +341,7 @@ export default function DeliveryTicketDetail(props) {
   const handleDeleteLoadingTicket = () => {
     if (deliveryTicketData?._id) {
       axiosInstance()
-        .put(`${deliveryTicketApi}/remove?entity=${selectedEntity}`, {
+        .put(`${deliveryTicket.api}/remove?entity=${selectedEntity}`, {
           ids: [deliveryTicketData._id],
         })
         .then(({ data }) => {
@@ -375,7 +374,7 @@ export default function DeliveryTicketDetail(props) {
       let values = getObjKeysWithValues(deliveryTicketData, fieldsDataForUpdate)
       values["status"] = DELIVERY_TICKET_MAPPED_STATUS[label]
       values["_id"] = deliveryTicketData._id
-      axiosInstance().put(`${deliveryTicketApi}`, values).then(({ data: { data } }) => {
+      axiosInstance().put(`${deliveryTicket.api}`, values).then(({ data: { data } }) => {
         fetchDeliveryTicketData()
       }).catch((error) => {
         toastConfig.setToastConfig(error);
@@ -416,7 +415,7 @@ export default function DeliveryTicketDetail(props) {
       }
       else {
         setSubmittingSign(true)
-        axiosInstance().put(`${deliveryTicketApi}/signature`, {
+        axiosInstance().put(`${deliveryTicket.api}/signature`, {
           _id: id,
           signatures: [...signaturesToSend]
         }).then(() => {
@@ -433,7 +432,7 @@ export default function DeliveryTicketDetail(props) {
   }
 
   const handleViewPdf = (download) => {
-    axiosInstance().get(`${deliveryTicketApi}/${id}/pdf`)
+    axiosInstance().get(`${deliveryTicket.api}/${id}/pdf`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -470,7 +469,7 @@ export default function DeliveryTicketDetail(props) {
 
   const handleReceiveCustomerSign = () => {
     if (deliveryTicketData?.customerAccount?.optionValue) {
-      axiosInstance().post(`${deliveryTicketApi}/receive-customer-sign`, { "id": deliveryTicketData.customerAccount.optionValue, "deliveryTicketId": id }).then(({ data: { data } }) => {
+      axiosInstance().post(`${deliveryTicket.api}/receive-customer-sign`, { "id": deliveryTicketData.customerAccount.optionValue, "deliveryTicketId": id }).then(({ data: { data } }) => {
         toastConfig.setToastConfig({ open: true, type: "success", message: data })
 
       }).catch((error) => {
@@ -781,7 +780,7 @@ export default function DeliveryTicketDetail(props) {
                   <div>
                     <Activity
                       resourceId={deliveryTicketData?._id}
-                      resource={deliveryTicket.deliveryTicketResource}
+                      resource={deliveryTicket.resource}
                       // restrictedAddActivities={["Attachment", "Case"]}
                       relatedTo={[
                         {
@@ -853,7 +852,7 @@ export default function DeliveryTicketDetail(props) {
             }}
             onOk={() => {
               setOkBtnLoading(true);
-              axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${id}/remove-assets`, { ids: selectedRecords.map(m => m._id) })
+              axiosInstance().put(`${deliveryTicket.api}/${id}/remove-assets`, { ids: selectedRecords.map(m => m._id) })
                 .then(() => {
                   toastConfig.setToastConfig({ open: true, type: "success", message: `Selected serialized asset(s) removed` });
                   dispatch({
@@ -876,7 +875,7 @@ export default function DeliveryTicketDetail(props) {
         {addSerializedAssetDialog &&
           <AddSerializedAsset
             addSerializedAsset={(newRecordsToAdd) => {
-              axiosInstance().post(`${deliveryTicket.deliveryTicketApi}/${id}/add-assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
+              axiosInstance().post(`${deliveryTicket.api}/${id}/add-assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
                 .then(({ data }) => {
                   setAddSerializedAssetDialog(false)
                   fetchDeliveryTicketData()

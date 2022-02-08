@@ -39,6 +39,8 @@ import { RiExchangeFundsLine } from 'react-icons/ri';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 import ManageRepairJob from '../../RepairJob/ManageRepairJob'
+import HtmlTooltip from "../../../components/CustomTooltipTitle";
+import InfoIcon from '@material-ui/icons/Info';
 
 const renderedFrom = 'rentalManagementDetailsPageReceivingTicket';
 
@@ -76,6 +78,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
 
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
+  const [repairJobCount, setRepairJobCount] = useState(0);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -87,6 +90,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
   useEffect(() => {
     fetchRecords();
+    if (!isOffline) {
+      fetchRepairJob()
+    }
   }, []);
 
   const fetchRecords = async () => {
@@ -108,7 +114,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         productAssets = response?.data?.data;
         productAssets = productAssets.map((d) => d.inventory).map((u) => ({ ...u, productName: u?.product?.optionLabel }));
 
-        const result = await axiosInstance().get(`${deliveryTicket.deliveryTicketApi}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}`)
+        const result = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}`)
         deliveryTicketList = result?.data?.data
       }
 
@@ -157,6 +163,16 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       toastConfig.setToastConfig(error);
     }
   };
+
+  const fetchRepairJob = async () => {
+    let filterById = [];
+    filterById.push({ field: "rentalJob", term: rentalManagementData?._id });
+    const queryString = `?filterById=${JSON.stringify(filterById)}`
+    axiosInstance().get(`${repairJob.api}${queryString}`).then(({ data: { data } }) => {
+      setRepairJobCount(data.length)
+    }).catch((error) => {
+    });
+  }
 
   const InventoryRenderer = (params) => (
     <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
@@ -245,7 +261,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
-      .post(`${repairJob.repairJobApi}/${repairJobId}/add-assets`, { "ids": selectedRecords?.map(s => s._id) })
+      .post(`${repairJob.api}/${repairJobId}/add-assets`, { "ids": selectedRecords?.map(s => s._id) })
       .then(({ data }) => {
       })
       .catch((error) => {
@@ -422,7 +438,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
               </Button>
             </Tooltip>
           </Fragment> : null}
-
         <Box mx={1} />
         {(showProcessDeliveryTicket && !isOffline) &&
           <Fragment>
@@ -441,6 +456,20 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             </Tooltip>
             <Box mx={1} />
           </Fragment>}
+        {repairJobCount > 0 &&
+          <Fragment>
+            <HtmlTooltip title={`Created ${routes.repairJob.title}`}>
+              <IconButton size="small" onClick={() => {
+                history.push(routes.repairJob.path, {
+                  rental: rentalManagementData,
+                })
+              }}>
+                <InfoIcon color={"primary"} />
+              </IconButton>
+            </HtmlTooltip>
+            <Box mx={1} />
+          </Fragment>
+        }
       </Box>
     </Box>
     <Grid item xs={12} md={12} sm={12} className="mt-3">
@@ -547,7 +576,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           let apiCalls = [];
           Object.keys(groupByCalls).forEach((key) => {
             apiCalls.push(
-              axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) })
+              axiosInstance().put(`${deliveryTicket.api}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) })
             );
           });
           Promise.all(apiCalls)

@@ -431,6 +431,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                 onSuccess={(data) => {
                     handleAddAssetToTransferAsset(data?._id);
                 }}
+                refrenceId={refrenceData._id}
                 refrenceType={refrenceType}
                 refrenceData={{
                     transferFromPlant: getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0]?.warehouseId,

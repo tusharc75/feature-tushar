@@ -48,8 +48,6 @@ const DeliveryTicket = () => {
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
 
-  const { deliveryTicketApi, deliveryTicketResource } = deliveryTicket;
-
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -73,7 +71,7 @@ const DeliveryTicket = () => {
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      let currentColumn = getColumnData(deliveryTicketResource, o?.fieldData, `${routes.deliveryTicket.path}/detail`);
+      let currentColumn = getColumnData(deliveryTicket.resource, o?.fieldData, `${routes.deliveryTicket.path}/detail`);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -102,7 +100,7 @@ const DeliveryTicket = () => {
         let data: any = [], count;
         if (!isOffline) {
           const queryString = getQueryString();
-          const response: any = await axiosInstance().get(`${deliveryTicketApi}${queryString}`);
+          const response: any = await axiosInstance().get(`${deliveryTicket.api}${queryString}`);
           data = response?.data?.data;
           count = response?.data?.count;
         }
@@ -245,7 +243,7 @@ const DeliveryTicket = () => {
     }
     if (recordsToDelete.length > 0) {
       axiosInstance()
-        .put(`${deliveryTicketApi}/remove?entity=${selectedEntity}`, {
+        .put(`${deliveryTicket.api}/remove?entity=${selectedEntity}`, {
           ids: recordsToDelete
         })
         .then(({ data }) => {
@@ -281,7 +279,7 @@ const DeliveryTicket = () => {
                   <ImportExportLinks
                     permissions={deliveryPermissions}
                     module="deliveryTicket"
-                    api={deliveryTicketApi}
+                    api={deliveryTicket.api}
                     afterImportCompleted={fetchDeliveryTicket}
                     isExportAllOrSomeFeature={true}
                     onlyExport={true}
@@ -397,7 +395,7 @@ const DeliveryTicket = () => {
               onCreate={null}
               showClone={false}
               onClone={() => { }}
-              renderedFrom={deliveryTicketResource}
+              renderedFrom={deliveryTicket.resource}
             />
           ) : Object.keys(frameWorkComponent).length > 0 ? (
             <CustomAgGrid
@@ -414,7 +412,7 @@ const DeliveryTicket = () => {
               loading={loading}
               allowSelection={true}
               allowAction={false}
-              renderedFrom={deliveryTicketResource}
+              renderedFrom={deliveryTicket.resource}
               refreshGrid={fetchDeliveryTicket}
             />
           ) : null}

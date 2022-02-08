@@ -365,8 +365,18 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       errors['endDate'] = 'Please enter valid end date';
     }
     if (rowData && rowData.hideSelection) {
-      if (values.qty < rowData.assetQty) {
-        errors['qty'] = 'Qty is not less than assigned asset qty.';
+      if (rowData.parentId) {
+        const _package = material?.filter((e) => e._id === rowData.parentId);
+        if (_package.length) {
+          if ((values.qty * _package[0].qty) < rowData.assetQty) {
+            errors['qty'] = 'Qty is not less than assigned asset qty.';
+          }
+        }
+      }
+      else {
+        if (values.qty < rowData.assetQty) {
+          errors['qty'] = 'Qty is not less than assigned asset qty.';
+        }
       }
     }
     return errors;
