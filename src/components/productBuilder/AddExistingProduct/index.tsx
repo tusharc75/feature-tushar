@@ -67,7 +67,12 @@ const AddExistingProduct = (props) => {
             if (productCategory && productCategory !== "") {
                 axiosInstance().post(`/product-template/template/` + productCategory, { entity: null }).then(({ data: { data } }) => {
                     setProductTemplateList(data.data)
-                    setProductTemplate(null);
+                    if (data.data.length) {
+                        setProductTemplate(data.data[0]?.optionValue);
+                    }
+                    else {
+                        setProductTemplate(null);
+                    }
                 })
             }
             else {
