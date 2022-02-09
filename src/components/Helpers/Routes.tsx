@@ -165,13 +165,13 @@ const routes = {
     title: storedRoutes ? storedRoutes.productTemplate?.title : RESOURCE_LABEL.productTemplate,
     path: "/product-template",
   },
-  productInventory: {
-    title: (storedRoutes && storedRoutes.productInventory && storedRoutes.productInventory.title) ? storedRoutes.productInventory.title : RESOURCE_LABEL.productInventory,
-    path: "/product-inventory",
+  serializedAsset: {
+    title: (storedRoutes && storedRoutes.serializedAsset && storedRoutes.serializedAsset.title) ? storedRoutes.serializedAsset.title : RESOURCE_LABEL.serializedAsset,
+    path: "/serialized-asset",
   },
-  productInventoryDetail: {
-    title: (storedRoutes && storedRoutes.productInventory && storedRoutes.productInventory.title) ? storedRoutes.productInventory.title : RESOURCE_LABEL.productInventory,
-    path: "/product-inventory/detail",
+  serializedAssetDetail: {
+    title: (storedRoutes && storedRoutes.serializedAsset && storedRoutes.serializedAsset.title) ? storedRoutes.serializedAsset.title : RESOURCE_LABEL.serializedAsset,
+    path: "/serialized-asset/detail",
   },
   equiptmentRentalMaster: {
     title: (storedRoutes && storedRoutes.equiptmentRentalMaster && storedRoutes.equiptmentRentalMaster) ? storedRoutes.equiptmentRentalMaster.title : RESOURCE_LABEL.equiptmentRentalMaster,

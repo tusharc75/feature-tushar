@@ -74,9 +74,9 @@ import CreateNewQuotePdfTemplate from './pages/QuotePdfTemplate/NewCreateQuotePd
 import QuotePdfTemplate from './pages/QuotePdfTemplate';
 import Warehouse from './pages/Warehouse';
 import WarehouseDetailsPage from './pages/Warehouse/WarehouseDetailsPage';
-import ProductInventory from './pages/ProductInventory';
+import SerializedAsset from './pages/SerializedAsset';
+import SerializedAssetDetailsPage from './pages/SerializedAsset/SerializedAssetDetailsPage';
 import EquipmentRentalMaster from './pages/EquipmentRentalMaster';
-import ProductInventoryDetailsPage from './pages/ProductInventory/ProductInventoryDetailsPage';
 import ProductDetailsPage from './pages/Product/ProductDetailsPage';
 import RentalManagement from './pages/RentalManagement';
 import RentalManagementDetailsPage from './pages/RentalManagement/RentalManagementDetailsPage';
@@ -395,11 +395,11 @@ function App() {
             <PrivateRoute exact path={routes.productDetail.path + '/:id'}>
               <ProductDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.productInventory.path}>
-              <ProductInventory />
+            <PrivateRoute exact path={routes.serializedAsset.path}>
+              <SerializedAsset />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.productInventoryDetail.path + '/:id'}>
-              <ProductInventoryDetailsPage />
+            <PrivateRoute exact path={routes.serializedAssetDetail.path + '/:id'}>
+              <SerializedAssetDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.equiptmentRentalMaster.path}>
               <EquipmentRentalMaster />

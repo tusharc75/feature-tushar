@@ -11,7 +11,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import AddSerializedAsset from "./AddSerializedAsset";
 import {
   dateFormat, formatAmountWithCurrency, rentalManagement, purchaseOrder, transferAsset,
-  sidebarResource, treeToFlatArray, productInventory, INVENTORY_STATUS, CHILD_RESOURCE
+  sidebarResource, treeToFlatArray, serializedAsset, INVENTORY_STATUS, CHILD_RESOURCE
 } from "../../../constants/helpers";
 import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -82,7 +82,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate" title={row.original.detail}  >
             {(row.original?.type === "asset" && !isOffline) ?
-              <a className="link text-truncate" href={`${productInventory.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
+              <a className="link text-truncate" href={`${serializedAsset.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
               row.original.detail}
           </p>
           {row.original?.type === "asset" &&
@@ -408,7 +408,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             setAddSerializedAssetDialog({ open: true })
           }}
         >
-          {isMobile && !isTablet ? <CgAssign size={20} /> : `Assign ${routes.productInventory.title}`}
+          {isMobile && !isTablet ? <CgAssign size={20} /> : `Assign ${routes.serializedAsset.title}`}
         </Button>
         <Box mx={1} />
         <Button

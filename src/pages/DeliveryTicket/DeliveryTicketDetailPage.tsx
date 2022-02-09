@@ -14,7 +14,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import ManageDeliveryTicket from "./ManageDeliveryTicket"
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, gridLoadingTimeout } from "../../constants/helpers"
+import { serializedAsset, gridLoadingTimeout } from "../../constants/helpers"
 import { IoIosArrowDropright, IoIosArrowDropleft, IoMdDownload } from 'react-icons/io';
 import Activity from "../../components/Activity";
 import { isMobile, isTablet } from "react-device-detect";
@@ -149,7 +149,7 @@ export default function DeliveryTicketDetail(props) {
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-          if (["rentalJob", "transferAsset", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
+          if (["rentalJob", "repairJob", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
@@ -260,13 +260,13 @@ export default function DeliveryTicketDetail(props) {
         data = await findOne(objectStore.resource, "productInventory")
       }
       else {
-        const response = await axiosInstance().get(`/field?resource=Product Inventory`)
+        const response = await axiosInstance().get(`/field?resource=Serialized Asset`)
         data = response?.data?.data
       }
       let columns = []
       let rendererNames = []
       data.forEach(o => {
-        let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
+        let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData]
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -309,7 +309,7 @@ export default function DeliveryTicketDetail(props) {
       else {
         let ids = JSON.stringify(productInventories)
         const queryString = `?getById=${ids}`
-        const response = await axiosInstance().get(`${productInventory.api}${queryString}`)
+        const response = await axiosInstance().get(`${serializedAsset.api}${queryString}`)
         data = response?.data?.data
       }
       let rows = data.map((u) => {
@@ -705,7 +705,7 @@ export default function DeliveryTicketDetail(props) {
                           permissions={permissions}
                           primaryField={columns?.find(d => d.field === "assetNumber")}
                           onClick={(data) => {
-                            history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                            history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
                           }}
                           dataRows={dataRows}
                           selectedRecords={selectedRecords}
