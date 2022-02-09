@@ -172,7 +172,7 @@ const Note = () => {
     }
     </>
   );
-  
+
   const CreatedAtDateRenderer = (params) => <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(params.value)}</span>;
 
   const UpdatedAtDateRenderer = (params) =>
@@ -316,63 +316,63 @@ const Note = () => {
 
   let newResourceOptions = [];
 
-  for(let i=0; i<resourceOptions.length; i++){
-    if(resourceOptions[i] === 'Customer Account'){
-       if(permissions.customerAccount.isRead === true ){
-         newResourceOptions.push(resourceOptions[i]);
-         i++;
-       }
+  for (let i = 0; i < resourceOptions.length; i++) {
+    if (resourceOptions[i] === 'Customer Account') {
+      if (permissions.customerAccount.isRead === true) {
+        newResourceOptions.push(resourceOptions[i]);
+        i++;
+      }
     }
-    if(resourceOptions[i] === 'Customer Contact'){
-      if(permissions.customerContact.isRead === true ){
+    if (resourceOptions[i] === 'Customer Contact') {
+      if (permissions.customerContact.isRead === true) {
         newResourceOptions.push(resourceOptions[i]);
       }
-   }
-   if(resourceOptions[i] === 'Supplier Account'){
-    if(permissions.supplierAccount.isRead === true ){
-      newResourceOptions.push(resourceOptions[i]);
     }
- }
- if(resourceOptions[i] === 'Supplier Contact'){
-  if(permissions.supplierContact.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-if(resourceOptions[i] === 'Lead'){
-  if(permissions.lead.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-if(resourceOptions[i] === 'Opportunity'){
-  if(permissions.opportunity.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-if(resourceOptions[i] === 'Customer Account'){
-  if(permissions.customerAccount.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-if(resourceOptions[i] === 'Quote'){
-  if(permissions.quoteBuilder.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-if(resourceOptions[i] === 'Rental Management'){
-  if(permissions.rentalManagement.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-if(resourceOptions[i] === 'Delivery Ticket'){
-  if(permissions.deliveryTicket.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-if(resourceOptions[i] === "Project Sales"){
-  if(permissions.projectSales.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
+    if (resourceOptions[i] === 'Supplier Account') {
+      if (permissions.supplierAccount.isRead === true) {
+        newResourceOptions.push(resourceOptions[i]);
+      }
+    }
+    if (resourceOptions[i] === 'Supplier Contact') {
+      if (permissions.supplierContact.isRead === true) {
+        newResourceOptions.push(resourceOptions[i]);
+      }
+    }
+    if (resourceOptions[i] === 'Lead') {
+      if (permissions.lead.isRead === true) {
+        newResourceOptions.push(resourceOptions[i]);
+      }
+    }
+    if (resourceOptions[i] === 'Opportunity') {
+      if (permissions.opportunity.isRead === true) {
+        newResourceOptions.push(resourceOptions[i]);
+      }
+    }
+    if (resourceOptions[i] === 'Customer Account') {
+      if (permissions.customerAccount.isRead === true) {
+        newResourceOptions.push(resourceOptions[i]);
+      }
+    }
+    if (resourceOptions[i] === 'Quote') {
+      if (permissions.quoteBuilder.isRead === true) {
+        newResourceOptions.push(resourceOptions[i]);
+      }
+    }
+    if (resourceOptions[i] === 'Rental Management') {
+      if (permissions.rentalManagement.isRead === true) {
+        newResourceOptions.push(resourceOptions[i]);
+      }
+    }
+    if (resourceOptions[i] === 'Delivery Ticket') {
+      if (permissions.deliveryTicket.isRead === true) {
+        newResourceOptions.push(resourceOptions[i]);
+      }
+    }
+    if (resourceOptions[i] === "Project Sales") {
+      if (permissions.projectSales.isRead === true) {
+        newResourceOptions.push(resourceOptions[i]);
+      }
+    }
   }
 
 
@@ -432,7 +432,11 @@ if(resourceOptions[i] === "Project Sales"){
               <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
 
                 <Grid style={{ width: "100%", display: "flex" }}>
-                  <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" permissions={permissions}/>
+                  <SearchFilter
+                    handleChangeFilter={handleChangeFilter}
+                    filter={filter}
+                    chip={{ size: 'small' }}
+                    activityName="note" />
                 </Grid>
 
                 <Grid style={{ display: "flex", gap: "5px" }}>
