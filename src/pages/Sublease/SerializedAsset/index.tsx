@@ -69,7 +69,7 @@ const SerializedAsset = ({ subleaseData }) => {
 
     const fetchRecords = async () => {
         const productInventories = []
-        subleaseData?.serializedAsset?.forEach(element => {
+        subleaseData?.productInventory?.forEach(element => {
             productInventories.push(element.inventory)
         });
         if (productInventories.length) {
