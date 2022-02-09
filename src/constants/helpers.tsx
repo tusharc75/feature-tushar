@@ -1565,6 +1565,16 @@ export const DELIVERY_FROM_TO_TYPE = {
   supplier: 'Supplier',
 };
 
+export const SUBLEASE_STATUS = {
+  new: 'New',
+  indTransit: 'In-Transit',
+  issued: 'Issued',
+  completed: 'Completed',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
+  closed: 'Closed',
+};
+
 export const asyncForEach = async (
   array: any[],
   callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>
