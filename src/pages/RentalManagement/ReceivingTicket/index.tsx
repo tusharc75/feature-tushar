@@ -41,6 +41,7 @@ import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 import ManageRepairJob from '../../RepairJob/ManageRepairJob'
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import InfoIcon from '@material-ui/icons/Info';
+import { ExpandMore } from '@material-ui/icons';
 
 const renderedFrom = 'rentalManagementDetailsPageReceivingTicket';
 
@@ -80,12 +81,22 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
   const [repairJobCount, setRepairJobCount] = useState(0);
 
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const openActions = (event) => {
+    setAnchorActionEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorActionEl(null);
   };
 
   useEffect(() => {
@@ -252,11 +263,20 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     data["pickupFrom"] = rentalManagementData?.customerAccount?.optionValue;
     data["pickupFromAddress"] = rentalManagementData.shippingAddress?.optionValue;
     data["deliveryToType"] = deliveryToType;
-    data["deliveryTo"] = rentalManagementData?.warehouse?.optionValue;
-    data["deliveryToAddress"] = rentalManagementData?.warehouse?.address;
+    if (deliveryToType === DELIVERY_FROM_TO_TYPE.supplier) {
+      if (selectedRecords.length) {
+        data["deliveryTo"] = selectedRecords[0].owner;
+        data["deliveryToAddress"] = ""
+      }
+    }
+    else {
+      data["deliveryTo"] = rentalManagementData?.warehouse?.optionValue;
+      data["deliveryToAddress"] = rentalManagementData?.warehouse?.address;
+    }
     data["startDate"] = rentalManagementData?.estimateStartDate;
     data["endDate"] = rentalManagementData?.estimateStartDate;
     setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
+    closeActions()
   };
 
   const handleAddAssetToRepairJob = (repairJobId) => {
@@ -358,107 +378,70 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           }}>{INVENTORY_STATUS.lost}</MenuItem>
         </Menu>
         <Box mx={1} />
-        <Tooltip title="Create Receiving Ticket">
-          <Button
-            variant={isMobile && !isTablet ? "text" : "outlined"}
-            color="primary"
-            size="small"
-            style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
-            onClick={() => {
-              handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant)
-            }}
-            disabled={(selectedRecords.length === 0)
-              || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
+        <Button
+          variant="outlined"
+          color="default"
+          size="small"
+          onClick={openActions}
+          aria-controls="action-menu"
+        >
+          Actions <ExpandMore />
+        </Button>
+        <Menu
+          anchorEl={anchorActionEl}
+          keepMounted
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left'
+          }}
+          id="action-menu"
+          open={Boolean(anchorActionEl)}
+          onClose={closeActions}
+        >
+          <MenuItem
+            disabled={(selectedRecords.length === 0) ||
+              (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
                 || !f.hasOwnProperty("loadingTicketId")
                 || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
-          >
-            {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Create Receiving Ticket'}
-          </Button>
-        </Tooltip>
-        <Box mx={1} />
-        {(selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("receivingTicketId") &&
-          f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedRecords?.length) ?
-          <Fragment>
-            <Tooltip title="Remove Assets From Receiving Ticket(s)">
-              <Button
-                variant={isMobile && !isTablet ? "text" : "outlined"}
-                color="primary"
-                size="small"
-                style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
-                onClick={() => {
-                  setShowRemoveAssetFromReceivingTicketDialog(true)
-                }}
-                disabled={(selectedRecords.length === 0) || (selectedRecords.some(f =>
-                  !f.hasOwnProperty("receivingTicketId") || [INVENTORY_STATUS.underReview].includes(f.status)
-                  || f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered))}
-              >
-                {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : "Remove Receiving Ticket"}
-              </Button>
-            </Tooltip>
-            <Box mx={1} />
-          </Fragment> : null
-        }
-        <Tooltip title="Create Return Ticket">
-          <Button
-            variant={isMobile && !isTablet ? "text" : "outlined"}
-            color="primary"
-            size="small"
-            style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
-            onClick={() => {
-              handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant)
-            }}
+            onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant) }}>
+            Create Receiving Ticket</MenuItem>
+
+          {(selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("receivingTicketId") &&
+            f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedRecords?.length) ?
+            <MenuItem onClick={() => { setShowRemoveAssetFromReceivingTicketDialog(true) }}>Remove Receiving Ticket</MenuItem>
+            : null}
+
+          <MenuItem
+            onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant) }}
             disabled={(selectedRecords.length === 0)
               || (selectedRecords.some(f =>
                 !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
                 || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
           >
-            {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Create Return Ticket'}
-          </Button>
-        </Tooltip>
+            Create Return Ticket</MenuItem>
 
 
-        <Box mx={1} />
-        <Tooltip title="Create Supplier Delivery Ticket">
-          <Button
-            variant={isMobile && !isTablet ? "text" : "outlined"}
-            color="primary"
-            size="small"
-            style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
-            onClick={() => {
-              handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier)
-            }}
+          <MenuItem
+            onClick={() => handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier)}
             disabled={(selectedRecords.length === 0)
               || (selectedRecords.some(f =>
                 !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
                 || !f.subleaseAsset || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
-          >
-            {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Create Supplier Delivery Ticket'}
-          </Button>
-        </Tooltip>
+          >Create Supplier Receiving Ticket</MenuItem>
 
+          {(selectedRecords.length && selectedRecords?.filter(f =>
+            ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+              (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)
+              || f.status === INVENTORY_STATUS.scrap)
+            && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.available].includes(f.status)
+          )?.length === selectedRecords?.length) ?
 
-        {(selectedRecords.length && selectedRecords?.filter(f =>
-          ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-            (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)
-            || f.status === INVENTORY_STATUS.scrap)
-          && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.available].includes(f.status)
-        )?.length === selectedRecords?.length) ?
-          <Fragment>
-            <Box mx={1} />
-            <Tooltip title="Create Repair Job">
-              <Button
-                variant={isMobile && !isTablet ? "text" : "outlined"}
-                color="primary"
-                size="small"
-                style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
-                onClick={() => {
-                  setShowRepairJobDialog(true)
-                }}
-              >
-                {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Create Repair Job'}
-              </Button>
-            </Tooltip>
-          </Fragment> : null}
+            <MenuItem
+              onClick={() => setShowRepairJobDialog(true)}
+            >Create Repair Job</MenuItem>
+            : null}
+        </Menu>
         <Box mx={1} />
         {(showProcessDeliveryTicket && !isOffline) &&
           <Fragment>

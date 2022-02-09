@@ -170,9 +170,13 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     );
 
   const WarehouseRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`}>
-      {params.value}
-    </Link>
+    params?.value ? (
+      <Link className="link text-truncate" title={params.value} to={`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`}>
+        {params.value}
+      </Link>
+    ) : (
+      <NoDataCell />
+    )
   );
 
   const InventoryRenderer = (params) => (
