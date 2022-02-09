@@ -107,7 +107,7 @@ const SubleaseDetailsPage = () => {
             const { data: { data } } = await axiosInstance().get(`${sublease.api}/${id}`);
             setCurrentStep(processSteps.indexOf(data?.processStatus) !== -1 ? processSteps.indexOf(data?.processStatus) : 0);
             const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-            if (data?.productInventory?.length) {
+            if (data?.serializedAsset?.length) {
                 setIsIssued(true)
             }
             setAllowedToEdit(isAllowedToEdit);

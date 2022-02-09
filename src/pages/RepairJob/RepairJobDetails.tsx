@@ -328,7 +328,7 @@ const RepairJobDetails = () => {
           size="small"
           aria-label="Details"
           onClick={() => {
-            window.open(`${routes.productInventoryDetail.path}/${params.data._id}`);
+            window.open(`${routes.serializedAssetDetail.path}/${params.data._id}`);
           }}
         >
           <InfoIcon fontSize="small" />
@@ -371,7 +371,7 @@ const RepairJobDetails = () => {
           onDelete={() => {
             setShowAssetRemoveConfirmationDialog({ open: true, id: params.data._id ?? params.data.id, ids: [] });
           }}
-          entity={sidebarResource.productInventory}
+          entity={sidebarResource.serializedAsset}
         /> : ""
       }
     </div>
@@ -681,7 +681,7 @@ const RepairJobDetails = () => {
                                       setAddSerializedAssetDialog(true)
                                     }}
                                   >
-                                    {isMobile && !isTablet ? <MdAdd size={23}/> : `Add ${routes.productInventory.title}`}
+                                    {isMobile && !isTablet ? <MdAdd size={23}/> : `Add ${routes.serializedAsset.title}`}
                                   </Button>
                                   {
                                     repairJobData && repairJobData["typeOfRepair"] === "Internal" &&
@@ -782,7 +782,7 @@ const RepairJobDetails = () => {
                                       permissions={permissions}
                                       primaryField={step1Columns?.find(d => d.field)}
                                       onClick={(data) => {
-                                        history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                                        history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
                                       }}
                                       dataRows={step1DataRows}
                                       selectedRecords={true}

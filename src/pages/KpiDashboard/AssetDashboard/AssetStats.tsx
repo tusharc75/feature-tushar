@@ -32,7 +32,7 @@ const AssetStats = (props: FilterProps) => {
   const loadAssetsStats = () => {
     setLoadingStats(true);
     axiosInstance()
-      .post('product-inventory/inventory-stats', {
+      .post('serialized-asset/inventory-stats', {
         ids: selectedAssets.map((a) => a.optionValue)
       })
       .then(({ data: { data } }) => {
@@ -55,7 +55,7 @@ const AssetStats = (props: FilterProps) => {
   const searchAssets = () => {
     setLoadingAssets(true)
     axiosInstance()
-      .get(`/product-inventory/search-assets?assetNumber=${searchVal}`)
+      .get(`/serialized-asset/search-assets?assetNumber=${searchVal}`)
       .then(({ data: { data } }) => {
         setAssets(data)
         setLoadingAssets(false)

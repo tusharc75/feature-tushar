@@ -6,7 +6,7 @@ import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { gridLoadingTimeout, productInventory } from '../../../constants/helpers';
+import { gridLoadingTimeout, serializedAsset } from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
@@ -43,12 +43,12 @@ const SerializedAsset = ({ subleaseData }) => {
 
     const fetchGridColumns = () => {
         axiosInstance()
-            .get("/field?resource=Product Inventory")
+            .get("/field?resource=Serialized Asset")
             .then(({ data: { data } }) => {
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
+                    let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -69,7 +69,7 @@ const SerializedAsset = ({ subleaseData }) => {
 
     const fetchRecords = async () => {
         const productInventories = []
-        subleaseData?.productInventory?.forEach(element => {
+        subleaseData?.serializedAsset?.forEach(element => {
             productInventories.push(element.inventory)
         });
         if (productInventories.length) {
@@ -80,7 +80,7 @@ const SerializedAsset = ({ subleaseData }) => {
             let data;
             let ids = JSON.stringify(productInventories)
             const queryString = `?getById=${ids}`
-            const response = await axiosInstance().get(`${productInventory.api}${queryString}`)
+            const response = await axiosInstance().get(`${serializedAsset.api}${queryString}`)
             data = response?.data?.data
             let rows = data.map((u) => {
                 let res = {
@@ -127,7 +127,7 @@ const SerializedAsset = ({ subleaseData }) => {
                         permissions={true}
                         primaryField={columns?.find(d => d.field)}
                         onClick={(data) => {
-                            history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                            history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
                         }}
                         dataRows={dataRows}
                         selectedRecords={selectedRecords}

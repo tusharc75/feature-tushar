@@ -9,7 +9,7 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "../../RentalManagement/SerializedAsset/AddSerializedAsset";
-import { dateFormat, formatAmountWithCurrency, salesOrder, sidebarResource, treeToFlatArray, productInventory } from "../../../constants/helpers";
+import { dateFormat, formatAmountWithCurrency, salesOrder, sidebarResource, treeToFlatArray, serializedAsset } from "../../../constants/helpers";
 import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
@@ -57,7 +57,7 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate" title={row.original.detail}  >
             {(row.original?.type === "asset") ?
-              <a className="link text-truncate" href={`${productInventory.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
+              <a className="link text-truncate" href={`${serializedAsset.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
               row.original.detail}
           </p>
           {row.original?.type === "asset" &&
@@ -373,7 +373,7 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
                 setAddSerializedAssetDialog(true)
               }}
             >
-              {`Assign ${routes.productInventory.title}`}
+              {`Assign ${routes.serializedAsset.title}`}
             </Button>
             <Box mx={1} component="span" />
             <Button

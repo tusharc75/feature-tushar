@@ -897,8 +897,8 @@ const Header = ({ toggleDrawer }) => {
     if (history.location.pathname.includes(routes.deliveryTicketDetail.path)) {
       history.push({ pathname: routes.deliveryTicket.path })
     }
-    if (history.location.pathname.includes(routes.productInventoryDetail.path)) {
-      history.push({ pathname: routes.productInventory.path })
+    if (history.location.pathname.includes(routes.serializedAssetDetail.path)) {
+      history.push({ pathname: routes.serializedAsset.path })
     }
     if (history.location.pathname.includes(routes.pricingConditionDetail.path)) {
       history.push({ pathname: routes.pricingCondition.path })

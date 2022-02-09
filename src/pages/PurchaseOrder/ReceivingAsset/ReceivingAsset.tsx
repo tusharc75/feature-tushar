@@ -7,7 +7,7 @@ import { Button, Chip, IconButton, makeStyles, useMediaQuery } from "@material-u
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
-import { dateFormat, defaultActivityShow, gridLoadingTimeout, productInventory, purchaseOrder, rentalManagement, translateDataToTree } from "../../../constants/helpers";
+import { dateFormat, defaultActivityShow, gridLoadingTimeout, serializedAsset, purchaseOrder, rentalManagement, translateDataToTree } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import moment from "moment";
 import { startCase } from "lodash";
@@ -134,7 +134,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
 
     const fetchSerializedAsset = () => {
         dispatch({ type: "loading", loading: true });
-        axiosInstance().get(`${productInventory.api}?filterById=[{"field": "pONumber", "term": "${purchaseOrderData._id}"}]`)
+        axiosInstance().get(`${serializedAsset.api}?filterById=[{"field": "purchaseOrder", "term": "${purchaseOrderData._id}"}]`)
             .then(({ data }) => {
                 data.data = data.data.map((u) => {
                     let tempProduct = constPurchaseOrderProduct.find(obj => obj.treeId === u.product.optionValue)
