@@ -138,14 +138,14 @@ export default function NewOpportunityProjectSales({
 
           if (
             accountId &&
-            ["customerAccountName", "supplierAccountName"].some(
+            ["customerAccount", "supplierAccount"].some(
               (d) => d === _f.fieldData.fieldName
             )
           ) {
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
           }
 
-          if (!(_f.fieldData.fieldName === "supplierAccountName")) {
+          if (!(_f.fieldData.fieldName === "supplierAccount")) {
             newFields.push(_f.fieldData);
           }
         });
@@ -201,7 +201,7 @@ export default function NewOpportunityProjectSales({
   };
 
   const handleCreateOpportunity = (values) => {
-    if (accountId) values["supplierAccountName"] = [accountId];
+    if (accountId) values["supplierAccount"] = [accountId];
     setLoading(true);
     axiosInstance()
       .post(`${opportunityApi}?entity=${selectedEntity}`, values)
@@ -646,7 +646,7 @@ export default function NewOpportunityProjectSales({
                                               // {...rest}
                                               disabled={
                                                 field.fieldName ===
-                                                "customerAccountName"
+                                                "customerAccount"
                                               }
                                               values={values}
                                               errors={errors}
