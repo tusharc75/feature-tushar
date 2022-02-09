@@ -49,6 +49,7 @@ const BOMTable = () => {
   useEffect(() => {
     if (id) {
       fetchBOMData();
+      fetchProduct();
 
     }
   }, [page, limit, filters, sorting, selectedEntity,]);
@@ -88,10 +89,10 @@ const BOMTable = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    const queryString = getQueryString();
+   
     setLoadingBOMData(true);
     axiosInstance()
-      .get(`/product/${id}/bom${queryString}`)
+      .get(`/product/${id}/bom`)
       .then(({ data: { data } }) => {
         data = data.map((o) => {
        
@@ -101,16 +102,7 @@ const BOMTable = () => {
             productId: o.childProductDetail._id
           };
         });
-        //   let rows = data.data.map((u) => {
-        //     let finalObject = prepareDataForGrid(u);
-        //     finalObject["canDelete"] = permissions.product.isDelete;
-        //     finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-        //     finalObject["allowedToEdit"] = permissions.product.isUpdate;
-        //     return {
-        //         ...finalObject,
-        //     };
-        // });
-        // setIsAllChecked(false);
+       
 
         if (appendRows) {
           dispatch({
@@ -228,32 +220,8 @@ const BOMTable = () => {
 
   }
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
 
-    const updatedFilters = [];
-
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
-    }
-
-    if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
-    }
-
-    if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
-    }
-    return deepFilter;
-  };
-
+  
   const getColumns = () => {
     if (gridApi) {
       gridApi.setRowData([]);
@@ -400,6 +368,7 @@ const BOMTable = () => {
           <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
+            isClientSideGrid={true}
             frameworkComponents={frameworkComponents}
             setGridApi={setGridApi}
             dispatch={dispatch}
