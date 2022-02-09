@@ -108,7 +108,7 @@ const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNe
   );
 
   const InventoryRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+    <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data._id}`}>
       {params.value}
     </Link>
   );

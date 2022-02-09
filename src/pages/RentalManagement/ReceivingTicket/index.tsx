@@ -16,7 +16,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
   gridLoadingTimeout, deliveryTicket, rentalManagement,
-  sidebarResource, productInventory as productInventoryHelperObject, INVENTORY_STATUS, DELIVERY_TICKET_STATUS,
+  sidebarResource, serializedAsset as productInventoryHelperObject, INVENTORY_STATUS, DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE,
   repairJob, DELIVERY_FROM_TO_TYPE
 } from "../../../constants/helpers";
@@ -175,7 +175,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   }
 
   const InventoryRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+    <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data._id}`}>
       {params.value}
     </Link>
   );
@@ -244,14 +244,14 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     });
   }
 
-  const handleTicketDialog = (ticketType) => {
+  const handleTicketDialog = (ticketType, deliveryToType) => {
     const data = {}
     data["ticketName"] = rentalManagementData.rentalJobName;
     data["refrenceId"] = rentalManagementData._id;
     data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
     data["pickupFrom"] = rentalManagementData?.customerAccount?.optionValue;
     data["pickupFromAddress"] = rentalManagementData.shippingAddress?.optionValue;
-    data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+    data["deliveryToType"] = deliveryToType;
     data["deliveryTo"] = rentalManagementData?.warehouse?.optionValue;
     data["deliveryToAddress"] = rentalManagementData?.warehouse?.address;
     data["startDate"] = rentalManagementData?.estimateStartDate;
@@ -365,7 +365,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             size="small"
             style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
             onClick={() => {
-              handleTicketDialog(DELIVERY_TICKET_TYPE.receiving)
+              handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant)
             }}
             disabled={(selectedRecords.length === 0)
               || (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
@@ -405,7 +405,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             size="small"
             style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
             onClick={() => {
-              handleTicketDialog(DELIVERY_TICKET_TYPE.return)
+              handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant)
             }}
             disabled={(selectedRecords.length === 0)
               || (selectedRecords.some(f =>
@@ -415,6 +415,27 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Create Return Ticket'}
           </Button>
         </Tooltip>
+
+
+        <Box mx={1} />
+        <Tooltip title="Create Supplier Delivery Ticket">
+          <Button
+            variant={isMobile && !isTablet ? "text" : "outlined"}
+            color="primary"
+            size="small"
+            style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
+            onClick={() => {
+              handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier)
+            }}
+            disabled={(selectedRecords.length === 0)
+              || (selectedRecords.some(f =>
+                !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
+                || !f.subleaseAsset || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
+          >
+            {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Create Supplier Delivery Ticket'}
+          </Button>
+        </Tooltip>
+
 
         {(selectedRecords.length && selectedRecords?.filter(f =>
           ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
@@ -481,7 +502,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
             permissions={true}
             primaryField={columns?.find((d) => d.field)}
             onClick={(data) => {
-              history.push(`${routes.productInventoryDetail.path}/${data._id}`);
+              history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
             }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}

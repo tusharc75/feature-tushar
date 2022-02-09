@@ -130,7 +130,8 @@ export const sidebarResource = {
   opportunity: 'Opportunity',
   field: 'Field',
   productCategory: 'Product Category',
-  productInventory: 'Product Inventory',
+  //productInventory: 'Product Inventory',
+  serializedAsset: "Serialized Asset",
   priceTemplate: 'Price Template',
   product: 'Product',
   productTemplate: 'Product Template',
@@ -187,7 +188,8 @@ export const resourceNames = {
   opportunity: 'Opportunity',
   field: 'Field',
   productCategory: 'Product Category',
-  productInventory: 'Serialized Asset',
+  //productInventory: 'Serialized Asset',
+  serializedAsset: "Serialized Asset",
   priceTemplate: 'Price Template',
   product: 'Product',
   productTemplate: 'Product Template',
@@ -235,7 +237,7 @@ export const resourceNames = {
 };
 
 export const primaryFields = {
-  productInventory: "assetNumber",
+  serializedAsset: "assetNumber",
   rentalManagement: "rentalJobName",
   transferAsset: "transferAssetNumber",
   repairJob: "repairJobName",
@@ -257,7 +259,8 @@ export const RESOURCE_LABEL = {
   opportunity: 'Opportunities',
   field: 'Fields',
   productCategory: 'Product Categories',
-  productInventory: 'Serialized Assets',
+  //productInventory: 'Serialized Assets',
+  serializedAsset: 'Serialized Assets',
   priceTemplate: 'Price Templates',
   product: 'Product Master',
   productTemplate: 'Product Templates',
@@ -448,11 +451,11 @@ export const eProduct = {
   route: '/e-product',
 };
 
-export const productInventory = {
-  api: '/product-inventory',
-  route: '/product-inventory',
-  permission: 'productInventory',
-  resource: 'product-inventory'
+export const serializedAsset = {
+  api: '/serialized-asset',
+  route: '/serialized-asset',
+  permission: 'serializedAsset',
+  resource: 'serialized-asset'
 };
 
 export const budget = {
@@ -1588,7 +1591,7 @@ export const resourceOptions = [
 export const REPORT_LIST = [
   { title: sidebarResource.rentalManagement, key: "rentalManagement" },
   { title: sidebarResource.salesOrder, key: "salesOrder" },
-  { title: sidebarResource.productInventory, key: "productInventory" },
+  { title: sidebarResource.serializedAsset, key: "serializedAsset" },
   { title: sidebarResource.lead, key: "lead" },
   { title: sidebarResource.opportunity, key: "opportunity" },
   { title: sidebarResource.quoteBuilder, key: "quoteBuilder" },

@@ -180,7 +180,7 @@ const RepairJobDeliveryTicket = ({ repairJobData, setNextButtonDisabled, setPrev
 
   const InventoryRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
-      <Link className="link text-truncate" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+      <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data._id}`}>
         {params.value}
       </Link>
 
