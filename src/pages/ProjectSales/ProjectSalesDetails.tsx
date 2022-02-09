@@ -164,7 +164,7 @@ const ProjectSalesDetails = () => {
       setCopyOfProjectSalesData(modifiedData);
 
       setProjectSalesData(data);
-      setCurrentTabIndex(0);
+      currentTabIndex=== 0 && setCurrentTabIndex(0);
       handleMainPoints(data);
       const name = data.projectName;
 

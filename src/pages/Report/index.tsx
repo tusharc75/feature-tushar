@@ -36,7 +36,7 @@ const Report = () => {
 
   let resourceCamelCase = camelCase(resource);
   let resourceStartCase = startCase(resource);
-  const renderedFrom = `${resource}-report`;
+  const renderedFrom = `${resource}_report`;
 
   const [showGrid, setShowGrid] = React.useState(false);
   const [selectedData, setSelectedData] = React.useState(null);
@@ -107,7 +107,7 @@ const Report = () => {
   React.useEffect(() => {
 
     axiosInstance()
-      .get(`/report-colum-setting?type=${resource}`)
+      .get(`/report-colum-setting?resource=${resource}`)
       .then(({ data: { data } }) => {
         setReportList(data);
       })

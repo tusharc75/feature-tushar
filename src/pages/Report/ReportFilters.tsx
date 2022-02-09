@@ -55,7 +55,7 @@ const ReportFilters = (props: FiltersProps) => {
     reportList,
     setReportList
   } = props;
-  const [showConfirmDialog, setShowConfirmDialog] = React.useState({ open: false, id: null });
+  const [showConfirmDialog, setShowConfirmDialog] = React.useState({ open: false, id: null, name: '' });
   const [isDeleting, setDeleting] = React.useState(false);
 
   React.useEffect(() => {
@@ -113,49 +113,16 @@ const ReportFilters = (props: FiltersProps) => {
       })
       .then(() => {
         setDeleting(false);
-        setShowConfirmDialog({ open: false, id: null });
+        setShowConfirmDialog({ open: false, id: null, name: '' });
       })
       .catch((err) => {
         setDeleting(false);
-        setShowConfirmDialog({ open: false, id: null });
+        setShowConfirmDialog({ open: false, id: null, name: '' });
       });
   };
 
   return (
     <Container maxWidth="sm">
-      <Box height={'100%'} my={2}>
-        <Autocomplete
-          options={reportList}
-          value={selectedReportView}
-          noOptionsText="No views were found"
-          onChange={(_, val) => {
-            setSelectedReportView(val);
-          }}
-          fullWidth
-          renderOption={(option) => (
-            <React.Fragment>
-              <Box display={'flex'} width="100%" justifyContent="space-between">
-                {option.name}
-                {isDeleting ? (
-                  <CircularProgress size={18} color="inherit" />
-                ) : (
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowConfirmDialog({ open: true, id: option._id });
-                    }}
-                  >
-                    <Delete color="error" />
-                  </IconButton>
-                )}
-              </Box>
-            </React.Fragment>
-          )}
-          getOptionLabel={(option) => option.name}
-          renderInput={(params) => <TextField {...params} variant="outlined" label="Select View" size="small" />}
-        />
-      </Box>
       <Box height={'100%'} my={2}>
         <Autocomplete
           loading={loadingColumns}
@@ -247,6 +214,39 @@ const ReportFilters = (props: FiltersProps) => {
           </Grid>
         </Box>
         <Box mt={2}>
+          <Box height={'100%'} mb={2}>
+            <Autocomplete
+              options={reportList}
+              value={selectedReportView}
+              noOptionsText="No views were found"
+              onChange={(_, val) => {
+                setSelectedReportView(val);
+              }}
+              fullWidth
+              renderOption={(option) => (
+                <React.Fragment>
+                  <Box display={'flex'} width="100%" justifyContent="space-between">
+                    {option.name}
+                    {isDeleting ? (
+                      <CircularProgress size={18} color="inherit" />
+                    ) : (
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowConfirmDialog({ open: true, id: option._id, name: option.name });
+                        }}
+                      >
+                        <Delete color="error" />
+                      </IconButton>
+                    )}
+                  </Box>
+                </React.Fragment>
+              )}
+              getOptionLabel={(option) => option.name}
+              renderInput={(params) => <TextField {...params} variant="outlined" label="Select View" size="small" />}
+            />
+          </Box>
           <Button
             onClick={fetchReportData}
             startIcon={loading ? <CircularProgress color="inherit" size={18} /> : <List />}
@@ -263,11 +263,15 @@ const ReportFilters = (props: FiltersProps) => {
       </Box>
       {showConfirmDialog.open && (
         <ConfirmDialog
-          onClose={() => setShowConfirmDialog({ open: false, id: null })}
+          onClose={() => setShowConfirmDialog({ open: false, id: null, name: '' })}
           onOk={() => handleRemoveOption()}
           open={true}
           okBtnLoading={isDeleting}
-          message="Are you sure you want to delete this option?"
+          message={
+            <>
+              Are you sure you want to delete view <Box component={'span'} px={1} bgcolor="#eee">{showConfirmDialog.name}</Box>?
+            </>
+          }
         />
       )}
     </Container>
