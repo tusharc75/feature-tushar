@@ -159,7 +159,7 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
       setSubmitting(true);
       axiosInstance()
         .put(`/report-colum-setting/${selectedReportView._id}`, {
-          type: renderedFrom.split('_')[0],
+          resource: renderedFrom.split('_')[0],
           columnState: columnState,
           name: reportName.trimEnd()
         })
@@ -181,7 +181,7 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
       setSubmitting(true);
       axiosInstance()
         .post(`/report-colum-setting`, {
-          type: renderedFrom.split('_')[0],
+          resource: renderedFrom.split('_')[0],
           columnState: columnState,
           name: reportName.trimEnd()
         })
