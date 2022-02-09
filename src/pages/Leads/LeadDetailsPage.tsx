@@ -116,8 +116,8 @@ const LeadDetailsPage = () => {
   }, [user, selectedEntity]);
 
   const fetchLeadData = async () => {
-    setLoading(true);
     if (selectedEntity) {
+      setLoading(true);
       axiosInstance()
         .get(`${leadApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
@@ -168,6 +168,9 @@ const LeadDetailsPage = () => {
             params.delete('openEdit');
             history.push({ search: params.toString() });
           }
+        }).catch(err => {
+          setLoading(false);
+          toastConfig.setToastConfig(err)
         });
     }
   };
@@ -210,6 +213,9 @@ const LeadDetailsPage = () => {
         });
 
         setLoading(false);
+      }).catch(err => {
+        setLoading(false);
+        toastConfig.setToastConfig(err)
       });
   };
 
