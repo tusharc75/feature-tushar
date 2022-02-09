@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.56.0](https://github.com/vebholic/oms_frontend/compare/v2.55.0...v2.56.0) (2022-02-09)
+
+
+### Features
+
+* - Pricing condition code updated ([f961e70](https://github.com/vebholic/oms_frontend/commit/f961e70635b9d6497b549d7ac413457359bfe23d))
+* **feat/avi:** feat/avi ([0770bd9](https://github.com/vebholic/oms_frontend/commit/0770bd9cdeeec0d17294ef54b3d0b15adbb7374e))
+* **report view:** save report views ([ee00828](https://github.com/vebholic/oms_frontend/commit/ee008283704a3bc5ede31f13efdb3526ff9525bd))
+
+
+### Bug Fixes
+
+* **arrange view:** fix locked columns ([2c368ba](https://github.com/vebholic/oms_frontend/commit/2c368bab70fac3ec7b63551053c9135de0d0e560))
+* bug fix ([0f43eee](https://github.com/vebholic/oms_frontend/commit/0f43eee3cc1f0b7fc285b0a80f8688bde41ea99d))
+* bug fix ([f806da6](https://github.com/vebholic/oms_frontend/commit/f806da6b35fc677d2e3ec2717e3245356535f02a))
+* dashboard opportunities trend issue ([fbcdc4c](https://github.com/vebholic/oms_frontend/commit/fbcdc4c0b58858674efa4f5ec418067fb560384c))
+* dashboard opportunity table filter changes ([c2a7b99](https://github.com/vebholic/oms_frontend/commit/c2a7b99f1d028076201a9d0b77033611183d7c11))
+* project sales customer account accordin opportunity, quote and contact ([9554368](https://github.com/vebholic/oms_frontend/commit/9554368e588aaf2058600c6b0e3b1184fb26a5dc))
+* report save in reports ([c91d260](https://github.com/vebholic/oms_frontend/commit/c91d26018e1f1c3b7ca9555d7afaba7aa6875012))
+* **report view:** delete button ([6525b8d](https://github.com/vebholic/oms_frontend/commit/6525b8dcfbfc771ee877a44f7ade9821349af031))
+* **report:** conflict fix ([b81c277](https://github.com/vebholic/oms_frontend/commit/b81c277c63aad76992fc77544397ae2925b02fdd))
+
 ## [2.55.0](https://github.com/vebholic/oms_frontend/compare/v2.54.2...v2.55.0) (2022-02-08)
 
 
