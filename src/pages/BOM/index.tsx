@@ -148,26 +148,7 @@ const BOMTable = () => {
     }
   };
 
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
-    if (field !== updatedField) return updatedField;
-    switch (field) {
-      case "productName":
-        return "productName"
 
-        case "productCategory":
-          return "productCategory.optionLabel"
-
-      case "createdBy":
-        return "createdBy.user.concatedName";
-
-      case "updatedBy":
-        return "updatedBy.user.concatedName";
-
-      default:
-        return field;
-    }
-  };
 
   const handleRemove = () => {
     setIsDeleting(true)
@@ -221,7 +202,7 @@ const BOMTable = () => {
   }
 
 
-  
+
   const getColumns = () => {
     if (gridApi) {
       gridApi.setRowData([]);
@@ -245,7 +226,7 @@ const BOMTable = () => {
       newColumns = [
         { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer' },
         { field: 'qty', headerName: 'Quantity', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-        { field: 'productCategory', headerName: 'ProductCategory', show: true, disabled: false, cellRenderer: 'commonRenderer' },
+        { field: 'productCategory', headerName: 'Product Category', show: true, disabled: false, cellRenderer: 'commonRenderer' },
 
 
 
