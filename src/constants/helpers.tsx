@@ -548,6 +548,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === 'year') {
       obj[key.fieldName] = value ? value : new Date();
+    } else if (key.type === 'colorPicker') {
+      obj[key.fieldName] = value ? value : "#aaaaaa";
     } else if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = value ? value : false;
     } else if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
