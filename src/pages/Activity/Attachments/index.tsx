@@ -562,7 +562,6 @@ if(resourceOptions[i] === "Project Sales"){
                     filter={filter}
                     chip={{ size: 'small' }}
                     activityName="attachment"
-                    //permissions={permissions}
                   />
                 </Grid>
 
