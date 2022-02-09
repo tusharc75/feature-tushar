@@ -5,7 +5,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import { productInventory } from '../../constants/helpers';
+import { serializedAsset } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 const useStyles = makeStyles((theme) => ({
@@ -70,7 +70,7 @@ export default function AssetScrapRepairDialog({ statusToUpdate, setStatusToUpda
                     size="small"
                     onClick={() => {
                         setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
-                        axiosInstance().put(`${productInventory.api}/update-status`, {
+                        axiosInstance().put(`${serializedAsset.api}/update-status`, {
                             comment: statusToUpdate.message,
                             assets: selectedRecords.map(m => m?._id ?? m?.id),
                             status: statusToUpdate.status,

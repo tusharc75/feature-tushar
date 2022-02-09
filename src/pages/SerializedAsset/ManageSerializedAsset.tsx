@@ -11,7 +11,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, productInventory, setFieldsInAscendingOrder } from '../../constants/helpers';
+import { CustomDialogTransition, serializedAsset, setFieldsInAscendingOrder } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -25,7 +25,7 @@ import CreateProductCategory from '../ProductCategory/CreateProductCategory';
 import CreateProduct from "../../components/Product/CreateProduct";
 import ManageWarehouse from "../Warehouse/ManageWarehouse"
 
-const ManageProductInventory = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null, isNew = true }) => {
+const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null, isNew = true }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
@@ -47,7 +47,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
 
   useEffect(() => {
     axiosInstance()
-      .get('/field?resource=Product Inventory')
+      .get('/field?resource=Serialized Asset')
       .then(({ data: { data } }) => {
 
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
@@ -65,7 +65,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
 
         if (productInventoryId) {
           axiosInstance()
-            .get(`${productInventory.api}/` + productInventoryId)
+            .get(`${serializedAsset.api}/` + productInventoryId)
             .then(({ data: { data } }) => {
               if (isClone) {
                 const { _id, createdBy, updatedBy, serialNumber, ...rest } = data;
@@ -115,7 +115,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
     if (productInventoryId && isClone === false) {
       values._id = productInventoryId;
       axiosInstance()
-        .put(`${productInventory.api}`, values)
+        .put(`${serializedAsset.api}`, values)
         .then(({ data: { data } }) => {
           setSubmitting(false);
           onSuccess();
@@ -126,7 +126,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
         });
     } else {
       axiosInstance()
-        .post(`${productInventory.api}`, values)
+        .post(`${serializedAsset.api}`, values)
         .then(({ data: { data } }) => {
           setSubmitting(false);
           onSuccess(data);
@@ -174,7 +174,7 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
               <Fragment>
                 <CustomDialogHeader
                   title={
-                    productInventoryId ? (isClone ? 'Clone' : 'Update ' + routes.productInventory.title) : 'Create ' + routes.productInventory.title
+                    productInventoryId ? (isClone ? 'Clone' : 'Update ' + routes.serializedAsset.title) : 'Create ' + routes.serializedAsset.title
                   }
                   onClose={() => {
                     if (isFieldNotTouched(initialData, values)) onClose();
@@ -584,4 +584,4 @@ const ManageProductInventory = ({ isClone = false, productInventoryId = null, on
 
 
 
-export default ManageProductInventory;
+export default ManageSerializedAsset;

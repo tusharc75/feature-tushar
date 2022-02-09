@@ -239,7 +239,7 @@ export const DropField = ({
                     <MenuItem onClick={() => handleClone(data)}>Clone</MenuItem>
                   </Fragment>
                   {((["product-template", "price-template"].includes(module) && data.editAble) ||
-                    ["form-builder-master"].includes(module) || data.deletAble) && <MenuItem onClick={() => deleteField(data._id)}>Delete</MenuItem>}
+                    ["form-builder-master"].includes(module) || data.deletAble || true) && <MenuItem onClick={() => deleteField(data._id)}>Delete</MenuItem>}
                 </Menu>
                 {propertie_open ? (
                   <Properties

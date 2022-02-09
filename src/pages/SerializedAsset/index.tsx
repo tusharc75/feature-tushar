@@ -15,10 +15,10 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL, product } from '../../constants/helpers';
+import { serializedAsset, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL, product } from '../../constants/helpers';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
-import ManageProductInventory from "./ManageProductInventory";
+import ManageSerializedAsset from "./ManageSerializedAsset";
 import ManageRepairJob from '../RepairJob/ManageRepairJob'
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from "react-router-dom";
@@ -43,7 +43,7 @@ const ProductInventory = () => {
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
     const [gridApi, setGridApi] = useState(null);
-    const [columns, setColumns] = useState([])
+    const [columns, setColumns] = useState(null)
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
@@ -101,7 +101,7 @@ const ProductInventory = () => {
 
     const fetchGridColumns = () => {
         axiosInstance()
-            .get("/field?resource=Product Inventory")
+            .get("/field?resource=Serialized Asset")
             .then(({ data: { data } }) => {
                 let columns = []
                 let rendererNames = []
@@ -109,8 +109,7 @@ const ProductInventory = () => {
                     if (o?.fieldData?.fieldName === "serialNumber") {
                         o.fieldData.primaryField = true
                     }
-                    let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
-
+                    let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -137,12 +136,12 @@ const ProductInventory = () => {
         }
 
         const queryString = getQueryString();
-        axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
+        axiosInstance().get(`${serializedAsset.api}${queryString}`).then(({ data }) => {
             let rows = data.data?.map((u, user) => {
                 let finalObject = prepareDataForGrid(u);
-                finalObject["canDelete"] = permissions?.productInventory?.isDelete
+                finalObject["canDelete"] = permissions?.serializedAsset?.isDelete
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-                finalObject["allowedToEdit"] = permissions?.productInventory.isUpdate
+                finalObject["allowedToEdit"] = permissions?.serializedAsset.isUpdate
                 return {
                     ...finalObject,
 
@@ -184,7 +183,7 @@ const ProductInventory = () => {
             filterById.push({ field: "product", term: redirectProduct?.id });
         }
         if (fromPurchaseOrder?.pOId) {
-            filterById.push({ field: "pONumber", term: fromPurchaseOrder.pOId });
+            filterById.push({ field: "purchaseOrder", term: fromPurchaseOrder.pOId });
         }
         if (fromPurchaseOrder?.productId) {
             filterById.push({ field: "product", term: fromPurchaseOrder.productId });
@@ -230,7 +229,7 @@ const ProductInventory = () => {
         else {
             ids = selectedRecords.map(d => d._id);
         }
-        axiosInstance().put(`${productInventory.api}/remove`, { "ids": ids }).then(() => {
+        axiosInstance().put(`${serializedAsset.api}/remove`, { "ids": ids }).then(() => {
             fetchProductInventory();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
@@ -243,7 +242,7 @@ const ProductInventory = () => {
     const ActionsRenderer = params => (
         <>
             {
-                permissions?.productInventory?.isCreate &&
+                permissions?.serializedAsset?.isCreate &&
                 <HtmlTooltip title="Clone">
                     <IconButton
                         size="small"
@@ -256,7 +255,7 @@ const ProductInventory = () => {
                     </IconButton>
                 </HtmlTooltip>
             }
-            {permissions?.productInventory?.isDelete &&
+            {permissions?.serializedAsset?.isDelete &&
                 <HtmlTooltip title="Delete">
                     <IconButton size="small" aria-label="Delete" onClick={() => {
                         setDeleteRecord(params.data);
@@ -297,13 +296,13 @@ const ProductInventory = () => {
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[routes.productInventory]} />
+                <CustomBreadCrumbs routes={[routes.serializedAsset]} />
             </Grid>
             <Grid item md={8} sm={1} xs={2}>
                 <ImportExportLinks
-                    permissions={permissions?.productInventory}
+                    permissions={permissions?.serializedAsset}
                     module="product inventory"
-                    api={productInventory.api}
+                    api={serializedAsset.api}
                     afterImportCompleted={() => {
                         fetchProductInventory();
                     }}
@@ -324,7 +323,7 @@ const ProductInventory = () => {
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1">
                         <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
-                        <span className="listingHeader">{routes.productInventory?.title} </span>
+                        <span className="listingHeader">{routes.serializedAsset?.title} </span>
                         {warehouse && (
                             <Chip
                                 className="ml-3"
@@ -453,7 +452,7 @@ const ProductInventory = () => {
                             </Grid>
 
                             <Grid style={{ display: "flex", gap: "5px" }}>
-                                {permissions?.productInventory?.isCreate &&
+                                {permissions?.serializedAsset?.isCreate &&
                                     <Button
                                         onClick={() => {
                                             setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null })
@@ -495,11 +494,11 @@ const ProductInventory = () => {
                                     open={Boolean(anchorEl)}
                                     onClose={closeActions}
                                 >
-                                    {permissions?.productInventory?.isDelete && <MenuItem onClick={() => {
+                                    {permissions?.serializedAsset?.isDelete && <MenuItem onClick={() => {
                                         closeActions()
                                         setShowDeleteConfirmBox(true)
                                     }}>Delete</MenuItem>}
-                                    {permissions?.repairJob?.isCreate && permissions?.productInventory?.isUpdate && <MenuItem onClick={() => {
+                                    {permissions?.repairJob?.isCreate && permissions?.serializedAsset?.isUpdate && <MenuItem onClick={() => {
                                         closeActions()
                                         setShowRepairJobDialog(true)
                                     }}>Create Repair Job</MenuItem>}
@@ -509,61 +508,62 @@ const ProductInventory = () => {
                     </Grid>
                 </Grid>
             </div>
-            {columns ? isMobile && !isTablet ? <CustomSwipableList
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions?.productInventory}
-                primaryField={columns?.find(d => d.field === "assetNumber")}
-                onClick={(d) => {
-                    history.push(`${routes.productInventoryDetail.path}/${d._id}`)
-                }}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                onEdit={(d) => {
-                    history.push(`${routes.productInventoryDetail.path}/${d._id}`)
-                }}
-                extraParamsToCheckDelete={false}
-                onDelete={(d) => {
-                    setDeleteRecord(d);
-                    setShowDeleteConfirmBox(true)
-                }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                additionalDetails={[]}
-                chips={[
-                    {
-                        label: "Serial Number : ",
-                        field: "serialNumber",
-                    },
-                ]}
-                owerCollaboratorInitialsOrImages=""
-                onCreate={false}
-                showClone={true}
-                onClone={(data) => { setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id }); }}
-                renderedFrom={routes.productInventory?.title} /> :
-                Object.keys(frameWorkComponent).length > 0 ?
-                    <CustomAgGrid
-                        columns={columns}
-                        dataRows={dataRows}
-                        frameworkComponents={frameWorkComponent}
-                        setGridApi={setGridApi}
-                        dispatch={dispatch}
-                        rowCount={rowCount}
-                        limit={limit}
-                        pageSizes={pageSizes}
-                        page={page}
-                        actionWidth={150}
-                        loading={loading}
-                        renderedFrom={routes.productInventory?.title}
-                        refreshGrid={fetchProductInventory}
-                    /> : null
+            {columns ?
+                isMobile && !isTablet ? <CustomSwipableList
+                    allowSelection={true}
+                    allowSwipe={true}
+                    permissions={permissions?.serializedAsset}
+                    primaryField={columns?.find(d => d.field === "assetNumber")}
+                    onClick={(d) => {
+                        history.push(`${routes.serializedAssetDetail.path}/${d._id}`)
+                    }}
+                    dataRows={dataRows}
+                    selectedRecords={selectedRecords}
+                    dispatch={dispatch}
+                    onEdit={(d) => {
+                        history.push(`${routes.serializedAssetDetail.path}/${d._id}`)
+                    }}
+                    extraParamsToCheckDelete={false}
+                    onDelete={(d) => {
+                        setDeleteRecord(d);
+                        setShowDeleteConfirmBox(true)
+                    }}
+                    rowCount={rowCount}
+                    page={page}
+                    loading={loading}
+                    additionalDetails={[]}
+                    chips={[
+                        {
+                            label: "Serial Number : ",
+                            field: "serialNumber",
+                        },
+                    ]}
+                    owerCollaboratorInitialsOrImages=""
+                    onCreate={false}
+                    showClone={true}
+                    onClone={(data) => { setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id }); }}
+                    renderedFrom={routes.serializedAsset?.title} /> :
+                    Object.keys(frameWorkComponent).length > 0 ?
+                        <CustomAgGrid
+                            columns={columns}
+                            dataRows={dataRows}
+                            frameworkComponents={frameWorkComponent}
+                            setGridApi={setGridApi}
+                            dispatch={dispatch}
+                            rowCount={rowCount}
+                            limit={limit}
+                            pageSizes={pageSizes}
+                            page={page}
+                            actionWidth={150}
+                            loading={loading}
+                            renderedFrom={routes.serializedAsset?.title}
+                            refreshGrid={fetchProductInventory}
+                        /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
         {
             showManageProductInventoryDialog.open &&
-            <ManageProductInventory
+            <ManageSerializedAsset
                 isNew={true}
                 isClone={showManageProductInventoryDialog.isClone}
                 productInventoryId={showManageProductInventoryDialog.idToClone}
@@ -591,7 +591,7 @@ const ProductInventory = () => {
             showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.productInventory?.title?.toLowerCase() : RESOURCE_LABEL.productInventory?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
+                message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.serializedAsset?.title?.toLowerCase() : RESOURCE_LABEL.serializedAsset?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />

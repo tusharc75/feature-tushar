@@ -70,7 +70,7 @@ const CreateProduct = (props) => {
 
 
     useEffect(() => {
-        if (pathName !== '/product-inventory') {
+        if (pathName !== '/serialized-asset') {
             sessionStorage.removeItem('productCategoryId')
             sessionStorage.removeItem('productCategoryName')
         }

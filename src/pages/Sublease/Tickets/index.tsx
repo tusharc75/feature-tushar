@@ -6,7 +6,7 @@ import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { gridLoadingTimeout, deliveryTicket, productInventory, DELIVERY_TICKET_REFRENCE_TYPE } from '../../../constants/helpers';
+import { gridLoadingTimeout, deliveryTicket, serializedAsset, DELIVERY_TICKET_REFRENCE_TYPE } from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
@@ -89,7 +89,7 @@ const Tickets = ({ subleaseData }) => {
                         permissions={true}
                         primaryField={columns?.find(d => d.field)}
                         onClick={(data) => {
-                            history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                            history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
                         }}
                         dataRows={dataRows}
                         selectedRecords={selectedRecords}

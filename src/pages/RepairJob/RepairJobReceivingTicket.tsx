@@ -16,7 +16,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import {
     gridLoadingTimeout, repairJob,
-    sidebarResource, productInventory as productInventoryHelperObject, REPAIR_JOB_STATUS, deliveryTicket, INVENTORY_STATUS,
+    sidebarResource, serializedAsset as productInventoryHelperObject, REPAIR_JOB_STATUS, deliveryTicket, INVENTORY_STATUS,
     DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE
 } from "../../constants/helpers";
 import { groupBy } from "lodash";
@@ -160,7 +160,7 @@ const RepairJobReceivingTicket = (props) => {
 
 
     const InventoryRenderer = (params) => (
-        <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+        <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data._id}`}>
             {params.value}
         </Link>
     );
