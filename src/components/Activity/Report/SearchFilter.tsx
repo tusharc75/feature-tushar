@@ -28,9 +28,8 @@ export const SearchFilter = ({
   chip,
   dontShowMyActivity = false,
   activityName,
-  permissions
 }) => {
-  const { state: { user: { user }, }, } = useData();
+  const { state: { user: { user }, permissions}, } = useData();
   const [options, setOptions] = React.useState([]);
   const [inputValue, setInputValue] = React.useState("");
   const [value, setValue] = React.useState([]);

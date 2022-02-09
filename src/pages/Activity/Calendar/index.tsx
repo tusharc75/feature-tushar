@@ -36,7 +36,7 @@ import styles from "../../Leads/Header.module.scss";
 const BigCalendar = () => {
   const {
     state: {
-      user: { user ,permissions},
+      user: {user},
     },
   } = useData();
   const history = useHistory();
@@ -225,7 +225,6 @@ const BigCalendar = () => {
                 filter={filter}
                 chip={{ size: "small" }}
                 activityName="calendar"
-                permissions={permissions}
               />
             </Grid>
           </Grid>
