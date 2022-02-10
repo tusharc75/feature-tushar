@@ -89,7 +89,6 @@ const Activity = ({ type }) => {
                   handleChangeFilter={handleChangeFilter}
                   filter={filter}
                   activityName={type}
-                  permissions={permissions}
                 />
               </Grid>
             </Grid>

@@ -10,7 +10,7 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout, displayDate } from '../../constants/helpers';
+import { serializedAsset, isObjectEmpty, gridLoadingTimeout, displayDate } from '../../constants/helpers';
 import {
     CommonRenderer,
     CreatedByRenderer,
@@ -64,7 +64,7 @@ const EquipmentRentalMaster = () => {
         }
 
         const queryString = getQueryString();
-        axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
+        axiosInstance().get(`${serializedAsset.api}${queryString}`).then(({ data }) => {
             data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
@@ -123,7 +123,7 @@ const EquipmentRentalMaster = () => {
         else {
             ids = selectedRecords.map(d => d._id);
         }
-        axiosInstance().put(`${productInventory.api}/remove`, { "ids": ids }).then(() => {
+        axiosInstance().put(`${serializedAsset.api}/remove`, { "ids": ids }).then(() => {
             fetchProductInventory();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)

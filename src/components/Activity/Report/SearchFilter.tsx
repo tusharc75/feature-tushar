@@ -14,7 +14,7 @@ import { SearchActivity } from "../../../axios/activity";
 import { useData } from "../../../StateProvider/Provider";
 import { resActivityColors } from "../Helpers/utils";
 import ActivityModelHandler from "../ActivityModelHandler";
-import {isMobile, isTablet} from "react-device-detect";
+import { isMobile, isTablet } from "react-device-detect";
 
 export const capitalize = (string) => {
   return string && typeof string === "string"
@@ -28,9 +28,8 @@ export const SearchFilter = ({
   chip,
   dontShowMyActivity = false,
   activityName,
-  permissions
 }) => {
-  const { state: { user: { user }, }, } = useData();
+  const { state: { user: { user }, permissions }, } = useData();
   const [options, setOptions] = React.useState([]);
   const [inputValue, setInputValue] = React.useState("");
   const [value, setValue] = React.useState([]);
@@ -56,9 +55,9 @@ export const SearchFilter = ({
   ];
 
 
-  let permissionsSearch =  allSearch.filter((item) => permissions[item.type]?.isRead === true)
+  let permissionsSearch = allSearch.filter((item) => permissions[item.type]?.isRead === true)
 
-  
+
 
   const activityType = ["task", "event", "case", "note", "email", "attachment"]
 
@@ -68,7 +67,7 @@ export const SearchFilter = ({
 
   useEffect(() => {
     if (inputValue === "") {
-      let filteredSearch = dontShowMyActivity ? permissionsSearch .filter((_o) => _o.type !== "my") : permissionsSearch ; setOptions(filteredSearch);
+      let filteredSearch = dontShowMyActivity ? permissionsSearch.filter((_o) => _o.type !== "my") : permissionsSearch; setOptions(filteredSearch);
     } else {
       setLoading(true);
       let _activityName = activityName;
@@ -130,34 +129,15 @@ export const SearchFilter = ({
           ))
         }
         renderInput={(params) => (
-            isMobile && !isTablet ?    <TextField
-                    {...params}
-                    size="small"
-                    variant="standard"
-                    placeholder="Search or Filter"
-                    className= {isMobile ? "serchBox" : "" }
-                    InputProps={{
-                      ...params.InputProps,
-                      disableUnderline: true,
-                      endAdornment: (
-                          <React.Fragment>
-                            {loading ? (
-                                <CircularProgress color="inherit" size={20} />
-                            ) : null}
-                            {params.InputProps.endAdornment}
-                          </React.Fragment>
-                      ),
-                    }}
-                /> :
-
-                <TextField
+          isMobile && !isTablet ? <TextField
             {...params}
             size="small"
-            variant="outlined"
+            variant="standard"
             placeholder="Search or Filter"
-
+            className={isMobile ? "serchBox" : ""}
             InputProps={{
               ...params.InputProps,
+              disableUnderline: true,
               endAdornment: (
                 <React.Fragment>
                   {loading ? (
@@ -167,7 +147,26 @@ export const SearchFilter = ({
                 </React.Fragment>
               ),
             }}
-          />
+          /> :
+
+            <TextField
+              {...params}
+              size="small"
+              variant="outlined"
+              placeholder="Search or Filter"
+
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <React.Fragment>
+                    {loading ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : null}
+                    {params.InputProps.endAdornment}
+                  </React.Fragment>
+                ),
+              }}
+            />
         )}
         value={value}
         renderOption={(option) => {

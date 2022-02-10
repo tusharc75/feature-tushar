@@ -7,7 +7,7 @@ import { Button, Chip, Dialog, IconButton, makeStyles, useMediaQuery } from "@ma
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
-import { CustomDialogTransition, dateFormat, defaultActivityShow, gridLoadingTimeout, productInventory, purchaseOrder, rentalManagement, CHILD_RESOURCE, prepareDataForGrid } from "../../../constants/helpers";
+import { CustomDialogTransition, dateFormat, defaultActivityShow, gridLoadingTimeout, serializedAsset, purchaseOrder, rentalManagement, CHILD_RESOURCE, prepareDataForGrid } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import moment from "moment";
 import { startCase } from "lodash";
@@ -88,7 +88,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                         <Chip label="Asset"
                             size="small"
                             color="primary"
-                            onClick={() => history.push(`${routes.productInventory.path}`, {
+                            onClick={() => history.push(`${routes.serializedAsset.path}`, {
                                 productId: params.data?.productId,
                                 productName: params.data?.productDescription,
                                 pOId: purchaseOrderData?._id,

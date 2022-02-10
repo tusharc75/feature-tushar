@@ -7,7 +7,7 @@ import { Box, CircularProgress } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData } from '../../constants/helpers';
+import { serializedAsset, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData } from '../../constants/helpers';
 import { prepareDataForGrid } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
@@ -46,7 +46,7 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
   }, []);
   const fetchGridColumns = () => {
     axiosInstance()
-      .get('/field?resource=Product Inventory')
+      .get('/field?resource=Serialized Asset')
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
@@ -54,7 +54,7 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
           if (o?.fieldData?.fieldName === 'serialNumber') {
             o.fieldData.primaryField = true;
           }
-          let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path);
+          let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path);
 
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
@@ -83,7 +83,7 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
     let queryString = getQueryString();
 
     axiosInstance()
-      .get(`${productInventory.api}${queryString}`)
+      .get(`${serializedAsset.api}${queryString}`)
       .then(({ data: { data } }) => {
         data = data
           .filter((asset: any) => !existingAssets.includes(asset._id))
@@ -198,7 +198,7 @@ const AddAssetsDialog: FC<AssetDialogProps> = (props) => {
           open={true}
           onClose={closeDialog}
         >
-          <CustomDialogHeader title={`Add ${routes.productInventory.title}`} onClose={closeDialog} />
+          <CustomDialogHeader title={`Add ${routes.serializedAsset.title}`} onClose={closeDialog} />
           <CustomDialogContent>
             <div className="listing-grid p-3">
               <Box mb={2}>

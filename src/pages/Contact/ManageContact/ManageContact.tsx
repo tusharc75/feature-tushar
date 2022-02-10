@@ -228,6 +228,8 @@ export default function ManageContact(props) {
     );
   };
 
+  console.log(contactData)
+
   return (
     <>
       <Dialog
@@ -253,7 +255,7 @@ export default function ManageContact(props) {
           }}
           title={
             isClone
-              ? 'Clone'
+              ? `Clone - [${contactData.firstName}]`
               : isNew
                 ? contactResource === 'customerContact'
                   ? 'Add Customer Contact'

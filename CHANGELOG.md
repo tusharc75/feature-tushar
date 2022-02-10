@@ -2,6 +2,51 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.57.0](https://github.com/vebholic/oms_frontend/compare/v2.56.0...v2.57.0) (2022-02-10)
+
+
+### Features
+
+* code refacturing ([ae9667e](https://github.com/vebholic/oms_frontend/commit/ae9667ef82c84643babbcd1e9a86036c372d9093))
+
+
+### Bug Fixes
+
+* **avi/feat:** avi/feat ([d598558](https://github.com/vebholic/oms_frontend/commit/d598558aca525f8952dc761c6b29ff07ecca8a42))
+* bug fix ([d41ea47](https://github.com/vebholic/oms_frontend/commit/d41ea47980afd4a3a1304b500111e8557599c7ff))
+* bug fix ([d81c5d4](https://github.com/vebholic/oms_frontend/commit/d81c5d48a6dbe0232d04b043163216cc80fcad94))
+* bug fix ([743da05](https://github.com/vebholic/oms_frontend/commit/743da058ffdb258f2f40573f5069b5447d3ce49c))
+* bug fix ([6cbc06c](https://github.com/vebholic/oms_frontend/commit/6cbc06ca2349067b0a87bb1de7cef90940099d87))
+* bug fix ([492c953](https://github.com/vebholic/oms_frontend/commit/492c953c65dea65714c5603b5fce7524dc3ad2c5))
+* **bug:** bug ([b2e208f](https://github.com/vebholic/oms_frontend/commit/b2e208f9339e32fd7e7048af0ba712c33de71989))
+* **calendar:** fix input time ([574fa56](https://github.com/vebholic/oms_frontend/commit/574fa56c4658584df90a745d558ccd9140dfc9a5))
+* **lead-details:** error not showing ([d899d40](https://github.com/vebholic/oms_frontend/commit/d899d40ee27551ce7e33b7d6ebb20a8dcd6ace4d))
+* **product-category:** default chip color ([9471639](https://github.com/vebholic/oms_frontend/commit/9471639d304e8af0b9a8c7ed2908b1f7304ca4fd))
+* **productimgaes:** take fields for config from template ([7e81b40](https://github.com/vebholic/oms_frontend/commit/7e81b4004132b422e0098a9b53722512c2f33ea3))
+* **report:** resource name fix ([8ce772b](https://github.com/vebholic/oms_frontend/commit/8ce772bef5ecd9ad3ba73229549bc51126963005))
+
+## [2.56.0](https://github.com/vebholic/oms_frontend/compare/v2.55.0...v2.56.0) (2022-02-09)
+
+
+### Features
+
+* - Pricing condition code updated ([f961e70](https://github.com/vebholic/oms_frontend/commit/f961e70635b9d6497b549d7ac413457359bfe23d))
+* **feat/avi:** feat/avi ([0770bd9](https://github.com/vebholic/oms_frontend/commit/0770bd9cdeeec0d17294ef54b3d0b15adbb7374e))
+* **report view:** save report views ([ee00828](https://github.com/vebholic/oms_frontend/commit/ee008283704a3bc5ede31f13efdb3526ff9525bd))
+
+
+### Bug Fixes
+
+* **arrange view:** fix locked columns ([2c368ba](https://github.com/vebholic/oms_frontend/commit/2c368bab70fac3ec7b63551053c9135de0d0e560))
+* bug fix ([0f43eee](https://github.com/vebholic/oms_frontend/commit/0f43eee3cc1f0b7fc285b0a80f8688bde41ea99d))
+* bug fix ([f806da6](https://github.com/vebholic/oms_frontend/commit/f806da6b35fc677d2e3ec2717e3245356535f02a))
+* dashboard opportunities trend issue ([fbcdc4c](https://github.com/vebholic/oms_frontend/commit/fbcdc4c0b58858674efa4f5ec418067fb560384c))
+* dashboard opportunity table filter changes ([c2a7b99](https://github.com/vebholic/oms_frontend/commit/c2a7b99f1d028076201a9d0b77033611183d7c11))
+* project sales customer account accordin opportunity, quote and contact ([9554368](https://github.com/vebholic/oms_frontend/commit/9554368e588aaf2058600c6b0e3b1184fb26a5dc))
+* report save in reports ([c91d260](https://github.com/vebholic/oms_frontend/commit/c91d26018e1f1c3b7ca9555d7afaba7aa6875012))
+* **report view:** delete button ([6525b8d](https://github.com/vebholic/oms_frontend/commit/6525b8dcfbfc771ee877a44f7ade9821349af031))
+* **report:** conflict fix ([b81c277](https://github.com/vebholic/oms_frontend/commit/b81c277c63aad76992fc77544397ae2925b02fdd))
+
 ## [2.55.0](https://github.com/vebholic/oms_frontend/compare/v2.54.2...v2.55.0) (2022-02-08)
 
 

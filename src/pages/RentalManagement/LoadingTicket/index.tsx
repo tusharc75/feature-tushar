@@ -20,7 +20,7 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   DELIVERY_TICKET_REFRENCE_TYPE,
-  productInventory,
+  serializedAsset,
   DELIVERY_FROM_TO_TYPE
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -170,13 +170,17 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     );
 
   const WarehouseRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`}>
-      {params.value}
-    </Link>
+    params?.value ? (
+      <Link className="link text-truncate" title={params.value} to={`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`}>
+        {params.value}
+      </Link>
+    ) : (
+      <NoDataCell />
+    )
   );
 
   const InventoryRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+    <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data._id}`}>
       {params.value}
     </Link>
   );
@@ -400,7 +404,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             permissions={true}
             primaryField={columns?.find(d => d.field)}
             onClick={(data) => {
-              history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+              history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
             }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}
@@ -553,7 +557,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             size="small"
             onClick={() => {
               setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
-              axiosInstance().put(`${productInventory.api}/update-status`, {
+              axiosInstance().put(`${serializedAsset.api}/update-status`, {
                 comment: statusToUpdate.message,
                 assets: selectedRecords.map(m => m?._id ?? m?.id),
                 status: statusToUpdate.status,

@@ -73,7 +73,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   const AssetRenderer = (params) =>
     params.value ? (
-      <Link className="link cursor-pointer" to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+      <Link className="link cursor-pointer" to={`${routes.serializedAssetDetail.path}/${params.data._id}`}>
         <p title={params.value}>{params.value}</p>
       </Link>
     ) : (
@@ -302,7 +302,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             permissions={permissions.transferAsset}
             primaryField={columns?.find((d) => d.field)}
             onClick={(data) => {
-              history.push(`${routes.productInventoryDetail.path}/${data._id}`);
+              history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
             }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}

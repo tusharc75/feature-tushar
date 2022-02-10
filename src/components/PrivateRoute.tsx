@@ -55,7 +55,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'project-sales',
         'doa-request',
         'quote-pdf-template',
-        'product-inventory',
+        'serialized-asset',
         'equiptment-rental-master',
         'rental-management',
         'delivery-ticket',
