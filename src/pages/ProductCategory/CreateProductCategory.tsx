@@ -26,6 +26,7 @@ const CreateProductCategory = (props) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [saveClick, setSaveClick] = useState(false);
+  const [cloneHeading,setCloneHeading]= useState('')
 
   useEffect(() => {
     axiosInstance()
@@ -43,6 +44,7 @@ const CreateProductCategory = (props) => {
                 (data) => data.optionValue !== productCategoryId
               );
               const { name, ...rest } = data;
+              setCloneHeading(name)
               if (isClone) {
                 setInitialData({
                   fields: fieldsDataForCreate,
@@ -142,7 +144,7 @@ const CreateProductCategory = (props) => {
               <CustomDialogHeader
                 title={
                   isClone
-                    ? 'Clone'
+                    ? `Clone - [${cloneHeading}]`
                     : productCategoryId
                     ? !isUpdateDisabled
                       ? 'Update ' + routes.productCategory.title
