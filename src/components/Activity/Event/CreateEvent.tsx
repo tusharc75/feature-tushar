@@ -329,7 +329,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               name="startDate"
                               label="Start Date"
                               onChange={(date: any) => {
-                                setFieldValue("startDate", date);
+                                setFieldValue("startDate", date ? date : null);
                                 setFieldValue("startTime", date ? getTime(date._d) : null);
                               }}
                               format={dateFormat}
@@ -405,11 +405,11 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               name="endDate"
                               label="End Date"
                               onChange={(date: any) => {
-                                setFieldValue("endDate", date || null);
+                                setFieldValue("endDate", date);
                                 setFieldValue(
-                                  "endTime",
+                                  "endTime", 
                                   new Date(
-                                    getTime(date._d).getTime() + 30 * 60000
+                                    getTime(date ? date._d: new Date()).getTime() + 30 * 60000
                                   )
                                 );
                               }}
