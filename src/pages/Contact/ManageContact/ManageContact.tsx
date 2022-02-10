@@ -135,7 +135,7 @@ export default function ManageContact(props) {
         .then(({ data: { data } }) => {
           const { _id, firstName, lastName, middleName, email, reportsTo, ...rest } = data
 
-         setCloneHeading(firstName);
+         setCloneHeading(`${firstName} ${middleName} ${lastName}`);
 
           
        
@@ -273,7 +273,7 @@ export default function ManageContact(props) {
           }}
           title={
             isClone
-              ? `Clone - [${cloneHeading}]`
+              ? `Clone - ${cloneHeading}`
               : isNew
                 ? contactResource === 'customerContact'
                   ? 'Add Customer Contact'

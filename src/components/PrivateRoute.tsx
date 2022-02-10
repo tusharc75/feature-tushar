@@ -59,6 +59,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'equiptment-rental-master',
         'rental-management',
         'delivery-ticket',
+        'product-inventory',
         'entity',
         'logout',
         "address",
