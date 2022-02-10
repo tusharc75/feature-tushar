@@ -551,6 +551,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === 'year') {
       obj[key.fieldName] = value ? value : new Date();
+    } else if (key.type === 'colorPicker') {
+      obj[key.fieldName] = value ? value : "#aaaaaa";
     } else if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = value ? value : false;
     } else if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
@@ -1561,6 +1563,16 @@ export const DELIVERY_FROM_TO_TYPE = {
   plant: 'Plant',
   customer: 'Customer',
   supplier: 'Supplier',
+};
+
+export const SUBLEASE_STATUS = {
+  new: 'New',
+  indTransit: 'In-Transit',
+  issued: 'Issued',
+  completed: 'Completed',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
+  closed: 'Closed',
 };
 
 export const asyncForEach = async (

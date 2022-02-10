@@ -101,7 +101,6 @@ const Event = () => {
                 filter={filter}
                 chip={{ variant: "default", size: "small", color: "default" }}
                 activityName="event"
-                permissions={permissions}
               />
             </Box>
 

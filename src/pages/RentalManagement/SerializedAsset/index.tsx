@@ -424,6 +424,16 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         >
           {isMobile && !isTablet ? <IoCreate size={20} /> : `Create ${routes.purchaseOrder.title}`}
         </Button>
+        {poCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
+          <IconButton size="small" onClick={() => {
+            history.push(routes.purchaseOrder.path, {
+              rental: rentalManagementData,
+            })
+          }}>
+            <InfoIcon color={"primary"} />
+          </IconButton>
+        </HtmlTooltip>}
+        
         {permissions?.sublease?.isCreate &&
           <Fragment>
             <Box mx={1} />
@@ -442,15 +452,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             </Button>
           </Fragment>
         }
-        {poCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
-          <IconButton size="small" onClick={() => {
-            history.push(routes.purchaseOrder.path, {
-              rental: rentalManagementData,
-            })
-          }}>
-            <InfoIcon color={"primary"} />
-          </IconButton>
-        </HtmlTooltip>}
+
         <Box mx={1} />
         <Button
           variant={isMobile && !isTablet ? "text" : "contained"}

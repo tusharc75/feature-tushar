@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
-import { prepareDataForGrid, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, DELIVERY_FROM_TO_TYPE } from "../../../constants/helpers"
+import { prepareDataForGrid, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, DELIVERY_FROM_TO_TYPE, sublease, SUBLEASE_STATUS } from "../../../constants/helpers"
 import { useData } from "../../../StateProvider/Provider";
 import {
     Button, Tooltip, IconButton, Menu, MenuItem,
@@ -36,6 +36,8 @@ const SerializedAsset = ({ subleaseData }) => {
     const { state: { user, permissions, selectedEntity } }: any = useData();
 
     const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
+    const [isCompleteing, setIsCompleteing] = useState(false);
+    const [isCompleteEnable, setIsCompleteEnable] = useState(false);
 
     useEffect(() => {
         fetchGridColumns()
@@ -68,55 +70,74 @@ const SerializedAsset = ({ subleaseData }) => {
     }
 
     const fetchRecords = async () => {
-        const productInventories = []
-        subleaseData?.serializedAsset?.forEach(element => {
-            productInventories.push(element.inventory)
-        });
-        if (productInventories.length) {
-            dispatch({ type: "loading", loading: true });
-            if (gridApi) {
-                gridApi.setRowData([]);
-            }
-            let data;
-            let ids = JSON.stringify(productInventories)
-            const queryString = `?getById=${ids}`
-            const response = await axiosInstance().get(`${serializedAsset.api}${queryString}`)
-            data = response?.data?.data
-            let rows = data.map((u) => {
-                let res = {
-                    ...prepareDataForGrid(u, user)
-                };
-                return res;
-            });
-            dispatch({ type: "initialize", data: rows, count: rows.length });
-            setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
+        dispatch({ type: "loading", loading: true });
+        if (gridApi) {
+            gridApi.setRowData([]);
         }
+        const response = await axiosInstance().get(`${sublease.api}/${subleaseData._id}/serialized-asset`)
+        var isComplate = true;
+        let rows = response?.data?.data.map((u) => {
+            if (u?.currentOwner !== subleaseData?.supplierAccount?.optionValue) {
+                isComplate = false;
+            }
+            let res = {
+                ...prepareDataForGrid(u, user)
+            };
+            return res;
+        });
+        setIsCompleteEnable(isComplate)
+        dispatch({ type: "initialize", data: rows, count: rows.length });
+        setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
     };
+
+    const completeSublease = () => {
+        setIsCompleteing(true);
+        axiosInstance().put(`${sublease.api}/${subleaseData._id}/complete-sublease`).then(() => {
+            setIsCompleteing(false);
+            fetchRecords()
+        }).catch((error) => {
+            setIsCompleteing(false)
+            toastConfig.setToastConfig(error)
+        });
+    }
 
     return (<>
         <Box display="flex" justifyContent="flex-end" pt={1}>
-            <Tooltip title="Transfer to Plant">
-                <Button
-                    variant={isMobile && !isTablet ? "text" : "contained"}
-                    color="primary"
-                    size="small"
-                    style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
-                    onClick={() => {
-                        const data = {}
-                        data["ticketName"] = subleaseData.subleaseName;
-                        data["refrenceId"] = subleaseData._id;
-                        data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
-                        data["pickupFrom"] = subleaseData?.supplierAccount?.optionValue;
-                        data["pickupFromAddress"] = subleaseData?.shippingAddress?.optionValue;
-                        data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
-                        setShowTicketDialog({ open: true, data: data });
-                    }}
-                    disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse"))))}
-                >
-                    {isMobile && !isTablet ? <AiOutlineDeliveredProcedure size={18} /> : 'Transfer to Plant'}
-                </Button>
-            </Tooltip>
-            <Box mx={1} />
+            {SUBLEASE_STATUS.completed != subleaseData?.status &&
+                <Fragment>
+                    <Tooltip title="Transfer to Plant">
+                        <Button
+                            variant={"contained"}
+                            color="primary"
+                            size="small"
+                            onClick={() => {
+                                const data = {}
+                                data["ticketName"] = subleaseData.subleaseName;
+                                data["refrenceId"] = subleaseData._id;
+                                data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
+                                data["pickupFrom"] = subleaseData?.supplierAccount?.optionValue;
+                                data["pickupFromAddress"] = subleaseData?.shippingAddress?.optionValue;
+                                data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                                setShowTicketDialog({ open: true, data: data });
+                            }}
+                            disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse"))))}
+                        >
+                            Transfer to Plant
+                        </Button>
+                    </Tooltip>
+                    <Box mx={1} />
+                    <Button
+                        variant={"contained"}
+                        color="primary"
+                        size="small"
+                        disabled={!isCompleteEnable || isCompleteing}
+                        onClick={() => { completeSublease() }}
+                    >
+                        Complete Sublease
+                    </Button>
+                    <Box mx={1} />
+                </Fragment>
+            }
         </Box>
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns ?
