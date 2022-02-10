@@ -58,6 +58,17 @@ export const SearchFilter = ({
   let permissionsSearch = allSearch.filter((item) => permissions[item.type]?.isRead === true)
 
 
+  useEffect(() => {
+    if(permissions['quoteBuilder'].isRead === true){
+      permissionsSearch.push({ type: "quote", name: "All", isAll: true })
+    }
+    if(permissions['projectStrategy'].isRead === true){
+      permissionsSearch.push({ type: "projectSales", name: "All", isAll: true })
+    }
+    if(permissions['user'].isRead === true){
+      permissionsSearch.push( { type: "my", name: user?._id, isAll: true })
+    }
+  },[permissionsSearch])
 
   const activityType = ["task", "event", "case", "note", "email", "attachment"]
 

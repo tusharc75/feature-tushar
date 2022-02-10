@@ -36,7 +36,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
   const [allFields, setAllFields] = useState([]);
   const [plantsCategoryOptions, setPlantsCategoryOptions] = useState([]);
   const [productDescriptionOptions, setProductDescriptionOptions] = useState([]);
-
+  const [cloneHeading,setCloneHeading] = useState('')
   const [formValues, setFormValues] = useState({});
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [plantsOpen, setPlantsOpen] = useState({ open: false, isClone: false });
@@ -68,7 +68,9 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
             .get(`${serializedAsset.api}/` + productInventoryId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, createdBy, updatedBy, serialNumber, ...rest } = data;
+                const { _id, createdBy, updatedBy, assetNumber, ...rest } = data;
+                
+                setCloneHeading(assetNumber);
                 let oldValues = { ...rest };
                 oldValues.status = "New";
                 setInitialData({
@@ -174,7 +176,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
               <Fragment>
                 <CustomDialogHeader
                   title={
-                    productInventoryId ? (isClone ? 'Clone' : 'Update ' + routes.serializedAsset.title) : 'Create ' + routes.serializedAsset.title
+                    productInventoryId ? (isClone ?   `Clone - [${cloneHeading}]` : 'Update ' + routes.serializedAsset.title) : 'Create ' + routes.serializedAsset.title
                   }
                   onClose={() => {
                     if (isFieldNotTouched(initialData, values)) onClose();

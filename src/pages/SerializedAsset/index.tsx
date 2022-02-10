@@ -50,7 +50,7 @@ const ProductInventory = () => {
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
     const localStorageSelectedRecords = "warehouse_selected";
-
+    const [plantOptions, setPlantOptions]= useState([])
     const [productCategoryList, setProductCategoryList] = useState([]);
     const [productFilterList, setProductFilterList] = useState([]);
     const [productCategory, setProductCategory] = useState(null);
@@ -148,7 +148,14 @@ const ProductInventory = () => {
                 };
             });
             setIsAllChecked(false);
+            
             setClonedData(data.data);
+          
+            let plantData  = data.data.map((i)=>{
+                return i.warehouse
+            })
+            setPlantOptions(plantData);
+      
             if (appendRows) {
                 dispatch({
                     type: "initialize", data: [...dataRows, ...rows],
@@ -293,6 +300,9 @@ const ProductInventory = () => {
         }
     };
 
+
+    
+
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
@@ -406,6 +416,46 @@ const ProductInventory = () => {
                                                 />
                                         )}
                                     />
+    
+                                    <Autocomplete
+                                        style={{ width: "250px" }}
+                                        options={plantOptions}
+                                        getOptionLabel={(option: any) => option ? option.optionLabel : ""}
+                                        getOptionSelected={(option: any, val) =>
+                                            option.optionValue === val
+                                        }
+                                        value={plantOptions.filter((data) => data._id === plantOptions).length
+                                            ? plantOptions.filter((data) => data._id === plantOptions)[0]
+                                            : ""
+                                        }
+                                        onChange={(e, val) => {
+                                            setWarehouse(val && val._id ? val._id : "")
+                                        }}
+                                        renderInput={(params) => (
+
+                                            isMobile && !isTablet ?
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="plant"
+                                                    placeholder="Plant"
+                                                    variant="standard"
+                                                    fullWidth
+                                                    className={isMobile ? "serchBox" : ""}
+
+
+                                                /> :
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="plant"
+                                                    label="Plant"
+                                                    variant="outlined"
+                                                    fullWidth
+                                                />
+                                        )}
+                                    />
+
                                     {productCategory &&
                                         <Autocomplete
                                             style={{ width: "250px" }}

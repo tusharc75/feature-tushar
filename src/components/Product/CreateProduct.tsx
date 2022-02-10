@@ -63,7 +63,7 @@ const CreateProduct = (props) => {
     const [currencySymbol, setCurrencySymbol] = useState(null);
     const [isProductTemplate, setIsProductTemplate] = useState(false);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
+    const [cloneHeading, setCloneHeading] = useState('')
     const [expanded, setExpanded] = useState({});
     const [fieldChanges, setFieldChanges] = useState([]);
 
@@ -113,6 +113,10 @@ const CreateProduct = (props) => {
             if (productId) {
                 const newField = _fields;
                 axiosInstance().get(`/product/` + productId).then(({ data: { data } }) => {
+
+               
+
+
                     data.fields?.map((_f) => newField.push(_f));
                     data.productData.fields?.map((_f) => newField.push(_f));
                     if (data.productData.fieldChanges) {
@@ -120,6 +124,7 @@ const CreateProduct = (props) => {
                     }
                     setFields(data.productData.fields)
                     if (isClone) {
+                        setCloneHeading(data.productData.productName );
                         data.productData.productName = ""
                     }
                     newField.map((_f) => {
@@ -550,7 +555,7 @@ const CreateProduct = (props) => {
                 }) => (
                     <Fragment>
                         <CustomDialogHeader
-                            title={`${(productId && !isClone) ? `Edit Product - ${values?.productName}` : `New Product`}`}
+                            title={`${(productId && !isClone) ? `Edit Product - ${values?.productName}` : (productId && isClone) ? `Clone - [${cloneHeading}]` : `New Product`}`}
                             isMinimized={!fullScreen}
                             onMinimizeMaximize={() => {
                                 setFullScreen(prevState => !prevState)
