@@ -39,7 +39,7 @@ const RentalManagementViews = (props) => {
               <>
                 {item.productDetail.productName}
                 <br />
-                type: {item.type}
+                {item.type}
               </>
             )
           },
@@ -49,8 +49,8 @@ const RentalManagementViews = (props) => {
           id: `edge-${item._id}`,
           source: `${rentalId}`,
           arrowHeadType: 'arrow',
-          target: `${item._id}`,
-          animated: true
+          target: `${item._id}`
+          // animated: true
         });
       });
       response?.data?.data?.inventory?.map((item: any, index) => {
@@ -66,8 +66,8 @@ const RentalManagementViews = (props) => {
           id: `edge-${item.inventoryDetail.assetNumber}`,
           source: `${item._id}`,
           arrowHeadType: 'arrow',
-          target: `${item.inventoryDetail.assetNumber}`,
-          animated: true
+          target: `${item.inventoryDetail.assetNumber}`
+          // animated: true
         });
       });
       const loadingTicketData = await axiosInstance().get(
@@ -84,9 +84,9 @@ const RentalManagementViews = (props) => {
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {item.ticketName}
                 <br />
-                type: {item.ticketType} Ticket
+                {item.ticketType} Ticket
                 <br />
-                status: {item.status}
+                {item.status}
               </div>
             )
           },
@@ -106,15 +106,15 @@ const RentalManagementViews = (props) => {
             id: `edge-${item._id}`,
             source: `${product.optionLabel}`,
             arrowHeadType: 'arrow',
-            target: `${item._id}`,
-            animated: true
+            target: `${item._id}`
+            // animated: true
           });
           flowEdge.push({
             id: `edge-${product.optionValue}`,
             source: `${item._id}`,
             arrowHeadType: 'arrow',
-            target: `${product.optionValue}`,
-            animated: true
+            target: `${product.optionValue}`
+            // animated: true
           });
         });
       });
@@ -132,9 +132,9 @@ const RentalManagementViews = (props) => {
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {item.ticketName}
                 <br />
-                type: {item.ticketType} Ticket
+                {item.ticketType} Ticket
                 <br />
-                status: {item.status}
+                {item.status}
               </div>
             )
           },
@@ -145,8 +145,8 @@ const RentalManagementViews = (props) => {
             id: `edge-${product.optionValue}`,
             source: `${product.optionValue}`,
             arrowHeadType: 'arrow',
-            target: `${item._id}`,
-            animated: true
+            target: `${item._id}`
+            // animated: true
           });
         });
       });
