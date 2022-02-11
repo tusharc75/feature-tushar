@@ -1532,6 +1532,14 @@ export const RENTAL_STATUS = {
   closed: 'Closed',
 };
 
+export const RENTAL_INTERNAL_ASSET_STATUS = {
+  reserved: 'Reserved',
+  inUse: 'In-Use',
+  complete: 'Complete',
+  return: 'Return',
+} as const;
+
+
 export const REPAIR_JOB_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
