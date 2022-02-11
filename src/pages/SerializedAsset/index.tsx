@@ -15,9 +15,10 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { serializedAsset, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL, product } from '../../constants/helpers';
+import { serializedAsset, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL, product, warehouse as warehouseHelper } from '../../constants/helpers';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
+import ManageSerializedAsset from "./ManageSerializedAsset";
 import ManageRepairJob from '../RepairJob/ManageRepairJob'
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from "react-router-dom";
@@ -30,11 +31,11 @@ import { AiFillCrown, MdAdd } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from "@material-ui/lab";
-import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
+const ProductInventory = () => {
 
-const InventoryProduct = () => {
     const toastConfig = useContext(CustomToastContext)
     const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
     const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
@@ -42,18 +43,19 @@ const InventoryProduct = () => {
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
     const [gridApi, setGridApi] = useState(null);
-    // const [columns, setColumns] = useState(null)
-    // const [frameWorkComponent, setFrameWorkComponent] = useState({})
+    const [columns, setColumns] = useState(null)
+    const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
-    const localStorageSelectedRecords = "warehouse_selected";
-    const [plantOptions, setPlantOptions] = useState([])
     const [productCategoryList, setProductCategoryList] = useState([]);
     const [productFilterList, setProductFilterList] = useState([]);
     const [productCategory, setProductCategory] = useState(null);
     const [productFilter, setProductFilter] = useState(null);
+
+    const [plantOptions, setPlantOptions] = useState([])
+    const [selectedPlant, setSelectedPlant] = useState(null)
 
     const {
         state: { permissions },
@@ -62,26 +64,33 @@ const InventoryProduct = () => {
     const history = useHistory();
 
     const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);
+
     const [fromPurchaseOrder, setFromPurchaseOrder] = useState({
         productId: history.location?.state?.productId,
         productName: history.location?.state?.productName,
         pOId: history.location?.state?.pOId,
         pOName: history.location?.state?.pOName,
     });
+
     const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
 
     useEffect(() => {
-        // fetchGridColumns()
-        getPlants()
+        fetchGridColumns()
     }, [])
 
     useEffect(() => {
         fetchProductInventory()
-    }, [page, limit, filters, sorting, search, warehouse, redirectProduct, fromPurchaseOrder, productCategory, productFilter]);
+    }, [page, limit, filters, sorting, search, warehouse, selectedPlant, redirectProduct, fromPurchaseOrder, productCategory, productFilter]);
 
     useEffect(() => {
-        axiosInstance().get("/product-category?sortBy=name&orderBy=asc").then(({ data: { data } }) => {
+        axiosInstance().get(`/product-category?sortBy=name&orderBy=asc`).then(({ data: { data } }) => {
             setProductCategoryList(data)
+        })
+    }, [])
+
+    useEffect(() => {
+        axiosInstance().get(`${warehouseHelper.warehouseApi}?sortBy=warehouseName&orderBy=asc`).then(({ data: { data } }) => {
+            setPlantOptions(data)
         })
     }, [])
 
@@ -99,65 +108,42 @@ const InventoryProduct = () => {
 
     }, [productCategory])
 
-
-    const getPlants = () => {
+    const fetchGridColumns = () => {
         axiosInstance()
-            .get(`/warehouse`)
-            .then(({ data: { data, count } }) => {
-              
-                setPlantOptions(data);
-
-            });
+            .get("/field?resource=Serialized Asset")
+            .then(({ data: { data } }) => {
+                let columns = []
+                let rendererNames = []
+                data.forEach(o => {
+                    if (o?.fieldData?.fieldName === "serialNumber") {
+                        o.fieldData.primaryField = true
+                    }
+                    let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
+                    if (currentColumn !== null) {
+                        columns = [...columns, currentColumn?.columnData]
+                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                            rendererNames.push(currentColumn?.rendererName)
+                        }
+                    }
+                })
+                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+                tempFrameworkComponent = {
+                    ...tempFrameworkComponent,
+                    actionsRenderer: ActionsRenderer
+                }
+                setFrameWorkComponent({ ...tempFrameworkComponent })
+                columns = [...columns, ...getStaticFields()]
+                setColumns([...columns])
+            })
     }
-
-    // const fetchGridColumns = () => {
-    //     axiosInstance()
-    //         .get("/field?resource=Serialized Asset")
-    //         .then(({ data: { data } }) => {
-    //             let columns = []
-    //             let rendererNames = []
-    //             data.forEach(o => {
-    //                 if (o?.fieldData?.fieldName === "serialNumber") {
-    //                     o.fieldData.primaryField = true
-    //                 }
-    //                 let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
-    //                 if (currentColumn !== null) {
-    //                     columns = [...columns, currentColumn?.columnData]
-    //                     if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-    //                         rendererNames.push(currentColumn?.rendererName)
-    //                     }
-    //                 }
-    //             })
-    //             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-    //             tempFrameworkComponent = {
-    //                 ...tempFrameworkComponent,
-    //                 actionsRenderer: ActionsRenderer
-    //             }
-    //             setFrameWorkComponent({ ...tempFrameworkComponent })
-    //             columns = [...columns, ...getStaticFields()]
-    //             setColumns([...columns])
-    //         })
-    // }
-
-
-    let columns = [
-        { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
-        { field: 'plant', headerName: 'Plant', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-        { field: 'inventory', headerName: 'Inventory', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-        { field: 'minInventory', headerName: 'Min Inventory', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-    ]
-
-
 
     const fetchProductInventory = () => {
         dispatch({ type: "loading", loading: true });
-
         if (gridApi) {
             gridApi.setRowData([]);
         }
-
         const queryString = getQueryString();
-        axiosInstance().get(`/product-inventory?wareHouse=61e54c3e8b18de57f0ec5587`).then(({ data }) => {
+        axiosInstance().get(`${serializedAsset.api}${queryString}`).then(({ data }) => {
             let rows = data.data?.map((u, user) => {
                 let finalObject = prepareDataForGrid(u);
                 finalObject["canDelete"] = permissions?.serializedAsset?.isDelete
@@ -165,20 +151,10 @@ const InventoryProduct = () => {
                 finalObject["allowedToEdit"] = permissions?.serializedAsset.isUpdate
                 return {
                     ...finalObject,
-
                 };
             });
             setIsAllChecked(false);
-
             setClonedData(data.data);
-
-            // let plantData  = data.data.map((i)=>{
-            //     return i.warehouse
-            // })
-
-
-      
-
             if (appendRows) {
                 dispatch({
                     type: "initialize", data: [...dataRows, ...rows],
@@ -194,7 +170,6 @@ const InventoryProduct = () => {
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
-
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
@@ -203,11 +178,12 @@ const InventoryProduct = () => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
-
         let filterById = [];
-
         if (warehouse?.optionValue) {
             filterById.push({ field: "warehouse", term: warehouse?.optionValue });
+        }
+        if (selectedPlant && selectedPlant !== "") {
+            filterById.push({ field: "warehouse", term: selectedPlant });
         }
         if (redirectProduct?.id) {
             filterById.push({ field: "product", term: redirectProduct?.id });
@@ -227,10 +203,8 @@ const InventoryProduct = () => {
         if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
         }
-
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
-
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
@@ -239,15 +213,12 @@ const InventoryProduct = () => {
             });
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`
         }
-
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
-
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
         }
-
         return `${deepFilter}&filterType=and&filterByIdType=and`;
     };
 
@@ -298,15 +269,6 @@ const InventoryProduct = () => {
         </>
     )
 
-    const frameworkComponents = {
-        actionsRenderer: ActionsRenderer,
-        // productNameRenderer: ProductNameRenderer,
-        commonRenderer: CommonRenderer,
-
-
-    };
-
-
     const handleSearch = (e) => {
         dispatch({ type: "search", search: e.target.value });
     };
@@ -332,13 +294,10 @@ const InventoryProduct = () => {
         }
     };
 
-
-
-
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[routes.productInventory]} />
+                <CustomBreadCrumbs routes={[routes.serializedAsset]} />
             </Grid>
             <Grid item md={8} sm={1} xs={2}>
                 <ImportExportLinks
@@ -363,60 +322,155 @@ const InventoryProduct = () => {
         <div className="main-container">
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1">
-                        <div className="d-flex align-items-center">
-                            <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
-                            <span className="listingHeader">{routes.productInventory?.title} </span>
-                        </div>
-
-
-                        <>
-
-
-                            <Autocomplete
-                                style={{ width: "250px" }}
-                                options={plantOptions}
-                                getOptionLabel={(option: any) => option ? option.warehouseName : ""}
-                                getOptionSelected={(option: any, val) =>
-                                    option._id === val
-                                }
-                                value={plantOptions.filter((data) => data._id === plantOptions).length
-                                    ? plantOptions.filter((data) => data._id === plantOptions)[0]
-                                    : ""
-                                }
-                                onChange={(e, val) => {
-                                    setWarehouse(val && val._id ? val._id : "")
+                    <Grid item xs={12} sm={12} md={8} className="d-flex align-items-center gap-1">
+                        <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
+                        <span className="listingHeader">{routes.serializedAsset?.title} </span>
+                        {warehouse && (
+                            <Chip
+                                className="ml-3"
+                                color="primary"
+                                label={`Plants : ${warehouse.optionLabel}`}
+                                onDelete={() => {
+                                    setWarehouse(null);
                                 }}
-                                renderInput={(params) => (
-
-                                    isMobile && !isTablet ?
-                                        <TextField
-                                            {...params}
-                                            margin="dense"
-                                            name="plant"
-                                            placeholder="Plant"
-                                            variant="standard"
-                                            fullWidth
-                                            className={isMobile ? "serchBox" : ""}
-
-
-                                        /> :
-                                        <TextField
-                                            {...params}
-                                            margin="dense"
-                                            name="plant"
-                                            label="Plant"
-                                            variant="outlined"
-                                            fullWidth
-                                        />
-                                )}
                             />
+                        )}
+                        {redirectProduct && (
+                            <Chip
+                                className="ml-3"
+                                color="primary"
+                                label={`Product : ${redirectProduct.name}`}
+                                onDelete={() => {
+                                    setRedirectProduct(null);
+                                }}
+                            />
+                        )}
+                        {fromPurchaseOrder?.pOId ? (
+                            <>
+                                {fromPurchaseOrder?.productId && (
+                                    <Chip
+                                        className="ml-3"
+                                        color="primary"
+                                        label={`Product : ${fromPurchaseOrder.productName}`}
+                                        onDelete={() => {
+                                            setFromPurchaseOrder(null);
+                                        }}
+                                    />
+                                )}
+                                <Chip
+                                    className="ml-3"
+                                    color="primary"
+                                    label={`Purchase Order : ${fromPurchaseOrder.pOName}`}
+                                    onDelete={() => {
+                                        setFromPurchaseOrder(null);
+                                    }}
+                                />
+                            </>
+                        ) :
+                            (
+                                <Fragment>
+                                    <Autocomplete
+                                        style={{ width: "250px" }}
+                                        options={productCategoryList}
+                                        getOptionLabel={(option: any) => option ? option.name : ""}
+                                        getOptionSelected={(option: any, val) =>
+                                            option._id === val
+                                        }
+                                        value={productCategoryList.filter((data) => data._id === productCategory).length
+                                            ? productCategoryList.filter((data) => data._id === productCategory)[0]
+                                            : ""
+                                        }
+                                        onChange={(e, val) => {
+                                            setProductCategory(val && val._id ? val._id : "")
+                                        }}
+                                        renderInput={(params) => (
+                                            isMobile && !isTablet ?
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="productCategory"
+                                                    placeholder="Product Category"
+                                                    variant="standard"
+                                                    fullWidth
+                                                    className={isMobile ? "serchBox" : ""}
+                                                /> :
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="productCategory"
+                                                    label="Product Category"
+                                                    variant="outlined"
+                                                    fullWidth
+                                                />
+                                        )}
+                                    />
+                                    {productCategory &&
+                                        <Autocomplete
+                                            style={{ width: "250px" }}
+                                            options={productFilterList}
+                                            getOptionLabel={(option: any) => option ? option.productName : ""}
+                                            getOptionSelected={(option: any, val) =>
+                                                option._id === val
+                                            }
+                                            value={productFilterList.filter((data) => data._id === productFilter).length
+                                                ? productFilterList.filter((data) => data._id === productFilter)[0]
+                                                : ""
+                                            }
+                                            onChange={(e, val) => {
+                                                setProductFilter(val && val._id ? val._id : "")
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="product"
+                                                    label="Product"
+                                                    variant="outlined"
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
+                                    <Autocomplete
+                                        style={{ width: "250px" }}
+                                        options={plantOptions}
+                                        getOptionLabel={(option: any) => option ? option?.warehouseName : ""}
+                                        getOptionSelected={(option: any, val) =>
+                                            option.optionValue === val
+                                        }
+                                        value={plantOptions.filter((data) => data._id === selectedPlant).length
+                                            ? plantOptions.filter((data) => data._id === selectedPlant)[0]
+                                            : ""
+                                        }
+                                        onChange={(e, val) => {
+                                            setSelectedPlant(val && val._id ? val._id : "")
+                                        }}
+                                        renderInput={(params) => (
+                                            isMobile && !isTablet ?
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="plant"
+                                                    placeholder="Plant"
+                                                    variant="standard"
+                                                    fullWidth
+                                                    className={isMobile ? "serchBox" : ""}
+                                                /> :
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="plant"
+                                                    label="Plant"
+                                                    variant="outlined"
+                                                    fullWidth
+                                                />
+                                        )}
+                                    />
+                                </Fragment>
+                            )
+                        }
 
-                           
-                        </>
-                        
                     </Grid>
-                    <Grid md={6} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`} >
+                    <Grid md={4} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
 
                             <Grid style={{ display: "flex", flex: 1 }}>
@@ -430,7 +484,7 @@ const InventoryProduct = () => {
                                 />
                             </Grid>
 
-                            {/* <Grid style={{ display: "flex", gap: "5px" }}>
+                            <Grid style={{ display: "flex", gap: "5px" }}>
                                 {permissions?.serializedAsset?.isCreate &&
                                     <Button
                                         onClick={() => {
@@ -482,7 +536,7 @@ const InventoryProduct = () => {
                                         setShowRepairJobDialog(true)
                                     }}>Create Repair Job</MenuItem>}
                                 </Menu>
-                            </Grid> */}
+                            </Grid>
                         </Box>
                     </Grid>
                 </Grid>
@@ -522,11 +576,11 @@ const InventoryProduct = () => {
                     showClone={true}
                     onClone={(data) => { setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id }); }}
                     renderedFrom={routes.serializedAsset?.title} /> :
-                    Object.keys(frameworkComponents).length > 0 ?
+                    Object.keys(frameWorkComponent).length > 0 ?
                         <CustomAgGrid
                             columns={columns}
                             dataRows={dataRows}
-                            frameworkComponents={frameworkComponents}
+                            frameworkComponents={frameWorkComponent}
                             setGridApi={setGridApi}
                             dispatch={dispatch}
                             rowCount={rowCount}
@@ -540,7 +594,7 @@ const InventoryProduct = () => {
                         /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
-        {/* {
+        {
             showManageProductInventoryDialog.open &&
             <ManageSerializedAsset
                 isNew={true}
@@ -552,8 +606,8 @@ const InventoryProduct = () => {
                     fetchProductInventory()
                 }}
             />
-        } */}
-        {/* {
+        }
+        {
             showRepairJobDialog &&
             <ManageRepairJob
                 refrenceType="Product Inventory"
@@ -565,7 +619,7 @@ const InventoryProduct = () => {
                     fetchProductInventory()
                 }}
             />
-        } */}
+        }
         {
             showDeleteConfirmBox &&
             <ConfirmationDialog
@@ -579,4 +633,4 @@ const InventoryProduct = () => {
     );
 }
 
-export default InventoryProduct;
+export default ProductInventory;

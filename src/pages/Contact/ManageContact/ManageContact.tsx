@@ -24,6 +24,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import ManageContactDialog from './index';
 import ManageAddressDialog from "../../../components/Address/ManageAddressDialog"
+import axiosInstance from "../../../axios/axiosInstance";
 
 const arr = [...Array(9).keys()];
 
@@ -81,6 +82,7 @@ export default function ManageContact(props) {
   const [showContactDialog, setShowContactDialog] = useState(false);
   const [addressOpen, setAddressOpen] = useState({ open: false, isClone: false })
   const [addressDataSource, setAddressDataSource] = useState([]);
+  const [cloneHeading, setCloneHeading] = useState('');
 
   useEffect(() => {
     if (contactData.fields.length > 0) {
@@ -124,6 +126,22 @@ export default function ManageContact(props) {
       setFormsData(setFieldsInAscendingOrder(contactData.fields));
     }
   }, [contactData.fields]);
+
+
+  useEffect(()=>{
+    if (contactId) {
+      axiosInstance()
+        .get(`/${contactApi}/${contactId}`)
+        .then(({ data: { data } }) => {
+          const { _id, firstName, lastName, middleName, email, reportsTo, ...rest } = data
+
+         setCloneHeading(`${firstName} ${middleName} ${lastName}`);
+
+          
+       
+        })
+    }
+  })
 
   const onOwnerDropdownOpen = (selectedCollaborator, selectedEntity) => {
     if (selectedEntity?.length > 0) {
@@ -228,6 +246,8 @@ export default function ManageContact(props) {
     );
   };
 
+
+
   return (
     <>
       <Dialog
@@ -253,7 +273,7 @@ export default function ManageContact(props) {
           }}
           title={
             isClone
-              ? 'Clone'
+              ? `Clone - ${cloneHeading}`
               : isNew
                 ? contactResource === 'customerContact'
                   ? 'Add Customer Contact'

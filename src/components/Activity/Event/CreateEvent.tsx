@@ -329,8 +329,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               name="startDate"
                               label="Start Date"
                               onChange={(date: any) => {
-                                setFieldValue("startDate", date);
-                                setFieldValue("startTime", getTime(date._d));
+                                setFieldValue("startDate", date ? date : null);
+                                setFieldValue("startTime", date ? getTime(date._d) : null);
                               }}
                               format={dateFormat}
                               error={
@@ -362,8 +362,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               value={values.startTime}
                               invalidDateMessage="Invalid time format"
                               onChange={(date: any) => {
-                                setFieldValue("startTime", date);
-                                if (new Date(date._d).getHours() < 23) {
+                                setFieldValue("startTime", date || null);
+                                if (date && new Date(date._d).getHours() < 23) {
                                   setFieldValue("endTime", new Date(
                                     new Date(date._d).getTime() + 30 * 60000
                                   )
@@ -407,9 +407,9 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               onChange={(date: any) => {
                                 setFieldValue("endDate", date);
                                 setFieldValue(
-                                  "endTime",
+                                  "endTime", 
                                   new Date(
-                                    getTime(date._d).getTime() + 30 * 60000
+                                    getTime(date ? date._d: new Date()).getTime() + 30 * 60000
                                   )
                                 );
                               }}
@@ -442,12 +442,14 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               onChange={(date: any) => {
                                 const nDate = new Date(values.startTime).toISOString().split("T")[0];
                                 let nTime = ""
-                                if ((date._d + "").includes("Invalid Date")) {
-                                  setFieldValue("endTime", `${date._i}`)
-                                }
-                                else {
-                                  nTime = new Date(date._d).toISOString().split("T")[1];
-                                  setFieldValue("endTime", new Date(`${nDate}T${nTime}`))
+                                if(date) {
+                                  if ((date._d + "").includes("Invalid Date")) {
+                                    setFieldValue("endTime", `${date._i}`)
+                                  }
+                                  else {
+                                    nTime = new Date(date._d).toISOString().split("T")[1];
+                                    setFieldValue("endTime", new Date(`${nDate}T${nTime}`))
+                                  }
                                 }
 
                               }}

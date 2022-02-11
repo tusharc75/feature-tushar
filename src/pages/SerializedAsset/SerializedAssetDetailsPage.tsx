@@ -11,8 +11,8 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { productInventory, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, INVENTORY_STATUS, repairJob } from "../../constants/helpers";
-import ManageProductInventory from "./ManageProductInventory";
+import { serializedAsset, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, INVENTORY_STATUS, repairJob } from "../../constants/helpers";
+import ManageSerializedAsset from "./ManageSerializedAsset";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
@@ -56,7 +56,7 @@ function TabPanel(props: TabPanelProps) {
 
 
 
-const ProductInventoryDetailsPage = () => {
+const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -205,7 +205,7 @@ const ProductInventoryDetailsPage = () => {
     try {
       const {
         data: { data },
-      } = await axiosInstance().post(`${productInventory.api}/inventory-stats`, { "ids": [id] });
+      } = await axiosInstance().post(`${serializedAsset.api}/inventory-stats`, { "ids": [id] });
       handleMainPoints(data);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -217,12 +217,12 @@ const ProductInventoryDetailsPage = () => {
     try {
       const {
         data: { data },
-      } = await axiosInstance().get(`${productInventory.api}/${id}`);
+      } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
 
       // handleMainPoints(data);
       fetchProductInventoryStates()
       setHeadingLbl(`${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
-      setCustomizedRoutes([routes.productInventory,
+      setCustomizedRoutes([routes.serializedAsset,
       { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
       setProductId(data?.product?.optionValue)
       setProductInventoryData(data);
@@ -255,7 +255,7 @@ const ProductInventoryDetailsPage = () => {
 
   const getProductInventoryFields = () => {
     axiosInstance()
-      .get("/field?resource=Product Inventory")
+      .get("/field?resource=Serialized Asset")
       .then(({ data }) => {
         if (data.data && data.data.length) {
           data.data.some(o => {
@@ -290,7 +290,7 @@ const ProductInventoryDetailsPage = () => {
 
   const handleDelete = () => {
 
-    axiosInstance().put(`${productInventory.api}/remove`, { "ids": [] }).then(() => {
+    axiosInstance().put(`${serializedAsset.api}/remove`, { "ids": [] }).then(() => {
       setShowConfirmBox(false);
       history.goBack();
     }).catch((error) => {
@@ -339,7 +339,7 @@ const ProductInventoryDetailsPage = () => {
       values["status"] = obj.status
       if (obj.reason) values[status === "Scrap" ? "scrapingReason" : "lostReason"] = obj.reason
       values["_id"] = productInventoryData._id
-      axiosInstance().put(`${productInventory.api}`, values).then(({ data: { data } }) => {
+      axiosInstance().put(`${serializedAsset.api}`, values).then(({ data: { data } }) => {
         setUpdateLoading(false)
         fetchProductInventoryData()
         fetchProductInventoryHistory()
@@ -399,7 +399,7 @@ const ProductInventoryDetailsPage = () => {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
-                  {permissions?.productInventory?.isUpdate && (
+                  {permissions?.serializedAsset?.isUpdate && (
                     <>
                       <Button
                         variant="outlined"
@@ -702,7 +702,7 @@ const ProductInventoryDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${storedRoutes ? storedRoutes.productInventory?.title : RESOURCE_LABEL.productInventory} ?`
+          message={`Are you sure you want to delete this ${storedRoutes ? storedRoutes.serializedAsset?.title : RESOURCE_LABEL.serializedAsset} ?`
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -725,7 +725,7 @@ const ProductInventoryDetailsPage = () => {
         />
       }
       {openUpdateDialog &&
-        <ManageProductInventory
+        <ManageSerializedAsset
           isClone={false}
           productInventoryId={id}
           onClose={() => setOpenUpdateDialog(false)}
@@ -750,4 +750,4 @@ const ProductInventoryDetailsPage = () => {
   );
 };
 
-export default ProductInventoryDetailsPage;
+export default SerializedAssetDetailsPage;

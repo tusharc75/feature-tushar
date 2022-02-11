@@ -20,7 +20,7 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   DELIVERY_TICKET_REFRENCE_TYPE,
-  productInventory,
+  serializedAsset,
   DELIVERY_FROM_TO_TYPE
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -103,7 +103,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id)
       }
       else {
-        const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
+        const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`)
         productAssets = response?.data?.data
         productAssets = productAssets.map(d => d.inventory).map(u => ({
           ...u,
@@ -170,13 +170,17 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     );
 
   const WarehouseRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`}>
-      {params.value}
-    </Link>
+    params?.value ? (
+      <Link className="link text-truncate" title={params.value} to={`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`}>
+        {params.value}
+      </Link>
+    ) : (
+      <NoDataCell />
+    )
   );
 
   const InventoryRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+    <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data._id}`}>
       {params.value}
     </Link>
   );
@@ -201,7 +205,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
     { field: "warehouse", headerName: "Plant", show: true, disabled: true, cellRenderer: "warehouseRenderer" },
     { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "ticketRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
+    { field: "status", headerName: "Asset Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
@@ -400,7 +404,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             permissions={true}
             primaryField={columns?.find(d => d.field)}
             onClick={(data) => {
-              history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+              history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
             }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}
@@ -553,7 +557,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             size="small"
             onClick={() => {
               setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
-              axiosInstance().put(`${productInventory.api}/update-status`, {
+              axiosInstance().put(`${serializedAsset.api}/update-status`, {
                 comment: statusToUpdate.message,
                 assets: selectedRecords.map(m => m?._id ?? m?.id),
                 status: statusToUpdate.status,

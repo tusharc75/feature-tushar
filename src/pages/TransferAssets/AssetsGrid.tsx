@@ -56,7 +56,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   }, [transferAssetData, currentStep])
   const fetchGridColumns = () => {
     axiosInstance()
-      .get("/field?resource=Product Inventory")
+      .get("/field?resource=Serialized Asset")
       .then(({ data: { data } }) => {
         let columns = []
         let rendererNames = []
@@ -64,7 +64,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           if (o?.fieldData?.fieldName === "serialNumber") {
             o.fieldData.primaryField = true
           }
-          let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
+          let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
 
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData]
@@ -213,7 +213,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
             setOpenAddNewAssets(true);
           }}
         >
-          {isMobile && !isTablet ? <MdAdd size={22} /> : `Add ${routes.productInventory.title}`}
+          {isMobile && !isTablet ? <MdAdd size={22} /> : `Add ${routes.serializedAsset.title}`}
         </Button>}
         {permissions?.transferAsset.isUpdate && <Button
           variant={isMobile ? 'text' : 'contained'}
@@ -241,7 +241,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
               permissions={permissions.transferAsset}
               primaryField={columns?.find(d => d.primaryField)}
               onClick={(data) => {
-                history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}

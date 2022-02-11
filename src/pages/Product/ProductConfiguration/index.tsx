@@ -10,6 +10,7 @@ import useColumns, { getFrameworkComponents } from '../../../constants/useColumn
 import { Delete, Edit } from '@material-ui/icons';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteButton from '../../../components/Helpers/DeleteButton';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 interface ConfigProps {
   productFields: any[];
   productData: any | {};
@@ -17,9 +18,9 @@ interface ConfigProps {
 }
 
 const ProductConfiguration = (props: ConfigProps) => {
-  
   const initialRender = React.useRef(true);
-  const { productData, productFields, id } = props;
+  const { productData, id } = props;
+  const {setToastConfig} = React.useContext(CustomToastContext)
   const [specFields, setSpecFields] = React.useState([]);
   const [configData, setConfigData] = React.useState([]);
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -46,33 +47,14 @@ const ProductConfiguration = (props: ConfigProps) => {
   const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
   React.useEffect(() => {
-    if (productFields) {
-      const fields = [...productFields].filter((field) => field.sectionName.includes('Specifications'));
-      setSpecFields(fields);
-      let columns = [];
-      let rendererNames = [];
-      fields.forEach((o) => {
-        let currentColumn = getColumnData(routes.product.title, o, routes.product.path);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName);
-          }
-        }
-      });
-      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-      tempFrameworkComponent = {
-        ...tempFrameworkComponent,
-        actionsRenderer: ActionRenderer
-      };
-      setFrameWorkComponent({ ...tempFrameworkComponent });
-      setColumns([...columns]);
+    if (productData) {
+      getTemplateFields();
     }
     if (initialRender) {
       getConfigurationData();
       initialRender.current = false;
     }
-  }, [productFields]);
+  }, [productData]);
 
   const ActionRenderer = (params) => (
     <>
@@ -103,6 +85,36 @@ const ProductConfiguration = (props: ConfigProps) => {
     setOpenDialog(true);
   };
 
+  const getTemplateFields = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`${routes.productTemplate.path}/fields/${productData.productTemplate}`);
+      const { fields } = data;
+      setSpecFields(fields);
+      let columns = [];
+      let rendererNames = [];
+      fields.forEach((o) => {
+        let currentColumn = getColumnData(routes.product.title, o, routes.product.path);
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData];
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName);
+          }
+        }
+      });
+      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+      tempFrameworkComponent = {
+        ...tempFrameworkComponent,
+        actionsRenderer: ActionRenderer
+      };
+      setFrameWorkComponent({ ...tempFrameworkComponent });
+      setColumns([...columns]);
+    } catch (err) {
+      setToastConfig(err);
+    }
+  };
+
   const getConfigurationData = () => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
@@ -125,7 +137,12 @@ const ProductConfiguration = (props: ConfigProps) => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
       })
-      .catch(() => { });
+      .catch((err) => {
+        setToastConfig(err)
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      });
   };
 
   const removeData = () => {
@@ -142,12 +159,13 @@ const ProductConfiguration = (props: ConfigProps) => {
         getConfigurationData();
         setRemoving(false);
       })
-      .catch(() => {
+      .catch((err) => {
         setShowConfirmBox({
           open: false,
           ids: []
         });
         setRemoving(false);
+        setToastConfig(err)
       });
   };
 

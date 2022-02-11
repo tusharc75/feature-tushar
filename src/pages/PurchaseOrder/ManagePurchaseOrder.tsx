@@ -39,6 +39,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [formsData, setFormsData] = useState([]);
     const [purchaseOrderData, setPurchaseOrderData] = useState(null);
+    const [cloneHeading, setCloneHeading]=useState('head')
 
 
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -71,13 +72,15 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                 axiosInstance().get(`${purchaseOrder.api}/` + purchaseOrderId).then(({ data: { data } }) => {
                     setPurchaseOrderData(data)
                     if (isClone) {
-                        const { _id, createdBy, updatedBy, serialNumber, ...rest } = data
+                        const { _id, createdBy, updatedBy, serialNumber,purchaseOrderNumber, ...rest } = data
+                      
                         rest['purchaseOrderNumber'] = `PO_${generateUniqueIdOnly()}`
                         rest["status"] = "New"
                         setInitialData({
                             fields: fieldsDataForCreate,
                             values: getObjKeysWithValues(rest, fieldsDataForCreate),
                         });
+                        setCloneHeading(purchaseOrderNumber);
                         setLoading(false)
                     } else {
                         setInitialData({
@@ -309,7 +312,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     setValues,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={purchaseOrderId ? (isClone ? "Clone" : `Update [ ${purchaseOrderData?.purchaseOrderNumber || ""} ]`) : "Create " + routes.purchaseOrder.title}
+                        <CustomDialogHeader title={purchaseOrderId ? (isClone ? `Clone - [${cloneHeading}]` : `Update [ ${purchaseOrderData?.purchaseOrderNumber || ""} ]`) : "Create " + routes.purchaseOrder.title}
                             onClose={() => {
                                 if (isFieldNotTouched(initialData, values)) onClose()
                                 else setShowConfirmDialog(true)

@@ -130,7 +130,8 @@ export const sidebarResource = {
   opportunity: 'Opportunity',
   field: 'Field',
   productCategory: 'Product Category',
-  productInventory: 'Product Inventory',
+  //productInventory: 'Product Inventory',
+  serializedAsset: "Serialized Asset",
   priceTemplate: 'Price Template',
   product: 'Product',
   productTemplate: 'Product Template',
@@ -187,7 +188,8 @@ export const resourceNames = {
   opportunity: 'Opportunity',
   field: 'Field',
   productCategory: 'Product Category',
-  productInventory: 'Serialized Asset',
+  //productInventory: 'Serialized Asset',
+  serializedAsset: "Serialized Asset",
   priceTemplate: 'Price Template',
   product: 'Product',
   productTemplate: 'Product Template',
@@ -235,7 +237,7 @@ export const resourceNames = {
 };
 
 export const primaryFields = {
-  productInventory: "assetNumber",
+  serializedAsset: "assetNumber",
   rentalManagement: "rentalJobName",
   transferAsset: "transferAssetNumber",
   repairJob: "repairJobName",
@@ -257,7 +259,8 @@ export const RESOURCE_LABEL = {
   opportunity: 'Opportunities',
   field: 'Fields',
   productCategory: 'Product Categories',
-  productInventory: 'Serialized Assets',
+  //productInventory: 'Serialized Assets',
+  serializedAsset: 'Serialized Assets',
   priceTemplate: 'Price Templates',
   product: 'Product Master',
   productTemplate: 'Product Templates',
@@ -353,7 +356,6 @@ export const quoteBuilder = {
 export const rentalManagement = {
   api: '/rental-management',
   rentalManagementResource: 'rentalManagement',
-  rentalManagementApi: '/rental-management',
   resource: "rental-management"
 };
 
@@ -448,11 +450,11 @@ export const eProduct = {
   route: '/e-product',
 };
 
-export const productInventory = {
-  api: '/product-inventory',
-  route: '/product-inventory',
-  permission: 'productInventory',
-  resource: 'product-inventory'
+export const serializedAsset = {
+  api: '/serialized-asset',
+  route: '/serialized-asset',
+  permission: 'serializedAsset',
+  resource: 'serialized-asset'
 };
 
 export const budget = {
@@ -548,6 +550,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === 'year') {
       obj[key.fieldName] = value ? value : new Date();
+    } else if (key.type === 'colorPicker') {
+      obj[key.fieldName] = value ? value : "#aaaaaa";
     } else if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = value ? value : false;
     } else if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
@@ -1528,6 +1532,14 @@ export const RENTAL_STATUS = {
   closed: 'Closed',
 };
 
+export const RENTAL_INTERNAL_ASSET_STATUS = {
+  reserved: 'Reserved',
+  inUse: 'In-Use',
+  complete: 'Complete',
+  return: 'Return',
+} as const;
+
+
 export const REPAIR_JOB_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
@@ -1560,6 +1572,16 @@ export const DELIVERY_FROM_TO_TYPE = {
   supplier: 'Supplier',
 };
 
+export const SUBLEASE_STATUS = {
+  new: 'New',
+  indTransit: 'In-Transit',
+  issued: 'Issued',
+  completed: 'Completed',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
+  closed: 'Closed',
+};
+
 export const asyncForEach = async (
   array: any[],
   callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>
@@ -1586,7 +1608,7 @@ export const resourceOptions = [
 export const REPORT_LIST = [
   { title: sidebarResource.rentalManagement, key: "rentalManagement" },
   { title: sidebarResource.salesOrder, key: "salesOrder" },
-  { title: sidebarResource.productInventory, key: "productInventory" },
+  { title: sidebarResource.serializedAsset, key: "serializedAsset" },
   { title: sidebarResource.lead, key: "lead" },
   { title: sidebarResource.opportunity, key: "opportunity" },
   { title: sidebarResource.quoteBuilder, key: "quoteBuilder" },
