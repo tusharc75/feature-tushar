@@ -5,6 +5,29 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, rentalManagement } from '../../../constants/helpers';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 
+const customNodeStyles = {
+  rentalJob: {
+    background: '#c3d5e6',
+    borderColor: '#6c89a6'
+  },
+  product: {
+    background: '#97c9bf',
+    borderColor: '#70948d'
+  },
+  productAssets: {
+    background: '#ffd65b',
+    borderColor: '#f5c431'
+  },
+  loadingTicket: {
+    background: '#e6c6e6',
+    borderColor: '#b38fb3'
+  },
+  receivingTicket: {
+    background: '#cfdb7f',
+    borderColor: '#aeb86e'
+  }
+};
+
 const RentalManagementViews = (props) => {
   const { rentalName, rentalId } = props;
   const { isOffline } = useContext(CustomOfflineContext);
@@ -22,8 +45,9 @@ const RentalManagementViews = (props) => {
           type: 'input',
           className: 'dark-node',
           sourcePosition: 'right',
-          data: { label: rentalName ?? rentalName },
-          position: { x: 0, y: 70 }
+          data: { label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName ?? rentalName}</div> },
+          position: { x: 0, y: 70 },
+          style: customNodeStyles.rentalJob
         }
       ];
       var flowEdge: any[] = [];
@@ -36,14 +60,15 @@ const RentalManagementViews = (props) => {
           type: 'default',
           data: {
             label: (
-              <>
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {item.productDetail.productName}
                 <br />
                 {item.type}
-              </>
+              </div>
             )
           },
-          position: { x: 300, y: index * 80 }
+          position: { x: 300, y: index * 80 },
+          style: customNodeStyles.product
         });
         flowEdge.push({
           id: `edge-${item._id}`,
@@ -59,8 +84,11 @@ const RentalManagementViews = (props) => {
           sourcePosition: 'right',
           targetPosition: 'left',
           type: 'default',
-          data: { label: item.inventoryDetail.assetNumber },
-          position: { x: 600, y: index * 80 }
+          data: {
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.inventoryDetail.assetNumber}</div>
+          },
+          position: { x: 600, y: index * 80 },
+          style: customNodeStyles.productAssets
         });
         flowEdge.push({
           id: `edge-${item.inventoryDetail.assetNumber}`,
@@ -90,7 +118,8 @@ const RentalManagementViews = (props) => {
               </div>
             )
           },
-          position: { x: 900, y: index * 80 }
+          position: { x: 900, y: index * 80 },
+          style: customNodeStyles.loadingTicket
         });
 
         item.productInventory?.map((product: any, productIndex) => {
@@ -99,8 +128,9 @@ const RentalManagementViews = (props) => {
             sourcePosition: 'right',
             targetPosition: 'left',
             type: 'default',
-            data: { label: product.optionLabel },
-            position: { x: 1200, y: productIndex * 80 }
+            data: { label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.optionLabel}</div> },
+            position: { x: 1200, y: (productIndex + index) * 80 },
+            style: customNodeStyles.productAssets
           });
           flowEdge.push({
             id: `edge-${item._id}`,
@@ -138,7 +168,8 @@ const RentalManagementViews = (props) => {
               </div>
             )
           },
-          position: { x: 1400, y: index * 80 }
+          position: { x: 1400, y: index * 80 },
+          style: customNodeStyles.receivingTicket
         });
         item.productInventory?.map((product: any) => {
           flowEdge.push({
@@ -159,8 +190,9 @@ const RentalManagementViews = (props) => {
           type: 'input',
           //   className: 'dark-node',
           sourcePosition: 'right',
-          data: { label: rentalName },
-          position: { x: 0, y: 80 }
+          data: { label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName}</div> },
+          position: { x: 0, y: 80 },
+          style: customNodeStyles.rentalJob
         }
       ]);
     }
