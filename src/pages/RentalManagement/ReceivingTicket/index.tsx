@@ -435,7 +435,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
               || (selectedRecords.some(f =>
                 !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
                 || !f.subleaseAsset || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
-          >Create Supplier Receiving Ticket</MenuItem>
+          >Create Supplier Delivery Ticket</MenuItem>
 
           <MenuItem
             onClick={() => {
