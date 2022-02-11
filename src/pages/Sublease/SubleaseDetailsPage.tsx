@@ -244,6 +244,7 @@ const SubleaseDetailsPage = () => {
                                                     )}
                                                     {currentStep === 1 && subleaseData && (
                                                         <SerializedAsset
+                                                            fetchData={fetchData}
                                                             subleaseData={subleaseData}
                                                         />
                                                     )}

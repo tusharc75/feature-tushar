@@ -488,7 +488,7 @@ export default function ManageQuoteDialog({
             initialData["quoteName"] = opportunityName;
           }
           initialData["currency"] = currency || "";
-          initialData["estimatedAmount"] = estimatedAmount || "";
+          // initialData["estimatedAmount"] = estimatedAmount || "";
         } else {
           if (isNew) {
             const selectedEntityDetails = user?.entity?.find(d => d?._id === selectedEntity)
