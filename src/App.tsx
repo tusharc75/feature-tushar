@@ -107,6 +107,7 @@ import CustomerSign from './pages/DeliveryTicket/CustomerSign';
 import EcommercePolicy from './pages/EcommercePolicy';
 import Sublease from './pages/Sublease';
 import SubleaseDetailsPage from './pages/Sublease/SubleaseDetailsPage';
+import NewDashboard from './pages/NewDashboard';
 
 var notificationInterval: any = null;
 
@@ -562,6 +563,9 @@ function App() {
             <Route exact path={'/customer-sign/:id'}>
               <CustomerSign />
             </Route>
+            <PrivateRoute exact path='/new-dashboard'>
+              <NewDashboard/>
+            </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
           </Switch>

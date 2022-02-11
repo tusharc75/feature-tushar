@@ -102,10 +102,7 @@ const Report = () => {
     }
   }, []);
 
-  
-  
   React.useEffect(() => {
-
     axiosInstance()
       .get(`/report-colum-setting?resource=${resource}`)
       .then(({ data: { data } }) => {
@@ -114,7 +111,6 @@ const Report = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-   
   }, [showGrid]);
 
   /**
@@ -122,6 +118,7 @@ const Report = () => {
    * @returns none if no data selected
    */
   const fetchResourceData = () => {
+    console.log(resourceCamelCase);
     if (cancelTokenSource) {
       cancelTokenSource.cancel();
     }
@@ -134,7 +131,7 @@ const Report = () => {
     let filterQuery = getFilter();
 
     axiosInstance()
-      .get(`${routes[resourceCamelCase].path}/report${filterQuery}`, {
+      .get(`${resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'}/report${filterQuery}`, {
         cancelToken: cancelTokenSource.token
       })
       .then(({ data: { data } }) => {
