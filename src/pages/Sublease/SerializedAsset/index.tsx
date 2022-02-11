@@ -133,7 +133,7 @@ const SerializedAsset = ({ subleaseData }) => {
                         disabled={!isCompleteEnable || isCompleteing}
                         onClick={() => { completeSublease() }}
                     >
-                        Complete Sublease
+                        Close Sublease
                     </Button>
                     <Box mx={1} />
                 </Fragment>
