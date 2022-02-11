@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.58.0](https://github.com/vebholic/oms_frontend/compare/v2.57.0...v2.58.0) (2022-02-11)
+
+
+### Features
+
+* **feat/avi:** feat/avi ([d61cca5](https://github.com/vebholic/oms_frontend/commit/d61cca5d3ad1840541f5f353edcc3e5873664736))
+* rentalJob full roadmap views feature add PO-1091 ([ccb8ff3](https://github.com/vebholic/oms_frontend/commit/ccb8ff31f428c85678c435790ab3f00067761142))
+
+
+### Bug Fixes
+
+* **event:** date bug ([9feebaf](https://github.com/vebholic/oms_frontend/commit/9feebafceee16727c4560c2a39509643b0bef4de))
+* little design change on rentalJob views tab ([33a08e9](https://github.com/vebholic/oms_frontend/commit/33a08e94ed70e6f6d24690a219aada7a1cf4e6ff))
+* rentalJob views page roadmap little fix PO-1091 ([6d69703](https://github.com/vebholic/oms_frontend/commit/6d69703a1f4f07206f40d61eb6d2343bf8f0f888))
+
 ## [2.57.0](https://github.com/vebholic/oms_frontend/compare/v2.56.0...v2.57.0) (2022-02-10)
 
 
