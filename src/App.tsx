@@ -99,6 +99,7 @@ import TransferAsset from './pages/TransferAssets/Index';
 import TransferAssetDetailPage from './pages/TransferAssets/TransferAssetDetailPage';
 import Address from "./pages/Address";
 import AddressDetailPage from './pages/Address/AddressDetailPage'
+import InventoryProduct from './pages/ProductInventory';
 import Logout from './pages/Auth/Logout';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import Report from './pages/Report';
@@ -107,6 +108,7 @@ import CustomerSign from './pages/DeliveryTicket/CustomerSign';
 import EcommercePolicy from './pages/EcommercePolicy';
 import Sublease from './pages/Sublease';
 import SubleaseDetailsPage from './pages/Sublease/SubleaseDetailsPage';
+import ProductInventory from './pages/SerializedAsset';
 
 var notificationInterval: any = null;
 
@@ -366,7 +368,10 @@ function App() {
               <RoleDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path="/activity">
-              <Activitydemo />
+              <Activitydemo />   
+            </PrivateRoute>
+            <PrivateRoute exact path="/product-inventory">
+              <InventoryProduct />
             </PrivateRoute>
             <PrivateRoute exact path={routes.activityEmail.path}>
               <Email />
