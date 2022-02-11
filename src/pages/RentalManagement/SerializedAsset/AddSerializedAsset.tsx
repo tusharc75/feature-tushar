@@ -8,7 +8,7 @@ import SearchBox from '../../../components/Helpers/SearchBox'
 import routes from "../../../components/Helpers/Routes";
 import { Link, useHistory } from 'react-router-dom';
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData, INVENTORY_STATUS, transferAsset } from '../../../constants/helpers';
+import { serializedAsset, isObjectEmpty, gridLoadingTimeout, CustomDialogTransition, getLocalStorageArrayData, INVENTORY_STATUS, transferAsset } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { useData } from "../../../StateProvider/Provider";
 import Dialog from "@material-ui/core/Dialog/Dialog";
@@ -65,14 +65,14 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     }, [])
 
     const fetchGridColumns = () => {
-        axiosInstance().get("/field?resource=Product Inventory").then(({ data: { data } }) => {
+        axiosInstance().get("/field?resource=Serialized Asset").then(({ data: { data } }) => {
             let columns = []
             let rendererNames = []
             data.forEach(o => {
                 if (o?.fieldData?.fieldName === "serialNumber") {
                     o.fieldData.primaryField = true
                 }
-                let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
+                let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
                 if (currentColumn !== null) {
                     columns = [...columns, currentColumn?.columnData]
                     if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -145,7 +145,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         if (selectedProducts.length > 0) {
             queryString = `${queryString}&filterById=${JSON.stringify(selectedProducts.map(m => { return { "field": "product", "term": m?._id ?? "" } }))}&filterByIdType=or`
         }
-        axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
+        axiosInstance().get(`${serializedAsset.api}${queryString}`).then(({ data }) => {
             data.data = data.data
                 .map((u) => {
                     let finalObject = prepareDataForGrid(u);
@@ -272,7 +272,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             aria-labelledby="customized-dialog-title"
             open={true}
         >
-            <CustomDialogHeader title={`Add ${routes.productInventory.title}`} onClose={handleSerializedAssetClose} ></CustomDialogHeader>
+            <CustomDialogHeader title={`Add ${routes.serializedAsset.title}`} onClose={handleSerializedAssetClose} ></CustomDialogHeader>
             <CustomDialogContent>
                 <div className={isMobile ? "listing-grid" : "listing-grid p-3"}>
                     <Box mb={2}>
@@ -368,7 +368,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                         //         permissions={permissions}
                         //         primaryField={columns?.find(d => d.primaryField)}
                         //         onClick={(data) => {
-                        //             history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                        //             history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
 
                         //         }}
                         //         dataRows={dataRows}
@@ -384,7 +384,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                         //         chips={[
                         //             {
                         //                 label: "PO Number:",
-                        //                 field: "pONumber"
+                        //                 field: "purchaseOrder"
                         //             },
                         //             {
                         //                 label: "Product Category:",
@@ -431,6 +431,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                 onSuccess={(data) => {
                     handleAddAssetToTransferAsset(data?._id);
                 }}
+                refrenceId={refrenceData._id}
                 refrenceType={refrenceType}
                 refrenceData={{
                     transferFromPlant: getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0]?.warehouseId,

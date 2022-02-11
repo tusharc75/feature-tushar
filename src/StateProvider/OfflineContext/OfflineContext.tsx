@@ -62,7 +62,7 @@ export const CustomOfflineProvider = ({ children }) => {
                     return OrderBy.indexOf(item?.data?.ticketType);
                 });
                 await asyncForEach(data, async (d: any) => {
-                    await axiosInstance().post(`${deliveryTicket.deliveryTicketApi}/offlinedatasync`, d.data)
+                    await axiosInstance().post(`${deliveryTicket.api}/offlinedatasync`, d.data)
                         .then(({ data: { data } }) => {
                             deleteOne(objectStore.offlineDataSync, d.data._id)
                             deleteOne(objectStore.deliveryTicket, d.data._id)

@@ -14,7 +14,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import ManageDeliveryTicket from "./ManageDeliveryTicket"
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, gridLoadingTimeout } from "../../constants/helpers"
+import { serializedAsset, gridLoadingTimeout } from "../../constants/helpers"
 import { IoIosArrowDropright, IoIosArrowDropleft, IoMdDownload } from 'react-icons/io';
 import Activity from "../../components/Activity";
 import { isMobile, isTablet } from "react-device-detect";
@@ -74,7 +74,6 @@ export default function DeliveryTicketDetail(props) {
   const [submittingSign, setSubmittingSign] = useState(false);
   const [openSignatureDialog, setOpenSignatureDialog] = useState(false);
   const [signatures, setSignatures] = useState([]);
-  const { deliveryTicketApi } = deliveryTicket;
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [deliveryTicketFields, setDeliveryTicketFields] = useState([]);
@@ -150,7 +149,7 @@ export default function DeliveryTicketDetail(props) {
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-          if (["rentalJob", "transferAsset", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
+          if (["rentalJob", "repairJob", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
@@ -217,7 +216,7 @@ export default function DeliveryTicketDetail(props) {
           data = await findOne(objectStore.deliveryTicket, id)
         }
         else {
-          const response = await axiosInstance().get(`${deliveryTicketApi}/${id}?entity=${selectedEntity}`)
+          const response = await axiosInstance().get(`${deliveryTicket.api}/${id}?entity=${selectedEntity}`)
           data = response?.data?.data
         }
         getDeliveryTicketFields(data)
@@ -261,13 +260,13 @@ export default function DeliveryTicketDetail(props) {
         data = await findOne(objectStore.resource, "productInventory")
       }
       else {
-        const response = await axiosInstance().get(`/field?resource=Product Inventory`)
+        const response = await axiosInstance().get(`/field?resource=Serialized Asset`)
         data = response?.data?.data
       }
       let columns = []
       let rendererNames = []
       data.forEach(o => {
-        let currentColumn = getColumnData(routes.productInventory?.title, o?.fieldData, routes.productInventoryDetail.path)
+        let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData]
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -310,7 +309,7 @@ export default function DeliveryTicketDetail(props) {
       else {
         let ids = JSON.stringify(productInventories)
         const queryString = `?getById=${ids}`
-        const response = await axiosInstance().get(`${productInventory.api}${queryString}`)
+        const response = await axiosInstance().get(`${serializedAsset.api}${queryString}`)
         data = response?.data?.data
       }
       let rows = data.map((u) => {
@@ -342,7 +341,7 @@ export default function DeliveryTicketDetail(props) {
   const handleDeleteLoadingTicket = () => {
     if (deliveryTicketData?._id) {
       axiosInstance()
-        .put(`${deliveryTicketApi}/remove?entity=${selectedEntity}`, {
+        .put(`${deliveryTicket.api}/remove?entity=${selectedEntity}`, {
           ids: [deliveryTicketData._id],
         })
         .then(({ data }) => {
@@ -375,7 +374,7 @@ export default function DeliveryTicketDetail(props) {
       let values = getObjKeysWithValues(deliveryTicketData, fieldsDataForUpdate)
       values["status"] = DELIVERY_TICKET_MAPPED_STATUS[label]
       values["_id"] = deliveryTicketData._id
-      axiosInstance().put(`${deliveryTicketApi}`, values).then(({ data: { data } }) => {
+      axiosInstance().put(`${deliveryTicket.api}`, values).then(({ data: { data } }) => {
         fetchDeliveryTicketData()
       }).catch((error) => {
         toastConfig.setToastConfig(error);
@@ -416,7 +415,7 @@ export default function DeliveryTicketDetail(props) {
       }
       else {
         setSubmittingSign(true)
-        axiosInstance().put(`${deliveryTicketApi}/signature`, {
+        axiosInstance().put(`${deliveryTicket.api}/signature`, {
           _id: id,
           signatures: [...signaturesToSend]
         }).then(() => {
@@ -433,7 +432,7 @@ export default function DeliveryTicketDetail(props) {
   }
 
   const handleViewPdf = (download) => {
-    axiosInstance().get(`${deliveryTicketApi}/${id}/pdf`)
+    axiosInstance().get(`${deliveryTicket.api}/${id}/pdf`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -470,7 +469,7 @@ export default function DeliveryTicketDetail(props) {
 
   const handleReceiveCustomerSign = () => {
     if (deliveryTicketData?.customerAccount?.optionValue) {
-      axiosInstance().post(`${deliveryTicketApi}/receive-customer-sign`, { "id": deliveryTicketData.customerAccount.optionValue, "deliveryTicketId": id }).then(({ data: { data } }) => {
+      axiosInstance().post(`${deliveryTicket.api}/receive-customer-sign`, { "id": deliveryTicketData.customerAccount.optionValue, "deliveryTicketId": id }).then(({ data: { data } }) => {
         toastConfig.setToastConfig({ open: true, type: "success", message: data })
 
       }).catch((error) => {
@@ -706,7 +705,7 @@ export default function DeliveryTicketDetail(props) {
                           permissions={permissions}
                           primaryField={columns?.find(d => d.field === "assetNumber")}
                           onClick={(data) => {
-                            history.push(`${routes.productInventoryDetail.path}/${data._id}`)
+                            history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
                           }}
                           dataRows={dataRows}
                           selectedRecords={selectedRecords}
@@ -781,7 +780,7 @@ export default function DeliveryTicketDetail(props) {
                   <div>
                     <Activity
                       resourceId={deliveryTicketData?._id}
-                      resource={deliveryTicket.deliveryTicketResource}
+                      resource={deliveryTicket.resource}
                       // restrictedAddActivities={["Attachment", "Case"]}
                       relatedTo={[
                         {
@@ -853,7 +852,7 @@ export default function DeliveryTicketDetail(props) {
             }}
             onOk={() => {
               setOkBtnLoading(true);
-              axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${id}/remove-assets`, { ids: selectedRecords.map(m => m._id) })
+              axiosInstance().put(`${deliveryTicket.api}/${id}/remove-assets`, { ids: selectedRecords.map(m => m._id) })
                 .then(() => {
                   toastConfig.setToastConfig({ open: true, type: "success", message: `Selected serialized asset(s) removed` });
                   dispatch({
@@ -876,7 +875,7 @@ export default function DeliveryTicketDetail(props) {
         {addSerializedAssetDialog &&
           <AddSerializedAsset
             addSerializedAsset={(newRecordsToAdd) => {
-              axiosInstance().post(`${deliveryTicket.deliveryTicketApi}/${id}/add-assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
+              axiosInstance().post(`${deliveryTicket.api}/${id}/add-assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
                 .then(({ data }) => {
                   setAddSerializedAssetDialog(false)
                   fetchDeliveryTicketData()

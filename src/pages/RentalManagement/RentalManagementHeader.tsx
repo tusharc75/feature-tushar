@@ -112,9 +112,9 @@ function RentalManagementHeader(props) {
         insertUpdate(objectStore.resource, objectStore.deliveryTicket, data);
       });
     axiosInstance()
-      .get(`/field?resource=Product Inventory&view=true`)
+      .get(`/field?resource=Serialized Asset&view=true`)
       .then(({ data: { data } }) => {
-        insertUpdate(objectStore.resource, 'productInventory', data);
+        insertUpdate(objectStore.resource, 'serializedAsset', data);
       });
   };
 

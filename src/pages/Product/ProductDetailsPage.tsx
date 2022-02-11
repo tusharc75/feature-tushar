@@ -14,13 +14,13 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { product, productInventory, warehouse } from '../../constants/helpers';
+import { product, serializedAsset, warehouse } from '../../constants/helpers';
 import CreateProduct from '../../components/Product/CreateProduct';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import AssignedFrequentlyBoughtProduct from './AssignedFrequentlyBoughtProduct';
 import AssignProductDialog from '../../components/AssignRolesDialog/AssignProductDialog';
-import ManageProductInventory from '../ProductInventory/ManageProductInventory';
+import ManageSerializedAsset from '../SerializedAsset/ManageSerializedAsset';
 import { extractFieldsForDisplay } from '../../constants/formulaUtility';
 import ProductHierarchy from './BOM';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
@@ -112,7 +112,7 @@ const ProductDetailsPage = () => {
     if (selectedWarehouse) {
       setWarehouseInventoriesLoading(true);
       axiosInstance()
-        .get(`${productInventory.api}?limit=6&filterById=[{"field":"warehouse","term":"${selectedWarehouse}"},{"field":"product","term":"${id}"}]&filterByIdType=and`)
+        .get(`${serializedAsset.api}?limit=6&filterById=[{"field":"warehouse","term":"${selectedWarehouse}"},{"field":"product","term":"${id}"}]&filterByIdType=and`)
         .then(({ data: { data } }) => {
           setWarehouseInventories(data);
           setWarehouseInventoriesLoading(false);
@@ -570,7 +570,7 @@ const ProductDetailsPage = () => {
                 <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
                   <Typography variant="subtitle2">Plants ({inventoriesData?.length || 0})</Typography>
 
-                  {permissions?.productInventory?.isCreate && (
+                  {permissions?.serializedAsset?.isCreate && (
                     <IconButton
                       title="Manage Plant(s)"
                       color="primary"
@@ -675,7 +675,7 @@ const ProductDetailsPage = () => {
                                             variant="outlined"
                                             color="primary"
                                             onClick={() => {
-                                              history.push(`${routes.productInventory.path}`, {
+                                              history.push(`${routes.serializedAsset.path}`, {
                                                 warehouse: productWarehouseData.find((d) => d?.warehouse?.optionValue === selectedWarehouse).warehouse,
                                                 product: { id: id, name: headingLabel }
                                               });
@@ -692,7 +692,7 @@ const ProductDetailsPage = () => {
                                               background: ['New', 'Available'].indexOf(i?.status) >= 0 ? '#b9ffce' : '#ffb4b4'
                                             }}
                                             onClick={() => {
-                                              history.push({ pathname: `${routes.productInventoryDetail.path}/${i._id}` });
+                                              history.push({ pathname: `${routes.serializedAssetDetail.path}/${i._id}` });
                                             }}
                                           />
                                         )
@@ -771,7 +771,7 @@ const ProductDetailsPage = () => {
 
       {openProductInventoryDialog ? (
         productData.serializedProduct ? (
-          <ManageProductInventory
+          <ManageSerializedAsset
             productId={productData?._id}
             productCategory={productData?.productCategory}
             productInventoryId={null}

@@ -12,7 +12,6 @@ import CustomReactTable from "../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import Add from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
-
 import moment from "moment";
 import {
     rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency, CHILD_RESOURCE
@@ -230,7 +229,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
             inventory = data.productInventory;
         }
         else {
-            const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`)
+            const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
             data = response?.data?.data
             setMaterial(JSON.parse(JSON.stringify(data.material)))
             inventory = data.inventory;
@@ -302,7 +301,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
             }
         })
 
-        axiosInstance().post(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`, { material })
+        axiosInstance().post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material })
             .then(() => {
                 setAddExistingProductDialog({ open: false, type: "", parentId: null })
                 fetchProductInventory()
@@ -326,7 +325,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
             delete element.subRows
         });
         setUpdating(true);
-        axiosInstance().put(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`, { material: rows }).then(() => {
+        axiosInstance().put(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: rows }).then(() => {
             setUpdating(false)
             setIsProductEdit({ open: false, isBulkedit: false })
             fetchProductInventory()
@@ -338,7 +337,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
 
     const handleDelete = (rows) => {
         setDeleting(true)
-        axiosInstance().put(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData?._id}/delete`, { ids: rows })
+        axiosInstance().put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: rows })
             .then(() => {
                 setDeleting(false)
                 fetchProductInventory()

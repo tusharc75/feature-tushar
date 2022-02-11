@@ -10,8 +10,8 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
 import {
-  dateFormat, formatAmountWithCurrency, rentalManagement, purchaseOrder,
-  sidebarResource, treeToFlatArray, productInventory, INVENTORY_STATUS, CHILD_RESOURCE
+  dateFormat, formatAmountWithCurrency, rentalManagement, purchaseOrder, transferAsset,
+  sidebarResource, treeToFlatArray, serializedAsset, INVENTORY_STATUS, CHILD_RESOURCE
 } from "../../../constants/helpers";
 import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -49,6 +49,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const [rowsData, setRowsData] = useState(null);
   const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], type: "" });
   const [poCount, setPoCount] = useState(0);
+  const [transferAssetCount, setTransferAssetCount] = useState(0);
+
   const { state: { user, permissions, selectedEntity } }: any = useData();
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -57,6 +59,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     fetchFields()
     if (!isOffline) {
       fetchPurchaseOrder()
+      fetchTransferAsset()
     }
   }, []);
 
@@ -79,7 +82,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate" title={row.original.detail}  >
             {(row.original?.type === "asset" && !isOffline) ?
-              <a className="link text-truncate" href={`${productInventory.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
+              <a className="link text-truncate" href={`${serializedAsset.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
               row.original.detail}
           </p>
           {row.original?.type === "asset" &&
@@ -193,7 +196,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         data.inventory = data.productInventory;
       }
       else {
-        const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`)
+        const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
         data = response?.data?.data
       }
       const rows = data.material.filter((e) => e.parentId === null)
@@ -268,6 +271,16 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     });
   }
 
+  const fetchTransferAsset = async () => {
+    let filterById = [];
+    filterById.push({ field: "rentalJob", term: rentalManagementData?._id });
+    const queryString = `?filterById=${JSON.stringify(filterById)}`
+    axiosInstance().get(`${transferAsset.api}${queryString}`).then(({ data: { data } }) => {
+      setTransferAssetCount(data.length)
+    }).catch((error) => {
+    });
+  }
+
   const getAssetAssignedValues = (row) => {
     if (row.original?.type === "product") {
       if (row.subRows && row.subRows?.length > 0) {
@@ -286,7 +299,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
 
   const handleAddSerializedAsset = (assets) => {
     let data = [];
-    let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" );
+    let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product");
     flatArray?.forEach((e: any) => {
       if (e.type === "product") {
         let qty = e.qty - e.subRows.length;
@@ -306,7 +319,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     })
     if (data.length) {
       setAdding(true)
-      axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`, { "products": data })
+      axiosInstance().post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { "products": data })
         .then(({ data }) => {
           setAddSerializedAssetDialog({ open: false })
           fetchProductInventory()
@@ -329,7 +342,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const handleRemoveInventory = () => {
     if (deleteData.length >= 1) {
       setDeleting(true)
-      axiosInstance().put(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory/remove`, { products: deleteData })
+      axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/inventory/remove`, { products: deleteData })
         .then(() => {
           setDeleting(false)
           fetchProductInventory()
@@ -395,7 +408,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             setAddSerializedAssetDialog({ open: true })
           }}
         >
-          {isMobile && !isTablet ? <CgAssign size={20} /> : `Assign ${routes.productInventory.title}`}
+          {isMobile && !isTablet ? <CgAssign size={20} /> : `Assign ${routes.serializedAsset.title}`}
         </Button>
         <Box mx={1} />
         <Button
@@ -411,6 +424,16 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         >
           {isMobile && !isTablet ? <IoCreate size={20} /> : `Create ${routes.purchaseOrder.title}`}
         </Button>
+        {poCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
+          <IconButton size="small" onClick={() => {
+            history.push(routes.purchaseOrder.path, {
+              rental: rentalManagementData,
+            })
+          }}>
+            <InfoIcon color={"primary"} />
+          </IconButton>
+        </HtmlTooltip>}
+        
         {permissions?.sublease?.isCreate &&
           <Fragment>
             <Box mx={1} />
@@ -429,15 +452,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             </Button>
           </Fragment>
         }
-        {poCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
-          <IconButton size="small" onClick={() => {
-            history.push(routes.purchaseOrder.path, {
-              rental: rentalManagementData,
-            })
-          }}>
-            <InfoIcon color={"primary"} />
-          </IconButton>
-        </HtmlTooltip>}
+
         <Box mx={1} />
         <Button
           variant={isMobile && !isTablet ? "text" : "contained"}
@@ -453,6 +468,15 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         >
           {isMobile && !isTablet ? <MdDeleteSweep size={20} /> : "Delete Assets"}
         </Button>
+        {transferAssetCount > 0 && <HtmlTooltip title={`Created ${routes.transferAsset.title}`}>
+          <IconButton size="small" onClick={() => {
+            history.push(routes.transferAsset.path, {
+              rental: rentalManagementData,
+            })
+          }}>
+            <InfoIcon color={"primary"} />
+          </IconButton>
+        </HtmlTooltip>}
         <Box mx={1} />
       </Box>
     </Box>
@@ -492,7 +516,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setAddSerializedAssetDialog({ open: false });
         }}
         refrenceType={"Rental Job"}
-        refrenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue }}
+        refrenceData={{ _id: rentalManagementData?._id, warehouse: rentalManagementData?.warehouse?.optionValue }}
         isAdding={isAdding}
         selectedProducts={assetAssignedProduct}
         //queryString={addSerializedAssetDialog.type === "all" ? `notInPlant=${rentalManagementData?.warehouse?.optionValue}&availableAssets=true` : ``}
@@ -555,7 +579,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         currency={rentalManagementData.currency}
         refrenceType="rentalJob"
         refrenceId={rentalManagementData._id}
-        refrenceData={{ material: [...showOrderDialog.products] }}
+        refrenceData={{ ...rentalManagementData, material: [...showOrderDialog.products] }}
       />
     }
   </Fragment>

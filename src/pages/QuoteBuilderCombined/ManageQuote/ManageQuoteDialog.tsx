@@ -870,7 +870,7 @@ export default function ManageQuoteDialog({
         fullScreen={fullScreen || (isMobile || isTablet)}
       >
         <CustomDialogHeader
-          title={isNew ? "Create Quote" : isClone ? `Clone ${dataToUpdate.quoteName}` : `Editing ${dataToUpdate.quoteName}`}
+          title={isNew ? "Create Quote" : isClone ? `Clone - [${dataToUpdate.quoteName}]` : `Editing ${dataToUpdate.quoteName}`}
           onClose={(e, reason) => {
             if (isFieldNotTouched(entityData, formValues)) onClose()
             else setShowConfirmDialog(true)

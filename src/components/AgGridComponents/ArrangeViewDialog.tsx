@@ -60,10 +60,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const [allChecked, setAllChecked] = React.useState(false);
   const [hasChanged, setHasChanged] = React.useState(false);
 
-  const [lockedItem, setLockedItem] = React.useState({
-    index: 0,
-    column: {}
-  });
+  const [lockedItem, setLockedItem] = React.useState([]);
 
   React.useEffect(() => {
     if (!columnApi) return;
@@ -76,6 +73,9 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       const index = layedCols.indexOf(col.field);
       if (index > -1) {
         newCols[index] = col;
+      }
+      if(col.hasOwnProperty("pivotIndex")|| col.hasOwnProperty("lockPosition") && col.lockPosition) {
+        setLockedItem(prevState => [...prevState, col])
       }
     });
 
@@ -192,8 +192,23 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
               <Switch size="small" checked={allChecked} onChange={handleToggleAll} />
             </ListItemSecondaryAction>
           </ListItem>
+          {lockedItem.map(col => (
+            <ListItem divider disableGutters disabled={col?.disabled} key={col.field}>
+            <ListItemText primary={col?.headerName} />
+            <ListItemSecondaryAction>
+              <Switch  size="small" disabled={col?.disabled} checked={col?.show} onChange={handleToggle(col)} />
+            </ListItemSecondaryAction>
+          </ListItem>
+          ))}
           <DndProvider backend={HTML5Backend}>
-            {sortedColumns.map((column, index) => (
+            {sortedColumns.filter((col) => {
+              const index = lockedItem.findIndex(c => c.field === col.field)
+
+              if(index !== -1) {
+                return false
+              } 
+              return true
+            }).map((column, index) => (
               <RenderListItem
                 key={column.field}
                 column={column}

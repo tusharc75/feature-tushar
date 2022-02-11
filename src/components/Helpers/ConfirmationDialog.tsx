@@ -60,7 +60,7 @@ export default function ConfirmationDialogRaw(props) {
 ConfirmationDialogRaw.propTypes = {
     onClose: PropTypes.func.isRequired,
     open: PropTypes.bool.isRequired,
-    message: PropTypes.string.isRequired,
+    message: PropTypes.node.isRequired,
     onOk: PropTypes.func,
     okBtnLoading: PropTypes.any
 };

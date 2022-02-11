@@ -73,7 +73,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   const AssetRenderer = (params) =>
     params.value ? (
-      <Link className="link cursor-pointer" to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+      <Link className="link cursor-pointer" to={`${routes.serializedAssetDetail.path}/${params.data._id}`}>
         <p title={params.value}>{params.value}</p>
       </Link>
     ) : (
@@ -198,7 +198,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     let apiCalls = [];
 
     Object.keys(groupByCalls).forEach((key) => {
-      apiCalls.push(axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) }));
+      apiCalls.push(axiosInstance().put(`${deliveryTicket.api}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) }));
     });
 
     Promise.all(apiCalls)
@@ -302,7 +302,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             permissions={permissions.transferAsset}
             primaryField={columns?.find((d) => d.field)}
             onClick={(data) => {
-              history.push(`${routes.productInventoryDetail.path}/${data._id}`);
+              history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
             }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}

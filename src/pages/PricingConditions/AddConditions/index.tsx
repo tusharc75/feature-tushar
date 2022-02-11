@@ -18,7 +18,7 @@ import { ConsoleView, isMobile } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
-import { prepareDataForGrid } from "../../../constants/helpers";
+import { prepareDataForGrid, productTemplate } from "../../../constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
 import { GrBusinessService } from "react-icons/all";
 import AddExistingMaterialDialog from "../AddExistingMaterialDialog";

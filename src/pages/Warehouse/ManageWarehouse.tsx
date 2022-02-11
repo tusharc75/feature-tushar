@@ -18,7 +18,7 @@ const ManageWarehouse = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
     const { addressResource, close, onSuccess, isClone = false, open } = props;
-
+    const [cloneHeading,setCloneHeading] = useState('')
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -40,6 +40,7 @@ const ManageWarehouse = (props) => {
                     if (isClone) {
                         fields = fieldsDataForCreate
                         const { warehouseName, ...rest } = data
+                        setCloneHeading(warehouseName);
                         tempData = { ...rest }
                     }
                     setInitialData({
@@ -124,7 +125,7 @@ const ManageWarehouse = (props) => {
                 }) => (
                     <Fragment>
                         <CustomDialogHeader
-                            title={isClone ? `Clone Plant` : addressResource?.id ? `Update ${initialData?.values["warehouseName"] ?? ""}` : "Create Plant"}
+                            title={isClone ? `Clone - [${cloneHeading}]` : addressResource?.id ? `Update ${initialData?.values["warehouseName"] ?? ""}` : "Create Plant"}
                             onClose={() => {
                                 if (isFieldNotTouched({
                                     initialValues: initialData.values,

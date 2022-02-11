@@ -34,6 +34,7 @@ interface Props {
   isEditable?: boolean;
   isMainInfoEditable?: boolean;
   refrenceType?: string;
+  refrenceId?: string;
   refrenceData?: any;
 }
 
@@ -42,7 +43,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
     state: { selectedEntity, permissions }
   }: any = useData();
   const { isClone = false, transferAssetId = null, onClose, onSuccess, number = '', isEditable = false, isMainInfoEditable = false,
-    refrenceType = null, refrenceData = null } = props;
+    refrenceType = null, refrenceId = null, refrenceData = null } = props;
 
   const toastConfig = useContext(CustomToastContext);
   const initialRender = useRef(true);
@@ -59,7 +60,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
   const [plantShipToOptions, setPlantShipToOptions] = useState([])
   const [supplierShipToOptions, setSupplierShipToOptions] = useState([])
   const [customerShipToOptions, setCustomerShipToOptions] = useState([])
-
+  const [cloneHeading, setCloneHeading] = useState('')
   const [customerOpen, setCustomerOpen] = useState({ open: false, isClone: false });
   const [transferToPlantOpen, setTransferToPlantOpen] = useState({ open: false, isClone: false });
   const [plantsOpen, setPlantsOpen] = useState({ open: false, isClone: false });
@@ -95,11 +96,11 @@ const ManageTransferAsset: FC<Props> = (props) => {
             .get(`${transferAsset.api}/` + transferAssetId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, createdBy, updatedBy, entity, ...rest } = data;
+                const { _id, createdBy, updatedBy, entity,transferAssetNumber, ...rest } = data;
                 let oldValues = { ...rest }
                 oldValues.transferAssetNumber = `TA_${generateUniqueIdOnly()}`;
                 oldValues.status = "New"
-
+                setCloneHeading(transferAssetNumber)
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                   values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
@@ -130,6 +131,8 @@ const ManageTransferAsset: FC<Props> = (props) => {
                 }
               }
             })
+            console.log(refrenceId)
+            createValues["rentalJob"] = refrenceId;
           }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -253,7 +256,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                 title={
                   transferAssetId
                     ? isClone
-                      ? 'Clone'
+                      ? `Clone - [${cloneHeading}]`
                       : `Update ${RESOURCE_LABEL.transferAsset} (${number})`
                     : 'Create ' + RESOURCE_LABEL.transferAsset
                 }

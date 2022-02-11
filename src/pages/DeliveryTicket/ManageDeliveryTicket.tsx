@@ -31,7 +31,6 @@ const ManageDeliveryTicket = (props) => {
 
     const { state: { user } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
-    const { deliveryTicketApi } = deliveryTicket;
     const { deliveryTicketId = null, ticketType, refrenceType = null, refrenceData = null, productInventory = null, onClose, onSuccess,
         warehouseId = null } = props;
 
@@ -73,7 +72,7 @@ const ManageDeliveryTicket = (props) => {
         }
     }, [initialData.fields, refrenceData]);
 
-    const updateFieldProperty = (fields, pickupFromType, deliveryToType) => {
+    const updateFieldProperty = (fields, pickupFromType, deliveryToType, ticketType) => {
         var warehouse = [];
         var customerAccount = [];
         var supplierAccount = [];
@@ -109,6 +108,9 @@ const ManageDeliveryTicket = (props) => {
                     element.option = supplierAccount
                 }
             }
+            if (ticketType === DELIVERY_TICKET_TYPE.return && element.fieldName === "returnReason") {
+                element.required = true;
+            }
         });
         return fields;
     }
@@ -135,12 +137,12 @@ const ManageDeliveryTicket = (props) => {
                     data = await findOne(objectStore.deliveryTicket, deliveryTicketId)
                 }
                 else {
-                    const response = await axiosInstance().get(`${deliveryTicketApi}/${deliveryTicketId}`)
+                    const response = await axiosInstance().get(`${deliveryTicket.api}/${deliveryTicketId}`)
                     data = response?.data?.data
                 }
                 setDeliveryTicketData(data)
                 setDisableOwnerSelection(deliveryTicketId && user.user._id !== data?.owner?.optionValue);
-                fieldsDataForUpdate = updateFieldProperty(fieldsDataForUpdate, data?.pickupFromType, data?.deliveryToType);
+                fieldsDataForUpdate = updateFieldProperty(fieldsDataForUpdate, data?.pickupFromType, data?.deliveryToType, data?.ticketType);
                 setInitialData({
                     fields: fieldsDataForUpdate,
                     values: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -279,7 +281,7 @@ const ManageDeliveryTicket = (props) => {
                         tempInitialData["deliveryToAddress"] = refrenceData?.deliveryToAddress;
                     }
                 }
-                fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, tempInitialData["pickupFromType"], tempInitialData["deliveryToType"]);
+                fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, tempInitialData["pickupFromType"], tempInitialData["deliveryToType"], tempInitialData["ticketType"]);
                 setInitialData({
                     fields: fieldsDataForCreate,
                     values: tempInitialData,
@@ -350,7 +352,7 @@ const ManageDeliveryTicket = (props) => {
             if (deliveryTicketId) {
                 setSubmitting(true);
                 values._id = deliveryTicketId
-                axiosInstance().put(`${deliveryTicketApi}`, values).then(({ data }) => {
+                axiosInstance().put(`${deliveryTicket.api}`, values).then(({ data }) => {
                     setLoading(false);
                     onSuccess()
                     setSubmitting(false);
@@ -369,9 +371,9 @@ const ManageDeliveryTicket = (props) => {
             else {
                 setSubmitting(true);
                 let updatedValues = { ...values }
-                axiosInstance().post(`${deliveryTicketApi}`, updatedValues).then(({ data }) => {
+                axiosInstance().post(`${deliveryTicket.api}`, updatedValues).then(({ data }) => {
                     setLoading(false);
-                    onSuccess()
+                    onSuccess(data)
                     setSubmitting(false);
                     toastConfig.setToastConfig({
                         open: true,

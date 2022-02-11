@@ -336,7 +336,7 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
           if (isFieldNotTouched(initialData, formValues)) close()
           else setShowConfirmDialog(true)
         }}
-        title={`${isClone ? "Clone" : projectSalesId ? `Update ${productSalesName}` : `New ${RESOURCE_LABEL.projectStrategy}`}`}
+        title={`${isClone ? `Clone - [${productSalesName}]` : projectSalesId ? `Update ${productSalesName}` : `New ${RESOURCE_LABEL.projectStrategy}`}`}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
           setFullScreen(prevState => !prevState)

@@ -50,7 +50,7 @@ const LookupResource = [
   { name: 'Lead', value: 'Lead' },
   { name: 'Opportunity', value: 'Opportunity' },
   { name: 'Product Master', value: 'Product' },
-  { name: 'Serialized Assets', value: 'Product Inventory' },
+  { name: 'Serialized Assets', value: 'Serialized Asset' },
   { name: 'Product Category', value: 'Product Category' },
   { name: 'Project Sales', value: 'Project Sales' },
   { name: 'Quotes', value: 'Quotes' },
@@ -64,7 +64,7 @@ const LookupResource = [
   { name: 'Rental Management', value: 'Rental Management' },
   { name: 'Delivery Ticket', value: 'Delivery Ticket' },
   { name: 'Packages', value: 'Packages' },
-  { name: 'Purchase Orders', value: 'Purchase Orders' },
+  { name: 'Purchase Order', value: 'Purchase Order' },
   { name: 'Pricing Condition', value: 'Pricing Condition' },
   { name: 'Repair Job', value: 'Repair Job' },
   { name: 'Sales Order', value: 'Sales Order' },
@@ -845,7 +845,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       control={
                         <Checkbox
                           name="required"
-                          disabled={values['required'] ? true : false}
+                          //disabled={values['required'] ? true : false}
                           checked={values['required']}
                           onChange={(e) => {
                             setFieldValue('required', e.target.checked);

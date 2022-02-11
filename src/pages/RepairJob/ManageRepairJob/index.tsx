@@ -88,11 +88,11 @@ const ManageRepairJob = (props) => {
 
         if (repairJobId) {
           axiosInstance()
-            .get(`${repairJob.repairJobApi}/` + repairJobId)
+            .get(`${repairJob.api}/` + repairJobId)
             .then(({ data: { data } }) => {
               if (isClone) {
                 const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
-                setTitle('Clone')
+                setTitle(`Clone - [${repairJobName}]`)
                 setDisablePlantIfAssetAdded(false);
 
                 rest.repairJobName = `RJ_${generateUniqueIdOnly()}`;
@@ -115,7 +115,7 @@ const ManageRepairJob = (props) => {
                 setLoading(false);
 
                 //  If loading ticket is created, then we need to disable some controls in update dialog
-                axiosInstance().get(`${repairJob.repairJobApi}/${repairJobId}/get-assets`)
+                axiosInstance().get(`${repairJob.api}/${repairJobId}/get-assets`)
                   .then(({ data: { data } }) => {
                     let tempProductInventory = data.map(u => ({ ...u, _id: u?.id, productName: u?.product?.optionLabel }))
                     setDisablePlantIfAssetAdded(data.length > 0)
@@ -168,6 +168,7 @@ const ManageRepairJob = (props) => {
             initialData["plant"] = refrenceData?.warehouse?.optionValue
             initialData["repairPlant"] = refrenceData?.warehouse?.optionValue
             initialData["productInventory"] = inventories
+            initialData["rentalJob"] = refrenceData?._id
           }
           setDisableFields(false);
           setAllFields(fieldsDataForCreate);
@@ -243,7 +244,7 @@ const ManageRepairJob = (props) => {
     if (repairJobId && isClone === false) {
       values._id = repairJobId;
       axiosInstance()
-        .put(`${repairJob.repairJobApi}`, values)
+        .put(`${repairJob.api}`, values)
         .then(({ data }) => {
           setSubmitting(false);
           onSuccess();
@@ -260,11 +261,11 @@ const ManageRepairJob = (props) => {
     } else {
       const { productInventory, ...rest } = values
       axiosInstance()
-        .post(`${repairJob.repairJobApi}`, rest)
+        .post(`${repairJob.api}`, rest)
         .then(({ data: { data, message } }) => {
 
           axiosInstance()
-            .put(`${repairJob.repairJobApi}/${data._id}/process-status`, {
+            .put(`${repairJob.api}/${data._id}/process-status`, {
               "processStatus": repairJobProcessSteps[0]
             })
             .then(() => {
@@ -462,36 +463,14 @@ const ManageRepairJob = (props) => {
                                         </Grid>
                                       )
                                     )
-                                      : 
+                                      :
                                       <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                         {
-                                        field.fieldName === "productInventory"
-                                          ? <FormTypes
-                                            repairJobId={repairJobId}
-                                            {...field}
-                                            disabled={(!repairJobId && field.disableOnEdit) || (field.fieldName === "productInventory" && refrenceType)}
-                                            values={getValues(values)}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={field.option}
-                                            setFieldValue={(name, value) => {
-                                              setFieldValue(name, value);
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                          />
-                                          : 
-                                          field.fieldName === "typeOfRepair"
+                                          field.fieldName === "productInventory"
                                             ? <FormTypes
                                               repairJobId={repairJobId}
                                               {...field}
-                                              disabled={disableFields || (!repairJobId && field.disableOnEdit)}
+                                              disabled={(!repairJobId && field.disableOnEdit) || (field.fieldName === "productInventory" && refrenceType)}
                                               values={getValues(values)}
                                               errors={errors}
                                               touched={touched}
@@ -501,40 +480,20 @@ const ManageRepairJob = (props) => {
                                               options={field.option}
                                               setFieldValue={(name, value) => {
                                                 setFieldValue(name, value);
-
-                                                if (value) {
-                                                  if (value === "Internal") {
-                                                    setFieldValue("repairPlant", values["plant"] ?? values["warehouse"]);
-                                                    setFieldValue("plantShipTo", repairPlantDataSource.find(d => d.optionValue === values["plant"] || d.optionValue === values["warehouse"])?.address ?? "");
-                                                  } else {
-                                                    setFieldValue("repairPlant", "");
-                                                    setFieldValue("plantShipTo", "");
-                                                  }
-                                                  setFieldValue("supplier", "");
-                                                  setFieldValue("supplierShipTo", "");
-
-                                                  setSupplierShipToAddresses([]);
-                                                }
-                                                else {
-                                                  setFieldValue("repairPlant", "");
-                                                  setFieldValue("plantShipTo", "");
-                                                  setFieldValue("supplier", "");
-                                                  setFieldValue("supplierShipTo", "");
-
-                                                  setSupplierShipToAddresses([]);
-                                                }
                                               }}
                                               required={field.required}
                                               fullWidth
                                               isTooltip={field?.isTooltip || false}
                                               tooltipMessage={field?.tooltipMessage}
                                               size="small"
-                                            /> : field.fieldName === "startDate"
+                                            />
+                                            :
+                                            field.fieldName === "typeOfRepair"
                                               ? <FormTypes
                                                 repairJobId={repairJobId}
                                                 {...field}
-                                                disabled={(!repairJobId && field.disableOnEdit) || values["status"] === "Completed"}
-                                                values={values}
+                                                disabled={disableFields || (!repairJobId && field.disableOnEdit)}
+                                                values={getValues(values)}
                                                 errors={errors}
                                                 touched={touched}
                                                 label={field.fieldLabel}
@@ -543,15 +502,35 @@ const ManageRepairJob = (props) => {
                                                 options={field.option}
                                                 setFieldValue={(name, value) => {
                                                   setFieldValue(name, value);
+
+                                                  if (value) {
+                                                    if (value === "Internal") {
+                                                      setFieldValue("repairPlant", values["plant"] ?? values["warehouse"]);
+                                                      setFieldValue("plantShipTo", repairPlantDataSource.find(d => d.optionValue === values["plant"] || d.optionValue === values["warehouse"])?.address ?? "");
+                                                    } else {
+                                                      setFieldValue("repairPlant", "");
+                                                      setFieldValue("plantShipTo", "");
+                                                    }
+                                                    setFieldValue("supplier", "");
+                                                    setFieldValue("supplierShipTo", "");
+
+                                                    setSupplierShipToAddresses([]);
+                                                  }
+                                                  else {
+                                                    setFieldValue("repairPlant", "");
+                                                    setFieldValue("plantShipTo", "");
+                                                    setFieldValue("supplier", "");
+                                                    setFieldValue("supplierShipTo", "");
+
+                                                    setSupplierShipToAddresses([]);
+                                                  }
                                                 }}
                                                 required={field.required}
                                                 fullWidth
                                                 isTooltip={field?.isTooltip || false}
                                                 tooltipMessage={field?.tooltipMessage}
                                                 size="small"
-                                                minDate={new Date()}
-                                                maxDate={values["expectedCompletionDate"] ? moment(values["expectedCompletionDate"]) : moment().add(5, "years")}
-                                              /> : field.fieldName === "expectedCompletionDate"
+                                              /> : field.fieldName === "startDate"
                                                 ? <FormTypes
                                                   repairJobId={repairJobId}
                                                   {...field}
@@ -571,93 +550,13 @@ const ManageRepairJob = (props) => {
                                                   isTooltip={field?.isTooltip || false}
                                                   tooltipMessage={field?.tooltipMessage}
                                                   size="small"
-                                                  minDate={values["startDate"]}
-                                                /> : (field.fieldName === "plant" || field.fieldName === "warehouse") ? (
-                                                  <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                                    <Grid container spacing={1}>
-                                                      <Grid item
-                                                        xs={
-                                                          permissions?.warehouse?.isCreate
-                                                            ? 11
-                                                            : 11
-                                                        }
-                                                        sm={
-                                                          permissions?.warehouse?.isCreate
-                                                            ? 11
-                                                            : 11
-                                                        }
-                                                        md={
-                                                          permissions?.warehouse?.isCreate
-                                                            ? 11
-                                                            : 11
-                                                        }
-                                                      >
-                                                        <FormTypes
-                                                          repairJobId={repairJobId}
-                                                          {...field}
-                                                          disabled={disablePlantIfAssetAdded || (!repairJobId && field.disableOnEdit)}
-                                                          values={values}
-                                                          errors={errors}
-                                                          touched={touched}
-                                                          label={field.fieldLabel}
-                                                          name={field.fieldName}
-                                                          type={field.type}
-                                                          options={optionsPlantsEntity}
-                                                          setFieldValue={(name, value) => {
-                                                            setFieldValue(name, value);
-
-                                                            if (values["typeOfRepair"] === "Internal") {
-                                                              setFieldValue("repairPlant", value);
-                                                              setFieldValue("plantShipTo", repairPlantDataSource.find(d => d.optionValue === value)?.address ?? "");
-                                                            }
-
-                                                          }}
-                                                          required={field.required}
-                                                          fullWidth
-                                                          isTooltip={field?.isTooltip || false}
-                                                          tooltipMessage={field?.tooltipMessage}
-                                                          size="small"
-                                                        />
-                                                      </Grid>
-                                                      {permissions?.warehouse?.isCreate && (
-                                                        <Grid item xs={1} sm={1} md={1} >
-                                                          <Tooltip
-
-                                                            title="Create Plant"
-                                                            className="mt-1"
-                                                          >
-                                                            <IconButton
-                                                              onClick={() => {
-                                                                setShowAddWarehouseDialog(true);
-                                                              }}
-                                                              disabled={disablePlantIfAssetAdded || (!repairJobId && field.disableOnEdit)}
-                                                              size="small"
-                                                            >
-                                                              <AddIcon color={disablePlantIfAssetAdded || (!repairJobId && field.disableOnEdit) ? "disabled" : "primary"} />
-                                                            </IconButton>
-                                                          </Tooltip>
-                                                        </Grid>
-                                                      )}
-                                                      {field?.tooltipMessage ? (
-                                                        <Grid item xs={1} sm={1} md={1}>
-                                                          <Tooltip
-                                                            className="mt-2"
-                                                            title={
-                                                              field?.tooltipMessage ?? ""
-                                                            }
-                                                          >
-                                                            <InfoIcon color="disabled" />
-                                                          </Tooltip>
-                                                        </Grid>
-                                                      ) : null}
-                                                    </Grid>
-                                                  </Grid>
-
-                                                ) : field.fieldName === "status"
+                                                  minDate={new Date()}
+                                                  maxDate={values["expectedCompletionDate"] ? moment(values["expectedCompletionDate"]) : moment().add(5, "years")}
+                                                /> : field.fieldName === "expectedCompletionDate"
                                                   ? <FormTypes
                                                     repairJobId={repairJobId}
                                                     {...field}
-                                                    disabled={true}
+                                                    disabled={(!repairJobId && field.disableOnEdit) || values["status"] === "Completed"}
                                                     values={values}
                                                     errors={errors}
                                                     touched={touched}
@@ -673,11 +572,93 @@ const ManageRepairJob = (props) => {
                                                     isTooltip={field?.isTooltip || false}
                                                     tooltipMessage={field?.tooltipMessage}
                                                     size="small"
-                                                  /> : field.fieldName === "repairPerson"
+                                                    minDate={values["startDate"]}
+                                                  /> : (field.fieldName === "plant" || field.fieldName === "warehouse") ? (
+                                                    <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                                      <Grid container spacing={1}>
+                                                        <Grid item
+                                                          xs={
+                                                            permissions?.warehouse?.isCreate
+                                                              ? 11
+                                                              : 11
+                                                          }
+                                                          sm={
+                                                            permissions?.warehouse?.isCreate
+                                                              ? 11
+                                                              : 11
+                                                          }
+                                                          md={
+                                                            permissions?.warehouse?.isCreate
+                                                              ? 11
+                                                              : 11
+                                                          }
+                                                        >
+                                                          <FormTypes
+                                                            repairJobId={repairJobId}
+                                                            {...field}
+                                                            disabled={disablePlantIfAssetAdded || (!repairJobId && field.disableOnEdit)}
+                                                            values={values}
+                                                            errors={errors}
+                                                            touched={touched}
+                                                            label={field.fieldLabel}
+                                                            name={field.fieldName}
+                                                            type={field.type}
+                                                            options={optionsPlantsEntity}
+                                                            setFieldValue={(name, value) => {
+                                                              setFieldValue(name, value);
+
+                                                              if (values["typeOfRepair"] === "Internal") {
+                                                                setFieldValue("repairPlant", value);
+                                                                setFieldValue("plantShipTo", repairPlantDataSource.find(d => d.optionValue === value)?.address ?? "");
+                                                              }
+
+                                                            }}
+                                                            required={field.required}
+                                                            fullWidth
+                                                            isTooltip={field?.isTooltip || false}
+                                                            tooltipMessage={field?.tooltipMessage}
+                                                            size="small"
+                                                          />
+                                                        </Grid>
+                                                        {permissions?.warehouse?.isCreate && (
+                                                          <Grid item xs={1} sm={1} md={1} >
+                                                            <Tooltip
+
+                                                              title="Create Plant"
+                                                              className="mt-1"
+                                                            >
+                                                              <IconButton
+                                                                onClick={() => {
+                                                                  setShowAddWarehouseDialog(true);
+                                                                }}
+                                                                disabled={disablePlantIfAssetAdded || (!repairJobId && field.disableOnEdit)}
+                                                                size="small"
+                                                              >
+                                                                <AddIcon color={disablePlantIfAssetAdded || (!repairJobId && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                              </IconButton>
+                                                            </Tooltip>
+                                                          </Grid>
+                                                        )}
+                                                        {field?.tooltipMessage ? (
+                                                          <Grid item xs={1} sm={1} md={1}>
+                                                            <Tooltip
+                                                              className="mt-2"
+                                                              title={
+                                                                field?.tooltipMessage ?? ""
+                                                              }
+                                                            >
+                                                              <InfoIcon color="disabled" />
+                                                            </Tooltip>
+                                                          </Grid>
+                                                        ) : null}
+                                                      </Grid>
+                                                    </Grid>
+
+                                                  ) : field.fieldName === "status"
                                                     ? <FormTypes
                                                       repairJobId={repairJobId}
                                                       {...field}
-                                                      disabled={disableFields || (!repairJobId && field.disableOnEdit)}
+                                                      disabled={true}
                                                       values={values}
                                                       errors={errors}
                                                       touched={touched}
@@ -693,33 +674,53 @@ const ManageRepairJob = (props) => {
                                                       isTooltip={field?.isTooltip || false}
                                                       tooltipMessage={field?.tooltipMessage}
                                                       size="small"
-                                                    /> : <FormTypes
-                                                      repairJobId={repairJobId}
-                                                      {...field}
-                                                      disabled={(!repairJobId && field.disableOnEdit) || (field.fieldName === "repairJobName")}
-                                                      values={values}
-                                                      errors={errors}
-                                                      touched={touched}
-                                                      label={field.fieldLabel}
-                                                      name={field.fieldName}
-                                                      type={field.type}
-                                                      options={field.option}
-                                                      setFieldValue={(name, value) => {
-                                                        setFieldValue(name, value);
-                                                      }}
-                                                      required={field.required}
-                                                      fullWidth
-                                                      isTooltip={field?.isTooltip || false}
-                                                      tooltipMessage={field?.tooltipMessage}
-                                                      size="small"
-                                                      imageOrFileUploadCompletePercentage={
-                                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                                          ? (completePercentage) => {
-                                                            setUploadingImageOrFileProgress(completePercentage);
-                                                          }
-                                                          : null
-                                                      }
-                                                    />}
+                                                    /> : field.fieldName === "repairPerson"
+                                                      ? <FormTypes
+                                                        repairJobId={repairJobId}
+                                                        {...field}
+                                                        disabled={disableFields || (!repairJobId && field.disableOnEdit)}
+                                                        values={values}
+                                                        errors={errors}
+                                                        touched={touched}
+                                                        label={field.fieldLabel}
+                                                        name={field.fieldName}
+                                                        type={field.type}
+                                                        options={field.option}
+                                                        setFieldValue={(name, value) => {
+                                                          setFieldValue(name, value);
+                                                        }}
+                                                        required={field.required}
+                                                        fullWidth
+                                                        isTooltip={field?.isTooltip || false}
+                                                        tooltipMessage={field?.tooltipMessage}
+                                                        size="small"
+                                                      /> : <FormTypes
+                                                        repairJobId={repairJobId}
+                                                        {...field}
+                                                        disabled={(!repairJobId && field.disableOnEdit) || (field.fieldName === "repairJobName")}
+                                                        values={values}
+                                                        errors={errors}
+                                                        touched={touched}
+                                                        label={field.fieldLabel}
+                                                        name={field.fieldName}
+                                                        type={field.type}
+                                                        options={field.option}
+                                                        setFieldValue={(name, value) => {
+                                                          setFieldValue(name, value);
+                                                        }}
+                                                        required={field.required}
+                                                        fullWidth
+                                                        isTooltip={field?.isTooltip || false}
+                                                        tooltipMessage={field?.tooltipMessage}
+                                                        size="small"
+                                                        imageOrFileUploadCompletePercentage={
+                                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                                            ? (completePercentage) => {
+                                                              setUploadingImageOrFileProgress(completePercentage);
+                                                            }
+                                                            : null
+                                                        }
+                                                      />}
 
                                       </Grid>
                                   )}

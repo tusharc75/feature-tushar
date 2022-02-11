@@ -41,7 +41,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
     values: values,
   });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
+  const [cloneHeading, setCloneHeading] = useState('');
   //  Owner, Collaborator Code - Start
   const [formsData, setFormsData] = useState([]);
   const [parentEntityDataSource, setParentEntityDataSource] = useState([]);
@@ -93,6 +93,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
         if (isClone) {
           const { data: { data } } = await axiosInstance().get(`/entity/${entityId}`);
           const { entityName, ...rest } = data
+          setCloneHeading(entityName);
           tempData = getObjKeysWithValues({ ...rest }, fieldsData)
         }
 
@@ -171,7 +172,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
       fullWidth
       fullScreen={fullScreen || (isMobile || isTablet)}
     >
-      <CustomDialogHeader title={isClone ? "Clone" : isNew ? "Create New Entities" : "Update Entity"}
+      <CustomDialogHeader title={isClone ? `Clone - [${cloneHeading}]`: isNew ? "Create New Entities" : "Update Entity"}
         onClose={() => {
           if (isFieldNotTouched({
             ...initialData,

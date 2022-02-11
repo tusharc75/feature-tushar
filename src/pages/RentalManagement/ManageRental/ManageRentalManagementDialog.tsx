@@ -11,7 +11,7 @@ import { useData } from "../../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
 import {
     CustomDialogTransition, customerAccount, customerContact, getCollaboratorDropdownDataSource, getObjKeys, getObjKeysWithValues,
-    getOwnerDropdownDataSource, isFieldNotTouched, rentalManagement, setFieldsInAscendingOrder, yupSchema, generateUniqueIdOnly
+    getOwnerDropdownDataSource, isFieldNotTouched, rentalManagement, setFieldsInAscendingOrder, yupSchema, generateUniqueIdOnly, RENTAL_STATUS
 } from "../../../constants/helpers";
 import axiosInstance from '../../../axios/axiosInstance'
 import Dialog from "@material-ui/core/Dialog";
@@ -65,6 +65,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     const [countrySellToDropDown, setCountrySellToDropDown] = useState([]);
     const [countryBillToMainData, setCountryBillToMainData] = useState([]);
     const [countrySellToMainData, setCountrySellToMainData] = useState([]);
+    const [cloneHeading, setCloneHeading] = useState('');
 
     const [showAddWarehouseDialog, setShowAddWarehouseDialog] = useState(false);
     const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
@@ -214,7 +215,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                 try {
                     let data;
                     if (!isOffline) {
-                        const response: any = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/` + rentalManagementId);
+                        const response: any = await axiosInstance().get(`${rentalManagement.api}/` + rentalManagementId);
                         data = response?.data?.data;
                     } else {
                         data = offlineGridData?.rentalManagement?.find(d => d._id === rentalManagementId)
@@ -227,6 +228,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                         rest['actualStartDate'] = new Date();
                         rest['estimateEndDate'] = "";
                         rest['actualEndDate'] = "";
+                        setCloneHeading(rentalJobName);
                         setRentalData({
                             fields: fieldsDataForCreate,
                             initialValues: getObjKeysWithValues(rest, fieldsDataForCreate),
@@ -288,7 +290,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         if (rentalManagementId && isClone === false) {
             values._id = rentalManagementId
             if (!isOffline) {
-                axiosInstance().put(`${rentalManagement.rentalManagementApi}`, values).then(({ data }) => {
+                axiosInstance().put(`${rentalManagement.api}`, values).then(({ data }) => {
                     setLoading(false);
                     onSuccess()
                     toastConfig.setToastConfig({
@@ -306,7 +308,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     storedData = JSON.parse(localStorage.getItem("offlineDataToSave"));
                 }
                 const dataToSave = {
-                    api: rentalManagement.rentalManagementApi,
+                    api: rentalManagement.api,
                     method: "put",
                     values: values
                 };
@@ -326,7 +328,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         }
         else {
             if (!isOffline) {
-                axiosInstance().post(`${rentalManagement.rentalManagementApi}`, values).then(({ data: { data, message } }) => {
+                axiosInstance().post(`${rentalManagement.api}`, values).then(({ data: { data, message } }) => {
                     history.push(`${routes.rentalManagementDetail.path}/${data}`)
                     setLoading(false);
                     onSuccess(data)
@@ -346,7 +348,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     storedData = JSON.parse(localStorage.getItem("offlineDataToSave"));
                 }
                 const dataToSave = {
-                    api: rentalManagement.rentalManagementApi,
+                    api: rentalManagement.api,
                     method: "post",
                     values: values
                 };
@@ -441,7 +443,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     title={
                         !rentalManagementId
                             ? `Create ${routes.rentalManagement.title}`
-                            : `${isClone ? "Clone" : `Update ${rentalManagementData?.rentalJobName}`}`
+                            : `${isClone ? `Clone - [${cloneHeading}]` : `Update ${rentalManagementData?.rentalJobName}`}`
                     }
                     onClose={(e, reason) => {
                         if (isFieldNotTouched(rentalData, formValues)) onClose()
@@ -796,7 +798,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                         ) : ["actualStartDate", "actualEndDate"].includes(field.fieldName) ? (
                                                                             <FormTypes
                                                                                 {...field}
-                                                                                disabled={values["status"] === "Ready to Invoice" ? false : true}
+                                                                                disabled={values["status"] === RENTAL_STATUS.readyToInvoice ? false : true}
                                                                                 fieldData={field}
                                                                                 values={values}
                                                                                 errors={errors}

@@ -41,7 +41,6 @@ const AssetFilters = (props: FilterProps) => {
         if(data) {
           setAllProducts(data["Product"].map((d) => ({ id: d.optionValue, title: d.optionLabel })));
           setAllProductCategories(data["Product Category"].map((d) => ({ id: d.optionValue, title: d.optionLabel })))
-          // setAssets(data["Product Inventory"].map((d) => ({ id: d.optionValue, title: d.optionLabel })))
         }
         setLoadingDropdown(false);
       })

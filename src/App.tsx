@@ -74,9 +74,9 @@ import CreateNewQuotePdfTemplate from './pages/QuotePdfTemplate/NewCreateQuotePd
 import QuotePdfTemplate from './pages/QuotePdfTemplate';
 import Warehouse from './pages/Warehouse';
 import WarehouseDetailsPage from './pages/Warehouse/WarehouseDetailsPage';
-import ProductInventory from './pages/ProductInventory';
+import SerializedAsset from './pages/SerializedAsset';
+import SerializedAssetDetailsPage from './pages/SerializedAsset/SerializedAssetDetailsPage';
 import EquipmentRentalMaster from './pages/EquipmentRentalMaster';
-import ProductInventoryDetailsPage from './pages/ProductInventory/ProductInventoryDetailsPage';
 import ProductDetailsPage from './pages/Product/ProductDetailsPage';
 import RentalManagement from './pages/RentalManagement';
 import RentalManagementDetailsPage from './pages/RentalManagement/RentalManagementDetailsPage';
@@ -99,6 +99,7 @@ import TransferAsset from './pages/TransferAssets/Index';
 import TransferAssetDetailPage from './pages/TransferAssets/TransferAssetDetailPage';
 import Address from "./pages/Address";
 import AddressDetailPage from './pages/Address/AddressDetailPage'
+import InventoryProduct from './pages/ProductInventory';
 import Logout from './pages/Auth/Logout';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import Report from './pages/Report';
@@ -107,6 +108,7 @@ import CustomerSign from './pages/DeliveryTicket/CustomerSign';
 import EcommercePolicy from './pages/EcommercePolicy';
 import Sublease from './pages/Sublease';
 import SubleaseDetailsPage from './pages/Sublease/SubleaseDetailsPage';
+import ProductInventory from './pages/SerializedAsset';
 
 var notificationInterval: any = null;
 
@@ -366,7 +368,10 @@ function App() {
               <RoleDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path="/activity">
-              <Activitydemo />
+              <Activitydemo />   
+            </PrivateRoute>
+            <PrivateRoute exact path="/product-inventory">
+              <InventoryProduct />
             </PrivateRoute>
             <PrivateRoute exact path={routes.activityEmail.path}>
               <Email />
@@ -395,11 +400,11 @@ function App() {
             <PrivateRoute exact path={routes.productDetail.path + '/:id'}>
               <ProductDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.productInventory.path}>
-              <ProductInventory />
+            <PrivateRoute exact path={routes.serializedAsset.path}>
+              <SerializedAsset />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.productInventoryDetail.path + '/:id'}>
-              <ProductInventoryDetailsPage />
+            <PrivateRoute exact path={routes.serializedAssetDetail.path + '/:id'}>
+              <SerializedAssetDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.equiptmentRentalMaster.path}>
               <EquipmentRentalMaster />

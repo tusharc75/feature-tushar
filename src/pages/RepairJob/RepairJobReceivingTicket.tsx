@@ -16,7 +16,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import {
     gridLoadingTimeout, repairJob,
-    sidebarResource, productInventory as productInventoryHelperObject, REPAIR_JOB_STATUS, deliveryTicket, INVENTORY_STATUS,
+    sidebarResource, serializedAsset as productInventoryHelperObject, REPAIR_JOB_STATUS, deliveryTicket, INVENTORY_STATUS,
     DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE
 } from "../../constants/helpers";
 import { groupBy } from "lodash";
@@ -106,7 +106,7 @@ const RepairJobReceivingTicket = (props) => {
 
         localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
 
-        axiosInstance().get(`${repairJob.repairJobApi}/${repairJobData._id}/get-assets`)
+        axiosInstance().get(`${repairJob.api}/${repairJobData._id}/get-assets`)
             .then(({ data }) => {
                 let tempProductInventory = data.data.map(u => ({ ...u, _id: u?.id, productName: u?.product?.optionLabel }))
                 dispatch({ type: "loading", loading: true });
@@ -160,7 +160,7 @@ const RepairJobReceivingTicket = (props) => {
 
 
     const InventoryRenderer = (params) => (
-        <Link className="link" title={params.value} to={`${routes.productInventoryDetail.path}/${params.data._id}`}>
+        <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data._id}`}>
             {params.value}
         </Link>
     );
@@ -430,7 +430,7 @@ const RepairJobReceivingTicket = (props) => {
                         const groupByCalls = groupBy(selectedRecords, "receivingTicketId");
                         let apiCalls = [];
                         Object.keys(groupByCalls).forEach((key) => {
-                            apiCalls.push(axiosInstance().put(`${deliveryTicket.deliveryTicketApi}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
+                            apiCalls.push(axiosInstance().put(`${deliveryTicket.api}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
                         })
                         Promise.all(apiCalls).then(() => {
                             toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged Receiving Ticket(s)` });
