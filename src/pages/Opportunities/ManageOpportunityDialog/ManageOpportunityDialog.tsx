@@ -294,7 +294,7 @@ export default function ManageOpportunityDialog({
 
   const handleCreateOpportunity = (values) => {
     setSaveClick(true);
-    if (accountId) values['supplierAccountName'] = [accountId];
+    // if (accountId) values['supplierAccountName'] = [accountId];
     if (contactId && contactResource)
       values.staticData = {
         [contactResource]: [contactId]
