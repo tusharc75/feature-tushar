@@ -330,8 +330,8 @@ const ContactDetailsPage = (props) => {
         );
 
         setProjectSales(
-          data[sidebarResource.projectSales] && data[sidebarResource.projectSales][sidebarResource[contactResource].replaceAll(' ', '_')]
-            ? data[sidebarResource.projectSales][sidebarResource[contactResource].replaceAll(' ', '_')]
+          data[sidebarResource.projectStrategy] && data[sidebarResource.projectStrategy][sidebarResource[contactResource].replaceAll(' ', '_')]
+            ? data[sidebarResource.projectStrategy][sidebarResource[contactResource].replaceAll(' ', '_')]
             : []
         );
 

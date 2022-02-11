@@ -14,6 +14,7 @@ import routes from '../Helpers/Routes';
 import CreateProjectSales from "../../pages/ProjectSales/CreateProjectSales";
 import { MoreVert } from '@material-ui/icons';
 import AssignProjectSalesDialog from '../AssignRolesDialog/AssignProjectSalesDialog';
+import { RESOURCE_LABEL } from '../../constants/helpers';
 
 const Accordion = withStyles({
     root: {
@@ -143,7 +144,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                             </Box>
                             <Box padding="5px">
                                 <Typography variant="subtitle2">
-                                    Projects Sales ({projectSales?.length || 0})
+                                    {RESOURCE_LABEL.projectStrategy} ({projectSales?.length || 0})
                                 </Typography>
                             </Box>
                         </Box>

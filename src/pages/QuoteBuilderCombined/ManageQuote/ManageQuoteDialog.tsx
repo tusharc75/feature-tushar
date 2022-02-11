@@ -270,7 +270,7 @@ export default function ManageQuoteDialog({
           opportunityDropDownData.option.filter(
             (d) =>
               d.customerAccountName ===
-              entityData.initialValues["customerAccountName"]
+              entityData.initialValues["customerAccount"]
           )
         );
       }
