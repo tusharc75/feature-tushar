@@ -75,7 +75,7 @@ const OpportunityDashboards = (props) => {
       }
     }
     axiosInstance()
-      .get(`/dashboard/opportunities/sales-rep${url}`)
+      .get(`/dashboard/quote/sales-rep${url}`)
       .then(({ data: { data } }) => {
         const labels = [];
         const datasets = [];
@@ -472,7 +472,7 @@ const OpportunityDashboards = (props) => {
                 Filters
               </Button>
               <Box textAlign="center">
-                <Typography variant="h6">{statusText[opp2Status]} Opportunities by Sales Rep</Typography>
+                <Typography variant="h6">{statusText[opp2Status]} Quotes by Sales Rep</Typography>
                 {oppSalesRep.labels.length > 0
                   ? <Chart type="pie" data={oppSalesRep} />
                   : <Box minHeight={515}>
