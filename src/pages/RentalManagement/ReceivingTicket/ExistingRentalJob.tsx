@@ -7,7 +7,7 @@ import { CommonRenderer, DateRenderer, } from "../../../components/AgGridCompone
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, Dialog, IconButton } from "@material-ui/core";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, rentalManagement, RENTAL_STATUS, sidebarResource } from "../../../constants/helpers";
+import { CustomDialogTransition, customerContact, gridLoadingTimeout, deliveryTicket, rentalManagement, RENTAL_STATUS, sidebarResource, DELIVERY_TICKET_STATUS } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
@@ -35,6 +35,7 @@ const ExistingRentalJob = ({ refrenceData, refrenceType, productInventory, onClo
   const [rentalJobs, setRentalJobs] = useState([])
   const [assetsAdd, setAssetsAdd] = useState([])
 
+  const toastConfig = useContext(CustomToastContext)
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -97,11 +98,12 @@ const ExistingRentalJob = ({ refrenceData, refrenceType, productInventory, onClo
 
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${selectedRecords[0]?._id}`)
     const assetsAdd = [];
+    const inventory= JSON.parse(JSON.stringify(productInventory))
     response?.data?.data?.material?.forEach((e: any) => {
       if (e.type === "product") {
         let qty = e.qty;
         while (qty) {
-          const result = productInventory.filter(f => f?.product?.optionValue === e.materialId && !f.isCounted);
+          const result = inventory.filter(f => f?.product?.optionValue === e.materialId && !f.isCounted);
           if (result.length) {
             let obj: any = {};
             obj._id = e._id
@@ -136,10 +138,18 @@ const ExistingRentalJob = ({ refrenceData, refrenceType, productInventory, onClo
 
   const handleCreateLoadingTicketAddAsstes = (data) => {
     console.log(data)
+    const deliveryTicketData: any = {};
+    deliveryTicketData._id = data._id;
+    deliveryTicketData.rentalJob = selectedRecords[0]._id;
+    deliveryTicketData.ticketType = DELIVERY_TICKET_TYPE.loading;
     axiosInstance().post(`${rentalManagement.api}/${selectedRecords[0]._id}/inventory`, { "products": assetsAdd })
       .then(({ data }) => {
-        setShowTicketDialog({ open: false, ticketType: "", data: {} });
-        onSuccess()
+        axiosInstance().post(`${deliveryTicket.api}/auto-create-ticket`, deliveryTicketData).then(({ data }) => {
+          setShowTicketDialog({ open: false, ticketType: "", data: {} });
+          onSuccess()
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
       }).catch((error) => {
       });
   }
@@ -160,7 +170,7 @@ const ExistingRentalJob = ({ refrenceData, refrenceType, productInventory, onClo
             variant={"contained"}
             disabled={selectedRecords.length > 1 || selectedRecords.length === 0}
           >
-            {`Assets add in ${routes.rentalManagement.title}`}</Button>
+            {`Transfer to ${routes.rentalManagement.title}`}</Button>
         </Grid>
       </Box>
       {Object.keys(frameWorkComponent).length > 0 ?
