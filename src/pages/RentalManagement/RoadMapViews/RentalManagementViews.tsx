@@ -27,7 +27,7 @@ const RentalManagementViews = (props) => {
         }
       ];
       var flowEdge: any[] = [];
-      const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalId}`);
+      const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}`);
       response?.data?.data?.material?.map((item: any, index) => {
         flow.push({
           id: `${item._id}`,

@@ -103,7 +103,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id)
       }
       else {
-        const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
+        const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`)
         productAssets = response?.data?.data
         productAssets = productAssets.map(d => d.inventory).map(u => ({
           ...u,
