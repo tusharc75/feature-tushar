@@ -15,16 +15,12 @@ const customNodeStyles = {
     borderColor: '#70948d'
   },
   productAssets: {
-    background: '#9CA8B3',
+    background: '#ffd65b',
     borderColor: '#f5c431'
   },
   loadingTicket: {
     background: '#e6c6e6',
     borderColor: '#b38fb3'
-  },
-  loadingAssets: {
-    background: '#ffd65b',
-    borderColor: '#f5c431'
   },
   receivingTicket: {
     background: '#cfdb7f',
@@ -134,7 +130,7 @@ const RentalManagementViews = (props) => {
             type: 'default',
             data: { label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.optionLabel}</div> },
             position: { x: 1200, y: (productIndex + index) * 80 },
-            style: customNodeStyles.loadingAssets
+            style: customNodeStyles.productAssets
           });
           flowEdge.push({
             id: `edge-${item._id}`,
