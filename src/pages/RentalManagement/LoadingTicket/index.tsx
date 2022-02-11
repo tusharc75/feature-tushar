@@ -103,7 +103,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id)
       }
       else {
-        const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`)
+        const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`)
         productAssets = response?.data?.data
         productAssets = productAssets.map(d => d.inventory).map(u => ({
           ...u,
@@ -205,7 +205,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
     { field: "warehouse", headerName: "Plant", show: true, disabled: true, cellRenderer: "warehouseRenderer" },
     { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "ticketRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
+    { field: "status", headerName: "Asset Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));

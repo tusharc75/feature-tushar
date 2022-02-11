@@ -257,7 +257,7 @@ function OpportunityDetailsPage() {
   const fetchSupplierContactData = (showDialog, useAccountList = false, accountList = []) => {
     let ids = [];
 
-    if (opportunityData.supplierAccountName.length > 0 || useAccountList) {
+    if (opportunityData.supplierAccount?.length > 0 || useAccountList) {
       ids = useAccountList ? accountList.map((d) => d?.optionValue) : opportunityData.supplierAccountName.map((d) => d?.optionValue);
 
       const filterById = JSON.stringify([{ field: 'accountName', term: ids.length > 1 ? { $in: ids } : ids[0] }]);
@@ -314,7 +314,7 @@ function OpportunityDetailsPage() {
     const filterById = JSON.stringify([
       {
         field: 'accountName',
-        term: opportunityData?.customerAccountName?.optionValue
+        term: opportunityData?.customerAccount?.optionValue
       }
     ]);
 
@@ -657,7 +657,7 @@ function OpportunityDetailsPage() {
                     });
                   }}
                   recordsPerLine={recordsPerLine}
-                  accounts={cloneDeep(opportunityData?.supplierAccountName)}
+                  accounts={cloneDeep(opportunityData?.supplierAccount)}
                   isAllowedToUpdate={allowedToEdit}
                 />
               )}
@@ -678,7 +678,7 @@ function OpportunityDetailsPage() {
                   }}
                   recordsPerLine={recordsPerLine}
                   saveContactToOpportunity={handleAssignContacts}
-                  accountId={opportunityData?.customerAccountName?.optionValue}
+                  accountId={opportunityData?.customerAccount?.optionValue}
                   isAllowedToUpdate={allowedToEdit}
                 />
               )}
@@ -700,7 +700,7 @@ function OpportunityDetailsPage() {
                   fetchData={fetchRelatedData}
                   quoteBuilderPermission={permissions.quoteBuilder}
                   opportunityId={id}
-                  accountId={opportunityData?.customerAccountName?.optionValue}
+                  accountId={opportunityData?.customerAccount?.optionValue}
                   opportunityName={opportunityData?.opportunityName}
                   marketSegmentId={opportunityData?.marketSegment?.optionValue}
                   subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}

@@ -26,6 +26,7 @@ import { isEqual } from 'lodash';
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne, findAll, insertUpdate } from '../../constants/indexdbhelper';
 import { createDeliveryTicketOffline } from './deliveryTicketOfflineHelper';
+import CustomButton from '../../components/Helpers/CustomButton'
 
 const ManageDeliveryTicket = (props) => {
 
@@ -72,7 +73,7 @@ const ManageDeliveryTicket = (props) => {
         }
     }, [initialData.fields, refrenceData]);
 
-    const updateFieldProperty = (fields, pickupFromType, deliveryToType) => {
+    const updateFieldProperty = (fields, pickupFromType, deliveryToType, ticketType) => {
         var warehouse = [];
         var customerAccount = [];
         var supplierAccount = [];
@@ -108,6 +109,9 @@ const ManageDeliveryTicket = (props) => {
                     element.option = supplierAccount
                 }
             }
+            if (ticketType === DELIVERY_TICKET_TYPE.return && element.fieldName === "returnReason") {
+                element.required = true;
+            }
         });
         return fields;
     }
@@ -139,7 +143,7 @@ const ManageDeliveryTicket = (props) => {
                 }
                 setDeliveryTicketData(data)
                 setDisableOwnerSelection(deliveryTicketId && user.user._id !== data?.owner?.optionValue);
-                fieldsDataForUpdate = updateFieldProperty(fieldsDataForUpdate, data?.pickupFromType, data?.deliveryToType);
+                fieldsDataForUpdate = updateFieldProperty(fieldsDataForUpdate, data?.pickupFromType, data?.deliveryToType, data?.ticketType);
                 setInitialData({
                     fields: fieldsDataForUpdate,
                     values: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -278,7 +282,7 @@ const ManageDeliveryTicket = (props) => {
                         tempInitialData["deliveryToAddress"] = refrenceData?.deliveryToAddress;
                     }
                 }
-                fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, tempInitialData["pickupFromType"], tempInitialData["deliveryToType"]);
+                fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, tempInitialData["pickupFromType"], tempInitialData["deliveryToType"], tempInitialData["ticketType"]);
                 setInitialData({
                     fields: fieldsDataForCreate,
                     values: tempInitialData,
@@ -370,7 +374,7 @@ const ManageDeliveryTicket = (props) => {
                 let updatedValues = { ...values }
                 axiosInstance().post(`${deliveryTicket.api}`, updatedValues).then(({ data }) => {
                     setLoading(false);
-                    onSuccess()
+                    onSuccess(data?.data)
                     setSubmitting(false);
                     toastConfig.setToastConfig({
                         open: true,
@@ -395,6 +399,21 @@ const ManageDeliveryTicket = (props) => {
         }
         return errors;
     }
+
+    const handleScroll = (errors) => {
+        const err = Object.keys(errors);
+        if (err.length) {
+            const input = document.querySelector(
+                `input[name=${err[0]}]`,
+            );
+            input.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'start',
+            });
+        }
+    }
+
 
     return (<Dialog
         maxWidth="md"
@@ -437,7 +456,7 @@ const ManageDeliveryTicket = (props) => {
                             showManimizeMaximize={true}
                         />
                         <CustomDialogContent>
-                            <Form noValidate>
+                            <Form autoComplete="off" autoCorrect="off" noValidate >
                                 {formsData &&
                                     formsData.map((form, index1) => {
                                         return form.name ? (
@@ -685,15 +704,17 @@ const ManageDeliveryTicket = (props) => {
                             >
                                 Cancel
                             </Button>
-                            <Button
+                            <CustomButton
+                                disabled={isSubmitting || loading}
                                 variant="contained"
                                 color="primary"
-                                size="small"
-                                onClick={submitForm}
-                                disabled={isSubmitting || loading}
-                            >
-                                {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
-                            </Button>
+                                type="submit"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleScroll(errors)
+                                    submitForm();
+                                }}
+                            > Save</CustomButton>
                         </CustomDialogFooter>
                         {
                             showConfirmDialog ?
@@ -702,6 +723,7 @@ const ManageDeliveryTicket = (props) => {
                                     open={showConfirmDialog}
                                     onSave={() => {
                                         setShowConfirmDialog(false)
+                                        handleScroll(errors)
                                         submitForm();
                                     }}
                                     onClose={() => {

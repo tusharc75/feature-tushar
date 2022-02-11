@@ -16,7 +16,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
   gridLoadingTimeout, deliveryTicket, rentalManagement,
-  sidebarResource, serializedAsset as productInventoryHelperObject, INVENTORY_STATUS, DELIVERY_TICKET_STATUS,
+  sidebarResource, serializedAsset as productInventoryHelperObject, INVENTORY_STATUS, DELIVERY_TICKET_STATUS, RENTAL_INTERNAL_ASSET_STATUS,
   DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE,
   repairJob, DELIVERY_FROM_TO_TYPE
 } from "../../../constants/helpers";
@@ -42,6 +42,7 @@ import ManageRepairJob from '../../RepairJob/ManageRepairJob'
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import InfoIcon from '@material-ui/icons/Info';
 import { ExpandMore } from '@material-ui/icons';
+import ExistingRentalJob from "./ExistingRentalJob";
 
 const renderedFrom = 'rentalManagementDetailsPageReceivingTicket';
 
@@ -82,6 +83,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   const [repairJobCount, setRepairJobCount] = useState(0);
 
   const [anchorActionEl, setAnchorActionEl] = useState(null);
+  const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -121,10 +123,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         productAssets = productAssets?.map((u) => ({ ...u, productName: u?.product?.optionLabel }));
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id);
       } else {
-        const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`);
+        const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
-        productAssets = productAssets.map((d) => d.inventory).map((u) => ({ ...u, productName: u?.product?.optionLabel }));
-
+        productAssets = productAssets.map((d) => ({ ...d.inventory, rentalAssetStatus: d.status })).map((u) => ({ ...u, productName: u?.product?.optionLabel }));
         const result = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}`)
         deliveryTicketList = result?.data?.data
       }
@@ -158,11 +159,15 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           }
         });
       });
+
       productAssets.forEach((d) => {
         d["isChecked"] = false;
         d["hideSelection"] = [INVENTORY_STATUS.indTransit, INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
       })
-      if (productAssets.filter((e) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.available, INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(e.status)).length === productAssets.length) {
+      if (productAssets.filter((e) =>
+        [INVENTORY_STATUS.underReview, INVENTORY_STATUS.available, INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(e.status) ||
+        [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(e.rentalAssetStatus)).length
+        === productAssets.length) {
         setNextStep(true)
       }
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
@@ -241,7 +246,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "deliveryTicketRenderer" },
     { field: "receivingTicket", headerName: "Receiving Ticket", show: true, cellRenderer: "receivingTicketRenderer" },
     { field: "returnTicket", headerName: "Return Ticket", show: true, cellRenderer: "returnTicketRenderer" },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
+    { field: "status", headerName: "Asset Status", show: true, cellRenderer: "commonRenderer" },
+    { field: "rentalAssetStatus", headerName: "Rental Asset Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
   const columnState = JSON.parse(localStorage.getItem('rentalManagementDetailsPageReceivingTicket'));
@@ -384,6 +390,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           size="small"
           onClick={openActions}
           aria-controls="action-menu"
+          disabled={(selectedRecords.length === 0)}
         >
           Actions <ExpandMore />
         </Button>
@@ -429,6 +436,18 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
                 !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
                 || !f.subleaseAsset || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
           >Create Supplier Receiving Ticket</MenuItem>
+
+          <MenuItem
+            onClick={() => {
+              setIsExistingRentalJob(true)
+              closeActions()
+            }}
+            disabled={(selectedRecords.length === 0)
+              || (selectedRecords.some(f =>
+                !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
+                || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
+          >
+            {`Transfer to another ${routes.rentalManagement.title}`}</MenuItem>
 
           {(selectedRecords.length && selectedRecords?.filter(f =>
             ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
@@ -563,6 +582,18 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         onClose={() => setShowTicketDialog({ open: false, ticketType: "", data: {} })}
         onSuccess={() => {
           setShowTicketDialog({ open: false, ticketType: "", data: {} });
+          fetchRecords();
+        }}
+      />
+    )}
+    {isExistingRentalJob && (
+      <ExistingRentalJob
+        refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
+        refrenceData={rentalManagementData}
+        productInventory={selectedRecords}
+        onClose={() => setIsExistingRentalJob(false)}
+        onSuccess={() => {
+          setIsExistingRentalJob(false)
           fetchRecords();
         }}
       />
