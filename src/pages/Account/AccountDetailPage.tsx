@@ -320,11 +320,11 @@ export default function AccountDetailPage(props) {
             : []
         );
         setProjectSales(
-          data[sidebarResource.projectSales] &&
-            data[sidebarResource.projectSales][
+          data[sidebarResource.projectStrategy] &&
+            data[sidebarResource.projectStrategy][
             sidebarResource[accountResource].replaceAll(" ", "_")
             ]
-            ? data[sidebarResource.projectSales][
+            ? data[sidebarResource.projectStrategy][
             sidebarResource[accountResource].replaceAll(" ", "_")
             ]
             : []
