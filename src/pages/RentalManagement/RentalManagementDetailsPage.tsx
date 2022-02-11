@@ -139,7 +139,7 @@ const RentalManagementDetailsPage = () => {
     try {
       let data;
       if (!isOffline) {
-        const response: any = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}`);
+        const response: any = await axiosInstance().get(`${rentalManagement.api}/${id}`);
         data = response?.data?.data;
       } else {
         data = await findOne(objectStore.rentalManagement, id)
@@ -189,7 +189,7 @@ const RentalManagementDetailsPage = () => {
 
   const handleCancelRentalJob = () => {
     axiosInstance()
-      .put(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/cancel`)
+      .put(`${rentalManagement.api}/${rentalManagementData._id}/cancel`)
       .then(() => {
         toastConfig.setToastConfig({
           open: true,
@@ -206,7 +206,7 @@ const RentalManagementDetailsPage = () => {
 
   const handleDelete = () => {
     axiosInstance()
-      .put(`${rentalManagement.rentalManagementApi}/remove`, { ids: [rentalManagementData._id] })
+      .put(`${rentalManagement.api}/remove`, { ids: [rentalManagementData._id] })
       .then(() => {
         setShowConfirmBox(false);
         history.goBack();
@@ -232,14 +232,14 @@ const RentalManagementDetailsPage = () => {
   }
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
+    axiosInstance().put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   }
 
   const updateJobStatus = (status) => {
-    axiosInstance().patch(`${rentalManagement.rentalManagementApi}/status/${rentalManagementData._id}`, { status: status }).then(({ data: { data } }) => {
+    axiosInstance().patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: status }).then(({ data: { data } }) => {
       if (status === "Invoiced" || status === "Closed") {
         updateProcessStatus(rentalProcessSteps[5])
         setCurrentStep(5)

@@ -13,7 +13,7 @@ export const rentalJobOfflineUpdate = async (ids) => {
             await clearAll(objectStore.rentalManagement)
             await clearAll(objectStore.deliveryTicket)
         }
-        await axiosInstance().post(`${rentalManagement.rentalManagementApi}/get-all-offline-data`, { ids: ids }).then(({ data: { data } }) => {
+        await axiosInstance().post(`${rentalManagement.api}/get-all-offline-data`, { ids: ids }).then(({ data: { data } }) => {
             data?.rentalManagement?.forEach(element => {
                 insertUpdate(objectStore.rentalManagement, element._id, element);
             });

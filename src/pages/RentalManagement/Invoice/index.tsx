@@ -116,7 +116,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         additionalcost = result?.additionalCost;
       }
       else {
-        const resultMaterial = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}?isInvoice=true`)
+        const resultMaterial = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}?isInvoice=true`)
         material = resultMaterial?.data?.data?.material;
         const resultCost = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`)
         additionalcost = resultCost?.data?.data;
@@ -149,7 +149,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
 
   const handlePDF = (type) => {
     setDownlodingFile(type);
-    axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/pdf`).then(({ data }) => {
+    axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/pdf`).then(({ data }) => {
       axiosInstance().get(`user/download?fileName=${data.data.fileName}`, {
         responseType: "blob",
       })

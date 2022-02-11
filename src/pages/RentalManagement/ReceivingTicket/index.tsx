@@ -42,6 +42,7 @@ import ManageRepairJob from '../../RepairJob/ManageRepairJob'
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import InfoIcon from '@material-ui/icons/Info';
 import { ExpandMore } from '@material-ui/icons';
+import ExistingRentalJob from "./ExistingRentalJob";
 
 const renderedFrom = 'rentalManagementDetailsPageReceivingTicket';
 
@@ -82,6 +83,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
   const [repairJobCount, setRepairJobCount] = useState(0);
 
   const [anchorActionEl, setAnchorActionEl] = useState(null);
+  const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -121,7 +123,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         productAssets = productAssets?.map((u) => ({ ...u, productName: u?.product?.optionLabel }));
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id);
       } else {
-        const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`);
+        const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
         productAssets = productAssets.map((d) => d.inventory).map((u) => ({ ...u, productName: u?.product?.optionLabel }));
 
@@ -384,6 +386,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           size="small"
           onClick={openActions}
           aria-controls="action-menu"
+          disabled={(selectedRecords.length === 0)}
         >
           Actions <ExpandMore />
         </Button>
@@ -429,6 +432,18 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
                 !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
                 || !f.subleaseAsset || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
           >Create Supplier Receiving Ticket</MenuItem>
+
+          <MenuItem
+            onClick={() => {
+              setIsExistingRentalJob(true)
+              closeActions()
+            }}
+            disabled={(selectedRecords.length === 0)
+              || (selectedRecords.some(f =>
+                !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
+                || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
+          >
+            {`Transfer to another ${routes.rentalManagement.title}`}</MenuItem>
 
           {(selectedRecords.length && selectedRecords?.filter(f =>
             ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
@@ -563,6 +578,18 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         onClose={() => setShowTicketDialog({ open: false, ticketType: "", data: {} })}
         onSuccess={() => {
           setShowTicketDialog({ open: false, ticketType: "", data: {} });
+          fetchRecords();
+        }}
+      />
+    )}
+    {isExistingRentalJob && (
+      <ExistingRentalJob
+        refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
+        refrenceData={rentalManagementData}
+        productInventory={selectedRecords}
+        onClose={() => setIsExistingRentalJob(false)}
+        onSuccess={() => {
+          setIsExistingRentalJob(false)
           fetchRecords();
         }}
       />

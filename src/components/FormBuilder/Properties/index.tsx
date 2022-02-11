@@ -845,7 +845,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       control={
                         <Checkbox
                           name="required"
-                          disabled={values['required'] ? true : false}
+                          //disabled={values['required'] ? true : false}
                           checked={values['required']}
                           onChange={(e) => {
                             setFieldValue('required', e.target.checked);

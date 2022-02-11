@@ -72,7 +72,7 @@ const ManageDeliveryTicket = (props) => {
         }
     }, [initialData.fields, refrenceData]);
 
-    const updateFieldProperty = (fields, pickupFromType, deliveryToType) => {
+    const updateFieldProperty = (fields, pickupFromType, deliveryToType, ticketType) => {
         var warehouse = [];
         var customerAccount = [];
         var supplierAccount = [];
@@ -108,6 +108,9 @@ const ManageDeliveryTicket = (props) => {
                     element.option = supplierAccount
                 }
             }
+            if (ticketType === DELIVERY_TICKET_TYPE.return && element.fieldName === "returnReason") {
+                element.required = true;
+            }
         });
         return fields;
     }
@@ -139,7 +142,7 @@ const ManageDeliveryTicket = (props) => {
                 }
                 setDeliveryTicketData(data)
                 setDisableOwnerSelection(deliveryTicketId && user.user._id !== data?.owner?.optionValue);
-                fieldsDataForUpdate = updateFieldProperty(fieldsDataForUpdate, data?.pickupFromType, data?.deliveryToType);
+                fieldsDataForUpdate = updateFieldProperty(fieldsDataForUpdate, data?.pickupFromType, data?.deliveryToType, data?.ticketType);
                 setInitialData({
                     fields: fieldsDataForUpdate,
                     values: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -278,7 +281,7 @@ const ManageDeliveryTicket = (props) => {
                         tempInitialData["deliveryToAddress"] = refrenceData?.deliveryToAddress;
                     }
                 }
-                fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, tempInitialData["pickupFromType"], tempInitialData["deliveryToType"]);
+                fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, tempInitialData["pickupFromType"], tempInitialData["deliveryToType"], tempInitialData["ticketType"]);
                 setInitialData({
                     fields: fieldsDataForCreate,
                     values: tempInitialData,
@@ -370,7 +373,7 @@ const ManageDeliveryTicket = (props) => {
                 let updatedValues = { ...values }
                 axiosInstance().post(`${deliveryTicket.api}`, updatedValues).then(({ data }) => {
                     setLoading(false);
-                    onSuccess()
+                    onSuccess(data)
                     setSubmitting(false);
                     toastConfig.setToastConfig({
                         open: true,
