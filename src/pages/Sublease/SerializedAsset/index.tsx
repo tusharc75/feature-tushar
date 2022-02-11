@@ -22,7 +22,7 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 
 const renderedFrom = 'SubleasingSerializedAsset';
 
-const SerializedAsset = ({ subleaseData }) => {
+const SerializedAsset = ({ subleaseData, fetchData }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
@@ -94,6 +94,7 @@ const SerializedAsset = ({ subleaseData }) => {
         setIsCompleteing(true);
         axiosInstance().put(`${sublease.api}/${subleaseData._id}/complete-sublease`).then(() => {
             setIsCompleteing(false);
+            fetchData()
             fetchRecords()
         }).catch((error) => {
             setIsCompleteing(false)
