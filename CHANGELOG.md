@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.59.0](https://github.com/vebholic/oms_frontend/compare/v2.58.0...v2.59.0) (2022-02-12)
+
+
+### Features
+
+* **avi:** avi ([46baf50](https://github.com/vebholic/oms_frontend/commit/46baf500167662192b3e9250419b72a9de5a245c))
+* **new-dashboard:** making of dynamic dashboard ([1957598](https://github.com/vebholic/oms_frontend/commit/19575989a8f7e68c1fb6ffc8b2392663220e80da))
+
+
+### Bug Fixes
+
+* **app.tsx:** conflict fix ([379b8c4](https://github.com/vebholic/oms_frontend/commit/379b8c4873d83b6551f0650e177f17255c6b26d8))
+* bug fix ([7e01733](https://github.com/vebholic/oms_frontend/commit/7e017339d5c9b06278a6bdca4213742839750ec8))
+* bug fix ([c362c06](https://github.com/vebholic/oms_frontend/commit/c362c06dd04bc0e627f84f50a64b802eca658399))
+* bug fix ([57a11b1](https://github.com/vebholic/oms_frontend/commit/57a11b1cc9e0318905704750510afc5f9157808f))
+* bug fix ([f9e3b1e](https://github.com/vebholic/oms_frontend/commit/f9e3b1ee6ecb454d7681cc2885bc5bcb79385021))
+* bug fix ([1108a87](https://github.com/vebholic/oms_frontend/commit/1108a87426dfdfafa36e74868ff05ee199a0201c))
+* bug fix ([c025e0e](https://github.com/vebholic/oms_frontend/commit/c025e0e1ae3f46664bbd5b93e1b3c58e0c8118ef))
+* bug fix ([a3be6ea](https://github.com/vebholic/oms_frontend/commit/a3be6eaf3a847577b777417b2d85799d27d48b98))
+* bug fix ([50bd1b0](https://github.com/vebholic/oms_frontend/commit/50bd1b09c7693cc82d829ce3b7ec76a28156fd07))
+* bug fix ([4e23d75](https://github.com/vebholic/oms_frontend/commit/4e23d75d7fd0e2b99c943990db2b30d6b7b70e82))
+* bug fix ([c9bae6e](https://github.com/vebholic/oms_frontend/commit/c9bae6e861db1edd7073f415b26248616a624042))
+* **Email:** Related to field value handled ([f7ece2a](https://github.com/vebholic/oms_frontend/commit/f7ece2a9f627a396e8c172da2025037d5beda1c1))
+* some color and logic change PO-1092 ([63cb25f](https://github.com/vebholic/oms_frontend/commit/63cb25f050152c5d6f90051e2683f0d8d8a06127))
+* ug fix ([ee62592](https://github.com/vebholic/oms_frontend/commit/ee62592eab591e6a1bf9e4b5f604a0a1e048f044))
+
 ## [2.58.0](https://github.com/vebholic/oms_frontend/compare/v2.57.0...v2.58.0) (2022-02-11)
 
 
