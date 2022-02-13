@@ -569,10 +569,20 @@ export default function AccountDetailPage(props) {
     },
     {
       label: "Projects",
-      count: 0,
+      count: projectSales ? projectSales.length : 0,
       show: true,
       icon: <FcMultipleSmartphones />,
       class: "project",
+      onClick: () => {
+        history.push({
+          pathname: `/project-sales`,
+          state: {
+            accountId: accountData._id,
+            accountName: accountData.accountName,
+            resource: accountResource,
+          },
+        });
+      }
     },
     {
       label: "Opportunity",
