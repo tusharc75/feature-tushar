@@ -187,8 +187,7 @@ const InventoryProduct = () => {
 
 
     const onCellValueChanged = (row) => {
-
-       
+  
        if(row?.data?.inventory && row?.data?.minInventory){
           let inputData = {
             
@@ -306,8 +305,13 @@ const InventoryProduct = () => {
                                     : ""
                                 }
                                 onChange={(e, val) => {
-                                    setPlantId(val && val._id ? val._id : "")
-                                    fetchProductInventory();
+                                   
+                                    if(val !== null){
+                                        setPlantId(val && val._id ? val._id : "")
+                                        setPlant(val && val.warehouseName ? val.warehouseName : "")
+                                        fetchProductInventory();
+                                    }
+                                   
                                 }}
                                 renderInput={(params) => (
 
