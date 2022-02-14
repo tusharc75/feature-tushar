@@ -38,44 +38,35 @@ const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.ge
 const InventoryProduct = () => {
     const toastConfig = useContext(CustomToastContext)
     const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
-    const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
-    const [anchorEl, setAnchorEl] = useState(null);
     const [gridApi, setGridApi] = useState(null);
-    // const [columns, setColumns] = useState(null)
-    // const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [disableSaveButton, setDisableSaveButton] = useState(false);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
-    const localStorageSelectedRecords = "warehouse_selected";
+   
     const [plant, setPlant] = useState('')
     const [plantOptions, setPlantOptions] = useState([])
-    const [productCategoryList, setProductCategoryList] = useState([]);
-    const [productFilterList, setProductFilterList] = useState([]);
-    const [productCategory, setProductCategory] = useState(null);
-    const [productFilter, setProductFilter] = useState(null);
-    const [plantId, setPlantId] = useState('');
+    const [plantId, setPlantId] = useState('61e54c3e8b18de57f0ec5587');
 
     const {
         state: { permissions },
     }: any = useData();
-    const { getColumnData } = useColumns();
+  
     const history = useHistory();
 
-    const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);
-  
-    const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
-    
+   
 
+    useEffect(() => {
+        getPlants()
+    },[])
 
     useEffect(() => {
 
-        getPlants()
         fetchProductInventory()
-    }, [page, limit, filters, sorting, search, warehouse, redirectProduct,productCategory, productFilter]);
+    }, [plant,plantId, page, limit, filters, sorting, search]);
 
  
 
@@ -121,7 +112,7 @@ const InventoryProduct = () => {
         }
 
         const queryString = getQueryString();
-        axiosInstance().get(`/product-inventory?wareHouse=61e54c3e8b18de57f0ec5587&${queryString}`).then(({ data }) => {
+        axiosInstance().get(`/product-inventory?wareHouse=${plantId}&${queryString}`).then(({ data }) => {
             let rows = data.data?.map((u, user) => {
                 let finalObject = prepareDataForGrid(u);
                 finalObject["canDelete"] = permissions?.serializedAsset?.isDelete
@@ -196,12 +187,13 @@ const InventoryProduct = () => {
 
 
     const onCellValueChanged = (row) => {
-    
+
+       
        if(row?.data?.inventory && row?.data?.minInventory){
           let inputData = {
             
 
-                plant:"61e54c3e8b18de57f0ec5587",
+                plant:plantId,
             
                 product:"61f8e15bb55f66174938a46f",
             
@@ -217,7 +209,7 @@ const InventoryProduct = () => {
 
        if(row?.data?.inventory) {
            let inputData = {
-               plant:'61e54c3e8b18de57f0ec5587',
+               plant:plantId,
                product:'61f8e15bb55f66174938a46f',
                inventory:row?.data?.inventory,
             
@@ -227,7 +219,7 @@ const InventoryProduct = () => {
 
        if(row?.data?.minInventory){
            let inputData ={
-               plant:'61e54c3e8b18de57f0ec5587',
+               plant:plantId,
                product:'61f8e15bb55f66174938a46f',
                minInventory:row?.data?.minInventory
            }
