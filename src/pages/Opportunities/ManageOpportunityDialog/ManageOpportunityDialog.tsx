@@ -623,7 +623,7 @@ export default function ManageOpportunityDialog({
                                                 isTooltip={field?.isTooltip || false}
                                                 tooltipMessage={field?.tooltipMessage}
                                                 size="small"
-                                                onOpen={() => onCountryBillToDropDownOpen(values.customerAccountName)}
+                                                onOpen={() => onCountryBillToDropDownOpen(values.customerAccountName ?? values.customerAccount)}
                                               />
                                             </Grid>
                                             {permissions.address?.isCreate && (
@@ -680,7 +680,7 @@ export default function ManageOpportunityDialog({
                                                 isTooltip={field?.isTooltip || false}
                                                 tooltipMessage={field?.tooltipMessage}
                                                 size="small"
-                                                onOpen={() => onCountrySellToDropDownOpen(values.customerAccountName)}
+                                                onOpen={() => onCountrySellToDropDownOpen(values.customerAccountName ?? values.customerAccount)}
                                               />
                                             </Grid>
                                             {permissions.marketSegment?.isCreate && (
