@@ -85,13 +85,7 @@ const RentalManagement = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource,
   });
-  // const [rentalManagementPermissions, setRentalManagementPermissions] = useState({
-  //   isCreate: permissions?.rentalManagement?.isCreate,
-  //   isUpdate: permissions?.quoteBuilder?.isUpdate,
-  //   isRead: permissions?.quoteBuilder?.isRead,
-  //   isDelete: permissions?.quoteBuilder?.isDelete,
-  // });
-  const { rentalManagementResource, rentalManagementApi } = rentalManagement;
+
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
@@ -185,7 +179,7 @@ const RentalManagement = () => {
   const handleSingleDeleteRentalManagement = async () => {
     dispatch({ type: "loading", loading: true });
     axiosInstance()
-      .put(`${rentalManagementApi}/remove`, {
+      .put(`${rentalManagement.api}/remove`, {
         ids: [singleRentalManagementDelete.id],
       })
       .then(({ data }) => {
@@ -336,7 +330,7 @@ const RentalManagement = () => {
     try {
       let data: any = [], count;
       if (!isOffline) {
-        const response: any = await axiosInstance().get(`${rentalManagementApi}${queryString}`);
+        const response: any = await axiosInstance().get(`${rentalManagement.api}${queryString}`);
         data = response?.data?.data;
         count = response?.data?.count;
       }
@@ -414,7 +408,7 @@ const RentalManagement = () => {
     }
     if (recordsToDelete.length > 0) {
       axiosInstance()
-        .put(`${rentalManagementApi}/remove`, {
+        .put(`${rentalManagement.api}/remove`, {
           ids: recordsToDelete,
         })
         .then(({ data }) => {
@@ -451,7 +445,7 @@ const RentalManagement = () => {
                   <ImportExportLinks
                     permissions={permissions.rentalManagement}
                     module="rentalManagements"
-                    api={rentalManagementApi}
+                    api={rentalManagement.api}
                     afterImportCompleted={() => {
                       fetchRentalManagement();
                     }}

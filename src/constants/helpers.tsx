@@ -356,7 +356,6 @@ export const quoteBuilder = {
 export const rentalManagement = {
   api: '/rental-management',
   rentalManagementResource: 'rentalManagement',
-  rentalManagementApi: '/rental-management',
   resource: "rental-management"
 };
 
@@ -1532,6 +1531,14 @@ export const RENTAL_STATUS = {
   invoiced: 'Invoiced',
   closed: 'Closed',
 };
+
+export const RENTAL_INTERNAL_ASSET_STATUS = {
+  reserved: 'Reserved',
+  inUse: 'In-Use',
+  complete: 'Complete',
+  return: 'Return',
+} as const;
+
 
 export const REPAIR_JOB_STATUS = {
   new: 'New',

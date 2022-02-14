@@ -196,7 +196,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         data.inventory = data.productInventory;
       }
       else {
-        const response = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/productpackage/${rentalManagementData._id}`)
+        const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
         data = response?.data?.data
       }
       const rows = data.material.filter((e) => e.parentId === null)
@@ -319,7 +319,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     })
     if (data.length) {
       setAdding(true)
-      axiosInstance().post(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory`, { "products": data })
+      axiosInstance().post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { "products": data })
         .then(({ data }) => {
           setAddSerializedAssetDialog({ open: false })
           fetchProductInventory()
@@ -342,7 +342,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const handleRemoveInventory = () => {
     if (deleteData.length >= 1) {
       setDeleting(true)
-      axiosInstance().put(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/inventory/remove`, { products: deleteData })
+      axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/inventory/remove`, { products: deleteData })
         .then(() => {
           setDeleting(false)
           fetchProductInventory()

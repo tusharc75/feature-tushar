@@ -15,7 +15,7 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { serializedAsset, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL, product } from '../../constants/helpers';
+import { serializedAsset, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL, product, warehouse as warehouseHelper } from '../../constants/helpers';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import ManageSerializedAsset from "./ManageSerializedAsset";
@@ -49,12 +49,13 @@ const ProductInventory = () => {
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
-    const localStorageSelectedRecords = "warehouse_selected";
-    const [plantOptions, setPlantOptions]= useState([])
     const [productCategoryList, setProductCategoryList] = useState([]);
     const [productFilterList, setProductFilterList] = useState([]);
     const [productCategory, setProductCategory] = useState(null);
     const [productFilter, setProductFilter] = useState(null);
+
+    const [plantOptions, setPlantOptions] = useState([])
+    const [selectedPlant, setSelectedPlant] = useState(null)
 
     const {
         state: { permissions },
@@ -63,12 +64,14 @@ const ProductInventory = () => {
     const history = useHistory();
 
     const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);
+
     const [fromPurchaseOrder, setFromPurchaseOrder] = useState({
         productId: history.location?.state?.productId,
         productName: history.location?.state?.productName,
         pOId: history.location?.state?.pOId,
         pOName: history.location?.state?.pOName,
     });
+
     const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
 
     useEffect(() => {
@@ -77,11 +80,17 @@ const ProductInventory = () => {
 
     useEffect(() => {
         fetchProductInventory()
-    }, [page, limit, filters, sorting, search, warehouse, redirectProduct, fromPurchaseOrder, productCategory, productFilter]);
+    }, [page, limit, filters, sorting, search, warehouse, selectedPlant, redirectProduct, fromPurchaseOrder, productCategory, productFilter]);
 
     useEffect(() => {
-        axiosInstance().get("/product-category?sortBy=name&orderBy=asc").then(({ data: { data } }) => {
+        axiosInstance().get(`/product-category?sortBy=name&orderBy=asc`).then(({ data: { data } }) => {
             setProductCategoryList(data)
+        })
+    }, [])
+
+    useEffect(() => {
+        axiosInstance().get(`${warehouseHelper.warehouseApi}?sortBy=warehouseName&orderBy=asc`).then(({ data: { data } }) => {
+            setPlantOptions(data)
         })
     }, [])
 
@@ -130,11 +139,9 @@ const ProductInventory = () => {
 
     const fetchProductInventory = () => {
         dispatch({ type: "loading", loading: true });
-
         if (gridApi) {
             gridApi.setRowData([]);
         }
-
         const queryString = getQueryString();
         axiosInstance().get(`${serializedAsset.api}${queryString}`).then(({ data }) => {
             let rows = data.data?.map((u, user) => {
@@ -144,18 +151,10 @@ const ProductInventory = () => {
                 finalObject["allowedToEdit"] = permissions?.serializedAsset.isUpdate
                 return {
                     ...finalObject,
-
                 };
             });
             setIsAllChecked(false);
-            
             setClonedData(data.data);
-          
-            let plantData  = data.data.map((i)=>{
-                return i.warehouse
-            })
-            setPlantOptions(plantData);
-      
             if (appendRows) {
                 dispatch({
                     type: "initialize", data: [...dataRows, ...rows],
@@ -171,7 +170,6 @@ const ProductInventory = () => {
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
-
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
@@ -180,11 +178,12 @@ const ProductInventory = () => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
-
         let filterById = [];
-
         if (warehouse?.optionValue) {
             filterById.push({ field: "warehouse", term: warehouse?.optionValue });
+        }
+        if (selectedPlant && selectedPlant !== "") {
+            filterById.push({ field: "warehouse", term: selectedPlant });
         }
         if (redirectProduct?.id) {
             filterById.push({ field: "product", term: redirectProduct?.id });
@@ -204,10 +203,8 @@ const ProductInventory = () => {
         if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
         }
-
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
-
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
@@ -216,15 +213,12 @@ const ProductInventory = () => {
             });
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`
         }
-
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
-
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
         }
-
         return `${deepFilter}&filterType=and&filterByIdType=and`;
     };
 
@@ -300,9 +294,6 @@ const ProductInventory = () => {
         }
     };
 
-
-    
-
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
@@ -331,7 +322,7 @@ const ProductInventory = () => {
         <div className="main-container">
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1">
+                    <Grid item xs={12} sm={12} md={8} className="d-flex align-items-center gap-1">
                         <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
                         <span className="listingHeader">{routes.serializedAsset?.title} </span>
                         {warehouse && (
@@ -377,7 +368,7 @@ const ProductInventory = () => {
                             </>
                         ) :
                             (
-                                <>
+                                <Fragment>
                                     <Autocomplete
                                         style={{ width: "250px" }}
                                         options={productCategoryList}
@@ -393,7 +384,6 @@ const ProductInventory = () => {
                                             setProductCategory(val && val._id ? val._id : "")
                                         }}
                                         renderInput={(params) => (
-
                                             isMobile && !isTablet ?
                                                 <TextField
                                                     {...params}
@@ -403,8 +393,6 @@ const ProductInventory = () => {
                                                     variant="standard"
                                                     fullWidth
                                                     className={isMobile ? "serchBox" : ""}
-
-
                                                 /> :
                                                 <TextField
                                                     {...params}
@@ -416,46 +404,6 @@ const ProductInventory = () => {
                                                 />
                                         )}
                                     />
-    
-                                    <Autocomplete
-                                        style={{ width: "250px" }}
-                                        options={plantOptions}
-                                        getOptionLabel={(option: any) => option ? option.optionLabel : ""}
-                                        getOptionSelected={(option: any, val) =>
-                                            option.optionValue === val
-                                        }
-                                        value={plantOptions.filter((data) => data._id === plantOptions).length
-                                            ? plantOptions.filter((data) => data._id === plantOptions)[0]
-                                            : ""
-                                        }
-                                        onChange={(e, val) => {
-                                            setWarehouse(val && val._id ? val._id : "")
-                                        }}
-                                        renderInput={(params) => (
-
-                                            isMobile && !isTablet ?
-                                                <TextField
-                                                    {...params}
-                                                    margin="dense"
-                                                    name="plant"
-                                                    placeholder="Plant"
-                                                    variant="standard"
-                                                    fullWidth
-                                                    className={isMobile ? "serchBox" : ""}
-
-
-                                                /> :
-                                                <TextField
-                                                    {...params}
-                                                    margin="dense"
-                                                    name="plant"
-                                                    label="Plant"
-                                                    variant="outlined"
-                                                    fullWidth
-                                                />
-                                        )}
-                                    />
-
                                     {productCategory &&
                                         <Autocomplete
                                             style={{ width: "250px" }}
@@ -482,12 +430,47 @@ const ProductInventory = () => {
                                                 />
                                             )}
                                         />}
-                                </>
+                                    <Autocomplete
+                                        style={{ width: "250px" }}
+                                        options={plantOptions}
+                                        getOptionLabel={(option: any) => option ? option?.warehouseName : ""}
+                                        getOptionSelected={(option: any, val) =>
+                                            option.optionValue === val
+                                        }
+                                        value={plantOptions.filter((data) => data._id === selectedPlant).length
+                                            ? plantOptions.filter((data) => data._id === selectedPlant)[0]
+                                            : ""
+                                        }
+                                        onChange={(e, val) => {
+                                            setSelectedPlant(val && val._id ? val._id : "")
+                                        }}
+                                        renderInput={(params) => (
+                                            isMobile && !isTablet ?
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="plant"
+                                                    placeholder="Plant"
+                                                    variant="standard"
+                                                    fullWidth
+                                                    className={isMobile ? "serchBox" : ""}
+                                                /> :
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="plant"
+                                                    label="Plant"
+                                                    variant="outlined"
+                                                    fullWidth
+                                                />
+                                        )}
+                                    />
+                                </Fragment>
                             )
                         }
 
                     </Grid>
-                    <Grid md={6} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`} >
+                    <Grid md={4} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
 
                             <Grid style={{ display: "flex", flex: 1 }}>

@@ -24,12 +24,13 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { RiFlowChart } from 'react-icons/ri';
 import TabPanel from '../../components/TabPanel';
-import Menu from "@material-ui/core/Menu"
-import { isMobile } from "react-device-detect";
+import Menu from '@material-ui/core/Menu';
+import { isMobile } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import { GrStatusInfo } from "react-icons/all";
-import MenuItem from "@material-ui/core/MenuItem"
+import { GrStatusInfo } from 'react-icons/all';
+import MenuItem from '@material-ui/core/MenuItem';
 import { objectStore, insertUpdate, findAll, findOne } from '../../constants/indexdbhelper';
 
 import Productpackage from './Productpackage';
@@ -38,11 +39,11 @@ import SerializedAsset from './SerializedAsset';
 import LoadingTicket from './LoadingTicket';
 import ReceivingTicket from './ReceivingTicket';
 import Invoice from './Invoice';
+import RentalManagementViews from './RoadMapViews/RentalManagementViews';
 
 const rentalProcessSteps = ['Add Products', 'Ad-hoc Charges', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Packing Slip'];
 
 const RentalManagementDetailsPage = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, updateOfflineGridData } = useContext(CustomOfflineContext);
 
@@ -51,7 +52,9 @@ const RentalManagementDetailsPage = () => {
   const parsed = queryString.parse(history.location.search);
   const { openEdit, tab }: any = parsed;
 
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [loadingDetails, setLoadingDetails] = useState(true);
@@ -64,36 +67,34 @@ const RentalManagementDetailsPage = () => {
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [statusOptions, setStatusOptions] = useState([])
+  const [statusOptions, setStatusOptions] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [nextStep, setNextStep] = useState(true);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
-  const [locationKeys, setLocationKeys] = useState([])
+  const [locationKeys, setLocationKeys] = useState([]);
 
   const [showCancelConfirmBox, setShowCancelConfirmBox] = useState(false);
 
-
   useEffect(() => {
-    return history.listen(location => {
+    return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
       if (history.action === 'PUSH') {
-        setLocationKeys([location.key])
+        setLocationKeys([location.key]);
       }
       if (history.action === 'POP') {
         if (locationKeys[1] === location.key) {
-          setLocationKeys(([_, ...keys]) => keys)
+          setLocationKeys(([_, ...keys]) => keys);
           // Handle forward event
-          setTabValue(tab ? parseInt(tab) : 0)
-
+          setTabValue(tab ? parseInt(tab) : 0);
         } else {
-          setLocationKeys((keys) => [location.key, ...keys])
+          setLocationKeys((keys) => [location.key, ...keys]);
           // Handle back event
-          setTabValue(tab ? parseInt(tab) : 0)
+          setTabValue(tab ? parseInt(tab) : 0);
         }
       }
-    })
-  }, [locationKeys])
+    });
+  }, [locationKeys]);
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity);
@@ -120,7 +121,7 @@ const RentalManagementDetailsPage = () => {
 
   useEffect(() => {
     if (!isOffline && currentStep !== null && currentStep >= 0 && currentStep <= 5) {
-      updateProcessStatus(rentalProcessSteps[currentStep])
+      updateProcessStatus(rentalProcessSteps[currentStep]);
     }
   }, [currentStep]);
 
@@ -139,10 +140,10 @@ const RentalManagementDetailsPage = () => {
     try {
       let data;
       if (!isOffline) {
-        const response: any = await axiosInstance().get(`${rentalManagement.rentalManagementApi}/${id}`);
+        const response: any = await axiosInstance().get(`${rentalManagement.api}/${id}`);
         data = response?.data?.data;
       } else {
-        data = await findOne(objectStore.rentalManagement, id)
+        data = await findOne(objectStore.rentalManagement, id);
       }
       setRentalManagementData(data);
       setCurrentStep(rentalProcessSteps.indexOf(data?.processStatus) !== -1 ? rentalProcessSteps.indexOf(data?.processStatus) : 0);
@@ -167,15 +168,15 @@ const RentalManagementDetailsPage = () => {
     try {
       if (!isOffline) {
         const response: any = await axiosInstance().get('/field?resource=Rental Management');
-        response?.data?.data.some(o => {
-          if (o?.fieldData?.fieldName === "status") {
-            setStatusOptions([...o.fieldData.option?.filter(e => ![RENTAL_STATUS.cancelled].includes(e.optionLabel))])
-            return true
+        response?.data?.data.some((o) => {
+          if (o?.fieldData?.fieldName === 'status') {
+            setStatusOptions([...o.fieldData.option?.filter((e) => ![RENTAL_STATUS.cancelled].includes(e.optionLabel))]);
+            return true;
           }
-        })
+        });
         setRentalManagementFields(response?.data?.data);
       } else {
-        const response: any = await findOne(objectStore.resource, objectStore.rentalManagement)
+        const response: any = await findOne(objectStore.resource, objectStore.rentalManagement);
         setRentalManagementFields(response);
       }
     } catch (error) {
@@ -189,7 +190,7 @@ const RentalManagementDetailsPage = () => {
 
   const handleCancelRentalJob = () => {
     axiosInstance()
-      .put(`${rentalManagement.rentalManagementApi}/${rentalManagementData._id}/cancel`)
+      .put(`${rentalManagement.api}/${rentalManagementData._id}/cancel`)
       .then(() => {
         toastConfig.setToastConfig({
           open: true,
@@ -197,7 +198,7 @@ const RentalManagementDetailsPage = () => {
           message: `${routes.rentalManagement.title} cancelled successfully`
         });
         fetchRentalManagementData();
-        setShowCancelConfirmBox(false)
+        setShowCancelConfirmBox(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -206,7 +207,7 @@ const RentalManagementDetailsPage = () => {
 
   const handleDelete = () => {
     axiosInstance()
-      .put(`${rentalManagement.rentalManagementApi}/remove`, { ids: [rentalManagementData._id] })
+      .put(`${rentalManagement.api}/remove`, { ids: [rentalManagementData._id] })
       .then(() => {
         setShowConfirmBox(false);
         history.goBack();
@@ -225,35 +226,38 @@ const RentalManagementDetailsPage = () => {
     setAnchorEl(null);
   };
 
-  const handleStatusChange = o => {
+  const handleStatusChange = (o) => {
     if (o.optionValue && rentalManagementData?.status !== o.optionValue) {
-      updateJobStatus(o.optionValue)
+      updateJobStatus(o.optionValue);
     }
-  }
+  };
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance().put(`${rentalManagement.rentalManagementApi}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
+    axiosInstance().put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const updateJobStatus = (status) => {
-    axiosInstance().patch(`${rentalManagement.rentalManagementApi}/status/${rentalManagementData._id}`, { status: status }).then(({ data: { data } }) => {
-      if (status === "Invoiced" || status === "Closed") {
-        updateProcessStatus(rentalProcessSteps[5])
-        setCurrentStep(5)
-      }
-      fetchRentalManagementData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: `Status changed to ${status}`
+    axiosInstance()
+      .patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: status })
+      .then(({ data: { data } }) => {
+        if (status === 'Invoiced' || status === 'Closed') {
+          updateProcessStatus(rentalProcessSteps[5]);
+          setCurrentStep(5);
+        }
+        fetchRentalManagementData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
-  }
+  };
 
   return (
     <>
@@ -275,62 +279,74 @@ const RentalManagementDetailsPage = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={rentalManagementData?.rentalJobName} mainPoints={mainPoints} showHeading={true}>
-                  {(permissions?.rentalManagement?.isUpdate && allowedToEdit && !isOffline
-                    && ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status)) && (
+                  {permissions?.rentalManagement?.isUpdate &&
+                    allowedToEdit &&
+                    !isOffline &&
+                    ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
                       <Fragment>
                         <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                           Edit
                         </Button>
-                        <Button className="buttonStyleSmallScreen" variant="text" color="primary" size="small" onClick={handleOpenUpdateDialog} style={isMobile ? { color: "#43aeaa" } : {}}>
+                        <Button
+                          className="buttonStyleSmallScreen"
+                          variant="text"
+                          color="primary"
+                          size="small"
+                          onClick={handleOpenUpdateDialog}
+                          style={isMobile ? { color: '#43aeaa' } : {}}
+                        >
                           <BiEdit size={20} />
                         </Button>
                       </Fragment>
                     )}
-                  {(permissions?.rentalManagement?.isUpdate && ![RENTAL_STATUS.cancelled, RENTAL_STATUS.invoiced, RENTAL_STATUS.closed].includes(rentalManagementData?.status)) && (
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      size="small"
-                      onClick={() => setShowCancelConfirmBox(true)}
-                    >
-                      {'Cancel ' + routes.rentalManagement.title}
-                    </Button>
-                  )}
-                  {permissions?.rentalManagement?.isUpdate && ([RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status)) && (
-                    <Fragment>
-                      <Button
-                        variant="outlined"
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                        endIcon={isMobile ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
-                      >
-                        {isMobile ? <GrStatusInfo size={20} /> : "Change Status"}
+                  {permissions?.rentalManagement?.isUpdate &&
+                    ![RENTAL_STATUS.cancelled, RENTAL_STATUS.invoiced, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
+                      <Button variant="outlined" color="primary" size="small" onClick={() => setShowCancelConfirmBox(true)}>
+                        {'Cancel ' + routes.rentalManagement.title}
                       </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}>
-                        {statusOptions?.map((o, index) => {
-                          return <MenuItem
-                            disabled={index <= statusOptions.findIndex(d => d.optionLabel === rentalManagementData?.status)}
-                            onClick={() => {
-                              closeActions()
-                              handleStatusChange(o)
-                            }}
-                            value={o}>{o?.optionLabel}</MenuItem>
-                        })}
-                      </Menu>
-                    </Fragment>
-                  )}
+                    )}
+                  {permissions?.rentalManagement?.isUpdate &&
+                    [RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) && (
+                      <Fragment>
+                        <Button
+                          variant="outlined"
+                          color="default"
+                          size="small"
+                          onClick={openActions}
+                          aria-controls="action-menu"
+                          endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                        >
+                          {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                        </Button>
+                        <Menu
+                          anchorEl={anchorEl}
+                          keepMounted
+                          getContentAnchorEl={null}
+                          anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left'
+                          }}
+                          id="action-menu"
+                          open={Boolean(anchorEl)}
+                          onClose={closeActions}
+                        >
+                          {statusOptions?.map((o, index) => {
+                            return (
+                              <MenuItem
+                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === rentalManagementData?.status)}
+                                onClick={() => {
+                                  closeActions();
+                                  handleStatusChange(o);
+                                }}
+                                value={o}
+                              >
+                                {o?.optionLabel}
+                              </MenuItem>
+                            );
+                          })}
+                        </Menu>
+                      </Fragment>
+                    )}
                 </DetailsPageHeader>
               )}
               <Tabs
@@ -361,7 +377,7 @@ const RentalManagementDetailsPage = () => {
                   className={'tabLayout'}
                   style={{
                     background: tabValue === 2 ? 'white' : '',
-                    color: tabValue === 2 ? 'blue' : '#163340'
+                    color: '#163340'
                   }}
                   label={
                     <div className="d-flex align-items-center tab-font">
@@ -369,6 +385,19 @@ const RentalManagementDetailsPage = () => {
                     </div>
                   }
                   {...a11yProps(1)}
+                />
+                <Tab
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 3 ? 'white' : '',
+                    color: tabValue === 3 ? 'blue' : '#163340'
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+                    </div>
+                  }
+                  {...a11yProps(2)}
                 />
                 <div className={'uio'}> </div>
               </Tabs>
@@ -403,10 +432,9 @@ const RentalManagementDetailsPage = () => {
                       showActivity={showActivity}
                     />
                   )}
-                  {currentStep === 1 && rentalManagementData &&
-                    <AdditionalCost
-                      rentalManagementData={rentalManagementData}
-                      setNextStep={setNextStep} />}
+                  {currentStep === 1 && rentalManagementData && (
+                    <AdditionalCost rentalManagementData={rentalManagementData} setNextStep={setNextStep} />
+                  )}
                   {currentStep === 2 && rentalManagementData && (
                     <SerializedAsset
                       rentalManagementData={rentalManagementData}
@@ -425,14 +453,10 @@ const RentalManagementDetailsPage = () => {
                       setNextStep={setNextStep}
                     />
                   )}
-                  {(currentStep === 4) && rentalManagementData && (
-                    <ReceivingTicket
-                      rentalManagementData={rentalManagementData}
-                      currentStep={currentStep}
-                      setNextStep={setNextStep}
-                    />
+                  {currentStep === 4 && rentalManagementData && (
+                    <ReceivingTicket rentalManagementData={rentalManagementData} currentStep={currentStep} setNextStep={setNextStep} />
                   )}
-                  {(currentStep === 5) && rentalManagementData && (
+                  {currentStep === 5 && rentalManagementData && (
                     <Invoice
                       rentalManagementData={rentalManagementData}
                       setNextStep={setNextStep}
@@ -442,6 +466,11 @@ const RentalManagementDetailsPage = () => {
                     />
                   )}
                 </Paper>
+              </TabPanel>
+              <TabPanel value={tabValue} index={2}>
+                <Box>
+                  <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} />
+                </Box>
               </TabPanel>
             </Paper>
           </div>
@@ -502,13 +531,11 @@ const RentalManagementDetailsPage = () => {
                           resourceId={rentalManagementData._id}
                           resource={rentalManagement.rentalManagementResource}
                           restrictedAddActivities={
-                            permissions && permissions['rentalManagement'] && permissions['rentalManagement'].isUpdate
-                              ? []
-                              : ['Attachment', 'Case']
+                            permissions && permissions['rentalManagement'] && permissions['rentalManagement'].isUpdate ? [] : ['Attachment', 'Case']
                           }
                           relatedTo={[
                             {
-                              type: "rentalManagement",
+                              type: 'rentalManagement',
                               referenceId: rentalManagementData._id,
                               access: true
                             }
@@ -558,7 +585,6 @@ const RentalManagementDetailsPage = () => {
           }}
         />
       )}
-
     </>
   );
 };
