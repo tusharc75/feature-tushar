@@ -563,7 +563,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     {(showOrderDialog.open && showOrderDialog.type === "sublease") &&
       <ManageSublease
         isClone={false}
-        subleasingId={null}
+        subleaseId={null}
         onClose={() => setOrderDialog(prevState => ({ ...prevState, open: false, type: "" }))}
         onSuccess={() => {
           setOrderDialog(({ open: false, products: [], type: "" }))
