@@ -306,11 +306,11 @@ const Opportunities = () => {
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          { field: replaceFieldName('customerAccountName'), term: accountDetails.accountId }
+          { field: replaceFieldName('customerAccount'), term: accountDetails.accountId }
         ])}`;
       } else if (accountDetails.resource === supplierAccount.accountResource) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          { field: replaceFieldName('supplierAccountName'), term: { $in: [accountDetails.accountId] } }
+          { field: replaceFieldName('supplierAccount'), term: { $in: [accountDetails.accountId] } }
         ])}`;
       }
     }
