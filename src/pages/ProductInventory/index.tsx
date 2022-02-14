@@ -121,7 +121,7 @@ const InventoryProduct = () => {
         }
 
         const queryString = getQueryString();
-        axiosInstance().get(`/product-inventory?wareHouse=61e54c3e8b18de57f0ec5587`).then(({ data }) => {
+        axiosInstance().get(`/product-inventory?wareHouse=61e54c3e8b18de57f0ec5587&${queryString}`).then(({ data }) => {
             let rows = data.data?.map((u, user) => {
                 let finalObject = prepareDataForGrid(u);
                 finalObject["canDelete"] = permissions?.serializedAsset?.isDelete
@@ -165,7 +165,7 @@ const InventoryProduct = () => {
     };
 
     const getQueryString = () => {
-        let deepFilter = `??wareHouse=${plantId}page=${page}&limit=${limit}`;
+        let deepFilter = `page=${page}&limit=${limit}`;
 
 
 
@@ -189,7 +189,7 @@ const InventoryProduct = () => {
             deepFilter = `${deepFilter}&search=${search}`;
         }
 
-        return `${deepFilter}&filterType=and&filterByIdType=and`;
+        return `${deepFilter}&filterType=and`;
     };
 
    
