@@ -156,6 +156,10 @@ const InventoryProduct = () => {
         });
     };
 
+    const handleSearch = (e) => {
+        dispatch({ type: "search", search: e.target.value });
+    };
+
     const getQueryString = () => {
         let deepFilter = `page=${page}&limit=${limit}`;
 
@@ -267,6 +271,8 @@ const InventoryProduct = () => {
 
 
 
+
+
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
@@ -353,6 +359,25 @@ const InventoryProduct = () => {
 
                         </>
 
+                      
+                    
+
+                    </Grid>
+                    <Grid md={6} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`} >
+                        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
+
+                            <Grid style={{ display: "flex", flex: 1 }}>
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    searchbox={styles.search_box_input}
+                                    width={isMobile ? "200px" : "242px"}
+                                    style={isMobile ? { flex: 1 } : {}}
+                                    size="small"
+                                    value={search}
+                                />
+                            </Grid>
+
+                            </Box>
                     </Grid>
 
                 </Grid>
