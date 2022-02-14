@@ -360,7 +360,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                     title={
                         !salesOrderId
                             ? `Create ${routes.salesOrder.title}`
-                            : `${isClone ? `Clone - [${cloneHeading}]` : `Update ${salesOrderData?.salesOrderNo}`}`
+                            : `${isClone ? `Clone - ${cloneHeading}` : `Update ${salesOrderData?.salesOrderNo}`}`
                     }
                     onClose={(e, reason) => {
                         if (isFieldNotTouched(salesData, formValues)) onClose()

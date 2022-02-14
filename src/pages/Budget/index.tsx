@@ -37,7 +37,7 @@ function Budget() {
   const location = useLocation();
   const history = useHistory();
   const {
-    state: { permissions, user }
+    state: { permissions, user, selectedEntity }
   }: any = useData();
   const { budgetApi } = budget;
 
@@ -101,7 +101,7 @@ function Budget() {
 
   useEffect(() => {
     fetchBudgetList();
-  }, [page, limit, filters, sorting]);
+  }, [page, limit, filters, sorting, selectedEntity]);
 
   useEffect(() => {
     const parsedParams = queryString.parse(location?.search);

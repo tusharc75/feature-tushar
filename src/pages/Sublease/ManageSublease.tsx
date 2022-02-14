@@ -27,8 +27,9 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../Account/ManageAccount";
 import ManageContactDialog from "../Contact/ManageContact";
 import { isEqual } from 'lodash';
+import moment from "moment";
 
-const ManageSublease = ({ isClone = false, subleasingId = null, onClose, onSuccess, currency = null,
+const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess, currency = null,
     refrenceType = null, refrenceId = null, refrenceData = null }) => {
 
     const history = useHistory();
@@ -56,8 +57,8 @@ const ManageSublease = ({ isClone = false, subleasingId = null, onClose, onSucce
         axiosInstance().get("/field?resource=Sublease").then(({ data: { data } }) => {
             let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-            if (subleasingId) {
-                axiosInstance().get(`${sublease.api}/` + subleasingId).then(({ data: { data } }) => {
+            if (subleaseId) {
+                axiosInstance().get(`${sublease.api}/` + subleaseId).then(({ data: { data } }) => {
                     setSubleaseData(data)
                     if (isClone) {
                         const { _id, createdBy, updatedBy, serialNumber, ...rest } = data
@@ -120,7 +121,7 @@ const ManageSublease = ({ isClone = false, subleasingId = null, onClose, onSucce
             .catch((error) => {
                 toastConfig.setToastConfig(error);
             });
-    }, [subleasingId]);
+    }, [subleaseId]);
 
     useEffect(() => {
         setFormsData(setFieldsInAscendingOrder(initialData.fields));
@@ -129,8 +130,8 @@ const ManageSublease = ({ isClone = false, subleasingId = null, onClose, onSucce
 
     const handleSubmit = (values) => {
         setLoading(true)
-        if (subleasingId && isClone === false) {
-            values._id = subleasingId
+        if (subleaseId && isClone === false) {
+            values._id = subleaseId
             axiosInstance().put(`${sublease.api}`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 onSuccess()
@@ -228,7 +229,7 @@ const ManageSublease = ({ isClone = false, subleasingId = null, onClose, onSucce
                     setFieldValue,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={subleasingId ? (isClone ? "Clone" : `Update ${subleaseData?.subleaseName}`) : "Create " + routes.sublease.title}
+                        <CustomDialogHeader title={subleaseId ? (isClone ? "Clone" : `Update ${subleaseData?.subleaseName}`) : "Create " + routes.sublease.title}
                             onClose={() => {
                                 if (!isEqual(ref.current.values, initialData.values)) {
                                     setShowConfirmDialog(true)
@@ -333,7 +334,7 @@ const ManageSublease = ({ isClone = false, subleasingId = null, onClose, onSucce
                                                                             md={permissions.supplierContact?.isCreate ? 11 : 11}
                                                                         >
                                                                             <FormTypes
-                                                                                isNew={Boolean(subleasingId)}
+                                                                                isNew={Boolean(subleaseId)}
                                                                                 {...field}
                                                                                 fieldData={field}
                                                                                 values={values}
@@ -463,12 +464,79 @@ const ManageSublease = ({ isClone = false, subleasingId = null, onClose, onSucce
                                                                             );
                                                                         }}
                                                                     />
-                                                                )
-                                                                    : <FormTypes
-                                                                        isNew={Boolean(subleasingId)}
+                                                                ) : field.fieldName === "estimateStartDate" ? (
+                                                                    <FormTypes
+                                                                        {...field}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={(name, value) => {
+                                                                            setFieldValue(name, value)
+                                                                            if (!subleaseId || isClone) {
+                                                                                setFieldValue("actualStartDate", value)
+                                                                            }
+                                                                        }}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                        minDate={new Date()}
+                                                                        maxDate={values["estimateEndDate"] ? moment(values["estimateEndDate"]).subtract(1, "day") : moment().add(5, "years")}
+                                                                    />
+                                                                ) : field.fieldName === "estimateEndDate" ? (
+                                                                    <FormTypes
+                                                                        {...field}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={(name, value) => {
+                                                                            setFieldValue(name, value)
+                                                                            if (!subleaseId || isClone) {
+                                                                                setFieldValue("actualEndDate", value)
+                                                                            }
+                                                                        }}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                        minDate={moment(values["estimateStartDate"]).add(1, "day")}
+                                                                    />
+                                                                ) : ["actualStartDate", "actualEndDate"].includes(field.fieldName) ? (
+                                                                    <FormTypes
                                                                         {...field}
                                                                         fieldData={field}
-                                                                        disabled={(Boolean(subleasingId) && field.disableOnEdit && !isClone)}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={(name, value) => {
+                                                                            setFieldValue(name, value)
+                                                                        }}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                    />
+                                                                )
+                                                                    : <FormTypes
+                                                                        isNew={Boolean(subleaseId)}
+                                                                        {...field}
+                                                                        fieldData={field}
+                                                                        disabled={(Boolean(subleaseId) && field.disableOnEdit && !isClone)}
                                                                         values={values}
                                                                         errors={errors}
                                                                         touched={touched}
