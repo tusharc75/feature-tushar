@@ -144,7 +144,7 @@ const CreateProductCategory = (props) => {
               <CustomDialogHeader
                 title={
                   isClone
-                    ? `Clone - [${cloneHeading}]`
+                    ? `Clone - ${cloneHeading}`
                     : productCategoryId
                     ? !isUpdateDisabled
                       ? 'Update ' + routes.productCategory.title

@@ -123,7 +123,7 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
                             }}
                             disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse"))))}
                         >
-                            Transfer to Plant
+                            Receiving to Plant
                         </Button>
                     </Tooltip>
                     <Box mx={1} />
@@ -134,7 +134,7 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
                         disabled={!isCompleteEnable || isCompleteing}
                         onClick={() => { completeSublease() }}
                     >
-                        Close Sublease
+                        End Sublease
                     </Button>
                     <Box mx={1} />
                 </Fragment>
