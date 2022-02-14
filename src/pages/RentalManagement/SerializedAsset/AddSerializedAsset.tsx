@@ -23,6 +23,8 @@ import { groupBy, orderBy, sortBy, uniq, map } from "lodash";
 import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
 import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
 const addSerializedAssetsRenderedFrom = "addSerializedAssets";
 const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
@@ -45,11 +47,12 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
 
     const [plantList, setPlantList] = useState([]);
     const [selectedPlant, setSelectedPlant] = useState(filterByPlant);
+    const [subleaseAsset, setSubleaseAsset] = useState(false)
 
 
     useEffect(() => {
         fetchProductInventory()
-    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedPlant]);
+    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedPlant, subleaseAsset]);
 
     useEffect(() => {
         fetchGridColumns()
@@ -204,6 +207,12 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                 deepFilter = `${deepFilter}&availableAssets=true`;
             }
         }
+        if (subleaseAsset) {
+            deepFilter = `${deepFilter}&subleaseAsset=1`;
+        }
+        else {
+            deepFilter = `${deepFilter}&subleaseAsset=0`;
+        }
         return deepFilter;
     };
 
@@ -294,33 +303,49 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                             <Grid item xs={12} sm={12} md={6} container justify={isMobile ? "flex-start" : "flex-end"}>
                                 <Box className={isMobile ? "mobile-filter-side-header" : "filter-side-header-serialized"} component="div">
                                     {refrenceType === "Rental Job" &&
-                                        <Autocomplete
-                                            style={{ width: "250px" }}
-                                            options={plantList}
-                                            getOptionLabel={(option: any) => option ? option?.warehouseName : ""}
-                                            getOptionSelected={(option: any, val) =>
-                                                option._id === val
-                                            }
-                                            value={plantList.filter((data) => data._id === selectedPlant).length
-                                                ? plantList.filter((data) => data._id === selectedPlant)[0]
-                                                : ""
-                                            }
-                                            onChange={(e, val) => {
-                                                setSelectedPlant(val && val._id ? val._id : null)
-                                            }}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    margin="dense"
-                                                    name="plant"
-                                                    placeholder="Plant"
-                                                    label="Plant"
-                                                    variant="outlined"
-                                                    fullWidth
-                                                    className="m-0"
-                                                />
-                                            )}
-                                        />
+                                        <Fragment>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        name="subleaseAsset"
+                                                        checked={subleaseAsset}
+                                                        onChange={(e) => {
+                                                            setSubleaseAsset(e.target.checked)
+                                                            setSelectedPlant(null)
+                                                        }}
+                                                        color="primary"
+                                                    />
+                                                }
+                                                label="Sublease Assets"
+                                            />
+                                            <Autocomplete
+                                                style={{ width: "250px" }}
+                                                options={plantList}
+                                                getOptionLabel={(option: any) => option ? option?.warehouseName : ""}
+                                                getOptionSelected={(option: any, val) =>
+                                                    option._id === val
+                                                }
+                                                value={plantList.filter((data) => data._id === selectedPlant).length
+                                                    ? plantList.filter((data) => data._id === selectedPlant)[0]
+                                                    : ""
+                                                }
+                                                onChange={(e, val) => {
+                                                    setSelectedPlant(val && val._id ? val._id : null)
+                                                }}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        margin="dense"
+                                                        name="plant"
+                                                        placeholder="Plant"
+                                                        label="Plant"
+                                                        variant="outlined"
+                                                        fullWidth
+                                                        className="m-0"
+                                                    />
+                                                )}
+                                            />
+                                        </Fragment>
                                     }
                                     <SearchBox
                                         onSearch={handleSearch}
