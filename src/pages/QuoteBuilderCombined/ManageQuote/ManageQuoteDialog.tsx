@@ -279,12 +279,14 @@ export default function ManageQuoteDialog({
       );
       if (countryBillToDropdownData) {
         setCountryBillToMainData(countryBillToDropdownData.option)
+        setCountryBillToDropDown(countryBillToDropdownData.option)
       }
       const countrySellToDropdownData = entityData.fields.find(
         (d) => d.fieldName === "countrySellTo"
       );
       if (countryBillToDropdownData) {
         setCountrySellToMainData(countrySellToDropdownData.option)
+        setCountrySellToDropDown(countrySellToDropdownData.option)
       }
     }
 
@@ -1017,6 +1019,10 @@ export default function ManageQuoteDialog({
                                               setFieldValue("subMarketSegment", value?.subMarketSegment ?? '');
                                               marketSegmentChange(value?.marketSegment ?? '');
                                               setFieldValue("opportunity", "");
+                                              setFieldValue('countryBillTo', value?.billingAddress ?? '');
+                                              setFieldValue('countrySellTo', value?.shippingAddress ?? '');
+                                              onCountryBillToDropDownOpen(value && value.optionValue ? value.optionValue : '');
+                                              onCountrySellToDropDownOpen(value && value.optionValue ? value.optionValue : '');
                                               handleValuesChange({
                                                 [field.fieldName]: value && value.optionValue ? value.optionValue : "",
                                                 "customerContactName": [],
