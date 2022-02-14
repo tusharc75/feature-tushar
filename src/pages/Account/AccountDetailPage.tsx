@@ -1150,6 +1150,9 @@ export default function AccountDetailPage(props) {
                               permissions[accountResource].isUpdate &&
                               canEdit
                             }
+                          accountId={accountData._id}
+                          accountName={accountData.accountName}
+                          resource={accountResource}
                           />
                         </span>
                       )}
