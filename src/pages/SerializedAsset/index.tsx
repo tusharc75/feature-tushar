@@ -31,6 +31,8 @@ import { AiFillCrown, MdAdd } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from "@material-ui/lab";
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -56,6 +58,8 @@ const ProductInventory = () => {
 
     const [plantOptions, setPlantOptions] = useState([])
     const [selectedPlant, setSelectedPlant] = useState(null)
+    const [subleaseAsset, setSubleaseAsset] = useState(false)
+
 
     const {
         state: { permissions },
@@ -80,7 +84,7 @@ const ProductInventory = () => {
 
     useEffect(() => {
         fetchProductInventory()
-    }, [page, limit, filters, sorting, search, warehouse, selectedPlant, redirectProduct, fromPurchaseOrder, productCategory, productFilter]);
+    }, [page, limit, filters, sorting, search, warehouse, selectedPlant, redirectProduct, fromPurchaseOrder, productCategory, productFilter, subleaseAsset]);
 
     useEffect(() => {
         axiosInstance().get(`/product-category?sortBy=name&orderBy=asc`).then(({ data: { data } }) => {
@@ -218,6 +222,12 @@ const ProductInventory = () => {
         }
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
+        }
+        if (subleaseAsset) {
+            deepFilter = `${deepFilter}&subleaseAsset=1`;
+        }
+        else {
+            deepFilter = `${deepFilter}&subleaseAsset=0`;
         }
         return `${deepFilter}&filterType=and&filterByIdType=and`;
     };
@@ -464,6 +474,19 @@ const ProductInventory = () => {
                                                     fullWidth
                                                 />
                                         )}
+                                    />
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                name="subleaseAsset"
+                                                checked={subleaseAsset}
+                                                onChange={(e) => {
+                                                    setSubleaseAsset(e.target.checked)
+                                                }}
+                                                color="primary"
+                                            />
+                                        }
+                                        label="Sublease Assets"
                                     />
                                 </Fragment>
                             )

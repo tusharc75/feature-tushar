@@ -1,5 +1,5 @@
 import { useState, FC, useReducer, useEffect, useContext, Fragment } from "react";
-import { Grid } from "@material-ui/core";
+import { Chip, Grid } from "@material-ui/core";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -9,7 +9,7 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import { useData } from "../../StateProvider/Provider";
 import CreateProjectSales from "./CreateProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { gridLoadingTimeout, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
+import { customerAccount, gridLoadingTimeout, gridPageSizes, isObjectEmpty, supplierAccount } from "../../constants/helpers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
@@ -140,6 +140,11 @@ const ProjectSales: FC = () => {
   const [entities, setEntities] = useState([])
   const [columns, setColumns] = useState([])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [accountDetails, setAccountDetails] = useState({
+    accountId: history.location?.state?.accountId,
+    accountName: history.location?.state?.accountName,
+    resource: history.location?.state?.resource
+  });
 
   const [state, dispatch] = useReducer(reducer, intialState);
   const {
@@ -223,7 +228,7 @@ const ProjectSales: FC = () => {
     if (renderCount > 0) {
       fetchProjects();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity]);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, accountDetails]);
 
   const ActionsRenderer = (params) => (
     <>
@@ -290,6 +295,11 @@ const ProjectSales: FC = () => {
       case "updatedBy":
         return "updatedBy.user.concatedName";
 
+      case "customerAccountName":
+        return "staticData.customerAccount";
+
+      case "supplierAccountName":
+        return "staticData.supplierAccount"
       default:
         return field;
     }
@@ -314,6 +324,18 @@ const ProjectSales: FC = () => {
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    }
+
+    if (accountDetails.accountId) {
+      if (accountDetails.resource === customerAccount.accountResource) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
+          { field: replaceFieldName('customerAccountName'), term: accountDetails.accountId }
+        ])}`;
+      } else if (accountDetails.resource === supplierAccount.accountResource) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
+          { field: replaceFieldName('supplierAccountName'), term: { $in: [accountDetails.accountId] } }
+        ])}`;
+      }
     }
 
     if (!isObjectEmpty(filters)) {
@@ -533,7 +555,19 @@ const ProjectSales: FC = () => {
               setShowEntityDialog={setShowEntityDialog}
               setEntities={setEntities}
               
-            />
+            >
+              {accountDetails.accountId && (
+              <Chip
+                className="ml-3"
+                color="primary"
+                label={`${accountDetails.resource === customerAccount.accountResource ? 'Customer' : 'Supplier'} Account: ${accountDetails.accountName
+                  }`}
+                onDelete={() => {
+                  setAccountDetails({ accountId: null, accountName: null, resource: null });
+                }}
+              />
+            )}
+            </ProjectHeader>
           </div>
 
           {

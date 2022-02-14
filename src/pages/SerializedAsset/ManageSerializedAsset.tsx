@@ -176,7 +176,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
               <Fragment>
                 <CustomDialogHeader
                   title={
-                    productInventoryId ? (isClone ?   `Clone - [${cloneHeading}]` : 'Update ' + routes.serializedAsset.title) : 'Create ' + routes.serializedAsset.title
+                    productInventoryId ? (isClone ?   `Clone - ${cloneHeading}` : 'Update ' + routes.serializedAsset.title) : 'Create ' + routes.serializedAsset.title
                   }
                   onClose={() => {
                     if (isFieldNotTouched(initialData, values)) onClose();

@@ -312,7 +312,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     setValues,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={purchaseOrderId ? (isClone ? `Clone - [${cloneHeading}]` : `Update [ ${purchaseOrderData?.purchaseOrderNumber || ""} ]`) : "Create " + routes.purchaseOrder.title}
+                        <CustomDialogHeader title={purchaseOrderId ? (isClone ? `Clone - ${cloneHeading}` : `Update [ ${purchaseOrderData?.purchaseOrderNumber || ""} ]`) : "Create " + routes.purchaseOrder.title}
                             onClose={() => {
                                 if (isFieldNotTouched(initialData, values)) onClose()
                                 else setShowConfirmDialog(true)

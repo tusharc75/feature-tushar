@@ -423,7 +423,7 @@ export default function ManageOpportunityDialog({
         open={open}
       >
         <CustomDialogHeader
-          title={isClone ? `Clone - [${cloneHeading}]` : isNew ? 'Create Opportunity' : `Editing ${dataToUpdate.opportunityName}`}
+          title={isClone ? `Clone - ${cloneHeading}` : isNew ? 'Create Opportunity' : `Editing ${dataToUpdate.opportunityName}`}
           onClose={(e, reason) => {
             if (isFieldNotTouched(entityData, formValues)) onClose();
             else setShowConfirmDialog(true);
