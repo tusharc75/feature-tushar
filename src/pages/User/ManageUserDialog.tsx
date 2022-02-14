@@ -220,7 +220,7 @@ export default function ManageUserDialog({
     >
       <CustomDialogHeader
         title={
-          isClone ? `Clone User - [${cloneHeadingName}]` :
+          isClone ? `Clone User - ${cloneHeadingName}` :
             isNew
               ? "Create New User"
               : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName]
