@@ -92,7 +92,7 @@ const ManageRepairJob = (props) => {
             .then(({ data: { data } }) => {
               if (isClone) {
                 const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
-                setTitle(`Clone - [${repairJobName}]`)
+                setTitle(`Clone - ${repairJobName}`)
                 setDisablePlantIfAssetAdded(false);
 
                 rest.repairJobName = `RJ_${generateUniqueIdOnly()}`;

@@ -172,7 +172,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
       fullWidth
       fullScreen={fullScreen || (isMobile || isTablet)}
     >
-      <CustomDialogHeader title={isClone ? `Clone - [${cloneHeading}]`: isNew ? "Create New Entities" : "Update Entity"}
+      <CustomDialogHeader title={isClone ? `Clone - ${cloneHeading}`: isNew ? "Create New Entities" : "Update Entity"}
         onClose={() => {
           if (isFieldNotTouched({
             ...initialData,

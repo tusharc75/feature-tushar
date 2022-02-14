@@ -256,7 +256,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                 title={
                   transferAssetId
                     ? isClone
-                      ? `Clone - [${cloneHeading}]`
+                      ? `Clone - ${cloneHeading}`
                       : `Update ${RESOURCE_LABEL.transferAsset} (${number})`
                     : 'Create ' + RESOURCE_LABEL.transferAsset
                 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
+import {Link} from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -96,7 +97,7 @@ const InventoryProduct = () => {
 
 
     let columns = [
-        { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
+        { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer' },
         { field: 'plant', headerName: 'Plant', show: true, disabled: false, cellRenderer: 'commonRenderer' },
         { field: 'inventory', headerName: 'Inventory', show: true, disabled: false, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
         { field: 'minInventory', headerName: 'Min Inventory', show: true, disabled: false, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
@@ -153,6 +154,10 @@ const InventoryProduct = () => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
         });
+    };
+
+    const handleSearch = (e) => {
+        dispatch({ type: "search", search: e.target.value });
     };
 
     const getQueryString = () => {
@@ -228,8 +233,19 @@ const InventoryProduct = () => {
     }
 
 
+  const ProductNameRenderer = (params) => (
+
+    <Link className="link" title={params.value} to={`/product/detail/${params.data._id}`}>
+      {params.value}
+    </Link>
+
+  )
+
+
     const frameworkComponents = {
         commonRenderer: CommonRenderer,
+        productNameRenderer: ProductNameRenderer,
+
     };
 
 
@@ -251,6 +267,8 @@ const InventoryProduct = () => {
                 return field;
         }
     };
+
+
 
 
 
@@ -341,6 +359,25 @@ const InventoryProduct = () => {
 
                         </>
 
+                      
+                    
+
+                    </Grid>
+                    <Grid md={6} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`} >
+                        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
+
+                            <Grid style={{ display: "flex", flex: 1 }}>
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    searchbox={styles.search_box_input}
+                                    width={isMobile ? "200px" : "242px"}
+                                    style={isMobile ? { flex: 1 } : {}}
+                                    size="small"
+                                    value={search}
+                                />
+                            </Grid>
+
+                            </Box>
                     </Grid>
 
                 </Grid>

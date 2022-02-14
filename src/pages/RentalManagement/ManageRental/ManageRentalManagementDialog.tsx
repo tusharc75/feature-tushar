@@ -443,7 +443,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     title={
                         !rentalManagementId
                             ? `Create ${routes.rentalManagement.title}`
-                            : `${isClone ? `Clone - [${cloneHeading}]` : `Update ${rentalManagementData?.rentalJobName}`}`
+                            : `${isClone ? `Clone - ${cloneHeading}` : `Update ${rentalManagementData?.rentalJobName}`}`
                     }
                     onClose={(e, reason) => {
                         if (isFieldNotTouched(rentalData, formValues)) onClose()
