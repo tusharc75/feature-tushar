@@ -111,7 +111,7 @@ const SerializedAssetDetailsPage = () => {
   const NameRenderer = (params) => (
     <>{
       params.value ? (
-        params.data.type === "Loading Ticket" || params.data.type === "Receiving Ticket" || params.data.type === "Return Ticket" ?
+        params.data.type === "Loading Ticket" || params.data.type === "Receiving Ticket" || params.data.type === "Return Ticket" || params.data.type === "Delivery Ticket" ?
           <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
             {params.value}
           </Link> : params.data.type.toLowerCase() === "repair" ?
