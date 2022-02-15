@@ -5,17 +5,17 @@ import routes from '../../components/Helpers/Routes';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import AddAssetsDialog from './AddAssetsDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from '../../components/AgGridComponents/CustomAgGrid';
 import axiosInstance from '../../axios/axiosInstance';
-import { prepareDataForGrid, deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE } from "../../constants/helpers"
+import { prepareDataForGrid, deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, transferAsset } from "../../constants/helpers"
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { FaSuitcase } from "react-icons/fa";
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { MdAdd } from 'react-icons/md';
+import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 
 interface AssetsGridProps {
   permissions?: any;
@@ -38,12 +38,14 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [removeData, setRemoveData] = useState([])
   const [columns, setColumns] = useState([])
-  const [openAddNewAssets, setOpenAddNewAssets] = useState(false);
+  const [openAddNewAssets, setAddSerializedAssetDialog] = useState(false);
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const [gridApi, setGridApi] = useState(null);
   const [agGridState, gridDispatch] = useReducer(gridReducer, gridState);
   const { getColumnData } = useColumns();
   const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = agGridState;
+
+  const [isAdding, setIsAdding] = useState(false)
 
   const history = useHistory();
 
@@ -131,7 +133,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     try {
       let data = await fetchAssets(forceRefresh)
       let ticketData: any = await fetchLoadingTickets();
-
       if (currentStep === 0) {
         if (data.length === 0 && transferAssetData?.status !== "New") {
           updateTransferStatus("New")
@@ -139,7 +140,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           updateTransferStatus("In Progress")
         }
       }
-
       for (let i = 0; i < ticketData.length; i++) {
         for (let j = 0; j < data.length; j++) {
           if (ticketData[i]?.productInventory.some((asset: any) => data[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
@@ -156,9 +156,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           assetNumber: `${index + 1}. ${finalObject.assetNumber}`
         }
       })
-
-
-
       gridDispatch({ type: "initialize", data: data, count: data.length })
       gridDispatch({ type: "loading", loading: false });
     } catch (error) {
@@ -167,9 +164,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     }
   };
 
-  /**
-   * Handle Remove Assets
-   */
+
   const handleRemoveAssets = async () => {
     if (removeData.length > 0) {
       setRemovingAssets(true)
@@ -210,7 +205,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           size="small"
           style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
           onClick={() => {
-            setOpenAddNewAssets(true);
+            setAddSerializedAssetDialog(true);
           }}
         >
           {isMobile && !isTablet ? <MdAdd size={22} /> : `Add ${routes.serializedAsset.title}`}
@@ -296,13 +291,41 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
       {/* Add Assets Dialog */}
       {openAddNewAssets &&
-        <AddAssetsDialog
-          transferAssetId={transferAssetData?._id ?? ""}
-          plantId={transferAssetData?.transferFromPlant.optionValue ?? ""}
-          closeDialog={() => setOpenAddNewAssets(false)}
-          fetchAssets={() => fetchAssetsData(true)}
-          existingAssets={dataRows.map(asset => asset._id)}
-          updateTransferStatus={updateTransferStatus}
+        // <AddAssetsDialog
+        //   transferAssetId={transferAssetData?._id ?? ""}
+        //   plantId={transferAssetData?.transferFromPlant.optionValue ?? ""}
+        //   closeDialog={() => setOpenAddNewAssets(false)}
+        //   fetchAssets={() => fetchAssetsData(true)}
+        //   existingAssets={dataRows.map(asset => asset._id)}
+        //   updateTransferStatus={updateTransferStatus}
+        // />
+        <AddSerializedAsset
+          addSerializedAsset={(newRecordsToAdd) => {
+            setIsAdding(true);
+            axiosInstance().put(`${transferAsset.api}/add-asset/${transferAssetData?._id}`, { "assets": newRecordsToAdd.map(m => m._id ?? m.id) })
+              .then(({ data }) => {
+                setAddSerializedAssetDialog(false)
+                updateTransferStatus('In Progress');
+                fetchAssetsData(true);
+                setIsAdding(false)
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: "success",
+                  message: data.message,
+                });
+              }).catch((error) => {
+                setAddSerializedAssetDialog(false)
+                setIsAdding(false)
+                toastConfig.setToastConfig(error)
+              });
+          }}
+          handleSerializedAssetClose={() => {
+            setAddSerializedAssetDialog(false);
+          }}
+          refrenceType="Transfer Asset"
+          isAdding={isAdding}
+          selectedProducts={[]}
+          filterByPlant={transferAssetData?.transferFromPlant.optionValue}
         />
       }
       {/* Confirm Delete Dialog */}

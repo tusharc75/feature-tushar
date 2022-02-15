@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -25,7 +25,7 @@ const InventoryProduct = () => {
     const toastConfig = useContext(CustomToastContext)
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state; 
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
     const [plant, setPlant] = useState('')
     const [plantOptions, setPlantOptions] = useState([])
     const [plantId, setPlantId] = useState(null);
@@ -33,19 +33,19 @@ const InventoryProduct = () => {
     const {
         state: { permissions },
     }: any = useData();
-  
+
     useEffect(() => {
         getPlants()
         fetchProductInventory()
-    }, [plant,plantId, page, limit, filters, sorting, search]);
+    }, [plant, plantId, page, limit, filters, sorting, search]);
 
     const getPlants = () => {
         axiosInstance()
             .get(`/warehouse`)
             .then(({ data: { data } }) => {
-                setPlantId(data[0]._id)
+                plantId === null && setPlantId(data[0]._id)
                 setPlantOptions(data);
-                setPlant(data[0].warehouseName);
+                plantId === null && setPlant(data[0].warehouseName);
             });
     }
 
@@ -61,12 +61,12 @@ const InventoryProduct = () => {
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-         plantId && axiosInstance().get(`/product-inventory?wareHouse=${plantId}&${queryString}`).then(({ data }) => {
+        plantId && plant && axiosInstance().get(`/product-inventory?wareHouse=${plantId}&${queryString}`).then(({ data }) => {
             let rows = data.data?.map((u, user) => {
                 let finalObject = prepareDataForGrid(u);
-                finalObject['plant'] = plant ;
+                finalObject['plant'] = plant;
                 finalObject['productId'] = u._id;
-           
+
                 return {
                     ...finalObject,
 
@@ -108,20 +108,20 @@ const InventoryProduct = () => {
     };
 
     const onCellValueChanged = (row) => {
-          let inputData = {           
-                plant:plantId,           
-                product:row?.data?.productId,           
-                inventory:row?.data?.inventory,        
-                minInventory:row?.data?.minInventory,           
-           }
-           axiosInstance().put(`/product-inventory`,inputData);   
+        let inputData = {
+            plant: plantId,
+            product: row?.data?.productId,
+            inventory: row?.data?.inventory,
+            minInventory: row?.data?.minInventory,
+        }
+        axiosInstance().put(`/product-inventory`, inputData);
     }
 
-  const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`/product/detail/${params.data._id}`}>
-      {params.value}
-    </Link>
-  )
+    const ProductNameRenderer = (params) => (
+        <Link className="link" title={params.value} to={`/product/detail/${params.data._id}`}>
+            {params.value}
+        </Link>
+    )
 
     const frameworkComponents = {
         commonRenderer: CommonRenderer,
@@ -158,6 +158,7 @@ const InventoryProduct = () => {
                     afterImportCompleted={() => {
                         fetchProductInventory();
                     }}
+                    //isDownloadExcel={false}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
                     recordsToExport={selectedRecords.length}
@@ -182,22 +183,19 @@ const InventoryProduct = () => {
                             <Autocomplete
                                 style={{ width: "250px" }}
                                 options={plantOptions}
-                                getOptionLabel={(option: any) =>  option.warehouseName }
+                                getOptionLabel={(option: any) => option.warehouseName}
                                 disableClearable
                                 getOptionSelected={(option: any, val) =>
                                     option._id === val
                                 }
-                                value={plantOptions.filter((data) => data._id === plantOptions).length
-                                    ? plantOptions.filter((data) => data._id === plantOptions)[0]
+                                value={plantOptions.filter((data) => data._id === plantId).length
+                                    ? plantOptions.filter((data) => data._id === plantId)[0]
                                     : ""
                                 }
-                                onChange={(e, val) => {                                
-                                 if(val !== null){
-                                        setPlantId(val?._id)
-                                        setPlant(val?.warehouseName)
-                                        setPlantLabel(val?.warehouseName )
-                                     
-                                    }                                   
+                                onChange={(e, val) => {
+                                    if (val !== null) {
+                                        setPlantId(val && val._id ? val._id : "")
+                                    }
                                 }}
                                 renderInput={(params) => (
                                     isMobile && !isTablet ?
@@ -214,7 +212,7 @@ const InventoryProduct = () => {
                                             {...params}
                                             margin="dense"
                                             name="plant"
-                                            label={plantLabel ? plantLabel : plant}
+                                            label="Plant"
                                             variant="outlined"
                                             fullWidth
                                         />
@@ -237,32 +235,32 @@ const InventoryProduct = () => {
                                 />
                             </Grid>
 
-                            </Box>
+                        </Box>
                     </Grid>
 
                 </Grid>
             </div>
             {columns && plantId ?
-                
-                    Object.keys(frameworkComponents).length > 0 ?
-                        <CustomAgGridEditable
-                            allowSelection={false}
-                            allowAction={false}
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameworkComponents}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            onCellValueChanged={onCellValueChanged}
-                            actionWidth={150}
-                            loading={loading}
-                            renderedFrom={routes.serializedAsset?.title}
-                            refreshGrid={fetchProductInventory}
-                        /> : null
+
+                Object.keys(frameworkComponents).length > 0 ?
+                    <CustomAgGridEditable
+                        allowSelection={false}
+                        allowAction={false}
+                        columns={columns}
+                        dataRows={dataRows}
+                        frameworkComponents={frameworkComponents}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount}
+                        limit={limit}
+                        pageSizes={pageSizes}
+                        page={page}
+                        onCellValueChanged={onCellValueChanged}
+                        actionWidth={150}
+                        loading={loading}
+                        renderedFrom={routes.serializedAsset?.title}
+                        refreshGrid={fetchProductInventory}
+                    /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
     </Fragment >
