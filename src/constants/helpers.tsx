@@ -307,6 +307,7 @@ export const CHILD_RESOURCE = {
   repairJobAsset: 'Repair Job Asset',
   salesOrderProduct: 'Sales Order Product',
   salesOrderCost: 'Sales Order Cost',
+  subleaseProduct: 'Sublease Product',
 };
 
 
@@ -1539,7 +1540,6 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   return: 'Return',
 } as const;
 
-
 export const REPAIR_JOB_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
@@ -1574,13 +1574,19 @@ export const DELIVERY_FROM_TO_TYPE = {
 
 export const SUBLEASE_STATUS = {
   new: 'New',
-  indTransit: 'In-Transit',
+  inProgress: 'In-Progress',
   issued: 'Issued',
   completed: 'Completed',
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
   closed: 'Closed',
 };
+
+export const INVENTORY_OWNER_TYPE = {
+  brand: 'Brand',
+  supplierAccount: 'Supplier Account',
+  customerAccount: 'Customer Account',
+} as const;
 
 export const asyncForEach = async (
   array: any[],
