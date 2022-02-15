@@ -19,6 +19,7 @@ import {
 } from "@material-ui/core";
 import { AiFillFilePdf, AiOutlineDeliveredProcedure } from 'react-icons/ai';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
+import { groupBy, uniq, map } from "lodash";
 
 const renderedFrom = 'SubleasingSerializedAsset';
 
@@ -102,6 +103,16 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
         });
     }
 
+    const checkUniqWarehouse = () => {
+        if (selectedRecords.length === 0) {
+            return false;
+        } else if (uniq(map(selectedRecords, "warehouseId")).length === 1) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
     return (<>
         <Box display="flex" justifyContent="flex-end" pt={1}>
             {SUBLEASE_STATUS.completed != subleaseData?.status &&
@@ -128,6 +139,35 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
                         </Button>
                     </Tooltip>
                     <Box mx={1} />
+                    {selectedRecords.length > 0 && selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+                        checkUniqWarehouse() ?
+                        <Fragment>
+                            <Tooltip title="Send to Supplier">
+                                <Button
+                                    variant={"contained"}
+                                    color="primary"
+                                    size="small"
+                                    onClick={() => {
+                                        console.log(selectedRecords)
+                                        const data = {}
+                                        data["ticketName"] = subleaseData.subleaseName;
+                                        data["refrenceId"] = subleaseData._id;
+                                        data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
+                                        data["pickupFrom"] = selectedRecords[0]?.warehouseId;
+                                        data["pickupFromAddress"] = selectedRecords[0]?.currentLocationId;
+                                        data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.supplier;
+                                        data["deliveryTo"] = subleaseData?.supplierAccount?.optionValue;
+                                        data["deliveryToAddress"] = subleaseData?.shippingAddress?.optionValue;
+                                        setShowTicketDialog({ open: true, data: data });
+                                    }}
+                                >
+                                    Send to Supplier
+                                </Button>
+                            </Tooltip>
+                            <Box mx={1} />
+                        </Fragment>
+                        : null
+                    }
                     <Button
                         variant={"contained"}
                         color="primary"
