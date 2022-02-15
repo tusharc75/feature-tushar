@@ -1085,7 +1085,36 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   };
 };
 
-export function b64toBlob(dataURI) {
+/**
+ * 
+ * @param date From when to convert amount
+ * @param amount An amount to be converted
+ * @param currencyFrom Currency to convert from
+ * @param currencyTo Currency to convert to
+ * @returns It returns a coverted amount in numbers
+ */
+
+export const getExchangeRates = (date:string, amount:number, currencyFrom:string, currencyTo:string) => {
+  if(!currencyFrom || !currencyTo) return
+
+  if(currencyFrom === currencyTo) return
+
+  if(amount <= 0) return
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      const host = 'api.frankfurter.app';
+      const res = await fetch(`https://${host}/${date}?amount=${amount}&from=${currencyFrom}&to=${currencyTo}`);
+      const data = await res.json();
+  
+      resolve(data);
+    } catch (error) {
+      reject(error);
+    }
+  })
+};
+
+export const b64toBlob = (dataURI:string) => {
   var byteString = atob(dataURI.split(',')[1]);
   var ab = new ArrayBuffer(byteString.length);
   var ia = new Uint8Array(ab);
