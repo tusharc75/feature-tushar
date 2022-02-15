@@ -12,6 +12,7 @@ interface Props {
 }
 
 const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values, setValues }: Props) => {
+  
   React.useEffect(() => {
     if (!filters) return;
     filters.forEach((filter) => {
@@ -23,11 +24,10 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
   }, [filters]);
 
   const handleChange = React.useCallback((key, val) => {
-    setValues((prevState) => ({ ...prevState, [key]: val }));
+    setValues((prevState: any) => ({ ...prevState, [key]: val }));
   }, []);
 
-
-  if(!values) return <p>Loading...</p>
+  if (!values) return <p>Loading...</p>;
 
   return (
     <Popover
@@ -53,15 +53,13 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                 fullWidth
                 options={filterOptions[filter.key]}
                 autoHighlight
-                // value={values[filter.key]}
+                value={values[filter.key]}
                 getOptionLabel={(option: any) => option.optionLabel}
                 getOptionSelected={(option, val) => option.optionValue === val.optionValue}
                 onChange={(_, val) => handleChange(filter.key, val)}
                 renderInput={(params) => <TextField {...params} label={filter.title} variant="outlined" />}
               />
-            ) : (
-              'null'
-            )}
+            ) : null}
           </Box>
         ))}
       </Box>
