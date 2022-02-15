@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.60.0](https://github.com/vebholic/oms_frontend/compare/v2.59.2...v2.60.0) (2022-02-15)
+
+
+### Features
+
+* **avi:** avi ([7326d5a](https://github.com/vebholic/oms_frontend/commit/7326d5a0b9884b030532cae54264a8082a56cbaf))
+* **filter/sort:** filter/sort ([882750f](https://github.com/vebholic/oms_frontend/commit/882750f1b504fec02e5945acb84a63acbeb381ca))
+* **product-inventory:** product-inventory ([b04e256](https://github.com/vebholic/oms_frontend/commit/b04e256c185e960563157cca26b07272ebbc821c))
+* **product-inventory:** product-inventory ([a46f90f](https://github.com/vebholic/oms_frontend/commit/a46f90fc3c3cc2966030dda5c5ad23f9d2c8f954))
+
+
+### Bug Fixes
+
+* **avi/feat:** avi/feat ([a99a0c4](https://github.com/vebholic/oms_frontend/commit/a99a0c4033ec563bed4bc4a3f90df558dd6b5d62))
+* bug fix ([4de4c8e](https://github.com/vebholic/oms_frontend/commit/4de4c8ecfb90b25e84496dfa73ed9b5082785535))
+* **bug:** bug ([14d8a09](https://github.com/vebholic/oms_frontend/commit/14d8a0981889f510f6da470e9a85edccbda68805))
+
 ### [2.59.2](https://github.com/vebholic/oms_frontend/compare/v2.59.1...v2.59.2) (2022-02-14)
 
 ### [2.59.1](https://github.com/vebholic/oms_frontend/compare/v2.59.0...v2.59.1) (2022-02-13)

@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
-import { prepareDataForGrid, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, DELIVERY_FROM_TO_TYPE, sublease, SUBLEASE_STATUS } from "../../../constants/helpers"
+import { prepareDataForGrid, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, DELIVERY_FROM_TO_TYPE, sublease, SUBLEASE_STATUS, INVENTORY_OWNER_TYPE } from "../../../constants/helpers"
 import { useData } from "../../../StateProvider/Provider";
 import {
     Button, Tooltip, IconButton, Menu, MenuItem,
@@ -121,7 +121,8 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
                                 data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
                                 setShowTicketDialog({ open: true, data: data });
                             }}
-                            disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse"))))}
+                            disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse")
+                                || f.currentOwnerType !== INVENTORY_OWNER_TYPE.supplierAccount)))}
                         >
                             Receiving to Plant
                         </Button>

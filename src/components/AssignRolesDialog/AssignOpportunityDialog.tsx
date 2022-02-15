@@ -40,7 +40,7 @@ const AssignOpportunityDialog = ({
   useEffect(() => {
     setLoadingOpportunities(true);
     axiosInstance()
-      .get(`${opportunity.opportunityApi}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`)
+      .get(`${opportunity.opportunityApi}?filterById=[{"field":"customerAccount", "term": "${accountId}"}]`)
       .then(({ data: { data } }) => {
         setOpportunities(data.filter(opportunity => !assignedOpportunity.some(item => item?._id === opportunity?._id)).map(obj => ({ ...obj, isChecked: false })))
         setOpportunitiesConst(data.filter(opportunity => !assignedOpportunity.some(item => item?._id === opportunity?._id)).map(obj => ({ ...obj, isChecked: false })))
