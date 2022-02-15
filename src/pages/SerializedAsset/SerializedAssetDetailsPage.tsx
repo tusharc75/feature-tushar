@@ -354,7 +354,7 @@ const SerializedAssetDetailsPage = () => {
   useEffect(() => {
     let statuses = [INVENTORY_STATUS.available, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost]
     if (productInventoryData) {
-      if (productInventoryData.status === INVENTORY_STATUS.lost || productInventoryData.status === INVENTORY_STATUS.repair || productInventoryData.status === INVENTORY_STATUS.underReview) {
+      if (productInventoryData.status === INVENTORY_STATUS.lost || productInventoryData.status === INVENTORY_STATUS.underReview) {
         setManualStatus(statuses)
       } else {
         setManualStatus(statuses.filter(status => status !== "Available"))
