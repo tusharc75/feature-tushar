@@ -547,7 +547,7 @@ const Sublease = () => {
             showManageDialog.open &&
             <ManageSublease
                 isClone={showManageDialog.isClone}
-                subleasingId={showManageDialog.idToClone}
+                subleaseId={showManageDialog.idToClone}
                 onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
                 onSuccess={() => {
                     setShowManageDialog({ open: false, isClone: false, idToClone: null });

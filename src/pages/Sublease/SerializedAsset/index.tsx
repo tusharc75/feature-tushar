@@ -22,7 +22,7 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 
 const renderedFrom = 'SubleasingSerializedAsset';
 
-const SerializedAsset = ({ subleaseData }) => {
+const SerializedAsset = ({ subleaseData, fetchData }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
@@ -94,6 +94,7 @@ const SerializedAsset = ({ subleaseData }) => {
         setIsCompleteing(true);
         axiosInstance().put(`${sublease.api}/${subleaseData._id}/complete-sublease`).then(() => {
             setIsCompleteing(false);
+            fetchData()
             fetchRecords()
         }).catch((error) => {
             setIsCompleteing(false)
@@ -122,7 +123,7 @@ const SerializedAsset = ({ subleaseData }) => {
                             }}
                             disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse"))))}
                         >
-                            Transfer to Plant
+                            Receiving to Plant
                         </Button>
                     </Tooltip>
                     <Box mx={1} />
@@ -133,7 +134,7 @@ const SerializedAsset = ({ subleaseData }) => {
                         disabled={!isCompleteEnable || isCompleteing}
                         onClick={() => { completeSublease() }}
                     >
-                        Close Sublease
+                        End Sublease
                     </Button>
                     <Box mx={1} />
                 </Fragment>

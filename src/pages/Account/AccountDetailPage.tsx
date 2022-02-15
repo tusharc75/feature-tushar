@@ -320,11 +320,11 @@ export default function AccountDetailPage(props) {
             : []
         );
         setProjectSales(
-          data[sidebarResource.projectSales] &&
-            data[sidebarResource.projectSales][
+          data[sidebarResource.projectStrategy] &&
+            data[sidebarResource.projectStrategy][
             sidebarResource[accountResource].replaceAll(" ", "_")
             ]
-            ? data[sidebarResource.projectSales][
+            ? data[sidebarResource.projectStrategy][
             sidebarResource[accountResource].replaceAll(" ", "_")
             ]
             : []
@@ -569,10 +569,20 @@ export default function AccountDetailPage(props) {
     },
     {
       label: "Projects",
-      count: 0,
+      count: projectSales ? projectSales.length : 0,
       show: true,
       icon: <FcMultipleSmartphones />,
       class: "project",
+      onClick: () => {
+        history.push({
+          pathname: `/project-sales`,
+          state: {
+            accountId: accountData._id,
+            accountName: accountData.accountName,
+            resource: accountResource,
+          },
+        });
+      }
     },
     {
       label: "Opportunity",
@@ -1140,6 +1150,9 @@ export default function AccountDetailPage(props) {
                               permissions[accountResource].isUpdate &&
                               canEdit
                             }
+                          accountId={accountData._id}
+                          accountName={accountData.accountName}
+                          resource={accountResource}
                           />
                         </span>
                       )}

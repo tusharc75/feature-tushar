@@ -231,9 +231,9 @@ function OpportunityDetailsPage() {
       .get(`${opportunityApi}/related/${id}`)
       .then(({ data: { data } }) => {
         setProjectSales(
-          data[sidebarResource.projectSales] &&
-            data[sidebarResource.projectSales][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
-            ? data[sidebarResource.projectSales][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
+          data[sidebarResource.projectStrategy] &&
+            data[sidebarResource.projectStrategy][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
+            ? data[sidebarResource.projectStrategy][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
             : []
         );
 

@@ -32,7 +32,6 @@ const ExistingRentalJob = ({ refrenceData, refrenceType, productInventory, onClo
   const { getColumnData } = useColumns();
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: "", data: {} });
 
-  const [rentalJobs, setRentalJobs] = useState([])
   const [assetsAdd, setAssetsAdd] = useState([])
 
   const toastConfig = useContext(CustomToastContext)
@@ -79,8 +78,20 @@ const ExistingRentalJob = ({ refrenceData, refrenceType, productInventory, onClo
       gridApi.setRowData([]);
     }
     try {
-      const response: any = await axiosInstance().get(`${rentalManagement.api}`);
-      setRentalJobs(response?.data?.data)
+      const data: any = {}
+      data.rentalJob = refrenceData._id;
+      const product = []
+      productInventory?.forEach((ele) => {
+        const filter = product.filter((e) => e.product === ele?.product?.optionValue);
+        if (filter.length) {
+          filter[0].qty = filter[0].qty + 1;
+        }
+        else {
+          product.push({ product: ele?.product?.optionValue, qty: 1 })
+        }
+      })
+      data.product = product;
+      const response: any = await axiosInstance().post(`${rentalManagement.api}/pending-asset-rental`, data);
       const count = response?.data?.count;
       let rows = response?.data?.data.map((u) => {
         let finalObject = prepareDataForGrid(u, user);
@@ -94,11 +105,12 @@ const ExistingRentalJob = ({ refrenceData, refrenceType, productInventory, onClo
       dispatch({ type: "loading", loading: false });
     }
   }
+
   const handleCreateReceivingTicket = async () => {
 
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${selectedRecords[0]?._id}`)
     const assetsAdd = [];
-    const inventory= JSON.parse(JSON.stringify(productInventory))
+    const inventory = JSON.parse(JSON.stringify(productInventory))
     response?.data?.data?.material?.forEach((e: any) => {
       if (e.type === "product") {
         let qty = e.qty;
@@ -137,7 +149,6 @@ const ExistingRentalJob = ({ refrenceData, refrenceType, productInventory, onClo
   }
 
   const handleCreateLoadingTicketAddAsstes = (data) => {
-    console.log(data)
     const deliveryTicketData: any = {};
     deliveryTicketData._id = data._id;
     deliveryTicketData.rentalJob = selectedRecords[0]._id;

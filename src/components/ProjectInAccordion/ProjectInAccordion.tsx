@@ -9,11 +9,13 @@ import { withStyles } from "@material-ui/core/styles";
 import { displayDate } from '../../services/util';
 import { BsClockHistory } from 'react-icons/bs';
 import { IoCalendarOutline } from 'react-icons/io5';
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import routes from '../Helpers/Routes';
 import CreateProjectSales from "../../pages/ProjectSales/CreateProjectSales";
 import { MoreVert } from '@material-ui/icons';
 import AssignProjectSalesDialog from '../AssignRolesDialog/AssignProjectSalesDialog';
+import { RESOURCE_LABEL } from '../../constants/helpers';
+import { HiExternalLink } from 'react-icons/hi';
 
 const Accordion = withStyles({
     root: {
@@ -74,7 +76,7 @@ function DisplayData({ key, label, value, icon }) {
 }
 
 
-export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3, projectSales, type, fetchData, permissions, isAddProjectSale = false, isAllowedToEdit }) {
+export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3, projectSales, type, fetchData, permissions, isAddProjectSale = false, isAllowedToEdit, accountId='', accountName='', resource='' }) {
     ;
     const [
         showCreateProjectSalesDialog,
@@ -100,7 +102,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
             recordsPerLineInLargeScreen = 6;
             break;
     }
-
+    const history = useHistory();
     const [expandProject, setExpandProject] = useState(expanded);
     const [anchorEl, setAnchorEl] = useState(null);
     const [
@@ -143,7 +145,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                             </Box>
                             <Box padding="5px">
                                 <Typography variant="subtitle2">
-                                    Projects Sales ({projectSales?.length || 0})
+                                    {RESOURCE_LABEL.projectStrategy} ({projectSales?.length || 0})
                                 </Typography>
                             </Box>
                         </Box>
@@ -203,33 +205,33 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                                                 <CardContent className="detailListing">
                                                     <div className="cardStyle"> </div>
                                                     <Grid item xs={12}>
-                                                    <Grid container className="detailCardHeader">
-                                                        <Grid item xs={12} sm={12}>
-                                                            {
-                                                                // obj.entity === selectedEntity ? 
-                                                                <Link className="link" to={`${routes.projectSalesDetail.path}/${obj._id}`}>
-                                                                    <Typography className="detailName">{obj.projectName}</Typography>
-                                                                </Link>
-                                                                // : <span className="d-flex gap-2 align-items-center">
-                                                                //     <Typography className="detailName">{obj.projectName}</Typography> <Tooltip title={`${obj.projectName} belongs to different entity`}>
-                                                                //         <InfoOutlinedIcon fontSize="small" />
-                                                                //     </Tooltip>
-                                                                // </span>
-                                                            }
+                                                        <Grid container className="detailCardHeader">
+                                                            <Grid item xs={12} sm={12}>
+                                                                {
+                                                                    // obj.entity === selectedEntity ? 
+                                                                    <Link className="link" to={`${routes.projectSalesDetail.path}/${obj._id}`}>
+                                                                        <Typography className="detailName">{obj.projectName}</Typography>
+                                                                    </Link>
+                                                                    // : <span className="d-flex gap-2 align-items-center">
+                                                                    //     <Typography className="detailName">{obj.projectName}</Typography> <Tooltip title={`${obj.projectName} belongs to different entity`}>
+                                                                    //         <InfoOutlinedIcon fontSize="small" />
+                                                                    //     </Tooltip>
+                                                                    // </span>
+                                                                }
+                                                            </Grid>
                                                         </Grid>
-                                                    </Grid>
-                                                    <Grid container>
-                                                        <Grid item xs={12} sm={6} md={6}>
-                                                            {
-                                                                <DisplayData key={1} label='Status' value={obj.projectStatus ? "Active" : "Inactive"} icon={<BsClockHistory size={15} />} />
-                                                            }
+                                                        <Grid container>
+                                                            <Grid item xs={12} sm={6} md={6}>
+                                                                {
+                                                                    <DisplayData key={1} label='Status' value={obj.projectStatus ? "Active" : "Inactive"} icon={<BsClockHistory size={15} />} />
+                                                                }
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={6} md={6}>
+                                                                {
+                                                                    <DisplayData key={2} label='Due Date' value={displayDate(obj.endDate)} icon={< IoCalendarOutline size={15} />} />
+                                                                }
+                                                            </Grid>
                                                         </Grid>
-                                                        <Grid item xs={12} sm={6} md={6}>
-                                                            {
-                                                                <DisplayData key={2} label='Due Date' value={displayDate(obj.endDate)} icon={< IoCalendarOutline size={15} />} />
-                                                            }
-                                                        </Grid>
-                                                    </Grid>
                                                     </Grid>
                                                 </CardContent>
                                             </Card>
@@ -246,6 +248,16 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                 <FaEye /> View All &#8599;
             </Box>
             <Box margin={1} /> */}
+            <Box margin={1} className="btn-view gap-1" onClick={() =>
+                history.push(`/project-sales`, {
+                    accountId: accountId,
+                    accountName: accountName,
+                    resource: `${resource}`,
+                })
+            }
+                p={1} display="flex" justifyContent="center" alignItems="center">
+                <HiExternalLink size={25} />
+            </Box>
         </Accordion>
 
         {showCreateProjectSalesDialog && (

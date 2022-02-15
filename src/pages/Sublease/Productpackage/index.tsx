@@ -250,7 +250,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                 parent.subRows = subRows
             }
         });
-        if (rows.filter(_rows => _rows.isValid === false).length > 0 || rows.length === 0) {
+        if (rows.filter(_rows => _rows.isValid === false).length > 0 || rows.length === 0 || inventory.length === 0) {
             setNextStep(false)
         } else {
             setNextStep(true)
@@ -464,7 +464,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                                         disabled={isIssueing}
                                         endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
                                     >
-                                        {isMobile && !isTablet ? <MdDelete size={20} /> : "Issue Sublease"}
+                                        {isMobile && !isTablet ? <MdDelete size={20} /> : "Start Sublease"}
                                     </Button>
                                 </HtmlTooltip>
                                 <Box mx={1} />

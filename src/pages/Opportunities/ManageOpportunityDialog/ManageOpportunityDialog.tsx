@@ -294,7 +294,7 @@ export default function ManageOpportunityDialog({
 
   const handleCreateOpportunity = (values) => {
     setSaveClick(true);
-    if (accountId) values['supplierAccountName'] = [accountId];
+    // if (accountId) values['supplierAccountName'] = [accountId];
     if (contactId && contactResource)
       values.staticData = {
         [contactResource]: [contactId]
@@ -423,7 +423,7 @@ export default function ManageOpportunityDialog({
         open={open}
       >
         <CustomDialogHeader
-          title={isClone ? `Clone - [${cloneHeading}]` : isNew ? 'Create Opportunity' : `Editing ${dataToUpdate.opportunityName}`}
+          title={isClone ? `Clone - ${cloneHeading}` : isNew ? 'Create Opportunity' : `Editing ${dataToUpdate.opportunityName}`}
           onClose={(e, reason) => {
             if (isFieldNotTouched(entityData, formValues)) onClose();
             else setShowConfirmDialog(true);
@@ -623,7 +623,7 @@ export default function ManageOpportunityDialog({
                                                 isTooltip={field?.isTooltip || false}
                                                 tooltipMessage={field?.tooltipMessage}
                                                 size="small"
-                                                onOpen={() => onCountryBillToDropDownOpen(values.customerAccountName)}
+                                                onOpen={() => onCountryBillToDropDownOpen(values.customerAccountName ?? values.customerAccount)}
                                               />
                                             </Grid>
                                             {permissions.address?.isCreate && (
@@ -680,7 +680,7 @@ export default function ManageOpportunityDialog({
                                                 isTooltip={field?.isTooltip || false}
                                                 tooltipMessage={field?.tooltipMessage}
                                                 size="small"
-                                                onOpen={() => onCountrySellToDropDownOpen(values.customerAccountName)}
+                                                onOpen={() => onCountrySellToDropDownOpen(values.customerAccountName ?? values.customerAccount)}
                                               />
                                             </Grid>
                                             {permissions.marketSegment?.isCreate && (

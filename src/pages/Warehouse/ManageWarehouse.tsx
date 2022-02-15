@@ -125,7 +125,7 @@ const ManageWarehouse = (props) => {
                 }) => (
                     <Fragment>
                         <CustomDialogHeader
-                            title={isClone ? `Clone - [${cloneHeading}]` : addressResource?.id ? `Update ${initialData?.values["warehouseName"] ?? ""}` : "Create Plant"}
+                            title={isClone ? `Clone - ${cloneHeading}` : addressResource?.id ? `Update ${initialData?.values["warehouseName"] ?? ""}` : "Create Plant"}
                             onClose={() => {
                                 if (isFieldNotTouched({
                                     initialValues: initialData.values,

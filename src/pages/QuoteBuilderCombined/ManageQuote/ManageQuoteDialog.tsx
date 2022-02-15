@@ -279,12 +279,14 @@ export default function ManageQuoteDialog({
       );
       if (countryBillToDropdownData) {
         setCountryBillToMainData(countryBillToDropdownData.option)
+        setCountryBillToDropDown(countryBillToDropdownData.option)
       }
       const countrySellToDropdownData = entityData.fields.find(
         (d) => d.fieldName === "countrySellTo"
       );
       if (countryBillToDropdownData) {
         setCountrySellToMainData(countrySellToDropdownData.option)
+        setCountrySellToDropDown(countrySellToDropdownData.option)
       }
     }
 
@@ -488,7 +490,7 @@ export default function ManageQuoteDialog({
             initialData["quoteName"] = opportunityName;
           }
           initialData["currency"] = currency || "";
-          initialData["estimatedAmount"] = estimatedAmount || "";
+          // initialData["estimatedAmount"] = estimatedAmount || "";
         } else {
           if (isNew) {
             const selectedEntityDetails = user?.entity?.find(d => d?._id === selectedEntity)
@@ -870,7 +872,7 @@ export default function ManageQuoteDialog({
         fullScreen={fullScreen || (isMobile || isTablet)}
       >
         <CustomDialogHeader
-          title={isNew ? "Create Quote" : isClone ? `Clone - [${dataToUpdate.quoteName}]` : `Editing ${dataToUpdate.quoteName}`}
+          title={isNew ? "Create Quote" : isClone ? `Clone - ${dataToUpdate.quoteName}` : `Editing ${dataToUpdate.quoteName}`}
           onClose={(e, reason) => {
             if (isFieldNotTouched(entityData, formValues)) onClose()
             else setShowConfirmDialog(true)
@@ -1017,6 +1019,10 @@ export default function ManageQuoteDialog({
                                               setFieldValue("subMarketSegment", value?.subMarketSegment ?? '');
                                               marketSegmentChange(value?.marketSegment ?? '');
                                               setFieldValue("opportunity", "");
+                                              setFieldValue('countryBillTo', value?.billingAddress ?? '');
+                                              setFieldValue('countrySellTo', value?.shippingAddress ?? '');
+                                              onCountryBillToDropDownOpen(value && value.optionValue ? value.optionValue : '');
+                                              onCountrySellToDropDownOpen(value && value.optionValue ? value.optionValue : '');
                                               handleValuesChange({
                                                 [field.fieldName]: value && value.optionValue ? value.optionValue : "",
                                                 "customerContactName": [],

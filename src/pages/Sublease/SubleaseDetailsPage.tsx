@@ -244,6 +244,7 @@ const SubleaseDetailsPage = () => {
                                                     )}
                                                     {currentStep === 1 && subleaseData && (
                                                         <SerializedAsset
+                                                            fetchData={fetchData}
                                                             subleaseData={subleaseData}
                                                         />
                                                     )}
@@ -278,7 +279,7 @@ const SubleaseDetailsPage = () => {
             {openUpdateDialog &&
                 <ManageSublease
                     isClone={false}
-                    subleasingId={id}
+                    subleaseId={id}
                     onClose={() => setOpenUpdateDialog(false)}
                     onSuccess={() => {
                         setOpenUpdateDialog(false);
