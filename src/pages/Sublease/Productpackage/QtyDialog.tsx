@@ -56,7 +56,7 @@ const QtyDialog: FC<EditDialogProps> = (
   const ref = useRef(null);
 
   useEffect(() => {
-    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`).then(({ data: { data } }) => {
+    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.subleaseProduct}`).then(({ data: { data } }) => {
       data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
       setAllFields(JSON.parse(JSON.stringify(data)))
       if (isBulkedit) {
