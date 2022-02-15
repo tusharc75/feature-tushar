@@ -75,7 +75,7 @@ const RentalManagementViews = (props) => {
           style: customNodeStyles.product
         });
         flowEdge.push({
-          id: `edge-${item._id}-${_.random(1, 100)}`,
+          id: `edge-product-${item._id}`,
           source: `${rentalId}`,
           arrowHeadType: 'arrow',
           target: `${item._id}`
@@ -95,7 +95,7 @@ const RentalManagementViews = (props) => {
           style: customNodeStyles.productAssets
         });
         flowEdge.push({
-          id: `edge-${item.inventoryDetail.assetNumber}-${_.random(100, 200)}`,
+          id: `edge-assets-${item.inventoryDetail.assetNumber}`,
           source: `${item._id}`,
           arrowHeadType: 'arrow',
           target: `${item.inventoryDetail.assetNumber}`
@@ -140,13 +140,13 @@ const RentalManagementViews = (props) => {
           });
           loadingAssets += 1;
           flowEdge.push({
-            id: `edge-${item._id}-${_.random(300, 400)}`,
+            id: `edge-loading-${item._id}-${product.optionValue}`,
             source: `${product.optionLabel}`,
             arrowHeadType: 'arrow',
             target: `${item._id}`
           });
           flowEdge.push({
-            id: `edge-${product.optionValue}-${_.random(500, 600)}`,
+            id: `edge-loading-assets-${product.optionValue}`,
             source: `${item._id}`,
             arrowHeadType: 'arrow',
             target: `${product.optionValue}`
@@ -174,12 +174,12 @@ const RentalManagementViews = (props) => {
             )
           },
           // route: `${routes.deliveryTicketDetail.path}/${item._id}`,
-          position: { x: 1400, y: index * 80 },
+          position: { x: 1500, y: index * 80 },
           style: customNodeStyles.receivingTicket
         });
         item.productInventory?.map((product: any) => {
           flowEdge.push({
-            id: `edge-${product.optionValue}-${_.random(600, 700)}`,
+            id: `edge-receiving-${product.optionValue}-${_.random(600, 700)}`,
             source: `${product.optionValue}`,
             arrowHeadType: 'arrow',
             target: `${item._id}`
@@ -221,14 +221,12 @@ const RentalManagementViews = (props) => {
           snapGrid={[15, 15]}
           aria-controls="right-panel"
           onElementClick={onElementClick}
-          // onNodeMouseEnter={onNodeMouseEnter}
-          // onNodeMouseMove={onNodeMouseMove}
-          // onNodeMouseLeave={onNodeMouseLeave}
-          // onNodeContextMenu={onNodeContextMenu}
         >
           <Controls />
         </ReactFlow>
-      ) : null}
+      ) : (
+        <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Map...</div>
+      )}
     </div>
   );
 };
