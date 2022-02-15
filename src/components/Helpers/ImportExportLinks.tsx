@@ -59,6 +59,7 @@ export default function ImportExportLinks({
   onExportToExcelSuccess = () => {},
   total = 0,
   additionalParams = null,
+  isDownloadExcel = true,
   isBackgroundWhite = false
 }) {
   const classes = useStyles();
@@ -89,7 +90,7 @@ export default function ImportExportLinks({
 
       let importApi = `${api}/import`;
 
-      if (additionalParams) {
+      if ( additionalParams) {
         importApi = `${importApi}?${additionalParams}`;
       }
 
@@ -216,10 +217,12 @@ export default function ImportExportLinks({
         <label onClick={exportToExcel} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
           Export to Excel {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : '(Selected)') : null}
         </label>
+         {isDownloadExcel && <>
         <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} />
-        <label onClick={downloadTemplate} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
+      <label onClick={downloadTemplate} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
           Download Template
         </label>
+        </>}
         {/* <Divider
           orientation="vertical"
           flexItem
@@ -247,14 +250,14 @@ export default function ImportExportLinks({
         >
           Export to Excel ({recordsToExport === 0 ? 'All' : 'Selected'})
         </MenuItem>
-        <MenuItem
+     {isDownloadExcel &&  <MenuItem
           onClick={() => {
             downloadTemplate();
             handleClose();
           }}
         >
           Download Template
-        </MenuItem>
+        </MenuItem>}
         {/* <MenuItem>Email a Link</MenuItem> */}
       </Menu>
       {isMobile && (
