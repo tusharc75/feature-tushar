@@ -64,7 +64,7 @@ const RentalManagementViews = (props) => {
           data: {
             label: (
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {item.productDetail.productName}
+                {item.productDetail?.productName || ''}
                 <br />
                 {_.startCase(_.camelCase(item.type))}
               </div>
