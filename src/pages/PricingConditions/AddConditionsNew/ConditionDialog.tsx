@@ -168,7 +168,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                 let res = {
                     _id: item._id,
                     materialId: item.materialId,
-                    ...prepareDataForGrid(item.productConfiguration),
+                    ...prepareDataForGrid(item),
                 };
                 return res;
             });
