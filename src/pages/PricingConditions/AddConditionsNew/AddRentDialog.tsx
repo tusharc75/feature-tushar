@@ -67,10 +67,18 @@ const AddRentDialog = (props) => {
         setSubmitting(true);
 
         if (id) {
-            const { _id, ...rest } = formData.values as any;
+
+            let dataToUpdate = {};
+
+            formData.fields.forEach((f) => {
+                dataToUpdate = {
+                    ...dataToUpdate,
+                    [f.fieldName]: formData.values[f.fieldName]
+                }
+            })
 
             axiosInstance()
-                .put(`${pricingCondition.api}/${pricingConditionId}/rate/${conditionData.materialId}/${id}`, { ...rest })
+                .put(`${pricingCondition.api}/${pricingConditionId}/rate/${conditionData.materialId}/${id}`, { ...dataToUpdate })
                 .then(() => {
                     setSubmitting(false);
                     fetchData()
