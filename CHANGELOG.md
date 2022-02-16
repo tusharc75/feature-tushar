@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.61.0](https://github.com/vebholic/oms_frontend/compare/v2.60.0...v2.61.0) (2022-02-16)
+
+
+### Features
+
+* **new dashboard:** dynamic dashboard finish part 1 ([f263b76](https://github.com/vebholic/oms_frontend/commit/f263b7675f3e97350bca49afe7c0c74d2a76b899))
+
+
+### Bug Fixes
+
+* bug fix ([ec6cc9c](https://github.com/vebholic/oms_frontend/commit/ec6cc9c740d17f14c097675cd40cbbee35ce4455))
+* bug fix ([d63782e](https://github.com/vebholic/oms_frontend/commit/d63782e941ecb4dbc9b6fd86fed0d0013e98608e))
+* bug fix ([59c47d1](https://github.com/vebholic/oms_frontend/commit/59c47d1b46b1d20f52127c83888fd445f1cf2309))
+* bug fix ([3087e4b](https://github.com/vebholic/oms_frontend/commit/3087e4b7d6dbad3fe8b6e58e6c3b30b6ca6f0201))
+* bug fix ([f02d095](https://github.com/vebholic/oms_frontend/commit/f02d0952e565fce3cb89f3a9751bc46b5bbd9b2a))
+* bug fix ([7c79f0f](https://github.com/vebholic/oms_frontend/commit/7c79f0f91b836576971f1fd6f6c87dd6fe5b2267))
+* **plantoptionbug:** plantoptionbug ([076e7fc](https://github.com/vebholic/oms_frontend/commit/076e7fcb9d77a5e91f9ccc81e5a141600e9273fd))
+
 ## [2.60.0](https://github.com/vebholic/oms_frontend/compare/v2.59.2...v2.60.0) (2022-02-15)
 
 

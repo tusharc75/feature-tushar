@@ -109,9 +109,17 @@ const ManageDeliveryTicket = (props) => {
                     element.option = supplierAccount
                 }
             }
+            if (pickupFromType === DELIVERY_FROM_TO_TYPE.plant &&  element.fieldName ==="pickupFromAddress") {
+                element.isUneditable = true
+            }
+            if (deliveryToType === DELIVERY_FROM_TO_TYPE.plant &&  element.fieldName ==="deliveryToAddress") {
+                element.isUneditable = true
+            }
+            
             if (ticketType === DELIVERY_TICKET_TYPE.return && element.fieldName === "returnReason") {
                 element.required = true;
             }
+
         });
         return fields;
     }

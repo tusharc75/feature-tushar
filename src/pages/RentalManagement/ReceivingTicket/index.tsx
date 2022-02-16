@@ -451,9 +451,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
           {(selectedRecords.length && selectedRecords?.filter(f =>
             ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-              (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)
-              || f.status === INVENTORY_STATUS.scrap)
+              (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) || f.status === INVENTORY_STATUS.scrap)
             && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.available].includes(f.status)
+            && !f.subleaseAsset
           )?.length === selectedRecords?.length) ?
 
             <MenuItem
