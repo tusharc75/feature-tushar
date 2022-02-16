@@ -13,7 +13,7 @@ import NoDataCell from "../../../components/Helpers/NoDataCell";
 import Add from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import moment from "moment";
-import { sublease, dateFormat, pricingCondition, formatAmountWithCurrency, CHILD_RESOURCE } from "../../../constants/helpers";
+import { sublease, dateFormat, pricingCondition, formatAmountWithCurrency, CHILD_RESOURCE, SUBLEASE_STATUS } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import QtyDialog from './QtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
@@ -48,7 +48,6 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
     const [rowsData, setRowsData] = useState(null);
     const [allFields, setAllFields] = useState([]);
 
-    const { isOffline } = useContext(CustomOfflineContext);
 
     useEffect(() => {
         fetchFields()
@@ -56,13 +55,8 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
 
     const fetchFields = async () => {
         var data = []
-        if (isOffline) {
-            data = await findOne(objectStore.resource, "rentalManagementProduct")
-        }
-        else {
-            const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`)
-            data = response?.data?.data
-        }
+        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.subleaseProduct}`)
+        data = response?.data?.data
         data = CURReplaceByCurrencySingle(data, subleaseData.currency)
         setAllFields(JSON.parse(JSON.stringify(data)))
         const coloum: any = [{
@@ -73,17 +67,15 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             sticky: "left",
             Cell: ({ row }) => (
                 <div style={{ display: "flex", alignItems: 'center' }}>
-                    {isOffline ? <p> {row.original.detail}</p>
-                        :
-                        <p
-                            onClick={() => {
-                                handleOpen(row.original)
-                            }}
-                            className="link text-truncate"
-                            title={row.original.detail}
-                        >
-                            {row.original.detail}
-                        </p>}
+                    <p
+                        onClick={() => {
+                            handleOpen(row.original)
+                        }}
+                        className="link text-truncate"
+                        title={row.original.detail}
+                    >
+                        {row.original.detail}
+                    </p>
                     {row.original?.type === 'package' &&
                         <Box ml={1} className="d-flex align-items-center">
                             <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
@@ -94,18 +86,17 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                             </HtmlTooltip>
                         </Box>
                     }
-                    {!isOffline &&
-                        <HtmlTooltip title="Details">
-                            <IconButton
-                                size="small"
-                                aria-label="Details"
-                                onClick={() => {
-                                    window.open(`${row.original.type === "product" ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`);
-                                }}
-                            >
-                                <InfoIcon fontSize="small" />
-                            </IconButton>
-                        </HtmlTooltip>}
+                    <HtmlTooltip title="Details">
+                        <IconButton
+                            size="small"
+                            aria-label="Details"
+                            onClick={() => {
+                                window.open(`${row.original.type === "product" ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`);
+                            }}
+                        >
+                            <InfoIcon fontSize="small" />
+                        </IconButton>
+                    </HtmlTooltip>
                 </div>
             ),
             Footer: () => {
@@ -232,16 +223,16 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
             parent.qtyDisplay = parent.qty;
             parent.isValid = parent["finalPrice_" + subleaseData?.currency?.toLowerCase()] ? true : false;
-            parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
-            parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
+            parent.hideSelection = parent.assetQty > 0 ? true : false;
+            parent.assetQty = parent.assetQty;
             if (parent.type === "package") {
                 const subRows: any = data.material.filter((e) => e.parentId === parent._id);
                 subRows.forEach((_subRow, j) => {
                     _subRow.detail = (i + 1) + "." + (j + 1) + " - " + _subRow.productDetail?.productName
                     _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`
                     _subRow.isValid = _subRow["finalPrice_" + subleaseData?.currency?.toLowerCase()] ? true : false;
-                    _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
-                    _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
+                    _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
+                    _subRow.assetQty = _subRow.assetQty;
                 })
                 if (subRows.length === 0) {
                     parent.isValid = false
@@ -389,31 +380,33 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             <Grid item xs={12} md={12} sm={12} >
                 <Box display="flex" justifyContent="space-between" m={1}>
                     <Box display="flex">
-                        <Button
-                            variant={isMobile && !isTablet ? "text" : "contained"}
-                            color="primary"
-                            size="small"
-                            disabled={isOffline}
-                            style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
-                            onClick={() => {
-                                setAddExistingProductDialog({ open: true, type: "product", parentId: null });
-                            }}
-                        >
-                            {isMobile && !isTablet ? <MdAdd size={20} /> : `Add ${routes.product.title}`}
-                        </Button>
-                        <Box mx={1} />
-                        <Button
-                            variant={isMobile && !isTablet ? "text" : "contained"}
-                            color="primary"
-                            size="small"
-                            style={isMobile && !isTablet ? { color: "var(--colorOpportunity)" } : {}}
-                            disabled={isOffline}
-                            onClick={() => {
-                                setAddExistingProductDialog({ open: true, type: "package", parentId: null });
-                            }}
-                        >
-                            {isMobile && !isTablet ? <FiPackage size={18} /> : `Add ${routes.packages.title}`}
-                        </Button>
+                        {subleaseData.status === SUBLEASE_STATUS.new &&
+                            <Fragment>
+                                <Button
+                                    variant={isMobile && !isTablet ? "text" : "contained"}
+                                    color="primary"
+                                    size="small"
+                                    style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
+                                    onClick={() => {
+                                        setAddExistingProductDialog({ open: true, type: "product", parentId: null });
+                                    }}
+                                >
+                                    {isMobile && !isTablet ? <MdAdd size={20} /> : `Add ${routes.product.title}`}
+                                </Button>
+                                <Box mx={1} />
+                                <Button
+                                    variant={isMobile && !isTablet ? "text" : "contained"}
+                                    color="primary"
+                                    size="small"
+                                    style={isMobile && !isTablet ? { color: "var(--colorOpportunity)" } : {}}
+                                    onClick={() => {
+                                        setAddExistingProductDialog({ open: true, type: "package", parentId: null });
+                                    }}
+                                >
+                                    {isMobile && !isTablet ? <FiPackage size={18} /> : `Add ${routes.packages.title}`}
+                                </Button>
+                            </Fragment>
+                        }
                     </Box>
                     <Box display="flex">
                         <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
@@ -453,9 +446,9 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                             </Button>
                         </HtmlTooltip>
                         <Box mx={1} />
-                        {(material.length && !isIssued) &&
+                        {(material.length && !isIssued && !rowsData?.some(f => !f.isValid)) &&
                             <Fragment>
-                                <HtmlTooltip title={"Issue Sublease"}>
+                                <HtmlTooltip title={"Start Sublease"}>
                                     <Button
                                         variant={isMobile && !isTablet ? "text" : "contained"}
                                         color="primary"
@@ -488,7 +481,6 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                             onSelect={setSelectedProducts}
                             childrenProperty="subRows"
                             uniqueKey="_id"
-                            hideSelection={isOffline}
                         />
                     </Box>
                     : <Box p={2} height={500} bgcolor="white">

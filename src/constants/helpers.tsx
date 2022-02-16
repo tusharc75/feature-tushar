@@ -170,7 +170,7 @@ export const sidebarResource = {
   pricing: 'Pricing',
   priceBuilder: 'Price Builder',
   flags: 'Flags',
-  projectSales: 'Target Projects List',
+  projectSales: 'Cross-Regional Target Projects List',
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
   address: 'Address',
@@ -267,7 +267,7 @@ export const RESOURCE_LABEL = {
   doa: 'DOA',
   termsAndConditions: 'T&Cs',
   equiptmentRentalMaster: 'Equiptment Rental Master',
-  projectStrategy: 'Target Projects List',
+  projectStrategy: 'Cross-Regional Target Projects List',
   productBuilder: 'Price Builder',
   formBuilder: 'Form Builder',
   currencyConverter: 'Currency Converter',
@@ -307,6 +307,7 @@ export const CHILD_RESOURCE = {
   repairJobAsset: 'Repair Job Asset',
   salesOrderProduct: 'Sales Order Product',
   salesOrderCost: 'Sales Order Cost',
+  subleaseProduct: 'Sublease Product',
 };
 
 
@@ -455,6 +456,13 @@ export const serializedAsset = {
   route: '/serialized-asset',
   permission: 'serializedAsset',
   resource: 'serialized-asset'
+};
+
+export const productInventory = {
+  api: '/product-inventory',
+  route: '/product-inventory',
+  permission: 'productInventory',
+  resource: 'product-inventory'
 };
 
 export const budget = {
@@ -1568,7 +1576,6 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   return: 'Return',
 } as const;
 
-
 export const REPAIR_JOB_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
@@ -1603,13 +1610,19 @@ export const DELIVERY_FROM_TO_TYPE = {
 
 export const SUBLEASE_STATUS = {
   new: 'New',
-  indTransit: 'In-Transit',
+  inProgress: 'In-Progress',
   issued: 'Issued',
   completed: 'Completed',
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
   closed: 'Closed',
 };
+
+export const INVENTORY_OWNER_TYPE = {
+  brand: 'Brand',
+  supplierAccount: 'Supplier Account',
+  customerAccount: 'Customer Account',
+} as const;
 
 export const asyncForEach = async (
   array: any[],
