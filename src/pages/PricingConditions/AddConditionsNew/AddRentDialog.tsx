@@ -31,7 +31,7 @@ const AddRentDialog = (props) => {
             axiosInstance().get(`${pricingCondition.api}/${pricingConditionId}/rate/${conditionData.materialId}/${id}`).then(({ data: { data } }) => {
                 setFormData({
                     values: {
-                        ...data.productConfiguration
+                        ...data
                     },
                     fields
                 });
@@ -67,11 +67,10 @@ const AddRentDialog = (props) => {
         setSubmitting(true);
 
         if (id) {
+            const { _id, ...rest } = formData.values as any;
+
             axiosInstance()
-                .put(`${pricingCondition.api}/${pricingConditionId}/rate/${conditionData.materialId}/${id}`, {
-                    product: conditionData.productDetail._id,
-                    productConfiguration: { ...formData.values }
-                })
+                .put(`${pricingCondition.api}/${pricingConditionId}/rate/${conditionData.materialId}/${id}`, { ...rest })
                 .then(() => {
                     setSubmitting(false);
                     fetchData()
@@ -82,10 +81,7 @@ const AddRentDialog = (props) => {
                 });
         } else {
             axiosInstance()
-                .post(`${pricingCondition.api}/${pricingConditionId}/rate/${conditionData.materialId}`, {
-                    product: conditionData.productDetail._id,
-                    productConfiguration: { ...formData.values }
-                })
+                .post(`${pricingCondition.api}/${pricingConditionId}/rate/${conditionData.materialId}`, { ...formData.values })
                 .then(() => {
                     setSubmitting(false);
                     fetchData()
