@@ -152,9 +152,11 @@ const InventoryProduct = () => {
             </Grid>
             <Grid item md={8} sm={1} xs={2}>
                 <ImportExportLinks
-                    permissions={permissions?.serializedAsset}
+      
+                    additionalParams={`wareHouse=${plantId}`}
+                    permissions={permissions.serializedAsset}
                     module="product inventory"
-                    api={serializedAsset.api}
+                    api={productInventory.api}
                     afterImportCompleted={() => {
                         fetchProductInventory();
                     }}
