@@ -4,6 +4,8 @@ import ReactFlow, { Controls } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
 import { deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, rentalManagement } from '../../../constants/helpers';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
+import routes from '../../../components/Helpers/Routes';
+import { useHistory } from 'react-router-dom';
 
 const customNodeStyles = {
   rentalJob: {
@@ -32,6 +34,7 @@ const RentalManagementViews = (props) => {
   const { rentalName, rentalId } = props;
   const { isOffline } = useContext(CustomOfflineContext);
   const [flowData, setFlowData] = useState([]);
+  const history = useHistory();
 
   useEffect(() => {
     fetchData();
@@ -61,21 +64,21 @@ const RentalManagementViews = (props) => {
           data: {
             label: (
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {item.productDetail.productName}
+                {item.productDetail?.productName || ''}
                 <br />
-                {item.type}
+                {_.startCase(_.camelCase(item.type))}
               </div>
             )
           },
+          // route: `${routes.productDetail.path}/${item._id}`,
           position: { x: 300, y: index * 80 },
           style: customNodeStyles.product
         });
         flowEdge.push({
-          id: `edge-${item._id}`,
+          id: `edge-product-${item._id}`,
           source: `${rentalId}`,
           arrowHeadType: 'arrow',
           target: `${item._id}`
-          // animated: true
         });
       });
       response?.data?.data?.inventory?.map((item: any, index) => {
@@ -87,20 +90,21 @@ const RentalManagementViews = (props) => {
           data: {
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.inventoryDetail.assetNumber}</div>
           },
+          // route: `${routes.serializedAssetDetail.path}/${item._id}`,
           position: { x: 600, y: index * 80 },
           style: customNodeStyles.productAssets
         });
         flowEdge.push({
-          id: `edge-${item.inventoryDetail.assetNumber}`,
+          id: `edge-assets-${item.inventoryDetail.assetNumber}`,
           source: `${item._id}`,
           arrowHeadType: 'arrow',
           target: `${item.inventoryDetail.assetNumber}`
-          // animated: true
         });
       });
       const loadingTicketData = await axiosInstance().get(
         `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalId}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
       );
+      var loadingAssets = 0;
       loadingTicketData?.data?.data?.map((item: any, index) => {
         flow.push({
           id: `${item._id}`,
@@ -118,6 +122,7 @@ const RentalManagementViews = (props) => {
               </div>
             )
           },
+          // route: `${routes.deliveryTicketDetail}/${item._id}`,
           position: { x: 900, y: index * 80 },
           style: customNodeStyles.loadingTicket
         });
@@ -129,22 +134,22 @@ const RentalManagementViews = (props) => {
             targetPosition: 'left',
             type: 'default',
             data: { label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.optionLabel}</div> },
-            position: { x: 1200, y: (productIndex + index) * 80 },
+            // route: `${routes.serializedAssetDetail.path}/${product._id}`,
+            position: { x: 1200, y: loadingAssets * 80 },
             style: customNodeStyles.productAssets
           });
+          loadingAssets += 1;
           flowEdge.push({
-            id: `edge-${item._id}`,
+            id: `edge-loading-${item._id}-${product.optionValue}`,
             source: `${product.optionLabel}`,
             arrowHeadType: 'arrow',
             target: `${item._id}`
-            // animated: true
           });
           flowEdge.push({
-            id: `edge-${product.optionValue}`,
+            id: `edge-loading-assets-${product.optionValue}`,
             source: `${item._id}`,
             arrowHeadType: 'arrow',
             target: `${product.optionValue}`
-            // animated: true
           });
         });
       });
@@ -168,16 +173,16 @@ const RentalManagementViews = (props) => {
               </div>
             )
           },
-          position: { x: 1400, y: index * 80 },
+          // route: `${routes.deliveryTicketDetail.path}/${item._id}`,
+          position: { x: 1500, y: index * 80 },
           style: customNodeStyles.receivingTicket
         });
         item.productInventory?.map((product: any) => {
           flowEdge.push({
-            id: `edge-${product.optionValue}`,
+            id: `edge-receiving-${product.optionValue}-${_.random(600, 700)}`,
             source: `${product.optionValue}`,
             arrowHeadType: 'arrow',
             target: `${item._id}`
-            // animated: true
           });
         });
       });
@@ -188,7 +193,6 @@ const RentalManagementViews = (props) => {
         {
           id: `${rentalId}`,
           type: 'input',
-          //   className: 'dark-node',
           sourcePosition: 'right',
           data: { label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName}</div> },
           position: { x: 0, y: 80 },
@@ -202,6 +206,10 @@ const RentalManagementViews = (props) => {
     reactFlowInstance.fitView({ padding: 0.25 });
   };
 
+  const onElementClick = (event, element) => {
+    console.log(element);
+  };
+
   return (
     <div style={{ height: '68vh' }}>
       {flowData.length ? (
@@ -212,14 +220,13 @@ const RentalManagementViews = (props) => {
           snapToGrid={true}
           snapGrid={[15, 15]}
           aria-controls="right-panel"
-          // onNodeMouseEnter={onNodeMouseEnter}
-          // onNodeMouseMove={onNodeMouseMove}
-          // onNodeMouseLeave={onNodeMouseLeave}
-          // onNodeContextMenu={onNodeContextMenu}
+          onElementClick={onElementClick}
         >
           <Controls />
         </ReactFlow>
-      ) : null}
+      ) : (
+        <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Map...</div>
+      )}
     </div>
   );
 };
