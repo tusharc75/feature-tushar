@@ -48,7 +48,11 @@ const RentalManagementViews = (props) => {
           type: 'input',
           className: 'dark-node',
           sourcePosition: 'right',
-          data: { label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName ?? rentalName}</div> },
+          data: {
+            ref_type: 'rentalJob',
+            ref_id: rentalId,
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName ?? rentalName}</div>
+          },
           position: { x: 0, y: 70 },
           style: customNodeStyles.rentalJob
         }
@@ -62,15 +66,16 @@ const RentalManagementViews = (props) => {
           targetPosition: 'left',
           type: 'default',
           data: {
+            ref_type: item.type,
+            ref_id: item.materialId,
             label: (
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {item.productDetail?.productName || ''}
+                {item.productDetail?.productName || item.packageDetail?.packageName}
                 <br />
                 {_.startCase(_.camelCase(item.type))}
               </div>
             )
           },
-          // route: `${routes.productDetail.path}/${item._id}`,
           position: { x: 300, y: index * 80 },
           style: customNodeStyles.product
         });
@@ -88,9 +93,10 @@ const RentalManagementViews = (props) => {
           targetPosition: 'left',
           type: 'default',
           data: {
+            ref_type: 'asset',
+            ref_id: item.inventory,
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.inventoryDetail.assetNumber}</div>
           },
-          // route: `${routes.serializedAssetDetail.path}/${item._id}`,
           position: { x: 600, y: index * 80 },
           style: customNodeStyles.productAssets
         });
@@ -112,6 +118,8 @@ const RentalManagementViews = (props) => {
           targetPosition: 'left',
           type: 'default',
           data: {
+            ref_type: 'loading',
+            ref_id: item._id,
             label: (
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {item.ticketName}
@@ -122,7 +130,6 @@ const RentalManagementViews = (props) => {
               </div>
             )
           },
-          // route: `${routes.deliveryTicketDetail}/${item._id}`,
           position: { x: 900, y: index * 80 },
           style: customNodeStyles.loadingTicket
         });
@@ -133,8 +140,11 @@ const RentalManagementViews = (props) => {
             sourcePosition: 'right',
             targetPosition: 'left',
             type: 'default',
-            data: { label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.optionLabel}</div> },
-            // route: `${routes.serializedAssetDetail.path}/${product._id}`,
+            data: {
+              ref_type: 'asset',
+              ref_id: product.optionValue,
+              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.optionLabel}</div>
+            },
             position: { x: 1200, y: loadingAssets * 80 },
             style: customNodeStyles.productAssets
           });
@@ -163,6 +173,8 @@ const RentalManagementViews = (props) => {
           targetPosition: 'left',
           type: 'output',
           data: {
+            ref_type: 'receiving',
+            ref_id: item._id,
             label: (
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {item.ticketName}
@@ -173,13 +185,12 @@ const RentalManagementViews = (props) => {
               </div>
             )
           },
-          // route: `${routes.deliveryTicketDetail.path}/${item._id}`,
           position: { x: 1500, y: index * 80 },
           style: customNodeStyles.receivingTicket
         });
         item.productInventory?.map((product: any) => {
           flowEdge.push({
-            id: `edge-receiving-${product.optionValue}-${_.random(600, 700)}`,
+            id: `edge-receiving-${product.optionValue}`,
             source: `${product.optionValue}`,
             arrowHeadType: 'arrow',
             target: `${item._id}`
@@ -194,7 +205,11 @@ const RentalManagementViews = (props) => {
           id: `${rentalId}`,
           type: 'input',
           sourcePosition: 'right',
-          data: { label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName}</div> },
+          data: {
+            ref_type: 'rentalJob',
+            ref_id: rentalId,
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName ?? rentalName}</div>
+          },
           position: { x: 0, y: 80 },
           style: customNodeStyles.rentalJob
         }
@@ -207,7 +222,25 @@ const RentalManagementViews = (props) => {
   };
 
   const onElementClick = (event, element) => {
-    console.log(element);
+    switch (element.data.ref_type) {
+      case 'product':
+        history.push(`${routes.productDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'package':
+        history.push(`${routes.packagesDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'asset':
+        history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'loading':
+        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'receiving':
+        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        break;
+      default:
+        history.push(`${routes.rentalManagementDetail.path}/${element.data.ref_id}?tab=2`);
+    }
   };
 
   return (
@@ -219,7 +252,6 @@ const RentalManagementViews = (props) => {
           selectNodesOnDrag={false}
           snapToGrid={true}
           snapGrid={[15, 15]}
-          aria-controls="right-panel"
           onElementClick={onElementClick}
         >
           <Controls />
