@@ -11,6 +11,7 @@ interface Props {
 }
 
 const TableView = ({ id, chartData, isScreenSmall, currency }: Props) => {
+  console.log(chartData)
   return (
     <TableContainer id={id} style={{ height: isScreenSmall ? '350px' : '500px' }}>
       <Table id={"table_" +  id} aria-label="simple table">

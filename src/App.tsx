@@ -110,6 +110,8 @@ import Sublease from './pages/Sublease';
 import SubleaseDetailsPage from './pages/Sublease/SubleaseDetailsPage';
 import NewDashboard from './pages/NewDashboard';
 import ProductInventory from './pages/SerializedAsset';
+import Zone from './pages/zone';
+import ZoneDetailPage from './pages/zone/ZoneDetailPage';
 
 var notificationInterval: any = null;
 
@@ -442,6 +444,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.formBuilder.path}>
               <FormBuilder />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.zone.path}>
+              <Zone />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.zoneDetail.path + '/:id'}>
+              <ZoneDetailPage />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.formBuilder.path}${routes.formBuilderResource.path}`}>
               <CreateFormBuilder />

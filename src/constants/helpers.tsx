@@ -458,6 +458,13 @@ export const serializedAsset = {
   resource: 'serialized-asset'
 };
 
+export const productInventory = {
+  api: '/product-inventory',
+  route: '/product-inventory',
+  permission: 'productInventory',
+  resource: 'product-inventory'
+};
+
 export const budget = {
   budgetApi: '/budget',
   budgetRoute: '/budget',

@@ -11,7 +11,7 @@ import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable"
-import { serializedAsset, isObjectEmpty, gridLoadingTimeout, } from '../../constants/helpers';
+import { serializedAsset, isObjectEmpty, gridLoadingTimeout,productInventory } from '../../constants/helpers';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
@@ -152,13 +152,15 @@ const InventoryProduct = () => {
             </Grid>
             <Grid item md={8} sm={1} xs={2}>
                 <ImportExportLinks
-                    permissions={permissions?.serializedAsset}
+      
+                    additionalParams={`wareHouse=${plantId}`}
+                    permissions={permissions.serializedAsset}
                     module="product inventory"
-                    api={serializedAsset.api}
+                    api={productInventory.api}
                     afterImportCompleted={() => {
                         fetchProductInventory();
                     }}
-                    //isDownloadExcel={false}
+                    isDownloadExcel={false}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
                     recordsToExport={selectedRecords.length}
