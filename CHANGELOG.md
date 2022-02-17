@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.62.0](https://github.com/vebholic/oms_frontend/compare/v2.61.0...v2.62.0) (2022-02-17)
+
+
+### Features
+
+* - Code Updated ([e4aacad](https://github.com/vebholic/oms_frontend/commit/e4aacad6da4776c3a81733d43864a2041fdfd17d))
+* - Pricing condition code change ([ef7a6c3](https://github.com/vebholic/oms_frontend/commit/ef7a6c33e295c0f3a0be4eaf210b6adcff19dba6))
+* **avi/feat:** avi/feat ([c01a571](https://github.com/vebholic/oms_frontend/commit/c01a57139bbc2ced50c4c29f206194a30c4e5259))
+* **zone:** zone ([898954c](https://github.com/vebholic/oms_frontend/commit/898954c1f98f86cc798303ff4d4bdd5598a33d92))
+
+
+### Bug Fixes
+
+* **bug:** bug ([6718a36](https://github.com/vebholic/oms_frontend/commit/6718a3675033079fe02a0ac7f450a0ec42b1be33))
+* **dashboard:** table error ([2df7162](https://github.com/vebholic/oms_frontend/commit/2df7162205fae4ea97df32f91209278b1f1dd996))
+* little styling fix ([1eb1bfe](https://github.com/vebholic/oms_frontend/commit/1eb1bfe6975ac8fab0e89223d04678a380a9ca5a))
+* rentalJob views roadmap not showing on some rental issue fixed ([9a66240](https://github.com/vebholic/oms_frontend/commit/9a6624084cf36625fb9f363b934ab01b111a533a))
+* rentalJob views roadmap view issue and clickable push route PO-1107 ([5e911b7](https://github.com/vebholic/oms_frontend/commit/5e911b763ec180a320da34fe1fda7f6c550401b3))
+* rentalJob views roadmap view issue and clickable push route PO-1107 ([e34a810](https://github.com/vebholic/oms_frontend/commit/e34a8101e757df31de378cc74ab5ca197ba4cfa9))
+
 ## [2.61.0](https://github.com/vebholic/oms_frontend/compare/v2.60.0...v2.61.0) (2022-02-16)
 
 
