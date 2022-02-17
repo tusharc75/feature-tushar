@@ -23,6 +23,7 @@ import accountClass from "../Account/account.module.scss";
 import Productpackage from './Productpackage';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
+import { GiAbstract055 } from 'react-icons/gi';
 
 const processSteps = ["Add Products", "Serialized Asset"]
 
@@ -209,7 +210,7 @@ const SubleaseDetailsPage = () => {
                                     }}
                                     label={
                                         <div className="d-flex align-items-center tab-font">
-                                            <BiFoodMenu className="mr-1" fontSize="inherit" /> Tickets
+                                            <GiAbstract055 className="mr-1" fontSize="inherit" />Delivery Tickets
                                         </div>
                                     }
                                     {...a11yProps(1)}
@@ -218,9 +219,8 @@ const SubleaseDetailsPage = () => {
                             </Tabs>
                             <TabPanel value={tabValue} index={0}>
                                 <Box>
-                                    {subleaseData || fields.length ? (
+                                    {subleaseData && fields.length ? (
                                         <DetailsPage data={subleaseData} fields={fields} />
-
                                     ) : (
                                         <Grid container spacing={2} style={{ padding: "8px" }}>
                                             <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -232,7 +232,7 @@ const SubleaseDetailsPage = () => {
                             </TabPanel>
                             <TabPanel value={tabValue} index={1}>
                                 <Grid item xs={12} sm={12} md={12} lg={12} >
-                                    {subleaseData || fields.length ? (
+                                    {subleaseData ? (
                                         <Grid item xs={12} sm={12} md={12} lg={12}>
                                             <>
                                                 <Paper>

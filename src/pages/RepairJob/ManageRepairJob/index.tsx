@@ -77,6 +77,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
             setTitle(`Clone - ${repairJobName}`)
             setDisablePlantIfAssetAdded(false);
             rest.repairJobName = `RJ_${generateUniqueIdOnly()}`;
+            rest.status = `New`;
             setInitialData({
               fields: setFieldsInAscendingOrder(fieldsDataForCreate),
               values: { ...getObjKeysWithValues(rest, fieldsDataForCreate) }
@@ -90,6 +91,16 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
               values: getObjKeysWithValues(data, fieldsDataForUpdate)
             });
             setAllFields(fieldsDataForUpdate);
+            axiosInstance().get(`${repairJob.api}/${repairJobId}/assets`)
+              .then(({ data: { data } }) => {
+                if (data.length) {
+                  setDisablePlantIfAssetAdded(true);
+                }
+                else {
+                  setDisablePlantIfAssetAdded(false);
+                }
+              }).catch((error) => {
+              });
             setLoading(false);
           }
         }).catch((error) => {
@@ -99,7 +110,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
         setTitle('Create Repair Job')
         setDisablePlantIfAssetAdded(false);
         let initialData = { ...getObjKeys('', fieldsDataForCreate), expectedCompletionDate: "", repairJobName: `RJ_${generateUniqueIdOnly()}` };
-        
+
         if (refrenceType === "Rental Job") {
           initialData["warehouse"] = refrenceData?.warehouse
           initialData["rentalJob"] = refrenceData?._id
