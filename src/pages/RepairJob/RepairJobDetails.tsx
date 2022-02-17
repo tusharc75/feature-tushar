@@ -26,6 +26,7 @@ import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import Steps from "../RentalManagement/Steps";
+import { GiAbstract055 } from 'react-icons/gi';
 
 function a11yProps(index: any) {
   return {
@@ -248,7 +249,7 @@ const RepairJobDetails = () => {
                   }}
                   label={
                     <div className="d-flex align-items-center tab-font">
-                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Delivery Tickets
+                      <GiAbstract055 className="mr-1" fontSize="inherit" /> Delivery Tickets
                     </div>
                   }
                   {...a11yProps(1)}

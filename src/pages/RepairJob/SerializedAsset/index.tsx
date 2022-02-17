@@ -103,30 +103,6 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             })
     }
 
-    const ActionsRenderer = (params) => (
-        <div className="d-flex gap-1">
-            {params.data.repaired ?
-                <HtmlTooltip title="Repaired">
-                    <CheckCircleIcon color="primary" fontSize="small" />
-                </HtmlTooltip>
-                :
-                ![INVENTORY_STATUS.lost].includes(params.data?.status) ?
-                    <HtmlTooltip title="Repair Asset">
-                        <IconButton
-                            size="small"
-                            aria-label="Repair Asset"
-                            color="primary"
-                            onClick={() => {
-                                setRepairAssetDialog({ open: true, assetId: params.data._id, assetName: `${params.data.assetNumber}`, assetIds: [] })
-                            }}
-                        >
-                            <CheckCircleOutlineIcon fontSize="small" />
-                        </IconButton>
-                    </HtmlTooltip> : null
-            }
-        </div>
-    );
-
     const fetchRecords = () => {
         dispatch({ type: "loading", loading: true });
         dispatch({ type: "initialize", data: [], count: 0 });
@@ -150,6 +126,31 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 toastConfig.setToastConfig(error)
             });
     }
+
+    const ActionsRenderer = (params) => (
+        <div className="d-flex gap-1">
+            {params.data.repaired ?
+                <HtmlTooltip title="Repaired">
+                    <CheckCircleIcon color="primary" fontSize="small" />
+                </HtmlTooltip>
+                :
+                ![INVENTORY_STATUS.lost].includes(params.data?.status) && params.data?.currentOwnerType === INVENTORY_OWNER_TYPE.brand ?
+                    <HtmlTooltip title="Repair Asset">
+                        <IconButton
+                            size="small"
+                            aria-label="Repair Asset"
+                            color="primary"
+                            onClick={() => {
+                                setRepairAssetDialog({ open: true, assetId: params.data._id, assetName: `${params.data.assetNumber}`, assetIds: [] })
+                            }}
+                        >
+                            <CheckCircleOutlineIcon fontSize="small" />
+                        </IconButton>
+                    </HtmlTooltip> : null
+            }
+        </div>
+    );
+
 
     const handleTicketDialog = (ticketType, pickupFromType, deliveryToType) => {
         const data = {}
@@ -175,6 +176,21 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         if (selectedRecords.length === 0) {
             return true;
         } else if (uniq(map(selectedRecords, "warehouseId")).length === 1) {
+            if (uniq(map(selectedRecords, "currentOwnerType"))[0] === INVENTORY_OWNER_TYPE.brand) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        } else {
+            return true;
+        }
+    };
+
+    const checkUniqcurrentOwnerType = () => {
+        if (selectedRecords.length === 0) {
+            return true;
+        } else if (uniq(map(selectedRecords, "currentOwnerType")).length === 1) {
             if (uniq(map(selectedRecords, "currentOwnerType"))[0] === INVENTORY_OWNER_TYPE.brand) {
                 return false;
             }
@@ -282,7 +298,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                             type="button"
                             size="small"
                             style={isMobile && !isTablet ? { color: "#FFFF5C" } : {}}
-                            disabled={selectedRecords.length === 0 || selectedRecords.some(s => s.repaired === true)}
+                            disabled={selectedRecords.length === 0 || selectedRecords.some(s => s.repaired === true) || checkUniqcurrentOwnerType()}
                             onClick={() => {
                                 setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...selectedRecords.map(m => m._id)] })
                             }}
