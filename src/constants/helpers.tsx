@@ -1613,9 +1613,6 @@ export const SUBLEASE_STATUS = {
   inProgress: 'In-Progress',
   issued: 'Issued',
   completed: 'Completed',
-  readyToInvoice: 'Ready to Invoice',
-  invoiced: 'Invoiced',
-  closed: 'Closed',
 };
 
 export const INVENTORY_OWNER_TYPE = {
