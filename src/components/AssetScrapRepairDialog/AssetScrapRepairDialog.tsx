@@ -38,7 +38,6 @@ export default function AssetScrapRepairDialog({ statusToUpdate, setStatusToUpda
 
             <CustomDialogContent>
                 <Box className="my-2">
-
                     {
                         statusToUpdate.status === "Repair" ? <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
                             : <TextField
@@ -54,7 +53,6 @@ export default function AssetScrapRepairDialog({ statusToUpdate, setStatusToUpda
                                 }}
                             />
                     }
-
                 </Box>
             </CustomDialogContent>
 
@@ -81,7 +79,6 @@ export default function AssetScrapRepairDialog({ statusToUpdate, setStatusToUpda
                         }).then(({ data }) => {
                             toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
                             setStatusToUpdate({ open: false, isUpdating: false, status: "", message: "" });
-
                             onSuccess();
                         }).catch((error) => {
                             setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false }));

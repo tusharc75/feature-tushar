@@ -33,11 +33,6 @@ import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
 import { MdEdit } from "react-icons/md";
 import { startCase } from "lodash";
 
-
-
-
-const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
-
 interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
@@ -106,8 +101,6 @@ const SerializedAssetDetailsPage = () => {
     };
   }
 
-
-
   const NameRenderer = (params) => (
     <>{
       params.value ? (
@@ -137,6 +130,7 @@ const SerializedAssetDetailsPage = () => {
 
     </>
   );
+
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     commonRenderer: CommonRenderer,
@@ -167,7 +161,6 @@ const SerializedAssetDetailsPage = () => {
     getProductInventoryFields();
     fetchProductInventoryData();
     fetchProductInventoryHistory();
-
   }
 
 
@@ -215,11 +208,7 @@ const SerializedAssetDetailsPage = () => {
   const fetchProductInventoryData = async () => {
     setLoadingProductInventory(true);
     try {
-      const {
-        data: { data },
-      } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
-
-      // handleMainPoints(data);
+      const { data: { data } } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
       fetchProductInventoryStates()
       setHeadingLbl(`${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
       setCustomizedRoutes([routes.serializedAsset,
@@ -289,7 +278,6 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleDelete = () => {
-
     axiosInstance().put(`${serializedAsset.api}/remove`, { "ids": [] }).then(() => {
       setShowConfirmBox(false);
       history.goBack();
@@ -306,6 +294,7 @@ const SerializedAssetDetailsPage = () => {
   const closeActions = () => {
     setAnchorEl(null);
   };
+
   const handleStatusChange = o => {
     if (o.optionValue === "Scrap" || o.optionValue === "Lost") {
       setStatus(o.optionValue)
@@ -318,13 +307,8 @@ const SerializedAssetDetailsPage = () => {
 
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
-      .post(`${repairJob.api}/${repairJobId}/add-assets`, { "ids": [id] })
+      .post(`${repairJob.api}/${repairJobId}/assets`, { "ids": [id] })
       .then(({ data }) => {
-        // toastConfig.setToastConfig({
-        //   type: 'success',
-        //   open: true,
-        //   message: data.message,
-        // })
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -349,7 +333,6 @@ const SerializedAssetDetailsPage = () => {
       });
     }
   }
-
 
   useEffect(() => {
     let statuses = [INVENTORY_STATUS.available, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost]
@@ -401,15 +384,16 @@ const SerializedAssetDetailsPage = () => {
                 >
                   {permissions?.serializedAsset?.isUpdate && (
                     <>
-                      <Button
-                        variant="outlined"
-                        color="default"
-                        size="small"
-                        onClick={() => setShowRepairJobDialog(true)}
-                      >
-                        {isMobile && !isTablet ? <GiAutoRepair size={20} /> : "Create Repair Job"}
-
-                      </Button>
+                      {![INVENTORY_STATUS.lost, INVENTORY_STATUS.inUse, INVENTORY_STATUS.reserved, INVENTORY_STATUS.repair].includes(productInventoryData.status) &&
+                        <Button
+                          variant="outlined"
+                          color="default"
+                          size="small"
+                          onClick={() => setShowRepairJobDialog(true)}
+                        >
+                          {isMobile && !isTablet ? <GiAutoRepair size={20} /> : "Create Repair Job"}
+                        </Button>
+                      }
                       <Button
                         variant="outlined"
                         color="default"
@@ -702,7 +686,7 @@ const SerializedAssetDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${storedRoutes ? storedRoutes.serializedAsset?.title : RESOURCE_LABEL.serializedAsset} ?`
+          message={`Are you sure you want to delete this ${routes.serializedAsset?.title} ?`
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -714,9 +698,8 @@ const SerializedAssetDetailsPage = () => {
         showRepairJobDialog &&
         <ManageRepairJob
           refrenceType="Product Inventory"
-          inventories={[id]}
-          open={showRepairJobDialog}
           onClose={() => setShowRepairJobDialog(false)}
+          refrenceData={{ warehouse: productInventoryData?.warehouse?.optionValue }}
           onSuccess={(obj) => {
             setShowRepairJobDialog(false);
             handleAddAssetToRepairJob(obj?._id)

@@ -54,7 +54,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
   text: '2 MB'
 };
 
-export const repairJobProcessSteps = ["Serialized Assets", "Loading Ticket", "Receiving Ticket", "End"];
+export const repairJobProcessSteps = ["Add", "Serialized Assets"];
 
 export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 
@@ -1095,19 +1095,19 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
  * @returns It returns a coverted amount in numbers
  */
 
-export const getExchangeRates = (date:string, amount:number, currencyFrom:string, currencyTo:string) => {
-  if(!currencyFrom || !currencyTo) return
+export const getExchangeRates = (date: string, amount: number, currencyFrom: string, currencyTo: string) => {
+  if (!currencyFrom || !currencyTo) return
 
-  if(currencyFrom === currencyTo) return
+  if (currencyFrom === currencyTo) return
 
-  if(amount <= 0) return
+  if (amount <= 0) return
 
   return new Promise(async (resolve, reject) => {
     try {
       const host = 'api.frankfurter.app';
       const res = await fetch(`https://${host}/${date}?amount=${amount}&from=${currencyFrom}&to=${currencyTo}`);
       const data = await res.json();
-  
+
       resolve(data);
     } catch (error) {
       reject(error);
@@ -1115,7 +1115,7 @@ export const getExchangeRates = (date:string, amount:number, currencyFrom:string
   })
 };
 
-export const b64toBlob = (dataURI:string) => {
+export const b64toBlob = (dataURI: string) => {
   var byteString = atob(dataURI.split(',')[1]);
   var ab = new ArrayBuffer(byteString.length);
   var ia = new Uint8Array(ab);
