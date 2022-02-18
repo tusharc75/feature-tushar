@@ -12,6 +12,7 @@ import { gridLoadingTimeout } from "../../constants/helpers";
 import { useHistory } from 'react-router-dom'
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 
 const FormBuilder = () => {
 
@@ -25,13 +26,14 @@ const FormBuilder = () => {
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columns = [
-    { field: "resource", headerName: "Resource", show: true, disabled: true, cellRenderer: "resourceRenderer" },
+    { field: "resourceLabel", headerName: "Resource Label", show: true, disabled: true, cellRenderer: "resourceRenderer" },
+    { field: "resource", headerName: "Resource", show: true, disabled: true, cellRenderer: "commonRenderer" },
   ];
   //  Grid Variables - End
 
   const ResourceRenderer = params => <Link className="link"
     to={"/form-builder/" + params.data.resource}>
-    {params.data.resource}
+    {params.data.resourceLabel}
   </Link>
 
   useEffect(() => {
@@ -39,21 +41,19 @@ const FormBuilder = () => {
   }, []);
 
   const frameworkComponents = {
+    commonRenderer: CommonRenderer,
     resourceRenderer: ResourceRenderer
   };
 
   const fetchGetBrandResource = () => {
     dispatch({ type: "loading", loading: true });
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     axiosInstance().get(`/sa-formbuilder/resource`).then(({ data: { data } }) => {
       data.forEach(d => {
         d["_id"] = d.id;
       })
-
       dispatch({ type: "initialize", data: data, count: data.length });
       setTimeout(() => {
         dispatch({ type: "loading", loading: false });
