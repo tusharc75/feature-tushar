@@ -11,7 +11,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { sublease } from "../../constants/helpers";
+import { sublease, SUBLEASE_STATUS } from "../../constants/helpers";
 import ManageSublease from "./ManageSublease";
 import Steps from "../RentalManagement/Steps";
 import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from "react-icons/fa";
@@ -23,8 +23,9 @@ import accountClass from "../Account/account.module.scss";
 import Productpackage from './Productpackage';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
+import { GiAbstract055 } from 'react-icons/gi';
 
-const processSteps = ["Add Products", "Serialized Asset", "Tickets"]
+const processSteps = ["Add Products", "Serialized Asset"]
 
 const SubleaseDetailsPage = () => {
 
@@ -192,7 +193,7 @@ const SubleaseDetailsPage = () => {
                                     className={'tabLayout'}
                                     style={{
                                         background: tabValue === 2 ? 'white' : '',
-                                        color: tabValue === 2 ? 'blue' : '#163340'
+                                        color: tabValue === 2 ? '#163340' : '#163340'
                                     }}
                                     label={
                                         <div className="d-flex align-items-center tab-font">
@@ -201,16 +202,29 @@ const SubleaseDetailsPage = () => {
                                     }
                                     {...a11yProps(1)}
                                 />
+                                <Tab
+                                    className={'tabLayout'}
+                                    style={{
+                                        background: tabValue === 3 ? 'white' : '',
+                                        color: tabValue === 3 ? '#163340' : '#163340'
+                                    }}
+                                    label={
+                                        <div className="d-flex align-items-center tab-font">
+                                            <GiAbstract055 className="mr-1" fontSize="inherit" />Delivery Tickets
+                                        </div>
+                                    }
+                                    {...a11yProps(1)}
+                                />
                                 <div className={'uio'}> </div>
                             </Tabs>
                             <TabPanel value={tabValue} index={0}>
                                 <Box>
-                                    {!subleaseData || !fields.length ? (
+                                    {subleaseData && fields.length ? (
+                                        <DetailsPage data={subleaseData} fields={fields} />
+                                    ) : (
                                         <Grid container spacing={2} style={{ padding: "8px" }}>
                                             <CommonSkeleton lenArray={[...Array(7).keys()]} />
                                         </Grid>
-                                    ) : (
-                                        <DetailsPage data={subleaseData} fields={fields} />
                                     )}
                                 </Box>
                                 <Grid container spacing={2}>
@@ -218,11 +232,7 @@ const SubleaseDetailsPage = () => {
                             </TabPanel>
                             <TabPanel value={tabValue} index={1}>
                                 <Grid item xs={12} sm={12} md={12} lg={12} >
-                                    {!subleaseData || !fields.length ? (
-                                        <Grid container spacing={2} style={{ padding: "8px" }}>
-                                            <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                                        </Grid>
-                                    ) : (
+                                    {subleaseData ? (
                                         <Grid item xs={12} sm={12} md={12} lg={12}>
                                             <>
                                                 <Paper>
@@ -232,7 +242,7 @@ const SubleaseDetailsPage = () => {
                                                         steps={processSteps}
                                                         currentStep={currentStep}
                                                         setCurrentStep={setCurrentStep}
-                                                        isStepEnded={["Invoiced", "Closed"].includes(subleaseData?.status)}
+                                                        isStepEnded={[SUBLEASE_STATUS.completed].includes(subleaseData?.status)}
                                                     />
                                                     {currentStep === 0 && subleaseData && (
                                                         <Productpackage
@@ -248,16 +258,28 @@ const SubleaseDetailsPage = () => {
                                                             subleaseData={subleaseData}
                                                         />
                                                     )}
-                                                    {currentStep === 2 && subleaseData && (
-                                                        <Tickets
-                                                            subleaseData={subleaseData}
-                                                        />
-                                                    )}
                                                 </Paper>
                                             </>
                                         </Grid>
+                                    ) : (
+                                        <Grid container spacing={2} style={{ padding: "8px" }}>
+                                            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                                        </Grid>
                                     )}
-
+                                </Grid>
+                            </TabPanel>
+                            <TabPanel value={tabValue} index={2}>
+                                <Grid item xs={12} sm={12} md={12} lg={12} >
+                                    {subleaseData ?
+                                        <Tickets
+                                            subleaseData={subleaseData}
+                                        />
+                                        : (
+                                            <Grid container spacing={2} style={{ padding: "8px" }}>
+                                                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                                            </Grid>
+                                        )
+                                    }
                                 </Grid>
                             </TabPanel>
                         </Paper>

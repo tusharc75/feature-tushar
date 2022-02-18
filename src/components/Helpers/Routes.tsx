@@ -169,7 +169,6 @@ const routes = {
     title:'Product Inventory',
     path:"/product-inventory",
   },
-
   serializedAsset: {
     title: (storedRoutes && storedRoutes.serializedAsset && storedRoutes.serializedAsset.title) ? storedRoutes.serializedAsset.title : RESOURCE_LABEL.serializedAsset,
     path: "/serialized-asset",
@@ -250,10 +249,14 @@ const routes = {
     title: storedRoutes ? storedRoutes.note?.title : RESOURCE_LABEL.note,
     path: "/note",
   },
-  // productList: {
-  //   title: "Products",
-  //   path: "/product-list",
-  // },
+  zone: {
+    title: "Zone",
+    path: "/zone",
+  },
+  zoneDetail: {
+    title: "Zone",
+    path: "/zone/detail",
+  },
   warehouse: {
     title: (storedRoutes && storedRoutes.warehouse && storedRoutes.warehouse.title) ? storedRoutes.warehouse.title : RESOURCE_LABEL.warehouse,
     path: "/warehouse",

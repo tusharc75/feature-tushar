@@ -68,7 +68,7 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.primary.main,
   },
   detailLabel: {
-    padding:"4px 10px 4px 4px",
+    padding: "4px 10px 4px 4px",
     fontSize: "0.9rem",
     fontWeight: "bold",
     color: "#656464",
@@ -78,13 +78,13 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "2px",
     top: "4px",
   },
-  "@media only screen and (max-width: 600px)":{
+  "@media only screen and (max-width: 600px)": {
     detailLabel: {
-      padding:"2px 10px 2px 4px",
+      padding: "2px 10px 2px 4px",
       fontSize: "0.8rem",
     },
     fieldText: {
-      fontSize:"0.8rem"
+      fontSize: "0.8rem"
     }
   }
 }));
@@ -374,12 +374,12 @@ const Details = (props: DetailProps) => {
             <React.Fragment key={form.name}>
               <div className="detail-box">
                 <div className={"detail-box-content"}>
-                <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
-                <h3 className="form-label-style" title={form.name}>
-                   {form.name}
-                </h3>
+                  <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                  <h3 className="form-label-style" title={form.name}>
+                    {form.name}
+                  </h3>
                 </div>
-                <Grid container style={{paddingTop:"6px"}}>
+                <Grid container style={{ paddingTop: "6px" }}>
                   {form.sectionFields.map((field, i) => (
                     <Grid
                       key={i}
@@ -388,14 +388,14 @@ const Details = (props: DetailProps) => {
                       sm={dynamicSize(6, field.fieldData.type)}
                       md={dynamicSize(6, field.fieldData.type)}
                     >
-                      <Grid container alignItems="center" style={{border:"1px solid #EDEDED"}} >
+                      <Grid container alignItems="center" style={{ border: "1px solid #EDEDED" }} >
                         <Grid
                           item
                           xs={dynamicSize(6, field.fieldData.type)}
                           sm={dynamicSize(5, field.fieldData.type)}
                           md={dynamicSize(5, field.fieldData.type)}
                         >
-                          <div className="d-flex align-items-center pr-1" style={{backgroundColor:"#F5F5F5", padding:"3px 0"}}>
+                          <div className="d-flex align-items-center pr-1" style={{ backgroundColor: "#F5F5F5", padding: "3px 0" }}>
                             <h4
                               title={field.fieldData.fieldLabel}
                               className={`text-truncate ${classes.detailLabel}`}

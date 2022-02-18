@@ -68,7 +68,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
     }, [])
 
     const fetchGridColumns = () => {
-        axiosInstance().get("/field?resource=Serialized Asset").then(({ data: { data } }) => {
+        axiosInstance().get(`/field?resource=${serializedAsset.resource}`).then(({ data: { data } }) => {
             let columns = []
             let rendererNames = []
             data.forEach(o => {
