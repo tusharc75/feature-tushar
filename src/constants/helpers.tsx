@@ -174,7 +174,8 @@ export const sidebarResource = {
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
   address: 'Address',
-  sublease: 'Sublease'
+  sublease: 'Sublease',
+  transferInventory: 'Transfer Inventory' 
 };
 
 export const resourceNames = {
@@ -232,8 +233,8 @@ export const resourceNames = {
   projectSales: 'Project Sales',
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
-  sublease: 'Sublease'
-
+  sublease: 'Sublease',
+  transferInventory: 'Transfer Inventory' 
 };
 
 export const primaryFields = {
@@ -297,6 +298,7 @@ export const RESOURCE_LABEL = {
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
   sublease: 'Sublease',
+  transferInventory: 'Transfer Inventories' 
 };
 
 export const CHILD_RESOURCE = {
@@ -507,6 +509,13 @@ export const transferAsset = {
   route: '/transfer-asset',
   permission: 'transferAsset',
   resource: 'transferAsset'
+};
+
+export const transferInventory = {
+  api: '/transfer-inventory',
+  route: '/transfer-inventory',
+  permission: 'transferInventory',
+  resource: 'transferInventory'
 };
 
 

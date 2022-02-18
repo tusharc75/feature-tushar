@@ -310,6 +310,14 @@ const routes = {
     title: storedRoutes ? storedRoutes.transferAsset?.title : RESOURCE_LABEL.transferAsset,
     path: "/transfer-asset/detail",
   },
+  transferInventory: {
+    title: storedRoutes ? storedRoutes.transferInventory?.title : RESOURCE_LABEL.transferInventory,
+    path: "/transfer-inventory",
+  },
+  transferInventoryDetail: {
+    title: storedRoutes ? storedRoutes.transferInventory?.title : RESOURCE_LABEL.transferInventory,
+    path: "/transfer-inventory/detail",
+  },
   address: {
     title: storedRoutes && storedRoutes.address ? storedRoutes.address?.title : RESOURCE_LABEL.address,
     path: "/address",

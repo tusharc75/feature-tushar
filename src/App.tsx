@@ -110,6 +110,8 @@ import Sublease from './pages/Sublease';
 import SubleaseDetailsPage from './pages/Sublease/SubleaseDetailsPage';
 import NewDashboard from './pages/NewDashboard';
 import ProductInventory from './pages/SerializedAsset';
+import TransferInventory from './pages/TransferInventory';
+import TransferInventoryDetailPage from './pages/TransferInventory/TransferInventoryDetailPage';
 
 var notificationInterval: any = null;
 
@@ -548,6 +550,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.transferAssetDetail.path}/:id`}>
               <TransferAssetDetailPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.transferInventory.path}>
+              <TransferInventory />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.transferInventoryDetail.path}/:id`}>
+              <TransferInventoryDetailPage />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.address.path}`}>
               <Address />
