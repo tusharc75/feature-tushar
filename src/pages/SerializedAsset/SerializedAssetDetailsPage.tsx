@@ -11,7 +11,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { serializedAsset, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, INVENTORY_STATUS, repairJob } from "../../constants/helpers";
+import { serializedAsset, getObjKeysWithValues, gridLoadingTimeout, product, sidebarResource, INVENTORY_STATUS, repairJob } from "../../constants/helpers";
 import ManageSerializedAsset from "./ManageSerializedAsset";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
@@ -83,10 +83,6 @@ const SerializedAssetDetailsPage = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-
-
-
-
   const [tabValue, setTabValue] = useState(0);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
@@ -143,6 +139,7 @@ const SerializedAssetDetailsPage = () => {
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
     { field: "comments", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
     { field: "location", headerName: "Location", show: true, cellRenderer: "commonRenderer" },
+    { field: "ownerType", headerName: "Owner Type", show: true, cellRenderer: "commonRenderer" },
     { field: "owner", headerName: "Owner", show: true, cellRenderer: "commonRenderer" },
   ];
 
@@ -161,8 +158,8 @@ const SerializedAssetDetailsPage = () => {
     getProductInventoryFields();
     fetchProductInventoryData();
     fetchProductInventoryHistory();
+    fetchProductInventoryStates()
   }
-
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
@@ -196,9 +193,7 @@ const SerializedAssetDetailsPage = () => {
 
   const fetchProductInventoryStates = async () => {
     try {
-      const {
-        data: { data },
-      } = await axiosInstance().post(`${serializedAsset.api}/inventory-stats`, { "ids": [id] });
+      const { data: { data } } = await axiosInstance().post(`${serializedAsset.api}/inventory-stats`, { "ids": [id] });
       handleMainPoints(data);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -209,12 +204,11 @@ const SerializedAssetDetailsPage = () => {
     setLoadingProductInventory(true);
     try {
       const { data: { data } } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
-      fetchProductInventoryStates()
+
       setHeadingLbl(`${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
-      setCustomizedRoutes([routes.serializedAsset,
-      { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
+      setCustomizedRoutes([routes.serializedAsset, { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
       setProductId(data?.product?.optionValue)
-      setProductInventoryData(data);
+      setProductInventoryData({ ...data, currentOwner: data?.currentOwner?.optionLabel });
       if (data.status === "Scrap") {
         setCustomField({
           fieldData: {
@@ -235,7 +229,6 @@ const SerializedAssetDetailsPage = () => {
           }
         })
       }
-
       setLoadingProductInventory(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -243,14 +236,18 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const getProductInventoryFields = () => {
-    axiosInstance()
-      .get("/field?resource=Serialized Asset")
+    axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data }) => {
         if (data.data && data.data.length) {
           data.data.some(o => {
             if (o?.fieldData?.fieldName === "status") {
               setStatusOptions([...o.fieldData.option])
               return true
+            }
+          })
+          data.data.forEach(element => {
+            if (element?.fieldData?.fieldName === "currentOwner") {
+              element.fieldData.type = "singleLine";
             }
           })
         }
