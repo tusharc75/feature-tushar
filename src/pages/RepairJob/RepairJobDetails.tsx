@@ -285,6 +285,7 @@ const RepairJobDetails = () => {
                             repairJobData={repairJobData}
                             setNextStep={setNextStep}
                             updateJobStatus={updateJobStatus}
+                            repairedAssetStatus={repairedAssetStatus}
                           />
                         )}
                         {(currentStep === 1) && (

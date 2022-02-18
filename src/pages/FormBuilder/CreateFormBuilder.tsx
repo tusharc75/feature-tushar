@@ -29,6 +29,7 @@ import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { IoIosArrowDropdown } from "react-icons/io";
 import { classNames } from "react-easy-crop/helpers";
 import { RiCloseCircleFill, RiSaveFill } from "react-icons/all";
+import TextField from '@material-ui/core/TextField';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -78,8 +79,6 @@ const useStyles = makeStyles((theme) => ({
 
 const CreateFormBuilder = () => {
 
-
-
     const { state: { permissions } }: any = useData();
     const [formBuilderPermissions, setFormBuilderPermissions] = useState({
         isCreate: false,
@@ -95,11 +94,11 @@ const CreateFormBuilder = () => {
     const toastConfig = useContext(CustomToastContext)
     const [orisection, setOriSection] = useState(null);
     const [section, setSection] = useState(null);
-    const [brandName, setBrandName] = useState("");
     const [deleteField, setDeleteField] = useState([]);
     const [isUpdating, setIsUpdating] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [anchorEl, setAnchorEl] = useState(null);
+    const [resourceLabel, setResourceLabel] = useState("");
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -137,14 +136,18 @@ const CreateFormBuilder = () => {
     const fetchBrandResourceData = async () => {
         axiosInstance().get(`/sa-formbuilder/resourcedata/` + resource).then(({ data: { data } }) => {
             setSection(data.section)
+            setResourceLabel(data.resourceLabel)
             setOriSection(JSON.parse(JSON.stringify(data.section)))
-            setBrandName(data.brandName)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
     };
 
     const handleSave = async () => {
+        if (resourceLabel === "") {
+            alert("Please enter resource label")
+            return;
+        }
         let data = []
         let order = 0;
         section.forEach(_section => {
@@ -194,6 +197,7 @@ const CreateFormBuilder = () => {
         sendData.resource = resource;
         sendData.field = data;
         sendData.deleteField = deleteField;
+        sendData.resourceLabel = resourceLabel;
         setIsUpdating(true)
         axiosInstance().put(`/sa-formbuilder/resourcedata`, sendData).then(({ data: { data } }) => {
             setIsUpdating(false)
@@ -312,50 +316,55 @@ const CreateFormBuilder = () => {
                 )}
 
             </Grid>
-
-
         </Grid>
         <CustomContainer>
             {section ?
                 <Fragment>
                     <Box p={1} pb={0} ml={1} bgcolor="white" >
-                        <Grid container spacing={1} className={isMobile ? "mobile_form_header" : "des_form_header"}>
-                            <Grid item xs={8} style={isMobile ? { display: "block" } : { display: "flex" }}>
-                                <Grid item xs={isMobile ? 12 : 6} md={4} sm={6}>
-                                    <Typography variant="caption">Brand </Typography>
-                                    <Typography variant="body1">{brandName}</Typography>
-                                </Grid>
-                                <Grid item xs={isMobile ? 12 : 6} md={4} sm={6}>
-                                    <Typography variant="caption">Resource </Typography>
-                                    <Typography variant="body1">{resource}</Typography>
-                                </Grid>
+                        <Grid container spacing={1}>
+                            <Grid item xs={3}>
+                                <Typography variant="caption">Resource</Typography>
+                                <Typography variant="body1">{resource}</Typography>
                             </Grid>
-                            <Grid item xs={4}>
-                                <Grid item xs={12} container justify="flex-end">
-                                    <Box>
-                                        {formBuilderPermissions.isUpdate &&
-                                            <Button disabled={isUpdating} color="primary" size="small" onClick={handleSave} variant={isMobile && !isTablet ? "text" : "contained"}
-                                                style={isMobile && !isTablet ? { color: "var(--success)" } : {}}
-                                            >
-                                                {isMobile && !isTablet ? <RiSaveFill size={24} /> : "Save"}
-                                                {isUpdating && <CircularProgress size={24} />}
-                                            </Button>
-                                        }
-                                    </Box>
-                                    <Box ml={1} >
-                                        <Button color="primary" variant={isMobile && !isTablet ? "text" : "contained"} size="small"
-                                            style={isMobile && !isTablet ? { color: "var(--error)" } : {}}
-                                            onClick={() => {
-                                                if ((!isEqual(orisection, section)) && formBuilderPermissions.isUpdate) {
-                                                    setShowConfirmDialog(true)
-                                                }
-                                                else {
-                                                    history.push({ pathname: routes.formBuilder.path })
-                                                }
-                                            }} >  {isMobile && !isTablet ? <RiCloseCircleFill size={24} /> : "Close"}
+                            <Grid item xs={3}>
+                                <TextField
+                                    variant="outlined"
+                                    type="text"
+                                    label="Resource Label"
+                                    required={true}
+                                    name="name"
+                                    fullWidth
+                                    margin="dense"
+                                    value={resourceLabel}
+                                    onChange={(e) => {
+                                        setResourceLabel(e.target.value.trimStart())
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={6} container justifyContent='flex-end'>
+                                <Box>
+                                    {formBuilderPermissions.isUpdate &&
+                                        <Button disabled={isUpdating} color="primary" size="small" onClick={handleSave} variant={isMobile && !isTablet ? "text" : "contained"}
+                                            style={isMobile && !isTablet ? { color: "var(--success)" } : {}}
+                                        >
+                                            {isMobile && !isTablet ? <RiSaveFill size={24} /> : "Save"}
+                                            {isUpdating && <CircularProgress size={24} />}
                                         </Button>
-                                    </Box>
-                                </Grid>
+                                    }
+                                </Box>
+                                <Box ml={1} >
+                                    <Button color="primary" variant={isMobile && !isTablet ? "text" : "contained"} size="small"
+                                        style={isMobile && !isTablet ? { color: "var(--error)" } : {}}
+                                        onClick={() => {
+                                            if ((!isEqual(orisection, section)) && formBuilderPermissions.isUpdate) {
+                                                setShowConfirmDialog(true)
+                                            }
+                                            else {
+                                                history.push({ pathname: routes.formBuilder.path })
+                                            }
+                                        }} >  {isMobile && !isTablet ? <RiCloseCircleFill size={24} /> : "Close"}
+                                    </Button>
+                                </Box>
                             </Grid>
                         </Grid>
                     </Box>

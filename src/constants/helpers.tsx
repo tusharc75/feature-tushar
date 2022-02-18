@@ -54,7 +54,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
   text: '2 MB'
 };
 
-export const repairJobProcessSteps = ["Add", "Serialized Assets"];
+export const repairJobProcessSteps = ["Serialized Assets", "Repair Process"];
 
 export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 
@@ -174,7 +174,8 @@ export const sidebarResource = {
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
   address: 'Address',
-  sublease: 'Sublease'
+  sublease: 'Sublease',
+  transferInventory: 'Transfer Inventory' 
 };
 
 export const resourceNames = {
@@ -232,8 +233,8 @@ export const resourceNames = {
   projectSales: 'Project Sales',
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
-  sublease: 'Sublease'
-
+  sublease: 'Sublease',
+  transferInventory: 'Transfer Inventory' 
 };
 
 export const primaryFields = {
@@ -297,6 +298,7 @@ export const RESOURCE_LABEL = {
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
   sublease: 'Sublease',
+  transferInventory: 'Transfer Inventories' 
 };
 
 export const CHILD_RESOURCE = {
@@ -455,7 +457,7 @@ export const serializedAsset = {
   api: '/serialized-asset',
   route: '/serialized-asset',
   permission: 'serializedAsset',
-  resource: 'serialized-asset'
+  resource: 'Serialized Asset'
 };
 
 export const productInventory = {
@@ -507,6 +509,13 @@ export const transferAsset = {
   route: '/transfer-asset',
   permission: 'transferAsset',
   resource: 'transferAsset'
+};
+
+export const transferInventory = {
+  api: '/transfer-inventory',
+  route: '/transfer-inventory',
+  permission: 'transferInventory',
+  resource: 'transferInventory'
 };
 
 

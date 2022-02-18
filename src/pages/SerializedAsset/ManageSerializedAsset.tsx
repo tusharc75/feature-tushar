@@ -36,7 +36,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
   const [allFields, setAllFields] = useState([]);
   const [plantsCategoryOptions, setPlantsCategoryOptions] = useState([]);
   const [productDescriptionOptions, setProductDescriptionOptions] = useState([]);
-  const [cloneHeading,setCloneHeading] = useState('')
+  const [cloneHeading, setCloneHeading] = useState('')
   const [formValues, setFormValues] = useState({});
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [plantsOpen, setPlantsOpen] = useState({ open: false, isClone: false });
@@ -47,9 +47,9 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
 
   useEffect(() => {
     axiosInstance()
-      .get('/field?resource=Serialized Asset')
+      .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-
+        data = data.filter((d) => !["currentOwnerType", "currentOwner"].includes(d.fieldData.fieldName));
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
@@ -69,7 +69,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
             .then(({ data: { data } }) => {
               if (isClone) {
                 const { _id, createdBy, updatedBy, assetNumber, ...rest } = data;
-                
+
                 setCloneHeading(assetNumber);
                 let oldValues = { ...rest };
                 oldValues.status = "New";
@@ -176,7 +176,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
               <Fragment>
                 <CustomDialogHeader
                   title={
-                    productInventoryId ? (isClone ?   `Clone - ${cloneHeading}` : 'Update ' + routes.serializedAsset.title) : 'Create ' + routes.serializedAsset.title
+                    productInventoryId ? (isClone ? `Clone - ${cloneHeading}` : 'Update ' + routes.serializedAsset.title) : 'Create ' + routes.serializedAsset.title
                   }
                   onClose={() => {
                     if (isFieldNotTouched(initialData, values)) onClose();

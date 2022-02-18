@@ -169,7 +169,6 @@ const routes = {
     title:'Product Inventory',
     path:"/product-inventory",
   },
-
   serializedAsset: {
     title: (storedRoutes && storedRoutes.serializedAsset && storedRoutes.serializedAsset.title) ? storedRoutes.serializedAsset.title : RESOURCE_LABEL.serializedAsset,
     path: "/serialized-asset",
@@ -313,6 +312,14 @@ const routes = {
   transferAssetDetail: {
     title: storedRoutes ? storedRoutes.transferAsset?.title : RESOURCE_LABEL.transferAsset,
     path: "/transfer-asset/detail",
+  },
+  transferInventory: {
+    title: storedRoutes ? storedRoutes.transferInventory?.title : RESOURCE_LABEL.transferInventory,
+    path: "/transfer-inventory",
+  },
+  transferInventoryDetail: {
+    title: storedRoutes ? storedRoutes.transferInventory?.title : RESOURCE_LABEL.transferInventory,
+    path: "/transfer-inventory/detail",
   },
   address: {
     title: storedRoutes && storedRoutes.address ? storedRoutes.address?.title : RESOURCE_LABEL.address,
