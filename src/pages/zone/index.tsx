@@ -343,8 +343,6 @@ const Zone = () => {
     axiosInstance()
       .get(`/zone${queryString}`)
       .then(({ data: { data, count } }) => {
-        console.log(data, 'data');
-
         let rows = data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions.productCategory.isDelete;
