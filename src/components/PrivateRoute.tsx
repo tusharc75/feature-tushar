@@ -67,6 +67,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'e-commerce-policy',
         'sublease',
         'new-dashboard',
+        'transfer-inventory',
         'zone'
       ].indexOf(pathnames[0]) >= 0
     ) {
