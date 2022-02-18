@@ -46,7 +46,7 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
 
     const fetchGridColumns = () => {
         axiosInstance()
-            .get("/field?resource=Serialized Asset")
+            .get(`/field?resource=${serializedAsset.resource}`)
             .then(({ data: { data } }) => {
                 let columns = []
                 let rendererNames = []
@@ -78,7 +78,7 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
         const response = await axiosInstance().get(`${sublease.api}/${subleaseData._id}/serialized-asset`)
         var isComplate = true;
         let rows = response?.data?.data.map((u) => {
-            if (u?.currentOwner !== subleaseData?.supplierAccount?.optionValue) {
+            if (u?.currentOwner?.optionValue !== subleaseData?.supplierAccount?.optionValue) {
                 isComplate = false;
             }
             let res = {

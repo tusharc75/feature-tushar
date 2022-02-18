@@ -29,7 +29,7 @@ import AssetScrapRepairDialog from '../../../components/AssetScrapRepairDialog/A
 
 const renderedFrom = "repairJob_add_assets"
 
-const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus }) => {
+const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus }) => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -404,6 +404,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus }) => {
       }}
       onSuccess={() => {
         fetchRecords();
+        repairedAssetStatus([]);
       }}
     />
     }

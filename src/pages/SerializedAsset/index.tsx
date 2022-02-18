@@ -111,7 +111,7 @@ const ProductInventory = () => {
 
     const fetchGridColumns = () => {
         axiosInstance()
-            .get("/field?resource=Serialized Asset")
+            .get(`/field?resource=${serializedAsset.resource}`)
             .then(({ data: { data } }) => {
                 let columns = []
                 let rendererNames = []

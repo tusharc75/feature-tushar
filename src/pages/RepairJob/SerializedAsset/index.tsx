@@ -10,7 +10,7 @@ import { AiFillFilePdf } from "react-icons/ai";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import {
-    gridLoadingTimeout, repairJob, REPAIR_JOB_STATUS, deliveryTicket, INVENTORY_STATUS,
+    gridLoadingTimeout, repairJob, REPAIR_JOB_STATUS, deliveryTicket, INVENTORY_STATUS, serializedAsset,
     DELIVERY_TICKET_TYPE, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_REFRENCE_TYPE, prepareDataForGrid, INVENTORY_OWNER_TYPE
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -78,7 +78,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
 
     const fetchGridColumns = () => {
         axiosInstance()
-            .get("/field?resource=Serialized Asset")
+            .get(`/field?resource=${serializedAsset.resource}`)
             .then(({ data: { data } }) => {
                 let columns = []
                 let rendererNames = []
@@ -162,7 +162,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             pickupFrom = selectedRecords[0].warehouseId;
         }
         else {
-            pickupFrom = selectedRecords[0]?.currentOwner;
+            pickupFrom = selectedRecords[0]?.currentOwnerId;
         }
         data["pickupFrom"] = pickupFrom;
         data["pickupFromAddress"] = selectedRecords[0]?.currentLocationId;
@@ -205,7 +205,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     const checkUniqSupplier = () => {
         if (selectedRecords.length === 0) {
             return true;
-        } else if (uniq(map(selectedRecords, "currentOwner")).length === 1) {
+        } else if (uniq(map(selectedRecords, "currentOwnerId")).length === 1) {
             if (uniq(map(selectedRecords, "currentOwnerType"))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
                 return false;
             }

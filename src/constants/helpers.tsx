@@ -54,7 +54,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
   text: '2 MB'
 };
 
-export const repairJobProcessSteps = ["Add", "Serialized Assets"];
+export const repairJobProcessSteps = ["Serialized Assets", "Repair Process"];
 
 export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 
@@ -455,7 +455,7 @@ export const serializedAsset = {
   api: '/serialized-asset',
   route: '/serialized-asset',
   permission: 'serializedAsset',
-  resource: 'serialized-asset'
+  resource: 'Serialized Asset'
 };
 
 export const productInventory = {

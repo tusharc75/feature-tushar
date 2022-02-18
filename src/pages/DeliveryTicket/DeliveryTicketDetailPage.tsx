@@ -143,8 +143,8 @@ export default function DeliveryTicketDetail(props) {
         data = response?.data?.data
       }
       data = data.filter((fields: any) => {
-        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-          if (["repairJob", "rentalJob", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
+        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
+          if (["transferAsset", "rentalJob", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
@@ -185,11 +185,11 @@ export default function DeliveryTicketDetail(props) {
             element.fieldData.lookupResource = sidebarResource.supplierAccount
           }
         }
-        if (element?.fieldData.fieldName === "deliveryFrom") {
-          if (ticket?.deliveryFromType === DELIVERY_FROM_TO_TYPE.customer) {
+        if (element?.fieldData.fieldName === "deliveryTo") {
+          if (ticket?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer) {
             element.fieldData.lookupResource = sidebarResource.customerAccount
           }
-          if (ticket?.deliveryFromType === DELIVERY_FROM_TO_TYPE.supplier) {
+          if (ticket?.deliveryToType === DELIVERY_FROM_TO_TYPE.supplier) {
             element.fieldData.lookupResource = sidebarResource.supplierAccount
           }
         }
@@ -260,7 +260,7 @@ export default function DeliveryTicketDetail(props) {
         data = await findOne(objectStore.resource, "productInventory")
       }
       else {
-        const response = await axiosInstance().get(`/field?resource=Serialized Asset`)
+        const response = await axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
         data = response?.data?.data
       }
       let columns = []
