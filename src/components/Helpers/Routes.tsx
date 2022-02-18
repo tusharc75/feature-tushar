@@ -169,7 +169,6 @@ const routes = {
     title:'Product Inventory',
     path:"/product-inventory",
   },
-
   serializedAsset: {
     title: (storedRoutes && storedRoutes.serializedAsset && storedRoutes.serializedAsset.title) ? storedRoutes.serializedAsset.title : RESOURCE_LABEL.serializedAsset,
     path: "/serialized-asset",
