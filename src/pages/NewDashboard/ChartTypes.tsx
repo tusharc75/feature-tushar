@@ -144,7 +144,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                   </Box>
                 </Grid>
               ))
-            : !chartData
+            : !chartData || chartData.length === 0
             ? null
             : Object.keys(chartData).map((key, index) => (
                 <Grid item xs={12} sm={6} md={3} key={index + 1}>
@@ -216,38 +216,36 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           <Box minHeight={isScreenSmall ? 350 : chart.col <= 6 ? 400 : 500}>
             {loading ? (
               <Loader noLoader={false} text="" style={{ minHeight: '100%' }} />
-            ) : chartData ? (
-              chart.type !== 'list' ? (
-                chart.hasTableView && tableView ? (
-                  <TableView
-                    id={chart.uniqueId}
-                    type={chart.type}
-                    chartData={chartData.tableData}
-                    isScreenSmall={isScreenSmall}
-                    currency={globalFilters.currency || currency}
-                  />
-                ) : (
-                  <Chart
-                    id={chart.uniqueId}
-                    type={chart.type}
-                    data={chartData}
-                    options={{
-                      maintainAspectRatio: false,
-                      indexAxis: chart.axis
-                    }}
-                  />
-                )
-              ) : (
+            ) : !chartData || chartData.length === 0 ? (
+              <Loader noLoader={true} text="No Data Avaiable" style={{ minHeight: '100%' }} />
+            ) : chart.type !== 'list' ? (
+              chart.hasTableView && tableView ? (
                 <TableView
                   id={chart.uniqueId}
                   type={chart.type}
-                  chartData={chartData}
+                  chartData={chartData.tableData}
                   isScreenSmall={isScreenSmall}
                   currency={globalFilters.currency || currency}
                 />
+              ) : (
+                <Chart
+                  id={chart.uniqueId}
+                  type={chart.type}
+                  data={chartData}
+                  options={{
+                    maintainAspectRatio: false,
+                    indexAxis: chart.axis
+                  }}
+                />
               )
             ) : (
-              <Loader noLoader={true} text="No Data Avaiable" style={{ minHeight: '100%' }} />
+              <TableView
+                id={chart.uniqueId}
+                type={chart.type}
+                chartData={chartData}
+                isScreenSmall={isScreenSmall}
+                currency={globalFilters.currency || currency}
+              />
             )}
           </Box>
         </Box>

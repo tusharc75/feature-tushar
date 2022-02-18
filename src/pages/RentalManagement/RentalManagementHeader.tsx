@@ -1,4 +1,4 @@
-import { useState, useContext,useEffect } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
 import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
@@ -13,7 +13,7 @@ import { MdAdd, MdFilterList, MdSort } from 'react-icons/md';
 import { objectStore, insertUpdate, clearAll } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { sidebarResource, CHILD_RESOURCE } from '../../constants/helpers';
+import { sidebarResource, CHILD_RESOURCE, serializedAsset } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
@@ -21,7 +21,7 @@ import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
 
 function RentalManagementHeader(props) {
 
-  
+
   const {
     selectedRecords,
     onTypeChange,
@@ -42,14 +42,14 @@ function RentalManagementHeader(props) {
     // showCloneRentalManagementDialog
   } = props;
 
- 
- 
+
+
   const {
     state: { selectedEntity }
   }: any = useData();
   const [anchorEl, setAnchorEl] = useState(null);
   const toastConfig = useContext(CustomToastContext);
-  
+
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -85,7 +85,7 @@ function RentalManagementHeader(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
-     
+
     }
   };
 
@@ -112,13 +112,13 @@ function RentalManagementHeader(props) {
         insertUpdate(objectStore.resource, objectStore.deliveryTicket, data);
       });
     axiosInstance()
-      .get(`/field?resource=Serialized Asset&view=true`)
+      .get(`/field?resource=${serializedAsset.resource}&view=true`)
       .then(({ data: { data } }) => {
         insertUpdate(objectStore.resource, 'serializedAsset', data);
       });
   };
 
-  
+
 
 
   const handleRemoveoffline = async () => {
@@ -126,7 +126,7 @@ function RentalManagementHeader(props) {
     await clearAll(objectStore.deliveryTicket);
     closeActions();
   };
-   let toggleInner = options && (
+  let toggleInner = options && (
     <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
       {options.map((k, index) => {
         return (
@@ -198,22 +198,22 @@ function RentalManagementHeader(props) {
               />
             </Grid>
           </>
-        ):
-        <HideWhenOffline>
-          <div className={`align-items-center gap-1 layout-for-mobile `}>
-            {options && (
-              <ToggleButtonGroup size="small" className="ml-2" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
-                {options.map((k, index) => {
-                  return (
-                    <ToggleButton value={k.key} key={index}>
-                      {k.key}
-                    </ToggleButton>
-                  );
-                })}
-              </ToggleButtonGroup>
-            )}
-          </div>
-        </HideWhenOffline>}
+        ) :
+          <HideWhenOffline>
+            <div className={`align-items-center gap-1 layout-for-mobile `}>
+              {options && (
+                <ToggleButtonGroup size="small" className="ml-2" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
+                  {options.map((k, index) => {
+                    return (
+                      <ToggleButton value={k.key} key={index}>
+                        {k.key}
+                      </ToggleButton>
+                    );
+                  })}
+                </ToggleButtonGroup>
+              )}
+            </div>
+          </HideWhenOffline>}
         {children}
       </Grid>
 
@@ -279,7 +279,7 @@ function RentalManagementHeader(props) {
                       >
                         Delete
                       </MenuItem> */}
-                        {/* {
+                      {/* {
                         RentalManagementPermissions.isUpdate && <MenuItem
                           disabled={!selectedRecords.length || selectedRecords.find((d) => d.canDelete === false)}
                           onClick={() => {

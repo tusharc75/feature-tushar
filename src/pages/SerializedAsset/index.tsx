@@ -19,7 +19,6 @@ import { serializedAsset, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL, pro
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import ManageSerializedAsset from "./ManageSerializedAsset";
-import ManageRepairJob from '../RepairJob/ManageRepairJob'
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from "react-router-dom";
 import HtmlTooltip from "../../components/CustomTooltipTitle";
@@ -40,7 +39,6 @@ const ProductInventory = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
-    const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
@@ -59,7 +57,6 @@ const ProductInventory = () => {
     const [plantOptions, setPlantOptions] = useState([])
     const [selectedPlant, setSelectedPlant] = useState(null)
     const [subleaseAsset, setSubleaseAsset] = useState(false)
-
 
     const {
         state: { permissions },
@@ -114,7 +111,7 @@ const ProductInventory = () => {
 
     const fetchGridColumns = () => {
         axiosInstance()
-            .get("/field?resource=Serialized Asset")
+            .get(`/field?resource=${serializedAsset.resource}`)
             .then(({ data: { data } }) => {
                 let columns = []
                 let rendererNames = []
@@ -554,10 +551,6 @@ const ProductInventory = () => {
                                         closeActions()
                                         setShowDeleteConfirmBox(true)
                                     }}>Delete</MenuItem>}
-                                    {permissions?.repairJob?.isCreate && permissions?.serializedAsset?.isUpdate && <MenuItem onClick={() => {
-                                        closeActions()
-                                        setShowRepairJobDialog(true)
-                                    }}>Create Repair Job</MenuItem>}
                                 </Menu>
                             </Grid>
                         </Box>
@@ -626,19 +619,6 @@ const ProductInventory = () => {
                 onClose={() => setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null })}
                 onSuccess={() => {
                     setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null });
-                    fetchProductInventory()
-                }}
-            />
-        }
-        {
-            showRepairJobDialog &&
-            <ManageRepairJob
-                refrenceType="Product Inventory"
-                inventories={selectedRecords?.map(s => s.id)}
-                open={showRepairJobDialog}
-                onClose={() => setShowRepairJobDialog(false)}
-                onSuccess={() => {
-                    setShowRepairJobDialog(false);
                     fetchProductInventory()
                 }}
             />

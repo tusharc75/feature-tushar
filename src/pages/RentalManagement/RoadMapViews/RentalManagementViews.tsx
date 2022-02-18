@@ -4,6 +4,8 @@ import ReactFlow, { Controls } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
 import { deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, rentalManagement } from '../../../constants/helpers';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
+import routes from '../../../components/Helpers/Routes';
+import { useHistory } from 'react-router-dom';
 
 const customNodeStyles = {
   rentalJob: {
@@ -32,6 +34,7 @@ const RentalManagementViews = (props) => {
   const { rentalName, rentalId } = props;
   const { isOffline } = useContext(CustomOfflineContext);
   const [flowData, setFlowData] = useState([]);
+  const history = useHistory();
 
   useEffect(() => {
     fetchData();
@@ -45,7 +48,11 @@ const RentalManagementViews = (props) => {
           type: 'input',
           className: 'dark-node',
           sourcePosition: 'right',
-          data: { label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName ?? rentalName}</div> },
+          data: {
+            ref_type: 'rentalJob',
+            ref_id: rentalId,
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName ?? rentalName}</div>
+          },
           position: { x: 0, y: 70 },
           style: customNodeStyles.rentalJob
         }
@@ -59,11 +66,13 @@ const RentalManagementViews = (props) => {
           targetPosition: 'left',
           type: 'default',
           data: {
+            ref_type: item.type,
+            ref_id: item.materialId,
             label: (
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {item.productDetail.productName}
+                {item.productDetail?.productName || item.packageDetail?.packageName}
                 <br />
-                {item.type}
+                {_.startCase(_.camelCase(item.type))}
               </div>
             )
           },
@@ -71,11 +80,10 @@ const RentalManagementViews = (props) => {
           style: customNodeStyles.product
         });
         flowEdge.push({
-          id: `edge-${item._id}`,
+          id: `edge-product-${item._id}`,
           source: `${rentalId}`,
           arrowHeadType: 'arrow',
           target: `${item._id}`
-          // animated: true
         });
       });
       response?.data?.data?.inventory?.map((item: any, index) => {
@@ -85,22 +93,24 @@ const RentalManagementViews = (props) => {
           targetPosition: 'left',
           type: 'default',
           data: {
+            ref_type: 'asset',
+            ref_id: item.inventory,
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.inventoryDetail.assetNumber}</div>
           },
           position: { x: 600, y: index * 80 },
           style: customNodeStyles.productAssets
         });
         flowEdge.push({
-          id: `edge-${item.inventoryDetail.assetNumber}`,
+          id: `edge-assets-${item.inventoryDetail.assetNumber}`,
           source: `${item._id}`,
           arrowHeadType: 'arrow',
           target: `${item.inventoryDetail.assetNumber}`
-          // animated: true
         });
       });
       const loadingTicketData = await axiosInstance().get(
         `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalId}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
       );
+      var loadingAssets = 0;
       loadingTicketData?.data?.data?.map((item: any, index) => {
         flow.push({
           id: `${item._id}`,
@@ -108,6 +118,8 @@ const RentalManagementViews = (props) => {
           targetPosition: 'left',
           type: 'default',
           data: {
+            ref_type: 'loading',
+            ref_id: item._id,
             label: (
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {item.ticketName}
@@ -128,23 +140,26 @@ const RentalManagementViews = (props) => {
             sourcePosition: 'right',
             targetPosition: 'left',
             type: 'default',
-            data: { label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.optionLabel}</div> },
-            position: { x: 1200, y: (productIndex + index) * 80 },
+            data: {
+              ref_type: 'asset',
+              ref_id: product.optionValue,
+              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.optionLabel}</div>
+            },
+            position: { x: 1200, y: loadingAssets * 80 },
             style: customNodeStyles.productAssets
           });
+          loadingAssets += 1;
           flowEdge.push({
-            id: `edge-${item._id}`,
+            id: `edge-loading-${item._id}-${product.optionValue}`,
             source: `${product.optionLabel}`,
             arrowHeadType: 'arrow',
             target: `${item._id}`
-            // animated: true
           });
           flowEdge.push({
-            id: `edge-${product.optionValue}`,
+            id: `edge-loading-assets-${product.optionValue}`,
             source: `${item._id}`,
             arrowHeadType: 'arrow',
             target: `${product.optionValue}`
-            // animated: true
           });
         });
       });
@@ -158,6 +173,8 @@ const RentalManagementViews = (props) => {
           targetPosition: 'left',
           type: 'output',
           data: {
+            ref_type: 'receiving',
+            ref_id: item._id,
             label: (
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {item.ticketName}
@@ -168,16 +185,15 @@ const RentalManagementViews = (props) => {
               </div>
             )
           },
-          position: { x: 1400, y: index * 80 },
+          position: { x: 1500, y: index * 80 },
           style: customNodeStyles.receivingTicket
         });
         item.productInventory?.map((product: any) => {
           flowEdge.push({
-            id: `edge-${product.optionValue}`,
+            id: `edge-receiving-${product.optionValue}`,
             source: `${product.optionValue}`,
             arrowHeadType: 'arrow',
             target: `${item._id}`
-            // animated: true
           });
         });
       });
@@ -188,9 +204,12 @@ const RentalManagementViews = (props) => {
         {
           id: `${rentalId}`,
           type: 'input',
-          //   className: 'dark-node',
           sourcePosition: 'right',
-          data: { label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName}</div> },
+          data: {
+            ref_type: 'rentalJob',
+            ref_id: rentalId,
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName ?? rentalName}</div>
+          },
           position: { x: 0, y: 80 },
           style: customNodeStyles.rentalJob
         }
@@ -202,6 +221,28 @@ const RentalManagementViews = (props) => {
     reactFlowInstance.fitView({ padding: 0.25 });
   };
 
+  const onElementClick = (event, element) => {
+    switch (element.data.ref_type) {
+      case 'product':
+        history.push(`${routes.productDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'package':
+        history.push(`${routes.packagesDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'asset':
+        history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'loading':
+        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'receiving':
+        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        break;
+      default:
+        history.push(`${routes.rentalManagementDetail.path}/${element.data.ref_id}?tab=2`);
+    }
+  };
+
   return (
     <div style={{ height: '68vh' }}>
       {flowData.length ? (
@@ -211,15 +252,13 @@ const RentalManagementViews = (props) => {
           selectNodesOnDrag={false}
           snapToGrid={true}
           snapGrid={[15, 15]}
-          aria-controls="right-panel"
-          // onNodeMouseEnter={onNodeMouseEnter}
-          // onNodeMouseMove={onNodeMouseMove}
-          // onNodeMouseLeave={onNodeMouseLeave}
-          // onNodeContextMenu={onNodeContextMenu}
+          onElementClick={onElementClick}
         >
           <Controls />
         </ReactFlow>
-      ) : null}
+      ) : (
+        <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Map...</div>
+      )}
     </div>
   );
 };
