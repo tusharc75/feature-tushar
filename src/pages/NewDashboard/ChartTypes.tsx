@@ -1,181 +1,276 @@
 import React from 'react';
-import { ChartData } from 'chart.js';
 import Chart from 'react-chartjs-2';
-import {
-  Paper,
-  Box,
-  Grid,
-  useTheme,
-  useMediaQuery,
-  Typography,
-  Button,
-  TableBody,
-  Table,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow
-} from '@material-ui/core';
+import { Paper, Box, Grid, useTheme, useMediaQuery, Typography, Button } from '@material-ui/core';
 import { ImportExport, TableChart, Timeline } from '@material-ui/icons';
-
 import { BsFilter } from 'react-icons/bs';
+import styles from '../KpiDashboard/dashboard.module.scss';
+
 import FiltersDropdown from './FiltersDropdown';
 import axiosInstance from '../../axios/axiosInstance';
+import ExportDropdown from './ExportDropdown';
+import getMappedData from './getMappedData';
 
+import Loader from '../../components/Loader';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import { formatAmountWithCurrency } from '../../constants/helpers';
+import { Skeleton } from '@material-ui/lab';
+import TableView from './TableView';
+import { GlobalFiltersType } from './GlobalFilter';
+
+export type ChartDataType = {
+  col: any;
+  type: string;
+  filters: { key: string; title: string; multiple: boolean }[];
+  title: string;
+  kpi: string;
+  hasFilter: boolean;
+  hasTableView: boolean;
+  hasExport: boolean;
+  uniqueId: string;
+  axis?: string;
+  numberOfCards?: number;
+};
 interface Props {
-  chart: {
-    col: any;
-    type: string;
-    filters: { key: string; title: string; multiple: boolean }[];
-    title: string;
-    kpi: string;
-    hasFilter: boolean;
-    hasTableView: boolean;
-    hasExport: boolean;
-  };
+  commonSalesData?: any;
+  setCommonSalesData?: any;
+  chart: ChartDataType;
   filterData: any;
+  globalFilters: GlobalFiltersType;
 }
 
-const ChartTypes = ({ chart, filterData }: Props) => {
+const StatusOptions1 = [
+  { optionLabel: 'Open', optionValue: 'open' },
+  { optionLabel: 'Won', optionValue: 'won' }
+];
+
+const StatusOptions2 = [
+  { optionLabel: 'Open', optionValue: 'open' },
+  { optionLabel: 'Won', optionValue: 'won' },
+  { optionLabel: 'Lost', optionValue: 'lost' }
+];
+
+const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
   const theme = useTheme();
-  const isScreenSmall = useMediaQuery(theme.breakpoints.down('md'));
+  const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
+  const { setToastConfig } = React.useContext(CustomToastContext);
+  const {
+    state: {
+      selectedEntity,
+      user: { user }
+    }
+  } = useData();
+  const currency = (user && user.currency) || '';
+  const [chartData, setChartData] = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
   const [tableView, setTableView] = React.useState(false);
   const [filterValues, setFilterValues] = React.useState(null);
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const data: ChartData = {
-    labels: ['Boston', 'Worcester', 'Springfield', 'Lowell', 'Cambridge', 'New Bedford'],
-    datasets: [
-      {
-        fill: true,
-        data: [617594, 181045, 153060, 106519, 105162, 95072],
-        //backgroundColor:'green',
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(255, 206, 86, 0.6)',
-          'rgba(75, 192, 192, 0.6)',
-          'rgba(153, 102, 255, 0.6)',
-          'rgba(255, 159, 64, 0.6)',
-          'rgba(255, 99, 132, 0.6)'
-        ]
-      }
-    ]
-  };
+  const [anchorElFilter, setAnchorElFilter] = React.useState(null);
+  const [anchorElExport, setAnchorElExport] = React.useState(null);
 
   const handleOpenFilter = React.useCallback((e: React.MouseEvent) => {
-    setAnchorEl(e.target);
+    setAnchorElFilter(e.target);
   }, []);
 
-  function createData(name: string, calories: number) {
-    return { name, calories };
-  }
-
-  const rows = [
-    createData('Frozen yoghurt', 159),
-    createData('Ice cream sandwich', 237),
-    createData('Eclair', 262),
-    createData('Cupcake', 305),
-    createData('Gingerbread', 356),
-    createData('Pancake', 400),
-    createData('Chocholate', 800),
-    createData('Mango', 259),
-    createData('Peaches', 259),
-    createData('Guava', 150),
-    createData('Kiwi', 120),
-    createData('Butterscotch', 300),
-    createData('Apple Pie', 600),
-    createData('Smoothie', 350)
-  ];
-
-  const fetchData = React.useCallback(() => {
-    const urlParams = '';
-    axiosInstance().get(`dashboards/${chart.kpi}?${urlParams}`);
+  const handleOpenExport = React.useCallback((e: React.MouseEvent) => {
+    setAnchorElExport(e.target);
   }, []);
+
+  const getParams = () => {
+    let url = '';
+    let params = {
+      ...filterValues,
+      ...globalFilters,
+      between: JSON.stringify({
+        from: new Date(globalFilters.between.from).toISOString().split('T')[0],
+        to: new Date(globalFilters.between.to).toISOString().split('T')[0]
+      })
+    };
+
+    const keys = Object.keys(params);
+    keys.forEach((key) => {
+      if (params[key]) {
+        if (key === 'between') {
+          url = `${url}${key}=${params[key]}&`;
+        }
+        if (key !== 'between' && params[key].optionValue) {
+          url = `${url}${key}=${params[key].optionValue}&`;
+        }
+        if (key === 'status' && !params[key].optionValue) {
+          url = `${url}${key}=open&`;
+        }
+      }
+    });
+
+    if (chart.uniqueId === 'offeredVsEntities') {
+      url = `${url}allEntity=1`;
+    }
+    return url;
+  };
+
+  React.useEffect(() => {
+    const fetchTimeout = setTimeout(fetchData, 200);
+    return () => clearTimeout(fetchTimeout);
+  }, [filterValues, globalFilters, selectedEntity]);
+
+  const fetchData = () => {
+    const urlParams = getParams();
+    setLoading(true);
+    axiosInstance()
+      .get(`dashboard/${chart.kpi}?entity=${selectedEntity}&${urlParams}`)
+      .then(async ({ data: { data } }) => {
+        const chartData = await getMappedData(chart, data, globalFilters.currency, currency);
+        setChartData(chartData);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setToastConfig(err);
+        setLoading(false);
+      });
+  };
+
+  const idsWithAdditionStatus = ['openQuote', 'openOpportinityByCustomer', 'openQuoteByRep'];
 
   return (
     <Grid item xs={12} md={chart.col}>
-      <Box component={Paper} p={'8px'} height={'100%'}>
-        <Box>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Box display="flex">
-              {chart.hasFilter && (
-                <Button
-                  onClick={handleOpenFilter}
-                  variant="outlined"
-                  size="small"
-                  disableElevation
-                  color="primary"
-                  startIcon={<BsFilter fontSize={14} />}
-                >
-                  Filters
-                </Button>
-              )}
+      {chart.type === 'cards' ? (
+        <Grid container spacing={1}>
+          {loading
+            ? [...Array(chart.numberOfCards).keys()].map((_, index) => (
+                <Grid item xs={12} sm={6} md={3} key={index + 1}>
+                  <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
+                    <Skeleton variant="text" width={150} height={30} />
+                    <Skeleton variant="text" width={100} height={20} />
+                  </Box>
+                </Grid>
+              ))
+            : !chartData || chartData.length === 0
+            ? null
+            : Object.keys(chartData).map((key, index) => (
+                <Grid item xs={12} sm={6} md={3} key={index + 1}>
+                  <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
+                    <Typography className={styles.price}>
+                      {chartData[key] ? formatAmountWithCurrency(globalFilters.currency || currency, chartData[key]).fullFormatAmount : 0}
+                    </Typography>
+                    <Typography variant="h6" className={styles.title}>
+                      {key}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ))}
+        </Grid>
+      ) : (
+        <Box component={Paper} p={'8px'} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
+          <Box>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Box display="flex">
+                {chart.hasFilter && (
+                  <Button
+                    disabled={!Boolean(chartData)}
+                    onClick={handleOpenFilter}
+                    size="small"
+                    disableElevation
+                    color="primary"
+                    startIcon={<BsFilter fontSize={14} />}
+                  >
+                    Filters
+                  </Button>
+                )}
+              </Box>
+              <Box display="flex">
+                {chart.hasExport && (
+                  <Button
+                    disabled={!Boolean(chartData)}
+                    style={{ marginRight: chart.hasTableView ? 16 : 0 }}
+                    onClick={handleOpenExport}
+                    color="primary"
+                    size="small"
+                    startIcon={<ImportExport />}
+                  >
+                    Export to
+                  </Button>
+                )}
+                {chart.hasTableView && (
+                  <Button
+                    disabled={!Boolean(chartData)}
+                    color="primary"
+                    onClick={() => {
+                      setTableView(!tableView);
+                    }}
+                    size="small"
+                    startIcon={!tableView ? <TableChart /> : <Timeline />}
+                  >
+                    {!tableView ? 'Table' : 'Chart'} View
+                  </Button>
+                )}
+              </Box>
             </Box>
-            <Box display="flex">
-              {chart.hasExport && (
-                <Button onClick={() => {}} size="small" startIcon={<ImportExport />}>
-                  Export to
-                </Button>
-              )}
-              {chart.hasTableView && (
-                <Button
-                  onClick={() => {
-                    setTableView(!tableView);
-                  }}
-                  startIcon={!tableView ? <TableChart /> : <Timeline />}
-                >
-                  {!tableView ? 'Table' : 'Chart'} View
-                </Button>
-              )}
-            </Box>
+
+            {chart.title && (
+              <Typography component="div" align="center" color="textPrimary">
+                <h4>{chart.title.replace(/currency/gi, globalFilters.currency || currency)}</h4>
+              </Typography>
+            )}
           </Box>
 
-          <Typography variant="h5" align="center">
-            {chart.title}
-          </Typography>
+          <Box minHeight={isScreenSmall ? 350 : chart.col <= 6 ? 400 : 500}>
+            {loading ? (
+              <Loader noLoader={false} text="" style={{ minHeight: '100%' }} />
+            ) : !chartData || chartData.length === 0 ? (
+              <Loader noLoader={true} text="No Data Avaiable" style={{ minHeight: '100%' }} />
+            ) : chart.type !== 'list' ? (
+              chart.hasTableView && tableView ? (
+                <TableView
+                  id={chart.uniqueId}
+                  type={chart.type}
+                  chartData={chartData.tableData}
+                  isScreenSmall={isScreenSmall}
+                  currency={globalFilters.currency || currency}
+                />
+              ) : (
+                <Chart
+                  id={chart.uniqueId}
+                  type={chart.type}
+                  data={chartData}
+                  options={{
+                    maintainAspectRatio: false,
+                    indexAxis: chart.axis
+                  }}
+                />
+              )
+            ) : (
+              <TableView
+                id={chart.uniqueId}
+                type={chart.type}
+                chartData={chartData}
+                isScreenSmall={isScreenSmall}
+                currency={globalFilters.currency || currency}
+              />
+            )}
+          </Box>
         </Box>
-        <Box minHeight={isScreenSmall ? '100%' : 500}>
-          {chart.type !== 'list' ? (
-            <Chart
-              type={chart.type}
-              data={data}
-              options={{
-                maintainAspectRatio: isScreenSmall ? true : false
-              }}
-            />
-          ) : (
-            <TableContainer style={{ height: '450px' }}>
-              <Table aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Dessert (100g serving)</TableCell>
-                    <TableCell align="right">Calories</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((row) => (
-                    <TableRow key={row.name}>
-                      <TableCell component="th" scope="row">
-                        {row.name}
-                      </TableCell>
-                      <TableCell align="right">{row.calories}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </Box>
-      </Box>
+      )}
 
       {chart.hasFilter && filterData && (
         <FiltersDropdown
-          closeAnchor={() => setAnchorEl(null)}
-          anchorEl={anchorEl}
+          closeAnchor={() => setAnchorElFilter(null)}
+          anchorEl={anchorElFilter}
           filters={chart.filters}
           values={filterValues}
           setValues={setFilterValues}
-          filterOptions={filterData}
+          filterOptions={{
+            ...filterData,
+            [idsWithAdditionStatus.includes(chart.uniqueId) && 'status']: chart.uniqueId === 'openQuote' ? StatusOptions1 : StatusOptions2
+          }}
+        />
+      )}
+      {chart.hasExport && (
+        <ExportDropdown
+          anchorEl={anchorElExport}
+          setAnchorClose={setAnchorElExport}
+          currency={globalFilters.currency || currency}
+          tableData={chartData ? (chart.type === 'list' ? chartData : chartData.tableData) : []}
+          chart={chart}
         />
       )}
     </Grid>

@@ -11,7 +11,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { serializedAsset, getObjKeysWithValues, gridLoadingTimeout, product, RESOURCE_LABEL, INVENTORY_STATUS, repairJob } from "../../constants/helpers";
+import { serializedAsset, getObjKeysWithValues, gridLoadingTimeout, product, sidebarResource, INVENTORY_STATUS, repairJob } from "../../constants/helpers";
 import ManageSerializedAsset from "./ManageSerializedAsset";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
@@ -32,11 +32,6 @@ import CustomTimeline from "../../components/CustomTimeline";
 import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
 import { MdEdit } from "react-icons/md";
 import { startCase } from "lodash";
-
-
-
-
-const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -88,10 +83,6 @@ const SerializedAssetDetailsPage = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-
-
-
-
   const [tabValue, setTabValue] = useState(0);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
@@ -106,12 +97,10 @@ const SerializedAssetDetailsPage = () => {
     };
   }
 
-
-
   const NameRenderer = (params) => (
     <>{
       params.value ? (
-        params.data.type === "Loading Ticket" || params.data.type === "Receiving Ticket" || params.data.type === "Return Ticket" ?
+        params.data.type === "Loading Ticket" || params.data.type === "Receiving Ticket" || params.data.type === "Return Ticket" || params.data.type === "Delivery Ticket" ?
           <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
             {params.value}
           </Link> : params.data.type.toLowerCase() === "repair" ?
@@ -137,6 +126,7 @@ const SerializedAssetDetailsPage = () => {
 
     </>
   );
+
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     commonRenderer: CommonRenderer,
@@ -149,6 +139,7 @@ const SerializedAssetDetailsPage = () => {
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
     { field: "comments", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
     { field: "location", headerName: "Location", show: true, cellRenderer: "commonRenderer" },
+    { field: "ownerType", headerName: "Owner Type", show: true, cellRenderer: "commonRenderer" },
     { field: "owner", headerName: "Owner", show: true, cellRenderer: "commonRenderer" },
   ];
 
@@ -167,9 +158,8 @@ const SerializedAssetDetailsPage = () => {
     getProductInventoryFields();
     fetchProductInventoryData();
     fetchProductInventoryHistory();
-
+    fetchProductInventoryStates()
   }
-
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
@@ -203,9 +193,7 @@ const SerializedAssetDetailsPage = () => {
 
   const fetchProductInventoryStates = async () => {
     try {
-      const {
-        data: { data },
-      } = await axiosInstance().post(`${serializedAsset.api}/inventory-stats`, { "ids": [id] });
+      const { data: { data } } = await axiosInstance().post(`${serializedAsset.api}/inventory-stats`, { "ids": [id] });
       handleMainPoints(data);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -215,17 +203,12 @@ const SerializedAssetDetailsPage = () => {
   const fetchProductInventoryData = async () => {
     setLoadingProductInventory(true);
     try {
-      const {
-        data: { data },
-      } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
+      const { data: { data } } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
 
-      // handleMainPoints(data);
-      fetchProductInventoryStates()
       setHeadingLbl(`${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
-      setCustomizedRoutes([routes.serializedAsset,
-      { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
+      setCustomizedRoutes([routes.serializedAsset, { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
       setProductId(data?.product?.optionValue)
-      setProductInventoryData(data);
+      setProductInventoryData({ ...data, currentOwner: data?.currentOwner?.optionLabel });
       if (data.status === "Scrap") {
         setCustomField({
           fieldData: {
@@ -246,7 +229,6 @@ const SerializedAssetDetailsPage = () => {
           }
         })
       }
-
       setLoadingProductInventory(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -254,14 +236,18 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const getProductInventoryFields = () => {
-    axiosInstance()
-      .get("/field?resource=Serialized Asset")
+    axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data }) => {
         if (data.data && data.data.length) {
           data.data.some(o => {
             if (o?.fieldData?.fieldName === "status") {
               setStatusOptions([...o.fieldData.option])
               return true
+            }
+          })
+          data.data.forEach(element => {
+            if (element?.fieldData?.fieldName === "currentOwner") {
+              element.fieldData.type = "singleLine";
             }
           })
         }
@@ -289,7 +275,6 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleDelete = () => {
-
     axiosInstance().put(`${serializedAsset.api}/remove`, { "ids": [] }).then(() => {
       setShowConfirmBox(false);
       history.goBack();
@@ -306,6 +291,7 @@ const SerializedAssetDetailsPage = () => {
   const closeActions = () => {
     setAnchorEl(null);
   };
+
   const handleStatusChange = o => {
     if (o.optionValue === "Scrap" || o.optionValue === "Lost") {
       setStatus(o.optionValue)
@@ -318,13 +304,8 @@ const SerializedAssetDetailsPage = () => {
 
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
-      .post(`${repairJob.api}/${repairJobId}/add-assets`, { "ids": [id] })
+      .post(`${repairJob.api}/${repairJobId}/assets`, { "ids": [id] })
       .then(({ data }) => {
-        // toastConfig.setToastConfig({
-        //   type: 'success',
-        //   open: true,
-        //   message: data.message,
-        // })
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -350,11 +331,10 @@ const SerializedAssetDetailsPage = () => {
     }
   }
 
-
   useEffect(() => {
     let statuses = [INVENTORY_STATUS.available, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost]
     if (productInventoryData) {
-      if (productInventoryData.status === INVENTORY_STATUS.lost || productInventoryData.status === INVENTORY_STATUS.repair || productInventoryData.status === INVENTORY_STATUS.underReview) {
+      if (productInventoryData.status === INVENTORY_STATUS.lost || productInventoryData.status === INVENTORY_STATUS.underReview) {
         setManualStatus(statuses)
       } else {
         setManualStatus(statuses.filter(status => status !== "Available"))
@@ -401,15 +381,16 @@ const SerializedAssetDetailsPage = () => {
                 >
                   {permissions?.serializedAsset?.isUpdate && (
                     <>
-                      <Button
-                        variant="outlined"
-                        color="default"
-                        size="small"
-                        onClick={() => setShowRepairJobDialog(true)}
-                      >
-                        {isMobile && !isTablet ? <GiAutoRepair size={20} /> : "Create Repair Job"}
-
-                      </Button>
+                      {![INVENTORY_STATUS.lost, INVENTORY_STATUS.inUse, INVENTORY_STATUS.reserved, INVENTORY_STATUS.repair].includes(productInventoryData.status) &&
+                        <Button
+                          variant="outlined"
+                          color="default"
+                          size="small"
+                          onClick={() => setShowRepairJobDialog(true)}
+                        >
+                          {isMobile && !isTablet ? <GiAutoRepair size={20} /> : "Create Repair Job"}
+                        </Button>
+                      }
                       <Button
                         variant="outlined"
                         color="default"
@@ -702,7 +683,7 @@ const SerializedAssetDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${storedRoutes ? storedRoutes.serializedAsset?.title : RESOURCE_LABEL.serializedAsset} ?`
+          message={`Are you sure you want to delete this ${routes.serializedAsset?.title} ?`
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -714,9 +695,8 @@ const SerializedAssetDetailsPage = () => {
         showRepairJobDialog &&
         <ManageRepairJob
           refrenceType="Product Inventory"
-          inventories={[id]}
-          open={showRepairJobDialog}
           onClose={() => setShowRepairJobDialog(false)}
+          refrenceData={{ warehouse: productInventoryData?.warehouse?.optionValue }}
           onSuccess={(obj) => {
             setShowRepairJobDialog(false);
             handleAddAssetToRepairJob(obj?._id)

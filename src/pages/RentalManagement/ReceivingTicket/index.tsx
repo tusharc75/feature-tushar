@@ -20,7 +20,6 @@ import {
   DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE,
   repairJob, DELIVERY_FROM_TO_TYPE
 } from "../../../constants/helpers";
-import { groupBy } from "lodash";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
@@ -43,6 +42,7 @@ import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import InfoIcon from '@material-ui/icons/Info';
 import { ExpandMore } from '@material-ui/icons';
 import ExistingRentalJob from "./ExistingRentalJob";
+import { groupBy, uniq, map } from "lodash";
 
 const renderedFrom = 'rentalManagementDetailsPageReceivingTicket';
 
@@ -125,7 +125,15 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
-        productAssets = productAssets.map((d) => ({ ...d.inventory, rentalAssetStatus: d.status })).map((u) => ({ ...u, productName: u?.product?.optionLabel }));
+        productAssets = productAssets.map(d => ({ ...d.inventory, rentalAssetStatus: d.status })).map(u => ({
+          ...u,
+          productName: u?.product?.optionLabel,
+          warehouse: u?.warehouse?.optionLabel,
+          warehouseId: u?.warehouse?.optionValue,
+          currentOwner: u?.currentOwner,
+          currentLocation: u?.currentLocation?.optionValue,
+        }))
+
         const result = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}`)
         deliveryTicketList = result?.data?.data
       }
@@ -196,6 +204,16 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     </Link>
   );
 
+  const WarehouseRenderer = (params) => (
+    params?.value ? (
+      <Link className="link text-truncate" title={params?.value} to={`${routes.warehouseDetail.path}/${params?.data?.warehouse?.optionValue}`}>
+        {params?.value}
+      </Link>
+    ) : (
+      <NoDataCell />
+    )
+  );
+
   const ProductNameRenderer = (params) => (
     <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data?.product?.optionValue}`}>
       {params.value}
@@ -235,6 +253,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     returnTicketRenderer: ReturnTicketRenderer,
     inventoryRenderer: InventoryRenderer,
     productNameRenderer: ProductNameRenderer,
+    warehouseRenderer: WarehouseRenderer,
     commonRenderer: CommonRenderer,
     dateRenderer: DateRenderer
   };
@@ -243,6 +262,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "inventoryRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
     { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
+    { field: "warehouse", headerName: "Plant", show: true, disabled: true, cellRenderer: "warehouseRenderer" },
     { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "deliveryTicketRenderer" },
     { field: "receivingTicket", headerName: "Receiving Ticket", show: true, cellRenderer: "receivingTicketRenderer" },
     { field: "returnTicket", headerName: "Return Ticket", show: true, cellRenderer: "returnTicketRenderer" },
@@ -287,13 +307,23 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
-      .post(`${repairJob.api}/${repairJobId}/add-assets`, { "ids": selectedRecords?.map(s => s._id) })
+      .post(`${repairJob.api}/${repairJobId}/assets`, { "ids": selectedRecords?.map(s => s._id) })
       .then(({ data }) => {
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       })
   }
+
+  const checkUniqWarehouse = () => {
+    if (selectedRecords.length === 0) {
+      return false;
+    } else if (uniq(map(selectedRecords, "warehouseId")).length === 1) {
+      return true;
+    } else {
+      return false;
+    }
+  };
 
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
@@ -451,9 +481,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
 
           {(selectedRecords.length && selectedRecords?.filter(f =>
             ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-              (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)
-              || f.status === INVENTORY_STATUS.scrap)
+              (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) || f.status === INVENTORY_STATUS.scrap)
             && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.available].includes(f.status)
+            && !f.subleaseAsset && checkUniqWarehouse()
           )?.length === selectedRecords?.length) ?
 
             <MenuItem
@@ -720,9 +750,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     {showRepairJobDialog &&
       <ManageRepairJob
         refrenceType="Rental Job"
-        refrenceData={rentalManagementData}
-        inventories={selectedRecords?.map(s => s._id)}
-        open={showRepairJobDialog}
+        refrenceData={{ _id: rentalManagementData._id, warehouse: selectedRecords[0].warehouseId }}
         onClose={() => setShowRepairJobDialog(false)}
         onSuccess={(obj) => {
           handleAddAssetToRepairJob(obj?._id)

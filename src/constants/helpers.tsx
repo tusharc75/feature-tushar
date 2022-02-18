@@ -54,7 +54,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
   text: '2 MB'
 };
 
-export const repairJobProcessSteps = ["Serialized Assets", "Loading Ticket", "Receiving Ticket", "End"];
+export const repairJobProcessSteps = ["Serialized Assets", "Repair Process"];
 
 export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 
@@ -170,7 +170,7 @@ export const sidebarResource = {
   pricing: 'Pricing',
   priceBuilder: 'Price Builder',
   flags: 'Flags',
-  projectSales: 'Target Projects List',
+  projectSales: 'Cross-Regional Target Projects List',
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
   address: 'Address',
@@ -267,7 +267,7 @@ export const RESOURCE_LABEL = {
   doa: 'DOA',
   termsAndConditions: 'T&Cs',
   equiptmentRentalMaster: 'Equiptment Rental Master',
-  projectStrategy: 'Target Projects List',
+  projectStrategy: 'Cross-Regional Target Projects List',
   productBuilder: 'Price Builder',
   formBuilder: 'Form Builder',
   currencyConverter: 'Currency Converter',
@@ -307,6 +307,7 @@ export const CHILD_RESOURCE = {
   repairJobAsset: 'Repair Job Asset',
   salesOrderProduct: 'Sales Order Product',
   salesOrderCost: 'Sales Order Cost',
+  subleaseProduct: 'Sublease Product',
 };
 
 
@@ -454,7 +455,14 @@ export const serializedAsset = {
   api: '/serialized-asset',
   route: '/serialized-asset',
   permission: 'serializedAsset',
-  resource: 'serialized-asset'
+  resource: 'Serialized Asset'
+};
+
+export const productInventory = {
+  api: '/product-inventory',
+  route: '/product-inventory',
+  permission: 'productInventory',
+  resource: 'product-inventory'
 };
 
 export const budget = {
@@ -1085,7 +1093,36 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   };
 };
 
-export function b64toBlob(dataURI) {
+/**
+ * 
+ * @param date From when to convert amount
+ * @param amount An amount to be converted
+ * @param currencyFrom Currency to convert from
+ * @param currencyTo Currency to convert to
+ * @returns It returns a coverted amount in numbers
+ */
+
+export const getExchangeRates = (date: string, amount: number, currencyFrom: string, currencyTo: string) => {
+  if (!currencyFrom || !currencyTo) return
+
+  if (currencyFrom === currencyTo) return
+
+  if (amount <= 0) return
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      const host = 'api.frankfurter.app';
+      const res = await fetch(`https://${host}/${date}?amount=${amount}&from=${currencyFrom}&to=${currencyTo}`);
+      const data = await res.json();
+
+      resolve(data);
+    } catch (error) {
+      reject(error);
+    }
+  })
+};
+
+export const b64toBlob = (dataURI: string) => {
   var byteString = atob(dataURI.split(',')[1]);
   var ab = new ArrayBuffer(byteString.length);
   var ia = new Uint8Array(ab);
@@ -1539,7 +1576,6 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   return: 'Return',
 } as const;
 
-
 export const REPAIR_JOB_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
@@ -1574,13 +1610,16 @@ export const DELIVERY_FROM_TO_TYPE = {
 
 export const SUBLEASE_STATUS = {
   new: 'New',
-  indTransit: 'In-Transit',
+  inProgress: 'In-Progress',
   issued: 'Issued',
   completed: 'Completed',
-  readyToInvoice: 'Ready to Invoice',
-  invoiced: 'Invoiced',
-  closed: 'Closed',
 };
+
+export const INVENTORY_OWNER_TYPE = {
+  brand: 'Brand',
+  supplierAccount: 'Supplier Account',
+  customerAccount: 'Customer Account',
+} as const;
 
 export const asyncForEach = async (
   array: any[],

@@ -12,8 +12,6 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { CommonRenderer, CreatedByRenderer, DateRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import RepairJobHeader from './RepairJobHeader';
@@ -22,7 +20,6 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import AddIcon from "@material-ui/icons/Add"
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
 import { camelCase } from 'lodash'
@@ -117,7 +114,6 @@ const RepairJob = () => {
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
-      repairJobNameRenderer: RepairJobNameRenderer,
       actionsRenderer: ActionsRenderer
     }
     setFrameworkComponents({ ...tempFrameworkComponent })
@@ -126,66 +122,6 @@ const RepairJob = () => {
       columns.push(checkStaticField(pageTitle, field))
     })
     setColumns([...columns])
-
-    // let data;
-    // if (isOffline) {
-    //   data = offlineFieldsData[accountResource] ?? [];
-    // } else {
-    //   const response = await axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`);
-
-    //   data = response?.data?.data;
-    //   try {
-    //     updateFieldsData(accountResource, data);
-    //   } catch (ex) {
-    //     console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`);
-    //   }
-    // }
-
-    // let columns = [];
-    // let rendererNames = [];
-
-    // data.forEach((o) => {
-    //   if (['repairJobName'].indexOf(o?.fieldData?.fieldName) === 0) {
-    //     columns = [
-    //       ...columns,
-    //       {
-    //         pivotIndex: 0,
-    //         field: 'repairJobName',
-    //         headerName: 'Repair Job Name',
-    //         show: true,
-    //         disabled: true,
-    //         cellRenderer: 'repairJobNameRenderer'
-    //       }
-    //     ];
-    //   } else {
-    //     let currentColumn = getColumnData(accountResource, o?.fieldData, `/${accountRoute}/detail`);
-    //     if (currentColumn !== null) {
-    //       columns = [...columns, currentColumn?.columnData];
-    //       if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-    //         rendererNames.push(currentColumn?.rendererName);
-    //       }
-    //     }
-    //   }
-    //   return o?.fieldData;
-    // });
-    // let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    // tempFrameworkComponent = {
-    //   ...tempFrameworkComponent,
-    //   repairJobNameRenderer: RepairJobNameRenderer,
-    //   actionsRenderer: ActionsRenderer
-    // };
-    // setFrameworkComponents({ ...tempFrameworkComponent });
-
-    // let staticFields = getStaticFields();
-    // staticFields.forEach((field) => {
-    //   columns.push(checkStaticField(routes.projectSales.title, field));
-    // });
-    // setColumns([...columns]);
-
-    // if (JSON.parse(sessionStorage.getItem('filters')) !== null) {
-    //   let savedFilter = JSON.parse(sessionStorage.getItem('filters'));
-    //   dispatch({ type: 'filter', filters: savedFilter });
-    // }
   };
 
   //  Grid Variables - End
@@ -221,7 +157,6 @@ const RepairJob = () => {
     repairJobTimeout = setTimeout(() => {
       fetchRepairJobs();
     }, millisec);
-    // eslint-disable-next-line
   }, [search]);
 
   useEffect(() => {
@@ -251,38 +186,6 @@ const RepairJob = () => {
         toastConfig.setToastConfig(error);
       });
   };
-
-  const RepairJobNameRenderer = (params) => (
-    <>
-      <Link className="text-truncate link" title={params.value} to={`${routes.repairJob.path}/detail/${params.data._id}`}>
-        {params.value}
-      </Link>
-    </>
-  );
-
-  const RepairPersonRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" title={params.value} to={`${routes.user.path}/detail/${params.data.repairPersonId}`}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  const OwnerRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" to={`${routes.userDetail.path}/${params.data.ownerId}`} title={params.owner}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
 
   const ActionsRenderer = (params) => (
     <>
@@ -719,7 +622,6 @@ const RepairJob = () => {
       {showManageRepairJobDialog.open && (
         <ManageRepairJobDialog
           isClone={showManageRepairJobDialog.isClone}
-          open={showManageRepairJobDialog.open}
           repairJobId={showManageRepairJobDialog.idToClone}
           onClose={() => setShowManageRepairJobDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={(data) => {

@@ -555,7 +555,7 @@ const CreateProduct = (props) => {
                 }) => (
                     <Fragment>
                         <CustomDialogHeader
-                            title={`${(productId && !isClone) ? `Edit Product - ${values?.productName}` : (productId && isClone) ? `Clone - [${cloneHeading}]` : `New Product`}`}
+                            title={`${(productId && !isClone) ? `Edit Product - ${values?.productName}` : (productId && isClone) ? `Clone - ${cloneHeading}` : `New Product`}`}
                             isMinimized={!fullScreen}
                             onMinimizeMaximize={() => {
                                 setFullScreen(prevState => !prevState)

@@ -50,6 +50,13 @@ const ManageDeliveryTicket = (props) => {
 
     const ref = useRef(null);
 
+    const [supplierData, setSupplierData] = useState([]);
+    const [customerData, setCustomerData] = useState([]);
+    const [addressData, setAddressData] = useState([]);
+
+    const [pickupFromAddress, setPickupFromAddress] = useState([]);
+    const [deliveryToAddress, setDeliveryToAddress] = useState([]);
+
     useEffect(() => {
         const fields = initialData.fields
         if (fields.length > 0) {
@@ -61,6 +68,21 @@ const ManageDeliveryTicket = (props) => {
                 setOwnerData(ownerCollabOptions[0].option);
                 setCollaboratorData(ownerCollabOptions[0].option);
             }
+            const supplierAccountData = fields.find((d) => d.fieldName === "supplierAccount");
+            if (supplierAccountData) {
+                setSupplierData(supplierAccountData.option)
+            }
+            const customerAccountData = fields.find((d) => d.fieldName === "customerAccount");
+            if (customerAccountData) {
+                setCustomerData(customerAccountData.option)
+            }
+            const allAddressData = fields.find((d) => d.fieldName === "pickupFromAddress");
+            if (allAddressData) {
+                setAddressData(allAddressData.option)
+                setPickupFromAddress(allAddressData.option)
+                setDeliveryToAddress(allAddressData.option)
+            }
+
             const modifiedData = setFieldsInAscendingOrder(fields)
 
             const newFilteredData = modifiedData.filter((formData) => {
@@ -108,6 +130,12 @@ const ManageDeliveryTicket = (props) => {
                 if (deliveryToType === DELIVERY_FROM_TO_TYPE.supplier) {
                     element.option = supplierAccount
                 }
+            }
+            if (pickupFromType === DELIVERY_FROM_TO_TYPE.plant && element.fieldName === "pickupFromAddress") {
+                element.isUneditable = true
+            }
+            if (deliveryToType === DELIVERY_FROM_TO_TYPE.plant && element.fieldName === "deliveryToAddress") {
+                element.isUneditable = true
             }
             if (ticketType === DELIVERY_TICKET_TYPE.return && element.fieldName === "returnReason") {
                 element.required = true;
@@ -177,54 +205,14 @@ const ManageDeliveryTicket = (props) => {
                         tempInitialData["deliveryDate"] = moment(refrenceData?.endDate).subtract(1, 'days');
                     }
                     else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
-                        tempInitialData["ticketName"] = `${refrenceData?.repairJobName}_${generateUniqueIdOnly()}`
-                        tempInitialData["repairJob"] = refrenceData?._id
-                        const plant = refrenceData["plant"] ?? refrenceData["warehouse"];
-                        if (ticketType === DELIVERY_TICKET_TYPE.loading) {
-                            tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
-                            tempInitialData["pickupFrom"] = plant?.optionValue
-                            fieldsDataForCreate?.forEach((e) => {
-                                if (e.fieldName === "warehouse") {
-                                    const plantAddress = e?.option?.filter((e) => e.optionValue === plant?.optionValue)
-                                    if (plantAddress.length) {
-                                        tempInitialData["pickupFromAddress"] = plantAddress[0].address
-                                    }
-                                }
-                            })
-                            if (refrenceData?.typeOfRepair === "Internal") {
-                                tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
-                                tempInitialData["deliveryTo"] = refrenceData?.repairPlant?.optionValue;
-                                tempInitialData["deliveryToAddress"] = refrenceData?.plantShipTo?.optionValue;
-                            }
-                            else if (refrenceData?.typeOfRepair === "External") {
-                                tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.supplier;
-                                tempInitialData["deliveryTo"] = refrenceData?.supplier?.optionValue;
-                                tempInitialData["deliveryToAddress"] = refrenceData?.supplierShipTo?.optionValue;
-                            }
-                        }
-                        else {
-                            if (refrenceData?.typeOfRepair === "Internal") {
-                                tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
-                                tempInitialData["pickupFrom"] = refrenceData?.repairPlant?.optionValue;
-                                tempInitialData["pickupFromAddress"] = refrenceData?.plantShipTo?.optionValue;
-                            }
-                            else if (refrenceData?.typeOfRepair === "External") {
-                                tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
-                                tempInitialData["pickupFrom"] = refrenceData?.supplier?.optionValue;
-                                tempInitialData["pickupFromAddress"] = refrenceData?.supplierShipTo?.optionValue;
-                            }
-                            tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
-                            tempInitialData["deliveryTo"] = warehouseId
-                            fieldsDataForCreate?.forEach((e) => {
-                                if (e.fieldName === "warehouse") {
-                                    const plantAddress = e?.option?.filter((e) => e.optionValue === warehouseId)
-                                    if (plantAddress.length) {
-                                        tempInitialData["deliveryToAddress"] = plantAddress[0].address
-                                    }
-                                }
-                            })
-                        }
-                        tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
+                        tempInitialData["ticketName"] = `${refrenceData?.ticketName}_${generateUniqueIdOnly()}`
+                        tempInitialData["repairJob"] = refrenceData?.refrenceId
+                        tempInitialData["pickupFromType"] = refrenceData?.pickupFromType;
+                        tempInitialData["pickupFrom"] = refrenceData?.pickupFrom;
+                        tempInitialData["pickupFromAddress"] = refrenceData?.pickupFromAddress;
+                        tempInitialData["deliveryToType"] = refrenceData?.deliveryToType;
+                        tempInitialData["deliveryTo"] = refrenceData?.deliveryTo;
+                        tempInitialData["deliveryToAddress"] = refrenceData?.deliveryToAddress;
                     }
                     else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
                         tempInitialData["ticketName"] = `${refrenceData?.transferAssetNumber}_${generateUniqueIdOnly()}`
@@ -414,6 +402,53 @@ const ManageDeliveryTicket = (props) => {
         }
     }
 
+    const onPickupFromAddressOpen = (pickupFromType, pickupFrom) => {
+        if (pickupFromType === DELIVERY_FROM_TO_TYPE.supplier) {
+            let filterAddress = supplierData.find(d => d.optionValue === pickupFrom)?.shippingAddress
+            if (filterAddress) {
+                setPickupFromAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue)));
+            }
+            else {
+                setPickupFromAddress([])
+            }
+        }
+        else if (pickupFromType === DELIVERY_FROM_TO_TYPE.customer) {
+            let filterAddress = customerData.find(d => d.optionValue === pickupFrom)?.shippingAddress
+            if (filterAddress) {
+                setPickupFromAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue)));
+            }
+            else {
+                setPickupFromAddress([])
+            }
+        }
+        else {
+            setPickupFromAddress(addressData)
+        }
+    };
+
+    const onDeliveryToAddressOpen = (deliveryToType, deliveryTo) => {
+        if (deliveryToType === DELIVERY_FROM_TO_TYPE.supplier) {
+            let filterAddress = supplierData.find(d => d.optionValue === deliveryTo)?.shippingAddress
+            if (filterAddress) {
+                setDeliveryToAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue)));
+            }
+            else {
+                setDeliveryToAddress([])
+            }
+        }
+        else if (deliveryToType === DELIVERY_FROM_TO_TYPE.customer) {
+            let filterAddress = customerData.find(d => d.optionValue === deliveryTo)?.shippingAddress
+            if (filterAddress) {
+                setDeliveryToAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue)));
+            }
+            else {
+                setDeliveryToAddress([])
+            }
+        }
+        else {
+            setDeliveryToAddress(addressData)
+        }
+    };
 
     return (<Dialog
         maxWidth="md"
@@ -607,7 +642,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                     );
                                                                                 }}
                                                                             />
-                                                                        ) : field.fieldName === "deliveryTo" ? (
+                                                                        ) : field.fieldName === "pickupFrom" ? (
                                                                             <FormTypes
                                                                                 {...field}
                                                                                 isNew={!deliveryTicketId}
@@ -621,8 +656,8 @@ const ManageDeliveryTicket = (props) => {
                                                                                 options={field.option}
                                                                                 onChange={(e, val) => {
                                                                                     setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "");
-                                                                                    if (values["deliveryToType"] === "Plant" && val?.address) {
-                                                                                        setFieldValue("deliveryToAddress", val?.address);
+                                                                                    if (values["pickupFromType"] === DELIVERY_FROM_TO_TYPE.plant && val?.address) {
+                                                                                        setFieldValue("pickupFromAddress", val?.address);
                                                                                     }
                                                                                 }}
                                                                                 required={field.required}
@@ -632,27 +667,101 @@ const ManageDeliveryTicket = (props) => {
                                                                                 size="small"
                                                                                 disabled={disableOwnerSelection || (deliveryTicketId && field.disableOnEdit)}
                                                                             />
-                                                                        ) : <FormTypes
-                                                                            {...field}
-                                                                            fieldData={field}
-                                                                            isNew={!Boolean(deliveryTicketId)}
-                                                                            values={values}
-                                                                            errors={errors}
-                                                                            touched={touched}
-                                                                            label={field.fieldLabel}
-                                                                            name={field.fieldName}
-                                                                            type={field.type}
-                                                                            options={field.option}
-                                                                            setFieldValue={(name, value) => {
-                                                                                setFieldValue(name, value)
-                                                                            }}
-                                                                            required={field.required}
-                                                                            fullWidth
-                                                                            isTooltip={field?.isTooltip || false}
-                                                                            tooltipMessage={field?.tooltipMessage}
-                                                                            size="small"
-                                                                            imageOrFileUploadCompletePercentage={null}
-                                                                        />}
+                                                                        )
+                                                                            : field.fieldName === "deliveryTo" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    isNew={!deliveryTicketId}
+                                                                                    fieldData={field}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={field.option}
+                                                                                    onChange={(e, val) => {
+                                                                                        setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "");
+                                                                                        if (values["deliveryToType"] === DELIVERY_FROM_TO_TYPE.plant && val?.address) {
+                                                                                            setFieldValue("deliveryToAddress", val?.address);
+                                                                                        }
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    disabled={disableOwnerSelection || (deliveryTicketId && field.disableOnEdit)}
+                                                                                />
+                                                                            ) : field.fieldName === "pickupFromAddress" ? (
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
+                                                                                    fieldData={field}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={pickupFromAddress}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    onOpen={() =>
+                                                                                        onPickupFromAddressOpen(values["pickupFromType"], values["pickupFrom"])
+                                                                                    }
+                                                                                />)
+                                                                                : field.fieldName === "deliveryToAddress" ? (
+                                                                                    <FormTypes
+                                                                                        {...field}
+                                                                                        disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
+                                                                                        fieldData={field}
+                                                                                        values={values}
+                                                                                        errors={errors}
+                                                                                        touched={touched}
+                                                                                        label={field.fieldLabel}
+                                                                                        name={field.fieldName}
+                                                                                        type={field.type}
+                                                                                        options={deliveryToAddress}
+                                                                                        setFieldValue={(name, value) => {
+                                                                                            setFieldValue(name, value)
+                                                                                        }}
+                                                                                        required={field.required}
+                                                                                        fullWidth
+                                                                                        isTooltip={field?.isTooltip || false}
+                                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                                        size="small"
+                                                                                        onOpen={() =>
+                                                                                            onDeliveryToAddressOpen(values["deliveryToType"], values["deliveryTo"])
+                                                                                        }
+                                                                                    />)
+                                                                                    : <FormTypes
+                                                                                        {...field}
+                                                                                        fieldData={field}
+                                                                                        isNew={!Boolean(deliveryTicketId)}
+                                                                                        values={values}
+                                                                                        errors={errors}
+                                                                                        touched={touched}
+                                                                                        label={field.fieldLabel}
+                                                                                        name={field.fieldName}
+                                                                                        type={field.type}
+                                                                                        options={field.option}
+                                                                                        setFieldValue={(name, value) => {
+                                                                                            setFieldValue(name, value)
+                                                                                        }}
+                                                                                        required={field.required}
+                                                                                        fullWidth
+                                                                                        isTooltip={field?.isTooltip || false}
+                                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                                        size="small"
+                                                                                        imageOrFileUploadCompletePercentage={null}
+                                                                                    />}
                                                                     </Grid>
                                                         ))}
                                                     </Grid>

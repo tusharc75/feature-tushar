@@ -141,17 +141,17 @@ function OpportunityDetailsPage() {
   useEffect(() => {
     if (
       opportunityData?.staticData?.customerContact &&
-      opportunityData.staticData?.customerContact.length &&
+      opportunityData?.staticData?.customerContact.length &&
       customerContacts &&
-      customerContacts.length === 0
+      customerContacts?.length === 0
     )
       fetchCustomerContactData(false);
 
     if (
       opportunityData?.staticData?.supplierContact &&
-      opportunityData.staticData?.supplierContact.length &&
+      opportunityData?.staticData?.supplierContact?.length &&
       supplierContacts &&
-      supplierContacts.length === 0
+      supplierContacts?.length === 0
     )
       fetchSupplierContactData(false);
   }, [opportunityData]);
@@ -162,6 +162,7 @@ function OpportunityDetailsPage() {
       axiosInstance()
         .get(`${opportunityApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
+          console.log(data,"data")
           let modifiedData = {};
           Object.assign(modifiedData, data);
           modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).fullFormatAmount;
@@ -230,6 +231,7 @@ function OpportunityDetailsPage() {
     axiosInstance()
       .get(`${opportunityApi}/related/${id}`)
       .then(({ data: { data } }) => {
+        console.log(data,'related')
         setProjectSales(
           data[sidebarResource.projectStrategy] &&
             data[sidebarResource.projectStrategy][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
@@ -258,7 +260,7 @@ function OpportunityDetailsPage() {
     let ids = [];
 
     if (opportunityData.supplierAccount?.length > 0 || useAccountList) {
-      ids = useAccountList ? accountList.map((d) => d?.optionValue) : opportunityData.supplierAccountName.map((d) => d?.optionValue);
+      ids = useAccountList ? accountList?.map((d) => d?.optionValue) : opportunityData?.supplierAccount.map((d) => d?.optionValue);
 
       const filterById = JSON.stringify([{ field: 'accountName', term: ids.length > 1 ? { $in: ids } : ids[0] }]);
       setLoadingSupplierAccounts(true);
@@ -443,7 +445,7 @@ function OpportunityDetailsPage() {
 
   const goBackToListing = () => {
     history.push({
-      pathname: routes.opportunity.path
+      pathname: routes?.opportunity?.path
     });
   };
 
