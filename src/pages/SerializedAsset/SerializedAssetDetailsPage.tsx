@@ -32,6 +32,7 @@ import CustomTimeline from "../../components/CustomTimeline";
 import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
 import { MdEdit } from "react-icons/md";
 import { startCase } from "lodash";
+import moment from 'moment';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -194,6 +195,12 @@ const SerializedAssetDetailsPage = () => {
   const fetchProductInventoryStates = async () => {
     try {
       const { data: { data } } = await axiosInstance().post(`${serializedAsset.api}/inventory-stats`, { "ids": [id] });
+      if (data.totalUtilization) {
+        data.totalUtilization = moment.duration(data.totalUtilization).hours()
+        if (data.totalUtilization) {
+          data.totalUtilization = `${data.totalUtilization} hours`
+        }
+      }
       handleMainPoints(data);
     } catch (error) {
       toastConfig.setToastConfig(error);

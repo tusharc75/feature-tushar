@@ -74,29 +74,27 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       if (index > -1) {
         newCols[index] = col;
       }
-      if(col.hasOwnProperty("pivotIndex")|| col.hasOwnProperty("lockPosition") && col.lockPosition) {
-        setLockedItem(prevState => [...prevState, col])
+      if (col.hasOwnProperty('pivotIndex') || (col.hasOwnProperty('lockPosition') && col.lockPosition)) {
+        setLockedItem((prevState) => [...prevState, col]);
       }
     });
 
-    newCols = newCols.filter(item => item)
+    newCols = newCols.filter((item) => item);
     setSortedColumns(newCols);
     setOldDate(JSON.stringify(newCols));
     setNewData(JSON.stringify(newCols));
   }, [columns]);
 
-
   React.useEffect(() => {
     if (oldData === newData) {
-      setHasChanged(false)
+      setHasChanged(false);
     } else {
-      setHasChanged(true)
+      setHasChanged(true);
     }
 
-    const allColumnShow = sortedColumns.filter(col => col.show === false).length === 0;
-    setAllChecked(allColumnShow)
-
-  }, [oldData, newData, sortedColumns])
+    const allColumnShow = sortedColumns.filter((col) => col.show === false).length === 0;
+    setAllChecked(allColumnShow);
+  }, [oldData, newData, sortedColumns]);
 
   const handleToggle = (column: any) => (event: React.ChangeEvent<HTMLInputElement>) => {
     const newColumns = [...sortedColumns];
@@ -192,23 +190,16 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
               <Switch size="small" checked={allChecked} onChange={handleToggleAll} />
             </ListItemSecondaryAction>
           </ListItem>
-          {lockedItem.map(col => (
+          {/* {lockedItem.map((col) => (
             <ListItem divider disableGutters disabled={col?.disabled} key={col.field}>
-            <ListItemText primary={col?.headerName} />
-            <ListItemSecondaryAction>
-              <Switch  size="small" disabled={col?.disabled} checked={col?.show} onChange={handleToggle(col)} />
-            </ListItemSecondaryAction>
-          </ListItem>
-          ))}
+              <ListItemText primary={col?.headerName} />
+              <ListItemSecondaryAction>
+                <Switch size="small" disabled={col?.disabled} checked={col?.show} onChange={handleToggle(col)} />
+              </ListItemSecondaryAction>
+            </ListItem>
+          ))} */}
           <DndProvider backend={HTML5Backend}>
-            {sortedColumns.filter((col) => {
-              const index = lockedItem.findIndex(c => c.field === col.field)
-
-              if(index !== -1) {
-                return false
-              } 
-              return true
-            }).map((column, index) => (
+            {sortedColumns.map((column, index) => (
               <RenderListItem
                 key={column.field}
                 column={column}
