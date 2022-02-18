@@ -1,18 +1,19 @@
 import React, { useContext, useState, useEffect, Fragment } from 'react'
 import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core'
-import ConfirmCancelDialog from '../../components/ConfirmCancelDialog'
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent'
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader'
-import { CustomDialogTransition, getObjKeysWithValues, repairJob, yupSchema, REPAIR_JOB_STATUS } from '../../constants/helpers'
-import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter'
-import axiosInstance from '../../axios/axiosInstance'
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext'
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog'
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent'
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader'
+import { CustomDialogTransition, getObjKeysWithValues, repairJob, yupSchema, REPAIR_JOB_STATUS } from '../../../constants/helpers'
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter'
+import axiosInstance from '../../../axios/axiosInstance'
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext'
 import { Formik, Form } from 'formik'
 import { FaDiceOne } from 'react-icons/fa'
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
-import FormTypes from '../../components/Helpers/FormTypes'
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
+import FormTypes from '../../../components/Helpers/FormTypes'
 import { uniq, map, orderBy } from 'lodash'
 import moment from 'moment'
+import { isMobile, isTablet } from 'react-device-detect';
 
 export default function ManageAssetDialog({ open, fields, asset, selectedRecords, onSuccess, onClose, repairJobData }) {
 
@@ -21,30 +22,26 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
     const [isUpdating, setIsUpdating] = useState(false)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [customFields, setCustomFields] = useState([]);
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     const toastConfig = useContext(CustomToastContext);
 
     useEffect(() => {
-
         setInitialData({
             fields: fields,
             values: getObjKeysWithValues(asset ? { ...asset, expectedCompletionDate: (asset["expectedCompletionDate"] ? asset["expectedCompletionDate"] : repairJobData["expectedCompletionDate"]) } : { expectedCompletionDate: repairJobData["expectedCompletionDate"] }, fields),
         });
-
         const sections = uniq(map(fields, 'sectionName'));
         const customData = sections.map((name) => {
             let sectionFields = fields.filter((field) => field.sectionName === name);
             sectionFields = orderBy(sectionFields, 'order', 'asc');
             return { name, sectionFields };
         });
-
         setCustomFields(customData)
-
     }, [])
 
     const handleSubmit = (values) => {
         const prepareDataToUpdate = [];
-
         if (selectedRecords.length > 0) {
             selectedRecords.forEach(d => {
                 prepareDataToUpdate.push({
@@ -58,14 +55,12 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
                 id: asset.id,
             })
         }
-
-        axiosInstance().put(`${repairJob.api}/${_id}/update-assets`, prepareDataToUpdate).then(() => {
+        axiosInstance().put(`${repairJob.api}/${_id}/assets`, prepareDataToUpdate).then(() => {
             setIsUpdating(false);
             onSuccess();
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         })
-
     }
 
     return (
@@ -73,7 +68,7 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
             <Dialog
                 fullWidth
                 maxWidth="md"
-                // fullScreen={fullScreen || (isMobile || isTablet)}
+                fullScreen={fullScreen || (isMobile || isTablet)}
                 TransitionComponent={CustomDialogTransition}
                 aria-labelledby="customized-dialog-title"
                 onClose={(e, reason) => {
@@ -99,17 +94,16 @@ export default function ManageAssetDialog({ open, fields, asset, selectedRecords
                         }) => (
                             <Fragment>
                                 <CustomDialogHeader
-                                    title={asset ? `Edit - ${asset.index} - ${asset.assetNumber}` : ("Bulk Edit " + "(" + selectedRecords.length + ")")}
-                                    onClose={() => {
+                                    title={asset ? `Edit - ${asset.assetNumber}` : ("Bulk Edit " + "(" + selectedRecords.length + ")")}
+                                    onClose={(e, reason) => {
                                         onClose()
                                     }}
-                                    // isMinimized={!fullScreen}
-                                    // onMinimizeMaximize={() => {
-                                    //     setFullScreen(prevState => !prevState)
-                                    // }}
-                                    showManimizeMaximize={false}
-                                ></CustomDialogHeader>
-
+                                    isMinimized={!fullScreen}
+                                    onMinimizeMaximize={() => {
+                                        setFullScreen(prevState => !prevState)
+                                    }}
+                                    showManimizeMaximize={true}
+                                />
                                 <CustomDialogContent>
                                     <Form autoComplete="off" autoCorrect="off" noValidate >
                                         {customFields && customFields.map((section, i) => (
