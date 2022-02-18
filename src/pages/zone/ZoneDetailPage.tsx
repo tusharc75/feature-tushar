@@ -15,6 +15,7 @@ import CreateZone from './CreateZone';
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import Zipcode from "./zip";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -166,7 +167,7 @@ const ZoneDetailPage = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+          <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
             <Paper>
               {!productCategoryData ? (
                 <div>
@@ -189,7 +190,7 @@ const ZoneDetailPage = () => {
 
                 <DetailsPageHeader
                   heading={headingLbl}
-                  mainPoints={mainPoints}
+                  mainPoints={null}
                   showHeading={true}
                 >
                   {permissions?.address?.isUpdate && (
@@ -202,7 +203,7 @@ const ZoneDetailPage = () => {
                       Edit
                     </Button>
                   )}
-                  <Box component="span" marginX={1} />
+                  <Box component="span" />
                   {permissions?.address?.isDelete && (
                     <span
                       title={
@@ -249,7 +250,9 @@ const ZoneDetailPage = () => {
               </Box>
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
-                    <Box><p>Pincode</p></Box>
+                  <Zipcode 
+                  id = {id}
+                  />
                     </TabPanel>
             </Paper>
           </Grid>
