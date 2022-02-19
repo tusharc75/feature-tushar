@@ -6,7 +6,7 @@ import routes from '../../../components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
 import CarouselDialog from '../../../components/CarouselDialog';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
-import {Link} from "react-router-dom"
+import {Link,useParams} from "react-router-dom"
 import {CommonRenderer} from "../../../components/AgGridComponents/CustomAgGridCellRenderers"
 import { Delete, Edit } from '@material-ui/icons';
 import CreateZip from "../CreateZip";
@@ -29,16 +29,18 @@ interface ConfigProps {
   const [removing, setRemoving] = React.useState(false);
   const [showConfirmBox, setShowConfirmBox] = React.useState({
     open: false,
-    ids: []
+    zips: []
   });
+  const { resource } = useParams();
   const [columns, setColumns] = React.useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
-  const localStorageSelectedRecords = `${routes.productCategory.title}_selected`;
+  const localStorageSelectedRecords = `zip_selected`;
   const [carouselDialog, setCarouselDialog] = React.useState({
     open: false,
     images: [],
     index: 0
   });
+  const [section, setSection] = React.useState(null);
   const [editConfig, setEditConfig] = React.useState({
     values: {},
     images: []
@@ -61,13 +63,14 @@ interface ConfigProps {
       {/* <IconButton size="small" color="inherit" onClick={() => editData(params.data)}>
         <Edit fontSize="small" />
       </IconButton> */}
+  
       <IconButton
         size="small"
         color="inherit"
         onClick={() => {
           setShowConfirmBox({
             open: true,
-            ids: [params.data.id]
+            zips: [params.data.zipCode]
           });
         }}
       >
@@ -79,9 +82,10 @@ interface ConfigProps {
 
   const ZipNameRenderer =(params) => (
     <>
-    <Link className="link" to="/zip">  {params.value}</Link>
+     {params.value}
     </>
   )
+
 
 
   const fetchGridColumns = () => {
@@ -112,14 +116,12 @@ interface ConfigProps {
     axiosInstance()
       .get(`${routes.zone.path}/${id}/zip`)
       .then(({ data: { data,count } }) => {
-        
-        // setConfigData(data)
+        setSection(data);
         const rows = data.map((d,index) => {
           let finalObject = prepareDataForGrid(d);
-          // finalObject['canDelete'] = permissions.productCategory.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === d._id);
-          // finalObject['allowedToEdit'] = permissions.productCategory.isUpdate;
-          finalObject['id'] = index;
+          finalObject['_id'] = index;
+         
           return {...finalObject};
         });
 
@@ -127,14 +129,14 @@ interface ConfigProps {
           dispatch({
             type: 'initialize',
             data: [...dataRows, ...rows],
-            count: count,
+            count: rows.length,
             selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
             type: 'initialize',
             data: rows,
-            count: count,
+            count: rows.length,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
@@ -144,16 +146,16 @@ interface ConfigProps {
             let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
               ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
               : [];
-            if (oldSelectedRecords.length > 0) {
+            if (oldSelectedRecords === null) {
               gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
+                node.setSelected(oldSelectedRecords.some((o) => o === node.data.id));
               });
             }
           } catch (ex) {
             console.error('Error in getting selected records from local storage');
           }
         }
-        dispatch({ type: 'initialize', data: rows, count: count });
+        dispatch({ type: 'initialize', data: rows, count:rows?.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -170,55 +172,96 @@ interface ConfigProps {
     setRemoving(true);
     axiosInstance()
       .put(`${routes.zone.path}/${id}/zip/remove`, {
-        zips: showConfirmBox.ids
+        zips: showConfirmBox.zips
       })
       .then(() => {
         setShowConfirmBox({
           open: false,
-          ids: []
+          zips: []
         });
         getZipData();
         setRemoving(false);
+        setToastConfig('Zipcode removed successfully');
       })
       .catch((err) => {
         setShowConfirmBox({
           open: false,
-          ids: []
+          zips: []
         });
         setRemoving(false);
         setToastConfig(err)
       });
+
+
   };
+
+  const handleExportFields = () => {
+    var dataStr =
+        "data:text/json;charset=utf-8," +
+        encodeURIComponent(JSON.stringify(section));
+    var dlAnchorElem = document.getElementById("downloadAnchorElem");
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", "Zip Code.xlsx");
+    dlAnchorElem.click();
+};
+
+const handleImportFields = (e) => {
+  e.preventDefault();
+  var files = e.target.files,
+    f = files[0];
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    var data: any = e.target.result;
+    setSection(JSON.parse(data));
+  };
+  reader.readAsBinaryString(f);
+};
+
 
   return (
     <Box>
-      <Box p={2} display="flex" justifyContent="space-between">
-        <div />
-        <Box display="flex">
-          <Box mr={2} component={'div'}>
-            <DeleteButton
+      <Box p={2} display="flex" justifyContent="space-between" >
+        <Box mr={2} component={'div'}>
+        <Button style={{marginTop:"20px"}} onClick={() => setOpenDialog(true)} size="small" variant="contained" color="primary" disableElevation>
+            Add Zip Code
+          </Button>
+          
+          </Box>
+        <Box p={2} display="flex" justifyContent="space-between" style={{marginLeft:""}}>
+          <Box mt={1}> <label style={{color:"#0E49B5"}}>Import from Excel |  
+              <input
+                onClick={(e: any) => (e.target.value = null)}
+                id="importField"
+                name="importField"
+                onChange={handleImportFields}
+                style={{
+                  opacity: "0",
+                  position: "absolute",
+                  zIndex: -1,
+                }}
+                type="file"
+              /></label>
+          <label style={{color:"#0E49B5"}}  onClick={handleExportFields}> Export to Excel</label> <a id="downloadAnchorElem" style={{ display: "none" }}></a></Box>
+         
+           <DeleteButton
               onClick={() => {
                 setShowConfirmBox({
                   open: true,
-                  ids: selectedRecords.map((s) => s.id)
+                  zips: selectedRecords.map((s) => s.zipCode)
                 });
               }}
               size="small"
               disabled={selectedRecords.length === 0}
               disableElevation
               text={'Delete'}
+              style={{ marginLeft: '10px' }}
             />
-          </Box>
-          <Button onClick={() => setOpenDialog(true)} size="small" variant="contained" color="primary" disableElevation>
-            Add Zipcode
-          </Button>
+          
         </Box>
       </Box>
       <Box>
         {Object.keys(frameWorkComponent).length > 0 && (
           <CustomAgGrid
-            allowSelection={true}
-            allowAction={true}
             columns={columns}
             dataRows={dataRows}
             frameworkComponents={frameWorkComponent}
@@ -232,6 +275,7 @@ interface ConfigProps {
             loading={gridLoading}
             isClientSideGrid
             renderedFrom="zone"
+            refreshGrid={getZipData}
           />
         )}
       </Box>
@@ -270,7 +314,7 @@ interface ConfigProps {
           onClose={() => {
             setShowConfirmBox({
               open: false,
-              ids: []
+              zips: []
             });
           }}
           onOk={removeData}

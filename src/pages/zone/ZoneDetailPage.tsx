@@ -235,7 +235,7 @@ const ZoneDetailPage = () => {
                 }}
               >
                 <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-                <Tab label="Pincode" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
+                <Tab label="Zip Code" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
               </Tabs>
 
               <TabPanel value={tabValue} index={0}>

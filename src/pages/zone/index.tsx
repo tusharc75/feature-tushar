@@ -158,19 +158,11 @@ const Zone = () => {
   const columnState = JSON.parse(localStorage.getItem('productCategoryPage'));
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
-  const localStorageSelectedRecords = `${routes.productCategory.title}_selected`;
+  const localStorageSelectedRecords = `${routes.zone.title}_selected`;
   const [isOpenDialog, setisOpenDialog] = useState(false)
   const [sortOpen, setSortOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId == item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
+
 
   useEffect(() => {
     const parsedParams = queryString.parse(location?.search);
