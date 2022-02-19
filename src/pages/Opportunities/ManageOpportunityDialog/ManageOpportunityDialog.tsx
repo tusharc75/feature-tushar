@@ -496,8 +496,8 @@ export default function ManageOpportunityDialog({
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
                                                 setFieldValue('marketSegment', value?.marketSegment ?? '');
                                                 setFieldValue('subMarketSegment', value?.subMarketSegment ?? '');
-                                                setFieldValue('countryBillTo', value?.billingAddress ?? '');
-                                                setFieldValue('countrySellTo', value?.shippingAddress ?? '');
+                                                setFieldValue('countryBillTo', value?.billingAddress.length > 0 ? value?.billingAddress : []);
+                                              setFieldValue('countrySellTo', value?.shippingAddress.length > 0 ? value?.shippingAddress : []);
                                                
                                                 marketSegmentChange(value?.marketSegment ?? '');
                                                 onCountryBillToDropDownOpen(value && value.optionValue ? value.optionValue : '');

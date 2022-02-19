@@ -70,7 +70,7 @@ const ProductBuilder = (props) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null);
   const [isAddField, setIsAddField] = useState(false);
-  const [showCloseConfirmBox,setShowCloseConfirmBox] = useState(false);
+  const [showCloseConfirmBox, setShowCloseConfirmBox] = useState(false);
   const [addFieldData, setaddFieldData] = useState({ section: [], fields: [] });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -157,7 +157,9 @@ const ProductBuilder = (props) => {
       }
       setFrameWorkComponent({ ...tempFrameworkComponent })
       setColumns([...columns])
-      setColumnForPDFExcel([...columns].filter(d => d.field !== "srno").map(d => d.headerName))
+      if (setColumnForPDFExcel) {
+        setColumnForPDFExcel([...columns].filter(d => d.field !== "srno").map(d => d.headerName))
+      }
       dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
       refreshProducts(data);
@@ -694,7 +696,7 @@ const ProductBuilder = (props) => {
         <CreateProduct
           isClone={false}
           productId={null}
-          handleClose={() =>  setIsAddNewProduct(false)}
+          handleClose={() => setIsAddNewProduct(false)}
           isAddInBuilder={true}
           addProductInBuilder={addProductInBuilder}
           openFrom="builder"
@@ -715,7 +717,7 @@ const ProductBuilder = (props) => {
           handleSaveProduct={handleSaveProduct}
           handleClose={() => {
             setProductId(null);
-          
+
           }}
           stage={stage}
         />
@@ -749,14 +751,14 @@ const ProductBuilder = (props) => {
         />
       )}
 
-{showCloseConfirmBox && (
+      {showCloseConfirmBox && (
         <ConfirmationDialog
           open={showCloseConfirmBox}
           message={`Are you sure you want to leave this dialouge?`}
           onClose={() => {
-            setShowCloseConfirmBox(false);                 
+            setShowCloseConfirmBox(false);
           }}
-          onOk={()=>{
+          onOk={() => {
             setProductId(null);
           }}
         />
@@ -766,36 +768,36 @@ const ProductBuilder = (props) => {
 
 
 
-{
-                    showConfirmDialog ?
-                      <ConfirmCancelDialog
-                        open={showConfirmDialog}
-                        close={() => setShowConfirmDialog(false)}
-                        onSave={() => {
-                          setShowConfirmDialog(false)
-                          // e.preventDefault();
-                          // const err = Object.keys(errors);
-                          // if (err.length) {
-                            // const input = document.querySelector(
-                            //   `input[name=${err[0]}]`,
-                            // );
+      {
+        showConfirmDialog ?
+          <ConfirmCancelDialog
+            open={showConfirmDialog}
+            close={() => setShowConfirmDialog(false)}
+            onSave={() => {
+              setShowConfirmDialog(false)
+              // e.preventDefault();
+              // const err = Object.keys(errors);
+              // if (err.length) {
+              // const input = document.querySelector(
+              //   `input[name=${err[0]}]`,
+              // );
 
-                            // input.scrollIntoView({
-                            //   behavior: 'smooth',
-                            //   block: 'center',
-                            //   inline: 'start',
-                            // });
+              // input.scrollIntoView({
+              //   behavior: 'smooth',
+              //   block: 'center',
+              //   inline: 'start',
+              // });
 
-                          }
-                         
-                        }
-                        onClose={() => {
-                          setShowConfirmDialog(false)
-                          
-                          setProductId(null);
-                        }}
-                      /> : null
-                  }
+            }
+
+            }
+            onClose={() => {
+              setShowConfirmDialog(false)
+
+              setProductId(null);
+            }}
+          /> : null
+      }
 
       {/* {
         showProductNumberOrProductNameUpdate.open && <Dialog
