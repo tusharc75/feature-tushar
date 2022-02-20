@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.64.0](https://github.com/vebholic/oms_frontend/compare/v2.63.0...v2.64.0) (2022-02-20)
+
+
+### Features
+
+* **feat/avi:** feat/avi ([2722c3d](https://github.com/vebholic/oms_frontend/commit/2722c3db42fc5f8cadcf1b4b9f2c09557ff3647d))
+
+
+### Bug Fixes
+
+* bug fix ([473924b](https://github.com/vebholic/oms_frontend/commit/473924b260a820444234faa450e3c069b528a259))
+
 ## [2.63.0](https://github.com/vebholic/oms_frontend/compare/v2.62.1...v2.63.0) (2022-02-19)
 
 
