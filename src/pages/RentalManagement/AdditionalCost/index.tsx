@@ -158,7 +158,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex">
                     <Button
-                        variant={isMobile && !isTablet ? "text" : "contained"}
+                        variant="contained"
                         color="primary"
                         size="small"
                         disabled={isOffline}
@@ -167,7 +167,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                             setSelectedCostData(null)
                         }}
                     >
-                        {isMobile && !isTablet ? <GiSabersChoc size={20}/> :"Add Ad-hoc Charge"}
+                        Add Ad-hoc Charge
                     </Button>
                 </Box>
             </Box>
