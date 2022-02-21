@@ -21,7 +21,8 @@ import AssetDashboard from '../KpiDashboard/AssetDashboard';
 const DashbaordNew = () => {
   const {
     state: {
-      user: { user }
+      user: { user },
+      userLoading
     }
   } = useData();
   const [commonSalesData, setCommonSalesData] = React.useState(null);
@@ -56,8 +57,8 @@ const DashbaordNew = () => {
             ...prevState,
             countryBillTo: countriesData,
             countrySellTo: countriesData,
-            subMarketSegment: data["Market Segment"].filter(d => d.parentMarketSegment),
-            marketSegment: data["Market Segment"].filter(d => !d.parentMarketSegment),
+            subMarketSegment: data['Market Segment'].filter((d) => d.parentMarketSegment),
+            marketSegment: data['Market Segment'].filter((d) => !d.parentMarketSegment),
             [camelCase(_d) === 'user' ? 'salesRep' : camelCase(_d)]: data[_d]
           }));
         });
@@ -75,51 +76,54 @@ const DashbaordNew = () => {
       <div className="headerbox">
         <CustomBreadCrumbs routes={[{ title: 'Dashboard' }]} />
       </div>
-      {typeOfDashboard ? (
-        <div className="detail-container">
-          <React.Fragment>
-            <GlobalFilter globalFilters={globalFilters} setGlobalFilters={setGlobalFilters} />
-            <Box bgcolor="#efefef" p={1} pt={1}>
-              {typeOfDashboard.includes('Asset') ? (
-                <AssetDashboard salesFilter={globalFilters} />
-              ) : (
-                <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
-                  {chartData?.charts ? (
-                    chartData?.charts.map((chart: ChartDataType, index: number) => (
-                      <ChartTypes
-                        globalFilters={globalFilters}
-                        key={chart.type + ' ' + index + 1}
-                        chart={chart}
-                        filterData={{ ...filtersOptions }}
-                        commonSalesData={commonSalesData}
-                        setCommonSalesData={setCommonSalesData}
-                      />
-                    ))
-                  ) : (
-                    <Loader minHeight="100%" noLoader={true} text="Loading Dasboard" />
-                  )}
-                </Grid>
-              )}
+      <div className="detail-container">
+        {!userLoading ? (
+          typeOfDashboard ? (
+            <React.Fragment>
+              <GlobalFilter globalFilters={globalFilters} setGlobalFilters={setGlobalFilters} />
+              <Box bgcolor="#efefef" p={1} pt={1}>
+                {typeOfDashboard.includes('Asset') ? (
+                  <AssetDashboard salesFilter={globalFilters} />
+                ) : (
+                  <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
+                    {chartData?.charts ? (
+                      chartData?.charts.map((chart: ChartDataType, index: number) => (
+                        <ChartTypes
+                          globalFilters={globalFilters}
+                          key={chart.type + ' ' + index + 1}
+                          chart={chart}
+                          filterData={{ ...filtersOptions }}
+                          commonSalesData={commonSalesData}
+                          setCommonSalesData={setCommonSalesData}
+                        />
+                      ))
+                    ) : (
+                      <Loader minHeight="100%" noLoader={true} text="Something went wrong" />
+                    )}
+                  </Grid>
+                )}
+              </Box>
+            </React.Fragment>
+          ) : (
+            <Box
+              style={{ height: 'calc(100vh - 110px)', minHeight: '400px' }}
+              width={'100%'}
+              display={'flex'}
+              flexDirection="column"
+              justifyContent={'center'}
+              alignItems={'center'}
+              bgcolor={'rgba(255, 255, 255, 0.7)'}
+            >
+              <img width={400} height={340} src={placeholder_img} alt="dashboard" />
+              <Typography color="textSecondary" variant="h5">
+                You don't have access to any dashboard
+              </Typography>
             </Box>
-          </React.Fragment>
-        </div>
-      ) : (
-        <Box
-          className="detail-container"
-          style={{ height: 'calc(100vh - 110px)', minHeight: '400px' }}
-          width={'100%'}
-          display={'flex'}
-          flexDirection="column"
-          justifyContent={'center'}
-          alignItems={'center'}
-          bgcolor={'rgba(255, 255, 255, 0.7)'}
-        >
-          <img width={400} height={340} src={placeholder_img} alt="dashboard" />
-          <Typography color="textSecondary" variant="h5">
-            You don't have access to any dashboard
-          </Typography>
-        </Box>
-      )}
+          )
+        ) : (
+          <Loader minHeight="100%" noLoader={false} text="Loading..." />
+        )}
+      </div>
     </MuiPickersUtilsProvider>
   );
 };
