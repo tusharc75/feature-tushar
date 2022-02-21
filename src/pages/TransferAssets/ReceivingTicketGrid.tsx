@@ -2,18 +2,18 @@ import React, { useState, useReducer, Fragment, useContext, useEffect, FC } from
 import { Button, Box } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import NoDataCell from '../../components/Helpers/NoDataCell';
-import { deliveryTicket, sidebarResource } from '../../constants/helpers';
+import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { deliveryTicket, sidebarResource } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { groupBy } from 'lodash';
 import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
-import { CommonRenderer, DateRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { CommonRenderer, DateRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
+import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
 

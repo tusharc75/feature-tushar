@@ -13,7 +13,7 @@ import MobileStepper from '@material-ui/core/MobileStepper';
 import Button from '@material-ui/core/Button';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
-import CustomMobileStepperOpportunities from '../../components/CustomMobileStepperOpportunities';
+import CustomMobileStepperOpportunities from 'src/components/CustomMobileStepperOpportunities';
 import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
 
 const useStyles = makeStyles((theme) => ({
