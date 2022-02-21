@@ -226,9 +226,9 @@ const Zipcode = (props: ConfigProps) => {
 
   return (
     <Box>
-      <Box p={2} display="flex" justifyContent="space-between" >
+      <Box display="flex" justifyContent="space-between" >
         <Box mr={2} component={'div'}>
-          <Button style={{ marginTop: "20px" }} onClick={() => setOpenDialog(true)} size="small" variant="contained" color="primary" disableElevation>
+          <Button style={{ marginTop: "20px",marginLeft:"20px" }} onClick={() => setOpenDialog(true)} size="small" variant="contained" color="primary" disableElevation>
             Add Zip Code
           </Button>
 
