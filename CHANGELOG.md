@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.64.1](https://github.com/vebholic/oms_frontend/compare/v2.64.0...v2.64.1) (2022-02-21)
+
+## [2.64.0](https://github.com/vebholic/oms_frontend/compare/v2.63.0...v2.64.0) (2022-02-20)
+
+
+### Features
+
+* **feat/avi:** feat/avi ([2722c3d](https://github.com/vebholic/oms_frontend/commit/2722c3db42fc5f8cadcf1b4b9f2c09557ff3647d))
+
+
+### Bug Fixes
+
+* bug fix ([473924b](https://github.com/vebholic/oms_frontend/commit/473924b260a820444234faa450e3c069b528a259))
+
+## [2.63.0](https://github.com/vebholic/oms_frontend/compare/v2.62.1...v2.63.0) (2022-02-19)
+
+
+### Features
+
+* **feat/avi:** feat/avi ([a6a9689](https://github.com/vebholic/oms_frontend/commit/a6a9689c9f2f7202b417a43781409effad5860a9))
+
+
+### Bug Fixes
+
+* **app.tsx:** conflict resolve ([c144894](https://github.com/vebholic/oms_frontend/commit/c144894da2e86d5baeb5c32d1bf3bec7ac545e94))
+* bug fix ([cb28a9a](https://github.com/vebholic/oms_frontend/commit/cb28a9a197112fb604cab615cf63b74987d98d08))
+* bug fix ([42b4122](https://github.com/vebholic/oms_frontend/commit/42b41227a52cd1d4ee573bc8febfaa811cd49798))
+* bug fix ([2b6ad0f](https://github.com/vebholic/oms_frontend/commit/2b6ad0fe97c525292b68753d2c0cd632cec05dc1))
+* **private-route:** minor fix ([3c9b685](https://github.com/vebholic/oms_frontend/commit/3c9b6857727e738b38e90ec31c38c654709e2472))
+* **transfer inventory:** bug fix and new pages ([81e8e6e](https://github.com/vebholic/oms_frontend/commit/81e8e6e8556f8c6e075afe88bf8f3b981984fe36))
+
 ### [2.62.1](https://github.com/vebholic/oms_frontend/compare/v2.62.0...v2.62.1) (2022-02-18)
 
 

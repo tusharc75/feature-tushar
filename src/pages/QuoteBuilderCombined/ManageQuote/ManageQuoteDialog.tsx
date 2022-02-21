@@ -1021,8 +1021,8 @@ export default function ManageQuoteDialog({
                                               setFieldValue("opportunity", "");
                                               setFieldValue('countryBillTo', value?.billingAddress ?? '');
                                               setFieldValue('countrySellTo', value?.shippingAddress ?? '');
-                                              onCountryBillToDropDownOpen(value && value.optionValue ? value.optionValue : '');
-                                              onCountrySellToDropDownOpen(value && value.optionValue ? value.optionValue : '');
+                                              setFieldValue('countryBillTo', value?.billingAddress.length > 0 ? value?.billingAddress : []);
+                                              setFieldValue('countrySellTo', value?.shippingAddress.length > 0 ? value?.shippingAddress : []);
                                               handleValuesChange({
                                                 [field.fieldName]: value && value.optionValue ? value.optionValue : "",
                                                 "customerContactName": [],
