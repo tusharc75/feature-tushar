@@ -11,7 +11,7 @@ import Dialog from '@material-ui/core/Dialog'
 import FormTypes from "../Helpers/FormTypes";
 import axiosInstance from '../../axios/axiosInstance'
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { getObjKeys, getUniqueCurrencies, yupSchema } from '../../constants/helpers';
+import { getObjKeys, getUniqueCurrencies, yupSchema, getObjKeysWithValues } from '../../constants/helpers';
 import CustomButton from '../Helpers/CustomButton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
@@ -113,10 +113,6 @@ const CreateProduct = (props) => {
             if (productId) {
                 const newField = _fields;
                 axiosInstance().get(`/product/` + productId).then(({ data: { data } }) => {
-
-               
-
-
                     data.fields?.map((_f) => newField.push(_f));
                     data.productData.fields?.map((_f) => newField.push(_f));
                     if (data.productData.fieldChanges) {
@@ -124,7 +120,7 @@ const CreateProduct = (props) => {
                     }
                     setFields(data.productData.fields)
                     if (isClone) {
-                        setCloneHeading(data.productData.productName );
+                        setCloneHeading(data.productData.productName);
                         data.productData.productName = ""
                     }
                     newField.map((_f) => {
@@ -138,7 +134,7 @@ const CreateProduct = (props) => {
                     });
                     setInitialData({
                         fields: newField,
-                        values: data.productData
+                        values: getObjKeysWithValues(data.productData, newField)
                     });
                     EvaluteproductFields(newField)
                     if (_isProductTemplate) {

@@ -1,39 +1,39 @@
 import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
 import { GiStockpiles } from 'react-icons/gi';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Box, Chip } from '@material-ui/core';
-import SearchBox from '../../components/Helpers/SearchBox';
+import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
-import routes from '../../components/Helpers/Routes';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { transferAsset, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { useData } from '../../StateProvider/Provider';
+import routes from 'src/components/Helpers/Routes';
+import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
+import { transferAsset, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from 'src/constants/helpers';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { useData } from 'src/StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from 'react-router-dom';
-import HtmlTooltip from '../../components/CustomTooltipTitle';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { prepareDataForGrid } from '../../constants/helpers';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
+import { prepareDataForGrid } from 'src/constants/helpers';
 import ManageTransferAsset from './ManageTransferAsset';
 import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { FaSuitcase } from 'react-icons/fa';
 import { MdAdd, MdFilterList, MdSort, RiFileTransferFill, GiCargoShip, RiFolderTransferFill, SiStatuspage } from 'react-icons/all';
-import MobileSortDialog from "../../components/MobileSortDialog"
-import MobileFilterDialog from "../../components/MobileFilterDialog"
+import MobileSortDialog from "src/components/MobileSortDialog"
+import MobileFilterDialog from "src/components/MobileFilterDialog"
 
 
 const TransferAsset = () => {
-  
+
   const toastConfig = useContext(CustomToastContext);
   const [showManageTransferAssetDialog, setShowManageTransferAssetDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -103,13 +103,9 @@ const TransferAsset = () => {
       .then(({ data }) => {
         let rows = data.data?.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-
-          finalObject['canDelete'] = permissions?.transferAsset?.isDelete;
-
+          finalObject['canDelete'] = false;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-
           finalObject['allowedToEdit'] = permissions?.transferAsset?.isUpdate;
-
           return finalObject;
         });
 

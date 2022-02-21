@@ -175,7 +175,7 @@ export const sidebarResource = {
   transferAsset: 'Transfer Asset',
   address: 'Address',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventory' 
+  transferInventory: 'Transfer Inventory'
 };
 
 export const resourceNames = {
@@ -234,7 +234,7 @@ export const resourceNames = {
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventory' 
+  transferInventory: 'Transfer Inventory'
 };
 
 export const primaryFields = {
@@ -298,7 +298,7 @@ export const RESOURCE_LABEL = {
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventories' 
+  transferInventory: 'Transfer Inventories'
 };
 
 export const CHILD_RESOURCE = {
@@ -611,14 +611,14 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue ? defaultValue : false;
     } else if (key.type === 'multiSelect') {
       const values = dataObj[key.fieldName] && dataObj[key.fieldName].length
-
         ? typeof dataObj[key.fieldName] === 'string'
-          ? dataObj[key.fieldName]
+          ? [dataObj[key.fieldName]]
           : dataObj[key.fieldName].map((val: any) => filterValues(val))
         : defaultValue || [];
       obj[key.fieldName] = values;
     } else if (key.type === 'dropDown') {
-      const value = filterValues(dataObj[key.fieldName]);
+      const value = (dataObj[key.fieldName] && Array.isArray(dataObj[key.fieldName]) && dataObj[key.fieldName]?.length) ? dataObj[key.fieldName][0] :
+        filterValues(dataObj[key.fieldName]);
       obj[key.fieldName] = value ? value : defaultValue || '';
     } else if (key.type === 'converter' || key.type === 'currencyAmount' || key.isConverter === true) {
       if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {

@@ -71,7 +71,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
             Header: 'Detail',
             minWidth: 300,
             width: 300,
-            sticky: "left",
+            sticky: isMobile ? "none" : "left",
             Cell: ({ row }) => (
                 <div style={{ display: "flex", alignItems: 'center' }}>
                     {isOffline ? <p> {row.original.detail}</p>
@@ -392,25 +392,25 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                             color="primary"
                             size="small"
                             disabled={isOffline}
-                            style={isMobile && !isTablet ? {color:"var(--secondary)"} : {}}
+                            style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
                             onClick={() => {
                                 setAddExistingProductDialog({ open: true, type: "product", parentId: null });
                             }}
                         >
-                            {isMobile && !isTablet ? <MdAdd size={20}/> :  `Add ${routes.product.title}` }
+                            {isMobile && !isTablet ? <MdAdd size={20} /> : `Add ${routes.product.title}`}
                         </Button>
                         <Box mx={1} />
                         <Button
                             variant={isMobile && !isTablet ? "text" : "contained"}
                             color="primary"
                             size="small"
-                            style={isMobile && !isTablet ? {color:"var(--colorOpportunity)"} : {}}
+                            style={isMobile && !isTablet ? { color: "var(--colorOpportunity)" } : {}}
                             disabled={isOffline}
                             onClick={() => {
                                 setAddExistingProductDialog({ open: true, type: "package", parentId: null });
                             }}
                         >
-                            {isMobile && !isTablet ? <FiPackage size={18}/> :  `Add ${routes.packages.title}` }
+                            {isMobile && !isTablet ? <FiPackage size={18} /> : `Add ${routes.packages.title}`}
                         </Button>
                     </Box>
                     <Box display="flex">
@@ -420,11 +420,11 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                                     variant={isMobile && !isTablet ? "text" : "contained"}
                                     color="primary"
                                     size="small"
-                                    style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
+                                    style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
                                     disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
                                     onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
                                 >
-                                   {isMobile && !isTablet ? <RiEditCircleLine size={20}/> :  "Bulk Edit" }  
+                                    {isMobile && !isTablet ? <RiEditCircleLine size={20} /> : "Bulk Edit"}
                                 </Button>
                             </span>
                         </HtmlTooltip>
@@ -447,7 +447,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                                 }}
                                 endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
                             >
-                               {isMobile && !isTablet ? <MdDelete size={20}/> :  "Delete" }
+                                {isMobile && !isTablet ? <MdDelete size={20} /> : "Delete"}
                             </Button>
                         </HtmlTooltip>
                     </Box>

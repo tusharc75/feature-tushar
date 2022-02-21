@@ -307,9 +307,7 @@ export default function DeliveryTicketDetail(props) {
         data = response?.productInventory?.filter(d => inventory?.includes(d.inventory)).map(obj => obj.inventoryDetail)
       }
       else {
-        let ids = JSON.stringify(productInventories)
-        const queryString = `?getById=${ids}`
-        const response = await axiosInstance().get(`${serializedAsset.api}${queryString}`)
+        const response = await axiosInstance().get(`${deliveryTicket.api}/${id}/assets`)
         data = response?.data?.data
       }
       let rows = data.map((u) => {
@@ -852,7 +850,7 @@ export default function DeliveryTicketDetail(props) {
             }}
             onOk={() => {
               setOkBtnLoading(true);
-              axiosInstance().put(`${deliveryTicket.api}/${id}/remove-assets`, { ids: selectedRecords.map(m => m._id) })
+              axiosInstance().put(`${deliveryTicket.api}/${id}/assets`, { ids: selectedRecords.map(m => m._id) })
                 .then(() => {
                   toastConfig.setToastConfig({ open: true, type: "success", message: `Selected serialized asset(s) removed` });
                   dispatch({
@@ -875,7 +873,7 @@ export default function DeliveryTicketDetail(props) {
         {addSerializedAssetDialog &&
           <AddSerializedAsset
             addSerializedAsset={(newRecordsToAdd) => {
-              axiosInstance().post(`${deliveryTicket.api}/${id}/add-assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
+              axiosInstance().post(`${deliveryTicket.api}/${id}/assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
                 .then(({ data }) => {
                   setAddSerializedAssetDialog(false)
                   fetchDeliveryTicketData()
