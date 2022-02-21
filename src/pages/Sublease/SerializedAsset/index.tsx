@@ -40,6 +40,8 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
     const [isCompleteing, setIsCompleteing] = useState(false);
     const [isCompleteEnable, setIsCompleteEnable] = useState(false);
 
+    const [downlodingFile, setDownlodingFile] = useState(false);
+
     useEffect(() => {
         fetchGridColumns()
     }, []);
@@ -115,6 +117,43 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
 
     return (<>
         <Box display="flex" justifyContent="flex-end" pt={1}>
+            <Button
+                onClick={() => {
+                    setDownlodingFile(true);
+                    axiosInstance().get(`${sublease.api}/${subleaseData._id}/pdf`)
+                        .then(({ data }) => {
+                            axiosInstance()
+                                .get(`user/download?fileName=${data.data.fileName}`, {
+                                    responseType: "blob",
+                                })
+                                .then(({ data }) => {
+                                    const file = new Blob([data], { type: "application/pdf" });
+                                    const fileURL = URL.createObjectURL(file);
+                                    const pdfWindow = window.open();
+                                    pdfWindow.location.href = fileURL;
+                                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                                    setDownlodingFile(false);
+                                })
+                                .catch((err) => {
+                                    toastConfig.setToastConfig(err);
+                                    setDownlodingFile(false);
+                                });
+                        }).catch((err) => {
+                            toastConfig.setToastConfig(err);
+                            setDownlodingFile(false);
+                        })
+                }}
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                color="primary"
+                type="button"
+                size="small"
+                disabled={downlodingFile}
+                style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
+                startIcon={isMobile ? '' : <AiFillFilePdf />}
+            >
+                {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
+            </Button>
+            <Box mx={1} />
             {SUBLEASE_STATUS.completed != subleaseData?.status &&
                 <Fragment>
                     <Tooltip title="Transfer to Plant">
