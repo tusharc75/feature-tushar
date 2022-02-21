@@ -9,8 +9,8 @@ import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import { getLocalStorageArrayData, prepareDataForGrid } from "../../constants/helpers"
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { FaRegistered, FaSuitcase,FaAddressBook,FaAddressCard } from "react-icons/fa";
-import {SiStatuspage } from "react-icons/all";
+import { FaRegistered, FaSuitcase, FaAddressBook, FaAddressCard } from "react-icons/fa";
+import { SiStatuspage } from "react-icons/all";
 import {
   isObjectEmpty,
   customerAccount,
@@ -30,7 +30,6 @@ import RentalManagementHeader from "./RentalManagementHeader";
 import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
-import HideWhenOffline from "../../components/HideWhenOffline";
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
 import { camelCase } from "lodash";
 import { isMobile, isTablet } from 'react-device-detect'
@@ -202,7 +201,6 @@ const RentalManagement = () => {
     <>
       {
         permissions.rentalManagement.isCreate ? (
-
           <Tooltip title="Clone">
             <IconButton
               size="small"
@@ -221,7 +219,6 @@ const RentalManagement = () => {
             </IconButton>
           </Tooltip>
         )}
-
       {/* <HideWhenOffline>
         <GridDeleteIcon
           hasDeletePermission={permissions.rentalManagement.isDelete}
@@ -340,7 +337,7 @@ const RentalManagement = () => {
       }
       let rows = data.map((u) => {
         let finalObject = prepareDataForGrid(u, user);
-        finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
+        finalObject["canDelete"] = false;
         finalObject["isChecked"] = false;
         finalObject["allowedToEdit"] = true;
         finalObject["owerCollaboratorInitialsOrImages"] = [];
@@ -451,8 +448,8 @@ const RentalManagement = () => {
                     }}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
-                    recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords).length}
-                    ids={getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id)}
+                    recordsToExport={selectedRecords.length}
+                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
                     onExportToExcelSuccess={() => {
                       if (gridApi) gridApi.deselectAll()
                       else fetchRentalManagement()
@@ -532,20 +529,10 @@ const RentalManagement = () => {
                   loading={loading}
                   chips={[
                     {
-                      icon:<SiStatuspage/>,
+                      icon: <SiStatuspage />,
                       label: "Status: ",
                       field: "status",
                     },
-                    {
-                      icon:<FaAddressBook/>,
-                      label:'Billing Address',
-                      field:"billingAddress"
-                    },
-                    {
-                      icon:<FaAddressCard/>,
-                      label:'Shipping Address',
-                      field:"shippingAddress"
-                    }
                   ]}
                   additionalDetails={[
                     {
