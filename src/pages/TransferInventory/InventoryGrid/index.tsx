@@ -135,7 +135,16 @@ const InventoryGrid = (props) => {
   };
 
   const onCellValueChanged = (row) => {
-    console.log({ row, dataRows });
+    axiosInstance()
+      .put(`${routes.transferInventory.path}/${transferData?._id}/product`, {
+        ids: [row.data.id],
+        qty: Number(row.data.qty)
+      })
+      .then(() => {
+        toastConfig.setToastConfig({ open: true, message: 'Record successfully updated', type: 'succes' });
+        fetchInventories();
+      })
+      .catch((err) => toastConfig.setToastConfig(err));
   };
 
   const ProductNameRenderer = (params) => (
@@ -145,7 +154,7 @@ const InventoryGrid = (props) => {
   );
 
   const ActionRenderer = (params) =>
-     permissions?.transferInventory.isUpdate ? (
+    permissions?.transferInventory.isUpdate ? (
       <>
         <GridDeleteIcon
           hasDeletePermission={permissions?.transferInventory.isUpdate}
