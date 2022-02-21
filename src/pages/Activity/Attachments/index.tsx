@@ -215,6 +215,13 @@ export default function Attachment() {
     // eslint-disable-next-line
   }, [resource]);
 
+  const redirectToResource = (type, id) => {
+    history.push(
+      type === "quote" ? `${routes["quoteBuilder"].path}/detail/${id}`
+        : `${routes[type].path}/detail/${id}`
+    )
+  }
+
   const NameRenderer = (params) => (
     <a className={permissions?.attachment?.isUpdate ? "link cursor-pointer" : ""} onClick={() => handleActivityOpen(params.data)}>
       {params.data.name}
@@ -227,7 +234,7 @@ export default function Attachment() {
         <>
           <Link
             className="link text-truncate"
-            onClick={() => history.push(`${routes[d?.type].path}/detail/${d?.referenceId}`)}
+            onClick={() => redirectToResource(d?.type, d?.referenceId)}
           >
             {d.name}
           </Link>
