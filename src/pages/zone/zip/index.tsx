@@ -6,10 +6,11 @@ import routes from '../../../components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
 import CarouselDialog from '../../../components/CarouselDialog';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
-import {Link,useParams} from "react-router-dom"
-import {CommonRenderer} from "../../../components/AgGridComponents/CustomAgGridCellRenderers"
+import { Link, useParams } from "react-router-dom"
+import { CommonRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers"
 import { Delete, Edit } from '@material-ui/icons';
 import CreateZip from "../CreateZip";
+import { read, utils, writeFile } from "xlsx";
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteButton from '../../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -19,19 +20,15 @@ interface ConfigProps {
   id: string;
 }
 
-  const Zipcode = (props: ConfigProps) => {
-  const initialRender = React.useRef(true);
-  const {id} = props;
-  const {setToastConfig,toastConfig} = React.useContext(CustomToastContext)
-  const [specFields, setSpecFields] = React.useState([]);
-  const [configData, setConfigData] = React.useState([]);
+const Zipcode = (props: ConfigProps) => {
+  const { id } = props;
+  const { setToastConfig, toastConfig } = React.useContext(CustomToastContext)
   const [openDialog, setOpenDialog] = React.useState(false);
   const [removing, setRemoving] = React.useState(false);
   const [showConfirmBox, setShowConfirmBox] = React.useState({
     open: false,
     zips: []
   });
-  const { resource } = useParams();
   const [columns, setColumns] = React.useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
   const localStorageSelectedRecords = `zip_selected`;
@@ -41,29 +38,18 @@ interface ConfigProps {
     index: 0
   });
   const [section, setSection] = React.useState(null);
-  const [editConfig, setEditConfig] = React.useState({
-    values: {},
-    images: []
-  });
-  const { getColumnData } = useColumns();
   const [gridApi, setGridApi] = React.useState(null);
   const [state, dispatch] = React.useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords,appendRows } = state;
+  const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
-  React.useEffect(()=> {
+
+  React.useEffect(() => {
     fetchGridColumns();
-      getZipData();
-  },[])
-
-
-
+    getZipData();
+  }, [])
 
   const ActionRenderer = (params) => (
     <>
-      {/* <IconButton size="small" color="inherit" onClick={() => editData(params.data)}>
-        <Edit fontSize="small" />
-      </IconButton> */}
-  
       <IconButton
         size="small"
         color="inherit"
@@ -80,9 +66,9 @@ interface ConfigProps {
   );
 
 
-  const ZipNameRenderer =(params) => (
+  const ZipNameRenderer = (params) => (
     <>
-     {params.value}
+      {params.value}
     </>
   )
 
@@ -102,8 +88,7 @@ interface ConfigProps {
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
-
-        setColumns([{field:'zipCode',headerName:'Zip Code',show:true,cellRenderer:'zipNameRenderer'}]);
+        setColumns([{ field: 'zipCode', headerName: 'Zip Code', show: true, cellRenderer: 'zipNameRenderer' }]);
       });
   };
 
@@ -115,16 +100,15 @@ interface ConfigProps {
     }
     axiosInstance()
       .get(`${routes.zone.path}/${id}/zip`)
-      .then(({ data: { data,count } }) => {
+      .then(({ data: { data, count } }) => {
         setSection(data);
-        const rows = data.map((d,index) => {
+        const rows = data.map((d, index) => {
           let finalObject = prepareDataForGrid(d);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === d._id);
           finalObject['_id'] = index;
-         
-          return {...finalObject};
-        });
 
+          return { ...finalObject };
+        });
         if (appendRows) {
           dispatch({
             type: 'initialize',
@@ -140,7 +124,6 @@ interface ConfigProps {
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
-
         if (gridApi) {
           try {
             let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
@@ -155,7 +138,7 @@ interface ConfigProps {
             console.error('Error in getting selected records from local storage');
           }
         }
-        dispatch({ type: 'initialize', data: rows, count:rows?.length });
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -167,6 +150,22 @@ interface ConfigProps {
   };
 
 
+  const AddZip = (newZipCode: Array<any>) => {
+    let newValues = { zoneZips: newZipCode };
+    axiosInstance()
+      .post(`/zone/${id}/zip`, newValues)
+      .then(({ data: { data } }) => {
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Zip Code imported Successfully'
+        });
+        getZipData();
+      })
+      .catch((error) => {
+        setToastConfig(error);
+      });
+  }
 
   const removeData = () => {
     setRemoving(true);
@@ -191,72 +190,79 @@ interface ConfigProps {
         setRemoving(false);
         setToastConfig(err)
       });
-
-
   };
 
   const handleExportFields = () => {
-    var dataStr =
-        "data:text/json;charset=utf-8," +
-        encodeURIComponent(JSON.stringify(section));
-    var dlAnchorElem = document.getElementById("downloadAnchorElem");
-    dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", "Zip Code.xlsx");
-    dlAnchorElem.click();
-};
-
-const handleImportFields = (e) => {
-  e.preventDefault();
-  var files = e.target.files,
-    f = files[0];
-  var reader = new FileReader();
-  reader.onload = function (e) {
-    var data: any = e.target.result;
-    setSection(JSON.parse(data));
+    const header = ['Zip Code']
+    var ws = utils.json_to_sheet(section);
+    if (header.length) {
+      utils.sheet_add_aoa(ws, [header]);
+    }
+    var wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Sheet1");
+    writeFile(wb, `Zip Code.xlsx`);
   };
-  reader.readAsBinaryString(f);
-};
+
+  const handleImportFields = (e) => {
+    e.preventDefault();
+    var files = e.target.files,
+      f = files[0];
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      var data: any = e.target.result;
+      let readedData = read(data, { type: "binary" });
+      const wsname = readedData.SheetNames[0];
+      const ws = readedData.Sheets[wsname];
+      const dataParse = utils.sheet_to_json(ws, { header: 1 });
+      let zipCode = dataParse.slice(1, dataParse?.length);
+      let newZipCode = zipCode.map((item, i) => {
+        return item[0]
+      })
+      AddZip(newZipCode)
+    };
+    reader.readAsBinaryString(f);
+  };
 
 
   return (
     <Box>
-      <Box p={2} display="flex" justifyContent="space-between" >
+      <Box display="flex" justifyContent="space-between" >
         <Box mr={2} component={'div'}>
-        <Button style={{marginTop:"20px"}} onClick={() => setOpenDialog(true)} size="small" variant="contained" color="primary" disableElevation>
+          <Button style={{ marginTop: "20px",marginLeft:"20px" }} onClick={() => setOpenDialog(true)} size="small" variant="contained" color="primary" disableElevation>
             Add Zip Code
           </Button>
-          
-          </Box>
-        <Box p={2} display="flex" justifyContent="space-between" style={{marginLeft:""}}>
-          <Box mt={1}> <label style={{color:"#0E49B5"}}>Import from Excel |  
-              <input
-                onClick={(e: any) => (e.target.value = null)}
-                id="importField"
-                name="importField"
-                onChange={handleImportFields}
-                style={{
-                  opacity: "0",
-                  position: "absolute",
-                  zIndex: -1,
-                }}
-                type="file"
-              /></label>
-          <label style={{color:"#0E49B5"}}  onClick={handleExportFields}> Export to Excel</label> <a id="downloadAnchorElem" style={{ display: "none" }}></a></Box>
-         
-           <DeleteButton
-              onClick={() => {
-                setShowConfirmBox({
-                  open: true,
-                  zips: selectedRecords.map((s) => s.zipCode)
-                });
+
+        </Box>
+        <Box p={2} display="flex" justifyContent="space-between" style={{ marginLeft: "" }}>
+          <Box mt={1}> <label style={{ color: "#0E49B5" }}>Import from Excel |
+            <input
+              onClick={(e: any) => (e.target.value = null)}
+              id="importField"
+              name="importField"
+              onChange={handleImportFields}
+              style={{
+                opacity: "0",
+                position: "absolute",
+                zIndex: -1,
               }}
-              size="small"
-              disabled={selectedRecords.length === 0}
-              disableElevation
-              text={'Delete'}
-              style={{ marginLeft: '10px' }}
-            />
-          
+              type="file"
+            /></label>
+            <label style={{ color: "#0E49B5" }} onClick={handleExportFields}> Export to Excel</label> <a id="downloadAnchorElem" style={{ display: "none" }}></a></Box>
+
+          <DeleteButton
+            onClick={() => {
+              setShowConfirmBox({
+                open: true,
+                zips: selectedRecords.map((s) => s.zipCode)
+              });
+            }}
+            size="small"
+            disabled={selectedRecords.length === 0}
+            disableElevation
+            text={'Delete'}
+            style={{ marginLeft: '10px' }}
+          />
+
         </Box>
       </Box>
       <Box>
@@ -281,17 +287,17 @@ const handleImportFields = (e) => {
       </Box>
       {openDialog && (
         <CreateZip
-        isUpdateDisaCreateProductCategorybled={false}
-        zoneId={id}
-        isClone={false}
-        onClose={() => setOpenDialog(false)}
-        onSuccess={() => {
-          setOpenDialog(false)
-          getZipData();
-        }
-     
-        }
-      />
+          isUpdateDisaCreateProductCategorybled={false}
+          zoneId={id}
+          isClone={false}
+          onClose={() => setOpenDialog(false)}
+          onSuccess={() => {
+            setOpenDialog(false)
+            getZipData();
+          }
+
+          }
+        />
       )}
       {carouselDialog.open && (
         <CarouselDialog
@@ -323,5 +329,4 @@ const handleImportFields = (e) => {
     </Box>
   );
 };
-
 export default Zipcode;

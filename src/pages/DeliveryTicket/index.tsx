@@ -10,7 +10,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { isObjectEmpty, gridLoadingTimeout, deliveryTicket } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, deliveryTicket, DELIVERY_FROM_TO_TYPE } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
@@ -24,6 +24,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
+import { PickupFromRenderer, DeliveryToRenderer } from '../../components/DeliveryTicket/helper';
 
 let deliveryTicketTimeout;
 
@@ -83,10 +84,21 @@ const DeliveryTicket = () => {
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
+      pickupFromRenderer: PickupFromRenderer,
+      deliveryToRenderer: DeliveryToRenderer,
       actionsRenderer: ActionsRenderer
     };
     setFrameWorkComponent({ ...tempFrameworkComponent });
     columns = [...columns, ...getStaticFields()];
+    columns = columns.filter((e) => !["warehouse", "customerAccount", "supplierAccount"].includes(e.field))
+    columns.forEach((e) => {
+      if (e.field === "pickupFrom") {
+        e.cellRenderer = "pickupFromRenderer";
+      }
+      if (e.field === "deliveryTo") {
+        e.cellRenderer = "deliveryToRenderer";
+      }
+    })
     setColumns([...columns]);
   };
 
@@ -304,18 +316,18 @@ const DeliveryTicket = () => {
         <CustomContainer>
           <div className="header-panel">
             <Grid container className={isMobile ? styles.mobile_filter_side_container_delivery_ticket : styles.filter_side_container_delivery_ticket}>
-              <Grid item xs={isMobile && !isTablet ? 12 : 6}  className="d-flex align-items-center gap-1">
+              <Grid item xs={isMobile && !isTablet ? 12 : 6} className="d-flex align-items-center gap-1">
                 <Grid>
-                <GiAbstract055 className="headerLogo" />
-                <span className="listingHeader">{routes.deliveryTicket.title} </span>
+                  <GiAbstract055 className="headerLogo" />
+                  <span className="listingHeader">{routes.deliveryTicket.title} </span>
                 </Grid>
 
 
 
               </Grid>
               <Grid item xs={isMobile && !isTablet ? 12 : 6} container className={isMobile ? styles.filter_side : styles.filter_side_deck}>
-                <Box className={isMobile && !isTablet ? styles.mobile_filter_side_header :  styles.filter_side_header} component="div">
-                  <Grid style={{ display: 'flex', flex: 1, gap:"5px" }} className={isMobile && !isTablet ? styles.content_box : ""}>
+                <Box className={isMobile && !isTablet ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                  <Grid style={{ display: 'flex', flex: 1, gap: "5px" }} className={isMobile && !isTablet ? styles.content_box : ""}>
                     <SearchBox
                       onSearch={handleSearch}
                       searchbox={isMobile ? styles.search_box_input : ""}

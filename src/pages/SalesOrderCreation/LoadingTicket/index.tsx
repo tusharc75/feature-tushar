@@ -300,7 +300,7 @@ const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNe
             let apiCalls = [];
 
             Object.keys(groupByCalls).forEach((key) => {
-              apiCalls.push(axiosInstance().put(`${deliveryTicket.api}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
+              apiCalls.push(axiosInstance().put(`${deliveryTicket.api}/${key}/assets`, { ids: groupByCalls[key].map(m => m._id) }));
             })
 
             Promise.all(apiCalls).then(() => {
