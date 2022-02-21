@@ -9,7 +9,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
-import {TextField} from "@material-ui/core";
+import { TextField } from "@material-ui/core";
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, isFieldNotTouched } from './../../constants/helpers';
 import InputField from '../../components/Helpers/InputField';
@@ -19,7 +19,7 @@ import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 
 const CreateZip = (props) => {
-  const toastConfig = useContext(CustomToastContext);
+  const { setToastConfig, toastConfig } = useContext(CustomToastContext)
   const { zoneId, onClose, onSuccess, isUpdateDisabled = false, isClone = false } = props;
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -28,12 +28,11 @@ const CreateZip = (props) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [saveClick, setSaveClick] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('')
-  const [value , setValue] = useState('')
+  const [value, setValue] = useState('')
 
 
-  
+
   const handleSubmit = () => {
-
     let newValues = { zoneZips: [value] };
     setSaveClick(true);
     axiosInstance()
@@ -41,19 +40,18 @@ const CreateZip = (props) => {
       .then(({ data: { data } }) => {
         setLoading(false);
         onSuccess(data);
-        toastConfig.setToastConfig({
+        setToastConfig({
           open: true,
           type: 'success',
-          message: 'Zone Created Successfully'
+          message: 'Zip Code Created Successfully'
         });
       })
       .catch((error) => {
         setLoading(false);
-        toastConfig.setToastConfig(error);
+        setToastConfig(error);
         setSaveClick(false);
       });
   };
-
 
 
   return (
@@ -72,51 +70,51 @@ const CreateZip = (props) => {
     >
       <CustomDialogHeader
         title={
-            `Create Zip Code`
+          `Create Zip Code`
         }
         onClose={() => {
-         onClose();
+          onClose();
         }}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
           setFullScreen((prevState) => !prevState);
         }}
         showManimizeMaximize={true}
-        ></CustomDialogHeader>
+      ></CustomDialogHeader>
       <CustomDialogContent>
-        <TextField 
-        variant='outlined'
-        label='Zip Code'
-        name='Zip Code'
-        value={value}
-        onChange= {(e) => {
-          setValue(e.target.value)
-         
-        }}
+        <TextField
+          variant='outlined'
+          label='Zip Code'
+          name='Zip Code'
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value)
+
+          }}
 
         />
       </CustomDialogContent>
-         <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  onClick={() => {
-                   
-                     
-                    onClose();
-                  }}
-                >
-                  {isUpdateDisabled ? 'Close' : 'Cancel'}
-                </Button>
-                {!isUpdateDisabled && (
-                  <CustomButton loading={loading} variant="contained" color="primary" type="submit" disabled={saveClick} onClick={handleSubmit}>
-                    {' '}
-                    Save
-                  </CustomButton>
-                )}
-              </CustomDialogFooter>
-              
-     
+      <CustomDialogFooter>
+        <Button
+          size="small"
+          color="primary"
+          onClick={() => {
+
+
+            onClose();
+          }}
+        >
+          {isUpdateDisabled ? 'Close' : 'Cancel'}
+        </Button>
+        {!isUpdateDisabled && (
+          <CustomButton loading={loading} variant="contained" color="primary" type="submit" disabled={saveClick} onClick={handleSubmit}>
+            {' '}
+            Save
+          </CustomButton>
+        )}
+      </CustomDialogFooter>
+
+
     </Dialog>
   );
 };
