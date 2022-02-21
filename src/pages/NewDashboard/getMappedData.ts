@@ -263,7 +263,7 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     }
   }
 
-  if (chart.uniqueId === 'volumeVsBudget' || chart.uniqueId === "volume2VsBudget") {
+  if (chart.uniqueId === 'volumeVsBudget' || chart.uniqueId === 'volume2VsBudget') {
     const volumeData = [];
     const labels = [];
     const budget = [];
@@ -280,8 +280,8 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
         const totalVolumeData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalVolume, currencyFrom, currencyTo);
         const budgetData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.volumeBudget, currencyFrom, currencyTo);
 
-        volumeData.push(totalVolumeData ? totalVolumeData.rates[currencyTo] : d.totalVolume);
-        budget.push(budgetData ? budgetData.rates[currencyTo] : d.volumeBudget);
+        volumeData.push(totalVolumeData ? totalVolumeData.rates[currencyTo] : d.totalVolume ? d.totalVolume : 0);
+        budget.push(budgetData ? budgetData.rates[currencyTo] : d.volumeBudget ? d.volumeBudget : 0);
       } else {
         volumeData.push(d.totalVolume);
         budget.push(d.budget);
