@@ -570,7 +570,7 @@ export default function AccountDetailPage(props) {
     {
       label: "Projects",
       count: projectSales ? projectSales.length : 0,
-      show: true,
+      show: permissions?.projectStrategy?.isRead,
       icon: <FcMultipleSmartphones />,
       class: "project",
       onClick: () => {
@@ -604,7 +604,7 @@ export default function AccountDetailPage(props) {
     {
       label: "Quotes",
       count: 0,
-      show: true,
+      show: permissions?.quoteBuilder?.isRead,
       icon: <FcMoneyTransfer />,
       class: "quotes",
     },
