@@ -56,7 +56,7 @@ export default function ImportExportLinks({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => {},
+  onExportToExcelSuccess = () => { },
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
@@ -90,7 +90,7 @@ export default function ImportExportLinks({
 
       let importApi = `${api}/import`;
 
-      if ( additionalParams) {
+      if (additionalParams) {
         importApi = `${importApi}?${additionalParams}`;
       }
 
@@ -217,11 +217,11 @@ export default function ImportExportLinks({
         <label onClick={exportToExcel} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
           Export to Excel {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : '(Selected)') : null}
         </label>
-         {isDownloadExcel && <>
-        <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} />
-      <label onClick={downloadTemplate} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
-          Download Template
-        </label>
+        {isDownloadExcel && <>
+          <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} />
+          <label onClick={downloadTemplate} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
+            Download Template
+          </label>
         </>}
         {/* <Divider
           orientation="vertical"
@@ -250,7 +250,7 @@ export default function ImportExportLinks({
         >
           Export to Excel ({recordsToExport === 0 ? 'All' : 'Selected'})
         </MenuItem>
-     {isDownloadExcel &&  <MenuItem
+        {isDownloadExcel && <MenuItem
           onClick={() => {
             downloadTemplate();
             handleClose();
@@ -272,25 +272,8 @@ export default function ImportExportLinks({
         <label onClick={exportToExcel} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
           Export to Excel {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : '(Selected)') : null}
         </label>
-        {/* <Divider
-          orientation="vertical"
-          flexItem
-          className={classes.linkDivider}
-        />
-        <label
-          onClick={(e) => e.preventDefault()}
-          className={`${classes.links} cursor-pointer`}
-        >
-          Email a Link
-        </label> */}
       </div>
       <Menu id="import-export-links" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem>
-          <label htmlFor="importFromExcel" className="cursor-pointer">
-            {ImportInput}
-            Import from Excel
-          </label>
-        </MenuItem>
         <MenuItem
           onClick={() => {
             exportToExcel();
@@ -299,15 +282,6 @@ export default function ImportExportLinks({
         >
           Export to Excel ({recordsToExport === 0 ? 'All' : 'Selected'})
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            downloadTemplate();
-            handleClose();
-          }}
-        >
-          Download Template
-        </MenuItem>
-        {/* <MenuItem>Email a Link</MenuItem> */}
       </Menu>
       {isMobile && (
         <IconButton onClick={handleClick}>

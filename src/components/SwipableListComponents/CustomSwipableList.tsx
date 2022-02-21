@@ -159,8 +159,7 @@ export default function CustomSwipableList({
                           </span>
                         </h4>
                       )}
-
-                      {allowSwipe && permissions?.isUpdate && d.allowedToEdit && permissions?.isDelete && d.canDelete && (
+                      {allowSwipe && permissions?.isUpdate && d.allowedToEdit && permissions?.isDelete  && (
                         <div className="icon-layout mr-2 d-flex align-items-center gap-1">
                           {showClone && permissions?.isCreate && (
                             <IconButton
