@@ -64,7 +64,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             Header: 'Detail',
             minWidth: 300,
             width: 300,
-            sticky: "left",
+            sticky: isMobile ? "none" : "left",
             Cell: ({ row }) => (
                 <div style={{ display: "flex", alignItems: 'center' }}>
                     <p

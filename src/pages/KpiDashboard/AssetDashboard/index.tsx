@@ -2,14 +2,14 @@ import React from 'react';
 import { Grid, Box, useMediaQuery, useTheme, CircularProgress, Typography, TextField } from '@material-ui/core';
 import axios from 'axios';
 
-import axiosInstance from '../../../axios/axiosInstance';
+import axiosInstance from 'src/axios/axiosInstance';
 import MapView from './MapView';
 import AssetFilters from './AssetFilters';
 import AssetChart from './AssetChart';
-import { useData } from '../../../StateProvider/Provider';
+import { useData } from 'src/StateProvider/Provider';
 import AssetStats from './AssetStats';
 
-import routes from '../../../components/Helpers/Routes';
+import routes from 'src/components/Helpers/Routes';
 import AssetStatusChart from './AssetStatusChart';
 import RentalChart from './RentalChart';
 

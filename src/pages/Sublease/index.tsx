@@ -106,6 +106,7 @@ const Sublease = () => {
                 const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                finalObject["canDelete"] = false;
                 finalObject["allowedToEdit"] = (
                     [...(u.collaborator ?? []), u.owner].some(
                         (d) => d?.optionValue === user?.user?._id
@@ -517,9 +518,6 @@ const Sublease = () => {
                                     label: "SupplierContact:  ",
                                     field: "supplierContact",
                                 },
-
-
-
                             ]}
                             onCreate={false}
                             showClone={true}

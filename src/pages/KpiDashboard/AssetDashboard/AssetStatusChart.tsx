@@ -77,6 +77,8 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between, 
             }
           });
         }
+ 
+        console.log(values)
 
         setTableDataRaw(tableData);
         setPieData({
@@ -173,53 +175,53 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between, 
       <Box textAlign={'center'}>
         <Typography variant="h6">Asset Count</Typography>
       </Box>
-      {tableDataRaw.length > 0 && (
-        <Box display={smallScreen ? "column" : 'flex'} justifyContent={'space-between'}>
-          <Box width={200} mb={1}>
-            <Autocomplete
-              disabled={loadingProductCategory}
-              fullWidth
-              disableListWrap
-              loading={loadingProductCategory}
-              loadingText={'Loading...'}
-              multiple={true}
-              value={selectedProductCategories}
-              options={productCategories}
-              disableCloseOnSelect
-              limitTags={2}
-              onChange={(_, newVal) => setSelectedProductCategories(newVal)}
-              getOptionSelected={(option, value) => option.id === value.id}
-              getOptionLabel={(option) => option.title}
-              renderOption={(option, { selected }) => (
-                <React.Fragment>
-                  <Checkbox
-                    icon={<CheckBoxOutlineBlank fontSize="small" />}
-                    checkedIcon={<CheckBox fontSize="small" />}
-                    style={{ marginRight: 8 }}
-                    checked={selected}
-                  />
-                  {option.title}
-                </React.Fragment>
-              )}
-              renderInput={(params) => <TextField {...params} variant="outlined" label="Product Category" size="small" />}
-            />
-          </Box>
-          <Box display={smallScreen ? "flex" : "block"} justifyContent={'space-between'}>
-            <Button disabled={loading} onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
-              Export to
-            </Button>
-            <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
-              <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
-              <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
-              <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
-              <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
-            </Menu>
-            <Button disabled={loading} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
-              {!tableView ? 'Table' : 'Chart'} View
-            </Button>
-          </Box>
+
+      <Box display={smallScreen ? 'column' : 'flex'} justifyContent={'space-between'}>
+        <Box width={200} mb={1}>
+          <Autocomplete
+            disabled={loadingProductCategory}
+            fullWidth
+            disableListWrap
+            loading={loadingProductCategory}
+            loadingText={'Loading...'}
+            multiple={true}
+            value={selectedProductCategories}
+            options={productCategories}
+            disableCloseOnSelect
+            limitTags={2}
+            onChange={(_, newVal) => setSelectedProductCategories(newVal)}
+            getOptionSelected={(option, value) => option.id === value.id}
+            getOptionLabel={(option) => option.title}
+            renderOption={(option, { selected }) => (
+              <React.Fragment>
+                <Checkbox
+                  icon={<CheckBoxOutlineBlank fontSize="small" />}
+                  checkedIcon={<CheckBox fontSize="small" />}
+                  style={{ marginRight: 8 }}
+                  checked={selected}
+                />
+                {option.title}
+              </React.Fragment>
+            )}
+            renderInput={(params) => <TextField {...params} variant="outlined" label="Product Category" size="small" />}
+          />
         </Box>
-      )}
+        <Box display={smallScreen ? 'flex' : 'block'} justifyContent={'space-between'}>
+          <Button disabled={loading || tableDataRaw.length === 0} onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
+            Export to
+          </Button>
+          <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
+            <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
+            <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
+            <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
+            <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
+          </Menu>
+          <Button disabled={loading || tableDataRaw.length === 0} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
+            {!tableView ? 'Table' : 'Chart'} View
+          </Button>
+        </Box>
+      </Box>
+
       <Box height={440}>
         {loading && <Loader noLoader minHeight={'100%'} text={'Loading chart data...'} />}
         {!loading && tableDataRaw.length > 0 ? (

@@ -3,10 +3,10 @@ import { Button, Box, Checkbox, TextField, Popover } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { CheckBoxOutlineBlank, CheckBox, FilterList } from '@material-ui/icons';
 
-import routes from '../../../components/Helpers/Routes';
-import axiosInstance from '../../../axios/axiosInstance';
-import countriesData from '../../../constants/Country.json';
-import { FilterType } from './AssetDashboard';
+import routes from 'src/components/Helpers/Routes';
+import axiosInstance from 'src/axios/axiosInstance';
+import countriesData from 'src/constants/Country.json';
+import { FilterType } from '.';
 
 interface FilterProps {
   filter: FilterType;

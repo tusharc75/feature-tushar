@@ -3,20 +3,20 @@ import { Box, Grid, Paper, Typography, CircularProgress } from '@material-ui/cor
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import moment from 'moment';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import axiosInstance from '../../axios/axiosInstance';
-import { marketSegment, customerAccount } from '../../constants/helpers';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import axiosInstance from 'src/axios/axiosInstance';
+import { marketSegment, customerAccount } from 'src/constants/helpers';
 import OpportunityDashboards from './OpportunityDashboards';
 import Filters from './Filters';
 import styles from './dashboard.module.scss';
-import placeholder_img from '../../assets/PerformanceTuning.png';
+import placeholder_img from 'src/assets/PerformanceTuning.png';
 
-import AssetDashboard from './AssetDashboard/AssetDashboard';
+import AssetDashboard from './AssetDashboard';
 import TopDashboard from './TopDasboard';
 import Top2Dashboard from './Top2Dashboard';
 import OpportunitiesDashboard from './OpportunitiesDashboard';
 import OpportunityTrends from './OpportunityTrends';
-import { useData } from '../../StateProvider/Provider';
+import { useData } from 'src/StateProvider/Provider';
 
 const Dashboard = () => {
   const {

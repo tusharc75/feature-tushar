@@ -51,7 +51,9 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                 size="small"
                 multiple={filter.multiple}
                 fullWidth
-                options={filterOptions[filter.key]}
+                options={filter.key.includes("subMarket") 
+                  ? filterOptions[filter.key].filter((d:any) => d.parentMarketSegment === values["marketSegment"].optionValue) 
+                  : filterOptions[filter.key]}
                 autoHighlight
                 value={values[filter.key]}
                 getOptionLabel={(option: any) => option.optionLabel}

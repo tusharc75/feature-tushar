@@ -68,6 +68,7 @@ const RentalChart = () => {
             bgColors.push(color);
           }
         });
+
         setCustomerRentalData({
           labels: labels,
           datasets: [
@@ -185,7 +186,7 @@ const RentalChart = () => {
       </Box>
       <Box display={'flex'} justifyContent={'space-between'}>
         <div>
-          <Button disabled={loading} onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
+          <Button disabled={loading || tableDataRaw.length === 0} onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
             Export to
           </Button>
           <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
@@ -195,7 +196,7 @@ const RentalChart = () => {
             <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
           </Menu>
         </div>
-        <Button disabled={loading} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
+        <Button disabled={loading || tableDataRaw.length === 0} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
           {!tableView ? 'Table' : 'Chart'} View
         </Button>
       </Box>
