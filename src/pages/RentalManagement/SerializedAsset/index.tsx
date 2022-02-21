@@ -77,7 +77,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       accessor: 'detail',
       Header: 'Detail',
       width: 300,
-      sticky: "left",
+      sticky: isMobile ? "none" : "left",
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate" title={row.original.detail}  >
@@ -433,7 +433,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             <InfoIcon color={"primary"} />
           </IconButton>
         </HtmlTooltip>}
-        
+
         {permissions?.sublease?.isCreate &&
           <Fragment>
             <Box mx={1} />

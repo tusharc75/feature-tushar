@@ -533,6 +533,10 @@ const RentalManagement = () => {
                       label: "Status: ",
                       field: "status",
                     },
+                    {
+                      label: "Plant: ",
+                      field: "warehouse",
+                    },
                   ]}
                   additionalDetails={[
                     {
