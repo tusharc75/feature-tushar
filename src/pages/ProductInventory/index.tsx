@@ -1,24 +1,24 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../axios/axiosInstance";
+import CustomBreadCrumbs from "src/components/CustomBreadCrumbs";
+import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "src/axios/axiosInstance";
 import { GiStockpiles } from 'react-icons/gi';
 import { Box, TextField } from "@material-ui/core";
-import SearchBox from '../../components/Helpers/SearchBox'
+import SearchBox from 'src/components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
-import routes from "../../components/Helpers/Routes";
-import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import CustomAgGridEditable from "../../components/AgGridComponents/CustomAgGridEditable"
-import { serializedAsset, isObjectEmpty, gridLoadingTimeout,productInventory } from '../../constants/helpers';
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { useData } from "../../StateProvider/Provider";
-import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import { prepareDataForGrid } from "../../constants/helpers"
+import routes from "src/components/Helpers/Routes";
+import { reducer, intialState } from "src/components/AgGridComponents/CustomAgGrid";
+import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable"
+import { serializedAsset, isObjectEmpty, gridLoadingTimeout,productInventory } from 'src/constants/helpers';
+import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import { useData } from "src/StateProvider/Provider";
+import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
+import { prepareDataForGrid } from "src/constants/helpers"
 import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from "@material-ui/lab";
-import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 
 
 const InventoryProduct = () => {
