@@ -671,7 +671,7 @@ const UserDetailsPage = () => {
                       Assign Entity/Role
                     </Button>
                   )}
-                  {isLoggedInUserBrandAdmin && (
+                  {permissions?.user?.isUpdate && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
