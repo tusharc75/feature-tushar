@@ -56,7 +56,7 @@ const CreateZip = (props) => {
 
   return (
     <Dialog
-      maxWidth="md"
+      maxWidth="xs"
       fullScreen={fullScreen || isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
@@ -84,6 +84,9 @@ const CreateZip = (props) => {
       <CustomDialogContent>
         <TextField
           variant='outlined'
+          type="text"
+          required={true}
+          margin="dense"
           label='Zip Code'
           name='Zip Code'
           value={value}
@@ -91,7 +94,6 @@ const CreateZip = (props) => {
             setValue(e.target.value)
 
           }}
-
         />
       </CustomDialogContent>
       <CustomDialogFooter>
@@ -99,8 +101,6 @@ const CreateZip = (props) => {
           size="small"
           color="primary"
           onClick={() => {
-
-
             onClose();
           }}
         >
@@ -113,8 +113,6 @@ const CreateZip = (props) => {
           </CustomButton>
         )}
       </CustomDialogFooter>
-
-
     </Dialog>
   );
 };
