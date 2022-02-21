@@ -105,6 +105,9 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
     if (chart.uniqueId === 'offeredVsEntities') {
       url = `${url}allEntity=1`;
     }
+    if (chart.uniqueId === 'volume2VsBudget') {
+      url = `${url}volumeUnit=GM`;
+    }
     return url;
   };
 

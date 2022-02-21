@@ -4,9 +4,9 @@ import { Autocomplete, Skeleton } from '@material-ui/lab';
 import { startCase } from 'lodash';
 
 
-import axiosInstance from '../../../axios/axiosInstance';
-import { FilterType } from './AssetDashboard';
-import VirtualizedList from '../../../components/VirtualizedList';
+import axiosInstance from 'src/axios/axiosInstance';
+import { FilterType } from '.';
+import VirtualizedList from 'src/components/VirtualizedList';
 
 interface FilterProps {
   filter: FilterType;

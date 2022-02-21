@@ -263,6 +263,67 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     }
   }
 
+  if (chart.uniqueId === 'volumeVsBudget' || chart.uniqueId === "volume2VsBudget") {
+    const volumeData = [];
+    const labels = [];
+    const budget = [];
+
+    data = data.sort((a: any, b: any) => {
+      const aDate = new Date(a.date).getTime();
+      const bDate = new Date(b.date).getTime();
+
+      return aDate - bDate;
+    });
+
+    for (let d of data) {
+      if (currencyTo && currencyFrom && currencyTo !== currencyFrom) {
+        const totalVolumeData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalVolume, currencyFrom, currencyTo);
+        const budgetData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.volumeBudget, currencyFrom, currencyTo);
+
+        volumeData.push(totalVolumeData ? totalVolumeData.rates[currencyTo] : d.totalVolume);
+        budget.push(budgetData ? budgetData.rates[currencyTo] : d.volumeBudget);
+      } else {
+        volumeData.push(d.totalVolume);
+        budget.push(d.budget);
+      }
+      labels.push(moment(d.date).format('MMM/YY'));
+    }
+
+    if (labels.length === 0) return null;
+
+    dataObject = {
+      labels,
+      datasets: [
+        {
+          type: 'line',
+          label: 'Total booked value',
+          borderColor: 'rgb(54, 162, 235)',
+          borderWidth: 2,
+          fill: true,
+          data: volumeData
+        },
+        {
+          type: 'line',
+          label: 'Budget',
+          borderColor: 'rgb(254, 162, 35)',
+          borderWidth: 2,
+          fill: false,
+          data: budget
+        }
+      ]
+    };
+
+    if (chart.hasTableView) {
+      const tableData = data.map((d: any) => ({
+        month: moment(d.date).format('MMM/YY'),
+        totalVolumeBooked: d.volumeBudget ? d.volumeBudget : 0,
+        totalVolume: d.totalVolume
+      }));
+
+      Object.assign(dataObject, { tableData });
+    }
+  }
+
   if (chart.uniqueId === 'openOpportinityByCustomer') {
     const labels = [];
     const datasets = [];
