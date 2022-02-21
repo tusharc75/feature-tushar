@@ -1,17 +1,17 @@
 import { useReducer, useState, useEffect, Fragment, FC, useContext } from 'react'
 import { Button, Box, } from '@material-ui/core'
 import { useHistory } from 'react-router-dom'
-import routes from '../../components/Helpers/Routes';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import routes from 'src/components/Helpers/Routes';
+import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import { isMobile, isTablet } from 'react-device-detect';
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from '../../components/AgGridComponents/CustomAgGrid';
-import axiosInstance from '../../axios/axiosInstance';
-import { prepareDataForGrid, deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, transferAsset, serializedAsset } from "../../constants/helpers"
-import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from 'src/components/AgGridComponents/CustomAgGrid';
+import axiosInstance from 'src/axios/axiosInstance';
+import { prepareDataForGrid, deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, transferAsset, serializedAsset } from "src/constants/helpers"
+import useColumns, { getStaticFields, getFrameworkComponents } from "src/constants/useColumns"
+import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import { FaSuitcase } from "react-icons/fa";
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { MdAdd } from 'react-icons/md';

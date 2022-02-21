@@ -2,29 +2,30 @@ import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
+import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { transferInventory } from '../../constants/helpers';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import DetailsPageHeader from 'src/components/DetailsPageHeader';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import { useData } from 'src/StateProvider/Provider';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { transferInventory } from 'src/constants/helpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
 import TransferStepper from './TransferInventorySteps';
 
 import { MdEdit } from 'react-icons/md';
-import { defaultActivityShow } from '../../constants/helpers';
-import Activity from '../../components/Activity';
-import TabPanel from '../../components/TabPanel';
+import { defaultActivityShow } from 'src/constants/helpers';
+import Activity from 'src/components/Activity';
+import TabPanel from 'src/components/TabPanel';
 import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-import HideWhenOffline from '../../components/HideWhenOffline';
+import HideWhenOffline from 'src/components/HideWhenOffline';
 import { TRANSFER_STEPS, STATUS } from './transferInventoryHelpers';
+import InventoryGrid from './InventoryGrid';
 
 const TransferInventoryDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -121,7 +122,7 @@ const TransferInventoryDetailPage = () => {
         setTransferInventoryData(data);
         handleMainPoints(data);
         setPlantId(data?.transferFromPlant.optionValue);
-        setHeadingLabel(data.transferInventoryNumber);
+        setHeadingLabel(data.transferNumber);
         setCurrentStep(TRANSFER_STEPS.indexOf(data?.processStatus) !== -1 ? TRANSFER_STEPS.indexOf(data?.processStatus) : 0);
         setCustomizedRoutes([routes.transferInventory, { title: data.transferNumber }]);
 
@@ -341,7 +342,14 @@ const TransferInventoryDetailPage = () => {
                   />
 
                   <Box my={1}>
-                    {currentStep === 0 && <p>STEP NUMBER SOME</p>}
+                    {currentStep === 0 && (
+                      <InventoryGrid
+                        setNextStep={setNextStep}
+                        transferData={transferInventoryData}
+                        currentStep={currentStep}
+                        updateTransferStatus={updateTransferStatus}
+                      />
+                    )}
                     {currentStep === 1 && <p>STEP NUMBER SOME</p>}
                   </Box>
                 </Box>
