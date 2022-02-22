@@ -19,7 +19,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { Link, useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd,FaSuitcase } from 'react-icons/all';
+import { MdAdd, FaSuitcase } from 'react-icons/all';
 import PricingConditionsDialog from './PricingConditionsDialog';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import useColumns, { getFrameworkComponents, getStaticFields } from '../../constants/useColumns';
@@ -137,15 +137,6 @@ const PricingConditions = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {/* <IconButton
-        size="small"
-        aria-label="Edit"
-        onClick={() => {
-          history.push(routes.pricingCondition.path + "/detail/" + params.data._id)
-        }}
-      >
-        <EditIcon color="primary" />
-      </IconButton> */}
       {permissions.pricingCondition.isDelete && (
         <Tooltip title="Delete">
           <IconButton
@@ -387,43 +378,41 @@ const PricingConditions = () => {
         </div>
         {columns && frameworkComponent ? (
           isMobile && !isTablet ? (
-            <CustomSwipableList 
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={permissions.pricingCondition}
-            primaryField={columns?.find(d => d.field)}
-            onClick={(data) => {
-              history.push(`${routes.pricingConditionDetail.path}/${data._id}`)
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(data) => {
-              history.push(`${routes.pricingConditionDetail.path}/${data._id}?openEdit=true`)
-            }}
-            extraParamsToCheckDelete={true}
-            onDelete={(data) => {
-              setDeleteRecord(data);
-              setShowDeleteConfirmBox(true);
-            
-            }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[
-              {
-                icon: <FaSuitcase size={18} />,
-                field: "conditionName"
-              },
-              
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions.pricingCondition}
+              primaryField={columns?.find(d => d.field)}
+              onClick={(data) => {
+                history.push(`${routes.pricingConditionDetail.path}/${data._id}`)
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(data) => {
+                history.push(`${routes.pricingConditionDetail.path}/${data._id}?openEdit=true`)
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(data) => {
+                setDeleteRecord(data);
+                setShowDeleteConfirmBox(true);
 
-            ]}
-            chips={[]}
-            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-            onCreate={false}
-            showClone={true}
-            onClone={(data) => {}}
-            renderedFrom={pricingCondition}
+              }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              additionalDetails={[
+                {
+                  icon: <FaSuitcase size={18} />,
+                  field: "conditionName"
+                },
+              ]}
+              chips={[]}
+              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+              onCreate={false}
+              showClone={true}
+              onClone={(data) => { }}
+              renderedFrom={pricingCondition}
             />
           ) : (
             <Box component="div">
