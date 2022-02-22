@@ -124,6 +124,7 @@ const DeliveryTicket = () => {
           let res = {
             ...prepareDataForGrid(u, user)
           };
+          res["isChecked"] = false;
           return res;
         });
         if (appendRows) {
