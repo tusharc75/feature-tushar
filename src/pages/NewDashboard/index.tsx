@@ -74,7 +74,7 @@ const DashbaordNew = () => {
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <div className="headerbox">
-        <CustomBreadCrumbs routes={[{ title: 'Dashboard' }]} />
+        <CustomBreadCrumbs routes={[{ title: 'Dashboards' }]} />
       </div>
       <div className="detail-container">
         {!userLoading ? (

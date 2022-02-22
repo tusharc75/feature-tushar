@@ -7,7 +7,7 @@ import { CommonRenderer, DateRenderer, } from "../../../components/AgGridCompone
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, Dialog, IconButton } from "@material-ui/core";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, rentalManagement, CHILD_RESOURCE } from "../../../constants/helpers";
+import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, rentalManagement, CHILD_RESOURCE, PURCHASE_ORDER_STATUS } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
@@ -23,7 +23,7 @@ import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgG
 import { Link } from "react-router-dom";
 
 
-const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrentStep, currentStep, handleAttachments }) => {
+const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrentStep, currentStep, handleAttachments, statusOptions }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -92,8 +92,6 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
             productServiceData = [...productData, ...serviceData];
             let rows = productServiceData?.map((item) => {
                 let finalObject = prepareDataForGrid(item);
-                finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
-                finalObject["allowedToEdit"] = true
                 let res: any = {
                     ...finalObject,
                 };
@@ -114,8 +112,6 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
             productServiceData = [...productData, ...serviceData];
             let rows = productServiceData?.map((item) => {
                 let finalObject = prepareDataForGrid(item);
-                finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
-                finalObject["allowedToEdit"] = true
                 let res: any = {
                     ...finalObject,
                 };
@@ -206,7 +202,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         color="primary"
                         type="button"
                         size="small"
-                        style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
+                        style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
                         startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                         disabled={downlodingFile}
                         onClick={() => { handleViewPdf(false) }}
@@ -221,7 +217,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         color="primary"
                         type="button"
                         size="small"
-                        style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+                        style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
                         startIcon={isMobile ? '' : <IoMdDownload />}
                         disabled={downlodingFile}
                         onClick={() => { handleViewPdf(true) }}
@@ -234,7 +230,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="primary"
                     size="small"
-                    style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
+                    style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
                     onClick={() => {
                         fetchEmailAttachment()
                         setEmailButtonLoading(true)
@@ -243,21 +239,23 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                     {isMobile && !isTablet ? <MdEmail size={20} /> : `Send Email`}
                 </Button>}
             </Box>
-            <Box display="flex" justifyContent="flex-end" p="4px">
-                <Box mx={1} />
-                <Button
-                    variant={isMobile && !isTablet ? "text" : "contained"}
-                    color="primary"
-                    size="small"
-                    style={isMobile && !isTablet ? {color:"#FFD700"} : {}}
-                    onClick={() => {
-                        setCurrentStep(currentStep + 1)
-                        handleUpdateData({ "status": "Issued" })
-                    }}
-                >
-                    {isMobile && !isTablet ? <BiPurchaseTagAlt size={20} /> : `Issue PO`}
-                </Button>
-            </Box>
+            {statusOptions?.findIndex(d => d.optionLabel === PURCHASE_ORDER_STATUS.issued) >
+                statusOptions.findIndex(d => d.optionLabel === purchaseOrderData?.status) &&
+                <Box display="flex" justifyContent="flex-end" p="4px">
+                    <Box mx={1} />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                            setCurrentStep(currentStep + 1)
+                            handleUpdateData({ "status": "Issued" })
+                        }}
+                    >
+                        Issue PO
+                    </Button>
+                </Box>
+            }
         </Box>
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns && frameWorkComponent ?
@@ -313,7 +311,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         page={page}
                         allowAction={false}
                         loading={loading}
-                        allowSelection={true}
+                        allowSelection={false}
                         isClientSideGrid={true}
                         renderedFrom="purchaseOrderDetailsPageIssuePO"
                         onCellValueChanged={(row) => {

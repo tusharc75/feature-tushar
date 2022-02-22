@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.65.0](https://github.com/vebholic/oms_frontend/compare/v2.64.1...v2.65.0) (2022-02-22)
+
+
+### Features
+
+* **bug:** bug ([f8806b8](https://github.com/vebholic/oms_frontend/commit/f8806b8d8e36f45d7a6a83e73e245c27326022ef))
+* **import /export:** import /export ([42a489c](https://github.com/vebholic/oms_frontend/commit/42a489c3dc36b01ab4d10708fa7141fd282a3bed))
+* **tansfer inventory:** update grid ([7366a50](https://github.com/vebholic/oms_frontend/commit/7366a501a20927f87a4b981881aebdf3fa0fc5f6))
+
+
+### Bug Fixes
+
+* bug fix ([690f9be](https://github.com/vebholic/oms_frontend/commit/690f9bea3b8908c4eefece90f0ee9a0ebd042ca8))
+* bug fix ([07721ac](https://github.com/vebholic/oms_frontend/commit/07721acd85c5dd2c25bc22d8c6cc8f544ab10fc5))
+* bug fix ([4f4f782](https://github.com/vebholic/oms_frontend/commit/4f4f782d0dd935c5164d74b99d5363ce70afe93b))
+* bug fix ([36656d2](https://github.com/vebholic/oms_frontend/commit/36656d2324b73a11fbd9a56a3073cb3e3bb38ac8))
+* bug fix ([119b69a](https://github.com/vebholic/oms_frontend/commit/119b69add94a66e712b486b9307c344c2a74563b))
+* **dashboard:** changes in dashboard ([cf3f34e](https://github.com/vebholic/oms_frontend/commit/cf3f34e81ad423f386c44ce83e996acb95067a39))
+* **dashboard:** fix ([5571052](https://github.com/vebholic/oms_frontend/commit/55710522bf24aa4491bcb9f59e22f62c52253f0a))
+* **dashbord:** sub market segment fix ([90c37de](https://github.com/vebholic/oms_frontend/commit/90c37de37381430180aa5a436062e42f995c1e8c))
+* **transfer-inventory:** new pages and new functionalities ([04bf2f8](https://github.com/vebholic/oms_frontend/commit/04bf2f859e0668b2e5188596fd53551cf0478b22))
+
 ### [2.64.1](https://github.com/vebholic/oms_frontend/compare/v2.64.0...v2.64.1) (2022-02-21)
 
 ## [2.64.0](https://github.com/vebholic/oms_frontend/compare/v2.63.0...v2.64.0) (2022-02-20)

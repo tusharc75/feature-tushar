@@ -31,7 +31,6 @@ interface Props {
   onClose?: any;
   onSuccess?: any;
   number?: string;
-  isEditable?: boolean;
   isMainInfoEditable?: boolean;
   refrenceType?: string;
   refrenceId?: string;
@@ -42,7 +41,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
   const {
     state: { selectedEntity, permissions }
   }: any = useData();
-  const { isClone = false, transferInventoryId = null, onClose, onSuccess, number = '' } = props;
+  const { isClone = false, transferInventoryId = null, onClose, onSuccess, number = '', isMainInfoEditable = false } = props;
 
   const toastConfig = useContext(CustomToastContext);
   const initialRender = useRef(true);
@@ -207,15 +206,80 @@ const ManageTransferInventory: FC<Props> = (props) => {
                         <Box marginY={2}>
                           <Grid spacing={3} container alignItems="center">
                             {form.sectionFields.map((field, index2) => (
-                              <Grid key={index2} item xs={12} sm={6} md={6}>
-                                <Grid container spacing={1} alignItems="center">
-                                  <Grid item xs={plantFields.includes(field.fieldName) && permissions?.warehouse.isCreate ? 11 : 12}>
+                              <>
+                                {['transfertoPlant', 'transferFromPlant'].includes(field.fieldName) ? (
+                                  <Grid key={index2} item xs={12} sm={6}>
+                                    <Grid container spacing={1} alignItems="center">
+                                      <Grid item xs={plantFields.includes(field.fieldName) && permissions?.warehouse.isCreate ? 11 : 12}>
+                                        <FormTypes
+                                          isNew={Boolean(transferInventoryId)}
+                                          {...field}
+                                          disabled={(Boolean(transferInventoryId) && field.disableOnEdit) || isMainInfoEditable}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={
+                                            plantFields.includes(field.fieldName) && field.fieldName === 'transfertoPlant'
+                                              ? plantToOptions?.filter((o: any) => o?.entity.includes(selectedEntity))
+                                              : field.fieldName === 'transferFromPlant'
+                                              ? plantsFromOptions?.filter((o: any) => o?.entity.includes(selectedEntity))
+                                              : []
+                                          }
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+
+                                            if (plantFields.includes(field.fieldName)) {
+                                              if (name.includes('transferFromPlant') && value === values?.transfertoPlant) {
+                                                setFieldValue('transfertoPlant', '');
+                                              }
+
+                                              if (name.includes('transfertoPlant') && value === values?.transferFromPlant) {
+                                                setFieldValue('transferFromPlant', '');
+                                              }
+                                            }
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                        />
+                                      </Grid>
+                                      {plantFields.includes(field.fieldName) && permissions?.warehouse.isCreate && (
+                                        <Grid item xs={1}>
+                                          <HtmlTooltip title="Add new plant">
+                                            <IconButton
+                                              size="small"
+                                              onClick={() => {
+                                                if (field.fieldName === 'transfertoPlant') {
+                                                  setPlantToOpen(true);
+                                                }
+
+                                                if (field.fieldName === 'transferFromPlant') {
+                                                  setPlantFromOpen(true);
+                                                }
+                                              }}
+                                            >
+                                              <AddIcon fontSize="small" color={'primary'} />
+                                            </IconButton>
+                                          </HtmlTooltip>
+                                        </Grid>
+                                      )}
+                                    </Grid>
+                                  </Grid>
+                                ) : (
+                                  <Grid key={index2} item xs={12} sm={6}>
                                     <FormTypes
                                       isNew={Boolean(transferInventoryId)}
                                       {...field}
                                       disabled={
-                                        (Boolean(transferInventoryId) && field.disableOnEdit) || field.fieldName === 'transferNumber'
-                                        // || field.fieldName === 'status'
+                                        (Boolean(transferInventoryId) && field.disableOnEdit) ||
+                                        field.fieldName === 'transferNumber' ||
+                                        field.fieldName === 'status' ||
+                                        isMainInfoEditable
                                       }
                                       values={values}
                                       errors={errors}
@@ -223,26 +287,8 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                       label={field.fieldLabel}
                                       name={field.fieldName}
                                       type={field.type}
-                                      options={
-                                        plantFields.includes(field.fieldName) && field.fieldName === 'transfertoPlant'
-                                          ? plantToOptions?.filter((o: any) => o?.entity.includes(selectedEntity))
-                                          : field.fieldName === 'transferFromPlant'
-                                          ? plantsFromOptions?.filter((o: any) => o?.entity.includes(selectedEntity))
-                                          : []
-                                      }
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-
-                                        if (plantFields.includes(field.fieldName)) {
-                                          if (name.includes('transferFromPlant') && value === values?.transfertoPlant) {
-                                            setFieldValue('transfertoPlant', '');
-                                          }
-
-                                          if (name.includes('transfertoPlant') && value === values?.transferFromPlant) {
-                                            setFieldValue('transferFromPlant', '');
-                                          }
-                                        }
-                                      }}
+                                      options={field.option}
+                                      setFieldValue={setFieldValue}
                                       required={field.required}
                                       fullWidth
                                       isTooltip={field?.isTooltip || false}
@@ -250,28 +296,8 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                       size="small"
                                     />
                                   </Grid>
-                                  {plantFields.includes(field.fieldName) && permissions?.warehouse.isCreate && (
-                                    <Grid item xs={1}>
-                                      <HtmlTooltip title="Add new plant">
-                                        <IconButton
-                                          size="small"
-                                          onClick={() => {
-                                            if (field.fieldName === 'transfertoPlant') {
-                                              setPlantToOpen(true);
-                                            }
-
-                                            if (field.fieldName === 'transferFromPlant') {
-                                              setPlantFromOpen(true);
-                                            }
-                                          }}
-                                        >
-                                          <AddIcon fontSize="small" color={'primary'} />
-                                        </IconButton>
-                                      </HtmlTooltip>
-                                    </Grid>
-                                  )}
-                                </Grid>
-                              </Grid>
+                                )}
+                              </>
                             ))}
                           </Grid>
                         </Box>
