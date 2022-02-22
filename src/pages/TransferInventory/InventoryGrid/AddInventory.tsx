@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, useReducer } from 'react';
 import { Link } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Box, Dialog, Button, CircularProgress } from '@material-ui/core';
+import { Box, Dialog, Button, CircularProgress, Typography } from '@material-ui/core';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from 'src/pages/Leads/Header.module.scss';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
@@ -39,8 +39,8 @@ const AddInventory = (props: Props) => {
   let columns = [
     { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer' },
     {
-      field: 'inventory',
-      headerName: 'Inventory',
+      field: 'qty',
+      headerName: 'Quantity',
       show: true,
       disabled: false,
       cellRenderer: 'commonRenderer',
@@ -48,13 +48,13 @@ const AddInventory = (props: Props) => {
       editable: true
     },
     {
-      field: 'minInventory',
-      headerName: 'Min Inventory',
+      field: 'inventory',
+      headerName: 'Inventory',
       show: true,
       disabled: false,
       cellRenderer: 'commonRenderer',
       cellEditor: 'numericCellEditor',
-      editable: true
+      editable: false
     }
   ];
 
@@ -67,9 +67,11 @@ const AddInventory = (props: Props) => {
     axiosInstance()
       .get(`/product-inventory?wareHouse=${plantId}&${queryString}`)
       .then(({ data }) => {
-        let rows = data.data?.map((u, user) => {
+        let rows = data.data?.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['productId'] = u._id;
+          finalObject['qty'] = 0;
+          finalObject['inventory'] = !isNaN(Number(u.inventory)) ? Number(u.inventory) : 0;
 
           return {
             ...finalObject
@@ -147,30 +149,65 @@ const AddInventory = (props: Props) => {
     }
   };
 
+  const onCellValueChanged = ({ data }) => {
+    if (Number(data.qty) > Number(data.inventory)) {
+      toastConfig.setToastConfig({
+        type: 'warning',
+        message: "Qty can't be greater then inventory",
+        open: true
+      });
+    }
+  };
+
+  let disableSave =
+    selectedRecords.length === 0 ||
+    selectedRecords.filter((d: any) => Number(d.qty) === 0).length > 0 ||
+    selectedRecords.filter((d: any) => Number(d.qty) > Number(d.inventory)).length > 0 ||
+    isAdding;
+
   return (
     <Dialog open fullScreen fullWidth onClose={close}>
-      <CustomDialogHeader title="Add Inventory" onClose={close} />
+      <CustomDialogHeader title="Add Product" onClose={close} />
       <CustomDialogContent>
-        <Box display={'flex'} mb={1} justifyContent="flex-end" alignItems="center">
-          <SearchBox
-            onSearch={handleSearch}
-            searchbox={styles.search_box_input}
-            width={isMobile ? '200px' : '242px'}
-            style={isMobile ? { flex: 1 } : {}}
-            size="small"
-            value={search}
-          />
-          <Box mx={1} />
-
-          <Button
-            startIcon={isAdding && <CircularProgress size={18} color="inherit" />}
-            disabled={selectedRecords.length === 0 || isAdding}
-            onClick={handleClickSave}
-            variant="contained"
-            color="primary"
-          >
-            Save
-          </Button>
+        <Box
+          display={'flex'}
+          mb={1}
+          flexDirection={isMobile ? 'column' : 'row'}
+          justifyContent="space-between"
+          alignItems={isMobile ? 'flex-start' : 'center'}
+        >
+          <div style={{ order: isMobile ? 2 : 1 }}>
+            {selectedRecords.filter((d: any) => d.qty === 0).length > 0 && (
+              <Typography variant="body2" color="error">
+                Enter quantity before you save
+              </Typography>
+            )}
+            {selectedRecords.filter((d: any) => Number(d.qty) > Number(d.inventory)).length > 0 && (
+              <Typography variant="body2" color="error">
+                Quantity should be less then inventory
+              </Typography>
+            )}
+          </div>
+          <Box order={isMobile ? 1 : 2} display="flex" justifyContent={'space-between'} minWidth={isMobile ? '100%' : '300px'}>
+            <SearchBox
+              onSearch={handleSearch}
+              searchbox={styles.search_box_input}
+              width={'245px'}
+              style={isMobile ? { flex: 1 } : {}}
+              size="small"
+              value={search}
+            />
+            <Box mx={1} />
+            <Button
+              startIcon={isAdding && <CircularProgress size={18} color="inherit" />}
+              disabled={disableSave}
+              onClick={handleClickSave}
+              variant="contained"
+              color="primary"
+            >
+              Save
+            </Button>
+          </Box>
         </Box>
 
         {columns.length > 0 && (
@@ -186,7 +223,7 @@ const AddInventory = (props: Props) => {
             limit={limit}
             pageSizes={pageSizes}
             page={page}
-            onCellValueChanged={() => {}}
+            onCellValueChanged={onCellValueChanged}
             actionWidth={150}
             loading={loading}
             renderedFrom={'transferInventory_addInventory'}

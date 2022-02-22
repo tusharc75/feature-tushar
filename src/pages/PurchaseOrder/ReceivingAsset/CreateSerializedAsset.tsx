@@ -10,8 +10,12 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { generateUniqueId, packages, product, purchaseOrder } from '../../../constants/helpers';
 import { Formik, Form, FieldArray, Field } from 'formik';
 import { useData } from '../../../StateProvider/Provider';
+import { isMobile, isTablet } from "react-device-detect";
 
 const CreateSerializedAsset = (props) => {
+
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
     const { purchaseOrderID, onClose, onSuccess, title, productList, handleUpdateData, purchaseOrderData } = props;
     const [constProductList, setConstProductList] = useState(productList);
     const [wareHouseList, setwareHouseList] = useState([]);
@@ -45,14 +49,12 @@ const CreateSerializedAsset = (props) => {
                 type: 'success',
                 message: data.message
             });
-
             let tempProductArray = values.map(d => {
                 let res;
                 res = d.row
                 res["actualReceived"] = parseInt(d.quantity || 0) + parseInt(constProductList.find(u => u?._id === d?.row?._id)?.actualReceived || 0)
                 return res
             })
-
             axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderID}/update`, { products: tempProductArray })
                 .then(() => {
                     handleUpdateData({ "status": "Received" })
@@ -63,13 +65,11 @@ const CreateSerializedAsset = (props) => {
         }).catch((error) => {
             toastConfig.setToastConfig(error)
             setIsSubmitting(false);
-
         });
     }
 
     const validate = (values) => {
         let errors = { quantity: null, warehouse: null };
-
         if (values.length > 0) {
             values.map(d => {
                 let tempProduct = productList.find(u => u.productId === d.productId)
@@ -81,13 +81,24 @@ const CreateSerializedAsset = (props) => {
                 }
             })
         }
-
         return errors;
     };
 
     return (
-        <Dialog open fullWidth maxWidth="md" onClose={onClose}>
-            <CustomDialogHeader title={title} onClose={onClose} />
+        <Dialog
+            open
+            fullScreen={fullScreen || (isMobile || isTablet)}
+            maxWidth="md"
+            onClose={onClose}>
+            <CustomDialogHeader
+                title={title}
+                onClose={onClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                    setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
+            ></CustomDialogHeader>
             <Formik
                 initialValues={{ seriaizedAsset: productList.map(d => ({ "product": d.productDescription, "productId": d.productId, "warehouse": defaultWareHouse || "", "quantity": d.qty - (d.actualReceived || 0), "row": d })) }}
                 enableReinitialize={true}
@@ -97,7 +108,6 @@ const CreateSerializedAsset = (props) => {
                         <CustomDialogContent>
                             <Box p={2}>
                                 <Grid container spacing={2}>
-
                                     <Form>
                                         <Container className="p-0">
                                             <Grid
@@ -108,7 +118,6 @@ const CreateSerializedAsset = (props) => {
                                             >
                                                 <Grid item md={12}>
                                                     {values.seriaizedAsset && values.seriaizedAsset.length > 0 && (
-
                                                         <Box className={""}>
                                                             <Grid
                                                                 container
@@ -121,7 +130,6 @@ const CreateSerializedAsset = (props) => {
                                                                 <Grid item md={4}> Product </Grid>
                                                                 <Grid item md={4}> Plants </Grid>
                                                                 <Grid item md={3}> Quantity </Grid>
-
                                                             </Grid>
                                                         </Box>
                                                     )}
@@ -140,9 +148,8 @@ const CreateSerializedAsset = (props) => {
                                                                                 alignItems="center"
                                                                                 key={index}
                                                                             >
-                                                                                <Grid item md={1}>{index + 1}</Grid>
-
-                                                                                <Grid item md={4}>
+                                                                                <Grid item md={1} xs={1}>{index + 1}</Grid>
+                                                                                <Grid item md={4} xs={10}>
                                                                                     <Autocomplete
                                                                                         size="small"
                                                                                         style={{ minWidth: 200 }}
@@ -165,36 +172,31 @@ const CreateSerializedAsset = (props) => {
                                                                                         />}
                                                                                     />
                                                                                 </Grid>
-                                                                                {
-                                                                                    <Grid item md={4}>
-                                                                                        <Autocomplete
-                                                                                            size="small"
-                                                                                            style={{ minWidth: 200 }}
-                                                                                            value={userVal.warehouse}
-                                                                                            options={wareHouseList}
-                                                                                            getOptionLabel={(option: any) => option ? option?.warehouseName || option?.warehouseID || option?.address : ""}
-                                                                                            onChange={(_, newValue) => {
-                                                                                                arrayHelpers.replace(index, {
-                                                                                                    ...values.seriaizedAsset[index],
-                                                                                                    ["warehouse"]: newValue,
-                                                                                                });
-                                                                                            }}
-
-
-                                                                                            renderInput={(params) => <TextField
-                                                                                                {...params}
-                                                                                                variant="outlined"
-                                                                                                name="plants"
-                                                                                                label="Plants"
-                                                                                                error={validate([userVal]).warehouse}
-                                                                                                helperText={validate([userVal]).warehouse ? "Plant is required" : ""}
-                                                                                                required
-                                                                                            />}
-                                                                                        />
-                                                                                    </Grid>
-
-                                                                                }
-                                                                                <Grid item md={3}>
+                                                                                <Grid item md={4} xs={8}>
+                                                                                    <Autocomplete
+                                                                                        size="small"
+                                                                                        style={{ minWidth: 200 }}
+                                                                                        value={userVal.warehouse}
+                                                                                        options={wareHouseList}
+                                                                                        getOptionLabel={(option: any) => option ? option?.warehouseName || option?.warehouseID || option?.address : ""}
+                                                                                        onChange={(_, newValue) => {
+                                                                                            arrayHelpers.replace(index, {
+                                                                                                ...values.seriaizedAsset[index],
+                                                                                                ["warehouse"]: newValue,
+                                                                                            });
+                                                                                        }}
+                                                                                        renderInput={(params) => <TextField
+                                                                                            {...params}
+                                                                                            variant="outlined"
+                                                                                            name="plants"
+                                                                                            label="Plants"
+                                                                                            error={validate([userVal]).warehouse}
+                                                                                            helperText={validate([userVal]).warehouse ? "Plant is required" : ""}
+                                                                                            required
+                                                                                        />}
+                                                                                    />
+                                                                                </Grid>
+                                                                                <Grid item md={3} xs={4}>
                                                                                     <Field
                                                                                         fullWidth
                                                                                         variant="outlined"
