@@ -55,8 +55,9 @@ export const termsAndConditionDocumentUploadMaxSize = {
 };
 
 export const repairJobProcessSteps = ["Serialized Assets", "Repair Process"];
-
 export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
+export const purchaseOrderSteps = ['Add Product', 'Ad hoc Charges', 'Issue PO', 'Receiving Asset'];
+export const rentalManagementSteps = ['Add Products', 'Ad-hoc Charges', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Packing Slip'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -558,7 +559,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
         defaultOptions = key.option;
       }
       const options = defaultOptions?.map((data: any) => data.optionValue);
-      obj[key.fieldName] = value ? value : options;
+      obj[key.fieldName] = value ? [value] : options;
     } else if (key.type === 'freeStyleMultiSelect') {
       const defaultOptions = key.option?.filter((item: any) => item.default === true);
       const options = defaultOptions?.map((data: any) => data.optionValue);
@@ -1623,6 +1624,16 @@ export const SUBLEASE_STATUS = {
   issued: 'Issued',
   completed: 'Completed',
 };
+
+export const PURCHASE_ORDER_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  issued: 'Issued',
+  received: 'Received',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
+  closed: 'Closed',
+} as const;
 
 export const INVENTORY_OWNER_TYPE = {
   brand: 'Brand',
