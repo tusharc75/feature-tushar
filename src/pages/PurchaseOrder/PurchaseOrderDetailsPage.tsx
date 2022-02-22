@@ -267,184 +267,188 @@ const PurchaseOrderDetailsPage = () => {
         />
       </Grid>
       <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-        <Paper>
-          {!purchaseOrderData ? (
-            <div>
-              <Skeleton variant="text" width="150px" height="40px" />
-              <Box display="flex">
-                <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                <Box marginX={1} />
-                <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-              </Box>
-            </div>
-          ) : (
-            <DetailsPageHeader heading={purchaseOrderData?.purchaseOrderNumber} mainPoints={null} showHeading={true}>
-              {permissions?.purchaseOrder?.isUpdate &&
-                ![PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)
-                && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-              {permissions?.purchaseOrder?.isUpdate && [PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced].includes(purchaseOrderData?.status)
-                && (
-                  <>
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                      endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                    >
-                      {isMobile && !isTablet ? <GrStatusGood size={18} style={{ color: 'var(--warning-darken)' }} /> : 'Change Status'}
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {statusOptions.map((o, index) => {
-                        return (
-                          <MenuItem
-                            disabled={index <= statusOptions.findIndex((d) => d.optionLabel === purchaseOrderData?.status)}
-                            onClick={() => {
-                              closeActions();
-                              handleStatusChange(o);
-                            }}
-                            value={o}
-                          >
-                            {o?.optionLabel}
-                          </MenuItem>
-                        );
-                      })}
-                    </Menu>
-                  </>
-                )}
-            </DetailsPageHeader>
-          )}
-          <Fragment>
-            <Tabs
-              className="quote-tab"
-              value={tabValue}
-              onChange={handleMainTabChange}
-              textColor="primary"
-              TabIndicatorProps={{
-                style: {
-                  display: 'none'
-                }
-              }}
-            >
-              <Tab
-                className={'tabLayout'}
-                style={{
-                  background: tabValue === 1 ? 'white' : '',
-                  color: tabValue === 1 ? '#163340' : '#163340'
-                }}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                  </div>
-                }
-                {...a11yProps(0)}
-              />
-              <Tab
-                className={'tabLayout'}
-                style={{
-                  background: tabValue === 2 ? 'white' : '',
-                  color: tabValue === 2 ? 'blue' : '#163340'
-                }}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                  </div>
-                }
-                {...a11yProps(1)}
-              />
-              <div className={'uio'}> </div>
-            </Tabs>
-            <TabPanel value={tabValue} index={0}>
-              <Box>
-                {loadingPurchaseOrder || !purchaseOrderFields.length ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <DetailsPage data={purchaseOrderData} fields={purchaseOrderFields} />
-                )}
-              </Box>
-            </TabPanel>
-            <TabPanel value={tabValue} index={1}>
-              <Grid item xs={12} sm={12} md={12} lg={12}>
-                {!purchaseOrderData || !purchaseOrderFields.length ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
+        <div>
+          <div>
+            <Paper>
+              {!purchaseOrderData ? (
+                <div>
+                  <Skeleton variant="text" width="150px" height="40px" />
+                  <Box display="flex">
+                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                    <Box marginX={1} />
+                    <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                  </Box>
+                </div>
+              ) : (
+                <DetailsPageHeader heading={purchaseOrderData?.purchaseOrderNumber} mainPoints={null} showHeading={true}>
+                  {permissions?.purchaseOrder?.isUpdate &&
+                    ![PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)
+                    && (
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        color="primary"
+                        size="small"
+                        onClick={handleOpenUpdateDialog}
+                        className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                        style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                      >
+                        {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                      </Button>
+                    )}
+                  {permissions?.purchaseOrder?.isUpdate && [PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced].includes(purchaseOrderData?.status)
+                    && (
+                      <>
+                        <Button
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          color="default"
+                          size="small"
+                          onClick={openActions}
+                          aria-controls="action-menu"
+                          endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                        >
+                          {isMobile && !isTablet ? <GrStatusGood size={18} style={{ color: 'var(--warning-darken)' }} /> : 'Change Status'}
+                        </Button>
+                        <Menu
+                          anchorEl={anchorEl}
+                          keepMounted
+                          getContentAnchorEl={null}
+                          anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left'
+                          }}
+                          id="action-menu"
+                          open={Boolean(anchorEl)}
+                          onClose={closeActions}
+                        >
+                          {statusOptions.map((o, index) => {
+                            return (
+                              <MenuItem
+                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === purchaseOrderData?.status)}
+                                onClick={() => {
+                                  closeActions();
+                                  handleStatusChange(o);
+                                }}
+                                value={o}
+                              >
+                                {o?.optionLabel}
+                              </MenuItem>
+                            );
+                          })}
+                        </Menu>
+                      </>
+                    )}
+                </DetailsPageHeader>
+              )}
+              <Fragment>
+                <Tabs
+                  className="quote-tab"
+                  value={tabValue}
+                  onChange={handleMainTabChange}
+                  textColor="primary"
+                  TabIndicatorProps={{
+                    style: {
+                      display: 'none'
+                    }
+                  }}
+                >
+                  <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 1 ? 'white' : '',
+                      color: tabValue === 1 ? '#163340' : '#163340'
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                      </div>
+                    }
+                    {...a11yProps(0)}
+                  />
+                  <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 2 ? 'white' : '',
+                      color: tabValue === 2 ? 'blue' : '#163340'
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                      </div>
+                    }
+                    {...a11yProps(1)}
+                  />
+                  <div className={'uio'}> </div>
+                </Tabs>
+                <TabPanel value={tabValue} index={0}>
+                  <Box>
+                    {loadingPurchaseOrder || !purchaseOrderFields.length ? (
+                      <Grid container spacing={2} style={{ padding: '8px' }}>
+                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                      </Grid>
+                    ) : (
+                      <DetailsPage data={purchaseOrderData} fields={purchaseOrderFields} />
+                    )}
+                  </Box>
+                </TabPanel>
+                <TabPanel value={tabValue} index={1}>
                   <Grid item xs={12} sm={12} md={12} lg={12}>
-                    <Paper>
-                      <Steps
-                        isNextStep={false}
-                        nextStep={nextStep}
-                        steps={purchaseOrderSteps}
-                        currentStep={currentStep}
-                        setCurrentStep={setCurrentStep}
-                        isStepEnded={[PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)}
-                      />
-                      {currentStep === 0 && (
-                        <Product
-                          purchaseOrderData={purchaseOrderData}
-                          setNextStep={setNextStep}
-                          setPurchaseOrderProduct={setPurchaseOrderProduct}
-                        />
-                      )}
-                      {currentStep === 1 &&
-                        <Service
-                          purchaseOrderData={purchaseOrderData}
-                        />}
-                      {currentStep === 2 && (
-                        <IssuePo
-                          purchaseOrderData={purchaseOrderData}
-                          handleViewPdf={handleViewPdf}
-                          handleUpdateData={handleUpdateData}
-                          setCurrentStep={setCurrentStep}
-                          currentStep={currentStep}
-                          handleAttachments={handleAttachments}
-                          statusOptions={statusOptions}
-                        />
-                      )}
-                      {(currentStep === 3) && (
-                        <ReceivingAsset
-                          purchaseOrderData={purchaseOrderData}
-                          setCurrentStep={setCurrentStep}
-                          handleUpdateData={handleUpdateData}
-                          statusOptions={statusOptions}
-                          handleViewPdf={handleViewPdf}
-                          handleAttachments={handleAttachments}
-                        />
-                      )}
-                    </Paper>
+                    {!purchaseOrderData || !purchaseOrderFields.length ? (
+                      <Grid container spacing={2} style={{ padding: '8px' }}>
+                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                      </Grid>
+                    ) : (
+                      <Grid item xs={12} sm={12} md={12} lg={12}>
+                        <Paper>
+                          <Steps
+                            isNextStep={false}
+                            nextStep={nextStep}
+                            steps={purchaseOrderSteps}
+                            currentStep={currentStep}
+                            setCurrentStep={setCurrentStep}
+                            isStepEnded={[PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)}
+                          />
+                          {currentStep === 0 && (
+                            <Product
+                              purchaseOrderData={purchaseOrderData}
+                              setNextStep={setNextStep}
+                              setPurchaseOrderProduct={setPurchaseOrderProduct}
+                            />
+                          )}
+                          {currentStep === 1 &&
+                            <Service
+                              purchaseOrderData={purchaseOrderData}
+                            />}
+                          {currentStep === 2 && (
+                            <IssuePo
+                              purchaseOrderData={purchaseOrderData}
+                              handleViewPdf={handleViewPdf}
+                              handleUpdateData={handleUpdateData}
+                              setCurrentStep={setCurrentStep}
+                              currentStep={currentStep}
+                              handleAttachments={handleAttachments}
+                              statusOptions={statusOptions}
+                            />
+                          )}
+                          {(currentStep === 3) && (
+                            <ReceivingAsset
+                              purchaseOrderData={purchaseOrderData}
+                              setCurrentStep={setCurrentStep}
+                              handleUpdateData={handleUpdateData}
+                              statusOptions={statusOptions}
+                              handleViewPdf={handleViewPdf}
+                              handleAttachments={handleAttachments}
+                            />
+                          )}
+                        </Paper>
+                      </Grid>
+                    )}
                   </Grid>
-                )}
-              </Grid>
-            </TabPanel>
-          </Fragment>
-        </Paper>
-        <Box my={1} />
+                </TabPanel>
+              </Fragment>
+            </Paper>
+          </div>
+          <Box my={1} />
+        </div>
         <div className="position-relative">
           <HideWhenOffline>
             <Paper>
