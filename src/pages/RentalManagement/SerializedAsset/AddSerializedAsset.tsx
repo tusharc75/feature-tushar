@@ -285,8 +285,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             <CustomDialogContent>
                 <div className={isMobile ? "listing-grid" : "listing-grid p-3"}>
                     <Box mb={2}>
-                        <Grid container spacing={1}>
-                            <Grid item xs={12} sm={12} md={6}>
+                        <Grid container spacing={1} alignItems='center'>
+                            <Grid item xs={12} sm={12} md={4}>
                                 <div>
                                     {
                                         serializedProducts.length > 0 ?
@@ -300,8 +300,10 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                     serializedProducts.length > 0 && serializedProducts.some(s => s.qty < 0) ? <div className="text-error font-weight-bold">You have selected more assets then needed.</div> : ""
                                 }
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} container justify={isMobile ? "flex-start" : "flex-end"}>
-                                <Box className={isMobile ? "mobile-filter-side-header" : "filter-side-header-serialized"} component="div">
+                            <Grid item xs={12} sm={12} md={8}>
+                                <Box display='flex' justifyContent={isMobile ? "flex-start" : "flex-end"}>
+                                <Box flexWrap={isMobile || isTablet ? 'wrap' : 'no-wrap'} alignItems='center' className={isMobile ? "mobile-filter-side-header" : "filter-side-header-serialized"} component="div">
+                                    <Box display={'flex'} flexWrap={isMobile || isTablet ? 'wrap' : 'no-wrap'}>
                                     {refrenceType === "Rental Job" &&
                                         <Fragment>
                                             <FormControlLabel
@@ -347,6 +349,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                             />
                                         </Fragment>
                                     }
+                                    </Box>
+                                    <Box display='flex'>
                                     <SearchBox
                                         onSearch={handleSearch}
                                         searchbox="terms_header_search_bar"
@@ -355,8 +359,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                         style={isMobile ? { flex: 1 } : {}}
                                     />
                                     {(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length && !checkUniqWarehouse()) ?
-                                        <Box ml={isMobile ? 0 : 1} mt={isMobile ? 0 : 1} className="d-flex">
-                                            <Button size="small"
+                                        <Box ml={isMobile ? 0 : 1} className="d-flex">
+                                            <Button
                                                 color="primary"
                                                 onClick={() => { setShowTransferAssetDialog(true) }}
                                                 variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -368,8 +372,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                                 {isMobile && !isTablet ? <MdAdd size={23} /> : 'Create Transfer Asset'}</Button>
                                         </Box>
                                         : null}
-                                    <Box ml={isMobile ? 0 : 1} mt={isMobile ? 0 : 1} className="d-flex">
-                                        <Button size="small"
+                                    <Box ml={isMobile ? 0 : 1} className="d-flex">
+                                        <Button
                                             color="primary"
                                             onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
                                             variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -381,6 +385,8 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                             {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? "(" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")  " : ""}
                                             {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}</Button>
                                     </Box>
+                                </Box>
+                                </Box>
                                 </Box>
                             </Grid>
                         </Grid>
