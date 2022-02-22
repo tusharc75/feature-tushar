@@ -558,7 +558,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
         defaultOptions = key.option;
       }
       const options = defaultOptions?.map((data: any) => data.optionValue);
-      obj[key.fieldName] = value ? value : options;
+      obj[key.fieldName] = value ? [value] : options;
     } else if (key.type === 'freeStyleMultiSelect') {
       const defaultOptions = key.option?.filter((item: any) => item.default === true);
       const options = defaultOptions?.map((data: any) => data.optionValue);

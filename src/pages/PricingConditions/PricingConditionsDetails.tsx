@@ -17,7 +17,7 @@ import { FaWpforms } from "react-icons/fa";
 import { BiFoodMenu } from "react-icons/bi";
 import { pricingCondition } from "../../constants/helpers";
 import { startCase } from 'lodash';
-import AddConditions from './AddConditionsNew';
+import AddConditions from './AddConditions';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -177,7 +177,7 @@ const PricingConditionsDetails = () => {
                     <AddConditions
                       pricingConditionId={id}
                       detailData={detailData}
-                      />
+                    />
                   </TabPanel>
                 </>
               )}

@@ -484,7 +484,7 @@ function App() {
               <QuoteDetail />
             </PrivateRoute>
             <PrivateRoute exact path={'/dashboards'}>
-              <KpiDashboards />
+              <NewDashboard />
             </PrivateRoute>
             {/* <Route exact path={"/dashboards"}>
               <KpiDashboard />

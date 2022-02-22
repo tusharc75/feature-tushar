@@ -89,6 +89,7 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
             _fields.forEach((_f) => {
                 _f.isFormulaColor = _f.isFormula;
                 _f.isFormula = false;
+                _f.isDefaultValue = false;
                 _f.isMulitFormula = false;
                 _f.unitoption = [];
             })
