@@ -3,27 +3,13 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import clsx from 'clsx';
-import IconButton from '@material-ui/core/IconButton';
-import { Grid } from '@material-ui/core';
-import { IoIosArrowDropleftCircle, IoMdDoneAll } from 'react-icons/io';
 import { isMobile, isTablet } from 'react-device-detect';
-import { TiArrowBack } from 'react-icons/ti';
-import { RiShareForwardFill } from 'react-icons/ri';
-import MobileStepper from '@material-ui/core/MobileStepper';
-import Button from '@material-ui/core/Button';
-import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
-import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import CustomMobileStepperOpportunities from 'src/components/CustomMobileStepperOpportunities';
-import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
 
 const useStyles = makeStyles((theme) => ({
-  backButton: {
-    marginRight: theme.spacing(1)
-  },
-  instructions: {
-    fontWeight: 'bold'
-  },
   pStepper: {
+    margin: '0px auto',
+    maxWidth: 800,
     padding: '10px 4px',
     borderRadius: '4px',
     [theme.breakpoints.down('xs')]: {
@@ -87,197 +73,44 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface Props {
-  isPrevStep?: boolean;
-  isNextStep?: boolean;
   steps: string[];
   currentStep: number;
   isTransferEnded?: boolean;
-  setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
-  updateStatus: (step: number) => void;
 }
 
 const TransferSteps = (props: Props) => {
-  const { isPrevStep, isNextStep, steps, currentStep, isTransferEnded, setCurrentStep, updateStatus } = props;
+  const { steps, currentStep, isTransferEnded } = props;
   const classes = useStyles();
-  let activeStep = currentStep;
-
-  const goNext = () => {
-    setCurrentStep((prevStep) => {
-      const newStep = prevStep + 1;
-      updateStatus(newStep);
-      return newStep;
-    });
-  };
-
-  const goPrev = () => {
-    setCurrentStep((prevStep) => {
-      const newStep = prevStep - 1;
-      updateStatus(newStep);
-      return newStep;
-    });
-  };
 
   return (
-    <div>
+    <>
       {isMobile && !isTablet ? (
         <div>
-          {/* <MobileStepper
-            style={{ background: '#dee2e6' }}
-            variant="dots"
-            steps={steps.length}
-            position="bottom"
-            activeStep={activeStep}
-            nextButton={
-              <Button
-                size="small"
-                color="primary"
-                variant="contained"
-                hidden={currentStep >= 2 || (currentStep === 0 && isNextStep)}
-                disabled={(isInternal ? currentStep >= 1 : currentStep >= 2) || !isNextStep || isTransferEnded}
-                onClick={goNext}
-                endIcon={currentStep < (isInternal ? 1 : 2) && <KeyboardArrowRight />}
-              >
-                {isInternal && currentStep === steps.length - 1 ? "Loading Ticket" : steps[currentStep + 1] ?? 'Receiving Ticket'}
-              </Button>
-              // : <Button size="small" disabled={loading} color="primary" onClick={handleNext} variant="contained" endIcon={<KeyboardArrowRight />}>
-              //   {steps[activeStep + 1]?.label ?? ""}
-              // </Button>
-            }
-            backButton={
-              <Button
-                size="small"
-                disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
-                variant="contained"
-                color="primary"
-                hidden={currentStep <= 0 || (currentStep === 0 && isPrevStep)}
-                onClick={goPrev}
-                startIcon={currentStep > 0 && <KeyboardArrowLeft />}
-              >
-                {steps[activeStep - 1] ?? 'Assets'}
-              </Button>
-              // <Button size="small" disabled={loading} color="primary" onClick={handleBack} variant="contained" startIcon={<KeyboardArrowLeft />}>
-              //   {steps[activeStep - 1]?.label ?? ""}
-              // </Button>
-            }
-          /> */}
-          <CustomMobileStepperOpportunities
-            stepName={activeStep + 1 + '/' + steps.length + ' ' + steps[activeStep]}
-            nextButton={
-              <Button
-                size="small"
-                color="primary"
-                variant="text"
-                // hidden={currentStep >= 2 || (currentStep === 0 && isNextStep)}
-                disabled={currentStep >= 1 || !isNextStep || isTransferEnded}
-                onClick={goNext}
-                endIcon={activeStep >= 1 ? <IoMdDoneAll /> : <AiOutlineRight />}
-                className="ml-1 MobileStep-next-back-button"
-              >
-                {/* {isInternal && currentStep === steps.length - 1 ? "Loading Ticket" : steps[currentStep + 1] ?? 'Receiving Ticket'} */}
-                {activeStep >= 1 ? 'Finish' : 'Next'}
-              </Button>
-              // : <Button size="small" disabled={loading} color="primary" onClick={handleNext} variant="contained" endIcon={<KeyboardArrowRight />}>
-              //   {steps[activeStep + 1]?.label ?? ""}
-              // </Button>
-            }
-            backButton={
-              <Button
-                size="small"
-                disabled={currentStep === 0 || !isPrevStep || isTransferEnded}
-                variant="text"
-                color="primary"
-                // hidden={currentStep <= 0 || (currentStep === 0 && isPrevStep)}
-                onClick={goPrev}
-                startIcon={<AiOutlineLeft />}
-                className="mr-1 MobileStep-next-back-button"
-              >
-                {'Back'}
-              </Button>
-              // <Button size="small" disabled={loading} color="primary" onClick={handleBack} variant="contained" startIcon={<KeyboardArrowLeft />}>
-              //   {steps[activeStep - 1]?.label ?? ""}
-              // </Button>
-            }
-          />
+          <CustomMobileStepperOpportunities stepName={steps[currentStep]} nextButton={<></>} backButton={<></>} />
         </div>
       ) : (
         <div className="position-relative">
-          <Grid container xs={12}>
-            <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-center mt-2">
-              {!isMobile && !isTransferEnded && (
-                <div>
-                  <IconButton disabled={currentStep === 0 || !isPrevStep || isTransferEnded} onClick={goPrev} className="stepperButton">
-                    <TiArrowBack size={30} />
-                  </IconButton>
-                </div>
-              )}
-              {isTablet && !isTransferEnded && (
-                <div>
-                  <IconButton disabled={currentStep === 0 || !isPrevStep || isTransferEnded} onClick={goPrev} className="stepperButton">
-                    <TiArrowBack size={30} />
-                  </IconButton>
-                </div>
-              )}
-            </Grid>
-            <Grid item xs={12} sm={8} md={10}>
-              <div className={classes.pStepper}>
-                <Grid container>
-                  <Grid item xs={6}>
-                    {isMobile && !isTransferEnded && !isTablet && (
-                      <div>
-                        <IconButton color="primary" disabled={currentStep === 0 || !isPrevStep || isTransferEnded} onClick={goNext} size="small">
-                          <IoIosArrowDropleftCircle />
-                        </IconButton>
-                      </div>
-                    )}
-                  </Grid>
-                  <Grid item xs={6} className="d-flex align-items-center justify-content-end mt-1 mb-1">
-                    {isMobile && !isTransferEnded && !isTablet && (
-                      <div>
-                        <IconButton color="primary" onClick={goNext} size="small" disabled={currentStep >= 1 || !isNextStep || isTransferEnded}>
-                          Next
-                        </IconButton>
-                      </div>
-                    )}
-                  </Grid>
-                </Grid>
-                <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={isTransferEnded ? steps.length + 1 : activeStep}>
-                  {steps.map((label: string, i: number) => (
-                    <Step
-                      key={label}
-                      className={clsx(classes.step, {
-                        [classes.active]: currentStep > i || isTransferEnded,
-                        [classes.currentStep]: currentStep === i,
-                        [classes.inActive]: currentStep !== i
-                      })}
-                    >
-                      <StepLabel style={{ color: '#555' }} className="currentStepColor">
-                        {label}
-                      </StepLabel>
-                    </Step>
-                  ))}
-                </Stepper>
-              </div>
-            </Grid>
-            <Grid item xs={12} sm={2} md={1} className="d-flex align-items-center justify-content-center mt-2 ">
-              {!isMobile && !isTransferEnded && (
-                <div>
-                  <IconButton onClick={goNext} disabled={currentStep >= 1 || !isNextStep || isTransferEnded} className="stepperButtonNext">
-                    <RiShareForwardFill />
-                  </IconButton>
-                </div>
-              )}
-              {isTablet && !isTransferEnded && (
-                <div>
-                  <IconButton onClick={goNext} disabled={currentStep >= 1 || !isNextStep || isTransferEnded} className="stepperButtonNext">
-                    <RiShareForwardFill />
-                  </IconButton>
-                </div>
-              )}
-            </Grid>
-          </Grid>
+          <div className={classes.pStepper}>
+            <Stepper className={`${classes.pbStepper} stepper-responsive`} activeStep={isTransferEnded ? steps.length + 1 : currentStep}>
+              {steps.map((label: string, i: number) => (
+                <Step
+                  key={label}
+                  className={clsx(classes.step, {
+                    [classes.active]: currentStep > i || isTransferEnded,
+                    [classes.currentStep]: currentStep === i,
+                    [classes.inActive]: currentStep !== i
+                  })}
+                >
+                  <StepLabel style={{ color: '#555' }} className="currentStepColor">
+                    {label}
+                  </StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
