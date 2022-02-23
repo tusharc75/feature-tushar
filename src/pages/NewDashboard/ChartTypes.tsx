@@ -1,22 +1,24 @@
 import React from 'react';
 import Chart from 'react-chartjs-2';
 import { Paper, Box, Grid, useTheme, useMediaQuery, Typography, Button } from '@material-ui/core';
-import { ImportExport, TableChart, Timeline } from '@material-ui/icons';
+import { ImportExport, TableChart, Timeline, Visibility } from '@material-ui/icons';
 import { BsFilter } from 'react-icons/bs';
-import styles from '../KpiDashboard/dashboard.module.scss';
+import { Skeleton } from '@material-ui/lab';
 
+import styles from '../KpiDashboard/dashboard.module.scss';
 import FiltersDropdown from './FiltersDropdown';
-import axiosInstance from '../../axios/axiosInstance';
+import axiosInstance from 'src/axios/axiosInstance';
 import ExportDropdown from './ExportDropdown';
 import getMappedData from './getMappedData';
-
-import Loader from '../../components/Loader';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../StateProvider/Provider';
-import { formatAmountWithCurrency } from '../../constants/helpers';
-import { Skeleton } from '@material-ui/lab';
 import TableView from './TableView';
 import { GlobalFiltersType } from './GlobalFilter';
+
+import Tooltip from 'src/components/CustomTooltipTitle';
+import Loader from 'src/components/Loader';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import { formatAmountWithCurrency } from 'src/constants/helpers';
+import EyeTooltip from './EyeTooltip';
 
 export type ChartDataType = {
   col: any;
@@ -149,12 +151,14 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
               ))
             : !chartData || chartData.length === 0
             ? null
-            : Object.keys(chartData).map((key, index) => (
+            : Object.keys(chartData?.cardData).map((key, index) => (
                 <Grid item xs={12} sm={6} md={3} key={index + 1}>
                   <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
-                    <Typography className={styles.price}>
-                      {chartData[key] ? formatAmountWithCurrency(globalFilters.currency || currency, chartData[key]).fullFormatAmount : 0}
-                    </Typography>
+                    <Box display="flex">
+                      <Typography className={styles.price}>{chartData?.cardData[key] ? chartData?.cardData[key] : 0}</Typography>
+
+                      <EyeTooltip title={key} data={chartData?.addtionalData} currency={globalFilters.currency || currency} />
+                    </Box>
                     <Typography variant="h6" className={styles.title}>
                       {key}
                     </Typography>

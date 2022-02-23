@@ -22,7 +22,8 @@ const DashbaordNew = () => {
   const {
     state: {
       user: { user },
-      userLoading
+      userLoading,
+      selectedEntity
     }
   } = useData();
   const [commonSalesData, setCommonSalesData] = React.useState(null);
@@ -55,11 +56,14 @@ const DashbaordNew = () => {
         Object.keys(data).forEach((_d) => {
           setFilterOptions((prevState: any): any => ({
             ...prevState,
+            customerAccount: data['Customer Account'].filter((c: any) =>
+              Array.isArray(c?.entity) ? c?.entity?.findIndex((entity: any) => entity === selectedEntity) !== -1 : c?.entity === selectedEntity
+            ),
             countryBillTo: countriesData,
             countrySellTo: countriesData,
             subMarketSegment: data['Market Segment'].filter((d) => d.parentMarketSegment),
             marketSegment: data['Market Segment'].filter((d) => !d.parentMarketSegment),
-            [camelCase(_d) === 'user' ? 'salesRep' : camelCase(_d)]: data[_d]
+            salesRep: data['User'].filter((u: any) => u?.entities?.findIndex((d: any) => d.entity === selectedEntity) !== -1)
           }));
         });
       } catch (error) {
