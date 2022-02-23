@@ -42,6 +42,7 @@ const RentalManagementViews = (props) => {
 
   const fetchData = async () => {
     if (!isOffline) {
+      var xPosition = 0;
       var flow: any[] = [
         {
           id: `${rentalId}`,
@@ -53,14 +54,16 @@ const RentalManagementViews = (props) => {
             ref_id: rentalId,
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName ?? rentalName}</div>
           },
-          position: { x: 0, y: 70 },
+          position: { x: xPosition, y: 70 },
           style: customNodeStyles.rentalJob
         }
       ];
       var flowEdge: any[] = [];
       const product = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}`);
-
+      xPosition += 300;
       const allPackages = product?.data?.data?.material?.filter((item) => item.type === 'package').map((item) => item._id);
+      if (allPackages.length) xPosition += 300;
+
       product?.data?.data?.material?.map((item: any, index) => {
         flow.push({
           id: `${item._id}`,
@@ -78,7 +81,7 @@ const RentalManagementViews = (props) => {
               </div>
             )
           },
-          position: { x: item.type === 'package' ? 300 : 600, y: index * 80 },
+          position: { x: item.type === 'package' ? xPosition - 300 : xPosition, y: index * 80 },
           style: customNodeStyles.product
         });
         flowEdge.push({
@@ -114,7 +117,7 @@ const RentalManagementViews = (props) => {
       //     target: `${item._id}`
       //   });
       // });
-
+      xPosition += 300;
       product?.data?.data?.inventory?.map((item: any, index) => {
         flow.push({
           id: `${item.inventoryDetail.assetNumber}`,
@@ -126,7 +129,7 @@ const RentalManagementViews = (props) => {
             ref_id: item.inventory,
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.inventoryDetail.assetNumber}</div>
           },
-          position: { x: 1200, y: index * 80 },
+          position: { x: xPosition, y: index * 80 },
           style: customNodeStyles.productAssets
         });
         // purchaseArr.get(`${item.inventoryDetail.purchaseOrder}`) ? item.inventoryDetail.purchaseOrder :
@@ -141,7 +144,7 @@ const RentalManagementViews = (props) => {
         `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalId}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
       );
       var loadingAssets = 0;
-      // if (loadingTicketData?.data?.data?.length) xPosition += 300;
+      if (loadingTicketData?.data?.data?.length) xPosition += 300;
       loadingTicketData?.data?.data?.map((item: any, index) => {
         flow.push({
           id: `${item._id}`,
@@ -161,7 +164,7 @@ const RentalManagementViews = (props) => {
               </div>
             )
           },
-          position: { x: 1500, y: index * 80 },
+          position: { x: xPosition, y: index * 80 },
           style: customNodeStyles.loadingTicket
         });
 
@@ -176,7 +179,7 @@ const RentalManagementViews = (props) => {
               ref_id: product.optionValue,
               label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.optionLabel}</div>
             },
-            position: { x: 1800, y: loadingAssets * 80 },
+            position: { x: xPosition + 300, y: loadingAssets * 80 },
             style: customNodeStyles.productAssets
           });
           loadingAssets += 1;
@@ -197,6 +200,7 @@ const RentalManagementViews = (props) => {
       const receivingTicketData = await axiosInstance().get(
         `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalId}&ticketType=${DELIVERY_TICKET_TYPE.receiving}`
       );
+      xPosition += 600;
       receivingTicketData?.data?.data?.map((item: any, index) => {
         flow.push({
           id: `${item._id}`,
@@ -216,7 +220,7 @@ const RentalManagementViews = (props) => {
               </div>
             )
           },
-          position: { x: 2100, y: index * 80 },
+          position: { x: xPosition, y: index * 80 },
           style: customNodeStyles.receivingTicket
         });
         item.productInventory?.map((product: any) => {
