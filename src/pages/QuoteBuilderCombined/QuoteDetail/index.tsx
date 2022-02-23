@@ -871,7 +871,7 @@ export default function QuoteDetail() {
                               color="primary"
                               size="small"
                               startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                              onClick={handleOpenUpdateDialog}
+                              onClick={() => { setOpenUpdateDialog(true) }}
                             >
                               Edit Information
                             </Button>
@@ -884,7 +884,7 @@ export default function QuoteDetail() {
                               color="primary"
                               size="small"
                               startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                              onClick={() => { setOpenUpdateDialog(true) }}
+                              onClick={handleOpenUpdateDialog}
                             >
                               Edit Quote
                             </Button>
