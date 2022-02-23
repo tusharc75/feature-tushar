@@ -227,6 +227,17 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
         <Box display="flex" justifyContent="space-between" m={1}>
             <Box display="flex" alignItems="center">
                 <Box display="flex">
+                <Button
+                    variant={"contained"}
+                    color="primary"
+                    size="small"
+                    style={isMobile && !isTablet ? {color:"var(--secondary)"} : {}}
+                    disabled={selectedRecords.length === 0 || disableCreateAsset}
+                    onClick={() => { setShowCreateAssetDialog(true) }}
+                >
+                    {`Create Asset`}
+                </Button>
+                <Box mx={1}/>
                     {permissions?.purchaseOrder?.isRead && (
                         <Button
                             variant={isMobile && !isTablet ? "text" : "outlined"}
@@ -272,16 +283,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     </Button>}
                 </Box>
                 <Box mx={1} />
-                <Button
-                    variant={isMobile && !isTablet ? "text" : "contained"}
-                    color="primary"
-                    size="small"
-                    style={isMobile && !isTablet ? {color:"var(--secondary)"} : {}}
-                    disabled={selectedRecords.length === 0 || disableCreateAsset}
-                    onClick={() => { setShowCreateAssetDialog(true) }}
-                >
-                    {isMobile && !isTablet ? <MdAdd size={20} /> : `Create Asset`}
-                </Button>
+                
             </Box>
         </Box>
         {columns && !loadingColumns ?

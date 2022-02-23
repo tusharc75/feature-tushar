@@ -157,7 +157,7 @@ const Product = ({ purchaseOrderData, id }) => {
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex">
                     <Button
-                        variant={isMobile && !isTablet ? "text" : "contained"}
+                        variant={"contained"}
                         color="primary"
                         size="small"
                         onClick={() => {
@@ -165,20 +165,20 @@ const Product = ({ purchaseOrderData, id }) => {
                             setSelectedServiceData(null)
                         }}
                     >
-                        {isMobile && !isTablet ? <GiSabersChoc size={20} /> : "Ad hoc Charges"}
+                        {"Ad hoc Charges"}
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
                     <HtmlTooltip title="Please select some product">
                         <span>
                             <Button
-                                variant={isMobile && !isTablet ? "text" : "outlined"}
+                                variant={"outlined"}
                                 color="default"
                                 size="small"
                                 onClick={openActions}
                                 disabled={selectedRecords.length ? false : true}
                                 aria-controls="action-menu"
-                            >  {isMobile ? '' : 'Actions'} <ExpandMore />
+                            >  {'Actions'} <ExpandMore />
                             </Button>
                         </span>
                     </HtmlTooltip>

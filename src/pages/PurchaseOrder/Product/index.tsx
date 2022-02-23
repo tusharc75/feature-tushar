@@ -221,32 +221,32 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex" alignItems="center">
                     <Button
-                        variant={isMobile && !isTablet ? "text" : "contained"}
+                        variant={"contained"}
                         color="primary"
                         size="small"
-                        style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
+                        // style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
                         onClick={() => {
                             setIsAddNewProduct(true);
                         }}
                     >
-                        {isMobile && !isTablet ? <MdAdd size={22} /> : `Add New ${routes.product.title}`}
+                        {isMobile && !isTablet ? "Add" : `Add New ${routes.product.title}`}
                     </Button>
-                    <Box mx={1} />
+                    <Box mx={isMobile ? 0.5 : 1} />
                     <Button
-                        variant={isMobile && !isTablet ? "text" : "contained"}
+                        variant={"contained"}
                         color="primary"
                         size="small"
-                        style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
+                        // style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
                         onClick={() => {
                             setAddProductDialog(true);
                         }}
                     >
-                        {isMobile && !isTablet ? <FaCartArrowDown size={18} /> : `Add Existing ${routes.product.title}`}
+                        {isMobile && !isTablet ? "Existing" : `Add Existing ${routes.product.title}`}
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
-                    <Box display="flex" justifyContent="flex-end">
-                        <Box mx={1} />
+
+                    <Box display={isMobile ? "none" : "flex"} justifyContent="flex-end"> 
                         <Button
                             variant={isMobile && !isTablet ? "text" : "contained"}
                             color="primary"
@@ -264,18 +264,18 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     </Box>
                     <HtmlTooltip title="Please select some product">
                         <Button
-                            variant={isMobile && !isTablet ? "text" : "outlined"}
+                            variant={"outlined"}
                             color="default"
                             size="small"
                             onClick={openActions}
                             disabled={selectedRecords.length ? false : true}
                             aria-controls="action-menu"
                         >
-                            {isMobile && !isTablet ? "" : "Actions"}
-                            <ExpandMore />
+                            {"Actions"}
+                            <ExpandMore fontSize="small"/>
                         </Button>
                     </HtmlTooltip>
-                    <Menu
+                    {isMobile ? <Menu
                         anchorEl={anchorEl}
                         keepMounted
                         getContentAnchorEl={null}
@@ -287,12 +287,39 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                         open={Boolean(anchorEl)}
                         onClose={closeActions}
                     >
+
+                        <MenuItem   disabled={selectedRecords.length === 0}
+                            onClick={() => {
+                                setIsBulkEdit(true)
+                                setShowProductDialog(true)
+                            }}>
+                                Bulk Edit
+                            </MenuItem>
                         {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
                             closeActions()
                             setShowDeleteConfirmBox(true)
                             setDeletePurchaseOrderProduct(selectedRecords.map(d => d._id))
                         }}>Delete</MenuItem>}
-                    </Menu>
+                    </Menu> : 
+                    <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: "left",
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                >
+                    {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
+                        closeActions()
+                        setShowDeleteConfirmBox(true)
+                        setDeletePurchaseOrderProduct(selectedRecords.map(d => d._id))
+                    }}>Delete</MenuItem>}
+                </Menu>
+                }
                 </div>
             </Box>
             {columns && frameWorkComponent ? isMobile && !isTablet ?

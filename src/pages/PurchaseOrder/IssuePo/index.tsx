@@ -246,7 +246,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
             <Box display="flex" justifyContent="flex-end" p="4px">
                 <Box mx={1} />
                 <Button
-                    variant={isMobile && !isTablet ? "text" : "contained"}
+                    variant={"contained"}
                     color="primary"
                     size="small"
                     style={isMobile && !isTablet ? {color:"#FFD700"} : {}}
@@ -255,7 +255,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         handleUpdateData({ "status": "Issued" })
                     }}
                 >
-                    {isMobile && !isTablet ? <BiPurchaseTagAlt size={20} /> : `Issue PO`}
+                    {`Issue PO`}
                 </Button>
             </Box>
         </Box>
