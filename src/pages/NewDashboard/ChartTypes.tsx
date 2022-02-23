@@ -156,19 +156,8 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                   <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
                     <Box display="flex">
                       <Typography className={styles.price}>{chartData?.cardData[key] ? chartData?.cardData[key] : 0}</Typography>
-                      {key.includes('Total Booked Value') ? (
-                        <EyeTooltip
-                          title={'Total Offered Value'}
-                          data={chartData?.addtionalData.totalOfferedValue}
-                          currency={globalFilters.currency || currency}
-                        />
-                      ) : key.includes('Total Booked Cost') ? (
-                        <EyeTooltip
-                          title={'Total Offered Cost'}
-                          data={chartData?.addtionalData.totalOfferedCost}
-                          currency={globalFilters.currency || currency}
-                        />
-                      ) : null}
+
+                      <EyeTooltip title={key} data={chartData?.addtionalData} currency={globalFilters.currency || currency} />
                     </Box>
                     <Typography variant="h6" className={styles.title}>
                       {key}
