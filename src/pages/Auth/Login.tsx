@@ -72,7 +72,6 @@ const Login = () => {
           localStorage.setItem('gridMetaData', tempMetaData);
           dispatch({ type: SET_GRID_METADATA, payload: gridRequest.data.data?.gridMetaData });
 
-
           let mappedEntities = [];
           if (data.entity && data.entity.length) {
             data.entity.forEach((o) => {
@@ -190,7 +189,7 @@ const Login = () => {
         <Grid container className={classes.grid}>
           <Grid item sm={6} md={5} className="loginSidebar">
             <Box display={{ xs: 'none', sm: 'block', md: 'block' }}>
-              <img className="imgLogin" src={SVG('imgComputer')}></img>
+              <img className="imgLogin" src={SVG('imgComputer')} />
             </Box>
           </Grid>
           <Grid item sm={6} md={7} xs={12} className={classes.formSide}>
@@ -247,7 +246,7 @@ const Login = () => {
                       </Box>
                       <Box width={260} className="mt-2">
                         <Button disabled={isSubmitting} fullWidth variant="contained" color="secondary" type="submit" onClick={submitForm}>
-                          {isSubmitting ? <CircularProgress size={22} /> : 'Login'}
+                          {isSubmitting ? <CircularProgress size={22} /> : 'Login Testing 22'}
                         </Button>
 
                         <Box className="mt-2">
@@ -268,7 +267,7 @@ const Login = () => {
                             )}
                           </AuthenticatedTemplate>
                           <UnauthenticatedTemplate>
-                            <AzureLogin></AzureLogin>
+                            <AzureLogin />
                           </UnauthenticatedTemplate>
                         </Box>
                       </Box>

@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.65.1](https://github.com/vebholic/oms_frontend/compare/v2.65.0...v2.65.1) (2022-02-23)
+
+
+### Bug Fixes
+
+* **breadcrumb:** minor fix ([ffd1a29](https://github.com/vebholic/oms_frontend/commit/ffd1a29fa05c067fe5bcf6ab6a522fb5367ba4b8))
+* bug fix ([79f9e04](https://github.com/vebholic/oms_frontend/commit/79f9e04708d90c42642e83771727bcb9ee0d9ace))
+* bug fix ([a39fd42](https://github.com/vebholic/oms_frontend/commit/a39fd4231db11084093c400c882c9c7637f2cc92))
+* bug fix ([75cd53d](https://github.com/vebholic/oms_frontend/commit/75cd53d56160f3c9feaed8bd07d3ffdca49be611))
+* bug fix ([aa78f0e](https://github.com/vebholic/oms_frontend/commit/aa78f0e381df04ef25e2066e4bd0e6aceb09b16f))
+* bug fix ([89d82b0](https://github.com/vebholic/oms_frontend/commit/89d82b072b022c19500a14529180becc7506613f))
+* **dashboard:** filter err fix ([b46af72](https://github.com/vebholic/oms_frontend/commit/b46af72a0ea10a9543ba547c9696f7d65e0df785))
+* **dashboard:** new dashboard merge ([452b0b3](https://github.com/vebholic/oms_frontend/commit/452b0b326dd3cd6e973b2596096f2fc2d4cea2ff))
+* **rental:** ui fix ([0877804](https://github.com/vebholic/oms_frontend/commit/087780459e763794a94f07cb390e6fa3740ede72))
+* **tranfer inventory:** some fix ([b080847](https://github.com/vebholic/oms_frontend/commit/b080847a9c1d1a89c4d7ab0ced5bf663c76f149b))
+
 ## [2.65.0](https://github.com/vebholic/oms_frontend/compare/v2.64.1...v2.65.0) (2022-02-22)
 
 
