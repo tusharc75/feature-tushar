@@ -30,7 +30,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import { MdAdd } from "react-icons/md";
 import { RiEditCircleLine } from "react-icons/ri";
 
-const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable, id, setPurchaseOrderProduct }) => {
+const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -58,7 +58,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
 
     useEffect(() => {
         fetchPurchaseOrderProduct();
-    }, [id]);
+    }, [purchaseOrderData]);
 
     useEffect(() => {
         axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
@@ -82,16 +82,17 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
         if (gridApi) {
             gridApi.setRowData([]);
         }
-        setCurrentStepDisable(false)
-        axiosInstance().get(`${purchaseOrder.api}/product/${id}`).then(({ data: { data } }) => {
+        setNextStep(false)
+        axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`).then(({ data: { data } }) => {
             setPurchaseOrderProduct(JSON.parse(JSON.stringify(data)))
             let rows = data?.map((item, index) => {
-                if ((!currentStepDisable) && (
-                    item.qty === 0
-                    || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === 0
+                if ((item.qty === 0 || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === 0
                     || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === undefined
                     || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === null)) {
-                    setCurrentStepDisable(true)
+                    setNextStep(false)
+                }
+                else {
+                    setNextStep(true)
                 }
                 let finalObject = prepareDataForGrid(item);
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
@@ -177,7 +178,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
             "qty": parseInt(d.quantity) || 0,
             "expectedDelivery": purchaseOrderData?.deliveryDate
         }))
-        axiosInstance().post(`${purchaseOrder.api}/product/${id}/add`, { "orderDetails": tempProductArray })
+        axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/add`, { "orderDetails": tempProductArray })
             .then(() => {
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
@@ -190,7 +191,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     }
 
     const handleUpdateQty = (rows) => {
-        axiosInstance().put(`${purchaseOrder.api}/product/${id}/update`, { products: rows })
+        axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows })
             .then(() => {
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
@@ -206,7 +207,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     }
 
     const handleDelete = () => {
-        axiosInstance().post(`${purchaseOrder.api}/product/${id}/delete`, { ids: deletePurchaseOrderProduct })
+        axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/delete`, { ids: deletePurchaseOrderProduct })
             .then(() => {
                 fetchPurchaseOrderProduct()
                 setShowDeleteConfirmBox(false)

@@ -18,6 +18,8 @@ import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 import { startCase } from 'lodash';
 import { useHistory } from "react-router-dom";
+import { useData } from "../../../StateProvider/Provider";
+import moment from "moment";
 
 const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpdateDisabled = false, isClone = false }) => {
 
@@ -27,6 +29,7 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const history = useHistory();
+    const { state: { user, permissions, selectedEntity } }: any = useData();
 
     useEffect(() => {
         axiosInstance().get(`/field?resource=${startCase(pricingCondition.resource)}`).then(({ data: { data } }) => {
@@ -51,9 +54,13 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
                 });
             }
             else {
+                let initialData = {
+                    ...getObjKeys("", fieldsDataForCreate),
+                    currency: user.user?.brandCurrency || ""
+                };
                 setInitialData({
                     fields: fieldsDataForCreate,
-                    values: getObjKeys("", fieldsDataForCreate),
+                    values: initialData,
                 });
             }
         })
@@ -84,6 +91,16 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
         }
     };
 
+    function validate(values) {
+        const errors = {};
+        let startDate = moment(values?.startDate);
+        let endDate = moment(values?.endDate);
+        if (endDate.diff(startDate, 'days') < 0) {
+            errors['endDate'] = 'Please enter valid end date';
+        }
+        return errors;
+    }
+
     return (<Dialog
         maxWidth="md"
         fullScreen={fullScreen || (isMobile || isTablet)}
@@ -103,6 +120,7 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
                 initialValues={initialData.values}
                 validationSchema={yupSchema(initialData.fields)}
                 validateOnMount
+                validate={validate}
                 onSubmit={handleSubmit}>
                 {({ values,
                     errors,

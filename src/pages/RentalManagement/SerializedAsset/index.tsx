@@ -10,7 +10,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
 import {
-  dateFormat, formatAmountWithCurrency, rentalManagement, purchaseOrder, transferAsset,
+  dateFormat, formatAmountWithCurrency, rentalManagement, purchaseOrder, transferAsset, sublease,
   sidebarResource, treeToFlatArray, serializedAsset, INVENTORY_STATUS, CHILD_RESOURCE
 } from "../../../constants/helpers";
 import moment from "moment";
@@ -50,8 +50,11 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], type: "" });
-  const [poCount, setPoCount] = useState(0);
+
+
+  const [purchaseOrderCount, setPurchaseOrderCount] = useState(0);
   const [transferAssetCount, setTransferAssetCount] = useState(0);
+  const [subleaseCount, setSubleaseCount] = useState(0);
 
   const { state: { user, permissions, selectedEntity } }: any = useData();
 
@@ -62,6 +65,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     if (!isOffline) {
       fetchPurchaseOrder()
       fetchTransferAsset()
+      if (permissions?.sublease?.isRead) {
+        fetchSublease()
+      }
     }
   }, []);
 
@@ -268,7 +274,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     filterById.push({ field: "rentalJob", term: rentalManagementData?._id });
     const queryString = `?filterById=${JSON.stringify(filterById)}`
     axiosInstance().get(`${purchaseOrder.api}${queryString}`).then(({ data: { data } }) => {
-      setPoCount(data.length)
+      setPurchaseOrderCount(data.length)
     }).catch((error) => {
     });
   }
@@ -279,6 +285,16 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     const queryString = `?filterById=${JSON.stringify(filterById)}`
     axiosInstance().get(`${transferAsset.api}${queryString}`).then(({ data: { data } }) => {
       setTransferAssetCount(data.length)
+    }).catch((error) => {
+    });
+  }
+
+  const fetchSublease = async () => {
+    let filterById = [];
+    filterById.push({ field: "rentalJob", term: rentalManagementData?._id });
+    const queryString = `?filterById=${JSON.stringify(filterById)}`
+    axiosInstance().get(`${sublease.api}${queryString}`).then(({ data: { data } }) => {
+      setSubleaseCount(data.length)
     }).catch((error) => {
     });
   }
@@ -424,7 +440,15 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         >
           {isMobile && !isTablet ? "Purchase order" : `Create ${routes.purchaseOrder.title}`}
         </Button>
-
+        {purchaseOrderCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
+          <IconButton size="small" onClick={() => {
+            history.push(routes.purchaseOrder.path, {
+              rental: rentalManagementData,
+            })
+          }}>
+            <InfoIcon color={"primary"} />
+          </IconButton>
+        </HtmlTooltip>}
         {permissions?.sublease?.isCreate &&
           <Fragment>
             {/* <Box mx={1} /> */}
@@ -441,6 +465,15 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             >
               {isMobile && !isTablet ? "Sublease" : `Create ${routes.sublease.title}`}
             </Button>
+            {subleaseCount > 0 && <HtmlTooltip title={`Created ${routes.sublease.title}`}>
+              <IconButton size="small" onClick={() => {
+                history.push(routes.sublease.path, {
+                  rental: rentalManagementData,
+                })
+              }}>
+                <InfoIcon color={"primary"} />
+              </IconButton>
+            </HtmlTooltip>}
           </Fragment>
         }
 
@@ -523,7 +556,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         </Button>
         {/* <Box mx={1} /> */}
         
-        {poCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
+        {purchaseOrderCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
           <IconButton size="small" onClick={() => {
             history.push(routes.purchaseOrder.path, {
               rental: rentalManagementData,
@@ -655,7 +688,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setOrderDialog(({ open: false, products: [], type: "" }))
           setSelectedProducts([])
           fetchProductInventory()
-          fetchPurchaseOrder()
+          fetchSublease()
           toastConfig.setToastConfig({
             open: true,
             type: "success",

@@ -11,7 +11,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { sublease, SUBLEASE_STATUS } from "../../constants/helpers";
+import { sublease, SUBLEASE_STATUS, subleaseSteps } from "../../constants/helpers";
 import ManageSublease from "./ManageSublease";
 import Steps from "../RentalManagement/Steps";
 import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from "react-icons/fa";
@@ -24,8 +24,6 @@ import Productpackage from './Productpackage';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
 import { GiAbstract055 } from 'react-icons/gi';
-
-const processSteps = ["Add Products", "Serialized Asset"]
 
 const SubleaseDetailsPage = () => {
 
@@ -63,7 +61,7 @@ const SubleaseDetailsPage = () => {
 
     useEffect(() => {
         if (currentStep >= 0 && currentStep <= 2) {
-            updateProcessStatus(processSteps[currentStep])
+            updateProcessStatus(subleaseSteps[currentStep])
         }
     }, [currentStep]);
 
@@ -106,7 +104,7 @@ const SubleaseDetailsPage = () => {
     const fetchData = async () => {
         try {
             const { data: { data } } = await axiosInstance().get(`${sublease.api}/${id}`);
-            setCurrentStep(processSteps.indexOf(data?.processStatus) !== -1 ? processSteps.indexOf(data?.processStatus) : 0);
+            setCurrentStep(subleaseSteps.indexOf(data?.processStatus) !== -1 ? subleaseSteps.indexOf(data?.processStatus) : 0);
             const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
             if (data?.productInventory?.length) {
                 setIsIssued(true)
@@ -150,7 +148,7 @@ const SubleaseDetailsPage = () => {
                                 mainPoints={null}
                                 showHeading={true}
                             >
-                                {permissions?.sublease?.isUpdate && (
+                                {(permissions?.sublease?.isUpdate && subleaseData?.status !== SUBLEASE_STATUS.completed) && (
                                     <>
                                         <Button
                                             variant={isMobile && !isTablet ? "text" : "contained"}
@@ -239,7 +237,7 @@ const SubleaseDetailsPage = () => {
                                                     <Steps
                                                         isNextStep={false}
                                                         nextStep={nextStep}
-                                                        steps={processSteps}
+                                                        steps={subleaseSteps}
                                                         currentStep={currentStep}
                                                         setCurrentStep={setCurrentStep}
                                                         isStepEnded={[SUBLEASE_STATUS.completed].includes(subleaseData?.status)}
@@ -252,10 +250,12 @@ const SubleaseDetailsPage = () => {
                                                             isIssued={isIssued}
                                                         />
                                                     )}
-                                                    {currentStep === 1 && subleaseData && (
+                                                    {(currentStep === 1 || currentStep === 2) && subleaseData && (
                                                         <SerializedAsset
                                                             fetchData={fetchData}
                                                             subleaseData={subleaseData}
+                                                            setNextStep={setNextStep}
+                                                            currentStep={currentStep}
                                                         />
                                                     )}
                                                 </Paper>

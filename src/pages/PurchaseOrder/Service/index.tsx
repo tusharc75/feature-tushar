@@ -21,12 +21,10 @@ import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { prepareDataForGrid } from "../../../constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
-import { GiSabersChoc, GrBusinessService } from "react-icons/all";
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 
-
-const Product = ({ purchaseOrderData, id }) => {
+const Product = ({ purchaseOrderData }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -45,7 +43,7 @@ const Product = ({ purchaseOrderData, id }) => {
 
     useEffect(() => {
         fetchPurchaseOrderService();
-    }, [id]);
+    }, [purchaseOrderData]);
 
     useEffect(() => {
         axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderService}`).then(({ data: { data } }) => {
@@ -68,11 +66,12 @@ const Product = ({ purchaseOrderData, id }) => {
         if (gridApi) {
             gridApi.setRowData([]);
         }
-        axiosInstance().get(`${purchaseOrder.api}/service/${id}`).then(({ data: { data } }) => {
+        axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData._id}`).then(({ data: { data } }) => {
             let rows = data?.map((item) => {
                 let finalObject = prepareDataForGrid(item);
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
-                finalObject["allowedToEdit"] = true
+                finalObject["canDelete"] = permissions?.purchaseOrder?.isDelete;
+                finalObject["allowedToEdit"] = permissions?.purchaseOrder?.isUpdate;
                 let res: any = {
                     ...finalObject,
                 };
@@ -122,7 +121,7 @@ const Product = ({ purchaseOrderData, id }) => {
     };
 
     const handleAddService = (rows) => {
-        axiosInstance().post(`${purchaseOrder.api}/service/${id}/add`, { services: rows })
+        axiosInstance().post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/add`, { services: rows })
             .then(() => {
                 fetchPurchaseOrderService()
                 setShowServiceDialog(false)
@@ -132,7 +131,7 @@ const Product = ({ purchaseOrderData, id }) => {
     }
 
     const handleUpdateService = (rows) => {
-        axiosInstance().put(`${purchaseOrder.api}/service/${id}/update`, { services: rows })
+        axiosInstance().put(`${purchaseOrder.api}/service/${purchaseOrderData._id}/update`, { services: rows })
             .then(() => {
                 fetchPurchaseOrderService()
                 setShowServiceDialog(false)
@@ -142,7 +141,7 @@ const Product = ({ purchaseOrderData, id }) => {
     }
 
     const handleDelete = () => {
-        axiosInstance().post(`${purchaseOrder.api}/service/${id}/delete`, { ids: deletePurchaseOrderService })
+        axiosInstance().post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/delete`, { ids: deletePurchaseOrderService })
             .then(() => {
                 fetchPurchaseOrderService()
                 setShowDeleteConfirmBox(false)
@@ -157,7 +156,7 @@ const Product = ({ purchaseOrderData, id }) => {
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex">
                     <Button
-                        variant={"contained"}
+                        variant="contained"
                         color="primary"
                         size="small"
                         onClick={() => {
@@ -165,7 +164,7 @@ const Product = ({ purchaseOrderData, id }) => {
                             setSelectedServiceData(null)
                         }}
                     >
-                        {"Ad hoc Charges"}
+                        Ad hoc Charges
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
@@ -206,7 +205,7 @@ const Product = ({ purchaseOrderData, id }) => {
                 <CustomSwipableList
                     allowSelection={true}
                     allowSwipe={true}
-                    permissions={permissions}
+                    permissions={permissions.purchaseOrder}
                     primaryField={columns?.find(d => d.field === "description")}
                     onClick={(data) => {
                         setShowServiceDialog(true)

@@ -65,20 +65,24 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between, 
             const oldData = { ...d };
             delete oldData.productName;
             delete oldData._id;
+
+            const total = Object.values(oldData).reduce((acc: number, val: number) => acc + val);
+
             return {
               ['Product']: d.productName,
-              ['Total Assets']: Object.values(oldData).reduce((acc: number, val: number) => acc + val)
+              ['Total Assets']: total
             };
           });
           Object.keys(data.data[0]).forEach((label: any) => {
             if (!ignoreId.includes(label)) {
-              values.push(getSum(data.data, label));
-              labels.push(label);
+              const val = getSum(data.data, label);
+              if (val) {
+                values.push(val);
+                labels.push(label);
+              }
             }
           });
         }
- 
-        console.log(values)
 
         setTableDataRaw(tableData);
         setPieData({
@@ -207,7 +211,11 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between, 
           />
         </Box>
         <Box display={smallScreen ? 'flex' : 'block'} justifyContent={'space-between'}>
-          <Button disabled={loading || tableDataRaw.length === 0} onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
+          <Button
+            disabled={loading || pieData?.labels.length === 0}
+            onClick={(event) => setAnchorEl(event.currentTarget)}
+            startIcon={<ImportExport />}
+          >
             Export to
           </Button>
           <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
@@ -216,7 +224,11 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between, 
             <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
             <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
           </Menu>
-          <Button disabled={loading || tableDataRaw.length === 0} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
+          <Button
+            disabled={loading || pieData?.labels.length === 0}
+            onClick={() => setTableView((prevState) => !prevState)}
+            startIcon={!tableView ? <TableChart /> : <Timeline />}
+          >
             {!tableView ? 'Table' : 'Chart'} View
           </Button>
         </Box>
@@ -224,7 +236,7 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between, 
 
       <Box height={440}>
         {loading && <Loader noLoader minHeight={'100%'} text={'Loading chart data...'} />}
-        {!loading && tableDataRaw.length > 0 ? (
+        {!loading && pieData && pieData?.labels.length > 0 ? (
           tableView ? (
             <TableContainer style={{ height: '400px' }}>
               <Table stickyHeader aria-label="caption table">
@@ -261,7 +273,7 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between, 
             />
           )
         ) : (
-          !loading && <div>No Data</div>
+          !loading && <Loader noLoader minHeight={'100%'} text={'No Data'} />
         )}
       </Box>
     </div>
