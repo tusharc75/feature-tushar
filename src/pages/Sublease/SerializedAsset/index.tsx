@@ -23,7 +23,7 @@ import { groupBy, uniq, map } from "lodash";
 
 const renderedFrom = 'SubleasingSerializedAsset';
 
-const SerializedAsset = ({ subleaseData, fetchData }) => {
+const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
@@ -89,6 +89,12 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
             return res;
         });
         setIsCompleteEnable(isComplate)
+        if (isComplate) {
+            setNextStep(true)
+        }
+        else {
+            setNextStep(false)
+        }
         dispatch({ type: "initialize", data: rows, count: rows.length });
         setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
     };
@@ -156,30 +162,34 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
             <Box mx={1} />
             {SUBLEASE_STATUS.completed != subleaseData?.status &&
                 <Fragment>
-                    <Tooltip title="Transfer to Plant">
-                        <Button
-                            variant={"contained"}
-                            color="primary"
-                            size="small"
-                            onClick={() => {
-                                const data = {}
-                                data["ticketName"] = subleaseData.subleaseName;
-                                data["refrenceId"] = subleaseData._id;
-                                data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
-                                data["pickupFrom"] = subleaseData?.supplierAccount?.optionValue;
-                                data["pickupFromAddress"] = subleaseData?.shippingAddress?.optionValue;
-                                data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
-                                setShowTicketDialog({ open: true, data: data });
-                            }}
-                            disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse")
-                                || f.currentOwnerType !== INVENTORY_OWNER_TYPE.supplierAccount)))}
-                        >
-                            Receiving to Plant
-                        </Button>
-                    </Tooltip>
-                    <Box mx={1} />
-                    {selectedRecords.length > 0 && selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
-                        checkUniqWarehouse() ?
+                    {currentStep === 1 &&
+                        <Fragment>
+                            <Tooltip title="Transfer to Plant">
+                                <Button
+                                    variant={"contained"}
+                                    color="primary"
+                                    size="small"
+                                    onClick={() => {
+                                        const data = {}
+                                        data["ticketName"] = subleaseData.subleaseName;
+                                        data["refrenceId"] = subleaseData._id;
+                                        data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
+                                        data["pickupFrom"] = subleaseData?.supplierAccount?.optionValue;
+                                        data["pickupFromAddress"] = subleaseData?.shippingAddress?.optionValue;
+                                        data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                                        setShowTicketDialog({ open: true, data: data });
+                                    }}
+                                    disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse")
+                                        || f.currentOwnerType !== INVENTORY_OWNER_TYPE.supplierAccount)))}
+                                >
+                                    Receiving to Plant
+                                </Button>
+                            </Tooltip>
+                            <Box mx={1} />
+                        </Fragment>
+                    }
+                    {(selectedRecords.length > 0 && selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+                        checkUniqWarehouse() && currentStep === 1) ?
                         <Fragment>
                             <Tooltip title="Send to Supplier">
                                 <Button
@@ -207,16 +217,19 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
                         </Fragment>
                         : null
                     }
-                    <Button
-                        variant={"contained"}
-                        color="primary"
-                        size="small"
-                        disabled={!isCompleteEnable || isCompleteing}
-                        onClick={() => { completeSublease() }}
-                    >
-                        End Sublease
-                    </Button>
-                    <Box mx={1} />
+                    {currentStep === 2 &&
+                        <Fragment>
+                            <Button
+                                variant={"contained"}
+                                color="primary"
+                                size="small"
+                                disabled={!isCompleteEnable || isCompleteing}
+                                onClick={() => { completeSublease() }}
+                            >
+                                End Sublease
+                            </Button>
+                            <Box mx={1} />
+                        </Fragment>}
                 </Fragment>
             }
         </Box>
