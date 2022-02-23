@@ -12,6 +12,7 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     const bookedValueData = [];
     const bookedCostData = [];
     const bookedVolumeData = [];
+    const offeredVolumeData = [];
     const offeredValueData = [];
     const offeredCostData = [];
     const labels = [];
@@ -28,45 +29,50 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
 
     for (let d of data) {
       if (currencyTo && currencyFrom && currencyTo !== currencyFrom) {
-        const bookedValue: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedValue, currencyFrom, currencyTo);
-        const bookedCost: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedCost, currencyFrom, currencyTo);
-        const offeredValue: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedValue, currencyFrom, currencyTo);
-        const offeredCost: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedCost, currencyFrom, currencyTo);
-        const budgetData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget, currencyFrom, currencyTo);
+        const bookedValue: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedValue || 0, currencyFrom, currencyTo);
+        const budgetData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget || 0, currencyFrom, currencyTo);
+        const bookedCost: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedCost || 0, currencyFrom, currencyTo);
+        const offeredValue: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedValue || 0, currencyFrom, currencyTo);
+        const offeredCost: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedCost || 0, currencyFrom, currencyTo);
 
-        bookedValueData.push(bookedValue ? bookedValue.rates[currencyTo] : d.totalBookedValue);
-        bookedCostData.push(bookedCost ? bookedCost.rates[currencyTo] : d.totalBookedCost);
-        budget.push(budgetData ? budgetData.rates[currencyTo] : d.budget);
-        offeredValueData.push(offeredValue ? offeredValue.rates[currencyTo] : d.totalOfferedValue);
-        offeredCostData.push(offeredValue ? offeredCost.rates[currencyTo] : d.totalOfferedCost);
+        bookedValueData.push(bookedValue ? bookedValue.rates[currencyTo] : d.totalBookedValue || 0);
+        budget.push(budgetData ? budgetData.rates[currencyTo] : d.budget || 0);
+        bookedCostData.push(bookedCost ? bookedCost.rates[currencyTo] : d.totalBookedCost || 0);
+        offeredValueData.push(offeredValue ? offeredValue.rates[currencyTo] : d.totalOfferedValue || 0);
+        offeredCostData.push(offeredValue ? offeredCost.rates[currencyTo] : d.totalOfferedCost || 0);
       } else {
         bookedValueData.push(d.totalBookedValue || 0);
+        budget.push(d.budget);
         bookedCostData.push(d.totalBookedCost || 0);
         offeredValueData.push(d.totalOfferedValue || 0);
         offeredCostData.push(d.totalOfferedCost || 0);
-        budget.push(d.budget);
       }
+
       bookedVolumeData.push(d.totalBookedVolume || 0);
+      offeredVolumeData.push(d.totalOfferedVolume || 0);
       labels.push(moment(d.date).format('MMM/YY'));
     }
 
     if (labels.length === 0) return null;
 
     if (chart.uniqueId === 'revenueCard') {
+      console.log(offeredValueData, offeredVolumeData)
       let totalBookedValue = bookedValueData.reduce((acc, val) => acc + val);
       let totalBookedCost = bookedCostData.reduce((acc, val) => acc + val);
       let totalBookedVolume = bookedVolumeData.reduce((acc, val) => acc + val);
       let totalOfferedValue = offeredValueData.reduce((acc, val) => acc + val);
       let totalOfferedCost = offeredCostData.reduce((acc, val) => acc + val);
-      let bookedRate: any, costRate: any;
+      let totalOfferedVolume = offeredVolumeData.reduce((acc, val) => acc + val);
 
       const grossMarginPercent = totalBookedValue && totalBookedCost ? Math.floor(((totalBookedValue - totalBookedCost) / totalBookedCost) * 100) : 0;
+      const offeredMarginPercent =
+        totalOfferedValue && totalOfferedCost ? Math.floor(((totalOfferedValue - totalOfferedCost) / totalBookedCost) * 100) : 0;
       const grossMargin = totalBookedValue && totalBookedCost ? totalBookedValue - totalBookedCost : 0;
-
-      if (currencyTo !== currencyFrom) {
-        bookedRate = await getExchangeRates(moment().format('YYYY-MM-DD'), totalBookedValue, currencyFrom, currencyTo);
-        costRate = await getExchangeRates(moment().format('YYYY-MM-DD'), totalBookedCost, currencyFrom, currencyTo);
-      }
+      const offeredMargin = totalOfferedValue && totalOfferedCost ? totalOfferedValue - totalOfferedCost : 0;
+      const hitRatioValue = totalBookedValue / totalOfferedValue;
+      const hitRatioCost = totalBookedCost / totalOfferedCost;
+      const hitRatioMargin = grossMargin / offeredMargin;
+      const hitRationVolume = totalBookedVolume / totalOfferedVolume;
 
       dataObject = {
         addtionalData: {
@@ -74,12 +80,19 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
           currency,
           totalOfferedValue,
           totalOfferedCost,
-          hitRatio: ''
+          totalOfferedVolume,
+          offeredMarginPercent,
+          offeredMargin,
+          grossMarginPercent,
+          hitRatioValue,
+          hitRatioCost,
+          hitRatioMargin,
+          hitRationVolume
         },
         cardData: {
-          ['Total Booked Value']: formatAmountWithCurrency(currency, bookedRate ? bookedRate.rates[currencyTo] : totalBookedValue).fullFormatAmount,
-          ['Total Booked Cost']: formatAmountWithCurrency(currency, costRate ? costRate.rates[currencyTo] : totalBookedCost).fullFormatAmount,
-          ['Gross Margin']: `${formatAmountWithCurrency(currency, grossMargin).fullFormatAmount} (${grossMarginPercent}%)`,
+          ['Total Booked Value']: formatAmountWithCurrency(currencyFrom || currencyTo, totalBookedValue).fullFormatAmount,
+          ['Total Booked Cost']: formatAmountWithCurrency(currencyFrom || currencyTo, totalBookedCost).fullFormatAmount,
+          ['Booked Gross Margin']: `${formatAmountWithCurrency(currencyFrom || currencyTo, grossMargin).fullFormatAmount} (${grossMarginPercent}%)`,
           ['Total Booked Volume']: `${totalBookedVolume.toFixed(2)} ${volumeUnit}`
         }
       };
@@ -237,13 +250,13 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
 
     for (let d of data) {
       if (currencyTo && currencyTo !== currencyFrom) {
-        const bookedValueData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedValue, currencyFrom, currencyTo);
-        const offeredValueData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedValue, currencyFrom, currencyTo);
-        const budgetData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget, currencyFrom, currencyTo);
+        const bookedValueData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedValue || 0, currencyFrom, currencyTo);
+        const offeredValueData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedValue || 0, currencyFrom, currencyTo);
+        const budgetData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget || 0, currencyFrom, currencyTo);
 
-        totalBookedData.push(bookedValueData ? bookedValueData.rates[currencyTo] : d.totalBookedValue);
-        totalOfferedValueData.push(offeredValueData ? offeredValueData.rates[currencyTo] : d.totalOfferedValue);
-        budget.push(budgetData ? budgetData.rates[currencyTo] : d.budget);
+        totalBookedData.push(bookedValueData ? bookedValueData.rates[currencyTo] : d.totalBookedValue || 0);
+        totalOfferedValueData.push(offeredValueData ? offeredValueData.rates[currencyTo] : d.totalOfferedValue || 0);
+        budget.push(budgetData ? budgetData.rates[currencyTo] : d.budget || 0);
       } else {
         totalBookedData.push(d.totalBookedValue || 0);
         totalOfferedValueData.push(d.totalOfferedValue || 0);
