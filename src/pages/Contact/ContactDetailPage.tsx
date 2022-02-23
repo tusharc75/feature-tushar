@@ -734,22 +734,24 @@ const ContactDetailsPage = (props) => {
               showHeading={true}
             >
               {
-                contactResource === customerContact.contactResource && !contactData.relatedUser?.eCommerceAccess &&
+                permissions.eCommerce?.isRead && contactResource === customerContact.contactResource &&
                 <Button
                   color="primary"
                   size="small"
                   variant={isMobile ? "text" : "contained"}
+                  disabled={contactData.relatedUser?.eCommerceAccess}
                   onClick={handleEcommerceAccess}
                 >
                   E-Commerce Access
                 </Button>
               }
               {
-                user.user?.userType === userType.brandAdmin && !contactData?.isUserExist &&
+                permissions.eCommerce?.isRead && user.user?.userType === userType.brandAdmin &&
                 <Button
                   color="primary"
                   size="small"
                   variant={isMobile ? "text" : "contained"}
+                  disabled={contactData?.isUserExist}
                   onClick={handlePortalAccess}
                 >
                   Give Portal Access
