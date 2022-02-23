@@ -36,7 +36,7 @@ import Calender from './pages/Activity/Calendar';
 import PasswordSetup from './pages/Auth/PasswordSetup';
 import ForgetPassword from './pages/Auth/ForgetPassword';
 import ProductCategory from './pages/ProductCategory';
-import ProductCategoryDetailPage from "./pages/ProductCategory/ProductCategoryDetailPage"
+import ProductCategoryDetailPage from './pages/ProductCategory/ProductCategoryDetailPage';
 import ProductTemplate from './pages/ProductTemplate';
 import CreateProductTemplate from './pages/ProductTemplate/CreateProductTemplate';
 import User from './pages/User';
@@ -97,8 +97,8 @@ import PurchaseOrderDetailsPage from './pages/PurchaseOrder/PurchaseOrderDetails
 import { entity } from './constants/helpers';
 import TransferAsset from './pages/TransferAssets/Index';
 import TransferAssetDetailPage from './pages/TransferAssets/TransferAssetDetailPage';
-import Address from "./pages/Address";
-import AddressDetailPage from './pages/Address/AddressDetailPage'
+import Address from './pages/Address';
+import AddressDetailPage from './pages/Address/AddressDetailPage';
 import InventoryProduct from './pages/ProductInventory';
 import Logout from './pages/Auth/Logout';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
@@ -114,11 +114,49 @@ import TransferInventory from './pages/TransferInventory';
 import TransferInventoryDetailPage from './pages/TransferInventory/TransferInventoryDetailPage';
 import Zone from './pages/zone';
 import ZoneDetailPage from './pages/zone/ZoneDetailPage';
+import { Button, Snackbar } from '@material-ui/core';
+import * as serviceWorkerRegistration from 'src/serviceWorkerRegistration';
 
 var notificationInterval: any = null;
 
-
 function App() {
+  const [serviceWorkerData, setServiceWorkerData] = useState<{
+    newVersionAvailable: boolean;
+    waitingWorker: { [key: string]: any };
+  }>({
+    newVersionAvailable: false,
+    waitingWorker: {}
+  });
+
+  const [refreshSnackBar, setRefreshSnackBar] = useState(false);
+
+  const onServiceWorkerUpdate = (registration) => {
+    setRefreshSnackBar(true);
+    setServiceWorkerData({
+      waitingWorker: registration && registration.waiting,
+      newVersionAvailable: true
+    });
+  };
+
+  const updateServiceWorker = () => {
+    const { waitingWorker } = serviceWorkerData;
+    waitingWorker && waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    setServiceWorkerData({ ...serviceWorkerData, newVersionAvailable: false });
+    window.location.reload();
+  };
+
+  const refreshAction = () => {
+    return (
+      <Button className="snackbar-button" size="small" onClick={updateServiceWorker}>
+        Refresh
+      </Button>
+    );
+  };
+
+  useEffect(() => {
+    serviceWorkerRegistration.register({ onUpdate: onServiceWorkerUpdate });
+  });
+
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
@@ -173,15 +211,14 @@ function App() {
       }
       if (isOffline) {
         if (notificationInterval) {
-          clearInterval(notificationInterval)
+          clearInterval(notificationInterval);
         }
-      }
-      else {
+      } else {
         notificationInterval = setInterval(async () => {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -253,7 +290,11 @@ function App() {
       // </Suspense>
       <Redirect
         to={{
-          pathname: redirectToAnotherScreen ? redirectToAnotherScreen.includes('?') ? redirectToAnotherScreen.split('?')[0] : redirectToAnotherScreen : '/',
+          pathname: redirectToAnotherScreen
+            ? redirectToAnotherScreen.includes('?')
+              ? redirectToAnotherScreen.split('?')[0]
+              : redirectToAnotherScreen
+            : '/',
           state: { from: location }
         }}
       />
@@ -264,6 +305,13 @@ function App() {
     <ThemeProvider theme={theme}>
       <AnimatePresence initial={false} exitBeforeEnter>
         <ErrorBoundaryComponent>
+          <Snackbar
+            open={refreshSnackBar}
+            autoHideDuration={6000}
+            onClose={() => setRefreshSnackBar(false)}
+            message="Note archived"
+            action={refreshAction}
+          />
           {/* <Switch location={location} key={location.key}> */}
           <Switch>
             <Route
@@ -373,7 +421,7 @@ function App() {
               <RoleDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path="/activity">
-              <Activitydemo />   
+              <Activitydemo />
             </PrivateRoute>
             <PrivateRoute exact path="/product-inventory">
               <InventoryProduct />
@@ -584,8 +632,8 @@ function App() {
             <Route exact path={'/customer-sign/:id'}>
               <CustomerSign />
             </Route>
-            <PrivateRoute exact path='/new-dashboard'>
-              <NewDashboard/>
+            <PrivateRoute exact path="/new-dashboard">
+              <NewDashboard />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
