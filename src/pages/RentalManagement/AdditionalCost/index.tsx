@@ -178,7 +178,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                             setSelectedCostData(null)
                         }}
                     >
-                        Add Ad-hoc Charge
+                        Add Ad-hoc Charges
                     </Button>
                 </Box>
                 <Box display="flex-end">

@@ -27,9 +27,9 @@ import { camelCase } from 'lodash';
 import ProductListDialog from './ProductListDialog';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import { prepareDataForGrid } from "../../constants/helpers"
-import { MdAccountCircle,MdDescription} from "react-icons/md";
+import { MdAccountCircle, MdDescription } from "react-icons/md";
 import { GoDeviceMobile } from "react-icons/go";
-import { AiFillCrown,IoIosPricetags, RiPriceTagLine } from "react-icons/all";
+import { AiFillCrown, IoIosPricetags, RiPriceTagLine } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 
@@ -338,13 +338,10 @@ const PackageList = () => {
             }
 
             let rows = data.map((u) => {
-                const { owner, createdBy, updatedBy, ...restProperties } = u;
-
-                let finalObject = prepareDataForGrid(u);
+                let finalObject = prepareDataForGrid(u, user);
                 finalObject["canDelete"] = permissions.packages.isDelete;
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
                 finalObject["allowedToEdit"] = permissions.packages.isUpdate;
-                finalObject["unit"] = finalObject["unit"].join(" , ");
                 return {
                     ...finalObject,
                 };
@@ -525,27 +522,27 @@ const PackageList = () => {
                             page={page}
                             loading={loading}
                             additionalDetails={[
-                                    {
-                                        icon:<IoIosPricetags size={18}/>,
-                                        field:'packageType'
-                                    }
+                                {
+                                    icon: <IoIosPricetags size={18} />,
+                                    field: 'packageType'
+                                }
                             ]}
                             chips={[
-                                        {
-                                            icon:<MdDescription />,
-                                            label:'Package Description: ',
-                                            field:'packageDescription'
-                                        },
-                                       {
-                                           icon:<GoDeviceMobile />,
-                                           label:'Unit: ',
-                                           field:'unit'
-                                       },
-                                       {
-                                           icon:<RiPriceTagLine/>,
-                                           label:'Pricing Method',
-                                           field:'pricingMethod'
-                                       }
+                                {
+                                    icon: <MdDescription />,
+                                    label: 'Package Description: ',
+                                    field: 'packageDescription'
+                                },
+                                {
+                                    icon: <GoDeviceMobile />,
+                                    label: 'Unit: ',
+                                    field: 'unit'
+                                },
+                                {
+                                    icon: <RiPriceTagLine />,
+                                    label: 'Pricing Method',
+                                    field: 'pricingMethod'
+                                }
                             ]}
                             owerCollaboratorInitialsOrImages=""
                             onCreate={false}

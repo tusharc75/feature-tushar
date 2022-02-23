@@ -58,6 +58,7 @@ export const repairJobProcessSteps = ["Serialized Assets", "Repair Process"];
 export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 export const purchaseOrderSteps = ['Add Product', 'Ad hoc Charges', 'Issue PO', 'Receiving Asset'];
 export const rentalManagementSteps = ['Add Products', 'Ad-hoc Charges', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Packing Slip'];
+export const subleaseSteps = ["Add Products", "Start Sublease", "End Sublease"]
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';

@@ -243,8 +243,11 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       }
       let rows: any = []
       let priceData: any = []
+      const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`
 
-      if (values["unit"] || values["pricingMethod"]) {
+      console.log(values[priceFieldName])
+
+      if ((values["unit"] || values["pricingMethod"]) && !values[priceFieldName]) {
         const material: any = [];
         selectedProducts.forEach(d => {
           const element: any = {};
@@ -263,12 +266,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         const rateResult = priceData?.filter((e) => e.materialId === element.materialId &&
           e.materialType === element.type && e.unit === (values["unit"] || element.unit) && e.pricingMethod === (values["pricingMethod"] || element.pricingMethod))
 
+        const tempRate = {}
         if (rateResult.length && rateResult[0].mrp) {
-          const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`
-          values[priceFieldName] = rateResult[0].mrp;
+          tempRate[priceFieldName] = rateResult[0].mrp;
         }
 
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, allFields)
         if (element.type === "product" && element.parentId === null) {
           rows.push({ ...element, ...calValues })
         }
