@@ -335,7 +335,6 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                                         : ""
                                                                                 );
                                                                                 setFieldValue("supplierContact", "");
-                                                                                
                                                                                 setFieldValue("shippingAddress", "");
                                                                             }}
                                                                         />
