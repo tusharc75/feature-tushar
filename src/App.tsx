@@ -114,15 +114,15 @@ import TransferInventory from './pages/TransferInventory';
 import TransferInventoryDetailPage from './pages/TransferInventory/TransferInventoryDetailPage';
 import Zone from './pages/zone';
 import ZoneDetailPage from './pages/zone/ZoneDetailPage';
-import { Button, Snackbar } from '@material-ui/core';
+// import { Button, Snackbar } from '@material-ui/core';
 import * as serviceWorkerRegistration from 'src/serviceWorkerRegistration';
-import MuiAlert from '@material-ui/lab/Alert';
+// import MuiAlert from '@material-ui/lab/Alert';
 
 var notificationInterval: any = null;
 
-function Alert(props) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
+// function Alert(props) {
+//   return <MuiAlert elevation={6} variant="filled" {...props} />;
+// }
 
 function App() {
   const [serviceWorkerData, setServiceWorkerData] = useState<{
@@ -133,15 +133,7 @@ function App() {
     waitingWorker: {}
   });
 
-  const [refreshSnackBar, setRefreshSnackBar] = useState(false);
-
-  const onServiceWorkerUpdate = (registration) => {
-    setRefreshSnackBar(true);
-    setServiceWorkerData({
-      waitingWorker: registration && registration.waiting,
-      newVersionAvailable: true
-    });
-  };
+  // const [refreshSnackBar, setRefreshSnackBar] = useState(false);
 
   const updateServiceWorker = () => {
     const { waitingWorker } = serviceWorkerData;
@@ -150,13 +142,22 @@ function App() {
     window.location.reload();
   };
 
-  const refreshAction = () => {
-    return (
-      <Button className="snackbar-button" size="medium" onClick={updateServiceWorker}>
-        Refresh
-      </Button>
-    );
+  const onServiceWorkerUpdate = (registration) => {
+    // setRefreshSnackBar(true);
+    setServiceWorkerData({
+      waitingWorker: registration && registration.waiting,
+      newVersionAvailable: true
+    });
+    updateServiceWorker();
   };
+
+  // const refreshAction = () => {
+  //   return (
+  //     <Button className="snackbar-button" size="medium" onClick={updateServiceWorker}>
+  //       Refresh
+  //     </Button>
+  //   );
+  // };
 
   useEffect(() => {
     serviceWorkerRegistration.register({ onUpdate: onServiceWorkerUpdate });
@@ -310,11 +311,11 @@ function App() {
     <ThemeProvider theme={theme}>
       <AnimatePresence initial={false} exitBeforeEnter>
         <ErrorBoundaryComponent>
-          <Snackbar open={refreshSnackBar} autoHideDuration={null} onClose={() => setRefreshSnackBar(false)} action={refreshAction}>
-            <Alert onClose={() => setRefreshSnackBar(false)} severity="info">
-              New Version of eQuip-T OM is available. Please refresh to get the latest changes.
-            </Alert>
-          </Snackbar>
+          {/*<Snackbar open={refreshSnackBar} autoHideDuration={null} onClose={() => setRefreshSnackBar(false)} action={refreshAction}>*/}
+          {/*  <Alert onClose={() => setRefreshSnackBar(false)} severity="info">*/}
+          {/*    New Version of eQuip-T OM is available. Please refresh to get the latest changes.*/}
+          {/*  </Alert>*/}
+          {/*</Snackbar>*/}
           {/* <Switch location={location} key={location.key}> */}
           <Switch>
             <Route
