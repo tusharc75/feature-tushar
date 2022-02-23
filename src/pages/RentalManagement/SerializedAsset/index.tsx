@@ -592,7 +592,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setOrderDialog(({ open: false, products: [], type: "" }))
           setSelectedProducts([])
           fetchProductInventory()
-          fetchPurchaseOrder()
+          fetchSublease()
           toastConfig.setToastConfig({
             open: true,
             type: "success",
