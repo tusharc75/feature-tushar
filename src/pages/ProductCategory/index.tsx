@@ -29,7 +29,7 @@ import queryString from 'query-string';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { MdAccountCircle } from 'react-icons/md';
-import { AiFillCrown, MdAdd,MdSort,MdFilterList,AiOutlineBgColors} from 'react-icons/all';
+import { AiFillCrown, MdAdd, MdSort, MdFilterList, AiOutlineBgColors } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
@@ -168,7 +168,7 @@ const ProductCategory = () => {
   const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = `${routes.productCategory.title}_selected`;
   const [isOpenDialog, setisOpenDialog] = useState(false)
-  const [sortOpen, setSortOpen]= useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   if (columnState) {
     columns.map((item) => {
@@ -256,25 +256,25 @@ const ProductCategory = () => {
 
   const NameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
-     
+
       {productCategoryPermissions.isUpdate ? (
-         <Link to={`${routes.productCategoryDetail.path}/${params.data._id}`}>
-        <Chip
-          className="ml-3 link"
-          style={{ backgroundColor: `${params.data.chipColour}` }}
-          label={<p style={{ color: params.data.isLowContrast ? "white" : "black" }}>{params.value}</p>}
-          onClick={() => {
-            setProductCategoryId(params.data.id);
-            // setOpen({ open: true, isClone: false });
-          }}
-        />
+        <Link to={`${routes.productCategoryDetail.path}/${params.data._id}`}>
+          <Chip
+            className="ml-3 link"
+            style={{ backgroundColor: `${params.data.chipColour}` }}
+            label={<p style={{ color: params.data.isLowContrast ? "white" : "black" }}>{params.value}</p>}
+            onClick={() => {
+              setProductCategoryId(params.data.id);
+              // setOpen({ open: true, isClone: false });
+            }}
+          />
         </Link>
       ) : (
         <Link to={`${routes.productCategoryDetail.path}/${params.data._id}`}>
-        <Chip className="ml-3" style={{ backgroundColor: `${params.data.chipColour}` }} label={`${params.value}`} />
+          <Chip className="ml-3" style={{ backgroundColor: `${params.data.chipColour}` }} label={`${params.value}`} />
         </Link>
       )}
-    
+
     </span>
   );
 
@@ -295,7 +295,7 @@ const ProductCategory = () => {
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
       </Tooltip>
-      {productCategoryPermissions.isDelete && params?.data?.createdById == user?.user?._id ? (
+      {productCategoryPermissions.isDelete ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -315,21 +315,6 @@ const ProductCategory = () => {
         </Tooltip>
       )}
     </Fragment>
-  );
-
-  const ProductCategoryRenderer = (params) => (
-    <>
-      {' '}
-      {params.data.parentCategory?.optionLabel !== undefined && params.data.parentCategory?.optionLabel !== null ? (
-        <Chip
-          className="ml-3"
-          style={{ backgroundColor: `${params.data.parentCategory?.chipColour}`, color: 'white' }}
-          label={`${params.data.parentCategory?.optionLabel}`}
-        />
-      ) : (
-        <NoDataCell />
-      )}
-    </>
   );
 
   const replaceFieldName = (field) => {
@@ -404,8 +389,8 @@ const ProductCategory = () => {
   }
 
   const isContrastRatioLow = (hexColor) => {
-   
-    let rgb = hexToRgb(hexColor.length === 0 || hexColor.length === undefined ? '#E0E0E0' : hexColor  );
+
+    let rgb = hexToRgb(hexColor.length === 0 || hexColor.length === undefined ? '#E0E0E0' : hexColor);
     let splitRgb = rgb.split(",");
     let rgbNum = splitRgb.map(function (x) {
       return parseInt(x, 10);
@@ -426,7 +411,7 @@ const ProductCategory = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    
+
 
     axiosInstance()
       .get(`/product-category${queryString}`)
@@ -437,10 +422,10 @@ const ProductCategory = () => {
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions.productCategory.isUpdate;
           finalObject['isLowContrast'] = isContrastRatioLow(u.chipColour);
-        
+
           return {
             ...finalObject
-           
+
           };
         });
         setIsAllChecked(false);
@@ -520,7 +505,7 @@ const ProductCategory = () => {
   const handleOpen = () => {
     setisOpenDialog(true);
   };
-  
+
   const handleClickOpen = () => {
     setSortOpen(true);
   };
@@ -533,7 +518,7 @@ const ProductCategory = () => {
   const handleFilterClose = () => {
     setisOpenDialog(false);
   };
-  
+
 
 
 
@@ -565,64 +550,64 @@ const ProductCategory = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
-            <div className="d-flex align-items-center">
-              <FaThemeisle size={20} style={{ paddingBottom: '3px' }} /> 
-              <span className="listingHeader">{routes.productCategory.title}</span>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+              <div className="d-flex align-items-center">
+                <FaThemeisle size={20} style={{ paddingBottom: '3px' }} />
+                <span className="listingHeader">{routes.productCategory.title}</span>
               </div>
               {isMobile && (
-                  <>
-                    <Grid style={{ display: 'inline-flex'}}>
-                      <Button
-                        onClick={handleClickOpen}
-                        id="demo-customized-button"
-                        aria-controls="demo-customized-menu"
-                        aria-haspopup="true"
-                        aria-expanded={ 'true'}
-                        color="secondary"
-                        variant="text"
-                        disableElevation
-                        startIcon={<MdSort />}
-                        className={'sort-filter-tablet'}
-                        style={isTablet ? { marginLeft: '50px' } : {}}
-                      >
-                        Sort
-                      </Button>
-                      <MobileSortDialog
-                        isOpen={sortOpen}
-                        handleClose={handleClickClose}
-                        contentPart={null}
-                        secHeading={['Sort Product Category']}
-                        columns={columns}
-                        dispatch={dispatch}
-                      />
+                <>
+                  <Grid style={{ display: 'inline-flex' }}>
+                    <Button
+                      onClick={handleClickOpen}
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      color="secondary"
+                      variant="text"
+                      disableElevation
+                      startIcon={<MdSort />}
+                      className={'sort-filter-tablet'}
+                      style={isTablet ? { marginLeft: '50px' } : {}}
+                    >
+                      Sort
+                    </Button>
+                    <MobileSortDialog
+                      isOpen={sortOpen}
+                      handleClose={handleClickClose}
+                      contentPart={null}
+                      secHeading={['Sort Product Category']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
 
-                      <Button
-                        id="demo-customized-button"
-                        aria-controls="demo-customized-menu"
-                        aria-haspopup="true"
-                        aria-expanded={'true'}
-                        variant="text"
-                        color="secondary"
-                        disableElevation
-                        className={'sort-filter-tablet'}
-                        startIcon={<MdFilterList />}
-                        onClick={handleOpen}
-                      >
-                        Filter
-                      </Button>
+                    <Button
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      variant="text"
+                      color="secondary"
+                      disableElevation
+                      className={'sort-filter-tablet'}
+                      startIcon={<MdFilterList />}
+                      onClick={handleOpen}
+                    >
+                      Filter
+                    </Button>
 
-                      <MobileFilterDialog
-                        isOpen={isOpenDialog}
-                        handleClose={handleFilterClose}
-                        contentPart={null}
-                        secHeading={['Filter Product Category']}
-                        columns={columns}
-                        dispatch={dispatch}
-                      />
-                    </Grid>
-                  </>
-                )}
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleFilterClose}
+                      contentPart={null}
+                      secHeading={['Filter Product Category']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+                  </Grid>
+                </>
+              )}
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -730,11 +715,11 @@ const ProductCategory = () => {
                 }
               ]}
               chips={[
-               {
-                 icon:<AiOutlineBgColors />,
-                 label:'Chip Color',
-                field:'chipColor'
-              }
+                {
+                  icon: <AiOutlineBgColors />,
+                  label: 'Chip Color',
+                  field: 'chipColor'
+                }
               ]}
               owerCollaboratorInitialsOrImages=""
               onCreate={false}

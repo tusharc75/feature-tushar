@@ -247,7 +247,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
                 setShowCostDialog(true);
               }}
             >
-              Add Ad-hoc Charge
+              Add Ad-hoc Charges
             </Button>
             <Box mx={1} />
           </Fragment>
