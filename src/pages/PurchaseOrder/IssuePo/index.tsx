@@ -239,23 +239,6 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                     {isMobile && !isTablet ? <MdEmail size={20} /> : `Send Email`}
                 </Button>}
             </Box>
-<<<<<<< HEAD
-            <Box display="flex" justifyContent="flex-end" p="4px">
-                <Box mx={1} />
-                <Button
-                    variant={"contained"}
-                    color="primary"
-                    size="small"
-                    style={isMobile && !isTablet ? {color:"#FFD700"} : {}}
-                    onClick={() => {
-                        setCurrentStep(currentStep + 1)
-                        handleUpdateData({ "status": "Issued" })
-                    }}
-                >
-                    {`Issue PO`}
-                </Button>
-            </Box>
-=======
             {statusOptions?.findIndex(d => d.optionLabel === PURCHASE_ORDER_STATUS.issued) >
                 statusOptions.findIndex(d => d.optionLabel === purchaseOrderData?.status) &&
                 <Box display="flex" justifyContent="flex-end" p="4px">
@@ -273,7 +256,6 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                     </Button>
                 </Box>
             }
->>>>>>> 6a3576c9c4def8138f2b04b2c149762e99dbefad
         </Box>
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns && frameWorkComponent ?
