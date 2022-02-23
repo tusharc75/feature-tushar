@@ -335,7 +335,7 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                                         : ""
                                                                                 );
                                                                                 setFieldValue("supplierContact", "");
-                                                                                setFieldValue("billingAddress", "");
+                                                                                
                                                                                 setFieldValue("shippingAddress", "");
                                                                             }}
                                                                         />
@@ -389,7 +389,7 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
                                                                                 type={field.type}
-                                                                                options={contactData.filter(d => d.parentAccount === values["supplier"])}
+                                                                                options={contactData.filter(d => d.parentAccount === values["supplierAccount"])}
                                                                                 setFieldValue={(name, value) => {
                                                                                     setFieldValue(name, value)
                                                                                 }}
@@ -720,7 +720,6 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                     });
                                     setFieldValue("supplierAccount", data._id);
                                     setFieldValue("supplierContact", "");
-                                    setFieldValue("billingAddress", "");
                                     setFieldValue("shippingAddress", "");
                                 }}
                                 isRedirectToDetailPage={false}
