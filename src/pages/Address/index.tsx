@@ -339,7 +339,7 @@ const Address = () => {
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[{ title: routes.address.title}]} />
         </Grid>
-        <Grid item md={8} sm={1} xs={2}>
+        {/* <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
             permissions={addressPermissions}
             module="address"
@@ -356,7 +356,7 @@ const Address = () => {
               else fetchAddresses();
             }}
           />
-        </Grid>
+        </Grid> */}
       </Grid>
       <CustomContainer>
         <div className="header-panel">
@@ -374,7 +374,7 @@ const Address = () => {
                     style={isMobile ? { flex: 1 } : {}}
                     size="small"
                     value={search}
-                    placeholder={`Search ${routes.warehouse.title}`}
+                    placeholder={`Search ${routes.address.title}`}
                   />
                 </div>
 
