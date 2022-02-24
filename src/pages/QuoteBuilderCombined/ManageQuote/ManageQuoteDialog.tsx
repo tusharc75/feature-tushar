@@ -742,7 +742,6 @@ export default function ManageQuoteDialog({
   };
   const onCountryBillToDropDownOpen = (selectedAccount) => {
     let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.billingAddress
-
     if (isArray(filterAddress)) {
       setCountryBillToDropDown(
         countryBillToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue))
@@ -751,7 +750,6 @@ export default function ManageQuoteDialog({
     else {
       setCountryBillToDropDown([])
     }
-
   };
 
   const handleErrors = (values) => {
