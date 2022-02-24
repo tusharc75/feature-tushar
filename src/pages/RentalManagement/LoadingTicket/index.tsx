@@ -470,6 +470,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         onSuccess={() => {
           setShowTicketDialog({ open: false, data: {} });
           fetchRecords();
+          fetchRentalData()
         }}
       />
     )}

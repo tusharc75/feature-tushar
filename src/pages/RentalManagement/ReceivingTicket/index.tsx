@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => {
+const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -613,6 +613,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         onSuccess={() => {
           setShowTicketDialog({ open: false, ticketType: "", data: {} });
           fetchRecords();
+          fetchRentalData()
         }}
       />
     )}
