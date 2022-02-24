@@ -731,7 +731,7 @@ export default function ManageQuoteDialog({
 
   const onCountrySellToDropDownOpen = (selectedAccount, alreadySelected) => {
     let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.shippingAddress
-    if (isArray(filterAddress)) {
+    if (isArray(filterAddress) || alreadySelected) {
       setCountrySellToDropDown(
         countrySellToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue) || alreadySelected?.some(u => u === d.optionValue))
       );
@@ -743,7 +743,7 @@ export default function ManageQuoteDialog({
 
   const onCountryBillToDropDownOpen = (selectedAccount, alreadySelected) => {
     let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.billingAddress
-    if (isArray(filterAddress)) {
+    if (isArray(filterAddress) || alreadySelected) {
       setCountryBillToDropDown(
         countryBillToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue) || alreadySelected?.some(u => u === d.optionValue))
       );
@@ -1022,10 +1022,10 @@ export default function ManageQuoteDialog({
                                               setFieldValue("subMarketSegment", value?.subMarketSegment ?? '');
                                               marketSegmentChange(value?.marketSegment ?? '');
                                               setFieldValue("opportunity", "");
-                                              setFieldValue('countryBillTo', value?.billingAddress ?? '');
-                                              setFieldValue('countrySellTo', value?.shippingAddress ?? '');
-                                              setFieldValue('countryBillTo', value?.billingAddress.length > 0 ? value?.billingAddress : []);
-                                              setFieldValue('countrySellTo', value?.shippingAddress.length > 0 ? value?.shippingAddress : []);
+                                              // setFieldValue('countryBillTo', value?.billingAddress ?? '');
+                                              // setFieldValue('countrySellTo', value?.shippingAddress ?? '');
+                                              setFieldValue('countryBillTo', value?.billingAddress?.length > 0 ? value?.billingAddress : []);
+                                              setFieldValue('countrySellTo', value?.shippingAddress?.length > 0 ? value?.shippingAddress : []);
                                               handleValuesChange({
                                                 [field.fieldName]: value && value.optionValue ? value.optionValue : "",
                                                 "customerContactName": [],
