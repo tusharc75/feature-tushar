@@ -47,6 +47,31 @@ const customNodeStyles = {
     name: 'Receiving Ticket',
     background: '#cfdb7f',
     borderColor: '#aeb86e'
+  },
+  returnTicket: {
+    name: 'Return Ticket',
+    background: '#ff9980',
+    borderColor: '#db765c'
+  }
+};
+const customDeliveredNodeStyle = {
+  loadingTicket: {
+    name: 'Loading Ticket',
+    background: '#e6c6e6',
+    borderColor: '#b38fb3',
+    borderLeft: '10px solid #008000'
+  },
+  receivingTicket: {
+    name: 'Receiving Ticket',
+    background: '#cfdb7f',
+    borderColor: '#aeb86e',
+    borderLeft: '10px solid #008000'
+  },
+  returnTicket: {
+    name: 'Return Ticket',
+    background: '#ff9980',
+    borderColor: '#db765c',
+    borderLeft: '10px solid #FF0000'
   }
 };
 
@@ -70,6 +95,7 @@ const RentalManagementViews = (props) => {
       const subLease = await axiosInstance().get(`${sublease.api}?filterById=[{"field":"rentalJob","term":"${rentalId}"}]`);
       const loadingTicket = ticketData?.data?.data?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.loading);
       const receivingTicket = ticketData?.data?.data?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.receiving);
+      const returnTicket = ticketData?.data?.data?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.return);
 
       var xPosition = 0;
       var flow: any[] = [
@@ -237,13 +263,11 @@ const RentalManagementViews = (props) => {
                 {item.ticketName}
                 <br />
                 {item.ticketType} Ticket
-                <br />
-                {item.status}
               </div>
             )
           },
           position: { x: xPosition, y: index * 80 },
-          style: customNodeStyles.loadingTicket
+          style: item.status === 'Delivered' ? customDeliveredNodeStyle.loadingTicket : customNodeStyles.loadingTicket
         });
 
         item.productInventory?.map((product: any, productIndex) => {
@@ -277,7 +301,8 @@ const RentalManagementViews = (props) => {
       });
 
       xPosition += 600;
-      receivingTicket?.map((item: any, index) => {
+      var receivingAndReturnIdx = 0;
+      receivingTicket?.map((item: any) => {
         flow.push({
           id: `${item._id}`,
           sourcePosition: 'right',
@@ -291,17 +316,46 @@ const RentalManagementViews = (props) => {
                 {item.ticketName}
                 <br />
                 {item.ticketType} Ticket
-                <br />
-                {item.status}
               </div>
             )
           },
-          position: { x: xPosition, y: index * 80 },
-          style: customNodeStyles.receivingTicket
+          position: { x: xPosition, y: receivingAndReturnIdx * 80 },
+          style: item.status === 'Delivered' ? customDeliveredNodeStyle.receivingTicket : customNodeStyles.receivingTicket
         });
+        receivingAndReturnIdx += 1;
         item.productInventory?.map((product: any) => {
           flowEdge.push({
             id: `edge-receiving-${product.optionValue}`,
+            source: `${product.optionValue}`,
+            arrowHeadType: 'arrow',
+            target: `${item._id}`
+          });
+        });
+      });
+      returnTicket?.map((item: any) => {
+        flow.push({
+          id: `${item._id}`,
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          type: 'output',
+          data: {
+            ref_type: 'return',
+            ref_id: item._id,
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {item.ticketName}
+                <br />
+                {item.ticketType} Ticket
+              </div>
+            )
+          },
+          position: { x: xPosition, y: receivingAndReturnIdx * 80 },
+          style: item.status === 'Delivered' ? customDeliveredNodeStyle.returnTicket : customNodeStyles.returnTicket
+        });
+        receivingAndReturnIdx += 1;
+        item.productInventory?.map((product: any) => {
+          flowEdge.push({
+            id: `edge-return-${product.optionValue}`,
             source: `${product.optionValue}`,
             arrowHeadType: 'arrow',
             target: `${item._id}`
@@ -374,7 +428,7 @@ const RentalManagementViews = (props) => {
           >
             <div
               className="d-flex justify-content-space-between"
-              style={{ width: '60%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}
+              style={{ width: '70%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}
             >
               {Object.keys(customNodeStyles).map((key) => {
                 return (
