@@ -381,6 +381,7 @@ const RentalManagementViews = (props) => {
                       style={{
                         height: '12px',
                         width: '12px',
+                        marginLeft: '3px',
                         borderRadius: '100%',
                         background: `${customNodeStyles[key].background}`,
                         borderColor: `1px solid ${customNodeStyles[key].borderColor}`
