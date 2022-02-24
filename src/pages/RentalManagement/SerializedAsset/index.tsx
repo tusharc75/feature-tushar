@@ -4,7 +4,7 @@ import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Chip, IconButton } from "@material-ui/core";
+import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -28,8 +28,10 @@ import InfoIcon from '@material-ui/icons/Info';
 import { isMobile, isTablet } from "react-device-detect";
 import { CgAssign } from "react-icons/cg";
 import { IoCreate } from "react-icons/io5";
-import { MdDeleteSweep } from "react-icons/md";
+import { MdDelete, MdDeleteSweep } from "react-icons/md";
 import { useData } from "../../../StateProvider/Provider";
+import { BiChevronDown } from "react-icons/bi";
+import React from "react";
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
 
@@ -409,10 +411,136 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty > f.subRows?.length);
     return flatArray.length === 0;
   }
+  
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
 
   return (<Fragment>
-    <Box display="flex" justifyContent="flex-end" pt={1} pb={2}>
-      <Box display="flex" alignItems="center">
+    <Box display="flex"  justifyContent="flex-end" pt={1} pb={2} >
+      <Box display="flex" alignItems="center" justifyContent={isMobile ? "space-between" : "flex-end"} paddingX={1} gridColumnGap={8} flex={1}>
+       
+       <Box display="flex" gridColumnGap={5}>
+       <Button
+          variant={isMobile && !isTablet ? "contained" : "contained"}
+          color="primary"
+          type="button"
+          size="small"
+          style={!isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
+          disabled={showOrderDialog.products.length === 0}
+          onClick={() => {
+            setOrderDialog(prevState => ({ ...prevState, open: true, type: "purchaseOrder" }))
+          }}
+        >
+          {isMobile && !isTablet ? "Purchase order" : `Create ${routes.purchaseOrder.title}`}
+        </Button>
+        {purchaseOrderCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
+          <IconButton size="small" onClick={() => {
+            history.push(routes.purchaseOrder.path, {
+              rental: rentalManagementData,
+            })
+          }}>
+            <InfoIcon color={"primary"} />
+          </IconButton>
+        </HtmlTooltip>}
+        {permissions?.sublease?.isCreate &&
+          <Fragment>
+            {/* <Box mx={1} /> */}
+            <Button
+              variant={isMobile && !isTablet ? "contained" : "contained"}
+              color="primary"
+              type="button"
+              size="small"
+              style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
+              disabled={showOrderDialog.products.length === 0}
+              onClick={() => {
+                setOrderDialog(prevState => ({ ...prevState, open: true, type: "sublease" }))
+              }}
+            >
+              {isMobile && !isTablet ? "Sublease" : `Create ${routes.sublease.title}`}
+            </Button>
+            {subleaseCount > 0 && <HtmlTooltip title={`Created ${routes.sublease.title}`}>
+              <IconButton size="small" onClick={() => {
+                history.push(routes.sublease.path, {
+                  rental: rentalManagementData,
+                })
+              }}>
+                <InfoIcon color={"primary"} />
+              </IconButton>
+            </HtmlTooltip>}
+          </Fragment>
+        }
+
+         </Box>
+
+
+        {isMobile ? <Box display="flex" gridColumnGap={5}>
+              
+        <Button
+                  variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+                  color="primary"
+                  size="small"
+                  style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                  id="demo-positioned-button"
+                  aria-controls={open ? 'demo-positioned-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={open ? 'true' : undefined}
+                  onClick={handleClick}
+                  endIcon={<BiChevronDown />}
+                >
+                  Actions
+                </Button>
+
+                <Menu
+                  id="basic-menu"
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleClose}
+                  MenuListProps={{
+                    'aria-labelledby': 'basic-button'
+                  }}
+                  className="add-product-action-menu"
+                >
+                 
+                    
+                      <MenuItem   disabled={disableAssignSerializedAssets()}
+          onClick={() => {
+            setAddSerializedAssetDialog({ open: true })
+          }}>
+                        <ListItemIcon>
+                          <CgAssign size={16} color="primary"/>
+                        </ListItemIcon>
+                        <ListItemText>Assign assets</ListItemText>
+                      </MenuItem>
+
+                    <MenuItem disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
+          onClick={() => {
+            setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
+            setShowConfirmBox(true)
+          }}>
+
+                    <ListItemIcon >
+                          <MdDelete size={16} />
+                        </ListItemIcon>
+                        
+                        <ListItemText>Delete</ListItemText>
+                      
+                    </MenuItem>
+                    
+                 
+                </Menu>
+
+
+
+        </Box> : 
+        
+        <Box display="flex" gridColumnGap={5}>
         <Button
           variant={isMobile && !isTablet ? "text" : "contained"}
           color="primary"
@@ -426,20 +554,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         >
           {isMobile && !isTablet ? <CgAssign size={20} /> : `Assign ${routes.serializedAsset.title}`}
         </Button>
-        <Box mx={1} />
-        <Button
-          variant={isMobile && !isTablet ? "text" : "contained"}
-          color="primary"
-          type="button"
-          size="small"
-          style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-          disabled={showOrderDialog.products.length === 0}
-          onClick={() => {
-            setOrderDialog(prevState => ({ ...prevState, open: true, type: "purchaseOrder" }))
-          }}
-        >
-          {isMobile && !isTablet ? <IoCreate size={20} /> : `Create ${routes.purchaseOrder.title}`}
-        </Button>
+        {/* <Box mx={1} /> */}
+        
         {purchaseOrderCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
           <IconButton size="small" onClick={() => {
             history.push(routes.purchaseOrder.path, {
@@ -449,34 +565,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             <InfoIcon color={"primary"} />
           </IconButton>
         </HtmlTooltip>}
-        {permissions?.sublease?.isCreate &&
-          <Fragment>
-            <Box mx={1} />
-            <Button
-              variant={isMobile && !isTablet ? "text" : "contained"}
-              color="primary"
-              type="button"
-              size="small"
-              style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-              disabled={showOrderDialog.products.length === 0}
-              onClick={() => {
-                setOrderDialog(prevState => ({ ...prevState, open: true, type: "sublease" }))
-              }}
-            >
-              {isMobile && !isTablet ? <IoCreate size={20} /> : `Create ${routes.sublease.title}`}
-            </Button>
-            {subleaseCount > 0 && <HtmlTooltip title={`Created ${routes.sublease.title}`}>
-              <IconButton size="small" onClick={() => {
-                history.push(routes.sublease.path, {
-                  rental: rentalManagementData,
-                })
-              }}>
-                <InfoIcon color={"primary"} />
-              </IconButton>
-            </HtmlTooltip>}
-          </Fragment>
-        }
-        <Box mx={1} />
+
+        
+        {/* <Box mx={1} /> */}
         <Button
           variant={isMobile && !isTablet ? "text" : "contained"}
           color="primary"
@@ -500,7 +591,12 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             <InfoIcon color={"primary"} />
           </IconButton>
         </HtmlTooltip>}
-        <Box mx={1} />
+
+        </Box>}
+        
+
+        
+        {/* <Box mx={1} /> */}
       </Box>
     </Box>
     <Grid container spacing={2}>
