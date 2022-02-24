@@ -113,16 +113,20 @@ const RentalManagementDetailsPage = () => {
   useEffect(() => {
     if (id) {
       getRentalManagementFields();
-      fetchRentalManagementData();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      fetchRentalManagementData();
+    }
+  }, [rentalManagementFields]);
 
   useEffect(() => {
     if (!isOffline && currentStep !== null && currentStep >= 0 && currentStep <= 5) {
       updateProcessStatus(rentalManagementSteps[currentStep]);
     }
   }, [currentStep]);
-
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
@@ -138,8 +142,15 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
+      if (statusOptions?.findIndex(d => d.optionLabel === RENTAL_STATUS.jobPartiallyStarted) > statusOptions.findIndex(d => d.optionLabel === data?.status)) {
+        data["actualStartDate"] = null;
+      }
+      if (statusOptions?.findIndex(d => d.optionLabel === RENTAL_STATUS.jobPartiallyEnded) > statusOptions.findIndex(d => d.optionLabel === data?.status)) {
+        data["actualEndDate"] = null;
+      }
       setRentalManagementData(data);
       setCurrentStep(rentalManagementSteps.indexOf(data?.processStatus) !== -1 ? rentalManagementSteps.indexOf(data?.processStatus) : 0);
+
       handleMainPoints(data);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
@@ -443,7 +454,11 @@ const RentalManagementDetailsPage = () => {
                     />
                   )}
                   {currentStep === 4 && rentalManagementData && (
-                    <ReceivingTicket rentalManagementData={rentalManagementData} currentStep={currentStep} setNextStep={setNextStep} />
+                    <ReceivingTicket
+                      fetchRentalData={fetchRentalManagementData}
+                      rentalManagementData={rentalManagementData}
+                      currentStep={currentStep}
+                      setNextStep={setNextStep} />
                   )}
                   {currentStep === 5 && rentalManagementData && (
                     <Invoice
@@ -473,7 +488,7 @@ const RentalManagementDetailsPage = () => {
                   {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
                 </span>
               )}
-              <div style={{ display: showActivity || (isSmallScreen && tabValue === 0)  ? 'block' : 'none' }}>
+              <div style={{ display: showActivity || (isSmallScreen && tabValue === 0) ? 'block' : 'none' }}>
                 <Grid container>
                   <Grid item xs={12}>
                     {rentalManagementData && (
