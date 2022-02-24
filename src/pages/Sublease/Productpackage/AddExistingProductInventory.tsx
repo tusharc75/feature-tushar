@@ -6,7 +6,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { Box, CircularProgress, TextField } from "@material-ui/core";
 import SearchBox from '../../../components/Helpers/SearchBox'
 import { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
-import { gridLoadingTimeout, CustomDialogTransition, packages, product, isObjectEmpty, prepareDataForGrid } from '../../../constants/helpers';
+import { gridLoadingTimeout, CustomDialogTransition, packages, product, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import Dialog from "@material-ui/core/Dialog/Dialog";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -59,6 +59,8 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 finalObject["qty"] = 0;
                 finalObject["productCategory"] = u.productCategory?.optionLabel;
                 finalObject["priceTemplate"] = u.priceTemplate?.optionLabel
+                finalObject["unitMain"] = u.unit
+                finalObject["pricingMethodMain"] = u.pricingMethod
                 return {
                     ...finalObject,
                 };
@@ -73,7 +75,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
 
     const getQueryString = () => {
         let deepFilter = '?';
-        
+
         if (type !== "product") {
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'packageType', term: 'product' }]))}&filterType=and`
         }
@@ -163,19 +165,12 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                     size="small"
                                     color="primary"
                                     onClick={() => {
-                                        const data = []
-                                        selectedRecords.forEach((element: any) => {
-                                            const result: any = materialList.filter((rec) => rec._id === element.id);
-                                            if (result.length) {
-                                                data.push({ ...result[0], qty: element.qty })
-                                            }
-                                        });
-                                        addProductInventory(data)
+                                        addProductInventory(getLocalStorageArrayData(`${localStorageSelectedRecords}`))
                                     }}
                                     variant="contained"
-                                    disabled={!Boolean(selectedRecords.length) || isAddingProducts}
+                                    disabled={!getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length || isAddingProducts}
                                     endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
-                                    {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
+                                    {getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? "(" + getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length + ")  " : ""}
                                     Add</Button>
                             </Box>
                         </Grid>
