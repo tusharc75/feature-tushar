@@ -47,11 +47,15 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
     const [allFields, setAllFields] = useState([]);
-
+    const [isRateRequired, setIsRateRequired] = useState(false);
 
     useEffect(() => {
         fetchFields()
     }, []);
+
+    useEffect(() => {
+        fetchProductInventory();
+    }, [columns]);
 
     const fetchFields = async () => {
         var data = []
@@ -104,6 +108,9 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             }
         }]
         data.forEach(element => {
+            if (element.fieldName === "price" && element.required) {
+                setIsRateRequired(true);
+            }
             if (element.type === "date") {
                 coloum.push({
                     accessor: element.fieldName,
@@ -207,7 +214,6 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             }
         });
         setColumns(coloum)
-        fetchProductInventory();
     }
 
     const fetchProductInventory = async () => {
@@ -222,7 +228,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
         rows.forEach((parent, i) => {
             parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
             parent.qtyDisplay = parent.qty;
-            parent.isValid = parent["finalPrice_" + subleaseData?.currency?.toLowerCase()] ? true : false;
+            parent.isValid = parent["finalPrice_" + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
             parent.hideSelection = parent.assetQty > 0 ? true : false;
             parent.assetQty = parent.assetQty;
             if (parent.type === "package") {
@@ -230,7 +236,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                 subRows.forEach((_subRow, j) => {
                     _subRow.detail = (i + 1) + "." + (j + 1) + " - " + _subRow.productDetail?.productName
                     _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`
-                    _subRow.isValid = _subRow["finalPrice_" + subleaseData?.currency?.toLowerCase()] ? true : false;
+                    _subRow.isValid = _subRow["finalPrice_" + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
                     _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
                     _subRow.assetQty = _subRow.assetQty;
                 })

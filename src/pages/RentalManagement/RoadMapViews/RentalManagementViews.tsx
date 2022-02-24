@@ -9,36 +9,69 @@ import { useHistory } from 'react-router-dom';
 
 const customNodeStyles = {
   rentalJob: {
+    name: 'Rental Job',
     background: '#c3d5e6',
     borderColor: '#6c89a6'
   },
   package: {
+    name: 'Package',
     background: '#acdce6',
     borderColor: '#81afb8'
   },
   product: {
+    name: 'Product',
     background: '#97c9bf',
     borderColor: '#70948d'
   },
   purchaseOrder: {
-    background: '#c3d5e6',
+    name: 'Purchase Order',
+    background: '#FFA500',
     borderColor: '#6c89a6'
   },
   sublease: {
+    name: 'Sublease',
     background: '#ffb3c6',
     borderColor: '#d98298'
   },
   productAssets: {
+    name: 'Assets',
     background: '#ffd65b',
     borderColor: '#f5c431'
   },
   loadingTicket: {
+    name: 'Loading Ticket',
     background: '#e6c6e6',
     borderColor: '#b38fb3'
   },
   receivingTicket: {
+    name: 'Receiving Ticket',
     background: '#cfdb7f',
     borderColor: '#aeb86e'
+  },
+  returnTicket: {
+    name: 'Return Ticket',
+    background: '#ff9980',
+    borderColor: '#db765c'
+  }
+};
+const customDeliveredNodeStyle = {
+  loadingTicket: {
+    name: 'Loading Ticket',
+    background: '#e6c6e6',
+    borderColor: '#b38fb3',
+    borderLeft: '10px solid #008000'
+  },
+  receivingTicket: {
+    name: 'Receiving Ticket',
+    background: '#cfdb7f',
+    borderColor: '#aeb86e',
+    borderLeft: '10px solid #008000'
+  },
+  returnTicket: {
+    name: 'Return Ticket',
+    background: '#ff9980',
+    borderColor: '#db765c',
+    borderLeft: '10px solid #FF0000'
   }
 };
 
@@ -62,6 +95,7 @@ const RentalManagementViews = (props) => {
       const subLease = await axiosInstance().get(`${sublease.api}?filterById=[{"field":"rentalJob","term":"${rentalId}"}]`);
       const loadingTicket = ticketData?.data?.data?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.loading);
       const receivingTicket = ticketData?.data?.data?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.receiving);
+      const returnTicket = ticketData?.data?.data?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.return);
 
       var xPosition = 0;
       var flow: any[] = [
@@ -119,21 +153,26 @@ const RentalManagementViews = (props) => {
       if (purchaseOrder?.data?.data?.length) xPosition += 300;
       const purchaseArr = purchaseOrder?.data?.data?.map((item) => item._id);
       const subLeaseArr = subLease?.data?.data?.map((item) => item.supplierAccount.optionValue);
+      const purchaseOrderInAssets = product?.data?.data?.inventory
+        ?.filter((item) => item.inventoryDetail.purchaseOrder)
+        .map((item) => item.inventoryDetail.purchaseOrder);
       purchaseOrder?.data?.data?.map((item: any, index) => {
-        flow.push({
-          id: `${item._id}`,
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          type: 'default',
-          data: {
-            ref_type: 'purchaseOrder',
-            ref_id: item._id,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.purchaseOrderNumber}</div>
-          },
-          position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
-          style: customNodeStyles.purchaseOrder
-        });
-        purchaseAndSubLeaseIdx += 1;
+        if (purchaseOrderInAssets.includes(item._id)) {
+          flow.push({
+            id: `${item._id}`,
+            sourcePosition: 'right',
+            targetPosition: 'left',
+            type: 'default',
+            data: {
+              ref_type: 'purchaseOrder',
+              ref_id: item._id,
+              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.purchaseOrderNumber}</div>
+            },
+            position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
+            style: customNodeStyles.purchaseOrder
+          });
+          purchaseAndSubLeaseIdx += 1;
+        }
         product?.data?.data?.inventory?.map((data) => {
           if (purchaseArr.includes(data.inventoryDetail.purchaseOrder) && data.inventoryDetail.purchaseOrder === item._id) {
             flowEdge.push({
@@ -145,21 +184,27 @@ const RentalManagementViews = (props) => {
           }
         });
       });
+
+      const subleaseInAssets = product?.data?.data?.inventory
+        ?.filter((item) => item.inventoryDetail.supplierAccount)
+        .map((item) => item.inventoryDetail.supplierAccount);
       subLease?.data?.data?.map((item: any, index) => {
-        flow.push({
-          id: `${item.supplierAccount.optionValue}`,
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          type: 'default',
-          data: {
-            ref_type: 'sublease',
-            ref_id: item._id,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.subleaseName}</div>
-          },
-          position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
-          style: customNodeStyles.sublease
-        });
-        purchaseAndSubLeaseIdx += 1;
+        if (subleaseInAssets.includes(item.supplierAccount.optionValue)) {
+          flow.push({
+            id: `${item.supplierAccount.optionValue}`,
+            sourcePosition: 'right',
+            targetPosition: 'left',
+            type: 'default',
+            data: {
+              ref_type: 'sublease',
+              ref_id: item._id,
+              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.subleaseName}</div>
+            },
+            position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
+            style: customNodeStyles.sublease
+          });
+          purchaseAndSubLeaseIdx += 1;
+        }
         product?.data?.data?.inventory?.map((data) => {
           if (
             subLeaseArr.includes(data.inventoryDetail.supplierAccount) &&
@@ -218,13 +263,11 @@ const RentalManagementViews = (props) => {
                 {item.ticketName}
                 <br />
                 {item.ticketType} Ticket
-                <br />
-                {item.status}
               </div>
             )
           },
           position: { x: xPosition, y: index * 80 },
-          style: customNodeStyles.loadingTicket
+          style: item.status === 'Delivered' ? customDeliveredNodeStyle.loadingTicket : customNodeStyles.loadingTicket
         });
 
         item.productInventory?.map((product: any, productIndex) => {
@@ -258,7 +301,8 @@ const RentalManagementViews = (props) => {
       });
 
       xPosition += 600;
-      receivingTicket?.map((item: any, index) => {
+      var receivingAndReturnIdx = 0;
+      receivingTicket?.map((item: any) => {
         flow.push({
           id: `${item._id}`,
           sourcePosition: 'right',
@@ -272,17 +316,46 @@ const RentalManagementViews = (props) => {
                 {item.ticketName}
                 <br />
                 {item.ticketType} Ticket
-                <br />
-                {item.status}
               </div>
             )
           },
-          position: { x: xPosition, y: index * 80 },
-          style: customNodeStyles.receivingTicket
+          position: { x: xPosition, y: receivingAndReturnIdx * 80 },
+          style: item.status === 'Delivered' ? customDeliveredNodeStyle.receivingTicket : customNodeStyles.receivingTicket
         });
+        receivingAndReturnIdx += 1;
         item.productInventory?.map((product: any) => {
           flowEdge.push({
             id: `edge-receiving-${product.optionValue}`,
+            source: `${product.optionValue}`,
+            arrowHeadType: 'arrow',
+            target: `${item._id}`
+          });
+        });
+      });
+      returnTicket?.map((item: any) => {
+        flow.push({
+          id: `${item._id}`,
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          type: 'output',
+          data: {
+            ref_type: 'return',
+            ref_id: item._id,
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {item.ticketName}
+                <br />
+                {item.ticketType} Ticket
+              </div>
+            )
+          },
+          position: { x: xPosition, y: receivingAndReturnIdx * 80 },
+          style: item.status === 'Delivered' ? customDeliveredNodeStyle.returnTicket : customNodeStyles.returnTicket
+        });
+        receivingAndReturnIdx += 1;
+        item.productInventory?.map((product: any) => {
+          flowEdge.push({
+            id: `edge-return-${product.optionValue}`,
             source: `${product.optionValue}`,
             arrowHeadType: 'arrow',
             target: `${item._id}`
@@ -344,16 +417,40 @@ const RentalManagementViews = (props) => {
   return (
     <div style={{ height: '68vh' }}>
       {flowData.length ? (
-        <ReactFlow
-          elements={flowData || []}
-          onLoad={onLoad}
-          selectNodesOnDrag={false}
-          snapToGrid={true}
-          snapGrid={[15, 15]}
-          onElementClick={onElementClick}
-        >
-          <Controls />
-        </ReactFlow>
+        <>
+          <ReactFlow
+            elements={flowData || []}
+            onLoad={onLoad}
+            selectNodesOnDrag={false}
+            snapToGrid={true}
+            snapGrid={[15, 15]}
+            onElementClick={onElementClick}
+          >
+            <div
+              className="d-flex justify-content-space-between"
+              style={{ width: '70%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}
+            >
+              {Object.keys(customNodeStyles).map((key) => {
+                return (
+                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {customNodeStyles[key].name}
+                    <div
+                      style={{
+                        height: '12px',
+                        width: '12px',
+                        marginLeft: '3px',
+                        borderRadius: '100%',
+                        background: `${customNodeStyles[key].background}`,
+                        borderColor: `1px solid ${customNodeStyles[key].borderColor}`
+                      }}
+                    ></div>
+                  </div>
+                );
+              })}
+            </div>
+            <Controls />
+          </ReactFlow>
+        </>
       ) : (
         <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Map...</div>
       )}
