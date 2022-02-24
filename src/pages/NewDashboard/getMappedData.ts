@@ -56,7 +56,6 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     if (labels.length === 0) return null;
 
     if (chart.uniqueId === 'revenueCard') {
-      console.log(offeredValueData, offeredVolumeData)
       let totalBookedValue = bookedValueData.reduce((acc, val) => acc + val);
       let totalBookedCost = bookedCostData.reduce((acc, val) => acc + val);
       let totalBookedVolume = bookedVolumeData.reduce((acc, val) => acc + val);
@@ -69,10 +68,10 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
         totalOfferedValue && totalOfferedCost ? Math.floor(((totalOfferedValue - totalOfferedCost) / totalBookedCost) * 100) : 0;
       const grossMargin = totalBookedValue && totalBookedCost ? totalBookedValue - totalBookedCost : 0;
       const offeredMargin = totalOfferedValue && totalOfferedCost ? totalOfferedValue - totalOfferedCost : 0;
-      const hitRatioValue = totalBookedValue / totalOfferedValue;
-      const hitRatioCost = totalBookedCost / totalOfferedCost;
-      const hitRatioMargin = grossMargin / offeredMargin;
-      const hitRationVolume = totalBookedVolume / totalOfferedVolume;
+      const hitRatioValue = totalBookedValue && totalOfferedValue ? totalBookedValue / totalOfferedValue : 0;
+      const hitRatioCost = totalBookedCost && totalOfferedCost ? totalBookedCost / totalOfferedCost : 0;
+      const hitRatioMargin = grossMargin && offeredMargin ? grossMargin / offeredMargin : 0;
+      const hitRatioVolume = totalBookedVolume && totalOfferedVolume ? totalBookedVolume / totalOfferedVolume : 0;
 
       dataObject = {
         addtionalData: {
@@ -84,15 +83,17 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
           offeredMarginPercent,
           offeredMargin,
           grossMarginPercent,
-          hitRatioValue,
-          hitRatioCost,
-          hitRatioMargin,
-          hitRationVolume
+          hitRatioValue: isNaN(hitRatioValue) ? 0 : hitRatioValue,
+          hitRatioCost: isNaN(hitRatioCost) ? 0 : hitRatioCost,
+          hitRatioMargin: isNaN(hitRatioMargin) ? 0 : hitRatioMargin,
+          hitRatioVolume: isNaN(hitRatioVolume) ? 0 : hitRatioVolume
         },
         cardData: {
-          ['Total Booked Value']: formatAmountWithCurrency(currencyFrom || currencyTo, totalBookedValue).fullFormatAmount,
-          ['Total Booked Cost']: formatAmountWithCurrency(currencyFrom || currencyTo, totalBookedCost).fullFormatAmount,
-          ['Booked Gross Margin']: `${formatAmountWithCurrency(currencyFrom || currencyTo, grossMargin).fullFormatAmount} (${grossMarginPercent}%)`,
+          ['Total Booked Value']: totalBookedValue ? formatAmountWithCurrency(currencyFrom || currencyTo, totalBookedValue).fullFormatAmount : 0,
+          ['Total Booked Cost']: totalBookedCost ? formatAmountWithCurrency(currencyFrom || currencyTo, totalBookedCost).fullFormatAmount : 0,
+          ['Booked Gross Margin']: `${
+            grossMargin ? formatAmountWithCurrency(currencyFrom || currencyTo, grossMargin).fullFormatAmount : 0
+          } (${grossMarginPercent}%)`,
           ['Total Booked Volume']: `${totalBookedVolume.toFixed(2)} ${volumeUnit}`
         }
       };

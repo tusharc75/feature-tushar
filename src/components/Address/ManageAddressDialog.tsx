@@ -94,6 +94,7 @@ const ManageAddressDialog = (props) => {
         setLoading(false);
         if (error?.data?.isAlreadyExist) {
           values['isAlreadyExist'] = true;
+          values['_id'] = error?.data?.alreadyExistId;
           onSuccess(values);
         } else {
           toastConfig.setToastConfig(error);
@@ -301,12 +302,12 @@ const ManageAddressDialog = (props) => {
                                       onChange={
                                         field.fieldName === 'fullAddress'
                                           ? (_, val) => {
-                                              if (typeof val !== 'object') return;
-                                              getFullAddress(val);
-                                              if (!val?.place_id) {
-                                                setAddressData(null);
-                                              }
+                                            if (typeof val !== 'object') return;
+                                            getFullAddress(val);
+                                            if (!val?.place_id) {
+                                              setAddressData(null);
                                             }
+                                          }
                                           : null
                                       }
                                     />
