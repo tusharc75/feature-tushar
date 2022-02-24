@@ -160,6 +160,7 @@ export default function CustomAgGridEditable({
   priceTemplateField = [],
   fromPurchaseOrderGrid = false,
   idProperty = "_id",
+  rowClassRules = null,
 }) {
   const [, setColumns] = useState(columns);
   const [columnApi, setColumnApi] = useState(null);
@@ -257,7 +258,7 @@ export default function CustomAgGridEditable({
     dataRows.forEach((data) => {
       let obj = {}
       Object.entries(data).forEach(([k, v]) => {
-        if ((fromPurchaseOrderGrid || isFooter) && !footerIgnoreFields.includes(k)  && typeof v === "number") {
+        if ((fromPurchaseOrderGrid || isFooter) && !footerIgnoreFields.includes(k) && typeof v === "number") {
           obj[k] = v
         }
         else if (typeof v === "number" && k.includes(currency && currency.toLowerCase())) {
@@ -383,17 +384,13 @@ export default function CustomAgGridEditable({
               gridOptions={customGridOptions}
               rowData={dataRows}
               onColumnMoved={onColumnMoved}
-              rowClassRules={{
+              rowClassRules={rowClassRules ? rowClassRules : {
                 "red-data-row":
                   (forProductBuilder &&
                     function (params) {
                       const tsp = params.data[`totalSalesPrice_${currency}`] || 0;
                       const qty = params.data.qty;
                       return qty === 0 || tsp === 0;
-                    }) || (fromPurchaseOrderGrid && function (params) {
-                      const finalPrice = params.data[`finalPrice_${currency.toLowerCase()}`] || 0;
-                      const qty = params.data.qty || 0;
-                      return finalPrice === 0 || qty === 0;
                     }),
               }}
               onGridReady={onGridReady}
