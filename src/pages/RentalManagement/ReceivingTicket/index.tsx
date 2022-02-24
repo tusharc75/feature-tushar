@@ -262,7 +262,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "inventoryRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
     { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
-    { field: "warehouse", headerName: "Plant", show: true, disabled: true, cellRenderer: "warehouseRenderer" },
+    { field: "warehouse", headerName: "Plant", show: false, disabled: true, cellRenderer: "warehouseRenderer" },
     { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "deliveryTicketRenderer" },
     { field: "receivingTicket", headerName: "Receiving Ticket", show: true, cellRenderer: "receivingTicketRenderer" },
     { field: "returnTicket", headerName: "Return Ticket", show: true, cellRenderer: "returnTicketRenderer" },
