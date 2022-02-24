@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React, { useContext, useState, useEffect } from 'react';
 import ReactFlow, { Controls } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
-import { deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, rentalManagement, purchaseOrder } from '../../../constants/helpers';
+import { deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, rentalManagement, sublease } from '../../../constants/helpers';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
@@ -15,6 +15,14 @@ const customNodeStyles = {
   product: {
     background: '#97c9bf',
     borderColor: '#70948d'
+  },
+  package: {
+    background: '#cfdb7f',
+    borderColor: '#aeb86e'
+  },
+  sublease: {
+    background: '#e6c6e6',
+    borderColor: '#b38fb3'
   },
   productAssets: {
     background: '#ffd65b',
@@ -82,7 +90,7 @@ const RentalManagementViews = (props) => {
             )
           },
           position: { x: item.type === 'package' ? xPosition - 300 : xPosition, y: index * 80 },
-          style: customNodeStyles.product
+          style: item.type === 'package' ? customNodeStyles.package : customNodeStyles.product
         });
         flowEdge.push({
           id: `edge-product-${item._id}`,
@@ -91,32 +99,73 @@ const RentalManagementViews = (props) => {
           target: `${item._id}`
         });
       });
-      // const purchaseArr = new Map();
-      // const purchaseOrder = await axiosInstance().get(`purchase-order?filterById=[{"field":"rentalJob","term":"${rentalId}"}]`);
-      // purchaseOrder?.data?.data?.map((item) => {
-      //   purchaseArr.set(`${item._id}`, `${item._id}`);
-      // });
-      // purchaseOrder?.data?.data?.map((item: any, index) => {
-      //   flow.push({
-      //     id: `${item._id}`,
-      //     sourcePosition: 'right',
-      //     targetPosition: 'left',
-      //     type: 'default',
-      //     data: {
-      //       ref_type: 'purchaseOrder',
-      //       ref_id: item._id,
-      //       label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.purchaseOrderNumber}</div>
-      //     },
-      //     position: { x: 900, y: index * 80 },
-      //     style: customNodeStyles.product
-      //   });
-      //   flowEdge.push({
-      //     id: `edge-purchseOrder-${item._id}`,
-      //     source: `${rentalId}`,
-      //     arrowHeadType: 'arrow',
-      //     target: `${item._id}`
-      //   });
-      // });
+      const ticketData = await axiosInstance().get(
+        `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalId}`
+      );
+      const purchaseOrder = await axiosInstance().get(`purchase-order?filterById=[{"field":"rentalJob","term":"${rentalId}"}]`);
+      const subLease = await axiosInstance().get(`${sublease.api}?filterById=[{"field":"rentalJob","term":"${rentalId}"}]`);
+      var purchaseAndSubLeaseIdx = 0;
+      if (purchaseOrder?.data?.data?.length) xPosition += 300;
+      const purchaseArr = purchaseOrder?.data?.data?.map((item) => item._id);
+      const subLeaseArr = subLease?.data?.data?.map((item) => item.supplierAccount.optionValue);
+      purchaseOrder?.data?.data?.map((item: any, index) => {
+        flow.push({
+          id: `${item._id}`,
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          type: 'default',
+          data: {
+            ref_type: 'purchaseOrder',
+            ref_id: item._id,
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.purchaseOrderNumber}</div>
+          },
+          position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
+          style: customNodeStyles.product
+        });
+        purchaseAndSubLeaseIdx += 1;
+        product?.data?.data?.inventory?.map((data) => {
+          if (purchaseArr.includes(data.inventoryDetail.purchaseOrder) && data.inventoryDetail.purchaseOrder === item._id) {
+            flowEdge.push({
+              id: `edge-purchseOrder-${item._id}`,
+              source: `${data._id}`,
+              arrowHeadType: 'arrow',
+              target: `${item._id}`
+            });
+          }
+        });
+      });
+      subLease?.data?.data?.map((item: any, index) => {
+        flow.push({
+          id: `${item.supplierAccount.optionValue}`,
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          type: 'default',
+          data: {
+            ref_type: 'sublease',
+            ref_id: item._id,
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.subleaseName}</div>
+          },
+          position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
+          style: customNodeStyles.sublease
+        });
+        purchaseAndSubLeaseIdx += 1;
+        product?.data?.data?.inventory?.map((data) => {
+          console.log(subLeaseArr.includes(data.inventoryDetail.supplierAccount));
+          console.log(data.inventoryDetail.supplierAccount);
+          if (
+            subLeaseArr.includes(data.inventoryDetail.supplierAccount) &&
+            data.inventoryDetail.supplierAccount === item.supplierAccount.optionValue
+          ) {
+            flowEdge.push({
+              id: `edge-sublease-${item._id}`,
+              source: `${data._id}`,
+              arrowHeadType: 'arrow',
+              target: `${item.supplierAccount.optionValue}`
+            });
+          }
+        });
+      });
+
       xPosition += 300;
       product?.data?.data?.inventory?.map((item: any, index) => {
         flow.push({
@@ -132,20 +181,24 @@ const RentalManagementViews = (props) => {
           position: { x: xPosition, y: index * 80 },
           style: customNodeStyles.productAssets
         });
-        // purchaseArr.get(`${item.inventoryDetail.purchaseOrder}`) ? item.inventoryDetail.purchaseOrder :
         flowEdge.push({
           id: `edge-assets-${item.inventoryDetail.assetNumber}`,
-          source: `${item._id}`,
+          source: purchaseArr.includes(item.inventoryDetail.purchaseOrder)
+            ? `${item.inventoryDetail.purchaseOrder}`
+            : subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset
+            ? `${item.inventoryDetail.supplierAccount}`
+            : `${item._id}`,
           arrowHeadType: 'arrow',
           target: `${item.inventoryDetail.assetNumber}`
         });
       });
-      const loadingTicketData = await axiosInstance().get(
-        `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalId}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
-      );
+
+      const loadingTicket = ticketData?.data?.data?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.loading);
+      const receivingTicket = ticketData?.data?.data?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.receiving);
+
       var loadingAssets = 0;
-      if (loadingTicketData?.data?.data?.length) xPosition += 300;
-      loadingTicketData?.data?.data?.map((item: any, index) => {
+      if (loadingTicket?.length) xPosition += 300;
+      loadingTicket?.map((item: any, index) => {
         flow.push({
           id: `${item._id}`,
           sourcePosition: 'right',
@@ -197,11 +250,9 @@ const RentalManagementViews = (props) => {
           });
         });
       });
-      const receivingTicketData = await axiosInstance().get(
-        `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalId}&ticketType=${DELIVERY_TICKET_TYPE.receiving}`
-      );
+
       xPosition += 600;
-      receivingTicketData?.data?.data?.map((item: any, index) => {
+      receivingTicket?.map((item: any, index) => {
         flow.push({
           id: `${item._id}`,
           sourcePosition: 'right',
@@ -275,6 +326,9 @@ const RentalManagementViews = (props) => {
         break;
       case 'purchaseOrder':
         history.push(`${routes.purchaseOrderDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'sublease':
+        history.push(`${routes.subleaseDetail.path}/${element.data.ref_id}`);
         break;
       default:
         history.push(`${routes.rentalManagementDetail.path}/${element.data.ref_id}?tab=2`);
