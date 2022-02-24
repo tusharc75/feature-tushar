@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.66.0](https://github.com/vebholic/oms_frontend/compare/v2.65.1...v2.66.0) (2022-02-24)
+
+
+### Features
+
+* - Tinymce file created to replace cdn ([f1534a7](https://github.com/vebholic/oms_frontend/commit/f1534a73648581bd05650343bb8867e43e371c66))
+
+
+### Bug Fixes
+
+* **App.tsx:** Change flow for hard refresh ([3dae7b6](https://github.com/vebholic/oms_frontend/commit/3dae7b66595a4d8183e0f9f3ba2a7c8c9a2c6b5a))
+* bug fix ([280028e](https://github.com/vebholic/oms_frontend/commit/280028eb18468364a10e4fc4ee87c324b0651f17))
+* bug fix ([94fd72e](https://github.com/vebholic/oms_frontend/commit/94fd72e23ef6c3b3a4c4f7aa8ccdb5fc9b88b32a))
+* bug fix ([6875336](https://github.com/vebholic/oms_frontend/commit/6875336fa8a30f36d46d32e398ce8131f44693c4))
+* bug fix ([47ad911](https://github.com/vebholic/oms_frontend/commit/47ad9117d54607d21962068ab78c9046e77e0ccf))
+* bug fix ([d4ef9a7](https://github.com/vebholic/oms_frontend/commit/d4ef9a729e447a401595d427fbd203dabb3eb6df))
+* **dashboard:** currency fix ([f0553f6](https://github.com/vebholic/oms_frontend/commit/f0553f6e05bae82fe2d47a9a1bca341b2a705f1a))
+* **dashboard:** fix and changes ([f7c102b](https://github.com/vebholic/oms_frontend/commit/f7c102b868001fc53db39ab93f8fa315b3c11e06))
+* rentalJob views product and package hierarchy show on roadmap PO-1152 ([b4d2306](https://github.com/vebholic/oms_frontend/commit/b4d23061072816255209fc849e8c2ad32672c4cc))
+* rentalJob views roadmap autospacing PO-1152 ([37a14b8](https://github.com/vebholic/oms_frontend/commit/37a14b8bde0176415798641bbec879c0f9fc9fde))
+
 ### [2.65.1](https://github.com/vebholic/oms_frontend/compare/v2.65.0...v2.65.1) (2022-02-23)
 
 
