@@ -5,6 +5,7 @@ import exportData from './exportData';
 interface Props {
   anchorEl: any;
   setAnchorClose: any;
+  chartData?: any;
   currency: string;
   tableData: any[];
   chart: {
@@ -22,13 +23,13 @@ interface Props {
   };
 }
 
-const ExportDropdown = ({ anchorEl, setAnchorClose, currency, tableData, chart }: Props) => {
+const ExportDropdown = ({ anchorEl, setAnchorClose, currency, tableData, chart, chartData }: Props) => {
   const handleClose = (type: string) => {
-    if (type) {
-      exportData(type, currency, tableData, chart);
-    } else {
+    if ((chart.type === 'list' && tableData.length === 0) || (chart.type !== 'list' && !chartData) || !type) {
       setAnchorClose(null);
+      return;
     }
+    exportData(type, currency, tableData, chart);
   };
 
   return (

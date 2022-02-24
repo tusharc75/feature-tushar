@@ -131,7 +131,7 @@ export default [
       },
       {
         col: 5,
-        title: 'Open Quotes',
+        title: 'Status Quotes',
         kpi: 'open-quote',
         type: 'doughnut',
         hasFilter: true,
@@ -149,7 +149,7 @@ export default [
       },
       {
         col: 7,
-        title: 'Open opportunities by Customer Account',
+        title: 'Status opportunities by Customer Account',
         kpi: 'opportunities/customer-account',
         type: 'bar',
         hasFilter: true,
@@ -168,7 +168,7 @@ export default [
 
       {
         col: 6,
-        title: 'Open quotes by Sales Rep',
+        title: 'Status quotes by Sales Rep',
         kpi: 'quote/sales-rep',
         type: 'pie',
         hasFilter: true,
