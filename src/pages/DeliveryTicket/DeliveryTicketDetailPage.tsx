@@ -144,27 +144,27 @@ export default function DeliveryTicketDetail(props) {
       }
       data = data.filter((fields: any) => {
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
-          if (["transferAsset", "rentalJob", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
+          if (["transferAsset", "rentalJob", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-          if (["rentalJob", "repairJob", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
+          if (["rentalJob", "repairJob", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob) {
-          if (["repairJob", "transferAsset", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
+          if (["repairJob", "transferAsset", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
-          if (["repairJob", "transferAsset", "sublease", "productInventory"].includes(fields.fieldData.fieldName)) {
+          if (["repairJob", "transferAsset", "sublease", "productInventory", "pickupFromType", "deliveryToType"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.sublease) {
-          if (["rentalJob", "repairJob", "transferAsset", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
+          if (["rentalJob", "repairJob", "transferAsset", "salesOrder", "productInventory", "pickupFromType", "deliveryToType"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
