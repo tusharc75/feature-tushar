@@ -851,12 +851,14 @@ export default function ManageQuoteDialog({
         simplifyValues(values, entityData.fields)
       ).toString()
   }
+
   const handleValuesChange = (data) => {
     setFormValues((prevState) => ({
       ...prevState,
       ...data
     }))
   }
+
   return (
     <>
       <Dialog
@@ -2116,6 +2118,20 @@ export default function ManageQuoteDialog({
                                 optionLabel: obj?.fullAddress,
                                 optionValue: obj._id,
                                 order: countrySellToMainData.length + 1,
+                              }]);
+                            addressType === 'countryBillTo' ? setCountryBillToDropDown((prevState) => [...prevState,
+                            {
+                              default: false,
+                              optionLabel: obj?.fullAddress,
+                              optionValue: obj._id,
+                              order: countryBillToDropDown.length + 1,
+                            }]) :
+                              setCountrySellToDropDown((prevState) => [...prevState,
+                              {
+                                default: false,
+                                optionLabel: obj?.fullAddress,
+                                optionValue: obj._id,
+                                order: countrySellToDropDown.length + 1,
                               }]);
                             setFieldValue(addressType, [...values[`${addressType}`], obj._id]);
                           }
