@@ -9,34 +9,42 @@ import { useHistory } from 'react-router-dom';
 
 const customNodeStyles = {
   rentalJob: {
+    name: 'Rental Job',
     background: '#c3d5e6',
     borderColor: '#6c89a6'
   },
   package: {
+    name: 'Package',
     background: '#acdce6',
     borderColor: '#81afb8'
   },
   product: {
+    name: 'Product',
     background: '#97c9bf',
     borderColor: '#70948d'
   },
   purchaseOrder: {
-    background: '#c3d5e6',
+    name: 'Purchase Order',
+    background: '#FFA500',
     borderColor: '#6c89a6'
   },
   sublease: {
+    name: 'Sublease',
     background: '#ffb3c6',
     borderColor: '#d98298'
   },
   productAssets: {
+    name: 'Assets',
     background: '#ffd65b',
     borderColor: '#f5c431'
   },
   loadingTicket: {
+    name: 'Loading Ticket',
     background: '#e6c6e6',
     borderColor: '#b38fb3'
   },
   receivingTicket: {
+    name: 'Receiving Ticket',
     background: '#cfdb7f',
     borderColor: '#aeb86e'
   }
@@ -119,21 +127,26 @@ const RentalManagementViews = (props) => {
       if (purchaseOrder?.data?.data?.length) xPosition += 300;
       const purchaseArr = purchaseOrder?.data?.data?.map((item) => item._id);
       const subLeaseArr = subLease?.data?.data?.map((item) => item.supplierAccount.optionValue);
+      const purchaseOrderInAssets = product?.data?.data?.inventory
+        ?.filter((item) => item.inventoryDetail.purchaseOrder)
+        .map((item) => item.inventoryDetail.purchaseOrder);
       purchaseOrder?.data?.data?.map((item: any, index) => {
-        flow.push({
-          id: `${item._id}`,
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          type: 'default',
-          data: {
-            ref_type: 'purchaseOrder',
-            ref_id: item._id,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.purchaseOrderNumber}</div>
-          },
-          position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
-          style: customNodeStyles.purchaseOrder
-        });
-        purchaseAndSubLeaseIdx += 1;
+        if (purchaseOrderInAssets.includes(item._id)) {
+          flow.push({
+            id: `${item._id}`,
+            sourcePosition: 'right',
+            targetPosition: 'left',
+            type: 'default',
+            data: {
+              ref_type: 'purchaseOrder',
+              ref_id: item._id,
+              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.purchaseOrderNumber}</div>
+            },
+            position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
+            style: customNodeStyles.purchaseOrder
+          });
+          purchaseAndSubLeaseIdx += 1;
+        }
         product?.data?.data?.inventory?.map((data) => {
           if (purchaseArr.includes(data.inventoryDetail.purchaseOrder) && data.inventoryDetail.purchaseOrder === item._id) {
             flowEdge.push({
@@ -145,21 +158,27 @@ const RentalManagementViews = (props) => {
           }
         });
       });
+
+      const subleaseInAssets = product?.data?.data?.inventory
+        ?.filter((item) => item.inventoryDetail.supplierAccount)
+        .map((item) => item.inventoryDetail.supplierAccount);
       subLease?.data?.data?.map((item: any, index) => {
-        flow.push({
-          id: `${item.supplierAccount.optionValue}`,
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          type: 'default',
-          data: {
-            ref_type: 'sublease',
-            ref_id: item._id,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.subleaseName}</div>
-          },
-          position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
-          style: customNodeStyles.sublease
-        });
-        purchaseAndSubLeaseIdx += 1;
+        if (subleaseInAssets.includes(item.supplierAccount.optionValue)) {
+          flow.push({
+            id: `${item.supplierAccount.optionValue}`,
+            sourcePosition: 'right',
+            targetPosition: 'left',
+            type: 'default',
+            data: {
+              ref_type: 'sublease',
+              ref_id: item._id,
+              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.subleaseName}</div>
+            },
+            position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
+            style: customNodeStyles.sublease
+          });
+          purchaseAndSubLeaseIdx += 1;
+        }
         product?.data?.data?.inventory?.map((data) => {
           if (
             subLeaseArr.includes(data.inventoryDetail.supplierAccount) &&
@@ -344,16 +363,36 @@ const RentalManagementViews = (props) => {
   return (
     <div style={{ height: '68vh' }}>
       {flowData.length ? (
-        <ReactFlow
-          elements={flowData || []}
-          onLoad={onLoad}
-          selectNodesOnDrag={false}
-          snapToGrid={true}
-          snapGrid={[15, 15]}
-          onElementClick={onElementClick}
-        >
-          <Controls />
-        </ReactFlow>
+        <>
+          <ReactFlow
+            elements={flowData || []}
+            onLoad={onLoad}
+            selectNodesOnDrag={false}
+            snapToGrid={true}
+            snapGrid={[15, 15]}
+            onElementClick={onElementClick}
+          >
+            <div className="d-flex justify-content-space-between" style={{ width: '60%', marginLeft: 'auto', marginRight: 'auto' }}>
+              {Object.keys(customNodeStyles).map((key) => {
+                return (
+                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {customNodeStyles[key].name}
+                    <div
+                      style={{
+                        height: '12px',
+                        width: '12px',
+                        borderRadius: '100%',
+                        background: `${customNodeStyles[key].background}`,
+                        borderColor: `1px solid ${customNodeStyles[key].borderColor}`
+                      }}
+                    ></div>
+                  </div>
+                );
+              })}
+            </div>
+            <Controls />
+          </ReactFlow>
+        </>
       ) : (
         <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Map...</div>
       )}
