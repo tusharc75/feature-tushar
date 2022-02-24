@@ -197,32 +197,34 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
         });
       }
     });
-    {isMobile ? <Box display={"none"}/> :  coloum.push({
-      accessor: 'action',
-      Header: '',
-      minWidth: 50,
-      width: 50,
-      sticky: 'right',
-      Cell: ({ row }) =>
-        !row.original.hideSelection && (
-          <IconButton
-            size="small"
-            aria-label="Details"
-            onClick={() => {
-              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-              if (row.original?.type === 'package' && row.original?.subRows?.length) {
-                row.original?.subRows.forEach((element) => {
-                  obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-                });
-              }
-              setDeleteData(obj);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        )
-    });}
-    
+    {
+      isMobile ? <Box display={"none"} /> : coloum.push({
+        accessor: 'action',
+        Header: '',
+        minWidth: 50,
+        width: 50,
+        sticky: 'right',
+        Cell: ({ row }) =>
+          !row.original.hideSelection && (
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                if (row.original?.type === 'package' && row.original?.subRows?.length) {
+                  row.original?.subRows.forEach((element) => {
+                    obj.push({ id: element._id, type: element.type, materialId: element.materialId });
+                  });
+                }
+                setDeleteData(obj);
+              }}
+            >
+              <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+          )
+      });
+    }
+
     coloum.forEach((element) => {
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
@@ -283,7 +285,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
   };
 
   const handleAdd = async (rows) => {
-    console.log(rows)
     setAddingProducts(true);
     const material: any = [];
     rows.forEach((d) => {
@@ -382,6 +383,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     setIsProductEdit({ open: true, isBulkedit: false });
     setRecordToUpdate(rowData);
   };
+
   const calculatePrice = (arr: any[]) => {
     //materialType can be =["product","packages","productCategory"]
     //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
@@ -414,12 +416,31 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const handleDeleteMultiple = () => {
+    const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection).map((rec: any) => {
+      const obj: any = {};
+      obj.id = rec._id;
+      obj.type = rec?.type;
+      obj.materialId = rec?.materialId;
+      return obj;
+    });
+    dataToDelete?.forEach((ele) => {
+      const _package = material?.filter((e) => e.parentId === ele.id);
+      _package?.forEach((element) => {
+        dataToDelete.push({ id: element._id, type: element.type, materialId: element.materialId });
+      });
+    })
+    setDeleteData(dataToDelete);
+  }
 
   return (
     <Fragment>
@@ -428,18 +449,18 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
           <Box display="flex" justifyContent="space-between" m={1}>
             <Box display="flex">
               <Button
-                variant={isMobile  ? 'contained' : 'contained'}
+                variant={isMobile ? 'contained' : 'contained'}
                 color="primary"
                 size="small"
                 disabled={isOffline}
-                style={!isMobile && !isTablet ? { color: 'var(--secondary)'  } : {}}
+                style={!isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
                 onClick={() => {
                   setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
                 }}
               >
                 {isMobile && !isTablet ? 'Product' : `Add ${routes.product.title}`}
               </Button>
-              <Box mx={isMobile ? 0.5 : 1}/>
+              <Box mx={isMobile ? 0.5 : 1} />
               <Button
                 variant={isMobile ? 'contained' : 'contained'}
                 color="primary"
@@ -481,44 +502,25 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                   }}
                   className="add-product-action-menu"
                 >
-                 
-                    <HtmlTooltip
-                      title={Boolean(selectedProducts && selectedProducts.length) ? 'Buld edit selected records' : 'Select records to edit'}
-                    >
-                      <MenuItem onClick={() => setIsProductEdit({ open: true, isBulkedit: true })} disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}>
-                        <ListItemIcon>
-                          <MdEdit size={16} />
-                        </ListItemIcon>
-                        <ListItemText>Bulk edit</ListItemText>
-                      </MenuItem>
-                    </HtmlTooltip>
-
-                    <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                    <MenuItem  disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-                    onClick={() => {
-                      const dataToDelete =
-                        selectedProducts &&
-                        selectedProducts
-                          .filter((e) => !e.hideSelection)
-                          .map((rec: any) => {
-                            const obj: any = {};
-                            obj.id = rec._id;
-                            obj.type = rec?.type;
-                            obj.materialId = rec?.materialId;
-                            return obj;
-                          });
-                      setDeleteData(dataToDelete);
-                    }}>
-
-                    <ListItemIcon>
-                          <MdDelete size={16} />
-                        </ListItemIcon>
-                        <ListItemText>Delete</ListItemText>
-                      
+                  <HtmlTooltip
+                    title={Boolean(selectedProducts && selectedProducts.length) ? 'Buld edit selected records' : 'Select records to edit'}
+                  >
+                    <MenuItem onClick={() => setIsProductEdit({ open: true, isBulkedit: true })} disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}>
+                      <ListItemIcon>
+                        <MdEdit size={16} />
+                      </ListItemIcon>
+                      <ListItemText>Bulk edit</ListItemText>
                     </MenuItem>
-                    
-                    </HtmlTooltip>
-                 
+                  </HtmlTooltip>
+                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+                    <MenuItem disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+                      onClick={() => { handleDeleteMultiple() }}>
+                      <ListItemIcon>
+                        <MdDelete size={16} />
+                      </ListItemIcon>
+                      <ListItemText>Delete</ListItemText>
+                    </MenuItem>
+                  </HtmlTooltip>
                 </Menu>
               </Box>
             ) : (
@@ -544,20 +546,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                     color="primary"
                     size="small"
                     disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-                    onClick={() => {
-                      const dataToDelete =
-                        selectedProducts &&
-                        selectedProducts
-                          .filter((e) => !e.hideSelection)
-                          .map((rec: any) => {
-                            const obj: any = {};
-                            obj.id = rec._id;
-                            obj.type = rec?.type;
-                            obj.materialId = rec?.materialId;
-                            return obj;
-                          });
-                      setDeleteData(dataToDelete);
-                    }}
+                    onClick={() => { handleDeleteMultiple() }}
                     endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
                   >
                     {isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
