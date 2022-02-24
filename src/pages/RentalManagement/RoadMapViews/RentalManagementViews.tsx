@@ -12,17 +12,21 @@ const customNodeStyles = {
     background: '#c3d5e6',
     borderColor: '#6c89a6'
   },
+  package: {
+    background: '#acdce6',
+    borderColor: '#81afb8'
+  },
   product: {
     background: '#97c9bf',
     borderColor: '#70948d'
   },
-  package: {
-    background: '#cfdb7f',
-    borderColor: '#aeb86e'
+  purchaseOrder: {
+    background: '#c3d5e6',
+    borderColor: '#6c89a6'
   },
   sublease: {
-    background: '#e6c6e6',
-    borderColor: '#b38fb3'
+    background: '#ffb3c6',
+    borderColor: '#d98298'
   },
   productAssets: {
     background: '#ffd65b',
@@ -50,6 +54,15 @@ const RentalManagementViews = (props) => {
 
   const fetchData = async () => {
     if (!isOffline) {
+      const product = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}`);
+      const ticketData = await axiosInstance().get(
+        `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalId}`
+      );
+      const purchaseOrder = await axiosInstance().get(`purchase-order?filterById=[{"field":"rentalJob","term":"${rentalId}"}]`);
+      const subLease = await axiosInstance().get(`${sublease.api}?filterById=[{"field":"rentalJob","term":"${rentalId}"}]`);
+      const loadingTicket = ticketData?.data?.data?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.loading);
+      const receivingTicket = ticketData?.data?.data?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.receiving);
+
       var xPosition = 0;
       var flow: any[] = [
         {
@@ -67,11 +80,12 @@ const RentalManagementViews = (props) => {
         }
       ];
       var flowEdge: any[] = [];
-      const product = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}`);
+
       xPosition += 300;
       const allPackages = product?.data?.data?.material?.filter((item) => item.type === 'package').map((item) => item._id);
       if (allPackages.length) xPosition += 300;
-
+      var pakcageIdx = 0;
+      var productIdx = 0;
       product?.data?.data?.material?.map((item: any, index) => {
         flow.push({
           id: `${item._id}`,
@@ -89,9 +103,10 @@ const RentalManagementViews = (props) => {
               </div>
             )
           },
-          position: { x: item.type === 'package' ? xPosition - 300 : xPosition, y: index * 80 },
+          position: { x: item.type === 'package' ? xPosition - 300 : xPosition, y: item.type === 'package' ? pakcageIdx * 80 : productIdx * 80 },
           style: item.type === 'package' ? customNodeStyles.package : customNodeStyles.product
         });
+        item.type === 'package' ? (pakcageIdx += 1) : (productIdx += 1);
         flowEdge.push({
           id: `edge-product-${item._id}`,
           source: `${item.parentId && allPackages.includes(item.parentId) ? item.parentId : rentalId}`,
@@ -99,11 +114,7 @@ const RentalManagementViews = (props) => {
           target: `${item._id}`
         });
       });
-      const ticketData = await axiosInstance().get(
-        `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalId}`
-      );
-      const purchaseOrder = await axiosInstance().get(`purchase-order?filterById=[{"field":"rentalJob","term":"${rentalId}"}]`);
-      const subLease = await axiosInstance().get(`${sublease.api}?filterById=[{"field":"rentalJob","term":"${rentalId}"}]`);
+
       var purchaseAndSubLeaseIdx = 0;
       if (purchaseOrder?.data?.data?.length) xPosition += 300;
       const purchaseArr = purchaseOrder?.data?.data?.map((item) => item._id);
@@ -120,13 +131,13 @@ const RentalManagementViews = (props) => {
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.purchaseOrderNumber}</div>
           },
           position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
-          style: customNodeStyles.product
+          style: customNodeStyles.purchaseOrder
         });
         purchaseAndSubLeaseIdx += 1;
         product?.data?.data?.inventory?.map((data) => {
           if (purchaseArr.includes(data.inventoryDetail.purchaseOrder) && data.inventoryDetail.purchaseOrder === item._id) {
             flowEdge.push({
-              id: `edge-purchseOrder-${item._id}`,
+              id: `edge-purchseOrder-${item._id}-${_.random(0, 1000)}`,
               source: `${data._id}`,
               arrowHeadType: 'arrow',
               target: `${item._id}`
@@ -150,14 +161,12 @@ const RentalManagementViews = (props) => {
         });
         purchaseAndSubLeaseIdx += 1;
         product?.data?.data?.inventory?.map((data) => {
-          console.log(subLeaseArr.includes(data.inventoryDetail.supplierAccount));
-          console.log(data.inventoryDetail.supplierAccount);
           if (
             subLeaseArr.includes(data.inventoryDetail.supplierAccount) &&
             data.inventoryDetail.supplierAccount === item.supplierAccount.optionValue
           ) {
             flowEdge.push({
-              id: `edge-sublease-${item._id}`,
+              id: `edge-sublease-${item._id}-${_.random(0, 1000)}`,
               source: `${data._id}`,
               arrowHeadType: 'arrow',
               target: `${item.supplierAccount.optionValue}`
@@ -192,9 +201,6 @@ const RentalManagementViews = (props) => {
           target: `${item.inventoryDetail.assetNumber}`
         });
       });
-
-      const loadingTicket = ticketData?.data?.data?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.loading);
-      const receivingTicket = ticketData?.data?.data?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.receiving);
 
       var loadingAssets = 0;
       if (loadingTicket?.length) xPosition += 300;
