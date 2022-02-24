@@ -1,7 +1,7 @@
 import React from 'react';
 import Chart from 'react-chartjs-2';
-import { Paper, Box, Grid, useTheme, useMediaQuery, Typography, Button } from '@material-ui/core';
-import { ImportExport, TableChart, Timeline, Visibility } from '@material-ui/icons';
+import { Paper, Box, Grid, useTheme, useMediaQuery, Typography, Button, Badge } from '@material-ui/core';
+import { ImportExport, TableChart, Timeline } from '@material-ui/icons';
 import { BsFilter } from 'react-icons/bs';
 import { Skeleton } from '@material-ui/lab';
 
@@ -13,11 +13,9 @@ import getMappedData from './getMappedData';
 import TableView from './TableView';
 import { GlobalFiltersType } from './GlobalFilter';
 
-import Tooltip from 'src/components/CustomTooltipTitle';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { formatAmountWithCurrency } from 'src/constants/helpers';
 import EyeTooltip from './EyeTooltip';
 
 export type ChartDataType = {
@@ -69,6 +67,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
   const [filterValues, setFilterValues] = React.useState(null);
   const [anchorElFilter, setAnchorElFilter] = React.useState(null);
   const [anchorElExport, setAnchorElExport] = React.useState(null);
+  const [invisible, setInvisible] = React.useState(false)
 
   const handleOpenFilter = React.useCallback((e: React.MouseEvent) => {
     setAnchorElFilter(e.target);
@@ -77,6 +76,24 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
   const handleOpenExport = React.useCallback((e: React.MouseEvent) => {
     setAnchorElExport(e.target);
   }, []);
+
+  React.useEffect(() => {
+    if(!filterValues) return
+    const keys = Object.keys(filterValues)
+    let values = []
+    keys.forEach((key:string) => {
+      if(!filterValues[key]) return
+      const isEmpty  = Object.keys(filterValues[key]).length === 0
+      if(!isEmpty) {
+        values.push(key)
+      }
+    })
+    if(values.length > 0) {
+      setInvisible(false)
+    } else {
+      setInvisible(true)
+    }
+  },[filterValues])
 
   const getParams = () => {
     let url = '';
@@ -172,22 +189,24 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
             <Box display="flex" justifyContent="space-between" alignItems="center">
               <Box display="flex">
                 {chart.hasFilter && (
-                  <Button
-                    disabled={!Boolean(chartData)}
-                    onClick={handleOpenFilter}
-                    size="small"
-                    disableElevation
-                    color="primary"
-                    startIcon={<BsFilter fontSize={14} />}
-                  >
-                    Filters
-                  </Button>
+                  <Badge color="secondary" variant="dot" invisible={invisible}>
+                    <Button
+                      disabled={loading}
+                      onClick={handleOpenFilter}
+                      size="small"
+                      disableElevation
+                      color="primary"
+                      startIcon={<BsFilter fontSize={14} />}
+                    >
+                      Filters
+                    </Button>
+                  </Badge>
                 )}
               </Box>
               <Box display="flex">
                 {chart.hasExport && (
                   <Button
-                    disabled={!Boolean(chartData)}
+                    disabled={loading}
                     style={{ marginRight: chart.hasTableView ? 16 : 0 }}
                     onClick={handleOpenExport}
                     color="primary"
@@ -199,7 +218,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                 )}
                 {chart.hasTableView && (
                   <Button
-                    disabled={!Boolean(chartData)}
+                    disabled={loading}
                     color="primary"
                     onClick={() => {
                       setTableView(!tableView);
@@ -215,7 +234,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
 
             {chart.title && (
               <Typography component="div" align="center" color="textPrimary">
-                <h4>{chart.title.replace(/currency/gi, globalFilters.currency || currency)}</h4>
+                <h4>{chart.title.includes("currency") ?  chart.title.replace(/currency/gi, globalFilters.currency || currency) : chart.title.replace(/Status/gi, filterValues?.status?.optionLabel || "Open")}</h4>
               </Typography>
             )}
           </Box>
@@ -278,6 +297,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           currency={globalFilters.currency || currency}
           tableData={chartData ? (chart.type === 'list' ? chartData : chartData.tableData) : []}
           chart={chart}
+          chartData={chartData}
         />
       )}
     </Grid>
