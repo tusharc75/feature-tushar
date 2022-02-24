@@ -581,7 +581,7 @@ const QtyDialog: FC<EditDialogProps> = (
             {
               showConfirmationDialog && <ConfirmationDialog
                 open={showConfirmationDialog}
-                message="Price configured at the product level will be override, would you like to override it ?"
+                message="Would you like to override the price configured at the product level?"
                 onOk={() => {
                   submitForm()
                 }}

@@ -171,13 +171,13 @@ const Product = ({ purchaseOrderData }) => {
                     <HtmlTooltip title="Please select some product">
                         <span>
                             <Button
-                                variant={isMobile && !isTablet ? "text" : "outlined"}
+                                variant={"outlined"}
                                 color="default"
                                 size="small"
                                 onClick={openActions}
                                 disabled={selectedRecords.length ? false : true}
                                 aria-controls="action-menu"
-                            >  {isMobile ? '' : 'Actions'} <ExpandMore />
+                            >  {'Actions'} <ExpandMore />
                             </Button>
                         </span>
                     </HtmlTooltip>

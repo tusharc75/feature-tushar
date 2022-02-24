@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import {
   Box,
   Button,
@@ -149,12 +149,14 @@ export default function ManageQuoteDialog({
   const [showAddressDialog, setShowAddressDialog] = useState(false);
   const [addressType, setAddressType] = useState('');
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const ref = useRef(null);
 
   useEffect(() => {
     if (entityData.fields.length === 0 && Object.keys(customError).length > 0) {
       setCustomError({});
     }
   }, [entityData]);
+
 
   useEffect(() => {
     if (isFromProjectSales) {
@@ -727,32 +729,30 @@ export default function ManageQuoteDialog({
     }
   };
 
-  const onCountrySellToDropDownOpen = (selectedAccount) => {
+  const onCountrySellToDropDownOpen = (selectedAccount, alreadySelected) => {
     let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.shippingAddress
-
     if (isArray(filterAddress)) {
       setCountrySellToDropDown(
-        countrySellToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue))
+        countrySellToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue) || alreadySelected?.some(u => u === d.optionValue))
       );
     }
     else {
       setCountrySellToDropDown([])
     }
-
   };
-  const onCountryBillToDropDownOpen = (selectedAccount) => {
-    let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.billingAddress
 
+  const onCountryBillToDropDownOpen = (selectedAccount, alreadySelected) => {
+    let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.billingAddress
     if (isArray(filterAddress)) {
       setCountryBillToDropDown(
-        countryBillToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue))
+        countryBillToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue) || alreadySelected?.some(u => u === d.optionValue))
       );
     }
     else {
       setCountryBillToDropDown([])
     }
-
   };
+
 
   const handleErrors = (values) => {
     let tempErrors = customError;
@@ -894,6 +894,7 @@ export default function ManageQuoteDialog({
             initialValues={entityData.initialValues}
             validationSchema={yupSchema(entityData.fields)}
             validateOnMount
+            innerRef={ref}
             onSubmit={onSubmit}
           >
             {({
@@ -1345,7 +1346,7 @@ export default function ManageQuoteDialog({
                                               tooltipMessage={field?.tooltipMessage}
                                               size="small"
                                               onOpen={() =>
-                                                onCountryBillToDropDownOpen(values.customerAccountName)
+                                                onCountryBillToDropDownOpen(values.customerAccountName, values.countryBillTo)
                                               }
                                             />
                                           </Grid>
@@ -1409,7 +1410,7 @@ export default function ManageQuoteDialog({
                                                 tooltipMessage={field?.tooltipMessage}
                                                 size="small"
                                                 onOpen={() =>
-                                                  onCountrySellToDropDownOpen(values.customerAccountName)
+                                                  onCountrySellToDropDownOpen(values.customerAccountName, values.countrySellTo)
                                                 }
                                               />
                                             </Grid>
@@ -2092,28 +2093,31 @@ export default function ManageQuoteDialog({
                         if (obj) {
                           setShowAddressDialog(false);
                           if (obj?.isAlreadyExist === true) {
-                            let tempAddress = addressType === 'countryBillTo' ? countryBillToDropDown.find(d => d?.optionLabel === obj?.fullAddress) : countrySellToDropDown.find(d => d?.optionLabel === obj?.fullAddress)
+                            let tempAddress = addressType === 'countryBillTo' ? countryBillToMainData.find(d => d?.optionLabel === obj?.fullAddress) : countrySellToMainData.find(d => d?.optionLabel === obj?.fullAddress)
+                            if (addressType === 'countryBillTo') {
+                              onCountryBillToDropDownOpen(values.customerAccountName, values.countryBillTo ? [...values.countryBillTo, tempAddress?.optionValue] : [tempAddress?.optionValue])
+                            }
+                            else {
+                              onCountrySellToDropDownOpen(values.customerAccountName, values.countrySellTo ? [...values.countrySellTo, tempAddress?.optionValue] : [tempAddress?.optionValue])
+                            }
                             setFieldValue(addressType, [...values[`${addressType}`], tempAddress?.optionValue]);
-
                           }
                           else {
-                            addressType === 'countryBillTo' ? setCountryBillToDropDown((prevState) => [...prevState,
+                            addressType === 'countryBillTo' ? setCountryBillToMainData((prevState) => [...prevState,
                             {
                               default: false,
                               optionLabel: obj?.fullAddress,
                               optionValue: obj._id,
-                              order: countryBillToDropDown.length + 1,
-                            }])
-                              :
-                              setCountrySellToDropDown((prevState) => [...prevState,
+                              order: countryBillToMainData.length + 1,
+                            }]) :
+                              setCountryBillToMainData((prevState) => [...prevState,
                               {
                                 default: false,
                                 optionLabel: obj?.fullAddress,
                                 optionValue: obj._id,
-                                order: countrySellToDropDown.length + 1,
+                                order: countrySellToMainData.length + 1,
                               }]);
                             setFieldValue(addressType, [...values[`${addressType}`], obj._id]);
-
                           }
                         }
                       }

@@ -257,8 +257,8 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             const element: any = {};
             element.materialId = d._id;
             element.type = addExistingProductDialog.type;
-            element.unit = d.unit && d.unit.length ? d.unit[0] : "";
-            element.pricingMethod = d.pricingMethod && d.pricingMethod.length ? d.pricingMethod[0] : "";
+            element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : "";
+            element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : "";
             element.qty = d.qty ? parseFloat(d.qty) : 1;
             element.estimateStartDate = subleaseData ? subleaseData?.estimateStartDate : new Date();
             element.estimateEndDate = subleaseData ? subleaseData?.estimateEndDate : new Date();
