@@ -16,7 +16,7 @@ import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
 import CreateProduct from "../../../components/Product/CreateProduct";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import PurchaseOrderQtyDialog from "./PurchaseOrderQtyDialog";
-import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
+import { FaCartArrowDown, FaCartPlus, FaLaptopHouse } from "react-icons/fa";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
@@ -56,13 +56,26 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deletePurchaseOrderProduct, setDeletePurchaseOrderProduct] = useState([]);
 
-    useEffect(() => {
-        fetchPurchaseOrderProduct();
-    }, [purchaseOrderData]);
+    const [isRateRequired, setIsRateRequired] = useState(false);
 
     useEffect(() => {
+        fetchFields()
+    }, []);
+
+
+    useEffect(() => {
+        fetchPurchaseOrderProduct();
+    }, [columns]);
+
+
+    const fetchFields = async () => {
         axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
             const fields = CURReplaceByCurrencySingle(data, purchaseOrderData?.currency)
+            fields.forEach(element => {
+                if (element.fieldName === "price" && element.required) {
+                    setIsRateRequired(true);
+                }
+            });
             let rendererNames = [];
             genrateColoum(fields, columns, rendererNames, false);
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
@@ -75,7 +88,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
             setFrameWorkComponent({ ...tempFrameworkComponent })
             setColumns([...columns])
         })
-    }, []);
+    }
 
     const fetchPurchaseOrderProduct = () => {
         dispatch({ type: "loading", loading: true });
@@ -86,14 +99,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
         axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`).then(({ data: { data } }) => {
             setPurchaseOrderProduct(JSON.parse(JSON.stringify(data)))
             let rows = data?.map((item, index) => {
-                if ((item.qty === 0 || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === 0
-                    || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === undefined
-                    || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === null)) {
-                    setNextStep(false)
-                }
-                else {
-                    setNextStep(true)
-                }
                 let finalObject = prepareDataForGrid(item);
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
                 finalObject["allowedToEdit"] = true
@@ -103,8 +108,27 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                 res.productName = `${index + 1}- ${item.productDetail?.productName}`
                 res.productNumber = item.productDetail?.productNumber
                 res.productDetail = item.productDetail
+                if (item?.qty === 0) {
+                    res.isValid = false;
+                }
+                else if (isRateRequired) {
+                    if (item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()]) {
+                        res.isValid = true;
+                    }
+                    else {
+                        res.isValid = false;
+                    }
+                }
+                else {
+                    res.isValid = true
+                }
                 return res;
             });
+            if (rows.filter(_rows => _rows.isValid === false).length > 0) {
+                setNextStep(false)
+            } else {
+                setNextStep(true)
+            }
             dispatch({ type: "initialize", data: rows, count: rows.length });
             dispatch({ type: "loading", loading: false });
         }).catch((error) => {
@@ -247,7 +271,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                 </Box>
                 <div className="d-flex gap-2">
 
-                    <Box display={isMobile ? "none" : "flex"} justifyContent="flex-end"> 
+                    <Box display={isMobile ? "none" : "flex"} justifyContent="flex-end">
                         <Button
                             variant={isMobile && !isTablet ? "text" : "contained"}
                             color="primary"
@@ -273,7 +297,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                             aria-controls="action-menu"
                         >
                             {"Actions"}
-                            <ExpandMore fontSize="small"/>
+                            <ExpandMore fontSize="small" />
                         </Button>
                     </HtmlTooltip>
                     {isMobile ? <Menu
@@ -289,38 +313,38 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                         onClose={closeActions}
                     >
 
-                        <MenuItem   disabled={selectedRecords.length === 0}
+                        <MenuItem disabled={selectedRecords.length === 0}
                             onClick={() => {
                                 setIsBulkEdit(true)
                                 setShowProductDialog(true)
                             }}>
-                                Bulk Edit
-                            </MenuItem>
+                            Bulk Edit
+                        </MenuItem>
                         {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
                             closeActions()
                             setShowDeleteConfirmBox(true)
                             setDeletePurchaseOrderProduct(selectedRecords.map(d => d._id))
                         }}>Delete</MenuItem>}
-                    </Menu> : 
-                    <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left",
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                >
-                    {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
-                        closeActions()
-                        setShowDeleteConfirmBox(true)
-                        setDeletePurchaseOrderProduct(selectedRecords.map(d => d._id))
-                    }}>Delete</MenuItem>}
-                </Menu>
-                }
+                    </Menu> :
+                        <Menu
+                            anchorEl={anchorEl}
+                            keepMounted
+                            getContentAnchorEl={null}
+                            anchorOrigin={{
+                                vertical: "bottom",
+                                horizontal: "left",
+                            }}
+                            id="action-menu"
+                            open={Boolean(anchorEl)}
+                            onClose={closeActions}
+                        >
+                            {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
+                                closeActions()
+                                setShowDeleteConfirmBox(true)
+                                setDeletePurchaseOrderProduct(selectedRecords.map(d => d._id))
+                            }}>Delete</MenuItem>}
+                        </Menu>
+                    }
                 </div>
             </Box>
             {columns && frameWorkComponent ? isMobile && !isTablet ?
@@ -382,8 +406,15 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                     }}
                     renderedFrom="purchaseOrderDetailsPageInventory"
                     refreshGrid={fetchPurchaseOrderProduct}
-                    fromPurchaseOrderGrid={true}
                     currency={purchaseOrderData?.currency?.toLowerCase()}
+                    fromPurchaseOrderGrid={true}
+                    rowClassRules={{
+                        "red-data-row":
+                            function (params) {
+                                console.log(params)
+                                return !params?.data?.isValid
+                            },
+                    }}
                 />
                 : <Box
                     p={2}

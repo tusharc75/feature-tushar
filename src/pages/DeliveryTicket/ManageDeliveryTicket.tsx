@@ -269,6 +269,22 @@ const ManageDeliveryTicket = (props) => {
                         tempInitialData["deliveryTo"] = refrenceData?.deliveryTo;
                         tempInitialData["deliveryToAddress"] = refrenceData?.deliveryToAddress;
                     }
+
+                    const warehouse = fieldsDataForUpdate.find((d) => d.fieldName === "warehouse");
+                    if (warehouse && warehouse?.option?.length) {
+                        if (tempInitialData["pickupFromType"] === DELIVERY_FROM_TO_TYPE.plant) {
+                            const pickupPlant = warehouse?.option.find((d) => d.optionValue === tempInitialData["pickupFrom"])
+                            if (pickupPlant) {
+                                tempInitialData["pickupFromAddress"] = pickupPlant?.address;
+                            }
+                        }
+                        if (tempInitialData["deliveryToType"] === DELIVERY_FROM_TO_TYPE.plant) {
+                            const deliveryPlant = warehouse?.option.find((d) => d.optionValue === tempInitialData["deliveryTo"])
+                            if (deliveryPlant) {
+                                tempInitialData["deliveryToAddress"] = deliveryPlant?.address;
+                            }
+                        }
+                    }
                 }
                 fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, tempInitialData["pickupFromType"], tempInitialData["deliveryToType"], tempInitialData["ticketType"]);
                 setInitialData({
@@ -503,7 +519,7 @@ const ManageDeliveryTicket = (props) => {
                                                 <Box marginY={2}>
                                                     <Grid spacing={3} container>
                                                         {form.sectionFields.map((field, index2) => (
-                                                            ["repairJob", "transferAsset", "rentalJob", "salesOrder", "type", "productInventory"].includes(field.fieldName) ? null :
+                                                            ["repairJob", "transferAsset", "rentalJob", "salesOrder", "type", "productInventory", "pickupFromType", "deliveryToType"].includes(field.fieldName) ? null :
                                                                 (["returnReason"].includes(field.fieldName) && values["ticketType"] !== DELIVERY_TICKET_TYPE.return) ? null :
                                                                     <Grid key={index2} item xs={12} sm={6} md={6}>
                                                                         {field.fieldName === "pickUpDate" ? (

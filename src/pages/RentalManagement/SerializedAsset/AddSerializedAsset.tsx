@@ -72,9 +72,6 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             let columns = []
             let rendererNames = []
             data.forEach(o => {
-                if (o?.fieldData?.fieldName === "serialNumber") {
-                    o.fieldData.primaryField = true
-                }
                 let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
                 if (currentColumn !== null) {
                     columns = [...columns, currentColumn?.columnData]

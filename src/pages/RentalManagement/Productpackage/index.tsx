@@ -28,10 +28,9 @@ import { BiChevronDown } from 'react-icons/bi';
 import React from 'react';
 
 const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
+  const { state: { user, permissions } }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
 
@@ -49,12 +48,17 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
+  const [isRateRequired, setIsRateRequired] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchFields();
   }, []);
+
+  useEffect(() => {
+    fetchProductInventory();
+  }, [columns]);
 
   const fetchFields = async () => {
     var data = [];
@@ -125,6 +129,9 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       }
     ];
     data.forEach((element) => {
+      if (element.fieldName === "price" && element.required) {
+        setIsRateRequired(true);
+      }
       if (element.type === 'date') {
         coloum.push({
           accessor: element.fieldName,
@@ -224,7 +231,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
           )
       });
     }
-
     coloum.forEach((element) => {
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
@@ -236,7 +242,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       }
     });
     setColumns(coloum);
-    fetchProductInventory();
   };
 
   const fetchProductInventory = async () => {
@@ -256,7 +261,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     rows.forEach((parent, i) => {
       parent.detail = `${i + 1} - ${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
       parent.qtyDisplay = parent.qty;
-      parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+      parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
       if (parent.type === 'package') {
@@ -264,7 +269,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
         subRows.forEach((_subRow, j) => {
           _subRow.detail = i + 1 + '.' + (j + 1) + ' - ' + _subRow.productDetail?.productName;
           _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`;
-          _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+          _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
           _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
           _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
         });
@@ -296,8 +301,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.estimateStartDate = rentalManagementData ? rentalManagementData?.estimateStartDate : new Date();
       element.estimateEndDate = rentalManagementData ? rentalManagementData?.estimateEndDate : new Date();
-      element.actualStartDate = rentalManagementData ? rentalManagementData?.actualStartDate : new Date();
-      element.actualEndDate = rentalManagementData ? rentalManagementData?.actualEndDate : new Date();
+      element.actualStartDate = rentalManagementData ? rentalManagementData?.estimateStartDate : new Date();
+      element.actualEndDate = rentalManagementData ? rentalManagementData?.estimateEndDate : new Date();
       element.parentId = addExistingProductDialog.parentId;
       const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
       element.tenure = 1;
