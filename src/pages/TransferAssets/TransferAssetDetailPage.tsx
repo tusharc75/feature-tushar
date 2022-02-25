@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, IconButton } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -23,7 +23,7 @@ import { MdEdit } from 'react-icons/md';
 import { defaultActivityShow } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import TabPanel from 'src/components/TabPanel';
-import { BiFoodMenu } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 const transferSteps = ['Add Assets', 'Loading Ticket'];
@@ -329,9 +329,9 @@ const TransferAssetDetailPage = () => {
                   </Button>
                 )}
                 {permissions?.transferAsset?.isUpdate && !isTransferEnded && (
-                  <Button className="buttonStyleSmallScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                    <MdEdit size={24} />
-                  </Button>
+                  <IconButton className="buttonStyleSmallScreen" style={{ color: '#43aeaa' }} size="small" onClick={handleOpenUpdateDialog}>
+                    <BiEdit size={20} />
+                  </IconButton>
                 )}
                 {/* <HideWhenOffline>
                   {permissions?.transferAsset?.isDelete && transferAssetData?.user === user?.user._id ? (
