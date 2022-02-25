@@ -69,9 +69,9 @@ const Product = ({ purchaseOrderData }) => {
         axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData._id}`).then(({ data: { data } }) => {
             let rows = data?.map((item) => {
                 let finalObject = prepareDataForGrid(item);
-                finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
-                finalObject["canDelete"] = permissions?.purchaseOrder?.isDelete;
-                finalObject["allowedToEdit"] = permissions?.purchaseOrder?.isUpdate;
+                // finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
+                // finalObject["canDelete"] = permissions?.purchaseOrder?.isDelete;
+                // finalObject["allowedToEdit"] = permissions?.purchaseOrder?.isUpdate;
                 let res: any = {
                     ...finalObject,
                 };
