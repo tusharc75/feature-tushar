@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.67.0](https://github.com/vebholic/oms_frontend/compare/v2.66.0...v2.67.0) (2022-02-25)
+
+
+### Features
+
+* rentalJob views roadmap return ticket show ([e3ae6be](https://github.com/vebholic/oms_frontend/commit/e3ae6be723355d713d6175b95148b18389a6a54c))
+* rentalJob views roadmap/flowchart parchaseOrder and sublease show PO-1094 ([f0ba039](https://github.com/vebholic/oms_frontend/commit/f0ba0391d981fb510e20e0e757775ce61573a44a))
+
+
+### Bug Fixes
+
+* bug fix ([baa648f](https://github.com/vebholic/oms_frontend/commit/baa648f0ccdb856dab394515398ff243c4dd4578))
+* bug fix ([eed90d1](https://github.com/vebholic/oms_frontend/commit/eed90d14d3c103bced0434eb864cea71d8361634))
+* bug fix ([855db0d](https://github.com/vebholic/oms_frontend/commit/855db0dc1543241a89ce027c8e4f7386b01f5e32))
+* bug fix ([78843a8](https://github.com/vebholic/oms_frontend/commit/78843a839fa50469a892fe091854c02109bb4e4c))
+* bug fix ([9b98838](https://github.com/vebholic/oms_frontend/commit/9b98838467203c7e5d03301694cbdc9733f1aa59))
+* bug fix ([a7446a0](https://github.com/vebholic/oms_frontend/commit/a7446a0fcf9fa55c3306e7a78bd027033b921486))
+* bug fix ([9d3abef](https://github.com/vebholic/oms_frontend/commit/9d3abef1464a97b237579406336742f338e4c6ee))
+* **dashboard:** minor bug fix ([74473e1](https://github.com/vebholic/oms_frontend/commit/74473e12dde479786973bda9a4c63cc034f9f41d))
+* fix ([c3021f5](https://github.com/vebholic/oms_frontend/commit/c3021f597f36f81003a83e54ef4feb7403fcdaf1))
+* **product:** fix product images tab ([95ca1fa](https://github.com/vebholic/oms_frontend/commit/95ca1fab3d7424a82fc2736c830001c0fe505678))
+* **product:** hide images tab ([32ec2b2](https://github.com/vebholic/oms_frontend/commit/32ec2b28d9d6f6379c5a35df012c81af2d438ae5))
+* rentalJob views formatting and color combination ([749e1c5](https://github.com/vebholic/oms_frontend/commit/749e1c535fa85eb099e8902b23d791074bd9fbe7))
+* rentalJob views roadmap/flowchart parchaseOrder and sublease show PO-1094 fix ([2bb5d0f](https://github.com/vebholic/oms_frontend/commit/2bb5d0fcd46e71c8fa5278c439f121ae3e234fee))
+
 ## [2.66.0](https://github.com/vebholic/oms_frontend/compare/v2.65.1...v2.66.0) (2022-02-24)
 
 

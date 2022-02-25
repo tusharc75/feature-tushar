@@ -11,7 +11,14 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow, RENTAL_STATUS, rentalManagementSteps } from '../../constants/helpers';
+import {
+  getUniqueCurrencies,
+  gridLoadingTimeout,
+  rentalManagement,
+  defaultActivityShow,
+  RENTAL_STATUS,
+  rentalManagementSteps
+} from '../../constants/helpers';
 import Steps from './Steps';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { MdEdit, MdDelete } from 'react-icons/md';
@@ -113,14 +120,9 @@ const RentalManagementDetailsPage = () => {
   useEffect(() => {
     if (id) {
       getRentalManagementFields();
-    }
-  }, [id]);
-
-  useEffect(() => {
-    if (id) {
       fetchRentalManagementData();
     }
-  }, [rentalManagementFields]);
+  }, [id]);
 
   useEffect(() => {
     if (!isOffline && currentStep !== null && currentStep >= 0 && currentStep <= 5) {
@@ -142,15 +144,9 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
-      if (statusOptions?.findIndex(d => d.optionLabel === RENTAL_STATUS.jobPartiallyStarted) > statusOptions.findIndex(d => d.optionLabel === data?.status)) {
-        data["actualStartDate"] = null;
-      }
-      if (statusOptions?.findIndex(d => d.optionLabel === RENTAL_STATUS.jobPartiallyEnded) > statusOptions.findIndex(d => d.optionLabel === data?.status)) {
-        data["actualEndDate"] = null;
-      }
+
       setRentalManagementData(data);
       setCurrentStep(rentalManagementSteps.indexOf(data?.processStatus) !== -1 ? rentalManagementSteps.indexOf(data?.processStatus) : 0);
-
       handleMainPoints(data);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
@@ -237,7 +233,9 @@ const RentalManagementDetailsPage = () => {
   };
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance().put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
+    axiosInstance()
+      .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -407,8 +405,10 @@ const RentalManagementDetailsPage = () => {
               </Tabs>
               <TabPanel value={tabValue} index={0}>
                 <Box>
+
                   {(!loadingDetails && rentalManagementFields.length > 0 ?
-                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields} /> : null
+                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields}
+                    /> : null
                   )}
                 </Box>
               </TabPanel>
@@ -458,7 +458,8 @@ const RentalManagementDetailsPage = () => {
                       fetchRentalData={fetchRentalManagementData}
                       rentalManagementData={rentalManagementData}
                       currentStep={currentStep}
-                      setNextStep={setNextStep} />
+                      setNextStep={setNextStep}
+                    />
                   )}
                   {currentStep === 5 && rentalManagementData && (
                     <Invoice
@@ -473,7 +474,7 @@ const RentalManagementDetailsPage = () => {
               </TabPanel>
               <TabPanel value={tabValue} index={2}>
                 <Box>
-                  <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} />
+                  <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
                 </Box>
               </TabPanel>
             </Paper>
@@ -506,7 +507,7 @@ const RentalManagementDetailsPage = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>
@@ -518,45 +519,39 @@ const RentalManagementDetailsPage = () => {
           </HideWhenOffline>
         </div>
       </div>
-      {
-        showConfirmBox && (
-          <ConfirmationDialog
-            open={showConfirmBox}
-            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ?`}
-            onClose={() => {
-              setShowConfirmBox(false);
-            }}
-            onOk={handleDelete}
-          />
-        )
-      }
-      {
-        showCancelConfirmBox && (
-          <ConfirmationDialog
-            open={showCancelConfirmBox}
-            message={`Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`}
-            onClose={() => {
-              setShowCancelConfirmBox(false);
-            }}
-            onOk={handleCancelRentalJob}
-          />
-        )
-      }
-      {
-        openUpdateDialog && (
-          <ManageRentalManagementDialog
-            isClone={false}
-            open={openUpdateDialog}
-            rentalManagementId={id}
-            rentalManagementData={rentalManagementData}
-            onClose={() => setOpenUpdateDialog(false)}
-            onSuccess={() => {
-              setOpenUpdateDialog(false);
-              fetchRentalManagementData();
-            }}
-          />
-        )
-      }
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
+      {showCancelConfirmBox && (
+        <ConfirmationDialog
+          open={showCancelConfirmBox}
+          message={`Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`}
+          onClose={() => {
+            setShowCancelConfirmBox(false);
+          }}
+          onOk={handleCancelRentalJob}
+        />
+      )}
+      {openUpdateDialog && (
+        <ManageRentalManagementDialog
+          isClone={false}
+          open={openUpdateDialog}
+          rentalManagementId={id}
+          rentalManagementData={rentalManagementData}
+          onClose={() => setOpenUpdateDialog(false)}
+          onSuccess={() => {
+            setOpenUpdateDialog(false);
+            fetchRentalManagementData();
+          }}
+        />
+      )}
     </>
   );
 };

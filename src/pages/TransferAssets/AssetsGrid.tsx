@@ -196,7 +196,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     <Fragment>
       <Box display="flex" justifyContent="space-between" mx="4px">
         {permissions?.transferAsset.isUpdate && <Button
-          variant={isMobile ? 'text' : 'contained'}
+          variant={'contained'}
           color="primary"
           size="small"
           style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
@@ -204,10 +204,10 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
             setAddSerializedAssetDialog(true);
           }}
         >
-          {isMobile && !isTablet ? <MdAdd size={22} /> : `Add ${routes.serializedAsset.title}`}
+          {isMobile && !isTablet ? "Add assets" : `Add ${routes.serializedAsset.title}`}
         </Button>}
         {permissions?.transferAsset.isUpdate && <Button
-          variant={isMobile ? 'text' : 'contained'}
+          variant={isMobile ? 'outlined' : 'contained'}
           size="small"
           color="primary"
           style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
@@ -218,7 +218,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           }}
         >
 
-          {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : "Remove Assets"}
+          {isMobile && !isTablet ? "Remove" : "Remove Assets"}
 
         </Button>}
       </Box>

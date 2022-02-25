@@ -24,6 +24,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { MdAdd, MdDelete } from "react-icons/md";
 import { FiPackage } from "react-icons/fi";
 import { RiEditCircleLine } from "react-icons/ri";
+import { fetch_sublease_product_fields } from "../../../components/Sublease/helper";
 
 const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
 
@@ -58,10 +59,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
     }, [columns]);
 
     const fetchFields = async () => {
-        var data = []
-        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.subleaseProduct}`)
-        data = response?.data?.data
-        data = CURReplaceByCurrencySingle(data, subleaseData.currency)
+        var data = await fetch_sublease_product_fields(subleaseData.currency)
         setAllFields(JSON.parse(JSON.stringify(data)))
         const coloum: any = [{
             accessor: 'detail',
@@ -268,13 +266,14 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             element.qty = d.qty ? parseFloat(d.qty) : 1;
             element.estimateStartDate = subleaseData ? subleaseData?.estimateStartDate : new Date();
             element.estimateEndDate = subleaseData ? subleaseData?.estimateEndDate : new Date();
-            element.actualStartDate = subleaseData ? subleaseData?.actualStartDate : new Date();
-            element.actualEndDate = subleaseData ? subleaseData?.actualEndDate : new Date();
+            element.actualStartDate = "";
+            element.actualEndDate = "";
+            element.actualJobDuration = "";
             element.parentId = addExistingProductDialog.parentId;
             const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields)
-            element.tenure = 1;
-            if (calValues && calValues["tenure"]) {
-                element.tenure = calValues["tenure"];
+            element.estimateJobDuration = 1;
+            if (calValues && calValues['estimateJobDuration']) {
+                element.estimateJobDuration = calValues['estimateJobDuration'];
             }
             material.push(element);
         });

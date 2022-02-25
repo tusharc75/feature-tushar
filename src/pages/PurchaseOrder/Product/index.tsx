@@ -11,7 +11,7 @@ import { purchaseOrder } from "../../../constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
-import AddProductDialog from "./AddProductDialog";
+import AddExistingProductInventory from "../../Sublease/Productpackage/AddExistingProductInventory";
 import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
 import CreateProduct from "../../../components/Product/CreateProduct";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
@@ -43,7 +43,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
     const [isAddingProducts, setAddingProducts] = useState(false);
     const [isAddNewProduct, setIsAddNewProduct] = useState(false)
 
-    const [productList, setProductList] = useState([]);
     const [showProductDialog, setShowProductDialog] = useState(false)
     const [selectedProductData, setSelectedProductData] = useState(null)
     const [isBulkEdit, setIsBulkEdit] = useState(false)
@@ -195,11 +194,12 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
         setAnchorEl(null);
     };
 
-    const handleAddProduct = (products) => {
+    const handleAddProduct = (rows) => {
+        console.log(rows)
         setAddingProducts(true)
-        let tempProductArray = products.map(d => ({
-            "productId": d.id || d.productId,
-            "qty": parseInt(d.quantity) || 0,
+        let tempProductArray = rows.map(d => ({
+            "productId": d._id,
+            "qty": d.qty ? parseInt(d.qty) : 1,
             "expectedDelivery": purchaseOrderData?.deliveryDate
         }))
         axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/add`, { "orderDetails": tempProductArray })
@@ -411,7 +411,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                     rowClassRules={{
                         "red-data-row":
                             function (params) {
-                                console.log(params)
                                 return !params?.data?.isValid
                             },
                     }}
@@ -424,11 +423,10 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                 </Box>
             }
             {addProductDialog &&
-                <AddProductDialog
+                <AddExistingProductInventory
                     isAddingProducts={isAddingProducts}
-                    addProductInPurchaseOrder={handleAddProduct}
-                    handleProductInPurchaseOrderClose={() => { setAddProductDialog(false) }}
-                    productInPurchaseOrder={productList}
+                    addProductInventory={handleAddProduct}
+                    handleProductInventoryClose={() => { setAddProductDialog(false) }}
                     type={"product"}
                 />
             }

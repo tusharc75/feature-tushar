@@ -225,6 +225,7 @@ export default function DeliveryTicketDetail(props) {
         if (startDeliverySignatures && startDeliverySignatures.length > 0) {
           setStartDeliveryDate(moment(startDeliverySignatures[startDeliverySignatures.length - 1].date).format(dateTimeFormat));
         }
+        setSignOffDate(data?.actualDeliveryDate)
         const signOffSignatures = data?.signatures?.filter(f => f.status === "Sign-Off" && f.date);
         if (signOffSignatures && signOffSignatures.length > 0) {
           setSignOffDate(moment(signOffSignatures[signOffSignatures.length - 1].date).format(dateTimeFormat));
@@ -613,21 +614,16 @@ export default function DeliveryTicketDetail(props) {
                   <TabPanel value={tabValue} index={0}>
                     {(deliveryTicketData && deliveryTicketFields.length > 0 ?
                       <DetailsPage
-                        data={{ ...deliveryTicketData, actualDispatchedDate: startDeliveryDate, actualDeliveredDate: signOffDate }}
+                        data={{ ...deliveryTicketData, actualDispatchedDate: startDeliveryDate, actualDeliveryDate: signOffDate }}
                         fields={[...deliveryTicketFields
-                        //   , {
-                        //   fieldData: {
-                        //     fieldLabel: "Actual Dispatched Date",
-                        //     fieldName: "actualDispatchedDate",
-                        //     sectionName: "Sign-off Information"
-                        //   }
-                        // }, {
-                        //   fieldData: {
-                        //     fieldLabel: "Actual Delivered Date",
-                        //     fieldName: "actualDeliveredDate",
-                        //     sectionName: "Sign-off Information"
-                        //   }
-                        // }
+                          , {
+                          fieldData: {
+                            type: "date",
+                            fieldLabel: "Actual Delivery Date",
+                            fieldName: "actualDeliveryDate",
+                            sectionName: "Actuals"
+                          }
+                        }
                         ]} /> : null
                     )}
                   </TabPanel>

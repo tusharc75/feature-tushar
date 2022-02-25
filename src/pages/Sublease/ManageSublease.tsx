@@ -69,12 +69,23 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                         const { _id, createdBy, updatedBy, serialNumber, ...rest } = data
                         rest['subleaseName'] = `SL_${generateUniqueIdOnly()}`
                         rest["status"] = "New"
+                        rest['estimateStartDate'] = new Date();
+                        rest['estimateEndDate'] = "";
+                        rest['actualStartDate'] = "";
+                        rest['actualEndDate'] = "";
+                        fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !["actualStartDate", "actualEndDate"].includes(obj.fieldName));
                         setInitialData({
                             fields: fieldsDataForCreate,
                             values: getObjKeysWithValues(rest, fieldsDataForCreate),
                         });
                         setLoading(false)
                     } else {
+                        if (data?.actualStartDate === "") {
+                            fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualStartDate"].includes(obj.fieldName));
+                        }
+                        if (data?.actualEndDate === "") {
+                            fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualEndDate"].includes(obj.fieldName));
+                        }
                         setInitialData({
                             fields: fieldsDataForUpdate,
                             values: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -85,6 +96,7 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                 });
             }
             else {
+                fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !["actualStartDate", "actualEndDate"].includes(obj.fieldName));
                 let createValues: any = getObjKeys("", fieldsDataForCreate)
                 createValues["subleaseName"] = `SL_${generateUniqueIdOnly()}`
                 if (currency) {
@@ -93,10 +105,10 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                 if (refrenceType === "rentalJob") {
                     createValues["rentalJob"] = refrenceId
                     createValues["estimateStartDate"] = refrenceData.estimateStartDate
-                    createValues["actualStartDate"] = refrenceData.actualStartDate
                     createValues["estimateEndDate"] = refrenceData.estimateEndDate
-                    createValues["actualEndDate"] = refrenceData.actualEndDate
                 }
+                createValues["actualStartDate"] = ""
+                createValues["actualEndDate"] = ""
                 setInitialData({
                     fields: fieldsDataForCreate,
                     values: createValues
@@ -520,9 +532,6 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                         options={field.option}
                                                                         setFieldValue={(name, value) => {
                                                                             setFieldValue(name, value)
-                                                                            if (!subleaseId || isClone) {
-                                                                                setFieldValue("actualStartDate", value)
-                                                                            }
                                                                         }}
                                                                         required={field.required}
                                                                         fullWidth
@@ -544,9 +553,6 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                         options={field.option}
                                                                         setFieldValue={(name, value) => {
                                                                             setFieldValue(name, value)
-                                                                            if (!subleaseId || isClone) {
-                                                                                setFieldValue("actualEndDate", value)
-                                                                            }
                                                                         }}
                                                                         required={field.required}
                                                                         fullWidth
