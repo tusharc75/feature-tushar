@@ -201,8 +201,6 @@ const ManageDeliveryTicket = (props) => {
                         tempInitialData["deliveryTo"] = refrenceData?.deliveryTo;
                         tempInitialData["deliveryToAddress"] = refrenceData?.deliveryToAddress;
 
-                        tempInitialData["pickUpDate"] = moment(refrenceData?.startDate).subtract(1, 'days');
-                        tempInitialData["deliveryDate"] = moment(refrenceData?.endDate).subtract(1, 'days');
                     }
                     else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
                         tempInitialData["ticketName"] = `${refrenceData?.ticketName}_${generateUniqueIdOnly()}`
@@ -396,7 +394,7 @@ const ManageDeliveryTicket = (props) => {
 
     function validate(values) {
         const errors = {};
-        let startDate = moment(values?.["pickUpDate"]);
+        let startDate = moment(values?.pickUpDate);
         let endDate = moment(values?.deliveryDate);
         if (endDate.diff(startDate, 'days') < 0) {
             errors['pickUpDate'] = 'Please enter valid pick-Up  date';
@@ -570,10 +568,7 @@ const ManageDeliveryTicket = (props) => {
                                                                                 isTooltip={field?.isTooltip || false}
                                                                                 tooltipMessage={field?.tooltipMessage}
                                                                                 size="small"
-                                                                                minDate={moment(values["pickUpDate"])} // Please, whoever changing this ask Gagan before any change 
-                                                                            //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
-                                                                            // maxDate={refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob ? refrenceData.estimateStartDate ? moment(refrenceData?.estimateStartDate) : moment().add(1, 'years').calendar() :
-                                                                            //     refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset ? moment().add(1, 'years').calendar() : moment().add(1, 'years').calendar()}
+                                                                                minDate={moment(values["pickUpDate"])}
                                                                             />
                                                                         ) : field.fieldName === "owner" ? (
                                                                             <FormTypes
