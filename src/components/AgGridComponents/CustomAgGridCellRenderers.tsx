@@ -69,23 +69,23 @@ const getTitle = data => {
     }
     return ""
 }
-export const LinkRenderer = params => params.value ? (
-    <>
-        <Link className="link text-truncate" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
-            `${params?.pathName}/${params?.data[params?.property]}`} title={params?.value}>{params?.value}</Link>
 
-        {
-            params["more"] && params.data[params["more"]]?.length > 0 && (
-                <Tooltip title={getTitle(params.data[params["more"]])} >
-                    <span className="createdAtTime badge-date">{`+${params.data[params["more"]].length} more..`}</span>
-                </Tooltip>
+export const LinkRenderer = params => params.value ? <>
+    <Link className="link text-truncate" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
+        `${params?.pathName}/${params?.data[params?.property]}`} title={params?.value}>{params?.value}</Link>
 
-            )
-        }
-    </>
-) : (
-    <NoDataCell />
+    {
+        params["more"] && params.data[params["more"]]?.length > 0 && (
+            <Tooltip title={getTitle(params.data[params["more"]])} >
+                <span className="createdAtTime badge-date">{`+${params.data[params["more"]].length} more..`}</span>
+            </Tooltip>
+
+        )
+    }
+</> : (
+    params.property === "entityId" ? "Global" : <NoDataCell />
 )
+
 
 export const NameRenderer = params => params.value ? (
     <Link className="link"
