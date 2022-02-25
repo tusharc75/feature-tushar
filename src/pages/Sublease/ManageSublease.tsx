@@ -173,8 +173,8 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                         element.parentId = null;
                         element.estimateStartDate = refrenceData?.estimateStartDate;
                         element.estimateEndDate = refrenceData?.estimateEndDate;
-                        element.actualStartDate = refrenceData?.actualStartDate;
-                        element.actualEndDate = refrenceData?.actualEndDate;
+                        element.actualStartDate = refrenceData?.estimateStartDate;
+                        element.actualEndDate = refrenceData?.estimateEndDate;
                         material.push(element);
                     });
                     axiosInstance().post(`${sublease.api}/productpackage/${data._id}`, { material })
@@ -205,7 +205,6 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
             getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData)
         );
     };
-
 
     const onCountryBillToDropDownOpen = (selectedAccount) => {
         let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.billingAddress
