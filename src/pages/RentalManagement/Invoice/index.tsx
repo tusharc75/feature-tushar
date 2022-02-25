@@ -288,6 +288,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           size="small"
           style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
           disabled={downlodingFile === "Email" ? true : (false || isOffline)}
+          startIcon={isMobile ? '' : <MdEmail />}
           onClick={() => {
             fetchEmailsData()
             handlePDF("Email")
