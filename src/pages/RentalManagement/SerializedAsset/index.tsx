@@ -32,6 +32,7 @@ import { MdDelete, MdDeleteSweep } from "react-icons/md";
 import { useData } from "../../../StateProvider/Provider";
 import { BiChevronDown } from "react-icons/bi";
 import React from "react";
+import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
 
@@ -72,15 +73,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   }, []);
 
   const fetchFields = async () => {
-    var data = []
-    if (isOffline) {
-      data = await findOne(objectStore.resource, "rentalManagementProduct")
-    }
-    else {
-      const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`)
-      data = response?.data?.data
-    }
-    data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
+    var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
     const coloum: any = [{
       accessor: 'detail',
       Header: 'Detail',
@@ -456,7 +449,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           >
             {isMobile && !isTablet ? "Purchase order" : `Create ${routes.purchaseOrder.title}`}
           </Button>
-          
+
           {purchaseOrderCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
             <IconButton size="small" onClick={() => {
               history.push(routes.purchaseOrder.path, {

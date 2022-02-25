@@ -204,18 +204,19 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             else {
                 fieldData = offlineFieldsData?.rentalManagement || [];
             }
+            var statusOptions = []
             fieldData?.forEach((e: any) => {
                 if (e?.fieldData?.fieldName === "warehouse" && e?.fieldData?.option) {
                     setOptionsPlantsEntity(e?.fieldData?.option?.filter((a) => a.entity?.includes(selectedEntity)));
                     e.fieldData.option = e?.fieldData?.option?.filter((a) => a.entity?.includes(selectedEntity));
                 }
                 if (e?.fieldData?.fieldName === 'status') {
-                    setStatusOptions(e.fieldData.option);
+                    statusOptions = e.fieldData.option;
                 }
             })
 
-            const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-            const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+            var fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+            var fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
             if (rentalManagementId) {
                 try {
@@ -231,9 +232,10 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                         rest['status'] = "New"
                         rest['rentalJobName'] = `RJ_${generateUniqueIdOnly()}`
                         rest['estimateStartDate'] = new Date();
-                        rest['actualStartDate'] = new Date();
                         rest['estimateEndDate'] = "";
+                        rest['actualStartDate'] = "";
                         rest['actualEndDate'] = "";
+                        fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !["actualStartDate", "actualEndDate"].includes(obj.fieldName));
                         setCloneHeading(rentalJobName);
                         setRentalData({
                             fields: fieldsDataForCreate,
@@ -243,6 +245,18 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                         setLoading(false)
                     } else {
                         setRentalDetails(data)
+                        // if (statusOptions?.findIndex(d => d.optionLabel === RENTAL_STATUS.jobPartiallyStarted) > statusOptions.findIndex(d => d.optionLabel === data?.status)) {
+                        //     fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualStartDate"].includes(obj.fieldName));
+                        // }
+                        // if (statusOptions?.findIndex(d => d.optionLabel === RENTAL_STATUS.jobPartiallyEnded) > statusOptions.findIndex(d => d.optionLabel === data?.status)) {
+                        //     fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualEndDate"].includes(obj.fieldName));
+                        // }  
+                        if (data?.actualStartDate === "") {
+                            fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualStartDate"].includes(obj.fieldName));
+                        }
+                        if (data?.actualEndDate === "") {
+                            fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualEndDate"].includes(obj.fieldName));
+                        }
                         setRentalData({
                             fields: fieldsDataForUpdate,
                             initialValues: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -256,9 +270,10 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                 }
             }
             else {
+                fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !["actualStartDate", "actualEndDate"].includes(obj.fieldName));
                 let initialData = {
                     ...getObjKeys("", fieldsDataForCreate),
-                    estimateEndDate: "", actualEndDate: "", currency: user.user?.brandCurrency || "", rentalJobName: `RJ_${generateUniqueIdOnly()}`
+                    estimateEndDate: "", actualStartDate: "", actualEndDate: "", currency: user.user?.brandCurrency || "", rentalJobName: `RJ_${generateUniqueIdOnly()}`
                 };
                 setRentalData({
                     fields: fieldsDataForCreate,
@@ -765,9 +780,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 setFieldValue={(name, value) => {
                                                                                     handleValuesChange({ [name]: value })
                                                                                     setFieldValue(name, value)
-                                                                                    if (!rentalManagementId || isClone) {
-                                                                                        setFieldValue("actualStartDate", value)
-                                                                                    }
                                                                                 }}
                                                                                 required={field.required}
                                                                                 fullWidth
@@ -789,9 +801,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 setFieldValue={(name, value) => {
                                                                                     handleValuesChange({ [name]: value })
                                                                                     setFieldValue(name, value)
-                                                                                    if (!rentalManagementId || isClone) {
-                                                                                        setFieldValue("actualEndDate", value)
-                                                                                    }
                                                                                 }}
                                                                                 required={field.required}
                                                                                 fullWidth
@@ -801,73 +810,50 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 minDate={moment(values["estimateStartDate"]).add(1, "day")}
                                                                             />
                                                                         ) : field.fieldName === "actualStartDate" ? (
-                                                                            (statusOptions?.findIndex(d => d.optionLabel === RENTAL_STATUS.jobPartiallyStarted) <= statusOptions.findIndex(d => d.optionLabel === values?.status) ?
-                                                                                <FormTypes
-                                                                                    {...field}
-                                                                                    disabled={values["status"] === RENTAL_STATUS.readyToInvoice ? false : true}
-                                                                                    fieldData={field}
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={field.option}
-                                                                                    setFieldValue={(name, value) => {
-                                                                                        handleValuesChange({ [name]: value })
-                                                                                        setFieldValue(name, value)
-                                                                                    }}
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={field?.isTooltip || false}
-                                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                                    size="small"
-                                                                                /> :
-                                                                                <TextField
-                                                                                    variant="outlined"
-                                                                                    fullWidth
-                                                                                    disabled
-                                                                                    id={field.fieldName}
-                                                                                    label={field.fieldLabel}
-                                                                                    defaultValue="---"
-                                                                                    margin="dense"
-                                                                                    style={{ marginTop: "0px" }}
-                                                                                />
-                                                                            )
+                                                                            <FormTypes
+                                                                                {...field}
+                                                                                disabled={values["status"] === RENTAL_STATUS.readyToInvoice ? false : true}
+                                                                                fieldData={field}
+                                                                                values={values}
+                                                                                errors={errors}
+                                                                                touched={touched}
+                                                                                label={field.fieldLabel}
+                                                                                name={field.fieldName}
+                                                                                type={field.type}
+                                                                                options={field.option}
+                                                                                setFieldValue={(name, value) => {
+                                                                                    handleValuesChange({ [name]: value })
+                                                                                    setFieldValue(name, value)
+                                                                                }}
+                                                                                required={field.required}
+                                                                                fullWidth
+                                                                                isTooltip={field?.isTooltip || false}
+                                                                                tooltipMessage={field?.tooltipMessage}
+                                                                                size="small"
+                                                                            />
                                                                         ) : field.fieldName === "actualEndDate" ? (
-                                                                            (statusOptions?.findIndex(d => d.optionLabel === RENTAL_STATUS.jobPartiallyEnded) <= statusOptions.findIndex(d => d.optionLabel === values?.status) ?
-                                                                                <FormTypes
-                                                                                    {...field}
-                                                                                    disabled={values["status"] === RENTAL_STATUS.readyToInvoice ? false : true}
-                                                                                    fieldData={field}
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={field.option}
-                                                                                    setFieldValue={(name, value) => {
-                                                                                        handleValuesChange({ [name]: value })
-                                                                                        setFieldValue(name, value)
-                                                                                    }}
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={field?.isTooltip || false}
-                                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                                    size="small"
-                                                                                /> :
-                                                                                <TextField
-                                                                                    variant="outlined"
-                                                                                    fullWidth
-                                                                                    disabled
-                                                                                    id={field.fieldName}
-                                                                                    label={field.fieldLabel}
-                                                                                    defaultValue="---"
-                                                                                    margin="dense"
-                                                                                    style={{ marginTop: "0px" }}
-                                                                                />
-                                                                            )
+
+                                                                            <FormTypes
+                                                                                {...field}
+                                                                                disabled={values["status"] === RENTAL_STATUS.readyToInvoice ? false : true}
+                                                                                fieldData={field}
+                                                                                values={values}
+                                                                                errors={errors}
+                                                                                touched={touched}
+                                                                                label={field.fieldLabel}
+                                                                                name={field.fieldName}
+                                                                                type={field.type}
+                                                                                options={field.option}
+                                                                                setFieldValue={(name, value) => {
+                                                                                    handleValuesChange({ [name]: value })
+                                                                                    setFieldValue(name, value)
+                                                                                }}
+                                                                                required={field.required}
+                                                                                fullWidth
+                                                                                isTooltip={field?.isTooltip || false}
+                                                                                tooltipMessage={field?.tooltipMessage}
+                                                                                size="small"
+                                                                            />
                                                                         )
                                                                             : field.fieldName === "billingAddress" ? (
                                                                                 <FormTypes
