@@ -360,22 +360,27 @@ export default function ManageOpportunityDialog({
     }
   };
 
-  const onCountrySellToDropDownOpen = (selectedAccount) => {
-    let filterAddress = accountData.find((d) => d.optionValue === selectedAccount)?.shippingAddress;
-
-    if (isArray(filterAddress)) {
-      setCountrySellToDropDown(countrySellToMainData.filter((d) => filterAddress?.some((u) => u === d.optionValue)));
-    } else {
-      setCountrySellToDropDown([]);
+  const onCountrySellToDropDownOpen = (selectedAccount, alreadySelected) => {
+    let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.shippingAddress
+    if (isArray(filterAddress) || alreadySelected) {
+      setCountrySellToDropDown(
+        countrySellToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue) || alreadySelected?.some(u => u === d.optionValue))
+      );
+    }
+    else {
+      setCountrySellToDropDown([])
     }
   };
-  const onCountryBillToDropDownOpen = (selectedAccount) => {
-    let filterAddress = accountData.find((d) => d.optionValue === selectedAccount)?.billingAddress;
 
-    if (isArray(filterAddress)) {
-      setCountryBillToDropDown(countryBillToMainData.filter((d) => filterAddress?.some((u) => u === d.optionValue)));
-    } else {
-      setCountryBillToDropDown([]);
+  const onCountryBillToDropDownOpen = (selectedAccount, alreadySelected) => {
+    let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.billingAddress
+    if (isArray(filterAddress) || alreadySelected) {
+      setCountryBillToDropDown(
+        countryBillToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue) || alreadySelected?.some(u => u === d.optionValue))
+      );
+    }
+    else {
+      setCountryBillToDropDown([])
     }
   };
 
@@ -496,12 +501,14 @@ export default function ManageOpportunityDialog({
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
                                                 setFieldValue('marketSegment', value?.marketSegment ?? '');
                                                 setFieldValue('subMarketSegment', value?.subMarketSegment ?? '');
-                                                setFieldValue('countryBillTo', value?.billingAddress.length > 0 ? value?.billingAddress : []);
-                                              setFieldValue('countrySellTo', value?.shippingAddress.length > 0 ? value?.shippingAddress : []);
-                                               
+
+                                                setFieldValue('countryBillTo', value?.billingAddress?.length > 0 ? value?.billingAddress : []);
+                                                setFieldValue('countrySellTo', value?.shippingAddress?.length > 0 ? value?.shippingAddress : []);
+
                                                 marketSegmentChange(value?.marketSegment ?? '');
-                                                onCountryBillToDropDownOpen(value && value.optionValue ? value.optionValue : '');
-                                                onCountrySellToDropDownOpen(value && value.optionValue ? value.optionValue : '');
+
+                                                // onCountryBillToDropDownOpen(value && value.optionValue ? value.optionValue : '');
+                                                // onCountrySellToDropDownOpen(value && value.optionValue ? value.optionValue : '');
                                               }}
                                               required={field.required}
                                               fullWidth
@@ -565,9 +572,9 @@ export default function ManageOpportunityDialog({
                                                 isTooltip={field?.isTooltip || false}
                                                 tooltipMessage={field?.tooltipMessage}
                                                 size="small"
-                                                // onOpen={() => {
-                                                //   onCollabOwnerMultiselectOpen(values['owner']);
-                                                // }}
+                                              // onOpen={() => {
+                                              //   onCollabOwnerMultiselectOpen(values['owner']);
+                                              // }}
                                               />
                                             </Grid>
                                             {permissions.supplierAccount?.isCreate && (
@@ -594,468 +601,613 @@ export default function ManageOpportunityDialog({
                                             ) : null}
                                           </Grid>
                                         </Grid>
-                                      ) : field.fieldName === 'countryBillTo' ? (
-                                        <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                          <Grid container spacing={1}>
-                                            <Grid
-                                              item
-                                              xs={permissions.address?.isCreate ? 11 : 11}
-                                              sm={permissions.address?.isCreate ? 11 : 11}
-                                              md={permissions.address?.isCreate ? 11 : 11}
-                                            >
-                                              <FormTypes
-                                                isNew={isNew}
-                                                {...field}
-                                                disabled={!isNew && field.disableOnEdit}
-                                                values={values}
-                                                errors={errors}
-                                                touched={touched}
-                                                label={field.fieldLabel}
-                                                name={field.fieldName}
-                                                type={field.type}
-                                                options={countryBillToDropDown}
-                                                setFieldValue={(name, value) => {
-                                                  // handleValuesChange(name, value);
-                                                  setFieldValue(name, value);
-                                                }}
-                                                required={field.required}
-                                                fullWidth
-                                                isTooltip={field?.isTooltip || false}
-                                                tooltipMessage={field?.tooltipMessage}
-                                                size="small"
-                                                onOpen={() => onCountryBillToDropDownOpen(values.customerAccountName ?? values.customerAccount)}
-                                              />
-                                            </Grid>
-                                            {permissions.address?.isCreate && (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title="Add Country Bill to Address" className="mt-1">
-                                                  <IconButton
-                                                    onClick={() => {
-                                                      setShowAddressDialog(true);
-                                                      setAddressType('countryBillTo');
-                                                    }}
-                                                    disabled={!isNew && field.disableOnEdit}
-                                                    size="small"
-                                                  >
-                                                    <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                  </IconButton>
-                                                </Tooltip>
-                                              </Grid>
-                                            )}
-                                            {field?.tooltipMessage ? (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                  <InfoIcon color="disabled" />
-                                                </Tooltip>
-                                              </Grid>
-                                            ) : null}
-                                          </Grid>
-                                        </Grid>
-                                      ) : field.fieldName === 'countrySellTo' ? (
-                                        <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                          <Grid container spacing={1}>
-                                            <Grid
-                                              item
-                                              xs={permissions.address?.isCreate ? 11 : 11}
-                                              sm={permissions.address?.isCreate ? 11 : 11}
-                                              md={permissions.address?.isCreate ? 11 : 11}
-                                            >
-                                              <FormTypes
-                                                isNew={isNew}
-                                                {...field}
-                                                disabled={!isNew && field.disableOnEdit}
-                                                values={values}
-                                                errors={errors}
-                                                touched={touched}
-                                                label={field.fieldLabel}
-                                                name={field.fieldName}
-                                                type={field.type}
-                                                options={countrySellToDropDown}
-                                                setFieldValue={(name, value) => {
-                                                  // handleValuesChange(name, value);
-                                                  setFieldValue(name, value);
-                                                }}
-                                                required={field.required}
-                                                fullWidth
-                                                isTooltip={field?.isTooltip || false}
-                                                tooltipMessage={field?.tooltipMessage}
-                                                size="small"
-                                                onOpen={() => onCountrySellToDropDownOpen(values.customerAccountName ?? values.customerAccount)}
-                                              />
-                                            </Grid>
-                                            {permissions.marketSegment?.isCreate && (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title="Add Country Sell to Address" className="mt-1">
-                                                  <IconButton
-                                                    onClick={() => {
-                                                      setShowAddressDialog(true);
-                                                      setAddressType('countrySellTo');
-                                                    }}
-                                                    disabled={!isNew && field.disableOnEdit}
-                                                    size="small"
-                                                  >
-                                                    <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                  </IconButton>
-                                                </Tooltip>
-                                              </Grid>
-                                            )}
-                                            {field?.tooltipMessage ? (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                  <InfoIcon color="disabled" />
-                                                </Tooltip>
-                                              </Grid>
-                                            ) : null}
-                                          </Grid>
-                                        </Grid>
-                                      ) : field.fieldName === 'owner' ? (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={ownerData}
-                                          onChange={(e, val) => {
-                                            setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                            handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : '');
+                                      ) :
 
-                                            if (val && val.optionValue !== user?.user?._id) {
-                                              const checkOwnerAddedInCollaborator = values['collaborator'].find(
-                                                (d) => d?.optionValue === user?.user?._id
-                                              );
-                                              if (!checkOwnerAddedInCollaborator) {
-                                                setFieldValue('collaborator', [
-                                                  ...values['collaborator'],
-                                                  collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                                ]);
-                                                handleValuesChange('collaborator', [
-                                                  ...values['collaborator'],
-                                                  collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                                ]);
+                                        field.fieldName === "countryBillTo" ? (
+                                          <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                            <Grid container spacing={1}>
+                                              <Grid
+                                                item
+                                                xs={permissions.address?.isCreate ? 11 : 11}
+                                                sm={permissions.address?.isCreate ? 11 : 11}
+                                                md={permissions.address?.isCreate ? 11 : 11}
+                                              >
+
+                                                <FormTypes
+                                                  isNew={isNew}
+                                                  {...field}
+                                                  disabled={!isNew && field.disableOnEdit}
+                                                  values={values}
+                                                  errors={errors}
+                                                  touched={touched}
+                                                  label={field.fieldLabel}
+                                                  name={field.fieldName}
+                                                  type={field.type}
+                                                  options={countryBillToDropDown}
+                                                  setFieldValue={(name, value) => {
+                                                    // handleValuesChange(name, value);
+                                                    setFieldValue(name, value)
+
+                                                  }}
+                                                  required={field.required}
+                                                  fullWidth
+                                                  isTooltip={field?.isTooltip || false}
+                                                  tooltipMessage={field?.tooltipMessage}
+                                                  size="small"
+                                                  onOpen={() =>
+                                                    onCountryBillToDropDownOpen(values.customerAccountName, values.countryBillTo)
+                                                  }
+                                                />
+                                              </Grid>
+                                              {
+                                                permissions.address?.isCreate && (
+                                                  <Grid item xs={1} sm={1} md={1}>
+                                                    <Tooltip title="Add Country Bill to Address" className="mt-1">
+                                                      <IconButton
+                                                        onClick={() => {
+                                                          setShowAddressDialog(true);
+                                                          setAddressType('countryBillTo');
+                                                        }}
+                                                        disabled={!isNew && field.disableOnEdit}
+                                                        size="small"
+                                                      >
+                                                        <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
+                                                      </IconButton>
+                                                    </Tooltip>
+                                                  </Grid>
+                                                )
                                               }
-                                            }
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          disabled={disableOwnerSelection || (!isNew && field.disableOnEdit)}
-                                          onOpen={() => {
-                                            onOwnerDropdownOpen(values['collaborator']);
-                                          }}
-                                        />
-                                      ) : field.fieldName === 'collaborator' ? (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          disabled={!isNew && field.disableOnEdit}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={collaboratorData}
-                                          setFieldValue={(name, value) => {
-                                            handleValuesChange(name, value);
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          onOpen={() => {
-                                            onCollabOwnerMultiselectOpen(values['owner']);
-                                          }}
-                                        />
-                                      ) : field.fieldName === 'probability' ? (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          // {...rest}
-                                          disabled={!isNew && field.disableOnEdit}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            handleValuesChange(name, value);
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          onChange={(e) => {
-                                            if (e.target.value && parseFloat(e.target.value) > 100) {
-                                              setFieldValue('probability', '100');
-                                              handleValuesChange('probability', '100');
-                                            } else {
-                                              setFieldValue('probability', e.target.value);
-                                              handleValuesChange('probability', e.target.value);
-                                            }
-                                          }}
-                                        />
-                                      ) : field.fieldName === 'lostReason' ? (
-                                        values['stage'] === 'Closed Lost' ? (
-                                          <FormTypes
-                                            isNew={isNew}
-                                            {...field}
-                                            // {...rest}
-                                            disabled={!isNew && field.disableOnEdit}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={field.option}
-                                            setFieldValue={(name, value) => {
-                                              handleValuesChange(name, value);
-                                              setFieldValue(name, value);
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                          />
-                                        ) : null
-                                      ) : field.fieldName === 'currency' ? (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          // {...rest}
-                                          disabled={!isNew && field.disableOnEdit}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            handleValuesChange(name, value);
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          onChange={(e, val) => {
-                                            if (val && val.currencyCode) {
-                                              setFieldValue(field.fieldName, val.currencyCode);
-                                              setCurrencySymbol(val.symbolNative);
-                                            } else {
-                                              setFieldValue(field.fieldName, '');
-                                              setCurrencySymbol(null);
-                                            }
-                                          }}
-                                        />
-                                      ) : field.fieldName.trim() === 'estimatedAmount' ? (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          // {...rest}
-                                          disabled={!isNew && field.disableOnEdit}
-                                          selectedCurrencyCode={values['currency']}
-                                          startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            handleValuesChange(name, value);
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                        />
-                                      ) : field.fieldName === formFieldNames.marketSegment ? (
-                                        <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                          <Grid container spacing={1}>
-                                            <Grid
-                                              item
-                                              xs={permissions.marketSegment?.isCreate ? 11 : 11}
-                                              sm={permissions.marketSegment?.isCreate ? 11 : 11}
-                                              md={permissions.marketSegment?.isCreate ? 11 : 11}
-                                            >
-                                              <FormTypes
-                                                isNew={isNew}
-                                                {...field}
-                                                disabled={!isNew && field.disableOnEdit}
-                                                fields={entityData.fields}
-                                                fieldData={field}
-                                                errors={errors}
-                                                touched={touched}
-                                                label={field.fieldLabel}
-                                                name={field.fieldName}
-                                                type={field.type}
-                                                setFieldValue={(name, value) => {
-                                                  handleValuesChange(name, value);
-                                                  setFieldValue(name, value);
-                                                }}
-                                                required={field.required}
-                                                fullWidth
-                                                isTooltip={field.isTooltip}
-                                                tooltipMessage={field.tooltipMessage}
-                                                onChange={(e, val) => {
-                                                  setNewMarketSegmentId(null);
-                                                  setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                                  setNewSubMarketSegmentId(null);
-                                                  setFieldValue(formFieldNames.subMarketSegment, '');
-                                                  marketSegmentChange(val && val.optionValue ? val.optionValue : '');
-                                                }}
-                                                size="small"
-                                                values={
-                                                  newMarketSegmentId ? initializeMarketSegmentDropdown(values, marketSegmentDataSource) : values
-                                                }
-                                                options={marketSegmentDataSource}
-                                                doNotShowInfoTooltip={true}
-                                              />
-                                            </Grid>
-                                            {
-                                              // permissions.productCategory
-                                              //     .isCreate
-                                              permissions.marketSegment?.isCreate && (
+                                              {field?.tooltipMessage ? (
                                                 <Grid item xs={1} sm={1} md={1}>
-                                                  <Tooltip title="Add Market Segment" className="mt-1">
-                                                    <IconButton
-                                                      onClick={() => {
-                                                        setShowAddMarketSegmentDialog(true);
-                                                      }}
-                                                      disabled={!isNew && field.disableOnEdit}
-                                                      size="small"
-                                                    >
-                                                      <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                    </IconButton>
+                                                  <Tooltip title={field?.tooltipMessage ?? ''}>
+                                                    <InfoIcon color="disabled" />
                                                   </Tooltip>
                                                 </Grid>
-                                              )
-                                            }
-                                            {field?.tooltipMessage ? (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                  <InfoIcon color="disabled" />
-                                                </Tooltip>
-                                              </Grid>
-                                            ) : null}
+                                              ) : null}
+                                            </Grid>
                                           </Grid>
-                                        </Grid>
-                                      ) : field.fieldName === formFieldNames.subMarketSegment ? (
-                                        <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                          <Grid container spacing={1}>
-                                            <Grid
-                                              item
-                                              xs={permissions.marketSegment?.isCreate ? 11 : 11}
-                                              sm={permissions.marketSegment?.isCreate ? 11 : 11}
-                                              md={permissions.marketSegment?.isCreate ? 11 : 11}
-                                            >
+                                        )
+                                          :
+                                          field.fieldName === "countrySellTo" ? (
+                                            <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                              <Grid container spacing={1}>
+                                                <Grid
+                                                  item
+                                                  xs={permissions.address?.isCreate ? 11 : 11}
+                                                  sm={permissions.address?.isCreate ? 11 : 11}
+                                                  md={permissions.address?.isCreate ? 11 : 11}
+                                                >
+                                                  <FormTypes
+                                                    isNew={isNew}
+                                                    {...field}
+                                                    disabled={!isNew && field.disableOnEdit}
+                                                    values={values}
+                                                    errors={errors}
+                                                    touched={touched}
+                                                    label={field.fieldLabel}
+                                                    name={field.fieldName}
+                                                    type={field.type}
+                                                    options={countrySellToDropDown}
+                                                    setFieldValue={(name, value) => {
+                                                      // handleValuesChange(name, value);
+                                                      setFieldValue(name, value)
+
+                                                    }}
+                                                    required={field.required}
+                                                    fullWidth
+                                                    isTooltip={field?.isTooltip || false}
+                                                    tooltipMessage={field?.tooltipMessage}
+                                                    size="small"
+                                                    onOpen={() =>
+                                                      onCountrySellToDropDownOpen(values.customerAccountName, values.countrySellTo)
+                                                    }
+                                                  />
+                                                </Grid>
+                                                {
+                                                  permissions.address?.isCreate && (
+                                                    <Grid item xs={1} sm={1} md={1}>
+                                                      <Tooltip title="Add Country Sell to Address" className="mt-1">
+                                                        <IconButton
+                                                          onClick={() => {
+                                                            setShowAddressDialog(true);
+                                                            setAddressType('countrySellTo');
+
+                                                          }}
+                                                          disabled={!isNew && field.disableOnEdit}
+                                                          size="small"
+                                                        >
+                                                          <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
+                                                        </IconButton>
+                                                      </Tooltip>
+                                                    </Grid>
+                                                  )
+                                                }
+                                                {field?.tooltipMessage ? (
+                                                  <Grid item xs={1} sm={1} md={1}>
+                                                    <Tooltip title={field?.tooltipMessage ?? ''}>
+                                                      <InfoIcon color="disabled" />
+                                                    </Tooltip>
+                                                  </Grid>
+                                                ) : null}
+                                              </Grid>
+                                            </Grid>
+
+                                          ) :
+
+
+
+
+
+
+
+
+
+
+
+
+                                            // field.fieldName === 'countryBillTo' ? (
+                                            //   <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                            //     <Grid container spacing={1}>
+                                            //       <Grid
+                                            //         item
+                                            //         xs={permissions.address?.isCreate ? 11 : 11}
+                                            //         sm={permissions.address?.isCreate ? 11 : 11}
+                                            //         md={permissions.address?.isCreate ? 11 : 11}
+                                            //       >
+                                            //         <FormTypes
+                                            //           isNew={isNew}
+                                            //           {...field}
+                                            //           disabled={!isNew && field.disableOnEdit}
+                                            //           values={values}
+                                            //           errors={errors}
+                                            //           touched={touched}
+                                            //           label={field.fieldLabel}
+                                            //           name={field.fieldName}
+                                            //           type={field.type}
+                                            //           options={countryBillToDropDown}
+                                            //           setFieldValue={(name, value) => {
+                                            //             // handleValuesChange(name, value);
+                                            //             setFieldValue(name, value);
+                                            //           }}
+                                            //           required={field.required}
+                                            //           fullWidth
+                                            //           isTooltip={field?.isTooltip || false}
+                                            //           tooltipMessage={field?.tooltipMessage}
+                                            //           size="small"
+                                            //           onOpen={() => onCountryBillToDropDownOpen(values.customerAccountName ?? values.customerAccount)}
+                                            //         />
+                                            //       </Grid>
+                                            //       {permissions.address?.isCreate && (
+                                            //         <Grid item xs={1} sm={1} md={1}>
+                                            //           <Tooltip title="Add Country Bill to Address" className="mt-1">
+                                            //             <IconButton
+                                            //               onClick={() => {
+                                            //                 setShowAddressDialog(true);
+                                            //                 setAddressType('countryBillTo');
+                                            //               }}
+                                            //               disabled={!isNew && field.disableOnEdit}
+                                            //               size="small"
+                                            //             >
+                                            //               <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
+                                            //             </IconButton>
+                                            //           </Tooltip>
+                                            //         </Grid>
+                                            //       )}
+                                            //       {field?.tooltipMessage ? (
+                                            //         <Grid item xs={1} sm={1} md={1}>
+                                            //           <Tooltip title={field?.tooltipMessage ?? ''}>
+                                            //             <InfoIcon color="disabled" />
+                                            //           </Tooltip>
+                                            //         </Grid>
+                                            //       ) : null}
+                                            //     </Grid>
+                                            //   </Grid>
+                                            // ) : field.fieldName === 'countrySellTo' ? (
+                                            //   <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                            //     <Grid container spacing={1}>
+                                            //       <Grid
+                                            //         item
+                                            //         xs={permissions.address?.isCreate ? 11 : 11}
+                                            //         sm={permissions.address?.isCreate ? 11 : 11}
+                                            //         md={permissions.address?.isCreate ? 11 : 11}
+                                            //       >
+                                            //         <FormTypes
+                                            //           isNew={isNew}
+                                            //           {...field}
+                                            //           disabled={!isNew && field.disableOnEdit}
+                                            //           values={values}
+                                            //           errors={errors}
+                                            //           touched={touched}
+                                            //           label={field.fieldLabel}
+                                            //           name={field.fieldName}
+                                            //           type={field.type}
+                                            //           options={countrySellToDropDown}
+                                            //           setFieldValue={(name, value) => {
+                                            //             // handleValuesChange(name, value);
+                                            //             setFieldValue(name, value);
+                                            //           }}
+                                            //           required={field.required}
+                                            //           fullWidth
+                                            //           isTooltip={field?.isTooltip || false}
+                                            //           tooltipMessage={field?.tooltipMessage}
+                                            //           size="small"
+                                            //           onOpen={() => onCountrySellToDropDownOpen(values.customerAccountName ?? values.customerAccount)}
+                                            //         />
+                                            //       </Grid>
+                                            //       {permissions.marketSegment?.isCreate && (
+                                            //         <Grid item xs={1} sm={1} md={1}>
+                                            //           <Tooltip title="Add Country Sell to Address" className="mt-1">
+                                            //             <IconButton
+                                            //               onClick={() => {
+                                            //                 setShowAddressDialog(true);
+                                            //                 setAddressType('countrySellTo');
+                                            //               }}
+                                            //               disabled={!isNew && field.disableOnEdit}
+                                            //               size="small"
+                                            //             >
+                                            //               <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
+                                            //             </IconButton>
+                                            //           </Tooltip>
+                                            //         </Grid>
+                                            //       )}
+                                            //       {field?.tooltipMessage ? (
+                                            //         <Grid item xs={1} sm={1} md={1}>
+                                            //           <Tooltip title={field?.tooltipMessage ?? ''}>
+                                            //             <InfoIcon color="disabled" />
+                                            //           </Tooltip>
+                                            //         </Grid>
+                                            //       ) : null}
+                                            //     </Grid>
+                                            //   </Grid>
+                                            // ) : 
+                                            field.fieldName === 'owner' ? (
                                               <FormTypes
                                                 isNew={isNew}
                                                 {...field}
-                                                disabled={!isNew && field.disableOnEdit}
-                                                fields={entityData.fields}
-                                                fieldData={field}
+                                                values={values}
                                                 errors={errors}
                                                 touched={touched}
                                                 label={field.fieldLabel}
                                                 name={field.fieldName}
                                                 type={field.type}
+                                                options={ownerData}
+                                                onChange={(e, val) => {
+                                                  setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
+                                                  handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : '');
+
+                                                  if (val && val.optionValue !== user?.user?._id) {
+                                                    const checkOwnerAddedInCollaborator = values['collaborator'].find(
+                                                      (d) => d?.optionValue === user?.user?._id
+                                                    );
+                                                    if (!checkOwnerAddedInCollaborator) {
+                                                      setFieldValue('collaborator', [
+                                                        ...values['collaborator'],
+                                                        collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
+                                                      ]);
+                                                      handleValuesChange('collaborator', [
+                                                        ...values['collaborator'],
+                                                        collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
+                                                      ]);
+                                                    }
+                                                  }
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                                disabled={disableOwnerSelection || (!isNew && field.disableOnEdit)}
+                                                onOpen={() => {
+                                                  onOwnerDropdownOpen(values['collaborator']);
+                                                }}
+                                              />
+                                            ) : field.fieldName === 'collaborator' ? (
+                                              <FormTypes
+                                                isNew={isNew}
+                                                {...field}
+                                                disabled={!isNew && field.disableOnEdit}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={collaboratorData}
                                                 setFieldValue={(name, value) => {
                                                   handleValuesChange(name, value);
                                                   setFieldValue(name, value);
                                                 }}
                                                 required={field.required}
                                                 fullWidth
-                                                isTooltip={field.isTooltip}
-                                                tooltipMessage={field.tooltipMessage}
-                                                onChange={(e, val) => {
-                                                  setNewSubMarketSegmentId(null);
-                                                  setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                                }}
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
                                                 size="small"
-                                                values={
-                                                  newSubMarketSegmentId
-                                                    ? initializeSubMarketSegmentDropdown(values, subMarketSegmentDataSource)
-                                                    : values
-                                                }
-                                                options={subMarketSegmentDataSource}
-                                                doNotShowInfoTooltip={true}
+                                                onOpen={() => {
+                                                  onCollabOwnerMultiselectOpen(values['owner']);
+                                                }}
                                               />
-                                            </Grid>
-                                            {permissions.marketSegment?.isCreate && (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title="Add Sub Market Segment" className="mt-1">
-                                                  <IconButton
-                                                    onClick={() => {
-                                                      setShowAddMarketSegmentDialog(true);
-                                                    }}
-                                                    disabled={!isNew && field.disableOnEdit}
-                                                    size="small"
+                                            ) : field.fieldName === 'probability' ? (
+                                              <FormTypes
+                                                isNew={isNew}
+                                                {...field}
+                                                // {...rest}
+                                                disabled={!isNew && field.disableOnEdit}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={field.option}
+                                                setFieldValue={(name, value) => {
+                                                  handleValuesChange(name, value);
+                                                  setFieldValue(name, value);
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                                onChange={(e) => {
+                                                  if (e.target.value && parseFloat(e.target.value) > 100) {
+                                                    setFieldValue('probability', '100');
+                                                    handleValuesChange('probability', '100');
+                                                  } else {
+                                                    setFieldValue('probability', e.target.value);
+                                                    handleValuesChange('probability', e.target.value);
+                                                  }
+                                                }}
+                                              />
+                                            ) : field.fieldName === 'lostReason' ? (
+                                              values['stage'] === 'Closed Lost' ? (
+                                                <FormTypes
+                                                  isNew={isNew}
+                                                  {...field}
+                                                  // {...rest}
+                                                  disabled={!isNew && field.disableOnEdit}
+                                                  values={values}
+                                                  errors={errors}
+                                                  touched={touched}
+                                                  label={field.fieldLabel}
+                                                  name={field.fieldName}
+                                                  type={field.type}
+                                                  options={field.option}
+                                                  setFieldValue={(name, value) => {
+                                                    handleValuesChange(name, value);
+                                                    setFieldValue(name, value);
+                                                  }}
+                                                  required={field.required}
+                                                  fullWidth
+                                                  isTooltip={field?.isTooltip || false}
+                                                  tooltipMessage={field?.tooltipMessage}
+                                                  size="small"
+                                                />
+                                              ) : null
+                                            ) : field.fieldName === 'currency' ? (
+                                              <FormTypes
+                                                isNew={isNew}
+                                                {...field}
+                                                // {...rest}
+                                                disabled={!isNew && field.disableOnEdit}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={field.option}
+                                                setFieldValue={(name, value) => {
+                                                  handleValuesChange(name, value);
+                                                  setFieldValue(name, value);
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                                onChange={(e, val) => {
+                                                  if (val && val.currencyCode) {
+                                                    setFieldValue(field.fieldName, val.currencyCode);
+                                                    setCurrencySymbol(val.symbolNative);
+                                                  } else {
+                                                    setFieldValue(field.fieldName, '');
+                                                    setCurrencySymbol(null);
+                                                  }
+                                                }}
+                                              />
+                                            ) : field.fieldName.trim() === 'estimatedAmount' ? (
+                                              <FormTypes
+                                                isNew={isNew}
+                                                {...field}
+                                                // {...rest}
+                                                disabled={!isNew && field.disableOnEdit}
+                                                selectedCurrencyCode={values['currency']}
+                                                startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={field.option}
+                                                setFieldValue={(name, value) => {
+                                                  handleValuesChange(name, value);
+                                                  setFieldValue(name, value);
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                              />
+                                            ) : field.fieldName === formFieldNames.marketSegment ? (
+                                              <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                                <Grid container spacing={1}>
+                                                  <Grid
+                                                    item
+                                                    xs={permissions.marketSegment?.isCreate ? 11 : 11}
+                                                    sm={permissions.marketSegment?.isCreate ? 11 : 11}
+                                                    md={permissions.marketSegment?.isCreate ? 11 : 11}
                                                   >
-                                                    <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                  </IconButton>
-                                                </Tooltip>
+                                                    <FormTypes
+                                                      isNew={isNew}
+                                                      {...field}
+                                                      disabled={!isNew && field.disableOnEdit}
+                                                      fields={entityData.fields}
+                                                      fieldData={field}
+                                                      errors={errors}
+                                                      touched={touched}
+                                                      label={field.fieldLabel}
+                                                      name={field.fieldName}
+                                                      type={field.type}
+                                                      setFieldValue={(name, value) => {
+                                                        handleValuesChange(name, value);
+                                                        setFieldValue(name, value);
+                                                      }}
+                                                      required={field.required}
+                                                      fullWidth
+                                                      isTooltip={field.isTooltip}
+                                                      tooltipMessage={field.tooltipMessage}
+                                                      onChange={(e, val) => {
+                                                        setNewMarketSegmentId(null);
+                                                        setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
+                                                        setNewSubMarketSegmentId(null);
+                                                        setFieldValue(formFieldNames.subMarketSegment, '');
+                                                        marketSegmentChange(val && val.optionValue ? val.optionValue : '');
+                                                      }}
+                                                      size="small"
+                                                      values={
+                                                        newMarketSegmentId ? initializeMarketSegmentDropdown(values, marketSegmentDataSource) : values
+                                                      }
+                                                      options={marketSegmentDataSource}
+                                                      doNotShowInfoTooltip={true}
+                                                    />
+                                                  </Grid>
+                                                  {
+                                                    // permissions.productCategory
+                                                    //     .isCreate
+                                                    permissions.marketSegment?.isCreate && (
+                                                      <Grid item xs={1} sm={1} md={1}>
+                                                        <Tooltip title="Add Market Segment" className="mt-1">
+                                                          <IconButton
+                                                            onClick={() => {
+                                                              setShowAddMarketSegmentDialog(true);
+                                                            }}
+                                                            disabled={!isNew && field.disableOnEdit}
+                                                            size="small"
+                                                          >
+                                                            <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
+                                                          </IconButton>
+                                                        </Tooltip>
+                                                      </Grid>
+                                                    )
+                                                  }
+                                                  {field?.tooltipMessage ? (
+                                                    <Grid item xs={1} sm={1} md={1}>
+                                                      <Tooltip title={field?.tooltipMessage ?? ''}>
+                                                        <InfoIcon color="disabled" />
+                                                      </Tooltip>
+                                                    </Grid>
+                                                  ) : null}
+                                                </Grid>
                                               </Grid>
-                                            )}
-                                            {field?.tooltipMessage ? (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                  <InfoIcon color="disabled" />
-                                                </Tooltip>
+                                            ) : field.fieldName === formFieldNames.subMarketSegment ? (
+                                              <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                                <Grid container spacing={1}>
+                                                  <Grid
+                                                    item
+                                                    xs={permissions.marketSegment?.isCreate ? 11 : 11}
+                                                    sm={permissions.marketSegment?.isCreate ? 11 : 11}
+                                                    md={permissions.marketSegment?.isCreate ? 11 : 11}
+                                                  >
+                                                    <FormTypes
+                                                      isNew={isNew}
+                                                      {...field}
+                                                      disabled={!isNew && field.disableOnEdit}
+                                                      fields={entityData.fields}
+                                                      fieldData={field}
+                                                      errors={errors}
+                                                      touched={touched}
+                                                      label={field.fieldLabel}
+                                                      name={field.fieldName}
+                                                      type={field.type}
+                                                      setFieldValue={(name, value) => {
+                                                        handleValuesChange(name, value);
+                                                        setFieldValue(name, value);
+                                                      }}
+                                                      required={field.required}
+                                                      fullWidth
+                                                      isTooltip={field.isTooltip}
+                                                      tooltipMessage={field.tooltipMessage}
+                                                      onChange={(e, val) => {
+                                                        setNewSubMarketSegmentId(null);
+                                                        setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
+                                                      }}
+                                                      size="small"
+                                                      values={
+                                                        newSubMarketSegmentId
+                                                          ? initializeSubMarketSegmentDropdown(values, subMarketSegmentDataSource)
+                                                          : values
+                                                      }
+                                                      options={subMarketSegmentDataSource}
+                                                      doNotShowInfoTooltip={true}
+                                                    />
+                                                  </Grid>
+                                                  {permissions.marketSegment?.isCreate && (
+                                                    <Grid item xs={1} sm={1} md={1}>
+                                                      <Tooltip title="Add Sub Market Segment" className="mt-1">
+                                                        <IconButton
+                                                          onClick={() => {
+                                                            setShowAddMarketSegmentDialog(true);
+                                                          }}
+                                                          disabled={!isNew && field.disableOnEdit}
+                                                          size="small"
+                                                        >
+                                                          <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
+                                                        </IconButton>
+                                                      </Tooltip>
+                                                    </Grid>
+                                                  )}
+                                                  {field?.tooltipMessage ? (
+                                                    <Grid item xs={1} sm={1} md={1}>
+                                                      <Tooltip title={field?.tooltipMessage ?? ''}>
+                                                        <InfoIcon color="disabled" />
+                                                      </Tooltip>
+                                                    </Grid>
+                                                  ) : null}
+                                                </Grid>
                                               </Grid>
-                                            ) : null}
-                                          </Grid>
-                                        </Grid>
-                                      ) : (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          // {...rest}
-                                          disabled={!isNew && field.disableOnEdit}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            handleValuesChange(name, value);
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                              ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
+                                            ) : (
+                                              <FormTypes
+                                                isNew={isNew}
+                                                {...field}
+                                                // {...rest}
+                                                disabled={!isNew && field.disableOnEdit}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={field.option}
+                                                setFieldValue={(name, value) => {
+                                                  handleValuesChange(name, value);
+                                                  setFieldValue(name, value);
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                                imageOrFileUploadCompletePercentage={
+                                                  ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                                    ? (completePercentage) => {
+                                                      setUploadingImageOrFileProgress(completePercentage);
+                                                    }
+                                                    : null
                                                 }
-                                              : null
-                                          }
-                                        />
-                                      )}
+                                              />
+                                            )}
                                     </Grid>
                                   ))}
                                 </Grid>
@@ -1099,35 +1251,49 @@ export default function ManageOpportunityDialog({
                         if (obj) {
                           setShowAddressDialog(false);
                           if (obj?.isAlreadyExist === true) {
-                            let tempAddress =
-                              addressType === 'countryBillTo'
-                                ? countrySellToDropDown.find((d) => d?.optionLabel === obj?.fullAddress)
-                                : countrySellToDropDown.find((d) => d?.optionLabel === obj?.fullAddress);
+                            let tempAddress = addressType === 'countryBillTo' ? countryBillToMainData.find(d => d?.optionLabel === obj?.fullAddress) : countrySellToMainData.find(d => d?.optionLabel === obj?.fullAddress)
+                            if (addressType === 'countryBillTo') {
+                              onCountryBillToDropDownOpen(values.customerAccountName, values.countryBillTo ? [...values.countryBillTo, tempAddress?.optionValue] : [tempAddress?.optionValue])
+                            }
+                            else {
+                              onCountrySellToDropDownOpen(values.customerAccountName, values.countrySellTo ? [...values.countrySellTo, tempAddress?.optionValue] : [tempAddress?.optionValue])
+                            }
                             setFieldValue(addressType, [...values[`${addressType}`], tempAddress?.optionValue]);
-                          } else {
-                            addressType === 'countryBillTo'
-                              ? setCountryBillToDropDown((prevState) => [
-                                  ...prevState,
-                                  {
-                                    default: false,
-                                    optionLabel: obj?.fullAddress,
-                                    optionValue: obj._id,
-                                    order: countryBillToDropDown.length + 1
-                                  }
-                                ])
-                              : setCountrySellToDropDown((prevState) => [
-                                  ...prevState,
-                                  {
-                                    default: false,
-                                    optionLabel: obj?.fullAddress,
-                                    optionValue: obj._id,
-                                    order: countrySellToDropDown.length + 1
-                                  }
-                                ]);
+                          }
+                          else {
+                            addressType === 'countryBillTo' ? setCountryBillToMainData((prevState) => [...prevState,
+                            {
+                              default: false,
+                              optionLabel: obj?.fullAddress,
+                              optionValue: obj._id,
+                              order: countryBillToMainData.length + 1,
+                            }]) :
+                              setCountrySellToMainData((prevState) => [...prevState,
+                              {
+                                default: false,
+                                optionLabel: obj?.fullAddress,
+                                optionValue: obj._id,
+                                order: countrySellToMainData.length + 1,
+                              }]);
+                            addressType === 'countryBillTo' ? setCountryBillToDropDown((prevState) => [...prevState,
+                            {
+                              default: false,
+                              optionLabel: obj?.fullAddress,
+                              optionValue: obj._id,
+                              order: countryBillToDropDown.length + 1,
+                            }]) :
+                              setCountrySellToDropDown((prevState) => [...prevState,
+                              {
+                                default: false,
+                                optionLabel: obj?.fullAddress,
+                                optionValue: obj._id,
+                                order: countrySellToDropDown.length + 1,
+                              }]);
                             setFieldValue(addressType, [...values[`${addressType}`], obj._id]);
                           }
                         }
-                      }}
+                      }
+                      }
                     />
                   )}
 
@@ -1142,19 +1308,19 @@ export default function ManageOpportunityDialog({
                       accountApi='supplier-account'
                       isGetAccountData={true}
                       onGetAddedAccount={({ data }) => {
-                        setSupplierData((prevState)=>{
+                        setSupplierData((prevState) => {
                           return [
                             ...prevState,
                             {
                               optionValue: data._id,
-                                optionLabel: data.accountName,
-                                order: supplierData.length,
-                                default: false
+                              optionLabel: data.accountName,
+                              order: supplierData.length,
+                              default: false
                             }
                           ]
                         });
 
-                    
+
                         setFieldValue('supplierAccount', [...values['supplierAccount'], data._id]);
                         handleValuesChange('supplierAccount', data._id);
                       }}
@@ -1173,15 +1339,15 @@ export default function ManageOpportunityDialog({
                       accountApi={customerAccount.accountApi}
                       isGetAccountData={true}
                       onGetAddedAccount={({ data }) => {
-                        
-                        setAccountData((prevState)=>{
+
+                        setAccountData((prevState) => {
                           return [
                             ...prevState,
                             {
                               optionValue: data._id,
-                                optionLabel: data.accountName,
-                                order: accountData.length,
-                                default: false
+                              optionLabel: data.accountName,
+                              order: accountData.length,
+                              default: false
                             }
                           ]
                         });
