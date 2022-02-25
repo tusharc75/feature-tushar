@@ -119,7 +119,7 @@ export const intialState = {
   filters: {},
   sorting: [],
   selectedRecords: [],
-  appendRows: false,
+  appendRows: isMobile,
   showFilteredRecordsOnly: false
 };
 
