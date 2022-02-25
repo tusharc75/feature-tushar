@@ -42,7 +42,7 @@ const customNodeStyles = {
   },
   transferAsset: {
     name: 'Transfer Asset',
-    background: '#ffb3c6',
+    background: '#ecc19c',
     borderColor: '#d98298'
   },
   productAssets: {
@@ -158,6 +158,7 @@ const RentalManagementViews = (props) => {
 
       xPosition += 300;
       const allPackages = product?.data?.data?.material?.filter((item) => item.type === 'package').map((item) => item._id);
+      const allPackagesAndProductIds = product?.data?.data?.material?.map((item) => item._id);
       if (allPackages.length) xPosition += 300;
       var pakcageIdx = 0;
       var productIdx = 0;
@@ -285,7 +286,7 @@ const RentalManagementViews = (props) => {
         });
         purchaseAndSubLeaseIdx += 1;
         product?.data?.data?.inventory?.map((data) => {
-          if (allAssets[data.inventoryDetail.assetNumber] !== undefined) {
+          if (allAssets[data.inventoryDetail.assetNumber] !== undefined && allPackagesAndProductIds.includes(data.product)) {
             flowEdge.push({
               id: `edge-transfer-${data.inventoryDetail.assetNumber}-${_.random(0, 1000)}`,
               source: `${data.product}`,
@@ -521,6 +522,9 @@ const RentalManagementViews = (props) => {
         break;
       case 'sublease':
         history.push(`${routes.subleaseDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'transferAsset':
+        history.push(`${routes.transferAssetDetail.path}/${element.data.ref_id}`);
         break;
       default:
         history.push(`${routes.rentalManagementDetail.path}/${element.data.ref_id}?tab=2`);
