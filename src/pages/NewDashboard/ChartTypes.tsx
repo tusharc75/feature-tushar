@@ -141,7 +141,8 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
     axiosInstance()
       .get(`dashboard/${chart.kpi}?entity=${selectedEntity}&${urlParams}`)
       .then(async ({ data: { data } }) => {
-        const chartData = await getMappedData(chart, data, globalFilters.currency, currency);
+        const statusForQuoteChart = chart.uniqueId === "openQuote" && filterValues ? filterValues?.status?.optionLabel : null
+        const chartData = await getMappedData(chart, data, globalFilters.currency, currency, statusForQuoteChart);
         setChartData(chartData);
         setLoading(false);
       })
