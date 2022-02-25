@@ -380,7 +380,7 @@ const RentalManagementViews = (props) => {
         });
       });
 
-      if (status === RENTAL_STATUS.cancelled || status === RENTAL_STATUS.closed) {
+      if ((status === RENTAL_STATUS.cancelled || status === RENTAL_STATUS.closed) && (receivingTicket.length || returnTicket.length)) {
         xPosition += 300;
         const endRentalTicketId = '12345678900987654123456';
         flow.push({
