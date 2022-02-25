@@ -24,6 +24,7 @@ import { startCase } from "lodash";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import AdditionalCostDialog from "../AdditionalCost/AdditionalCostDialog";
+import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 
 
 const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJobStatus, statusOptions }) => {
@@ -82,8 +83,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         fields = [...fields, ...CURReplaceByCurrencySingle(resultCost, rentalManagementData.currency)]
       }
       else {
-        const resultProduct = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`)
-        fields = CURReplaceByCurrencySingle(resultProduct?.data?.data, rentalManagementData.currency)
+        fields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
         const resultCost = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`)
         fields = [...fields, ...CURReplaceByCurrencySingle(resultCost?.data?.data, rentalManagementData.currency)]
       }
@@ -288,6 +288,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           size="small"
           style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
           disabled={downlodingFile === "Email" ? true : (false || isOffline)}
+          startIcon={isMobile ? '' : <MdEmail />}
           onClick={() => {
             fetchEmailsData()
             handlePDF("Email")
@@ -319,7 +320,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           onCellValueChanged={(row) => {
           }}
           currency={rentalManagementData?.currency?.toLowerCase()}
-          footerIgnoreFields={["tenure"]}
+          footerIgnoreFields={["estimateJobDuration", "actualJobDuration"]}
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
       }

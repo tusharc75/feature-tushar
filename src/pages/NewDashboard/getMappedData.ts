@@ -3,7 +3,7 @@ import moment from 'moment';
 import { getExchangeRates, formatAmountWithCurrency } from 'src/constants/helpers';
 import { ChartDataType } from './ChartTypes';
 
-export default async (chart: ChartDataType, data: any, currencyTo: string, currencyFrom: string) => {
+export default async (chart: ChartDataType, data: any, currencyTo: string, currencyFrom: string, status: string = "Open") => {
   if (!data) return null;
 
   let dataObject: any;
@@ -89,10 +89,10 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
           hitRatioVolume: isNaN(hitRatioVolume) ? 0 : hitRatioVolume
         },
         cardData: {
-          ['Total Booked Value']: totalBookedValue ? formatAmountWithCurrency(currencyFrom || currencyTo, totalBookedValue).fullFormatAmount : 0,
-          ['Total Booked Cost']: totalBookedCost ? formatAmountWithCurrency(currencyFrom || currencyTo, totalBookedCost).fullFormatAmount : 0,
+          ['Total Booked Value']: totalBookedValue ? formatAmountWithCurrency(currencyTo || currencyFrom, totalBookedValue).fullFormatAmount : 0,
+          ['Total Booked Cost']: totalBookedCost ? formatAmountWithCurrency(currencyTo || currencyFrom, totalBookedCost).fullFormatAmount : 0,
           ['Booked Gross Margin']: `${
-            grossMargin ? formatAmountWithCurrency(currencyFrom || currencyTo, grossMargin).fullFormatAmount : 0
+            grossMargin ? formatAmountWithCurrency(currencyTo || currencyFrom, grossMargin).fullFormatAmount : 0
           } (${grossMarginPercent}%)`,
           ['Total Booked Volume']: `${totalBookedVolume.toFixed(2)} ${volumeUnit}`
         }
@@ -147,7 +147,6 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     }
     dataObject = regionSalesData;
   }
-
   if (chart.kpi === 'sales' && chart.uniqueId === 'offeredVsEntities') {
     const totalOfferedData = [];
     const labels = [];
@@ -396,7 +395,7 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     const open = data.open;
     const total = data.count;
     dataObject = {
-      labels: ['Open', 'Total'],
+      labels: [status, 'Total'],
       datasets: [
         {
           label: '',

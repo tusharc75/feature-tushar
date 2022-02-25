@@ -1419,11 +1419,7 @@ export const generateUniqueIdOnly = () => {
 export const prepareDataForGrid = (data, user = {}) => {
   let objectValues = {};
   let restProperties = {};
-  let mappedEntities = JSON.parse(localStorage.getItem("mappedEntities"))
 
-  if (data.entity && data.entity.length === 0 && mappedEntities.length) {
-    data.entity = [...mappedEntities]
-  }
   Object.keys(data).forEach((key) => {
     if (typeof data[key] === "object") {
 
