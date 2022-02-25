@@ -85,12 +85,12 @@ const customDeliveredNodeStyle = {
     borderColor: '#db765c',
     borderLeft: '10px solid #FF0000'
   },
-  closedRentalJob: {
+  cancelledRentalJob: {
     name: 'Return Ticket',
     background: '#00FF00',
     borderColor: '#999999'
   },
-  cancelledRentalJob: {
+  closedRentalJob: {
     name: 'Return Ticket',
     background: '#FF0000',
     borderColor: '#999999'
@@ -191,7 +191,15 @@ const RentalManagementViews = (props) => {
       });
 
       var purchaseAndSubLeaseIdx = 0;
-      if (purchaseOrder?.data?.data?.length) xPosition += 300;
+      if (
+        purchaseOrder?.data?.data?.length ||
+        subLease?.data?.data.length ||
+        transferAsset?.data?.data?.length ||
+        (subLease?.data?.data.length && purchaseOrder?.data?.data?.length) ||
+        (transferAsset?.data?.data?.length && purchaseOrder?.data?.data?.length) ||
+        (transferAsset?.data?.data?.length && purchaseOrder?.data?.data?.length && subLease?.data?.data.length)
+      )
+        xPosition += 300;
       const purchaseArr = purchaseOrder?.data?.data?.map((item) => item._id);
       const subLeaseArr = subLease?.data?.data?.map((item) => item.supplierAccount.optionValue);
       const purchaseOrderInAssets = product?.data?.data?.inventory
