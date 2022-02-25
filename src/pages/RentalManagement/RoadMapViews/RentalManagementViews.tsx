@@ -286,12 +286,12 @@ const RentalManagementViews = (props) => {
         });
         purchaseAndSubLeaseIdx += 1;
         product?.data?.data?.inventory?.map((data) => {
-          if (allAssets[data.inventoryDetail.assetNumber] !== undefined && allPackagesAndProductIds.includes(data.product)) {
+          if (allAssets[data.inventoryDetail.assetNumber] !== undefined && allPackagesAndProductIds.includes(data._id)) {
             flowEdge.push({
               id: `edge-transfer-${data.inventoryDetail.assetNumber}-${_.random(0, 1000)}`,
-              source: `${data.product}`,
+              source: `${data._id}`,
               arrowHeadType: 'arrow',
-              target: `${item._id}`
+              target: `${allAssets[data.inventoryDetail.assetNumber]}`
             });
           }
         });
