@@ -1,4 +1,4 @@
-import { FC, useEffect, useState, Fragment, useRef } from 'react';
+import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
 import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -16,11 +16,10 @@ import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 import moment from "moment";
-
-
+import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -56,76 +55,82 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const ref = useRef(null);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
-    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`).then(({ data: { data } }) => {
-      data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
-      setAllFields(JSON.parse(JSON.stringify(data)))
-      if (isBulkedit) {
-        let unitArray: any = []
-        let pricingMethodArray: any = []
-        selectedProducts?.forEach(element => {
-          if (element?.[`${element.type}Detail`]?.unit) {
-            unitArray.push([...element?.[`${element.type}Detail`].unit])
-          }
-          if (element?.[`${element.type}Detail`].pricingMethod) {
-            pricingMethodArray.push([...element?.[`${element.type}Detail`].pricingMethod])
-          }
-        });
-        let unit: any = unitArray.shift().filter(function (v) {
-          return unitArray.every(function (a) {
-            return a.indexOf(v) !== -1;
-          });
-        });
-        let pricingMethod: any = pricingMethodArray.shift().filter(function (v) {
-          return pricingMethodArray.every(function (a) {
-            return a.indexOf(v) !== -1;
-          });
-        });
-        const unitOptions: any = arrayToDropwdownOption(unit)
-        const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
-        data.forEach((element) => {
-          if (element.fieldName === "unit") {
-            element.option = unitOptions;
-          }
-          if (element.fieldName === "pricingMethod") {
-            element.option = pricingMethodOptions;
-          }
-          element.required = false;
-          element.isFormula = false;
-          element.isMulitFormula = false;
-        })
-        data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
-        setInitialData({
-          fields: data,
-          values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", tenure: "" },
-        });
-      }
-      else {
-        let unitOptions: any = []
-        let pricingMethodOptions: any = []
-        if (rowData?.[`${rowData.type}Detail`]?.unit) {
-          unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].unit);
-        }
-        if (rowData?.[`${rowData.type}Detail`].pricingMethod) {
-          pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].pricingMethod);
-        }
-        data.forEach(element => {
-          if (element.fieldName === "unit") {
-            element.option = unitOptions;
-          }
-          if (element.fieldName === "pricingMethod") {
-            element.option = pricingMethodOptions;
-          }
-        });
-        setInitialData({
-          fields: data,
-          values: getObjKeysWithValues(rowData, data),
-        });
-      }
-      EvaluteproductFields(data);
-    })
+    fetchData()
   }, []);
+
+  const fetchData = async () => {
+    var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    setAllFields(JSON.parse(JSON.stringify(data)))
+    if (isBulkedit) {
+      let unitArray: any = []
+      let pricingMethodArray: any = []
+      selectedProducts?.forEach(element => {
+        if (element?.[`${element.type}Detail`]?.unit) {
+          unitArray.push([...element?.[`${element.type}Detail`].unit])
+        }
+        if (element?.[`${element.type}Detail`].pricingMethod) {
+          pricingMethodArray.push([...element?.[`${element.type}Detail`].pricingMethod])
+        }
+      });
+      let unit: any = unitArray.shift().filter(function (v) {
+        return unitArray.every(function (a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+      let pricingMethod: any = pricingMethodArray.shift().filter(function (v) {
+        return pricingMethodArray.every(function (a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+      const unitOptions: any = arrayToDropwdownOption(unit)
+      const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
+      data.forEach((element) => {
+        if (element.fieldName === "unit") {
+          element.option = unitOptions;
+        }
+        if (element.fieldName === "pricingMethod") {
+          element.option = pricingMethodOptions;
+        }
+        element.required = false;
+        element.isFormula = false;
+        element.isMulitFormula = false;
+      })
+      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
+      setInitialData({
+        fields: data,
+        values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", estimateJobDuration: "", actualJobDuration: "" },
+      });
+    }
+    else {
+      let unitOptions: any = []
+      let pricingMethodOptions: any = []
+      if (rowData?.[`${rowData.type}Detail`]?.unit) {
+        unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].unit);
+      }
+      if (rowData?.[`${rowData.type}Detail`].pricingMethod) {
+        pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].pricingMethod);
+      }
+      data.forEach(element => {
+        if (element.fieldName === "unit") {
+          element.option = unitOptions;
+        }
+        if (element.fieldName === "pricingMethod") {
+          element.option = pricingMethodOptions;
+        }
+      });
+      if (rowData.actualStartDate === "" || rowData.actualStartDate === "") {
+        data = data.filter((e) => !["actualStartDate", "actualEndDate", "actualJobDuration"].includes(e.fieldName))
+      }
+      setInitialData({
+        fields: data,
+        values: getObjKeysWithValues(rowData, data),
+      });
+    }
+    EvaluteproductFields(data);
+  }
 
   const EvaluteproductFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
@@ -244,8 +249,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       let rows: any = []
       let priceData: any = []
       const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`
-
-      console.log(values[priceFieldName])
+      const fieldAll: any = allFields.filter((e) => !["actualStartDate", "actualEndDate", "actualJobDuration"].includes(e.fieldName))
 
       if ((values["unit"] || values["pricingMethod"]) && !values[priceFieldName]) {
         const material: any = [];
@@ -271,7 +275,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           tempRate[priceFieldName] = rateResult[0].mrp;
         }
 
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, allFields)
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, fieldAll)
         if (element.type === "product" && element.parentId === null) {
           rows.push({ ...element, ...calValues })
         }
@@ -292,7 +296,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           const product: any = material.filter((e) => e.parentId === _packageId)
           product.forEach((element) => {
             if (packageProducts.filter((e) => element._id === e._id).length) {
-              const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
+              const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, fieldAll)
               rows.push({ ...element, ...calValues })
               for (var key in calValues) {
                 element[key] = calValues[key];
