@@ -2,7 +2,14 @@ import _ from 'lodash';
 import React, { useContext, useState, useEffect } from 'react';
 import ReactFlow, { Controls } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
-import { deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, rentalManagement, sublease } from '../../../constants/helpers';
+import {
+  deliveryTicket,
+  DELIVERY_TICKET_REFRENCE_TYPE,
+  DELIVERY_TICKET_TYPE,
+  rentalManagement,
+  RENTAL_STATUS,
+  sublease
+} from '../../../constants/helpers';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
@@ -72,11 +79,21 @@ const customDeliveredNodeStyle = {
     background: '#ff9980',
     borderColor: '#db765c',
     borderLeft: '10px solid #FF0000'
+  },
+  closedRentalJob: {
+    name: 'Return Ticket',
+    background: '#00FF00',
+    borderColor: '#999999'
+  },
+  cancelledRentalJob: {
+    name: 'Return Ticket',
+    background: '#FF0000',
+    borderColor: '#999999'
   }
 };
 
 const RentalManagementViews = (props) => {
-  const { rentalName, rentalId } = props;
+  const { rentalName, rentalId, status } = props;
   const { isOffline } = useContext(CustomOfflineContext);
   const [flowData, setFlowData] = useState([]);
   const history = useHistory();
@@ -307,7 +324,7 @@ const RentalManagementViews = (props) => {
           id: `${item._id}`,
           sourcePosition: 'right',
           targetPosition: 'left',
-          type: 'output',
+          type: 'default',
           data: {
             ref_type: 'receiving',
             ref_id: item._id,
@@ -337,7 +354,7 @@ const RentalManagementViews = (props) => {
           id: `${item._id}`,
           sourcePosition: 'right',
           targetPosition: 'left',
-          type: 'output',
+          type: 'default',
           data: {
             ref_type: 'return',
             ref_id: item._id,
@@ -362,6 +379,40 @@ const RentalManagementViews = (props) => {
           });
         });
       });
+
+      if (status === RENTAL_STATUS.cancelled || status === RENTAL_STATUS.closed) {
+        xPosition += 300;
+        const endRentalTicketId = '12345678900987654123456';
+        flow.push({
+          id: `${endRentalTicketId}`,
+          type: 'output',
+          className: 'dark-node',
+          targetPosition: 'left',
+          data: {
+            ref_type: 'rentalJob',
+            ref_id: rentalId,
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName ?? rentalName}</div>
+          },
+          position: { x: xPosition, y: 70 },
+          style: RENTAL_STATUS.cancelled ? customDeliveredNodeStyle.cancelledRentalJob : customDeliveredNodeStyle.closedRentalJob
+        });
+        receivingTicket?.map((item: any) => {
+          flowEdge.push({
+            id: `edge-receiving-and-return-${item._id}`,
+            source: `${item._id}`,
+            arrowHeadType: 'arrow',
+            target: `${endRentalTicketId}`
+          });
+        });
+        returnTicket?.map((item: any) => {
+          flowEdge.push({
+            id: `edge-receiving-and-return-${item._id}`,
+            source: `${item._id}`,
+            arrowHeadType: 'arrow',
+            target: `${endRentalTicketId}`
+          });
+        });
+      }
 
       setFlowData([...flow, ...flowEdge]);
     } else {
