@@ -113,14 +113,9 @@ const RentalManagementDetailsPage = () => {
   useEffect(() => {
     if (id) {
       getRentalManagementFields();
-    }
-  }, [id]);
-
-  useEffect(() => {
-    if (id) {
       fetchRentalManagementData();
     }
-  }, [rentalManagementFields]);
+  }, [id]);
 
   useEffect(() => {
     if (!isOffline && currentStep !== null && currentStep >= 0 && currentStep <= 5) {
@@ -142,15 +137,8 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
-      if (statusOptions?.findIndex(d => d.optionLabel === RENTAL_STATUS.jobPartiallyStarted) > statusOptions.findIndex(d => d.optionLabel === data?.status)) {
-        data["actualStartDate"] = null;
-      }
-      if (statusOptions?.findIndex(d => d.optionLabel === RENTAL_STATUS.jobPartiallyEnded) > statusOptions.findIndex(d => d.optionLabel === data?.status)) {
-        data["actualEndDate"] = null;
-      }
       setRentalManagementData(data);
       setCurrentStep(rentalManagementSteps.indexOf(data?.processStatus) !== -1 ? rentalManagementSteps.indexOf(data?.processStatus) : 0);
-
       handleMainPoints(data);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
@@ -408,7 +396,8 @@ const RentalManagementDetailsPage = () => {
               <TabPanel value={tabValue} index={0}>
                 <Box>
                   {(!loadingDetails && rentalManagementFields.length > 0 ?
-                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields} /> : null
+                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields}
+                    /> : null
                   )}
                 </Box>
               </TabPanel>
