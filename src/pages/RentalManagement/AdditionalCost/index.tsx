@@ -90,9 +90,9 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                 let res: any = {
                     ...prepareDataForGrid(item),
                 };
-                res["canDelete"] = permissions?.rentalManagement?.isDelete;
-                res["allowedToEdit"] = permissions?.rentalManagement?.isUpdate;
-                res["isChecked"] = false;
+                // res["canDelete"] = permissions?.rentalManagement?.isDelete;
+                // res["allowedToEdit"] = permissions?.rentalManagement?.isUpdate;
+                // res["isChecked"] = false;
                 return res;
             });
             setNextStep(true)
