@@ -27,7 +27,6 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
 import ManageContactDialog from "../../Contact/ManageContact";
 import ManageWarehouse from '../../Warehouse/ManageWarehouse';
-import TextField from '@material-ui/core/TextField';
 
 const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManagementData = null, onClose, onSuccess, open }) => {
 
@@ -780,7 +779,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 isTooltip={field?.isTooltip || false}
                                                                                 tooltipMessage={field?.tooltipMessage}
                                                                                 size="small"
-                                                                                maxDate={values["estimateEndDate"] ? moment(values["estimateEndDate"]).subtract(1, "day") : moment().add(5, "years")}
                                                                             />
                                                                         ) : field.fieldName === "estimateEndDate" ? (
                                                                             <FormTypes
@@ -801,7 +799,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 isTooltip={field?.isTooltip || false}
                                                                                 tooltipMessage={field?.tooltipMessage}
                                                                                 size="small"
-                                                                                minDate={moment(values["estimateStartDate"]).add(1, "day")}
                                                                             />
                                                                         ) : field.fieldName === "actualStartDate" ? (
                                                                             <FormTypes
