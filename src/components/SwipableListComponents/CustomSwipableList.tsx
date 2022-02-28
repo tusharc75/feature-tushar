@@ -112,13 +112,14 @@ export default function CustomSwipableList({
             hasMore={dataRows.length !== rowCount}
             loader={<h3 className="text-center border mt-3 p-3 loading-dots">Loading more items</h3>}
             scrollableTarget="scrollableDiv"
-            endMessage={loading == false && dataRows.length === rowCount ? <h3 className="text-center border p-3">No more records found.</h3> : <></>}
+            endMessage={loading == false && dataRows.length === rowCount ? <h3 className="text-center border p-3">{"Total no. of records found " + dataRows.length}</h3> : <></>}
           >
-            {loading ? (
+            {/* {loading ? (
              <Grid container alignItems="center" justifyContent="center" style={{minHeight:"20vh"}}>
                 <div className="spinner"></div>
                 </Grid>
-            ) : (
+            ) : ( */}
+            {
               dataRows.map((d, index) => (
                 <Grid
                   key={d._id}
@@ -159,8 +160,7 @@ export default function CustomSwipableList({
                           </span>
                         </h4>
                       )}
-
-                      {allowSwipe && permissions?.isUpdate && d.allowedToEdit && permissions?.isDelete && d.canDelete && (
+                      {allowSwipe && permissions?.isUpdate && d.allowedToEdit && permissions?.isDelete  && (
                         <div className="icon-layout mr-2 d-flex align-items-center gap-1">
                           {showClone && permissions?.isCreate && (
                             <IconButton
@@ -244,7 +244,7 @@ export default function CustomSwipableList({
                   </Grid>
                 </Grid>
               ))
-            )}
+            }
 
             <Menu
               id="menu-actions"

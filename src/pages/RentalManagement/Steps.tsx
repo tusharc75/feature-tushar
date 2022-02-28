@@ -155,7 +155,6 @@ const Steps = (props) => {
                 //         </Button>
                 //     }
                 // />
-
                 <CustomMobileStepperOpportunities
                     stepName={((activeStep + 1) + "/" + steps.length) + " " + steps[currentStep] ?? ""}
                     nextButton={
@@ -257,7 +256,7 @@ const Steps = (props) => {
                                 </Grid>
 
                                 <Stepper className={`${classes.pbStepper} stepper-responsive mt-2`}
-                                    activeStep={activeStep}>
+                                    activeStep={isStepEnded ? steps.length + 1 : activeStep}>
                                     {steps.map((label, i) => (
                                         <Step
                                             key={label}

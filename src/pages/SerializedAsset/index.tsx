@@ -116,9 +116,6 @@ const ProductInventory = () => {
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    if (o?.fieldData?.fieldName === "serialNumber") {
-                        o.fieldData.primaryField = true
-                    }
                     let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
@@ -167,7 +164,7 @@ const ProductInventory = () => {
                     selectedRecords: rows.filter(f => f.isChecked === true)
                 });
             }
-            dispatch({ type: "initialize", data: rows, count: data.count });
+            // dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);

@@ -55,8 +55,10 @@ export const termsAndConditionDocumentUploadMaxSize = {
 };
 
 export const repairJobProcessSteps = ["Serialized Assets", "Repair Process"];
-
 export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
+export const purchaseOrderSteps = ['Add Product', 'Ad hoc Charges', 'Issue PO', 'Receiving Asset'];
+export const rentalManagementSteps = ['Add Products', 'Ad-hoc Charges', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Packing Slip'];
+export const subleaseSteps = ["Add Products", "Start Sublease", "End Sublease"]
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -130,7 +132,7 @@ export const sidebarResource = {
   opportunity: 'Opportunity',
   field: 'Field',
   productCategory: 'Product Category',
-  //productInventory: 'Product Inventory',
+  productInventory: 'Product Inventory',
   serializedAsset: "Serialized Asset",
   priceTemplate: 'Price Template',
   product: 'Product',
@@ -175,7 +177,8 @@ export const sidebarResource = {
   transferAsset: 'Transfer Asset',
   address: 'Address',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventory' 
+  transferInventory: 'Transfer Inventory',
+  zone: 'Zone'
 };
 
 export const resourceNames = {
@@ -234,7 +237,7 @@ export const resourceNames = {
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventory' 
+  transferInventory: 'Transfer Inventory'
 };
 
 export const primaryFields = {
@@ -298,7 +301,7 @@ export const RESOURCE_LABEL = {
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventories' 
+  transferInventory: 'Transfer Inventories'
 };
 
 export const CHILD_RESOURCE = {
@@ -558,7 +561,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
         defaultOptions = key.option;
       }
       const options = defaultOptions?.map((data: any) => data.optionValue);
-      obj[key.fieldName] = value ? value : options;
+      obj[key.fieldName] = value ? typeof value === 'string' ? [value] : value : options;
     } else if (key.type === 'freeStyleMultiSelect') {
       const defaultOptions = key.option?.filter((item: any) => item.default === true);
       const options = defaultOptions?.map((data: any) => data.optionValue);
@@ -611,14 +614,14 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue ? defaultValue : false;
     } else if (key.type === 'multiSelect') {
       const values = dataObj[key.fieldName] && dataObj[key.fieldName].length
-
         ? typeof dataObj[key.fieldName] === 'string'
-          ? dataObj[key.fieldName]
+          ? [dataObj[key.fieldName]]
           : dataObj[key.fieldName].map((val: any) => filterValues(val))
         : defaultValue || [];
       obj[key.fieldName] = values;
     } else if (key.type === 'dropDown') {
-      const value = filterValues(dataObj[key.fieldName]);
+      const value = (dataObj[key.fieldName] && Array.isArray(dataObj[key.fieldName]) && dataObj[key.fieldName]?.length) ? dataObj[key.fieldName][0] :
+        filterValues(dataObj[key.fieldName]);
       obj[key.fieldName] = value ? value : defaultValue || '';
     } else if (key.type === 'converter' || key.type === 'currencyAmount' || key.isConverter === true) {
       if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
@@ -1417,11 +1420,7 @@ export const generateUniqueIdOnly = () => {
 export const prepareDataForGrid = (data, user = {}) => {
   let objectValues = {};
   let restProperties = {};
-  let mappedEntities = JSON.parse(localStorage.getItem("mappedEntities"))
 
-  if (data.entity && data.entity.length === 0 && mappedEntities.length) {
-    data.entity = [...mappedEntities]
-  }
   Object.keys(data).forEach((key) => {
     if (typeof data[key] === "object") {
 
@@ -1623,6 +1622,16 @@ export const SUBLEASE_STATUS = {
   issued: 'Issued',
   completed: 'Completed',
 };
+
+export const PURCHASE_ORDER_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  issued: 'Issued',
+  received: 'Received',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
+  closed: 'Closed',
+} as const;
 
 export const INVENTORY_OWNER_TYPE = {
   brand: 'Brand',

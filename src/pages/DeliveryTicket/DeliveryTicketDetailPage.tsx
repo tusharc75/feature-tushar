@@ -144,27 +144,27 @@ export default function DeliveryTicketDetail(props) {
       }
       data = data.filter((fields: any) => {
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
-          if (["transferAsset", "rentalJob", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
+          if (["transferAsset", "rentalJob", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-          if (["rentalJob", "repairJob", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
+          if (["rentalJob", "repairJob", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob) {
-          if (["repairJob", "transferAsset", "sublease", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
+          if (["repairJob", "transferAsset", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
-          if (["repairJob", "transferAsset", "sublease", "productInventory"].includes(fields.fieldData.fieldName)) {
+          if (["repairJob", "transferAsset", "sublease", "productInventory", "pickupFromType", "deliveryToType"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.sublease) {
-          if (["rentalJob", "repairJob", "transferAsset", "salesOrder", "productInventory"].includes(fields.fieldData.fieldName)) {
+          if (["rentalJob", "repairJob", "transferAsset", "salesOrder", "productInventory", "pickupFromType", "deliveryToType"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
@@ -225,6 +225,7 @@ export default function DeliveryTicketDetail(props) {
         if (startDeliverySignatures && startDeliverySignatures.length > 0) {
           setStartDeliveryDate(moment(startDeliverySignatures[startDeliverySignatures.length - 1].date).format(dateTimeFormat));
         }
+        setSignOffDate(data?.actualDeliveryDate)
         const signOffSignatures = data?.signatures?.filter(f => f.status === "Sign-Off" && f.date);
         if (signOffSignatures && signOffSignatures.length > 0) {
           setSignOffDate(moment(signOffSignatures[signOffSignatures.length - 1].date).format(dateTimeFormat));
@@ -307,9 +308,7 @@ export default function DeliveryTicketDetail(props) {
         data = response?.productInventory?.filter(d => inventory?.includes(d.inventory)).map(obj => obj.inventoryDetail)
       }
       else {
-        let ids = JSON.stringify(productInventories)
-        const queryString = `?getById=${ids}`
-        const response = await axiosInstance().get(`${serializedAsset.api}${queryString}`)
+        const response = await axiosInstance().get(`${deliveryTicket.api}/${id}/assets`)
         data = response?.data?.data
       }
       let rows = data.map((u) => {
@@ -615,18 +614,14 @@ export default function DeliveryTicketDetail(props) {
                   <TabPanel value={tabValue} index={0}>
                     {(deliveryTicketData && deliveryTicketFields.length > 0 ?
                       <DetailsPage
-                        data={{ ...deliveryTicketData, actualDispatchedDate: startDeliveryDate, actualDeliveredDate: signOffDate }}
-                        fields={[...deliveryTicketFields, {
+                        data={{ ...deliveryTicketData, actualDispatchedDate: startDeliveryDate, actualDeliveryDate: signOffDate }}
+                        fields={[...deliveryTicketFields
+                          , {
                           fieldData: {
-                            fieldLabel: "Actual Dispatched Date",
-                            fieldName: "actualDispatchedDate",
-                            sectionName: "Sign-off Information"
-                          }
-                        }, {
-                          fieldData: {
-                            fieldLabel: "Actual Delivered Date",
-                            fieldName: "actualDeliveredDate",
-                            sectionName: "Sign-off Information"
+                            type: "date",
+                            fieldLabel: "Actual Delivery Date",
+                            fieldName: "actualDeliveryDate",
+                            sectionName: "Actuals"
                           }
                         }
                         ]} /> : null
@@ -852,7 +847,7 @@ export default function DeliveryTicketDetail(props) {
             }}
             onOk={() => {
               setOkBtnLoading(true);
-              axiosInstance().put(`${deliveryTicket.api}/${id}/remove-assets`, { ids: selectedRecords.map(m => m._id) })
+              axiosInstance().put(`${deliveryTicket.api}/${id}/assets`, { ids: selectedRecords.map(m => m._id) })
                 .then(() => {
                   toastConfig.setToastConfig({ open: true, type: "success", message: `Selected serialized asset(s) removed` });
                   dispatch({
@@ -875,7 +870,7 @@ export default function DeliveryTicketDetail(props) {
         {addSerializedAssetDialog &&
           <AddSerializedAsset
             addSerializedAsset={(newRecordsToAdd) => {
-              axiosInstance().post(`${deliveryTicket.api}/${id}/add-assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
+              axiosInstance().post(`${deliveryTicket.api}/${id}/assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
                 .then(({ data }) => {
                   setAddSerializedAssetDialog(false)
                   fetchDeliveryTicketData()

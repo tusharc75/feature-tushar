@@ -11,12 +11,12 @@ import { purchaseOrder } from "../../../constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
-import AddProductDialog from "./AddProductDialog";
+import AddExistingProductInventory from "../../Sublease/Productpackage/AddExistingProductInventory";
 import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
 import CreateProduct from "../../../components/Product/CreateProduct";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import PurchaseOrderQtyDialog from "./PurchaseOrderQtyDialog";
-import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
+import { FaCartArrowDown, FaCartPlus, FaLaptopHouse } from "react-icons/fa";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
@@ -30,7 +30,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import { MdAdd } from "react-icons/md";
 import { RiEditCircleLine } from "react-icons/ri";
 
-const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable, id, setPurchaseOrderProduct }) => {
+const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -43,7 +43,6 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     const [isAddingProducts, setAddingProducts] = useState(false);
     const [isAddNewProduct, setIsAddNewProduct] = useState(false)
 
-    const [productList, setProductList] = useState([]);
     const [showProductDialog, setShowProductDialog] = useState(false)
     const [selectedProductData, setSelectedProductData] = useState(null)
     const [isBulkEdit, setIsBulkEdit] = useState(false)
@@ -56,13 +55,26 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deletePurchaseOrderProduct, setDeletePurchaseOrderProduct] = useState([]);
 
-    useEffect(() => {
-        fetchPurchaseOrderProduct();
-    }, [id]);
+    const [isRateRequired, setIsRateRequired] = useState(false);
 
     useEffect(() => {
+        fetchFields()
+    }, []);
+
+
+    useEffect(() => {
+        fetchPurchaseOrderProduct();
+    }, [columns]);
+
+
+    const fetchFields = async () => {
         axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
             const fields = CURReplaceByCurrencySingle(data, purchaseOrderData?.currency)
+            fields.forEach(element => {
+                if (element.fieldName === "price" && element.required) {
+                    setIsRateRequired(true);
+                }
+            });
             let rendererNames = [];
             genrateColoum(fields, columns, rendererNames, false);
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
@@ -75,24 +87,17 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
             setFrameWorkComponent({ ...tempFrameworkComponent })
             setColumns([...columns])
         })
-    }, []);
+    }
 
     const fetchPurchaseOrderProduct = () => {
         dispatch({ type: "loading", loading: true });
         if (gridApi) {
             gridApi.setRowData([]);
         }
-        setCurrentStepDisable(false)
-        axiosInstance().get(`${purchaseOrder.api}/product/${id}`).then(({ data: { data } }) => {
+        setNextStep(false)
+        axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`).then(({ data: { data } }) => {
             setPurchaseOrderProduct(JSON.parse(JSON.stringify(data)))
             let rows = data?.map((item, index) => {
-                if ((!currentStepDisable) && (
-                    item.qty === 0
-                    || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === 0
-                    || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === undefined
-                    || item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()] === null)) {
-                    setCurrentStepDisable(true)
-                }
                 let finalObject = prepareDataForGrid(item);
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
                 finalObject["allowedToEdit"] = true
@@ -102,8 +107,27 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                 res.productName = `${index + 1}- ${item.productDetail?.productName}`
                 res.productNumber = item.productDetail?.productNumber
                 res.productDetail = item.productDetail
+                if (item?.qty === 0) {
+                    res.isValid = false;
+                }
+                else if (isRateRequired) {
+                    if (item["finalPrice_" + purchaseOrderData?.currency?.toLowerCase()]) {
+                        res.isValid = true;
+                    }
+                    else {
+                        res.isValid = false;
+                    }
+                }
+                else {
+                    res.isValid = true
+                }
                 return res;
             });
+            if (rows.filter(_rows => _rows.isValid === false).length > 0) {
+                setNextStep(false)
+            } else {
+                setNextStep(true)
+            }
             dispatch({ type: "initialize", data: rows, count: rows.length });
             dispatch({ type: "loading", loading: false });
         }).catch((error) => {
@@ -170,14 +194,15 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
         setAnchorEl(null);
     };
 
-    const handleAddProduct = (products) => {
+    const handleAddProduct = (rows) => {
+        console.log(rows)
         setAddingProducts(true)
-        let tempProductArray = products.map(d => ({
-            "productId": d.id || d.productId,
-            "qty": parseInt(d.quantity) || 0,
+        let tempProductArray = rows.map(d => ({
+            "productId": d._id,
+            "qty": d.qty ? parseInt(d.qty) : 1,
             "expectedDelivery": purchaseOrderData?.deliveryDate
         }))
-        axiosInstance().post(`${purchaseOrder.api}/product/${id}/add`, { "orderDetails": tempProductArray })
+        axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/add`, { "orderDetails": tempProductArray })
             .then(() => {
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
@@ -190,7 +215,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     }
 
     const handleUpdateQty = (rows) => {
-        axiosInstance().put(`${purchaseOrder.api}/product/${id}/update`, { products: rows })
+        axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows })
             .then(() => {
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
@@ -206,7 +231,7 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
     }
 
     const handleDelete = () => {
-        axiosInstance().post(`${purchaseOrder.api}/product/${id}/delete`, { ids: deletePurchaseOrderProduct })
+        axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/delete`, { ids: deletePurchaseOrderProduct })
             .then(() => {
                 fetchPurchaseOrderProduct()
                 setShowDeleteConfirmBox(false)
@@ -221,32 +246,32 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex" alignItems="center">
                     <Button
-                        variant={isMobile && !isTablet ? "text" : "contained"}
+                        variant={"contained"}
                         color="primary"
                         size="small"
-                        style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
+                        // style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
                         onClick={() => {
                             setIsAddNewProduct(true);
                         }}
                     >
-                        {isMobile && !isTablet ? <MdAdd size={22} /> : `Add New ${routes.product.title}`}
+                        {isMobile && !isTablet ? "Add" : `Add New ${routes.product.title}`}
                     </Button>
-                    <Box mx={1} />
+                    <Box mx={isMobile ? 0.5 : 1} />
                     <Button
-                        variant={isMobile && !isTablet ? "text" : "contained"}
+                        variant={"contained"}
                         color="primary"
                         size="small"
-                        style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
+                        // style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
                         onClick={() => {
                             setAddProductDialog(true);
                         }}
                     >
-                        {isMobile && !isTablet ? <FaCartArrowDown size={18} /> : `Add Existing ${routes.product.title}`}
+                        {isMobile && !isTablet ? "Existing" : `Add Existing ${routes.product.title}`}
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
-                    <Box display="flex" justifyContent="flex-end">
-                        <Box mx={1} />
+
+                    <Box display={isMobile ? "none" : "flex"} justifyContent="flex-end">
                         <Button
                             variant={isMobile && !isTablet ? "text" : "contained"}
                             color="primary"
@@ -264,18 +289,18 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     </Box>
                     <HtmlTooltip title="Please select some product">
                         <Button
-                            variant={isMobile && !isTablet ? "text" : "outlined"}
+                            variant={"outlined"}
                             color="default"
                             size="small"
                             onClick={openActions}
                             disabled={selectedRecords.length ? false : true}
                             aria-controls="action-menu"
                         >
-                            {isMobile && !isTablet ? "" : "Actions"}
-                            <ExpandMore />
+                            {"Actions"}
+                            <ExpandMore fontSize="small" />
                         </Button>
                     </HtmlTooltip>
-                    <Menu
+                    {isMobile ? <Menu
                         anchorEl={anchorEl}
                         keepMounted
                         getContentAnchorEl={null}
@@ -287,12 +312,39 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                         open={Boolean(anchorEl)}
                         onClose={closeActions}
                     >
+
+                        <MenuItem disabled={selectedRecords.length === 0}
+                            onClick={() => {
+                                setIsBulkEdit(true)
+                                setShowProductDialog(true)
+                            }}>
+                            Bulk Edit
+                        </MenuItem>
                         {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
                             closeActions()
                             setShowDeleteConfirmBox(true)
                             setDeletePurchaseOrderProduct(selectedRecords.map(d => d._id))
                         }}>Delete</MenuItem>}
-                    </Menu>
+                    </Menu> :
+                        <Menu
+                            anchorEl={anchorEl}
+                            keepMounted
+                            getContentAnchorEl={null}
+                            anchorOrigin={{
+                                vertical: "bottom",
+                                horizontal: "left",
+                            }}
+                            id="action-menu"
+                            open={Boolean(anchorEl)}
+                            onClose={closeActions}
+                        >
+                            {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
+                                closeActions()
+                                setShowDeleteConfirmBox(true)
+                                setDeletePurchaseOrderProduct(selectedRecords.map(d => d._id))
+                            }}>Delete</MenuItem>}
+                        </Menu>
+                    }
                 </div>
             </Box>
             {columns && frameWorkComponent ? isMobile && !isTablet ?
@@ -354,8 +406,14 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                     }}
                     renderedFrom="purchaseOrderDetailsPageInventory"
                     refreshGrid={fetchPurchaseOrderProduct}
-                    fromPurchaseOrderGrid={true}
                     currency={purchaseOrderData?.currency?.toLowerCase()}
+                    fromPurchaseOrderGrid={true}
+                    rowClassRules={{
+                        "red-data-row":
+                            function (params) {
+                                return !params?.data?.isValid
+                            },
+                    }}
                 />
                 : <Box
                     p={2}
@@ -365,11 +423,10 @@ const Product = ({ purchaseOrderData, currentStepDisable, setCurrentStepDisable,
                 </Box>
             }
             {addProductDialog &&
-                <AddProductDialog
+                <AddExistingProductInventory
                     isAddingProducts={isAddingProducts}
-                    addProductInPurchaseOrder={handleAddProduct}
-                    handleProductInPurchaseOrderClose={() => { setAddProductDialog(false) }}
-                    productInPurchaseOrder={productList}
+                    addProductInventory={handleAddProduct}
+                    handleProductInventoryClose={() => { setAddProductDialog(false) }}
                     type={"product"}
                 />
             }

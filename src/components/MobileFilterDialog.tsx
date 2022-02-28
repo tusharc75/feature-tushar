@@ -2,7 +2,7 @@ import * as React from 'react';
 import './MobileFilterDialog.scss';
 import TextField from '@material-ui/core/TextField';
 import { Add, Delete } from '@material-ui/icons';
-import { MdAdd } from 'react-icons/all';
+import { MdAdd, MdClose } from 'react-icons/all';
 import { Autocomplete } from '@material-ui/lab';
 import { Grid, Button, ButtonGroup, IconButton, Dialog, DialogContent, Slide } from '@material-ui/core';
 import { v4 as uuidv4 } from 'uuid';
@@ -159,7 +159,10 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
         className="mobile-filter-root"
       >
         <DialogContent className="mobile-filter-content">
-          <h3 className="pb-3 sub-filter-heading">{secHeading}</h3>
+          <div className='d-flex justify-content-space-between align-items-center pb-3'>
+          <h3 className=" sub-filter-heading">{secHeading}</h3>  
+          <MdClose size={20} style={{color:"rgb(244, 67, 54)"}} onClick={handleClose}/>
+          </div>
           {contentPart}
           {inputFields?.length > 0 ? (
             <form className={classes.root} onSubmit={handleSubmit}>

@@ -22,6 +22,7 @@ import { FaDiceOne } from "react-icons/fa";
 import MenuItem from '@material-ui/core/MenuItem';
 import { Delete } from "@material-ui/icons";
 import MultipleEntry from './MultipleEntry';
+import { useData } from '../../../StateProvider/Provider';
 
 const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handleSuccess, detailData, isBulkedit }) => {
 
@@ -30,9 +31,9 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [headerLabel, setHeaderLabel] = useState("");
-
+    const { state: { permissions } }: any = useData();
     //["Price", "Rent", "Discount", "Charge", "Tax"]
-    const [conditionType, setConditionType] = useState(["Rent", "Price"]);
+    const [conditionType, setConditionType] = useState(permissions.eCommerce?.isRead ? ["Rent", "Price"] : ["Rent"]);
     const [currency, setCurrency] = useState([detailData.currency]);
     const [unit, setUnits] = useState([]);
     const [pricingMethod, setPricingMethod] = useState([]);
@@ -42,6 +43,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
     const [charge, setCharge] = useState([]);
 
     const [initialData, setInitialData] = useState(null);
+
     useEffect(() => {
         if (isBulkedit) {
             let unitArray: any = []
@@ -70,6 +72,9 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
             setInitialData({})
         }
         else {
+            if (!conditionData?.conditionType) {
+                conditionData["conditionType"] = ["Rent"]
+            }
             setInitialData(conditionData)
             let details: any = {}
             if (conditionData?.materialType === "product") {

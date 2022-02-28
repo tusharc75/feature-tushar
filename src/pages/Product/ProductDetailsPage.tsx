@@ -437,7 +437,7 @@ const ProductDetailsPage = () => {
                 <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
                 <Tab label="Packages" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
                 <Tab label="Parent Product" aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
-                <Tab label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />
+                {permissions?.eCommerce?.isRead && productData?.productTemplate && <Tab label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />}
               </Tabs>
               <TabPanel value={tabValue} index={0}>
                 <Box>
@@ -491,7 +491,7 @@ const ProductDetailsPage = () => {
                 />
               </TabPanel>
               <TabPanel value={tabValue} index={3}>
-                {tabValue === 3 && <ProductConfiguration
+                {tabValue === 3 && permissions?.eCommerce?.isRead && productData?.productTemplate && <ProductConfiguration
                   productFields={productFields.map((_f: any) => _f.fieldData)}
                   productData={productData}
                   id={id}

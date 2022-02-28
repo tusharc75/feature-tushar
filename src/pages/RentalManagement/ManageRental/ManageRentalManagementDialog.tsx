@@ -27,6 +27,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
 import ManageContactDialog from "../../Contact/ManageContact";
 import ManageWarehouse from '../../Warehouse/ManageWarehouse';
+import TextField from '@material-ui/core/TextField';
 
 const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManagementData = null, onClose, onSuccess, open }) => {
 
@@ -69,6 +70,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
 
     const [showAddWarehouseDialog, setShowAddWarehouseDialog] = useState(false);
     const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
+    const [statusOptions, setStatusOptions] = useState([]);
 
     const updateAccountDropdown = (data) => {
         const entityFields = rentalData.fields;
@@ -202,14 +204,19 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             else {
                 fieldData = offlineFieldsData?.rentalManagement || [];
             }
+            var statusOptions = []
             fieldData?.forEach((e: any) => {
                 if (e?.fieldData?.fieldName === "warehouse" && e?.fieldData?.option) {
                     setOptionsPlantsEntity(e?.fieldData?.option?.filter((a) => a.entity?.includes(selectedEntity)));
                     e.fieldData.option = e?.fieldData?.option?.filter((a) => a.entity?.includes(selectedEntity));
                 }
+                if (e?.fieldData?.fieldName === 'status') {
+                    statusOptions = e.fieldData.option;
+                }
             })
-            const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-            const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+
+            var fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+            var fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
             if (rentalManagementId) {
                 try {
@@ -225,9 +232,10 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                         rest['status'] = "New"
                         rest['rentalJobName'] = `RJ_${generateUniqueIdOnly()}`
                         rest['estimateStartDate'] = new Date();
-                        rest['actualStartDate'] = new Date();
                         rest['estimateEndDate'] = "";
+                        rest['actualStartDate'] = "";
                         rest['actualEndDate'] = "";
+                        fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !["actualStartDate", "actualEndDate"].includes(obj.fieldName));
                         setCloneHeading(rentalJobName);
                         setRentalData({
                             fields: fieldsDataForCreate,
@@ -236,7 +244,13 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                         setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate))
                         setLoading(false)
                     } else {
-                        setRentalDetails(data)
+                        setRentalDetails(data) 
+                        if (data?.actualStartDate === "") {
+                            fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualStartDate"].includes(obj.fieldName));
+                        }
+                        if (data?.actualEndDate === "") {
+                            fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualEndDate"].includes(obj.fieldName));
+                        }
                         setRentalData({
                             fields: fieldsDataForUpdate,
                             initialValues: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -250,9 +264,10 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                 }
             }
             else {
+                fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !["actualStartDate", "actualEndDate"].includes(obj.fieldName));
                 let initialData = {
                     ...getObjKeys("", fieldsDataForCreate),
-                    estimateEndDate: "", actualEndDate: "", currency: user.user?.brandCurrency || "", rentalJobName: `RJ_${generateUniqueIdOnly()}`
+                    estimateEndDate: "", actualStartDate: "", actualEndDate: "", currency: user.user?.brandCurrency || "", rentalJobName: `RJ_${generateUniqueIdOnly()}`
                 };
                 setRentalData({
                     fields: fieldsDataForCreate,
@@ -759,16 +774,12 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 setFieldValue={(name, value) => {
                                                                                     handleValuesChange({ [name]: value })
                                                                                     setFieldValue(name, value)
-                                                                                    if (!rentalManagementId || isClone) {
-                                                                                        setFieldValue("actualStartDate", value)
-                                                                                    }
                                                                                 }}
                                                                                 required={field.required}
                                                                                 fullWidth
                                                                                 isTooltip={field?.isTooltip || false}
                                                                                 tooltipMessage={field?.tooltipMessage}
                                                                                 size="small"
-                                                                                minDate={new Date()}
                                                                                 maxDate={values["estimateEndDate"] ? moment(values["estimateEndDate"]).subtract(1, "day") : moment().add(5, "years")}
                                                                             />
                                                                         ) : field.fieldName === "estimateEndDate" ? (
@@ -784,9 +795,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 setFieldValue={(name, value) => {
                                                                                     handleValuesChange({ [name]: value })
                                                                                     setFieldValue(name, value)
-                                                                                    if (!rentalManagementId || isClone) {
-                                                                                        setFieldValue("actualEndDate", value)
-                                                                                    }
                                                                                 }}
                                                                                 required={field.required}
                                                                                 fullWidth
@@ -795,7 +803,30 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 size="small"
                                                                                 minDate={moment(values["estimateStartDate"]).add(1, "day")}
                                                                             />
-                                                                        ) : ["actualStartDate", "actualEndDate"].includes(field.fieldName) ? (
+                                                                        ) : field.fieldName === "actualStartDate" ? (
+                                                                            <FormTypes
+                                                                                {...field}
+                                                                                disabled={values["status"] === RENTAL_STATUS.readyToInvoice ? false : true}
+                                                                                fieldData={field}
+                                                                                values={values}
+                                                                                errors={errors}
+                                                                                touched={touched}
+                                                                                label={field.fieldLabel}
+                                                                                name={field.fieldName}
+                                                                                type={field.type}
+                                                                                options={field.option}
+                                                                                setFieldValue={(name, value) => {
+                                                                                    handleValuesChange({ [name]: value })
+                                                                                    setFieldValue(name, value)
+                                                                                }}
+                                                                                required={field.required}
+                                                                                fullWidth
+                                                                                isTooltip={field?.isTooltip || false}
+                                                                                tooltipMessage={field?.tooltipMessage}
+                                                                                size="small"
+                                                                            />
+                                                                        ) : field.fieldName === "actualEndDate" ? (
+
                                                                             <FormTypes
                                                                                 {...field}
                                                                                 disabled={values["status"] === RENTAL_STATUS.readyToInvoice ? false : true}

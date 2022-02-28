@@ -11,7 +11,14 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow, RENTAL_STATUS } from '../../constants/helpers';
+import {
+  getUniqueCurrencies,
+  gridLoadingTimeout,
+  rentalManagement,
+  defaultActivityShow,
+  RENTAL_STATUS,
+  rentalManagementSteps
+} from '../../constants/helpers';
 import Steps from './Steps';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { MdEdit, MdDelete } from 'react-icons/md';
@@ -40,8 +47,6 @@ import LoadingTicket from './LoadingTicket';
 import ReceivingTicket from './ReceivingTicket';
 import Invoice from './Invoice';
 import RentalManagementViews from './RoadMapViews/RentalManagementViews';
-
-const rentalProcessSteps = ['Add Products', 'Ad-hoc Charges', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Packing Slip'];
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -121,15 +126,9 @@ const RentalManagementDetailsPage = () => {
 
   useEffect(() => {
     if (!isOffline && currentStep !== null && currentStep >= 0 && currentStep <= 5) {
-      updateProcessStatus(rentalProcessSteps[currentStep]);
+      updateProcessStatus(rentalManagementSteps[currentStep]);
     }
   }, [currentStep]);
-
-  useEffect(() => {
-    if (isSmallScreen) {
-      setActivityShow(true);
-    }
-  }, [isSmallScreen]);
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
@@ -145,8 +144,9 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
+
       setRentalManagementData(data);
-      setCurrentStep(rentalProcessSteps.indexOf(data?.processStatus) !== -1 ? rentalProcessSteps.indexOf(data?.processStatus) : 0);
+      setCurrentStep(rentalManagementSteps.indexOf(data?.processStatus) !== -1 ? rentalManagementSteps.indexOf(data?.processStatus) : 0);
       handleMainPoints(data);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
@@ -233,7 +233,9 @@ const RentalManagementDetailsPage = () => {
   };
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance().put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
+    axiosInstance()
+      .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -244,7 +246,7 @@ const RentalManagementDetailsPage = () => {
       .patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: status })
       .then(({ data: { data } }) => {
         if (status === 'Invoiced' || status === 'Closed') {
-          updateProcessStatus(rentalProcessSteps[5]);
+          updateProcessStatus(rentalManagementSteps[5]);
           setCurrentStep(5);
         }
         fetchRentalManagementData();
@@ -403,12 +405,10 @@ const RentalManagementDetailsPage = () => {
               </Tabs>
               <TabPanel value={tabValue} index={0}>
                 <Box>
-                  {loadingDetails || !rentalManagementFields.length ? (
-                    <Grid container spacing={2} style={{ padding: '8px' }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
-                  ) : (
-                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
+
+                  {(!loadingDetails && rentalManagementFields.length > 0 ?
+                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields}
+                    /> : null
                   )}
                 </Box>
               </TabPanel>
@@ -417,7 +417,7 @@ const RentalManagementDetailsPage = () => {
                   <Steps
                     isNextStep={false}
                     nextStep={nextStep}
-                    steps={rentalProcessSteps}
+                    steps={rentalManagementSteps}
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
                     isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
@@ -454,7 +454,12 @@ const RentalManagementDetailsPage = () => {
                     />
                   )}
                   {currentStep === 4 && rentalManagementData && (
-                    <ReceivingTicket rentalManagementData={rentalManagementData} currentStep={currentStep} setNextStep={setNextStep} />
+                    <ReceivingTicket
+                      fetchRentalData={fetchRentalManagementData}
+                      rentalManagementData={rentalManagementData}
+                      currentStep={currentStep}
+                      setNextStep={setNextStep}
+                    />
                   )}
                   {currentStep === 5 && rentalManagementData && (
                     <Invoice
@@ -469,60 +474,22 @@ const RentalManagementDetailsPage = () => {
               </TabPanel>
               <TabPanel value={tabValue} index={2}>
                 <Box>
-                  <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} />
+                  <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
                 </Box>
               </TabPanel>
             </Paper>
           </div>
           <Box my={1} />
         </div>
-
         <div className="position-relative">
           <HideWhenOffline>
-            {/* {showActivity ?
-                <Paper>
-                  {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                    <IoIosArrowDropright className="icon" />
-                  </span>}
-                  <Grid container>
-                    <Grid item xs={12}>
-                      {rentalManagementData && (
-                        <div>
-                          <Activity
-                            resourceId={rentalManagementData._id}
-                            resource={rentalManagement.resource}
-                            restrictedAddActivities={
-                              permissions &&
-                                permissions["rentalManagement"] &&
-                                permissions["rentalManagement"].isUpdate
-                                ? []
-                                : ["Attachment", "Case"]
-                            }
-                            relatedTo={[
-                              {
-                                type: rentalManagement,
-                                referenceId: rentalManagementData._id,
-                                access: true,
-                              },
-                            ]}
-                            handleActivityRefresh={() => { }}
-                            emails={[]}
-                          />
-                        </div>
-                      )}
-                    </Grid>
-                  </Grid>
-                </Paper> :
-                !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropleft className="icon" />
-                </span>} */}
             <Paper>
               {!isSmallScreen && (
                 <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
                   {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
                 </span>
               )}
-              <div style={{ display: showActivity ? 'block' : 'none' }}>
+              <div style={{ display: showActivity || (isSmallScreen && tabValue === 0) ? 'block' : 'none' }}>
                 <Grid container>
                   <Grid item xs={12}>
                     {rentalManagementData && (
@@ -540,7 +507,7 @@ const RentalManagementDetailsPage = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>

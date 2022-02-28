@@ -7,7 +7,10 @@ import { Button, Chip, Dialog, IconButton, makeStyles, useMediaQuery } from "@ma
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
-import { CustomDialogTransition, dateFormat, defaultActivityShow, gridLoadingTimeout, serializedAsset, purchaseOrder, rentalManagement, CHILD_RESOURCE, prepareDataForGrid } from "../../../constants/helpers";
+import {
+    CustomDialogTransition, dateFormat, defaultActivityShow, gridLoadingTimeout, serializedAsset,
+    purchaseOrder, PURCHASE_ORDER_STATUS, CHILD_RESOURCE, prepareDataForGrid
+} from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import moment from "moment";
 import { startCase } from "lodash";
@@ -40,7 +43,7 @@ const useStyles = makeStyles(() => ({
 
 }));
 
-const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, handleUpdateData, statusOptions, handleViewPdf, handleAttachments }) => {
+const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, statusOptions, handleViewPdf, handleAttachments }) => {
     const toastConfig = useContext(CustomToastContext);
     const {
         state: { user, permissions }
@@ -62,6 +65,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
     const [emailButtonLoading, setEmailButtonLoading] = useState(false)
     const [downlodingFile, setDownlodingFile] = useState(false)
     const [pdfFileBase64, setPdfFileBase64] = useState(null);
+
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
     const [gridApi, setGridApi] = useState(null);
@@ -141,9 +145,9 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
             });
             if (rows.every(d => d.qty === d.actualReceived)) {
                 setDisableCreateAsset(true)
-                if (statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice") >= statusOptions.findIndex(d => d.optionLabel === purchaseOrderData?.status)) {
-                    handleUpdateData({ "status": "Ready to Invoice" })
-                    setCurrentStep(4)
+                if (statusOptions.findIndex(d => d.optionLabel === PURCHASE_ORDER_STATUS.readyToInvoice) > statusOptions.findIndex(d => d.optionLabel === purchaseOrderData?.status)) {
+                    handleUpdateData({ "status": PURCHASE_ORDER_STATUS.readyToInvoice })
+                    setCurrentStep(3)
                 }
             }
             dispatch({ type: "initialize", data: rows, count: rows.length });
@@ -227,13 +231,24 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
         <Box display="flex" justifyContent="space-between" m={1}>
             <Box display="flex" alignItems="center">
                 <Box display="flex">
+                <Button
+                    variant={"contained"}
+                    color="primary"
+                    size="small"
+                    style={isMobile && !isTablet ? {color:"var(--secondary)"} : {}}
+                    disabled={selectedRecords.length === 0 || disableCreateAsset}
+                    onClick={() => { setShowCreateAssetDialog(true) }}
+                >
+                    {`Create Asset`}
+                </Button>
+                <Box mx={1}/>
                     {permissions?.purchaseOrder?.isRead && (
                         <Button
                             variant={isMobile && !isTablet ? "text" : "outlined"}
                             color="primary"
                             type="button"
                             size="small"
-                            style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
+                            style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
                             startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                             disabled={downlodingFile}
                             onClick={() => { handleViewPdf(false) }}
@@ -248,7 +263,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                             color="primary"
                             type="button"
                             size="small"
-                            style={isMobile && !isTablet ? {color:"var(--warning-darken)"} : {}}
+                            style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
                             startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
                             disabled={downlodingFile}
                             onClick={() => { handleViewPdf(true) }}
@@ -261,7 +276,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                         variant={isMobile && !isTablet ? "text" : "contained"}
                         color="primary"
                         size="small"
-                        style={isMobile && !isTablet ? {color:"var(--danger-light)"} : {}}
+                        style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
                         disabled={emailButtonLoading}
                         onClick={() => {
                             setEmailButtonLoading(true)
@@ -272,16 +287,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, setCurrentStep, han
                     </Button>}
                 </Box>
                 <Box mx={1} />
-                <Button
-                    variant={isMobile && !isTablet ? "text" : "contained"}
-                    color="primary"
-                    size="small"
-                    style={isMobile && !isTablet ? {color:"var(--secondary)"} : {}}
-                    disabled={selectedRecords.length === 0 || disableCreateAsset}
-                    onClick={() => { setShowCreateAssetDialog(true) }}
-                >
-                    {isMobile && !isTablet ? <MdAdd size={20} /> : `Create Asset`}
-                </Button>
+                
             </Box>
         </Box>
         {columns && !loadingColumns ?

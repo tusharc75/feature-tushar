@@ -24,6 +24,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { MdAdd, MdDelete } from "react-icons/md";
 import { FiPackage } from "react-icons/fi";
 import { RiEditCircleLine } from "react-icons/ri";
+import { fetch_sublease_product_fields } from "../../../components/Sublease/helper";
 
 const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
 
@@ -47,24 +48,25 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
     const [allFields, setAllFields] = useState([]);
-
+    const [isRateRequired, setIsRateRequired] = useState(false);
 
     useEffect(() => {
         fetchFields()
     }, []);
 
+    useEffect(() => {
+        fetchProductInventory();
+    }, [columns]);
+
     const fetchFields = async () => {
-        var data = []
-        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.subleaseProduct}`)
-        data = response?.data?.data
-        data = CURReplaceByCurrencySingle(data, subleaseData.currency)
+        var data = await fetch_sublease_product_fields(subleaseData.currency)
         setAllFields(JSON.parse(JSON.stringify(data)))
         const coloum: any = [{
             accessor: 'detail',
             Header: 'Detail',
             minWidth: 300,
             width: 300,
-            sticky: "left",
+            sticky: isMobile ? "none" : "left",
             Cell: ({ row }) => (
                 <div style={{ display: "flex", alignItems: 'center' }}>
                     <p
@@ -104,6 +106,9 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             }
         }]
         data.forEach(element => {
+            if (element.fieldName === "price" && element.required) {
+                setIsRateRequired(true);
+            }
             if (element.type === "date") {
                 coloum.push({
                     accessor: element.fieldName,
@@ -207,7 +212,6 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             }
         });
         setColumns(coloum)
-        fetchProductInventory();
     }
 
     const fetchProductInventory = async () => {
@@ -222,7 +226,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
         rows.forEach((parent, i) => {
             parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
             parent.qtyDisplay = parent.qty;
-            parent.isValid = parent["finalPrice_" + subleaseData?.currency?.toLowerCase()] ? true : false;
+            parent.isValid = parent["finalPrice_" + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
             parent.hideSelection = parent.assetQty > 0 ? true : false;
             parent.assetQty = parent.assetQty;
             if (parent.type === "package") {
@@ -230,7 +234,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                 subRows.forEach((_subRow, j) => {
                     _subRow.detail = (i + 1) + "." + (j + 1) + " - " + _subRow.productDetail?.productName
                     _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`
-                    _subRow.isValid = _subRow["finalPrice_" + subleaseData?.currency?.toLowerCase()] ? true : false;
+                    _subRow.isValid = _subRow["finalPrice_" + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
                     _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
                     _subRow.assetQty = _subRow.assetQty;
                 })
@@ -257,18 +261,19 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             const element: any = {};
             element.materialId = d._id;
             element.type = addExistingProductDialog.type;
-            element.unit = d.unit && d.unit.length ? d.unit[0] : "";
-            element.pricingMethod = d.pricingMethod && d.pricingMethod.length ? d.pricingMethod[0] : "";
+            element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : "";
+            element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : "";
             element.qty = d.qty ? parseFloat(d.qty) : 1;
             element.estimateStartDate = subleaseData ? subleaseData?.estimateStartDate : new Date();
             element.estimateEndDate = subleaseData ? subleaseData?.estimateEndDate : new Date();
-            element.actualStartDate = subleaseData ? subleaseData?.actualStartDate : new Date();
-            element.actualEndDate = subleaseData ? subleaseData?.actualEndDate : new Date();
+            element.actualStartDate = "";
+            element.actualEndDate = "";
+            element.actualJobDuration = "";
             element.parentId = addExistingProductDialog.parentId;
             const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields)
-            element.tenure = 1;
-            if (calValues && calValues["tenure"]) {
-                element.tenure = calValues["tenure"];
+            element.estimateJobDuration = 1;
+            if (calValues && calValues['estimateJobDuration']) {
+                element.estimateJobDuration = calValues['estimateJobDuration'];
             }
             material.push(element);
         });
@@ -361,9 +366,9 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                 unit: ele?.unit,
                 currency: subleaseData?.currency
             }))
-            data.supplier = [];
-            data.customer = [subleaseData?.customerAccount?.optionValue];
-            data.warehouse = [subleaseData?.warehouse?.optionValue];
+            data.supplier = [subleaseData?.supplierAccount?.optionValue];
+            data.customer = [];
+            data.warehouse = [];
             return new Promise((resolve, reject) => {
                 axiosInstance().post(pricingCondition.api + `/calculatePrice`, data)
                     .then(({ data: { data } }) => {
@@ -446,7 +451,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                             </Button>
                         </HtmlTooltip>
                         <Box mx={1} />
-                        {(material.length && !isIssued && !rowsData?.some(f => !f.isValid)) &&
+                        {(material.length && !isIssued && !rowsData?.some(f => !f.isValid)) ?
                             <Fragment>
                                 <HtmlTooltip title={"Start Sublease"}>
                                     <Button
@@ -462,7 +467,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                                 </HtmlTooltip>
                                 <Box mx={1} />
                             </Fragment>
-                        }
+                            : null}
                     </Box>
                 </Box>
             </Grid>

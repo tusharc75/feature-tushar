@@ -33,7 +33,7 @@ import MobileFilterDialog from "src/components/MobileFilterDialog"
 
 
 const TransferAsset = () => {
-  
+
   const toastConfig = useContext(CustomToastContext);
   const [showManageTransferAssetDialog, setShowManageTransferAssetDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -103,13 +103,9 @@ const TransferAsset = () => {
       .then(({ data }) => {
         let rows = data.data?.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-
-          finalObject['canDelete'] = permissions?.transferAsset?.isDelete;
-
+          finalObject['canDelete'] = false;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-
           finalObject['allowedToEdit'] = permissions?.transferAsset?.isUpdate;
-
           return finalObject;
         });
 

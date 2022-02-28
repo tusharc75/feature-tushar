@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => {
+const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -262,7 +262,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "inventoryRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
     { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
-    { field: "warehouse", headerName: "Plant", show: true, disabled: true, cellRenderer: "warehouseRenderer" },
+    { field: "warehouse", headerName: "Plant", show: false, disabled: true, cellRenderer: "warehouseRenderer" },
     { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "deliveryTicketRenderer" },
     { field: "receivingTicket", headerName: "Receiving Ticket", show: true, cellRenderer: "receivingTicketRenderer" },
     { field: "returnTicket", headerName: "Return Ticket", show: true, cellRenderer: "returnTicketRenderer" },
@@ -287,7 +287,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
     data["refrenceId"] = rentalManagementData._id;
     data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
     data["pickupFrom"] = rentalManagementData?.customerAccount?.optionValue;
-    data["pickupFromAddress"] = rentalManagementData.shippingAddress?.optionValue;
+    data["pickupFromAddress"] = selectedRecords[0]?.currentLocation;
     data["deliveryToType"] = deliveryToType;
     if (deliveryToType === DELIVERY_FROM_TO_TYPE.supplier) {
       if (selectedRecords.length) {
@@ -613,6 +613,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
         onSuccess={() => {
           setShowTicketDialog({ open: false, ticketType: "", data: {} });
           fetchRecords();
+          fetchRentalData()
         }}
       />
     )}
@@ -641,7 +642,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, setNextStep }) => 
           let apiCalls = [];
           Object.keys(groupByCalls).forEach((key) => {
             apiCalls.push(
-              axiosInstance().put(`${deliveryTicket.api}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) })
+              axiosInstance().put(`${deliveryTicket.api}/${key}/assets`, { ids: groupByCalls[key].map((m) => m._id) })
             );
           });
           Promise.all(apiCalls)

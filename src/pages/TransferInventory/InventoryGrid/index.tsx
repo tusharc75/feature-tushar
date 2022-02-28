@@ -1,28 +1,23 @@
-import React from 'react';
-import { useReducer, useState, useEffect, Fragment, FC, useContext } from 'react';
-import { Button, Box } from '@material-ui/core';
+import React, { useReducer, useState, useEffect, useContext } from 'react';
+import { Button, Box, CircularProgress } from '@material-ui/core';
 import { useHistory, Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import { isMobile, isTablet } from 'react-device-detect';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
-import { reducer as gridReducer, intialState as gridState } from 'src/components/AgGridComponents/CustomAgGrid';
-import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
+import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { FaSuitcase } from 'react-icons/fa';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
-import { MdAdd } from 'react-icons/md';
+import { MdAdd, MdDone } from 'react-icons/md';
 import { useData } from 'src/StateProvider/Provider';
 import AddInventory from './AddInventory';
 import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 
 const InventoryGrid = (props) => {
-  const { transferData, currentStep, setNextStep, updateTransferStatus } = props;
+  const { transferData, updateTransferStatus, setTransferIsEnded } = props;
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -38,8 +33,9 @@ const InventoryGrid = (props) => {
   const [state, dispatch] = useReducer(gridReducer, gridState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const [isAdding, setIsAdding] = useState(false);
+  const [isCompleting, setCompleting] = useState(false);
   const columns = [
-    { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer' },
+    { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer', primaryField: true },
     {
       field: 'qty',
       headerName: 'Quantity',
@@ -81,6 +77,13 @@ const InventoryGrid = (props) => {
             ...finalObject
           };
         });
+
+        if (data && data.length === 0 && transferData?.status !== 'New') {
+          updateTransferStatus('New');
+        } else if (data.length > 0 && !['In Progress', 'Completed'].includes(transferData?.status)) {
+          updateTransferStatus('In Progress');
+        }
+
         dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -134,19 +137,6 @@ const InventoryGrid = (props) => {
     }
   };
 
-  const onCellValueChanged = (row) => {
-    axiosInstance()
-      .put(`${routes.transferInventory.path}/${transferData?._id}/product`, {
-        ids: [row.data.id],
-        qty: Number(row.data.qty)
-      })
-      .then(() => {
-        toastConfig.setToastConfig({ open: true, message: 'Record successfully updated', type: 'succes' });
-        fetchInventories();
-      })
-      .catch((err) => toastConfig.setToastConfig(err));
-  };
-
   const ProductNameRenderer = (params) => (
     <Link className="link" title={params.value} to={`/product/detail/${params.data._id}`}>
       {params.value}
@@ -175,6 +165,25 @@ const InventoryGrid = (props) => {
     actionsRenderer: ActionRenderer
   };
 
+  const completeTransfer = () => {
+    setCompleting(true);
+    axiosInstance()
+      .patch(`${routes.transferInventory.path}/${transferData?._id}/complete`)
+      .then(() => {
+        toastConfig.setToastConfig({
+          open: true,
+          message: 'Transfer completed',
+          type: 'success'
+        });
+        setTransferIsEnded(true);
+        setCompleting(false);
+      })
+      .catch((err) => {
+        setCompleting(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
   return (
     <React.Fragment>
       <Box display="flex" justifyContent="space-between" mx="4px">
@@ -187,25 +196,43 @@ const InventoryGrid = (props) => {
             onClick={() => {
               setAddInventoryDialog(true);
             }}
+            disabled={isCompleting}
           >
-            {isMobile && !isTablet ? <MdAdd size={22} /> : `Add ${routes.productInventory.title}`}
+            {isMobile && !isTablet ? <MdAdd size={22} /> : `Add Product`}
           </Button>
         )}
-        {permissions?.transferInventory.isUpdate && (
-          <Button
-            variant={isMobile ? 'text' : 'contained'}
-            size="small"
-            color="primary"
-            style={isMobile && !isTablet ? { color: 'var(--danger-light)' } : {}}
-            disabled={selectedRecords.length === 0}
-            onClick={() => {
-              setShowConfirmBox(true);
-              setRemoveData(selectedRecords.map((inv: any) => inv?._id));
-            }}
-          >
-            {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : 'Remove Inventory'}
-          </Button>
-        )}
+        <Box display="flex">
+          {permissions?.transferInventory.isUpdate && (
+            <Button
+              variant={isMobile ? 'text' : 'contained'}
+              size="small"
+              color="primary"
+              style={isMobile && !isTablet ? { color: 'var(--danger-light)' } : {}}
+              disabled={selectedRecords.length === 0 || isCompleting}
+              onClick={() => {
+                setShowConfirmBox(true);
+                setRemoveData(selectedRecords.map((inv: any) => inv?._id));
+              }}
+            >
+              {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : 'Remove Product'}
+            </Button>
+          )}
+
+          {permissions?.transferInventory.isUpdate && (
+            <Button
+              className="ml-2"
+              variant={isMobile ? 'text' : 'contained'}
+              size="small"
+              color="primary"
+              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
+              disabled={dataRows.length === 0 || isCompleting}
+              onClick={completeTransfer}
+              startIcon={isCompleting && <CircularProgress color="inherit" size={18} />}
+            >
+              {isMobile && !isTablet ? <MdDone size={22} /> : 'Complete Transfer'}
+            </Button>
+          )}
+        </Box>
       </Box>
 
       <Box mt={1}>
@@ -229,7 +256,12 @@ const InventoryGrid = (props) => {
             rowCount={rowCount}
             page={page}
             loading={loading}
-            chips={[]}
+            chips={[
+              {
+                label: 'Quantity: ',
+                field: 'qty'
+              }
+            ]}
             additionalDetails={[]}
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
             onCreate={false}
@@ -238,7 +270,7 @@ const InventoryGrid = (props) => {
             renderedFrom="transferInentoryPage"
           />
         ) : (
-          <CustomAgGridEditable
+          <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
             frameworkComponents={frameworkComponents}
@@ -253,7 +285,7 @@ const InventoryGrid = (props) => {
             allowSelection={true}
             isClientSideGrid={true}
             loading={loading}
-            onCellValueChanged={onCellValueChanged}
+            // onCellValueChanged={onCellValueChanged}
             renderedFrom="transferInentory_productInventory"
             refreshGrid={() => {}}
           />

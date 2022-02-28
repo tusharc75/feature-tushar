@@ -198,7 +198,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     let apiCalls = [];
 
     Object.keys(groupByCalls).forEach((key) => {
-      apiCalls.push(axiosInstance().put(`${deliveryTicket.api}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) }));
+      apiCalls.push(axiosInstance().put(`${deliveryTicket.api}/${key}/assets`, { ids: groupByCalls[key].map((m) => m._id) }));
     });
 
     Promise.all(apiCalls)
@@ -222,9 +222,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   return (
     <Fragment>
-      <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} justifyContent="space-between" mx="4px">
+      <Box display="flex" flexDirection={isMobile ? "row-reverse" : 'row'} justifyContent={isMobile ? "flex-end" : "space-between"} mx="4px">
         <Box>
-          {permissions?.transferAsset?.isRead && (
+          {/* {permissions?.transferAsset?.isRead && (
             <Button
               variant={isMobile && !isTablet ? "text" : "outlined"}
               color="primary"
@@ -239,8 +239,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             >
               {isMobile && !isTablet ? <AiFillFilePdf size={18} /> :  fileDownloading ? 'Please wait...' : 'Preview'}
             </Button>
-          )}
-          <Box component="span" mx={1} />
+          )} */}
+          {/* <Box component="span" mx={1} /> */}
           {permissions?.transferAsset?.isRead && (
             <Button
               variant={isMobile && !isTablet ? "text" : "outlined"}
@@ -257,8 +257,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               {isMobile && !isTablet ? <IoMdDownload size={20} /> : fileDownloading ? 'Please wait...' : 'Download'}
             </Button>
           )}
+          <Box component="span" mx={1} />
         </Box>
-        {!isTransferEnded &&  <Box marginTop={isMobile ? 2 : 0}>
+        {!isTransferEnded &&  <Box >
           {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isCreate && (
             <Button
               variant="contained"
@@ -275,7 +276,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             </Button>
           )}
           <Box component="span" mx={1} />
-          {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isUpdate && (
+          {/* {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isUpdate && (
             <Button
               variant="contained"
               size="small"
@@ -290,7 +291,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             >
               Remove Loading Ticket
             </Button>
-          )}
+          )} */}
         </Box>}
       </Box>
 

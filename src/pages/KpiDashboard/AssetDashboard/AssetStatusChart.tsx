@@ -65,15 +65,21 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between, 
             const oldData = { ...d };
             delete oldData.productName;
             delete oldData._id;
+
+            const total = Object.values(oldData).reduce((acc: number, val: number) => acc + val);
+
             return {
               ['Product']: d.productName,
-              ['Total Assets']: Object.values(oldData).reduce((acc: number, val: number) => acc + val)
+              ['Total Assets']: total
             };
           });
           Object.keys(data.data[0]).forEach((label: any) => {
             if (!ignoreId.includes(label)) {
-              values.push(getSum(data.data, label));
-              labels.push(label);
+              const val = getSum(data.data, label);
+              if (val) {
+                values.push(val);
+                labels.push(label);
+              }
             }
           });
         }
@@ -173,56 +179,64 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between, 
       <Box textAlign={'center'}>
         <Typography variant="h6">Asset Count</Typography>
       </Box>
-      {tableDataRaw.length > 0 && (
-        <Box display={smallScreen ? "column" : 'flex'} justifyContent={'space-between'}>
-          <Box width={200} mb={1}>
-            <Autocomplete
-              disabled={loadingProductCategory}
-              fullWidth
-              disableListWrap
-              loading={loadingProductCategory}
-              loadingText={'Loading...'}
-              multiple={true}
-              value={selectedProductCategories}
-              options={productCategories}
-              disableCloseOnSelect
-              limitTags={2}
-              onChange={(_, newVal) => setSelectedProductCategories(newVal)}
-              getOptionSelected={(option, value) => option.id === value.id}
-              getOptionLabel={(option) => option.title}
-              renderOption={(option, { selected }) => (
-                <React.Fragment>
-                  <Checkbox
-                    icon={<CheckBoxOutlineBlank fontSize="small" />}
-                    checkedIcon={<CheckBox fontSize="small" />}
-                    style={{ marginRight: 8 }}
-                    checked={selected}
-                  />
-                  {option.title}
-                </React.Fragment>
-              )}
-              renderInput={(params) => <TextField {...params} variant="outlined" label="Product Category" size="small" />}
-            />
-          </Box>
-          <Box display={smallScreen ? "flex" : "block"} justifyContent={'space-between'}>
-            <Button disabled={loading} onClick={(event) => setAnchorEl(event.currentTarget)} startIcon={<ImportExport />}>
-              Export to
-            </Button>
-            <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
-              <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
-              <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
-              <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
-              <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
-            </Menu>
-            <Button disabled={loading} onClick={() => setTableView((prevState) => !prevState)} startIcon={!tableView ? <TableChart /> : <Timeline />}>
-              {!tableView ? 'Table' : 'Chart'} View
-            </Button>
-          </Box>
+
+      <Box display={smallScreen ? 'column' : 'flex'} justifyContent={'space-between'}>
+        <Box width={200} mb={1}>
+          <Autocomplete
+            disabled={loadingProductCategory}
+            fullWidth
+            disableListWrap
+            loading={loadingProductCategory}
+            loadingText={'Loading...'}
+            multiple={true}
+            value={selectedProductCategories}
+            options={productCategories}
+            disableCloseOnSelect
+            limitTags={2}
+            onChange={(_, newVal) => setSelectedProductCategories(newVal)}
+            getOptionSelected={(option, value) => option.id === value.id}
+            getOptionLabel={(option) => option.title}
+            renderOption={(option, { selected }) => (
+              <React.Fragment>
+                <Checkbox
+                  icon={<CheckBoxOutlineBlank fontSize="small" />}
+                  checkedIcon={<CheckBox fontSize="small" />}
+                  style={{ marginRight: 8 }}
+                  checked={selected}
+                />
+                {option.title}
+              </React.Fragment>
+            )}
+            renderInput={(params) => <TextField {...params} variant="outlined" label="Product Category" size="small" />}
+          />
         </Box>
-      )}
+        <Box display={smallScreen ? 'flex' : 'block'} justifyContent={'space-between'}>
+          <Button
+            disabled={loading || pieData?.labels.length === 0}
+            onClick={(event) => setAnchorEl(event.currentTarget)}
+            startIcon={<ImportExport />}
+          >
+            Export to
+          </Button>
+          <Menu id="export-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose('')}>
+            <MenuItem onClick={handleClose('ppt')}>Powerpoint</MenuItem>
+            <MenuItem onClick={handleClose('pdf')}>PDF</MenuItem>
+            <MenuItem onClick={handleClose('excel')}>Excel</MenuItem>
+            <MenuItem onClick={handleClose('json')}>Raw JSON</MenuItem>
+          </Menu>
+          <Button
+            disabled={loading || pieData?.labels.length === 0}
+            onClick={() => setTableView((prevState) => !prevState)}
+            startIcon={!tableView ? <TableChart /> : <Timeline />}
+          >
+            {!tableView ? 'Table' : 'Chart'} View
+          </Button>
+        </Box>
+      </Box>
+
       <Box height={440}>
         {loading && <Loader noLoader minHeight={'100%'} text={'Loading chart data...'} />}
-        {!loading && tableDataRaw.length > 0 ? (
+        {!loading && pieData && pieData?.labels.length > 0 ? (
           tableView ? (
             <TableContainer style={{ height: '400px' }}>
               <Table stickyHeader aria-label="caption table">
@@ -259,7 +273,7 @@ const AssetStatusChart = ({ productCategories, loadingProductCategory, between, 
             />
           )
         ) : (
-          !loading && <div>No Data</div>
+          !loading && <Loader noLoader minHeight={'100%'} text={'No Data'} />
         )}
       </Box>
     </div>

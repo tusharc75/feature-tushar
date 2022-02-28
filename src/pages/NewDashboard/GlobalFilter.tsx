@@ -21,18 +21,6 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down('xs')]: {
       height: 'auto'
     }
-  },
-  dashboardSelect: {
-    width: '200px',
-    [theme.breakpoints.down('xs')]: {
-      width: 'auto'
-    }
-  },
-  currencySelect: {
-    width: '200px',
-    [theme.breakpoints.down('xs')]: {
-      width: 'auto'
-    }
   }
 }));
 
@@ -57,8 +45,8 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters }: Props) => {
       user: { user }
     }
   } = useData();
-  // const dashboards = (user && user?.dashboards) || [];
-  const dashboards = seed.map((s) => s.name);
+  const dashboards = (user && user?.dashboards) || [];
+  // const dashboards = seed.map((s) => s.name);
   const [timeFrame, setTimeFrame] = React.useState<any>('1-year');
 
   React.useEffect(() => {
@@ -115,7 +103,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters }: Props) => {
           <Grid item xs={12} sm={6}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <FormControl className={classes.dashboardSelect} size="small" variant="outlined">
+                <FormControl fullWidth size="small" variant="outlined">
                   <InputLabel id="dashboard-type">Dashboard</InputLabel>
                   <Select
                     labelId="dashboard-type"
@@ -133,8 +121,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters }: Props) => {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormTypes
-                  fullWidth={false}
-                  className={classes.currencySelect}
+                  fullWidth
                   values={{ currency: globalFilters.currency }}
                   type="currency"
                   errors={{ currency: '' }}

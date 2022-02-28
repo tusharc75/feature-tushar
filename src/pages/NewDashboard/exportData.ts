@@ -39,6 +39,18 @@ const getTitle = (uniqueId: string, currency: string): { fileName: string; title
         title: 'Top Selling Product Category'
       };
 
+    case 'volumeVsBudget':
+      return {
+        fileName: 'Total Booked Volume',
+        title: 'Total Booked Volume in MT vs Budget'
+      };
+
+    case 'volume2VsBudget':
+      return {
+        fileName: 'Total Booked Margin',
+        title: `Total Booked GM in ${currency} vs Budget`
+      };
+
     default:
       return;
   }

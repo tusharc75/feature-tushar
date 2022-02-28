@@ -92,8 +92,46 @@ export default [
         ]
       },
       {
+        col: 6,
+        title: 'Total Booked Volume in MT vs Budget',
+        kpi: 'sales',
+        type: 'line',
+        hasFilter: true,
+        uniqueId: 'volumeVsBudget',
+        axis: 'x',
+        hasExport: true,
+        hasTableView: true,
+        filters: [
+          { key: 'salesRep', title: 'Sales Rep', multiple: false },
+          { key: 'customerAccount', title: 'Customer Account', multiple: false },
+          { key: 'marketSegment', title: 'Market Segment', multiple: false },
+          { key: 'subMarketSegment', title: 'Sub Market Segment', multiple: false },
+          { key: 'countrySellTo', title: 'Country Sell To', multiple: false },
+          { key: 'countryBillTo', title: 'Country Bill To', multiple: false }
+        ]
+      },
+      {
+        col: 6,
+        title: 'Total Booked GM in currency vs Budget',
+        kpi: 'sales',
+        type: 'line',
+        hasFilter: true,
+        uniqueId: 'volume2VsBudget',
+        axis: 'x',
+        hasExport: true,
+        hasTableView: true,
+        filters: [
+          { key: 'salesRep', title: 'Sales Rep', multiple: false },
+          { key: 'customerAccount', title: 'Customer Account', multiple: false },
+          { key: 'marketSegment', title: 'Market Segment', multiple: false },
+          { key: 'subMarketSegment', title: 'Sub Market Segment', multiple: false },
+          { key: 'countrySellTo', title: 'Country Sell To', multiple: false },
+          { key: 'countryBillTo', title: 'Country Bill To', multiple: false }
+        ]
+      },
+      {
         col: 5,
-        title: 'Open Quotes',
+        title: 'Status Quotes',
         kpi: 'open-quote',
         type: 'doughnut',
         hasFilter: true,
@@ -111,7 +149,7 @@ export default [
       },
       {
         col: 7,
-        title: 'Open opportunities by Customer Account',
+        title: 'Status opportunities by Customer Account',
         kpi: 'opportunities/customer-account',
         type: 'bar',
         hasFilter: true,
@@ -130,7 +168,7 @@ export default [
 
       {
         col: 6,
-        title: 'Open quotes by Sales Rep',
+        title: 'Status quotes by Sales Rep',
         kpi: 'quote/sales-rep',
         type: 'pie',
         hasFilter: true,

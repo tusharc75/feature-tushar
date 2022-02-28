@@ -6,7 +6,7 @@ import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { gridLoadingTimeout, serializedAsset } from '../../../constants/helpers';
+import { gridLoadingTimeout, INVENTORY_STATUS, serializedAsset } from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
@@ -23,7 +23,7 @@ import { groupBy, uniq, map } from "lodash";
 
 const renderedFrom = 'SubleasingSerializedAsset';
 
-const SerializedAsset = ({ subleaseData, fetchData }) => {
+const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
@@ -40,9 +40,11 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
     const [isCompleteing, setIsCompleteing] = useState(false);
     const [isCompleteEnable, setIsCompleteEnable] = useState(false);
 
+    const [downlodingFile, setDownlodingFile] = useState(false);
+
     useEffect(() => {
         fetchGridColumns()
-    }, []);
+    }, [currentStep]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -78,7 +80,8 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
         const response = await axiosInstance().get(`${sublease.api}/${subleaseData._id}/serialized-asset`)
         var isComplate = true;
         let rows = response?.data?.data.map((u) => {
-            if (u?.currentOwner?.optionValue !== subleaseData?.supplierAccount?.optionValue) {
+            if (u?.currentOwner?.optionValue !== subleaseData?.supplierAccount?.optionValue ||
+                [INVENTORY_STATUS.reserved, INVENTORY_STATUS.inUse, INVENTORY_STATUS.repair].includes(u.status)) {
                 isComplate = false;
             }
             let res = {
@@ -87,6 +90,12 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
             return res;
         });
         setIsCompleteEnable(isComplate)
+        if (isComplate) {
+            setNextStep(true)
+        }
+        else {
+            setNextStep(false)
+        }
         dispatch({ type: "initialize", data: rows, count: rows.length });
         setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
     };
@@ -115,32 +124,73 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
 
     return (<>
         <Box display="flex" justifyContent="flex-end" pt={1}>
+            <Button
+                onClick={() => {
+                    setDownlodingFile(true);
+                    axiosInstance().get(`${sublease.api}/${subleaseData._id}/pdf`)
+                        .then(({ data }) => {
+                            axiosInstance()
+                                .get(`user/download?fileName=${data.data.fileName}`, {
+                                    responseType: "blob",
+                                })
+                                .then(({ data }) => {
+                                    const file = new Blob([data], { type: "application/pdf" });
+                                    const fileURL = URL.createObjectURL(file);
+                                    const pdfWindow = window.open();
+                                    pdfWindow.location.href = fileURL;
+                                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                                    setDownlodingFile(false);
+                                })
+                                .catch((err) => {
+                                    toastConfig.setToastConfig(err);
+                                    setDownlodingFile(false);
+                                });
+                        }).catch((err) => {
+                            toastConfig.setToastConfig(err);
+                            setDownlodingFile(false);
+                        })
+                }}
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                color="primary"
+                type="button"
+                size="small"
+                disabled={downlodingFile}
+                style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
+                startIcon={isMobile ? '' : <AiFillFilePdf />}
+            >
+                {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
+            </Button>
+            <Box mx={1} />
             {SUBLEASE_STATUS.completed != subleaseData?.status &&
                 <Fragment>
-                    <Tooltip title="Transfer to Plant">
-                        <Button
-                            variant={"contained"}
-                            color="primary"
-                            size="small"
-                            onClick={() => {
-                                const data = {}
-                                data["ticketName"] = subleaseData.subleaseName;
-                                data["refrenceId"] = subleaseData._id;
-                                data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
-                                data["pickupFrom"] = subleaseData?.supplierAccount?.optionValue;
-                                data["pickupFromAddress"] = subleaseData?.shippingAddress?.optionValue;
-                                data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
-                                setShowTicketDialog({ open: true, data: data });
-                            }}
-                            disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse")
-                                || f.currentOwnerType !== INVENTORY_OWNER_TYPE.supplierAccount)))}
-                        >
-                            Receiving to Plant
-                        </Button>
-                    </Tooltip>
-                    <Box mx={1} />
-                    {selectedRecords.length > 0 && selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
-                        checkUniqWarehouse() ?
+                    {currentStep === 1 &&
+                        <Fragment>
+                            <Tooltip title="Transfer to Plant">
+                                <Button
+                                    variant={"contained"}
+                                    color="primary"
+                                    size="small"
+                                    onClick={() => {
+                                        const data = {}
+                                        data["ticketName"] = subleaseData.subleaseName;
+                                        data["refrenceId"] = subleaseData._id;
+                                        data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
+                                        data["pickupFrom"] = subleaseData?.supplierAccount?.optionValue;
+                                        data["pickupFromAddress"] = subleaseData?.shippingAddress?.optionValue;
+                                        data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                                        setShowTicketDialog({ open: true, data: data });
+                                    }}
+                                    disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse")
+                                        || f.currentOwnerType !== INVENTORY_OWNER_TYPE.supplierAccount || [INVENTORY_STATUS.reserved].includes(f.status))))}
+                                >
+                                    Receiving to Plant
+                                </Button>
+                            </Tooltip>
+                            <Box mx={1} />
+                        </Fragment>
+                    }
+                    {(selectedRecords.length > 0 && selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+                        checkUniqWarehouse() && currentStep === 1) ?
                         <Fragment>
                             <Tooltip title="Send to Supplier">
                                 <Button
@@ -168,16 +218,19 @@ const SerializedAsset = ({ subleaseData, fetchData }) => {
                         </Fragment>
                         : null
                     }
-                    <Button
-                        variant={"contained"}
-                        color="primary"
-                        size="small"
-                        disabled={!isCompleteEnable || isCompleteing}
-                        onClick={() => { completeSublease() }}
-                    >
-                        End Sublease
-                    </Button>
-                    <Box mx={1} />
+                    {currentStep === 2 &&
+                        <Fragment>
+                            <Button
+                                variant={"contained"}
+                                color="primary"
+                                size="small"
+                                disabled={!isCompleteEnable || isCompleteing}
+                                onClick={() => { completeSublease() }}
+                            >
+                                End Sublease
+                            </Button>
+                            <Box mx={1} />
+                        </Fragment>}
                 </Fragment>
             }
         </Box>

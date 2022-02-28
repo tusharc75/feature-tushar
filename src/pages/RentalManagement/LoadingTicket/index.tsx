@@ -203,7 +203,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "inventoryRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
     { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
-    { field: "warehouse", headerName: "Plant", show: true, disabled: true, cellRenderer: "warehouseRenderer" },
+    { field: "warehouse", headerName: "Plant", show: false, disabled: true, cellRenderer: "warehouseRenderer" },
     { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "ticketRenderer" },
     { field: "status", headerName: "Asset Status", show: true, cellRenderer: "commonRenderer" },
   ];
@@ -470,6 +470,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         onSuccess={() => {
           setShowTicketDialog({ open: false, data: {} });
           fetchRecords();
+          fetchRentalData()
         }}
       />
     )}
@@ -489,7 +490,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
             Object.keys(groupByCalls).forEach((key) => {
               apiCalls.push(
-                axiosInstance().put(`${deliveryTicket.api}/${key}/remove-assets`, { ids: groupByCalls[key].map((m) => m._id) })
+                axiosInstance().put(`${deliveryTicket.api}/${key}/assets`, { ids: groupByCalls[key].map((m) => m._id) })
               );
             });
 

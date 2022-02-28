@@ -59,11 +59,18 @@ export default function CustomReactTable({
             {
                 // Build our expander column
                 id: 'expander', // Make sure it has an ID
-                // Header: ({ getToggleAllRowsExpandedProps, isAllRowsExpanded }) => (
-                //     <span {...getToggleAllRowsExpandedProps()}>
-                //         {isAllRowsExpanded ? <FaAngleDown /> : <FaAngleRight />}
-                //     </span>
-                // ),
+                Header: ({ getToggleAllRowsExpandedProps, isAllRowsExpanded, rows }) => (
+                    <span {...getToggleAllRowsExpandedProps({
+                        style: {
+                            paddingLeft: "0.3rem",
+                            color: "black"
+                        }
+                    })}>
+                        {
+                            rows.some(d => d.canExpand) && (isAllRowsExpanded ? <FaAngleDown /> : <FaAngleRight />)
+                        }
+                    </span>
+                ),
                 sticky: "left",
                 width: 70,
                 minWidth: 70,
@@ -185,6 +192,7 @@ export default function CustomReactTable({
         //  Suggested by aman - 16-Nov-2021 - PO-174
         rows.forEach((d) => {
             if (d.subRows && d.subRows.length < 20) {
+                toggleAllRowsExpanded(true);
                 toggleRowExpanded(d.id, true)
             }
         })

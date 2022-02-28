@@ -2,6 +2,113 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.68.2](https://github.com/vebholic/oms_frontend/compare/v2.68.1...v2.68.2) (2022-02-28)
+
+### [2.68.1](https://github.com/vebholic/oms_frontend/compare/v2.68.0...v2.68.1) (2022-02-27)
+
+## [2.68.0](https://github.com/vebholic/oms_frontend/compare/v2.67.0...v2.68.0) (2022-02-26)
+
+
+### Features
+
+* - Expanded feature added in react table ([7f0ca9b](https://github.com/vebholic/oms_frontend/commit/7f0ca9b2a8a6b4793bc382a2afcde7a2afb8fe00))
+* - Global added if no entity assigned ([290a5a9](https://github.com/vebholic/oms_frontend/commit/290a5a95ffbd42590584f3c53592054f91cb544a))
+* rentalJob views close rental show based on cancelled and closed status PO-1170 ([f16da4a](https://github.com/vebholic/oms_frontend/commit/f16da4a3e4a140907e77f64f8742d4283358a568))
+
+
+### Bug Fixes
+
+* **asset and dashboard:** ui minor fix and changes ([634ff0e](https://github.com/vebholic/oms_frontend/commit/634ff0e8088fd6cd6a819b226b865852bcd3b0e8))
+* bug fix ([95e4a3a](https://github.com/vebholic/oms_frontend/commit/95e4a3a2c873bf5f8df64446eb4286d697b40561))
+* bug fix ([da2b1ad](https://github.com/vebholic/oms_frontend/commit/da2b1ad06cf2a2daf4bf9bab7b7b1fd880089e08))
+* bug fix ([12c9585](https://github.com/vebholic/oms_frontend/commit/12c9585873efcd758cf65538542ec9f41a9b9caf))
+* bug fix ([ed215de](https://github.com/vebholic/oms_frontend/commit/ed215dec630b459d9c65c2e29c66a287a436fc19))
+* **chatter:** bug fix ([b312538](https://github.com/vebholic/oms_frontend/commit/b312538b5eabdb5c38b0592d34d1517a80e9fad1))
+
+## [2.67.0](https://github.com/vebholic/oms_frontend/compare/v2.66.0...v2.67.0) (2022-02-25)
+
+
+### Features
+
+* rentalJob views roadmap return ticket show ([e3ae6be](https://github.com/vebholic/oms_frontend/commit/e3ae6be723355d713d6175b95148b18389a6a54c))
+* rentalJob views roadmap/flowchart parchaseOrder and sublease show PO-1094 ([f0ba039](https://github.com/vebholic/oms_frontend/commit/f0ba0391d981fb510e20e0e757775ce61573a44a))
+
+
+### Bug Fixes
+
+* bug fix ([baa648f](https://github.com/vebholic/oms_frontend/commit/baa648f0ccdb856dab394515398ff243c4dd4578))
+* bug fix ([eed90d1](https://github.com/vebholic/oms_frontend/commit/eed90d14d3c103bced0434eb864cea71d8361634))
+* bug fix ([855db0d](https://github.com/vebholic/oms_frontend/commit/855db0dc1543241a89ce027c8e4f7386b01f5e32))
+* bug fix ([78843a8](https://github.com/vebholic/oms_frontend/commit/78843a839fa50469a892fe091854c02109bb4e4c))
+* bug fix ([9b98838](https://github.com/vebholic/oms_frontend/commit/9b98838467203c7e5d03301694cbdc9733f1aa59))
+* bug fix ([a7446a0](https://github.com/vebholic/oms_frontend/commit/a7446a0fcf9fa55c3306e7a78bd027033b921486))
+* bug fix ([9d3abef](https://github.com/vebholic/oms_frontend/commit/9d3abef1464a97b237579406336742f338e4c6ee))
+* **dashboard:** minor bug fix ([74473e1](https://github.com/vebholic/oms_frontend/commit/74473e12dde479786973bda9a4c63cc034f9f41d))
+* fix ([c3021f5](https://github.com/vebholic/oms_frontend/commit/c3021f597f36f81003a83e54ef4feb7403fcdaf1))
+* **product:** fix product images tab ([95ca1fa](https://github.com/vebholic/oms_frontend/commit/95ca1fab3d7424a82fc2736c830001c0fe505678))
+* **product:** hide images tab ([32ec2b2](https://github.com/vebholic/oms_frontend/commit/32ec2b28d9d6f6379c5a35df012c81af2d438ae5))
+* rentalJob views formatting and color combination ([749e1c5](https://github.com/vebholic/oms_frontend/commit/749e1c535fa85eb099e8902b23d791074bd9fbe7))
+* rentalJob views roadmap/flowchart parchaseOrder and sublease show PO-1094 fix ([2bb5d0f](https://github.com/vebholic/oms_frontend/commit/2bb5d0fcd46e71c8fa5278c439f121ae3e234fee))
+
+## [2.66.0](https://github.com/vebholic/oms_frontend/compare/v2.65.1...v2.66.0) (2022-02-24)
+
+
+### Features
+
+* - Tinymce file created to replace cdn ([f1534a7](https://github.com/vebholic/oms_frontend/commit/f1534a73648581bd05650343bb8867e43e371c66))
+
+
+### Bug Fixes
+
+* **App.tsx:** Change flow for hard refresh ([3dae7b6](https://github.com/vebholic/oms_frontend/commit/3dae7b66595a4d8183e0f9f3ba2a7c8c9a2c6b5a))
+* bug fix ([280028e](https://github.com/vebholic/oms_frontend/commit/280028eb18468364a10e4fc4ee87c324b0651f17))
+* bug fix ([94fd72e](https://github.com/vebholic/oms_frontend/commit/94fd72e23ef6c3b3a4c4f7aa8ccdb5fc9b88b32a))
+* bug fix ([6875336](https://github.com/vebholic/oms_frontend/commit/6875336fa8a30f36d46d32e398ce8131f44693c4))
+* bug fix ([47ad911](https://github.com/vebholic/oms_frontend/commit/47ad9117d54607d21962068ab78c9046e77e0ccf))
+* bug fix ([d4ef9a7](https://github.com/vebholic/oms_frontend/commit/d4ef9a729e447a401595d427fbd203dabb3eb6df))
+* **dashboard:** currency fix ([f0553f6](https://github.com/vebholic/oms_frontend/commit/f0553f6e05bae82fe2d47a9a1bca341b2a705f1a))
+* **dashboard:** fix and changes ([f7c102b](https://github.com/vebholic/oms_frontend/commit/f7c102b868001fc53db39ab93f8fa315b3c11e06))
+* rentalJob views product and package hierarchy show on roadmap PO-1152 ([b4d2306](https://github.com/vebholic/oms_frontend/commit/b4d23061072816255209fc849e8c2ad32672c4cc))
+* rentalJob views roadmap autospacing PO-1152 ([37a14b8](https://github.com/vebholic/oms_frontend/commit/37a14b8bde0176415798641bbec879c0f9fc9fde))
+
+### [2.65.1](https://github.com/vebholic/oms_frontend/compare/v2.65.0...v2.65.1) (2022-02-23)
+
+
+### Bug Fixes
+
+* **breadcrumb:** minor fix ([ffd1a29](https://github.com/vebholic/oms_frontend/commit/ffd1a29fa05c067fe5bcf6ab6a522fb5367ba4b8))
+* bug fix ([79f9e04](https://github.com/vebholic/oms_frontend/commit/79f9e04708d90c42642e83771727bcb9ee0d9ace))
+* bug fix ([a39fd42](https://github.com/vebholic/oms_frontend/commit/a39fd4231db11084093c400c882c9c7637f2cc92))
+* bug fix ([75cd53d](https://github.com/vebholic/oms_frontend/commit/75cd53d56160f3c9feaed8bd07d3ffdca49be611))
+* bug fix ([aa78f0e](https://github.com/vebholic/oms_frontend/commit/aa78f0e381df04ef25e2066e4bd0e6aceb09b16f))
+* bug fix ([89d82b0](https://github.com/vebholic/oms_frontend/commit/89d82b072b022c19500a14529180becc7506613f))
+* **dashboard:** filter err fix ([b46af72](https://github.com/vebholic/oms_frontend/commit/b46af72a0ea10a9543ba547c9696f7d65e0df785))
+* **dashboard:** new dashboard merge ([452b0b3](https://github.com/vebholic/oms_frontend/commit/452b0b326dd3cd6e973b2596096f2fc2d4cea2ff))
+* **rental:** ui fix ([0877804](https://github.com/vebholic/oms_frontend/commit/087780459e763794a94f07cb390e6fa3740ede72))
+* **tranfer inventory:** some fix ([b080847](https://github.com/vebholic/oms_frontend/commit/b080847a9c1d1a89c4d7ab0ced5bf663c76f149b))
+
+## [2.65.0](https://github.com/vebholic/oms_frontend/compare/v2.64.1...v2.65.0) (2022-02-22)
+
+
+### Features
+
+* **bug:** bug ([f8806b8](https://github.com/vebholic/oms_frontend/commit/f8806b8d8e36f45d7a6a83e73e245c27326022ef))
+* **import /export:** import /export ([42a489c](https://github.com/vebholic/oms_frontend/commit/42a489c3dc36b01ab4d10708fa7141fd282a3bed))
+* **tansfer inventory:** update grid ([7366a50](https://github.com/vebholic/oms_frontend/commit/7366a501a20927f87a4b981881aebdf3fa0fc5f6))
+
+
+### Bug Fixes
+
+* bug fix ([690f9be](https://github.com/vebholic/oms_frontend/commit/690f9bea3b8908c4eefece90f0ee9a0ebd042ca8))
+* bug fix ([07721ac](https://github.com/vebholic/oms_frontend/commit/07721acd85c5dd2c25bc22d8c6cc8f544ab10fc5))
+* bug fix ([4f4f782](https://github.com/vebholic/oms_frontend/commit/4f4f782d0dd935c5164d74b99d5363ce70afe93b))
+* bug fix ([36656d2](https://github.com/vebholic/oms_frontend/commit/36656d2324b73a11fbd9a56a3073cb3e3bb38ac8))
+* bug fix ([119b69a](https://github.com/vebholic/oms_frontend/commit/119b69add94a66e712b486b9307c344c2a74563b))
+* **dashboard:** changes in dashboard ([cf3f34e](https://github.com/vebholic/oms_frontend/commit/cf3f34e81ad423f386c44ce83e996acb95067a39))
+* **dashboard:** fix ([5571052](https://github.com/vebholic/oms_frontend/commit/55710522bf24aa4491bcb9f59e22f62c52253f0a))
+* **dashbord:** sub market segment fix ([90c37de](https://github.com/vebholic/oms_frontend/commit/90c37de37381430180aa5a436062e42f995c1e8c))
+* **transfer-inventory:** new pages and new functionalities ([04bf2f8](https://github.com/vebholic/oms_frontend/commit/04bf2f859e0668b2e5188596fd53551cf0478b22))
+
 ### [2.64.1](https://github.com/vebholic/oms_frontend/compare/v2.64.0...v2.64.1) (2022-02-21)
 
 ## [2.64.0](https://github.com/vebholic/oms_frontend/compare/v2.63.0...v2.64.0) (2022-02-20)

@@ -422,7 +422,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                         const groupByCalls = groupBy(selectedRecords, "receivingTicketId");
                         let apiCalls = [];
                         Object.keys(groupByCalls).forEach((key) => {
-                            apiCalls.push(axiosInstance().put(`${deliveryTicket.api}/${key}/remove-assets`, { ids: groupByCalls[key].map(m => m._id) }));
+                            apiCalls.push(axiosInstance().put(`${deliveryTicket.api}/${key}/assets`, { ids: groupByCalls[key].map(m => m._id) }));
                         })
                         Promise.all(apiCalls).then(() => {
                             toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged Receiving Ticket(s)` });

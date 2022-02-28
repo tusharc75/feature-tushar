@@ -48,9 +48,7 @@ const Sublease = () => {
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
-    const localStorageSelectedRecords = `${routes.sublease?.title}_selected`;
     const [isOpenDialog, setisOpenDialog] = useState(false)
-
     const [fromRental, setFromRental] = useState(history.location?.state?.rental);
 
     const {
@@ -103,9 +101,10 @@ const Sublease = () => {
             dataToProcess = data?.data;
             count = data?.count;
             let rows = dataToProcess.map((u) => {
-                const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
+                const { owner, collaborator } = u;
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                finalObject["canDelete"] = false;
                 finalObject["allowedToEdit"] = (
                     [...(u.collaborator ?? []), u.owner].some(
                         (d) => d?.optionValue === user?.user?._id
@@ -136,22 +135,6 @@ const Sublease = () => {
                     selectedRecords: rows.filter(f => f.isChecked === true)
                 });
             }
-
-            if (gridApi) {
-                try {
-                    let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
-                    if (oldSelectedRecords.length > 0) {
-                        gridApi.forEachNode(function (node) {
-                            node.setSelected(
-                                oldSelectedRecords.some((o) => o === node.data._id)
-                            );
-                        });
-                    }
-                } catch (ex) {
-                    console.error("Error in getting selected records from local storage")
-                }
-            }
-
             dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
@@ -170,15 +153,11 @@ const Sublease = () => {
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
         }
-
-
-
         if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
         }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
-
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
@@ -187,33 +166,15 @@ const Sublease = () => {
             });
             deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
         }
-
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
-
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
         }
-
         return deepFilter;
     };
-
-    const columnState = JSON.parse(localStorage.getItem(routes.sublease?.title));
-
-
-    if (columnState) {
-        columns.map((item) => {
-            columnState.map((d) => {
-                if (d.colId == item.field) {
-                    item.show = !d.hide;
-                }
-            });
-        });
-    }
-
-
-
+    
     const handleDelete = () => {
         let ids = []
         if (deleteRecord) {
@@ -231,8 +192,6 @@ const Sublease = () => {
             toastConfig.setToastConfig(error)
         });
     }
-
-
 
     const ActionsRenderer = params => (
         <>
@@ -421,22 +380,6 @@ const Sublease = () => {
                                     }} variant={isMobile && !isTablet ? "text" : "contained"} size="small" color="primary" className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
                                         startIcon={isMobile && !isTablet ? null : <AddOutlined />}> {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}</Button>
                                 }
-                                {/* <HtmlTooltip title="Please select some purchase orders">
-                                    <span>
-                                        <Button
-                                            variant={isMobile ? "text" : "contained"}
-                                            color="default"
-                                            size="small"
-                                            onClick={openActions}
-                                            disabled={selectedRecords.length ? false : true}
-                                            aria-controls="action-menu"
-                                            className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                                        >
-                                            {isMobile ? "" : "Actions"} <ExpandMore />
-
-                                        </Button>
-                                    </span>
-                                </HtmlTooltip> */}
                                 <Menu
                                     anchorEl={anchorEl}
                                     keepMounted
@@ -492,34 +435,9 @@ const Sublease = () => {
                             ]}
                             chips={[
                                 {
-                                    label: "Delivery Date: ",
-                                    field: "deliveryDate",
-                                    fieldType: "date",
-                                    setBackground: (data) => { return data.status === "" && new Date() > new Date(data.deliveryDate) ? { backgroundColor: "#efcccc" } : null }
-                                },
-                                {
                                     label: "Status: ",
                                     field: "status",
                                 },
-                                {
-                                    label: "Tax Schedule: ",
-                                    field: "taxSchedule",
-                                },
-                                {
-                                    label: "Country Bill To: ",
-                                    field: "countryBillTo",
-                                },
-                                {
-                                    label: "Country Sell To: ",
-                                    field: "countrysellTo",
-                                },
-                                {
-                                    label: "SupplierContact:  ",
-                                    field: "supplierContact",
-                                },
-
-
-
                             ]}
                             onCreate={false}
                             showClone={true}
@@ -540,6 +458,7 @@ const Sublease = () => {
                             loading={loading}
                             renderedFrom={routes.sublease?.title}
                             refreshGrid={fetchData}
+                            showOnlyShowFilteredRecordSwitch={true}
                         /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

@@ -24,6 +24,9 @@ import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumn
 import { GiSabersChoc, GrBusinessService } from "react-icons/all";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
+import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
+import { Link } from 'react-router-dom'
+import NoDataCell from "../../../components/Helpers/NoDataCell";
 
 const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
 
@@ -39,6 +42,9 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
     const [showCostDialog, setShowCostDialog] = useState(false)
     const [selectedCostData, setSelectedCostData] = useState(null)
     const { isOffline } = useContext(CustomOfflineContext);
+
+    const [deleteData, setDeleteData] = useState(null);
+    const [isDeleting, setDeleting] = useState(false);
 
     useEffect(() => {
         fetchFields()
@@ -56,9 +62,15 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
         const fields = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
         let rendererNames = [];
         genrateColoum(fields, columns, rendererNames, false);
+        columns?.forEach((ele) => {
+            if (ele.field === "costType") {
+                ele.cellRenderer = "costTypeRenderer";
+            }
+        })
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
             commonRenderer: CommonRenderer,
+            costTypeRenderer: CostTypeRenderer,
             actionsRenderer: ActionsRenderer,
             ...tempFrameworkComponent,
         }
@@ -86,6 +98,9 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                 let res: any = {
                     ...prepareDataForGrid(item),
                 };
+                res["canDelete"] = permissions?.rentalManagement?.isDelete;
+                res["allowedToEdit"] = permissions?.rentalManagement?.isUpdate;
+                res["isChecked"] = false;
                 return res;
             });
             setNextStep(true)
@@ -113,16 +128,28 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                 </IconButton>
             </HtmlTooltip>
             <GridDeleteIcon
-                hasDeletePermission={permissions?.rentalManagement?.isUpdate}
+                hasDeletePermission={permissions?.rentalManagement?.isDelete}
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
                 onDelete={() => {
-                    handleDeleteCost([params.data._id])
+                    setDeleteData([params.data._id])
                 }}
                 entity="rentalManagement"
             />
         </Fragment>
     );
+
+    const CostTypeRenderer = (params) =>
+        params?.value ? (
+            <a className="link" title={params.value} onClick={() => {
+                setShowCostDialog(true)
+                setSelectedCostData(params.data)
+            }} >
+                {params.value}
+            </a>
+        ) : (
+            <NoDataCell />
+        );
 
     const handleAddCost = (rows) => {
         axiosInstance().post(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/add`, { additionalCost: rows })
@@ -144,12 +171,16 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
             });
     }
 
-    const handleDeleteCost = (ids) => {
+    const handleDelete = (ids) => {
+        setDeleting(true)
         axiosInstance().post(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/delete`, { ids })
             .then(() => {
                 fetchAdditionalCost()
+                setDeleting(false)
+                setDeleteData(null)
             }).catch((error) => {
                 toastConfig.setToastConfig(error)
+                setDeleteData(null)
             });
     }
 
@@ -158,7 +189,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex">
                     <Button
-                        variant={isMobile && !isTablet ? "text" : "contained"}
+                        variant="contained"
                         color="primary"
                         size="small"
                         disabled={isOffline}
@@ -167,7 +198,20 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                             setSelectedCostData(null)
                         }}
                     >
-                        {isMobile && !isTablet ? <GiSabersChoc size={20}/> :"Add Ad-hoc Charge"}
+                        Add Ad-hoc Charges
+                    </Button>
+                </Box>
+                <Box display="flex-end">
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        disabled={isOffline || selectedRecords.length === 0}
+                        onClick={() => {
+                            setDeleteData(selectedRecords?.map(({ _id }: any) => _id))
+                        }}
+                    >
+                        Delete
                     </Button>
                 </Box>
             </Box>
@@ -175,7 +219,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                 <CustomSwipableList
                     allowSelection={true}
                     allowSwipe={true}
-                    permissions={permissions}
+                    permissions={permissions.rentalManagement}
                     primaryField={columns?.find(d => d.field)}
                     onClick={(data) => {
                         setShowCostDialog(true)
@@ -190,7 +234,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                     }}
                     extraParamsToCheckDelete={true}
                     onDelete={(data) => {
-                        handleDeleteCost([data._id])
+                        setDeleteData([data._id])
                     }}
                     rowCount={rowCount}
                     page={page}
@@ -251,6 +295,13 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                     costData={selectedCostData}
                 />
             }
+            {deleteData && <ConfirmationDialog
+                open={true}
+                message={`Are you sure you want to delete the record(s)?`}
+                onClose={() => setDeleteData(null)}
+                onOk={() => handleDelete(deleteData)}
+                okBtnLoading={isDeleting}
+            />}
         </Fragment>
     );
 };
