@@ -25,7 +25,10 @@ import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import AdditionalCostDialog from "../AdditionalCost/AdditionalCostDialog";
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { camelCase } from "lodash";
 
+
+const renderedFrom = camelCase(`${routes.rentalManagement.title}_6`);
 
 const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJobStatus, statusOptions }) => {
 
@@ -88,7 +91,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         fields = [...fields, ...CURReplaceByCurrencySingle(resultCost?.data?.data, rentalManagementData.currency)]
       }
       let rendererNames = [];
-      genrateColoum(fields, columns, rendererNames, false);
+      genrateColoum(fields, columns, rendererNames, false, renderedFrom);
       let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
       tempFrameworkComponent = {
         commonRenderer: CommonRenderer,
@@ -314,7 +317,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           loading={loading}
           allowSelection={false}
           isClientSideGrid={true}
-          renderedFrom="rentalManagmentInvoicePage"
+          renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           fromPurchaseOrderGrid={true}
           onCellValueChanged={(row) => {

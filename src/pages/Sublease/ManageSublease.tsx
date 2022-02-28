@@ -210,6 +210,7 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                         element.estimateEndDate = refrenceData?.estimateEndDate;
                         element.actualStartDate = "";
                         element.actualEndDate = "";
+                        element.assetQty = 0;
                         material.push(element);
                     });
                     axiosInstance().post(`${sublease.api}/productpackage/${data._id}`, { material })

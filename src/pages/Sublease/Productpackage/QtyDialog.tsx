@@ -120,7 +120,7 @@ const QtyDialog: FC<EditDialogProps> = (
           element.option = pricingMethodOptions;
         }
       });
-      if (rowData.actualStartDate === "" || rowData.actualStartDate === "") {
+      if (rowData.actualStartDate === "" || rowData.actualEndDate === "") {
         data = data.filter((e) => !["actualStartDate", "actualEndDate", "actualJobDuration"].includes(e.fieldName))
       }
       setInitialData({
@@ -544,32 +544,61 @@ const QtyDialog: FC<EditDialogProps> = (
                                     </Box>
                                   </Box>
                                 </Grid>
-                                : <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                  <Box display="flex" >
-                                    <Box flexGrow={1}  >
-                                      <FormTypes
-                                        {...field}
-                                        fields={initialData.fields}
-                                        fieldData={field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field.isTooltip}
-                                        tooltipMessage={field.tooltipMessage}
-                                        size="small"
-                                      />
+                                :
+                                field.fieldName === "qty" ?
+                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Box display="flex" >
+                                      <Box flexGrow={1}  >
+                                        <FormTypes
+                                          {...field}
+                                          disabled={rowData?.assetQty > 0 ? true : false}
+                                          fields={initialData.fields}
+                                          fieldData={field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value)
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field.isTooltip}
+                                          tooltipMessage={field.tooltipMessage}
+                                          size="small"
+                                        />
+                                      </Box>
                                     </Box>
-                                  </Box>
-                                </Grid>
+                                  </Grid>
+                                  : <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Box display="flex" >
+                                      <Box flexGrow={1}  >
+                                        <FormTypes
+                                          {...field}
+                                          fields={initialData.fields}
+                                          fieldData={field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value)
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field.isTooltip}
+                                          tooltipMessage={field.tooltipMessage}
+                                          size="small"
+                                        />
+                                      </Box>
+                                    </Box>
+                                  </Grid>
                         ))}
                       </Grid>
                     </Box>
