@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.68.2](https://github.com/vebholic/oms_frontend/compare/v2.68.1...v2.68.2) (2022-02-28)
+
+### [2.68.1](https://github.com/vebholic/oms_frontend/compare/v2.68.0...v2.68.1) (2022-02-27)
+
+## [2.68.0](https://github.com/vebholic/oms_frontend/compare/v2.67.0...v2.68.0) (2022-02-26)
+
+
+### Features
+
+* - Expanded feature added in react table ([7f0ca9b](https://github.com/vebholic/oms_frontend/commit/7f0ca9b2a8a6b4793bc382a2afcde7a2afb8fe00))
+* - Global added if no entity assigned ([290a5a9](https://github.com/vebholic/oms_frontend/commit/290a5a95ffbd42590584f3c53592054f91cb544a))
+* rentalJob views close rental show based on cancelled and closed status PO-1170 ([f16da4a](https://github.com/vebholic/oms_frontend/commit/f16da4a3e4a140907e77f64f8742d4283358a568))
+
+
+### Bug Fixes
+
+* **asset and dashboard:** ui minor fix and changes ([634ff0e](https://github.com/vebholic/oms_frontend/commit/634ff0e8088fd6cd6a819b226b865852bcd3b0e8))
+* bug fix ([95e4a3a](https://github.com/vebholic/oms_frontend/commit/95e4a3a2c873bf5f8df64446eb4286d697b40561))
+* bug fix ([da2b1ad](https://github.com/vebholic/oms_frontend/commit/da2b1ad06cf2a2daf4bf9bab7b7b1fd880089e08))
+* bug fix ([12c9585](https://github.com/vebholic/oms_frontend/commit/12c9585873efcd758cf65538542ec9f41a9b9caf))
+* bug fix ([ed215de](https://github.com/vebholic/oms_frontend/commit/ed215dec630b459d9c65c2e29c66a287a436fc19))
+* **chatter:** bug fix ([b312538](https://github.com/vebholic/oms_frontend/commit/b312538b5eabdb5c38b0592d34d1517a80e9fad1))
+
 ## [2.67.0](https://github.com/vebholic/oms_frontend/compare/v2.66.0...v2.67.0) (2022-02-25)
 
 

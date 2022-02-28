@@ -244,13 +244,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                         setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate))
                         setLoading(false)
                     } else {
-                        setRentalDetails(data)
-                        // if (statusOptions?.findIndex(d => d.optionLabel === RENTAL_STATUS.jobPartiallyStarted) > statusOptions.findIndex(d => d.optionLabel === data?.status)) {
-                        //     fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualStartDate"].includes(obj.fieldName));
-                        // }
-                        // if (statusOptions?.findIndex(d => d.optionLabel === RENTAL_STATUS.jobPartiallyEnded) > statusOptions.findIndex(d => d.optionLabel === data?.status)) {
-                        //     fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualEndDate"].includes(obj.fieldName));
-                        // }  
+                        setRentalDetails(data) 
                         if (data?.actualStartDate === "") {
                             fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualStartDate"].includes(obj.fieldName));
                         }

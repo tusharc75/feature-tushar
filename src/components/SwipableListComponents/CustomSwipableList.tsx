@@ -41,8 +41,6 @@ export default function CustomSwipableList({
     localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
   }, []);
 
-  
-
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuData, setMenuData] = useState({
@@ -53,12 +51,6 @@ export default function CustomSwipableList({
     showDelete: false,
     onDelete: null
   });
-  const [data, setData] = useState([]);
-
-  useEffect(() => {
-    setData((prevState) => ([...prevState,...dataRows]))
-  }, [dataRows])
-  
 
   const generateChipStyle = (chipColorVariable, value) => {
     if (value) {
@@ -87,7 +79,7 @@ export default function CustomSwipableList({
                   checked={isAllChecked}
                   onChange={(e) => {
                     setIsAllChecked(e.target.checked);
-                    const updatedMetadata = data.map((d) => {
+                    const updatedMetadata = dataRows.map((d) => {
                       return { ...d, isChecked: !d.hideSelection ? e.target.checked : false };
                     });
                     dispatch({
@@ -110,24 +102,25 @@ export default function CustomSwipableList({
       <div style={{ overflowY: 'auto', height: fullHeight === true ? 'auto' : 'calc(100vh - 215px)', backgroundColor: '#F5F7F9' }} id="scrollableDiv">
         <div>
           <InfiniteScroll
-            dataLength={data.length}
+            dataLength={dataRows.length}
             // height="400px"
             next={() => {
               setTimeout(() => {
                 dispatch({ type: 'pageChange', page: page + 1 });
               }, 500);
             }}
-            hasMore={data.length !== rowCount}
+            hasMore={dataRows.length !== rowCount}
             loader={<h3 className="text-center border mt-3 p-3 loading-dots">Loading more items</h3>}
             scrollableTarget="scrollableDiv"
-            endMessage={loading == false && data.length === rowCount ? <h3 className="text-center border p-3">{"Total no. of records found " + data.length}</h3> : <></>}
+            endMessage={loading == false && dataRows.length === rowCount ? <h3 className="text-center border p-3">{"Total no. of records found " + dataRows.length}</h3> : <></>}
           >
-            {loading ? (
+            {/* {loading ? (
              <Grid container alignItems="center" justifyContent="center" style={{minHeight:"20vh"}}>
                 <div className="spinner"></div>
                 </Grid>
-            ) : (
-              data.map((d, index) => (
+            ) : ( */}
+            {
+              dataRows.map((d, index) => (
                 <Grid
                   key={d._id}
                   container
@@ -142,16 +135,16 @@ export default function CustomSwipableList({
                         color="primary"
                         checked={d.isChecked}
                         onChange={(e) => {
-                          data[index].isChecked = e.target.checked;
-                          setIsAllChecked(data.every((d) => d.isChecked === true));
+                          dataRows[index].isChecked = e.target.checked;
+                          setIsAllChecked(dataRows.every((d) => d.isChecked === true));
 
                           dispatch({
                             type: 'selection',
-                            selectedRecords: data.filter((d) => d.isChecked)
+                            selectedRecords: dataRows.filter((d) => d.isChecked)
                           });
 
-                          dispatch({ type: 'update', data: data });
-                          localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(data.filter((d) => d.isChecked).map((m) => m._id)));
+                          dispatch({ type: 'update', data: dataRows });
+                          localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(dataRows.filter((d) => d.isChecked).map((m) => m._id)));
                         }}
                         inputProps={{ 'aria-label': 'primary checkbox' }}
                       />
@@ -251,7 +244,7 @@ export default function CustomSwipableList({
                   </Grid>
                 </Grid>
               ))
-            )}
+            }
 
             <Menu
               id="menu-actions"
