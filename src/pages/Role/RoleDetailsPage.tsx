@@ -8,8 +8,16 @@ import {
   CircularProgress,
   Typography,
   IconButton,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  FormControlLabel,
+  Checkbox
 } from "@material-ui/core";
-import { ControlPoint } from "@material-ui/icons";
+import { ControlPoint, KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -33,7 +41,9 @@ import {
   SET_SELECTED_ENTITY,
 } from "../../StateProvider/actionTypes";
 import { PERMISSION } from "../../constants/Roles";
-import { roleTypes } from "../../constants/helpers";
+import { camelCase, roleTypes } from "../../constants/helpers";
+import React from "react";
+import { startCase } from "lodash";
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -66,6 +76,39 @@ const RoleDetailsPage = () => {
   const showRecordsBeforeViewAll = 2;
   const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
   const [entityAccess, setEntityAccess] = useState([]);
+  const [open, setOpen] = useState(false)
+  const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false)
+  const [isResourceCheckBoxFilled, setIsResourceCheckBoxFilled] = useState(isPolicyCheckBoxChecked)
+  const [isFieldCheckBoxFilled, setIsFieldCheckBoxFilled] = useState(isPolicyCheckBoxChecked || isResourceCheckBoxFilled)
+
+  const policyResources = [
+    {
+      'resource': 'Rental Management',
+      'fieldLabel': 'Hide Price Calculation',
+      'fieldName': 'hidePriceCalculation'
+    }
+  ];
+
+  const fieldOfPolicyResources = policyResources?.map((obj) => {
+    if (obj?.fieldName) {
+      return (
+        {
+          'resource': obj?.resource,
+          'field': obj?.fieldName,
+          'isChecked': false
+        }
+      )
+    }
+  });
+
+  const isPolicyTableVisible = () => {
+    let accessArray=[]
+    policyResources.map((item) => {
+      accessArray.push(permissions[camelCase(item.resource)]?.isRead)
+    })
+    return accessArray.filter(item => item === true).length > 0
+  }
+
 
   useEffect(() => {
     if (id) {
@@ -115,6 +158,11 @@ const RoleDetailsPage = () => {
       };
       setCurrentData(JSON.stringify(current));
       setCustomizedRoutes([routes.role, { title: data.name }]);
+      if (data?.policy?.hidePriceCalculation) {
+        setIsFieldCheckBoxFilled(data?.policy?.hidePriceCalculation ?? isResourceCheckBoxFilled)
+        setIsResourceCheckBoxFilled(data?.policy?.hidePriceCalculation)
+        setIsPolicyCheckBoxChecked(data?.policy?.hidePriceCalculation)
+      }
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -144,7 +192,6 @@ const RoleDetailsPage = () => {
 
   const handleUpdateRole = () => {
     setUpdating(true);
-
     axiosInstance()
       .put(`/role`, {
         _id: id,
@@ -152,6 +199,10 @@ const RoleDetailsPage = () => {
         field,
         resource,
         type: roleData.type,
+        policy:
+        {
+          hidePriceCalculation: isFieldCheckBoxFilled
+        }
       })
       .then(({ data }) => {
         fetchRoleData();
@@ -332,7 +383,7 @@ const RoleDetailsPage = () => {
                 <DetailsPageHeader heading={headingLbl} showHeading={true}>
                   {permissions.role.isUpdate && !isEditDeleteDisable ? (
                     <Button
-                      disabled={currentData === updatedData || isUpdating || checkError()}
+                      disabled={isUpdating || checkError()}
                       variant="contained"
                       color="primary"
                       size="small"
@@ -393,20 +444,111 @@ const RoleDetailsPage = () => {
                 ) : (
                   field.length &&
                   resource.length && (
-                    <RoleEngine
-                      style={{height: "70vh",}}
-                      field={field}
-                      resource={resource}
-                      setField={setField}
-                      setResource={setResource}
-                      isDisable={
-                        permissions.role.isUpdate
-                          ? isEditDeleteDisable
-                            ? true
-                            : false
-                          : true
+                    <>
+                      <RoleEngine
+                        style={{ height: "70vh", }}
+                        field={field}
+                        resource={resource}
+                        setField={setField}
+                        setResource={setResource}
+                        isDisable={
+                          permissions.role.isUpdate
+                            ? isEditDeleteDisable
+                              ? true
+                              : false
+                            : true
+                        }
+                      />
+                      {
+                        isPolicyTableVisible() && 
+                        <TableContainer style={{ height: 400, minHeight: 400, marginTop: 20 }}>
+                          <Table
+                            stickyHeader
+                            aria-label="policy"
+                            className="roles-table"
+                          >
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>Policy Names</TableCell>
+                                <TableCell align="center">
+                                  <FormControlLabel
+                                    control={<Checkbox
+                                      disabled={false}
+                                      checked={isPolicyCheckBoxChecked}
+                                      onChange={(e) => {
+                                        setIsPolicyCheckBoxChecked(e.target.checked)
+                                        setIsResourceCheckBoxFilled(e.target.checked)
+                                        setIsFieldCheckBoxFilled(e.target.checked)
+                                      }}
+                                    />}
+                                    label="Select All"
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {policyResources.map((resource, outerIndex) => (
+                                // const resourceFields = field
+                                //   .filter((_field) => _field.fieldData.resource === _resource.resource)
+                                <>
+                                  <TableRow>
+                                    <TableCell style={{ minWidth: 300 }}>
+                                      <Box display='flex' justifyContent={'flex-start'} alignItems={'center'}>
+                                        <Typography className="tableMainHeader">{resource.resource}</Typography>
+                                        {fieldOfPolicyResources.length > 0 && <Box ml={1}>
+                                          <IconButton
+                                            size="small"
+                                            aria-label="expand row"
+                                            onClick={() => setOpen(!open)}
+                                          >
+                                            {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                                          </IconButton>
+                                        </Box>}
+                                      </Box>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                      <Checkbox
+                                        checked={isResourceCheckBoxFilled}
+                                        onChange={(e) => {
+                                          setIsResourceCheckBoxFilled(e.target.checked)
+                                          setIsPolicyCheckBoxChecked(e.target.checked)
+                                          setIsFieldCheckBoxFilled(e.target.checked)
+                                        }}
+                                      />
+                                    </TableCell>
+                                  </TableRow>
+                                  {
+                                    open && fieldOfPolicyResources.filter((item) => item.resource === resource.resource).map((obj) => (
+                                      <TableRow key={2}>
+                                        <TableCell>
+                                          <Typography variant="body1">
+                                            &emsp;{" "}
+                                            {startCase(obj.field)}
+                                          </Typography>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                          <Checkbox
+                                            disabled={false}
+                                            checked={isFieldCheckBoxFilled}
+                                            onChange={(e) => {
+                                              setIsFieldCheckBoxFilled(e.target.checked)
+                                              setIsResourceCheckBoxFilled(e.target.checked)
+                                              setIsPolicyCheckBoxChecked(e.target.checked)
+                                            }}
+                                          />
+                                        </TableCell>
+                                      </TableRow>
+                                    ))
+                                  }
+                                </>
+
+                              ))
+                              }
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
                       }
-                    />
+                    </>
                   )
                 )}
                 {/* </TableBody>
