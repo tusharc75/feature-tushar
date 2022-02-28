@@ -7,7 +7,7 @@ import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder } from "../../../constants/helpers";
+import { purchaseOrder, camelCase } from "../../../constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -29,6 +29,8 @@ import CustomRenderCell from "../../../components/Helpers/CustomRenderCell";
 import InfoIcon from "@material-ui/icons/Info";
 import { MdAdd } from "react-icons/md";
 import { RiEditCircleLine } from "react-icons/ri";
+
+let renderedFrom = camelCase(routes.purchaseOrderDetail.title)
 
 const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) => {
 
@@ -382,7 +384,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                     onCreate={null}
                     showClone={false}
                     fullHeight={true}
-                    renderedFrom={routes.purchaseOrderDetail.title}
+                    renderedFrom={`${renderedFrom}_grid-1`}
                     onClone={() => { }}
 
                 /> :
@@ -404,7 +406,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                     onCellValueChanged={(row) => {
                         //handleUpdateOrderProduct(row.data)
                     }}
-                    renderedFrom="purchaseOrderDetailsPageInventory"
+                    renderedFrom={`${renderedFrom}_grid-1`}
                     refreshGrid={fetchPurchaseOrderProduct}
                     currency={purchaseOrderData?.currency?.toLowerCase()}
                     fromPurchaseOrderGrid={true}
