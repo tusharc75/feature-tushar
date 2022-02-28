@@ -77,11 +77,9 @@ export default function ManageProfile(props) {
     };
 
     const handleUpdateUser = (values) => {
-        console.log(values,'values')
         if (userData?._id) {
             setUpdating(true);
             let clonedValues = cloneDeep(values)
-            console.log(clonedValues,'clonedValues');
             axiosInstance()
                 .put(`/user/me`,clonedValues)
                 .then(({ data }) => {
@@ -89,6 +87,7 @@ export default function ManageProfile(props) {
                         open: true,
                         type: "success",
                         message: data.message,
+                        
                     });
                     onFetchUserData()
                     let updatedUserDetails = { ...user, user: { ...user.user, ...values } }
