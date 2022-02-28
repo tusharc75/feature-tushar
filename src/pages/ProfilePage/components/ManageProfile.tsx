@@ -77,11 +77,13 @@ export default function ManageProfile(props) {
     };
 
     const handleUpdateUser = (values) => {
+        console.log(values,'values')
         if (userData?._id) {
             setUpdating(true);
             let clonedValues = cloneDeep(values)
+            console.log(clonedValues,'clonedValues');
             axiosInstance()
-                .put(`/user/me`, { ...clonedValues })
+                .put(`/user/me`,clonedValues)
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
