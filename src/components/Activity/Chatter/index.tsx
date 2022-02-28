@@ -26,6 +26,7 @@ const Chatter = (props: any) => {
   const [loading, setLoading] = useState(false);
   const [socket, setSocket] = useState<Socket>(null);
   const [isFocused, setFocused] = useState(false);
+  const [isSending, setSending] = useState(false)
 
   const getChatter = () => {
     setLoading(true);
@@ -49,7 +50,7 @@ const Chatter = (props: any) => {
   useEffect(() => {
     if (!relatedTo || relatedTo.length === 0) return;
 
-    const timeout = setTimeout(getChatter, 500);
+    const timeout = setTimeout(getChatter, 1000);
     return () => clearTimeout(timeout);
   }, [relatedTo]);
 
@@ -92,19 +93,22 @@ const Chatter = (props: any) => {
 
   const sendMessage = async (e) => {
     e.preventDefault();
+    setSending(true)
     try {
       await axiosInstance().put(`/chatter/${chatterId}`, { message });
-
+      setSending(false)
+      
       // setMessages((prevState) => [
-      //   {
-      //     message,
-      //     date: new Date().toISOString(),
-      //     userName: `${user?.firstName} ${user?.lastName}`,
-      //     userid: user._id
-      //   },
-      //   ...prevState
-      // ]);
-    } catch (error) {
+        //   {
+          //     message,
+          //     date: new Date().toISOString(),
+          //     userName: `${user?.firstName} ${user?.lastName}`,
+          //     userid: user._id
+          //   },
+          //   ...prevState
+          // ]);
+        } catch (error) {
+      setSending(false)
       setToastConfig(error);
     }
     setMessage('');
@@ -174,7 +178,7 @@ const Chatter = (props: any) => {
               />
             </Box>
             <Box mx={1} />
-            <IconButton size="small" type="submit" disabled={!message} color="secondary">
+            <IconButton size="small" type="submit" disabled={!message || isSending} color="secondary">
               <Send />
             </IconButton>
           </Box>

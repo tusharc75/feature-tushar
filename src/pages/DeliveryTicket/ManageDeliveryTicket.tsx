@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useRef, Fragment } from "react";
-import { Box, Dialog, Button, Grid, CircularProgress } from '@material-ui/core';
+import { Box, Dialog, Button, Grid, Tooltip, IconButton } from '@material-ui/core';
 import { Formik, Form } from "formik";
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -27,6 +27,9 @@ import { CustomOfflineContext } from "../../StateProvider/OfflineContext/Offline
 import { objectStore, findOne, findAll, insertUpdate } from '../../constants/indexdbhelper';
 import { createDeliveryTicketOffline } from './deliveryTicketOfflineHelper';
 import CustomButton from '../../components/Helpers/CustomButton'
+import AddIcon from "@material-ui/icons/AddCircle";
+import ManageAddressDialog from "../../components/Address/ManageAddressDialog";
+import { isArray } from "lodash";
 
 const ManageDeliveryTicket = (props) => {
 
@@ -52,10 +55,13 @@ const ManageDeliveryTicket = (props) => {
 
     const [supplierData, setSupplierData] = useState([]);
     const [customerData, setCustomerData] = useState([]);
-    const [addressData, setAddressData] = useState([]);
 
+    const [addressData, setAddressData] = useState([]);
     const [pickupFromAddress, setPickupFromAddress] = useState([]);
     const [deliveryToAddress, setDeliveryToAddress] = useState([]);
+
+    const [showAddressDialog, setShowAddressDialog] = useState(false);
+    const [addressType, setAddressType] = useState('');
 
     useEffect(() => {
         const fields = initialData.fields
@@ -416,11 +422,11 @@ const ManageDeliveryTicket = (props) => {
         }
     }
 
-    const onPickupFromAddressOpen = (pickupFromType, pickupFrom) => {
+    const onPickupFromAddressOpen = (pickupFromType, pickupFrom, pickupFromAddress) => {
         if (pickupFromType === DELIVERY_FROM_TO_TYPE.supplier) {
             let filterAddress = supplierData.find(d => d.optionValue === pickupFrom)?.shippingAddress
-            if (filterAddress) {
-                setPickupFromAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue)));
+            if (filterAddress || pickupFromAddress) {
+                setPickupFromAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue) || d.optionValue === pickupFromAddress));
             }
             else {
                 setPickupFromAddress([])
@@ -428,8 +434,8 @@ const ManageDeliveryTicket = (props) => {
         }
         else if (pickupFromType === DELIVERY_FROM_TO_TYPE.customer) {
             let filterAddress = customerData.find(d => d.optionValue === pickupFrom)?.shippingAddress
-            if (filterAddress) {
-                setPickupFromAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue)));
+            if (filterAddress || pickupFromAddress) {
+                setPickupFromAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue) || d.optionValue === pickupFromAddress));
             }
             else {
                 setPickupFromAddress([])
@@ -440,11 +446,11 @@ const ManageDeliveryTicket = (props) => {
         }
     };
 
-    const onDeliveryToAddressOpen = (deliveryToType, deliveryTo) => {
+    const onDeliveryToAddressOpen = (deliveryToType, deliveryTo, deliveryToAddress) => {
         if (deliveryToType === DELIVERY_FROM_TO_TYPE.supplier) {
             let filterAddress = supplierData.find(d => d.optionValue === deliveryTo)?.shippingAddress
-            if (filterAddress) {
-                setDeliveryToAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue)));
+            if (filterAddress || deliveryToAddress) {
+                setDeliveryToAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue) || d.optionValue === deliveryToAddress));
             }
             else {
                 setDeliveryToAddress([])
@@ -452,8 +458,8 @@ const ManageDeliveryTicket = (props) => {
         }
         else if (deliveryToType === DELIVERY_FROM_TO_TYPE.customer) {
             let filterAddress = customerData.find(d => d.optionValue === deliveryTo)?.shippingAddress
-            if (filterAddress) {
-                setDeliveryToAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue)));
+            if (filterAddress || deliveryToAddress) {
+                setDeliveryToAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue) || d.optionValue === deliveryToAddress));
             }
             else {
                 setDeliveryToAddress([])
@@ -670,6 +676,9 @@ const ManageDeliveryTicket = (props) => {
                                                                                     if (values["pickupFromType"] === DELIVERY_FROM_TO_TYPE.plant && val?.address) {
                                                                                         setFieldValue("pickupFromAddress", val?.address);
                                                                                     }
+                                                                                    else {
+                                                                                        setFieldValue("pickupFromAddress", "");
+                                                                                    }
                                                                                 }}
                                                                                 required={field.required}
                                                                                 fullWidth
@@ -696,6 +705,9 @@ const ManageDeliveryTicket = (props) => {
                                                                                         if (values["deliveryToType"] === DELIVERY_FROM_TO_TYPE.plant && val?.address) {
                                                                                             setFieldValue("deliveryToAddress", val?.address);
                                                                                         }
+                                                                                        else {
+                                                                                            setFieldValue("deliveryToAddress", "");
+                                                                                        }
                                                                                     }}
                                                                                     required={field.required}
                                                                                     fullWidth
@@ -705,53 +717,95 @@ const ManageDeliveryTicket = (props) => {
                                                                                     disabled={disableOwnerSelection || (deliveryTicketId && field.disableOnEdit)}
                                                                                 />
                                                                             ) : field.fieldName === "pickupFromAddress" ? (
-                                                                                <FormTypes
-                                                                                    {...field}
-                                                                                    disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
-                                                                                    fieldData={field}
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={pickupFromAddress}
-                                                                                    setFieldValue={(name, value) => {
-                                                                                        setFieldValue(name, value)
-                                                                                    }}
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={field?.isTooltip || false}
-                                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                                    size="small"
-                                                                                    onOpen={() =>
-                                                                                        onPickupFromAddressOpen(values["pickupFromType"], values["pickupFrom"])
+                                                                                <Box display="flex">
+                                                                                    <Box flexGrow={1}>
+                                                                                        <FormTypes
+                                                                                            {...field}
+                                                                                            disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
+                                                                                            fieldData={field}
+                                                                                            values={values}
+                                                                                            errors={errors}
+                                                                                            touched={touched}
+                                                                                            label={field.fieldLabel}
+                                                                                            name={field.fieldName}
+                                                                                            type={field.type}
+                                                                                            options={pickupFromAddress}
+                                                                                            setFieldValue={(name, value) => {
+                                                                                                setFieldValue(name, value)
+                                                                                            }}
+                                                                                            required={field.required}
+                                                                                            fullWidth
+                                                                                            isTooltip={field?.isTooltip || false}
+                                                                                            tooltipMessage={field?.tooltipMessage}
+                                                                                            size="small"
+                                                                                            onOpen={() =>
+                                                                                                onPickupFromAddressOpen(values["pickupFromType"], values["pickupFrom"], values["pickupFromAddress"])
+                                                                                            }
+                                                                                        />
+                                                                                    </Box>
+                                                                                    {values["pickupFromType"] !== DELIVERY_FROM_TO_TYPE.plant &&
+                                                                                        <Box>
+                                                                                            <Tooltip title={`Add ${field.fieldLabel}`} className="mt-1">
+                                                                                                <IconButton
+                                                                                                    onClick={() => {
+                                                                                                        setShowAddressDialog(true);
+                                                                                                        setAddressType('pickupFromAddress');
+                                                                                                    }}
+                                                                                                    disabled={field.disableOnEdit}
+                                                                                                    size="small"
+                                                                                                >
+                                                                                                    <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
+                                                                                                </IconButton>
+                                                                                            </Tooltip>
+                                                                                        </Box>
                                                                                     }
-                                                                                />)
+                                                                                </Box>
+                                                                            )
                                                                                 : field.fieldName === "deliveryToAddress" ? (
-                                                                                    <FormTypes
-                                                                                        {...field}
-                                                                                        disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
-                                                                                        fieldData={field}
-                                                                                        values={values}
-                                                                                        errors={errors}
-                                                                                        touched={touched}
-                                                                                        label={field.fieldLabel}
-                                                                                        name={field.fieldName}
-                                                                                        type={field.type}
-                                                                                        options={deliveryToAddress}
-                                                                                        setFieldValue={(name, value) => {
-                                                                                            setFieldValue(name, value)
-                                                                                        }}
-                                                                                        required={field.required}
-                                                                                        fullWidth
-                                                                                        isTooltip={field?.isTooltip || false}
-                                                                                        tooltipMessage={field?.tooltipMessage}
-                                                                                        size="small"
-                                                                                        onOpen={() =>
-                                                                                            onDeliveryToAddressOpen(values["deliveryToType"], values["deliveryTo"])
+                                                                                    <Box display="flex">
+                                                                                        <Box flexGrow={1}>
+                                                                                            <FormTypes
+                                                                                                {...field}
+                                                                                                disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
+                                                                                                fieldData={field}
+                                                                                                values={values}
+                                                                                                errors={errors}
+                                                                                                touched={touched}
+                                                                                                label={field.fieldLabel}
+                                                                                                name={field.fieldName}
+                                                                                                type={field.type}
+                                                                                                options={deliveryToAddress}
+                                                                                                setFieldValue={(name, value) => {
+                                                                                                    setFieldValue(name, value)
+                                                                                                }}
+                                                                                                required={field.required}
+                                                                                                fullWidth
+                                                                                                isTooltip={field?.isTooltip || false}
+                                                                                                tooltipMessage={field?.tooltipMessage}
+                                                                                                size="small"
+                                                                                                onOpen={() =>
+                                                                                                    onDeliveryToAddressOpen(values["deliveryToType"], values["deliveryTo"], values["deliveryToAddress"])
+                                                                                                }
+                                                                                            />
+                                                                                        </Box>
+                                                                                        {values["deliveryToType"] !== DELIVERY_FROM_TO_TYPE.plant &&
+                                                                                            <Box>
+                                                                                                <Tooltip title={`Add ${field.fieldLabel}`} className="mt-1">
+                                                                                                    <IconButton
+                                                                                                        onClick={() => {
+                                                                                                            setShowAddressDialog(true);
+                                                                                                            setAddressType('deliveryToAddress');
+                                                                                                        }}
+                                                                                                        disabled={field.disableOnEdit}
+                                                                                                        size="small"
+                                                                                                    >
+                                                                                                        <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
+                                                                                                    </IconButton>
+                                                                                                </Tooltip>
+                                                                                            </Box>
                                                                                         }
-                                                                                    />)
+                                                                                    </Box>
+                                                                                )
                                                                                     : <FormTypes
                                                                                         {...field}
                                                                                         fieldData={field}
@@ -851,6 +905,55 @@ const ManageDeliveryTicket = (props) => {
                                         onClose()
                                     }}
                                 /> : null
+                        }
+                        {showAddressDialog &&
+                            <ManageAddressDialog
+                                onClose={() => {
+                                    setShowAddressDialog(false);
+                                }}
+                                onSuccess={(obj) => {
+                                    if (obj) {
+                                        setShowAddressDialog(false);
+                                        if (obj?.isAlreadyExist === true) {
+                                            let tempAddress = addressType === 'pickupFromAddress' ? addressData.find(d => d?.optionLabel === obj?.fullAddress) : addressData.find(d => d?.optionLabel === obj?.fullAddress)
+                                            if (addressType === 'pickupFromAddress') {
+                                                onPickupFromAddressOpen(values.pickupFromType, values.pickupFrom, tempAddress?.optionValue)
+                                            }
+                                            else {
+                                                onDeliveryToAddressOpen(values.deliveryToType, values.deliveryTo, tempAddress?.optionValue)
+                                            }
+                                            setFieldValue(addressType, tempAddress?.optionValue);
+                                        }
+                                        else {
+                                            setAddressData((prevState) => [...prevState,
+                                            {
+                                                default: false,
+                                                optionLabel: obj?.fullAddress,
+                                                optionValue: obj._id,
+                                                order: addressData.length + 1,
+                                            }])
+                                            if (addressType === 'pickupFromAddress') {
+                                                setPickupFromAddress((prevState) => [...prevState,
+                                                {
+                                                    default: false,
+                                                    optionLabel: obj?.fullAddress,
+                                                    optionValue: obj._id,
+                                                    order: pickupFromAddress.length + 1,
+                                                }])
+                                            } else {
+                                                setDeliveryToAddress((prevState) => [...prevState,
+                                                {
+                                                    default: false,
+                                                    optionLabel: obj?.fullAddress,
+                                                    optionValue: obj._id,
+                                                    order: deliveryToAddress.length + 1,
+                                                }])
+                                            }
+                                            setFieldValue(addressType, obj._id);
+                                        }
+                                    }
+                                }}
+                            />
                         }
                     </Fragment>
                 )}
