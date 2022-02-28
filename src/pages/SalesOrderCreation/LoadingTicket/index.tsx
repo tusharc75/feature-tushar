@@ -127,11 +127,11 @@ const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNe
   };
 
   const columns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "inventoryRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "inventoryRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    { field: "type", headerName: "Type", show: true, cellRenderer: "commonRenderer" },
     { field: "deliveryTicket", headerName: "Loading Ticket", show: true, cellRenderer: "ticketRenderer" },
-    { field: "productName", headerName: "Product Description", show: true, disabled: true, cellRenderer: "productNameRenderer" },
+    { field: "productName", headerName: "Product Description", show: true, cellRenderer: "productNameRenderer" },
     { field: "status", headerName: "Status", show: true, cellRenderer: "commonRenderer" },
   ];
 

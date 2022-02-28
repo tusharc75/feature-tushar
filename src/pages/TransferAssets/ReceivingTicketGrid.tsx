@@ -63,10 +63,10 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const columns = [
     { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
-    { field: 'serialNumber', headerName: 'Serial Number', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, disabled: true, cellRenderer: 'ticketRenderer' },
+    { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
     { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, disabled: true, cellRenderer: 'receivingRenderer' },
+    { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, cellRenderer: 'receivingRenderer' },
     { field: 'receivingTicketStatus', headerName: 'Receiving Ticket Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'loadingTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
   ];

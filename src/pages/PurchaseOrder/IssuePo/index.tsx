@@ -1,27 +1,28 @@
 
 import Box from "@material-ui/core/Box/Box";
 import React, { useState, useEffect, useReducer, useContext } from "react";
-import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer, } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
+import { CommonRenderer, DateRenderer, } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, Dialog, IconButton } from "@material-ui/core";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, rentalManagement, CHILD_RESOURCE, PURCHASE_ORDER_STATUS } from "../../../constants/helpers";
-import { useData } from "../../../StateProvider/Provider";
-import axiosInstance from "../../../axios/axiosInstance";
-import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
+import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
+import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, rentalManagement, CHILD_RESOURCE, PURCHASE_ORDER_STATUS, camelCase } from "src/constants/helpers";
+import { useData } from "src/StateProvider/Provider";
+import axiosInstance from "src/axios/axiosInstance";
+import { CreateEmail } from "src/components/Activity/Email/CreateEmail";
 import { isMobile, isTablet } from "react-device-detect";
 import { AiFillFilePdf } from "react-icons/ai";
-import routes from "../../../components/Helpers/Routes";
-import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
+import routes from "src/components/Helpers/Routes";
+import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import { BiPurchaseTagAlt, IoMdDownload, MdEmail } from "react-icons/all";
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
-import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
-import { prepareDataForGrid } from "../../../constants/helpers";
-import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
+import { CURReplaceByCurrencySingle } from "src/constants/formulaUtility";
+import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "src/constants/columns"
+import { prepareDataForGrid } from "src/constants/helpers";
+import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
 import { Link } from "react-router-dom";
 
+let renderedFrom = camelCase(routes.purchaseOrderDetail.title)
 
 const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrentStep, currentStep, handleAttachments, statusOptions }) => {
 
@@ -296,7 +297,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                     onCreate={null}
                     showClone={false}
                     fullHeight={true}
-                    renderedFrom={routes.purchaseOrderDetail.title}
+                    renderedFrom={`${renderedFrom}_grid-3`}
                     onClone={() => { }}
                 /> :
                     <CustomAgGridEditable
@@ -313,7 +314,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         loading={loading}
                         allowSelection={false}
                         isClientSideGrid={true}
-                        renderedFrom="purchaseOrderDetailsPageIssuePO"
+                        renderedFrom={`${renderedFrom}_grid-3`}
                         onCellValueChanged={(row) => {
                         }}
                         fromPurchaseOrderGrid={true}
