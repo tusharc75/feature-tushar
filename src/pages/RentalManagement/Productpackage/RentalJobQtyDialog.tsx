@@ -366,11 +366,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
 
   function validate(values) {
     const errors = {};
-    let startDate = moment(values?.estimateStartDate);
-    let endDate = moment(values?.estimateEndDate);
-    if (endDate.diff(startDate, 'days') < 0) {
-      errors['endDate'] = 'Please enter valid end date';
+    let estimateStartDate = moment(values?.estimateStartDate);
+    let estimateEndDate = moment(values?.estimateEndDate);
+    if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+      errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
+
     if (rowData && rowData.hideSelection) {
       if (rowData.parentId) {
         const _package = material?.filter((e) => e._id === rowData.parentId);

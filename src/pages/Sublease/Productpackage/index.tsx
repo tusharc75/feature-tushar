@@ -451,7 +451,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                             </Button>
                         </HtmlTooltip>
                         <Box mx={1} />
-                        {(material.length && !isIssued && !rowsData?.some(f => !f.isValid)) &&
+                        {(material.length && !isIssued && !rowsData?.some(f => !f.isValid)) ?
                             <Fragment>
                                 <HtmlTooltip title={"Start Sublease"}>
                                     <Button
@@ -467,7 +467,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                                 </HtmlTooltip>
                                 <Box mx={1} />
                             </Fragment>
-                        }
+                            : null}
                     </Box>
                 </Box>
             </Grid>
