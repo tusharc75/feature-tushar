@@ -208,8 +208,8 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                         element.parentId = null;
                         element.estimateStartDate = refrenceData?.estimateStartDate;
                         element.estimateEndDate = refrenceData?.estimateEndDate;
-                        element.actualStartDate = refrenceData?.estimateStartDate;
-                        element.actualEndDate = refrenceData?.estimateEndDate;
+                        element.actualStartDate = "";
+                        element.actualEndDate = "";
                         material.push(element);
                     });
                     axiosInstance().post(`${sublease.api}/productpackage/${data._id}`, { material })
@@ -314,6 +314,23 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
         }
     }
 
+    function validate(values) {
+        const errors = {};
+        let estimateStartDate = moment(values?.estimateStartDate);
+        let estimateEndDate = moment(values?.estimateEndDate);
+        if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+            errors['estimateEndDate'] = 'Please enter valid estimate end date';
+        }
+        let actualStartDate = moment(values?.actualStartDate);
+        let actualEndDate = moment(values?.actualEndDate);
+        if (actualStartDate.format("YYYY-MM-DD") !== actualEndDate.format("YYYY-MM-DD")) {
+            if (actualEndDate.diff(actualStartDate, 'days') <= 0) {
+                errors['actualEndDate'] = 'Please enter valid actual end date';
+            }
+        }
+        return errors;
+    }
+
     return (<Dialog
         maxWidth="md"
         fullScreen={fullScreen || (isMobile || isTablet)}
@@ -333,6 +350,7 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                 initialValues={initialData.values}
                 validationSchema={yupSchema(initialData.fields)}
                 validateOnMount
+                validate={validate}
                 onSubmit={handleSubmit}
             >
                 {({ values,
@@ -596,8 +614,6 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                         isTooltip={field?.isTooltip || false}
                                                                         tooltipMessage={field?.tooltipMessage}
                                                                         size="small"
-                                                                        minDate={new Date()}
-                                                                        maxDate={values["estimateEndDate"] ? moment(values["estimateEndDate"]).subtract(1, "day") : moment().add(5, "years")}
                                                                     />
                                                                 ) : field.fieldName === "estimateEndDate" ? (
                                                                     <FormTypes
@@ -617,7 +633,6 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                         isTooltip={field?.isTooltip || false}
                                                                         tooltipMessage={field?.tooltipMessage}
                                                                         size="small"
-                                                                        minDate={moment(values["estimateStartDate"]).add(1, "day")}
                                                                     />
                                                                 ) : ["actualStartDate", "actualEndDate"].includes(field.fieldName) ? (
                                                                     <FormTypes

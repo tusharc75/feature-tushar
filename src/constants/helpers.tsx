@@ -132,7 +132,7 @@ export const sidebarResource = {
   opportunity: 'Opportunity',
   field: 'Field',
   productCategory: 'Product Category',
-  //productInventory: 'Product Inventory',
+  productInventory: 'Product Inventory',
   serializedAsset: "Serialized Asset",
   priceTemplate: 'Price Template',
   product: 'Product',
@@ -177,7 +177,8 @@ export const sidebarResource = {
   transferAsset: 'Transfer Asset',
   address: 'Address',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventory'
+  transferInventory: 'Transfer Inventory',
+  zone: 'Zone'
 };
 
 export const resourceNames = {
