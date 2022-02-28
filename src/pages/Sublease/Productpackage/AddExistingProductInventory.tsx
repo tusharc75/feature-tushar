@@ -49,7 +49,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(type === "product" ? product.api + queryString : packages.packageApi + queryString).then(({ data: { data, count } }) => {
+        axiosInstance().get(`${type === "product" ? product.api + queryString : packages.packageApi + queryString}`).then(({ data: { data, count } }) => {
             setMaterialList(JSON.parse(JSON.stringify(data)));
             let rows = data.map((u) => {
                 let finalObject = prepareDataForGrid(u);
@@ -74,7 +74,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     };
 
     const getQueryString = () => {
-        let deepFilter = '?';
+        let deepFilter = `?page=${page}&limit=${limit}`;
 
         if (type !== "product") {
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'packageType', term: 'product' }]))}&filterType=and`
@@ -139,12 +139,12 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         dispatch({ type: "search", search: e.target.value });
     };
 
-    const onCellValueChanged = ({data}:any) => {
+    const onCellValueChanged = ({ data }: any) => {
         const selectedFromStorage = [...getLocalStorageArrayData(localStorageSelectedRecords)]
-        if(!selectedFromStorage || selectedFromStorage.length === 0 ) return
+        if (!selectedFromStorage || selectedFromStorage.length === 0) return
 
         const updatedRecords = selectedFromStorage.map(d => {
-            if(data._id === d._id) {
+            if (data._id === d._id) {
                 d.qty = data.qty
             }
             return d
