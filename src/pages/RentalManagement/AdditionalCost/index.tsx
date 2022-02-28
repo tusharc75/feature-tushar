@@ -27,6 +27,9 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { Link } from 'react-router-dom'
 import NoDataCell from "../../../components/Helpers/NoDataCell";
+import { camelCase } from "lodash";
+
+const renderedFrom = camelCase(`${routes.rentalManagement.title}_2`);
 
 const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
 
@@ -61,7 +64,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
         }
         const fields = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
         let rendererNames = [];
-        genrateColoum(fields, columns, rendererNames, false);
+        genrateColoum(fields, columns, rendererNames, false, renderedFrom);
         columns?.forEach((ele) => {
             if (ele.field === "costType") {
                 ele.cellRenderer = "costTypeRenderer";
@@ -249,7 +252,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                     onCreate={null}
                     showClone={false}
                     fullHeight={true}
-                    renderedFrom={routes.rentalManagement.title}
+                    renderedFrom={renderedFrom}
                     onClone={() => { }}
                 />
                 :
@@ -271,7 +274,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                     onCellValueChanged={(row) => {
                         //handleUpdateOrderProduct(row.data)
                     }}
-                    renderedFrom="rentalmanagmentadditionalcost"
+                    renderedFrom={renderedFrom}
                     refreshGrid={fetchAdditionalCost}
                     isFooter={true}
                     currency={rentalManagementData?.currency?.toLowerCase()}

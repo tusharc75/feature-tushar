@@ -287,7 +287,7 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
     }
 }
 
-export const genrateColoum = (fields, column, rendererNames, editable) => {
+export const genrateColoum = (fields, column, rendererNames, editable, renderedFrom = null) => {
     let _fields = fields;
     _fields.forEach((ele) => {
         if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
@@ -362,7 +362,7 @@ export const genrateColoum = (fields, column, rendererNames, editable) => {
         }
         else {
             if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-                let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path, true)
+                let currentColumn: any = getColumnData(renderedFrom ? renderedFrom : routes.productBuilder.title, ele, routes.productBuilder.path, true)
                 if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
                     if (!ele.isFormula && !ele.isUneditable && editable) {
                         if (ele.type === "decimal" || ele.type === "percent") {
