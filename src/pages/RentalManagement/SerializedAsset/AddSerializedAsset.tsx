@@ -375,7 +375,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                                     if(selectedRecords.length > 0 && val?._id !== selectedPlant ) {
                                                         toastConfig.setToastConfig({
                                                             open: true,
-                                                            message: "By changing plant all the pre selected records will deselect",
+                                                            message: "All pre-selected records will be deselected if you change the plant.",
                                                             type: "warning"
                                                         })
                                                         dispatch({

@@ -287,7 +287,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     data["refrenceId"] = rentalManagementData._id;
     data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
     data["pickupFrom"] = rentalManagementData?.customerAccount?.optionValue;
-    data["pickupFromAddress"] = rentalManagementData.shippingAddress?.optionValue;
+    data["pickupFromAddress"] = selectedRecords[0]?.currentLocation;
     data["deliveryToType"] = deliveryToType;
     if (deliveryToType === DELIVERY_FROM_TO_TYPE.supplier) {
       if (selectedRecords.length) {
