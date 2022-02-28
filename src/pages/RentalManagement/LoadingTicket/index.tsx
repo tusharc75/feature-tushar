@@ -340,8 +340,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           }}>Lost</MenuItem>
         </Menu>
         <Box mx={1} />
-        <Tooltip
-          title="Create Loading Ticket">
+        <Tooltip  title="Create Loading Ticket">
           <Button
             onClick={() => { handleDeliveryTicketDialog() }}
             variant={isMobile && !isTablet ? "text" : "outlined"}
