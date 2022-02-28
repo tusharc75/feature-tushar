@@ -382,7 +382,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                                             type: "selection",
                                                             selectedRecords: []
                                                         })
-                                                        localStorage.removeItem("addSerializedAssets_selected")
+                                                        localStorage.removeItem(addSerializedAssetsRenderedFrom)
                                                     }
                                                     setSelectedPlant(val && val._id ? val._id : null)
                                                 }}
