@@ -25,6 +25,8 @@ import { GiSabersChoc, GrBusinessService } from "react-icons/all";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
+import { Link } from 'react-router-dom'
+import NoDataCell from "../../../components/Helpers/NoDataCell";
 
 const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
 
@@ -60,9 +62,15 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
         const fields = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
         let rendererNames = [];
         genrateColoum(fields, columns, rendererNames, false);
+        columns?.forEach((ele) => {
+            if (ele.field === "costType") {
+                ele.cellRenderer = "costTypeRenderer";
+            }
+        })
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
             commonRenderer: CommonRenderer,
+            costTypeRenderer: CostTypeRenderer,
             actionsRenderer: ActionsRenderer,
             ...tempFrameworkComponent,
         }
@@ -90,9 +98,9 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                 let res: any = {
                     ...prepareDataForGrid(item),
                 };
-                // res["canDelete"] = permissions?.rentalManagement?.isDelete;
-                // res["allowedToEdit"] = permissions?.rentalManagement?.isUpdate;
-                // res["isChecked"] = false;
+                res["canDelete"] = permissions?.rentalManagement?.isDelete;
+                res["allowedToEdit"] = permissions?.rentalManagement?.isUpdate;
+                res["isChecked"] = false;
                 return res;
             });
             setNextStep(true)
@@ -130,6 +138,18 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
             />
         </Fragment>
     );
+
+    const CostTypeRenderer = (params) =>
+        params?.value ? (
+            <a className="link" title={params.value} onClick={() => {
+                setShowCostDialog(true)
+                setSelectedCostData(params.data)
+            }} >
+                {params.value}
+            </a>
+        ) : (
+            <NoDataCell />
+        );
 
     const handleAddCost = (rows) => {
         axiosInstance().post(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/add`, { additionalCost: rows })
