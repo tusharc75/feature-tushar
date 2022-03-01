@@ -15,7 +15,7 @@ import { ExpandMore } from '@material-ui/icons';
 import { Button, Chip, Dialog, Link, Menu, MenuItem, TextField } from '@material-ui/core';
 import { AddOutlined } from '@material-ui/icons';
 import { CreateNote } from '../../../components/Activity/Note/CreateNote';
-import { camelCase, CustomDialogTransition, getApi, getData, gridLoadingTimeout, resourceOptions } from '../../../constants/helpers';
+import { CustomDialogTransition, getApi, getData, gridLoadingTimeout, resourceOptions } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import styles from '../../Leads/Header.module.scss';
@@ -28,7 +28,7 @@ import routes from '../../../components/Helpers/Routes';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import { MdAdd } from "react-icons/all";
 import { Autocomplete } from '@material-ui/lab';
-import { startCase } from "lodash";
+import { startCase, camelCase } from "lodash";
 
 const Note = () => {
   const {

@@ -1,5 +1,5 @@
 import { uniq } from "lodash";
-import { camelCase } from "../constants/helpers";
+import { camelCase } from "lodash";
 
 const removeBracket = (string) => {
     return string.replace(/{/g, '').replace(/}/g, '')
