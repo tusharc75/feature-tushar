@@ -17,7 +17,7 @@ import { kebabCase } from "lodash";
 import axios from "axios";
 import { FcApproval } from "react-icons/fc";
 import { FaDiceOne } from "react-icons/fa";
-import { camelCase, getObjKeysWithValues, sidebarResource } from "../../constants/helpers";
+import { getObjKeysWithValues, sidebarResource } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "../../StateProvider/Provider";
@@ -25,6 +25,7 @@ import CopyToClipboard from "../Helpers/CopyToClipboard";
 import { displayDate, getUniqueCurrencies } from "../../constants/helpers";
 import HtmlTooltip from "../CustomTooltipTitle";
 import CarouselDialog from "../CarouselDialog";
+import { camelCase } from "lodash";
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
