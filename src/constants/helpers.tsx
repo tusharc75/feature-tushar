@@ -21,7 +21,7 @@ import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
-import { kebabCase, orderBy, uniqBy } from 'lodash';
+import { kebabCase, orderBy, uniqBy, camelCase } from 'lodash';
 
 // export const ORDER_TYPES =
 // {
@@ -745,13 +745,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
   return object().shape(schema);
 };
 
-export const camelCase = (str) => {
-  return str
-    .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
-      return index === 0 ? word.toLowerCase() : word.toUpperCase();
-    })
-    .replace(/\s+/g, '');
-};
+
 
 export const UnCamelCase = (str) => {
   return str

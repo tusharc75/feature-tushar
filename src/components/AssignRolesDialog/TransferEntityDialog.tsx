@@ -15,7 +15,7 @@ import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { camelCase } from "../../constants/helpers";
+import { camelCase } from "lodash";
 
 const TransferEntityDialog = ({
     TransferEntityDialogOpen,
