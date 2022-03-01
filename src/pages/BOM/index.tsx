@@ -79,7 +79,7 @@ const BOMTable = () => {
         setCustomizedRoutes([
           { title: "Product Master", path: routes.product.path },
           { title: productData?.productName, path: `${routes.productDetail.path}/${id}` },
-          { title: 'BOM' }
+          { title: 'Parts' }
         ]);
       })
   }

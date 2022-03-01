@@ -130,6 +130,12 @@ const PurchaseOrderDetailsPage = () => {
     }
   };
 
+  useEffect(() => {
+    if (isSmallScreen) {
+      setActivityShow(true)
+    }
+  }, [isSmallScreen])
+
   const getPurchaseOrderFields = () => {
     axiosInstance()
       .get('/field?resource=Purchase Order')
