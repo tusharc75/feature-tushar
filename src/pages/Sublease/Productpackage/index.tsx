@@ -231,16 +231,19 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             parent.assetQty = parent.assetQty;
             if (parent.type === "package") {
                 const subRows: any = data.material.filter((e) => e.parentId === parent._id);
+                var assetQty = 0;
                 subRows.forEach((_subRow, j) => {
                     _subRow.detail = (i + 1) + "." + (j + 1) + " - " + _subRow.productDetail?.productName
                     _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`
                     _subRow.isValid = _subRow["finalPrice_" + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
                     _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
                     _subRow.assetQty = _subRow.assetQty;
+                    assetQty += _subRow.assetQty
                 })
                 if (subRows.length === 0) {
                     parent.isValid = false
                 }
+                parent.assetQty = assetQty;
                 parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
                 parent.subRows = subRows
             }
@@ -269,6 +272,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             element.actualStartDate = "";
             element.actualEndDate = "";
             element.actualJobDuration = "";
+            element.assetQty = 0;
             element.parentId = addExistingProductDialog.parentId;
             const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields)
             element.estimateJobDuration = 1;
@@ -308,7 +312,6 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             delete element.qtyDisplay
             delete element.isValid
             delete element.hideSelection
-            delete element.assetQty
             delete element.productDetail
             delete element.packageDetail
             delete element.subRows
@@ -451,7 +454,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                             </Button>
                         </HtmlTooltip>
                         <Box mx={1} />
-                        {(material.length && !isIssued && !rowsData?.some(f => !f.isValid)) &&
+                        {(material.length && !isIssued && !rowsData?.some(f => !f.isValid)) ?
                             <Fragment>
                                 <HtmlTooltip title={"Start Sublease"}>
                                     <Button
@@ -467,7 +470,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                                 </HtmlTooltip>
                                 <Box mx={1} />
                             </Fragment>
-                        }
+                            : null}
                     </Box>
                 </Box>
             </Grid>

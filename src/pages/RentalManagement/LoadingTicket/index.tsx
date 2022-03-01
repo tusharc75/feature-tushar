@@ -40,8 +40,9 @@ import { RiExchangeFundsLine } from 'react-icons/ri';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 import { groupBy, uniq, map } from "lodash";
+import { camelCase } from "lodash";
 
-const renderedFrom = 'rentalManagementDetailsPageDeliveryTicket';
+const renderedFrom = camelCase(`${routes.rentalManagement.title}_4`);
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -200,10 +201,10 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   };
 
   const columns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "inventoryRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "inventoryRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
-    { field: "warehouse", headerName: "Plant", show: false, disabled: true, cellRenderer: "warehouseRenderer" },
+    { field: "productName", headerName: "Product Type", show: true, cellRenderer: "productNameRenderer" },
+    { field: "warehouse", headerName: "Plant", show: false, cellRenderer: "warehouseRenderer" },
     { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "ticketRenderer" },
     { field: "status", headerName: "Asset Status", show: true, cellRenderer: "commonRenderer" },
   ];
@@ -340,8 +341,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           }}>Lost</MenuItem>
         </Menu>
         <Box mx={1} />
-        <Tooltip
-          title="Create Loading Ticket">
+        <Tooltip title="Create Loading Ticket">
           <Button
             onClick={() => { handleDeliveryTicketDialog() }}
             variant={isMobile && !isTablet ? "text" : "outlined"}
