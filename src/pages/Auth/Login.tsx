@@ -243,11 +243,11 @@ const Login = () => {
                           InputProps={{
                             endAdornment: (
                               <InputAdornment position="end">
-                                <IconButton className="p-0" onClick={() => setShowPassword(!showPassword)} >
-                                  {showPassword ? < Visibility /> : <VisibilityOff />}
+                                <IconButton className="p-0" onClick={() => setShowPassword(!showPassword)}>
+                                  {showPassword ? <Visibility /> : <VisibilityOff />}
                                 </IconButton>
                               </InputAdornment>
-                            ),
+                            )
                           }}
                         />
                       </Box>
@@ -260,7 +260,7 @@ const Login = () => {
                       </Box>
                       <Box width={260} className="mt-2">
                         <Button disabled={isSubmitting} fullWidth variant="contained" color="secondary" type="submit" onClick={submitForm}>
-                          {isSubmitting ? <CircularProgress size={22} /> : 'Signin'}
+                          {isSubmitting ? <CircularProgress size={22} /> : 'Login'}
                         </Button>
 
                         <Box className="mt-2">
