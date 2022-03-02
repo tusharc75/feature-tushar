@@ -157,8 +157,8 @@ function App() {
 
   useEffect(() => {
     const newVersionAvailable = localStorage.getItem('newVersionAvailable');
-    if (newVersionAvailable === 'true') updateServiceWorker();
-  }, []);
+    if (newVersionAvailable === 'true') setRefreshSnackBar(true);
+  }, [setRefreshSnackBar]);
 
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
