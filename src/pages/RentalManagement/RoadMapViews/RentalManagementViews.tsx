@@ -92,7 +92,7 @@ const customDeliveredNodeStyle = {
   },
   closedRentalJob: {
     name: 'Return Ticket',
-    background: '4BB543',
+    background: '#4BB543',
     borderColor: '#999999'
   }
 };
