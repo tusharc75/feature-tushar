@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.70.0](https://github.com/vebholic/oms_frontend/compare/v2.69.0...v2.70.0) (2022-03-02)
+
+
+### Features
+
+* rental Api for views tab, all formatted data will come from backend one api PO-1186 ([2c2810c](https://github.com/vebholic/oms_frontend/commit/2c2810c5377fc482353e698b66af4ee15ddb009a))
+
+
+### Bug Fixes
+
+* bug fix ([f04fad3](https://github.com/vebholic/oms_frontend/commit/f04fad34af6c05209094759d6aeaabdab6cabd62))
+
 ## [2.69.0](https://github.com/vebholic/oms_frontend/compare/v2.68.2...v2.69.0) (2022-03-01)
 
 
