@@ -56,7 +56,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   const [purchaseOrderCount, setPurchaseOrderCount] = useState(0);
-  const [transferAssetCount, setTransferAssetCount] = useState(0);
   const [subleaseCount, setSubleaseCount] = useState(0);
 
   const { state: { user, permissions, selectedEntity } }: any = useData();
@@ -65,13 +64,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
 
   useEffect(() => {
     fetchFields()
-    if (!isOffline) {
-      fetchPurchaseOrder()
-      fetchTransferAsset()
-      if (permissions?.sublease?.isRead) {
-        fetchSublease()
-      }
-    }
   }, []);
 
   const fetchFields = async () => {
@@ -98,6 +90,17 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                 }}>
                   <Delete color="error" />
                 </IconButton>}
+              {row.original.isTransferAsset &&
+                <HtmlTooltip title={`${routes.transferAsset.title}`}>
+                  <IconButton size="small" onClick={() => {
+                    history.push(routes.transferAsset.path, {
+                      rental: rentalManagementData,
+                    })
+                  }}>
+                    <InfoIcon color={"primary"} />
+                  </IconButton>
+                </HtmlTooltip>
+              }
             </span>}
         </div>),
       Footer: () => {
@@ -194,6 +197,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     setNextStep(false)
     try {
       var data: any = []
+      var transferAssets: any = []
+
       if (isOffline) {
         data = await findOne(objectStore.rentalManagement, rentalManagementData._id)
         data.inventory = data.productInventory;
@@ -201,13 +206,22 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       else {
         const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
         data = response?.data?.data
+
+        const result = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`)
+        const transactionData = result?.data?.data
+
+        setSubleaseCount(transactionData?.sublease?.length)
+        setPurchaseOrderCount(transactionData?.purchaseOrder?.length)
+        transferAssets = transactionData?.transferAsset;
       }
+      
       const rows = data.material.filter((e) => e.parentId === null)
       rows.forEach((parent, i) => {
         parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
         const subRows = []
         const inventory = data.inventory.filter((e) => e._id === parent._id);
         inventory?.forEach((_inventory, k) => {
+          const isTransferAsset = transferAssets.some(e => e.assetId === _inventory.inventory);
           subRows.push({
             ..._inventory,
             detail: `${(i + 1)}.${(k + 1)} - ${_inventory.inventoryDetail?.assetNumber}`,
@@ -215,7 +229,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             status: _inventory.inventoryDetail?.status,
             manualStatus: _inventory.inventoryDetail?.manualStatus,
             _id: _inventory.inventory,
-            isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true
+            isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
+            isTransferAsset: isTransferAsset,
           })
         })
         parent.subRows = subRows;
@@ -230,6 +245,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             const subRows = []
             const inventory = data.inventory.filter((e) => e._id === _child._id);
             inventory?.forEach((_inventory, l) => {
+              const isTransferAsset = transferAssets.some(e => e.assetId === _inventory.inventory);
               subRows.push({
                 ..._inventory,
                 detail: `${(i + 1)}.${(j + 1)}.${(l + 1)} - ${_inventory.inventoryDetail?.assetNumber}`,
@@ -237,7 +253,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                 status: _inventory.inventoryDetail?.status,
                 manualStatus: _inventory.inventoryDetail?.manualStatus,
                 _id: _inventory.inventory,
-                isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true
+                isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
+                isTransferAsset: isTransferAsset,
               })
             })
             _child.subRows = subRows;
@@ -264,35 +281,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     }
   };
 
-  const fetchPurchaseOrder = async () => {
-    let filterById = [];
-    filterById.push({ field: "rentalJob", term: rentalManagementData?._id });
-    const queryString = `?filterById=${JSON.stringify(filterById)}`
-    axiosInstance().get(`${purchaseOrder.api}${queryString}`).then(({ data: { data } }) => {
-      setPurchaseOrderCount(data.length)
-    }).catch((error) => {
-    });
-  }
-
-  const fetchTransferAsset = async () => {
-    let filterById = [];
-    filterById.push({ field: "rentalJob", term: rentalManagementData?._id });
-    const queryString = `?filterById=${JSON.stringify(filterById)}`
-    axiosInstance().get(`${transferAsset.api}${queryString}`).then(({ data: { data } }) => {
-      setTransferAssetCount(data.length)
-    }).catch((error) => {
-    });
-  }
-
-  const fetchSublease = async () => {
-    let filterById = [];
-    filterById.push({ field: "rentalJob", term: rentalManagementData?._id });
-    const queryString = `?filterById=${JSON.stringify(filterById)}`
-    axiosInstance().get(`${sublease.api}${queryString}`).then(({ data: { data } }) => {
-      setSubleaseCount(data.length)
-    }).catch((error) => {
-    });
-  }
 
   const getAssetAssignedValues = (row) => {
     if (row.original?.type === "product") {
@@ -339,7 +327,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setSelectedProducts([])
           setAssetAssignedProduct([])
           setAdding(false)
-          fetchTransferAsset()
           toastConfig.setToastConfig({
             open: true,
             type: "success",
@@ -505,15 +492,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               </HtmlTooltip>}
             </Fragment>
           }
-          {transferAssetCount > 0 && <HtmlTooltip title={`Created ${routes.transferAsset.title}`}>
-            <IconButton size="small" onClick={() => {
-              history.push(routes.transferAsset.path, {
-                rental: rentalManagementData,
-              })
-            }}>
-              <InfoIcon color={"primary"} />
-            </IconButton>
-          </HtmlTooltip>}
         </Box>
       </Box>
     </Box>
@@ -582,7 +560,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setOrderDialog(({ open: false, products: [], type: "" }))
           setSelectedProducts([])
           fetchProductInventory()
-          fetchPurchaseOrder()
           toastConfig.setToastConfig({
             open: true,
             type: "success",
@@ -606,7 +583,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setOrderDialog(({ open: false, products: [], type: "" }))
           setSelectedProducts([])
           fetchProductInventory()
-          fetchSublease()
           toastConfig.setToastConfig({
             open: true,
             type: "success",
