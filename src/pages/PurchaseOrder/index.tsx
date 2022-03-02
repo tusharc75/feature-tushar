@@ -1,36 +1,39 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import CustomBreadCrumbs from "src/components/CustomBreadCrumbs";
 import AddIcon from "@material-ui/icons/Add";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../axios/axiosInstance";
+import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "src/axios/axiosInstance";
 import { GiStockpiles } from 'react-icons/gi';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog'
 import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
-import SearchBox from '../../components/Helpers/SearchBox'
+import SearchBox from 'src/components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
-import routes from "../../components/Helpers/Routes";
-import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { purchaseOrder, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { useData } from "../../StateProvider/Provider";
+import routes from "src/components/Helpers/Routes";
+import CustomAgGrid, { reducer, intialState } from "src/components/AgGridComponents/CustomAgGrid";
+import { purchaseOrder, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from 'src/constants/helpers';
+import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import { useData } from "src/StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import HtmlTooltip from "../../components/CustomTooltipTitle";
-import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
-import { prepareDataForGrid } from "../../constants/helpers"
+import HtmlTooltip from "src/components/CustomTooltipTitle";
+import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
+import useColumns, { getStaticFields, getFrameworkComponents } from "src/constants/useColumns"
+import { prepareDataForGrid } from "src/constants/helpers"
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
 import { AiFillCrown, MdAdd,MdSort,MdFilterList } from "react-icons/all";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from "react-router-dom";
 import {FaSuitcase} from "react-icons/fa";
-import MobileSortDialog from "../../components/MobileSortDialog";
-import MobileFilterDialog from "../../components/MobileFilterDialog"
+import MobileSortDialog from "src/components/MobileSortDialog";
+import MobileFilterDialog from "src/components/MobileFilterDialog"
+import { camelCase } from "lodash";
+
+let renderedFrom = camelCase(routes.purchaseOrder?.title)
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
@@ -51,7 +54,7 @@ const PurchaseOrder = () => {
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
-    const localStorageSelectedRecords = `${routes.purchaseOrder?.title}_selected`;
+    const localStorageSelectedRecords = `${renderedFrom}_selected`;
     const [isOpenDialog, setisOpenDialog] = useState(false)
 
     const [fromRental, setFromRental] = useState(history.location?.state?.rental);
@@ -77,7 +80,7 @@ const PurchaseOrder = () => {
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = getColumnData(routes.purchaseOrder?.title, o?.fieldData, routes.purchaseOrderDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.purchaseOrderDetail.path)
 
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
@@ -215,7 +218,7 @@ const PurchaseOrder = () => {
         return deepFilter;
     };
 
-    const columnState = JSON.parse(localStorage.getItem(routes.purchaseOrder?.title));
+    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
 
     if (columnState) {
@@ -564,7 +567,7 @@ const PurchaseOrder = () => {
                             onCreate={false}
                             showClone={true}
                             onClone={(data) => { setShowManagePurchaseOrderDialog({ open: true, isClone: true, idToClone: data._id }); }}
-                            renderedFrom={routes.purchaseOrder?.title}
+                            renderedFrom={renderedFrom}
                         /> :
                         <CustomAgGrid
                             columns={columns}
@@ -578,7 +581,7 @@ const PurchaseOrder = () => {
                             page={page}
                             actionWidth={150}
                             loading={loading}
-                            renderedFrom={routes.purchaseOrder?.title}
+                            renderedFrom={renderedFrom}
                             refreshGrid={fetchPurchaseOrder}
                         /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}

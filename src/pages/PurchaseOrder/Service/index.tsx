@@ -2,27 +2,30 @@ import React, { useState, useEffect, useContext, Fragment, useReducer } from "re
 import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs, ButtonGroup, Container, InputAdornment, TextField, Menu, MenuItem } from "@material-ui/core";
 import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
-import axiosInstance from "../../../axios/axiosInstance";
-import routes from "../../../components/Helpers/Routes";
-import { useData } from "../../../StateProvider/Provider";
-import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder, CHILD_RESOURCE } from "../../../constants/helpers";
+import axiosInstance from "src/axios/axiosInstance";
+import routes from "src/components/Helpers/Routes";
+import { useData } from "src/StateProvider/Provider";
+import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
+import { purchaseOrder, CHILD_RESOURCE } from "src/constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
-import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
-import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
-import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
+import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
+import { CommonRenderer, DateRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
+import GridDeleteIcon from "src/components/Helpers/GridDeleteIcon";
+import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
 import ServiceDialog from "./ServiceDialog";
 import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
 import { isMobile, isTablet } from "react-device-detect";
-import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
-import HtmlTooltip from "../../../components/CustomTooltipTitle";
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
-import { prepareDataForGrid } from "../../../constants/helpers";
-import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
+import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
+import HtmlTooltip from "src/components/CustomTooltipTitle";
+import { CURReplaceByCurrencySingle } from "src/constants/formulaUtility";
+import { prepareDataForGrid } from "src/constants/helpers";
+import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "src/constants/columns"
 import { ExpandMore } from "@material-ui/icons";
-import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
+import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
+import { camelCase } from "lodash";
+
+let renderedFrom = camelCase(routes.purchaseOrderDetail.title)
 
 const Product = ({ purchaseOrderData }) => {
 
@@ -236,7 +239,7 @@ const Product = ({ purchaseOrderData }) => {
                     onCreate={null}
                     showClone={false}
                     fullHeight={true}
-                    renderedFrom={routes.purchaseOrderDetail.title}
+                    renderedFrom={`${renderedFrom}_grid-2`}
                     onClone={() => { }}
                 />
                 :
@@ -258,7 +261,7 @@ const Product = ({ purchaseOrderData }) => {
                     onCellValueChanged={(row) => {
                         //handleUpdateOrderProduct(row.data)
                     }}
-                    renderedFrom="purchaseOrderDetailsPageInventory"
+                    renderedFrom={`${renderedFrom}_grid-2`}
                     refreshGrid={fetchPurchaseOrderService}
                     fromPurchaseOrderGrid={true}
                     currency={purchaseOrderData?.currency?.toLowerCase()}

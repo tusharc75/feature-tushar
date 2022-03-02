@@ -6,7 +6,7 @@ import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { gridLoadingTimeout, serializedAsset } from '../../../constants/helpers';
+import { gridLoadingTimeout, INVENTORY_STATUS, serializedAsset } from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
@@ -44,7 +44,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
 
     useEffect(() => {
         fetchGridColumns()
-    }, []);
+    }, [currentStep]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -80,7 +80,8 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
         const response = await axiosInstance().get(`${sublease.api}/${subleaseData._id}/serialized-asset`)
         var isComplate = true;
         let rows = response?.data?.data.map((u) => {
-            if (u?.currentOwner?.optionValue !== subleaseData?.supplierAccount?.optionValue) {
+            if (u?.currentOwner?.optionValue !== subleaseData?.supplierAccount?.optionValue ||
+                [INVENTORY_STATUS.reserved, INVENTORY_STATUS.inUse, INVENTORY_STATUS.repair].includes(u.status)) {
                 isComplate = false;
             }
             let res = {
@@ -180,7 +181,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
                                         setShowTicketDialog({ open: true, data: data });
                                     }}
                                     disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse")
-                                        || f.currentOwnerType !== INVENTORY_OWNER_TYPE.supplierAccount)))}
+                                        || f.currentOwnerType !== INVENTORY_OWNER_TYPE.supplierAccount || [INVENTORY_STATUS.reserved].includes(f.status))))}
                                 >
                                     Receiving to Plant
                                 </Button>

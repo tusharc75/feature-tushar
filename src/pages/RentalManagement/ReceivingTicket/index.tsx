@@ -43,8 +43,9 @@ import InfoIcon from '@material-ui/icons/Info';
 import { ExpandMore } from '@material-ui/icons';
 import ExistingRentalJob from "./ExistingRentalJob";
 import { groupBy, uniq, map } from "lodash";
+import { camelCase } from "lodash";
 
-const renderedFrom = 'rentalManagementDetailsPageReceivingTicket';
+const renderedFrom = camelCase(`${routes.rentalManagement.title}_5`);
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -259,10 +260,10 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   };
 
   const columns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "inventoryRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "inventoryRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
-    { field: "warehouse", headerName: "Plant", show: false, disabled: true, cellRenderer: "warehouseRenderer" },
+    { field: "productName", headerName: "Product Type", show: true, cellRenderer: "productNameRenderer" },
+    { field: "warehouse", headerName: "Plant", show: false, cellRenderer: "warehouseRenderer" },
     { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "deliveryTicketRenderer" },
     { field: "receivingTicket", headerName: "Receiving Ticket", show: true, cellRenderer: "receivingTicketRenderer" },
     { field: "returnTicket", headerName: "Return Ticket", show: true, cellRenderer: "returnTicketRenderer" },
@@ -270,7 +271,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     { field: "rentalAssetStatus", headerName: "Rental Asset Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
-  const columnState = JSON.parse(localStorage.getItem('rentalManagementDetailsPageReceivingTicket'));
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
     columns.forEach((item) => {
       columnState.forEach((d) => {

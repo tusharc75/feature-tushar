@@ -21,7 +21,7 @@ import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
-import { kebabCase, orderBy, uniqBy } from 'lodash';
+import { kebabCase, orderBy, uniqBy, camelCase } from 'lodash';
 
 // export const ORDER_TYPES =
 // {
@@ -132,7 +132,7 @@ export const sidebarResource = {
   opportunity: 'Opportunity',
   field: 'Field',
   productCategory: 'Product Category',
-  //productInventory: 'Product Inventory',
+  productInventory: 'Product Inventory',
   serializedAsset: "Serialized Asset",
   priceTemplate: 'Price Template',
   product: 'Product',
@@ -177,7 +177,8 @@ export const sidebarResource = {
   transferAsset: 'Transfer Asset',
   address: 'Address',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventory'
+  transferInventory: 'Transfer Inventory',
+  zone: 'Zone'
 };
 
 export const resourceNames = {
@@ -744,13 +745,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
   return object().shape(schema);
 };
 
-export const camelCase = (str) => {
-  return str
-    .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
-      return index === 0 ? word.toLowerCase() : word.toUpperCase();
-    })
-    .replace(/\s+/g, '');
-};
+
 
 export const UnCamelCase = (str) => {
   return str
