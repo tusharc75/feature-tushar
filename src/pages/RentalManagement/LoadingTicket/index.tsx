@@ -344,7 +344,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           }}>Lost</MenuItem>
         </Menu>
         <Box mx={1} />
-        <Tooltip title={selectedRecords.length === 0 ? "Create Loading Ticket" : "Selected assets are located in various locations."}>
+        <Tooltip title={selectedRecords.length === 0 ? "Create Loading Ticket" : "Selected assets are located in several locations."}>
           <span>
             <Button
               onClick={() => { handleDeliveryTicketDialog() }}
