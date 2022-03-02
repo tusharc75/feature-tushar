@@ -5,7 +5,7 @@ import { Link, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { deliveryTicket, sidebarResource } from 'src/constants/helpers';
+import { deliveryTicket, sidebarResource, DELIVERY_TICKET_STATUS } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { groupBy } from 'lodash';
@@ -249,20 +249,19 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     <Fragment>
       <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} justifyContent="space-between" mx="4px">
         <Box>
-          {permissions?.transferAsset?.isRead && (
+          {(permissions?.transferAsset?.isRead && !isMobile) && (
             <Button
               variant={isMobile && !isTablet ? "text" : "outlined"}
               color="primary"
               type="button"
               size="small"
-              style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              startIcon={<AiFillFilePdf />}
               disabled={fileDownloading}
               onClick={() => {
                 handleViewPdf(false);
               }}
             >
-              {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : fileDownloading ? 'Please wait...' : 'Preview'}
+              {fileDownloading ? 'Please wait...' : 'Preview'}
             </Button>
           )}
           <Box component="span" mx={1} />
@@ -283,9 +282,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             </Button>
           )}
         </Box>
-
         {!isTransferEnded && <Box marginTop={isMobile ? 2 : 0}>
-          {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isCreate && (
+          {permissions?.transferAsset.isUpdate && (
             <Button
               variant="contained"
               size="small"
@@ -303,23 +301,19 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             </Button>
           )}
           <Box component="span" mx={1} />
-          {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isUpdate && (
+          {permissions?.transferAsset.isUpdate && selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("receivingTicket") &&
+            f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedRecords?.length ? (
             <Button
               variant="contained"
               size="small"
               color="primary"
-              disabled={assetsDelivered.length > 0
-                || selectedRecords.filter((asset) => asset?.hasOwnProperty('receivingTicket')).length === 0
-                || selectedRecords.filter((asset) => !asset?.hasOwnProperty('receivingTicket')).length > 0
-              }
               onClick={() => setShowConfirmBox(true)}
             >
               Remove Receiving Ticket
             </Button>
-          )}
+          ) : null}
         </Box>}
       </Box>
-
       <Box mt={1}>
         {isMobile && !isTablet ? (
           <CustomSwipableList
