@@ -27,12 +27,11 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 
 
-const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, refrenceType = null,
+const AddSerializedAsset = ({renderedFrom = 'addSerializedAssets', isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, refrenceType = null,
     refrenceData = null,
     rentalId = null, repairJobId = null, transferAssetId = null, salesOrderId = null, notIn = null, queryString = null, filterByPlant = null }) => {
 
-    const addSerializedAssetsRenderedFrom = "addSerializedAssets";
-    const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
+    const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
     const theme = useTheme()
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('xs'))
@@ -75,7 +74,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             let columns = []
             let rendererNames = []
             data.forEach(o => {
-                let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
+                let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path)
                 if (currentColumn !== null) {
                     columns = [...columns, currentColumn?.columnData]
                     if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -447,7 +446,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                         //         showClone={false}
                         //         onClone={false}
                         //         fullHeight={true}
-                        //         renderedFrom={addSerializedAssetsRenderedFrom}
+                        //         renderedFrom={renderedFrom}
                         //     /> :
                         <CustomAgGrid
                             columns={columns}
@@ -462,7 +461,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                             allowAction={false}
                             loading={loading}
                             customGridOptions={{ getRowStyle: getRowStyleScheduled }}
-                            renderedFrom={addSerializedAssetsRenderedFrom}
+                            renderedFrom={renderedFrom}
                             showOnlyShowFilteredRecordSwitch={true}
                             refreshGrid={fetchProductInventory}
                         />

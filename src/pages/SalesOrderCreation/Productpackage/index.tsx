@@ -24,7 +24,7 @@ import SalesOrderQtyDialog from './SalesOrderQtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
 import InfoIcon from "@material-ui/icons/Info";
 
-const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
+const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -461,6 +461,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
         }
         {addExistingProductDialog.open &&
             <AddExistingProductInventory
+                renderedFrom={renderedFrom}
                 isAddingProducts={isAddingProducts}
                 addProductInventory={handleAdd}
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
