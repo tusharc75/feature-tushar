@@ -55,9 +55,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
-
-  const renderedFrom = camelCase(`${routes.rentalManagement.title}4`);
+const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -270,7 +268,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
       <Box display="flex" alignItems="center">
-        <Button
+        {!isMobile && <Button
           onClick={() => {
             setDownlodingFile(true);
             axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
@@ -301,20 +299,22 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           type="button"
           size="small"
           disabled={downlodingFile || isOffline}
-          style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-          startIcon={isMobile ? '' : <AiFillFilePdf />}
+          startIcon={<AiFillFilePdf />}
         >
-          {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
-        </Button>
+          {downlodingFile ? "Please wait..." : "Preview"}
+        </Button>}
         <Box mx={1} />
-        <Button variant={isMobile && !isTablet ? 'text' : 'outlined'} color="primary" aria-controls="simple-menu"
+        <Button
+          variant={isMobile && !isTablet ? 'text' : 'outlined'}
+          color="primary"
+          aria-controls="simple-menu"
           aria-haspopup="true"
           disabled={selectedRecords.length === 0 || isOffline}
           size="small"
           onClick={handleClick}
           style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
           endIcon={<ArrowDropDownIcon />}>
-          {isMobile && !isTablet ? <RiExchangeFundsLine size={20} /> : 'Change Status'}
+          {'Change Status'}
         </Button>
         <Menu
           id="simple-menu"
@@ -342,18 +342,17 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           }}>Lost</MenuItem>
         </Menu>
         <Box mx={1} />
-        <Tooltip title={selectedRecords.length === 0 ? "Create Loading Ticket" : "Selected assets are located in various locations."}>
+        <Tooltip title={selectedRecords.length === 0 ? "Create Loading Ticket" : "Selected assets are located in several locations."}>
           <span>
             <Button
               onClick={() => { handleDeliveryTicketDialog() }}
               variant={isMobile && !isTablet ? "text" : "outlined"}
               color="primary"
               size="small"
-              style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
               disabled={(selectedRecords.length === 0)
                 || (selectedRecords.some(f => f.hasOwnProperty("loadingTicketId")) || checkUniqWarehouse())}
             >
-              {isMobile && !isTablet ? <AiOutlineLoading3Quarters size={18} /> : 'Create Loading Ticket'}
+              {'Create Loading Ticket'}
             </Button>
           </span>
         </Tooltip>

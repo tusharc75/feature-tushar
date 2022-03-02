@@ -20,7 +20,7 @@ import { prepareDataForGrid, CHILD_RESOURCE } from "../../../constants/helpers";
 import { getFrameworkComponents, genrateColoum } from "../../../constants/columns"
 import { GrBusinessService } from "react-icons/all";
 
-const AdditionalCost = ({ salesOrderData, setNextStep }) => {
+const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -45,7 +45,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep }) => {
 
         const fields = CURReplaceByCurrencySingle(data, salesOrderData.currency)
         let rendererNames = [];
-        genrateColoum(fields, columns, rendererNames, false);
+        genrateColoum(fields, columns, rendererNames, false, renderedFrom);
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
             commonRenderer: CommonRenderer,
@@ -188,7 +188,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep }) => {
                     onCreate={null}
                     showClone={false}
                     fullHeight={true}
-                    renderedFrom={routes.salesOrder.title}
+                    renderedFrom={renderedFrom}
                     onClone={() => { }}
                 />
                 :
@@ -210,7 +210,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep }) => {
                     onCellValueChanged={(row) => {
                         //handleUpdateOrderProduct(row.data)
                     }}
-                    renderedFrom="salesorderadditionalcost"
+                    renderedFrom={renderedFrom}
                     refreshGrid={fetchAdditionalCost}
                 />
                 : <Box

@@ -33,7 +33,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
     const [headerLabel, setHeaderLabel] = useState("");
     const { state: { permissions } }: any = useData();
     //["Price", "Rent", "Discount", "Charge", "Tax"]
-    const [conditionType, setConditionType] = useState(permissions.eCommerce?.isRead ? ["Rent", "Price"] : ["Rent"]);
+    const [conditionType, setConditionType] = useState(permissions.eCommercePolicy?.isRead ? ["Rent", "Price"] : ["Rent"]);
     const [currency, setCurrency] = useState([detailData.currency]);
     const [unit, setUnits] = useState([]);
     const [pricingMethod, setPricingMethod] = useState([]);

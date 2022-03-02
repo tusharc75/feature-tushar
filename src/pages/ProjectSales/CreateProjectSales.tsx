@@ -676,7 +676,6 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                               ) : field.fieldName === "projectManager" ? (
                                                 <FormTypes
                                                   {...field}
-                                                  disabled={Boolean(projectSalesId) && !isClone}
                                                   values={values}
                                                   errors={errors}
                                                   touched={touched}

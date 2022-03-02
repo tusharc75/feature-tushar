@@ -6,7 +6,11 @@
       "google.visualization"
     ],
     "paths": {
-      "src/*": ["src/*"]
+      "src/*": ["src/*"],
+      "pages/*": ["src/pages/*"],
+      "components/*": ["src/components/*"],
+      "constants/*":["src/constants/*"],
+      "provider/*":["src/StateProvider/*"],
     },
     "target": "es5",
     "module": "esnext",
