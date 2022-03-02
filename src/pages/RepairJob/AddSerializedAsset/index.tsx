@@ -75,7 +75,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
     axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`).then(({ data: { data } }) => {
       const columns = [...commonColumns];
       let rendererNames = [];
-      genrateColoum(data, columns, rendererNames, false);
+      genrateColoum(data, columns, rendererNames, false, renderedFrom);
       setSerializedAssetFields(data)
       let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
       tempFrameworkComponent = {
