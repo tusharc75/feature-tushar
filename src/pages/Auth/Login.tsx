@@ -260,7 +260,7 @@ const Login = () => {
                       </Box>
                       <Box width={260} className="mt-2">
                         <Button disabled={isSubmitting} fullWidth variant="contained" color="secondary" type="submit" onClick={submitForm}>
-                          {isSubmitting ? <CircularProgress size={22} /> : 'Loginnnn'}
+                          {isSubmitting ? <CircularProgress size={22} /> : 'Login'}
                         </Button>
 
                         <Box className="mt-2">
