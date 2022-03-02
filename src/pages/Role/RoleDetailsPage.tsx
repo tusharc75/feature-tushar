@@ -77,32 +77,51 @@ const RoleDetailsPage = () => {
   const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
   const [entityAccess, setEntityAccess] = useState([]);
   const [open, setOpen] = useState(false)
+  const [policyFieldCheckBox, SetPolicyFieldCheckBox] = useState(
+    {
+      isPricingRentalManagement: false,
+      isPricingSublease: false,
+      isPricingPurchaseOrder: false
+    })
+  const [resourceCheckbox, setResourceCheckBox] = useState({
+    rentalManagement: false,
+    sublease: false,
+    purchaseOrder: false,
+  })
   const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false)
-  const [isResourceCheckBoxFilled, setIsResourceCheckBoxFilled] = useState(isPolicyCheckBoxChecked)
-  const [isFieldCheckBoxFilled, setIsFieldCheckBoxFilled] = useState(isPolicyCheckBoxChecked || isResourceCheckBoxFilled)
+
 
   const policyResources = [
     {
-      'resource': 'Rental Management',
-      'fieldLabel': 'Hide Price Calculation',
-      'fieldName': 'hidePriceCalculation'
-    }
-  ];
+      resource: "Rental Management",
+      fieldLabel: "Pricing Information",
+      fieldName: "isPricingRentalManagement"
+    },
+    {
+      resource: "Sublease",
+      fieldLabel: "Pricing Information",
+      fieldName: "isPricingSublease"
+    },
+    {
+      resource: "Purchase Order",
+      fieldLabel: "Pricing Information",
+      fieldName: "isPricingPurchaseOrder"
+    }];
 
   const fieldOfPolicyResources = policyResources?.map((obj) => {
     if (obj?.fieldName) {
       return (
         {
-          'resource': obj?.resource,
-          'field': obj?.fieldName,
-          'isChecked': false
+          resource: obj?.resource,
+          field: obj?.fieldName,
+          fieldLabel: obj?.fieldLabel,
         }
       )
     }
   });
 
   const isPolicyTableVisible = () => {
-    let accessArray=[]
+    let accessArray = []
     policyResources.map((item) => {
       accessArray.push(permissions[camelCase(item.resource)]?.isRead)
     })
@@ -110,10 +129,13 @@ const RoleDetailsPage = () => {
   }
 
 
+
+
   useEffect(() => {
     if (id) {
       fetchRoleData();
       fetchLoggedInUserEntities();
+
     }
     // eslint-disable-next-line
   }, [id]);
@@ -133,6 +155,26 @@ const RoleDetailsPage = () => {
     };
     setUpdatedData(JSON.stringify(data));
   }, [values, field, resource]);
+
+  useEffect(() => {
+    if (resourceCheckbox.purchaseOrder && resourceCheckbox.rentalManagement && resourceCheckbox.sublease) {
+      setIsPolicyCheckBoxChecked(true)
+    } else {
+      setIsPolicyCheckBoxChecked(false)
+    }
+
+  }, [resourceCheckbox])
+
+  const handlePolicyResourceCheckBox = async (field) => {
+    const resources = Object.keys(resourceCheckbox);
+    resources.map((key) => {
+      const isAllFieldChecked = policyResources.filter((item) => item.resource === startCase(key)).some((obj) => field[obj.fieldName] === false)
+      if (!isAllFieldChecked) {
+        setResourceCheckBox((prevState) => ({ ...prevState, [key]: true }))
+      }
+    })
+  }
+
 
   const fetchLoggedInUserEntities = async () => {
     const entityIds = user.entity?.map((e) => e._id);
@@ -158,11 +200,15 @@ const RoleDetailsPage = () => {
       };
       setCurrentData(JSON.stringify(current));
       setCustomizedRoutes([routes.role, { title: data.name }]);
-      if (data?.policy?.hidePriceCalculation) {
-        setIsFieldCheckBoxFilled(data?.policy?.hidePriceCalculation ?? isResourceCheckBoxFilled)
-        setIsResourceCheckBoxFilled(data?.policy?.hidePriceCalculation)
-        setIsPolicyCheckBoxChecked(data?.policy?.hidePriceCalculation)
+      if (data?.policy) { 
+      let copyOfResourcePolicy = {}
+        for (const item in data?.policy) {
+          copyOfResourcePolicy[item] = data?.policy[item];
+        }
+        SetPolicyFieldCheckBox((prevState) => ({...prevState,...copyOfResourcePolicy}))
+        handlePolicyResourceCheckBox(copyOfResourcePolicy)
       }
+
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -200,9 +246,7 @@ const RoleDetailsPage = () => {
         resource,
         type: roleData.type,
         policy:
-        {
-          hidePriceCalculation: isFieldCheckBoxFilled
-        }
+          policyFieldCheckBox
       })
       .then(({ data }) => {
         fetchRoleData();
@@ -460,7 +504,7 @@ const RoleDetailsPage = () => {
                         }
                       />
                       {
-                        isPolicyTableVisible() && 
+                        isPolicyTableVisible() &&
                         <TableContainer style={{ height: 400, minHeight: 400, marginTop: 20 }}>
                           <Table
                             stickyHeader
@@ -477,8 +521,8 @@ const RoleDetailsPage = () => {
                                       checked={isPolicyCheckBoxChecked}
                                       onChange={(e) => {
                                         setIsPolicyCheckBoxChecked(e.target.checked)
-                                        setIsResourceCheckBoxFilled(e.target.checked)
-                                        setIsFieldCheckBoxFilled(e.target.checked)
+                                        setResourceCheckBox({ rentalManagement: e.target.checked, purchaseOrder: e.target.checked, sublease: e.target.checked })
+                                        SetPolicyFieldCheckBox({ isPricingPurchaseOrder: e.target.checked, isPricingRentalManagement: e.target.checked, isPricingSublease: e.target.checked })
                                       }}
                                     />}
                                     label="Select All"
@@ -487,9 +531,7 @@ const RoleDetailsPage = () => {
                               </TableRow>
                             </TableHead>
                             <TableBody>
-                              {policyResources.map((resource, outerIndex) => (
-                                // const resourceFields = field
-                                //   .filter((_field) => _field.fieldData.resource === _resource.resource)
+                              {policyResources.filter((item) => permissions[camelCase(item.resource)].isRead).map((resource, outerIndex) => (
                                 <>
                                   <TableRow>
                                     <TableCell style={{ minWidth: 300 }}>
@@ -508,11 +550,10 @@ const RoleDetailsPage = () => {
                                     </TableCell>
                                     <TableCell align="center">
                                       <Checkbox
-                                        checked={isResourceCheckBoxFilled}
+                                        checked={resourceCheckbox[camelCase(resource.resource)]}
                                         onChange={(e) => {
-                                          setIsResourceCheckBoxFilled(e.target.checked)
-                                          setIsPolicyCheckBoxChecked(e.target.checked)
-                                          setIsFieldCheckBoxFilled(e.target.checked)
+                                          setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(resource.resource)]: e.target.checked }))
+                                          SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [resource.fieldName]: e.target.checked }))
                                         }}
                                       />
                                     </TableCell>
@@ -523,17 +564,17 @@ const RoleDetailsPage = () => {
                                         <TableCell>
                                           <Typography variant="body1">
                                             &emsp;{" "}
-                                            {startCase(obj.field)}
+                                            {obj?.fieldLabel}
                                           </Typography>
                                         </TableCell>
                                         <TableCell align="center">
                                           <Checkbox
                                             disabled={false}
-                                            checked={isFieldCheckBoxFilled}
+                                            checked={policyFieldCheckBox[obj.field]}
                                             onChange={(e) => {
-                                              setIsFieldCheckBoxFilled(e.target.checked)
-                                              setIsResourceCheckBoxFilled(e.target.checked)
-                                              setIsPolicyCheckBoxChecked(e.target.checked)
+                                              SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [obj.field]: e.target.checked }))
+                                              setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(resource.resource)]: e.target.checked }))
+
                                             }}
                                           />
                                         </TableCell>
