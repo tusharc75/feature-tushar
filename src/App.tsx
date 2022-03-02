@@ -153,12 +153,12 @@ function App() {
 
   useEffect(() => {
     serviceWorkerRegistration.register({ onUpdate: onServiceWorkerUpdate });
-  });
+  }, []);
 
   useEffect(() => {
     const newVersionAvailable = localStorage.getItem('newVersionAvailable');
     if (newVersionAvailable === 'true') updateServiceWorker();
-  });
+  }, []);
 
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
