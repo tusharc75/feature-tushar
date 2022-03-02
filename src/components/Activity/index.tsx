@@ -6,7 +6,8 @@ import {
   IconButton,
   Grid,
   Box,
-  Button
+  Button,
+  Tooltip
 } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
@@ -36,6 +37,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
 import HistoryDialog from "./History/index"
 import { useData } from "./../../StateProvider/Provider";
+import InfoIcon from '@material-ui/icons/Info';
 
 const useStyles = makeStyles(() => ({
   activityBox: {
@@ -77,6 +79,14 @@ const Activity = (props) => {
     Email: 0,
     Attachment: 0,
   });
+  const [infoTitle, setInfoTitle] = useState({
+    Task: 'The Tasks are visible to the Assignee and Reporter.',
+    Event: 'The Event is visible to all participants.',
+    Case: 'The Cases are visible to the Assignee and Reporter.',
+    Note: 'The Note is visible to the owner',
+    Email: 'The owner has access to the email.',
+    Attachment: 'The Attachment is visible to the owner',
+  })
   const [showHistory, setShowHistory] = useState(false)
   const {
     state: { permissions, selectedEntity },
@@ -223,12 +233,22 @@ const Activity = (props) => {
                             {getIcon(data)} {data} ({totalCount[data]})
                           </Typography>
                         </Box>
+
                       </Box>
                     </Grid>
                     {
                       data === "Event" || permissions[data?.toLowerCase()]?.isCreate ?
                         restrictedAddActivities.indexOf(data) >= 0 ? null :
                           <Grid item xs={4} container justify="flex-end">
+                            <Box mr={1} mt={0.5}>
+                              <Tooltip
+                                title={
+                                  infoTitle[data]
+                                }
+                              >
+                                <InfoIcon color="disabled" />
+                              </Tooltip>
+                            </Box>
                             <IconButton
                               color="primary"
                               size="small"
