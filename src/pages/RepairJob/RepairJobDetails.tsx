@@ -305,10 +305,12 @@ const RepairJobDetails = () => {
               </TabPanel>
               <TabPanel value={tabValue} index={2}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
-                  <Tickets
-                    repairJobId={id}
-                    renderedFrom={`${renderedFrom}_grid-3`}
-                  />
+                  {repairJobData &&
+                    <Tickets
+                      repairJobData={repairJobData}
+                      renderedFrom={`${renderedFrom}_grid-3`}
+                    />
+                  }
                 </Grid>
               </TabPanel>
             </Paper>

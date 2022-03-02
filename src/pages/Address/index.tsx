@@ -207,17 +207,17 @@ const Address = () => {
   const NameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
       <Link to={`${routes.addressDetail.path}/${params.data._id}`}>
-      <span
-      className="link"
-      onClick={() => {
-        if (params.data?.isAllowedToUpdate) {
-          setAddressResource(params.data);
-          setOpen({ title: `Edit Address`, open: true, edit: true, isClone: false });
-        }
-      }}
-      >
-        <CustomRenderCell value={params.value} />
-      </span>
+        <span
+          className="link"
+          onClick={() => {
+            if (params.data?.isAllowedToUpdate) {
+              setAddressResource(params.data);
+              setOpen({ title: `Edit Address`, open: true, edit: true, isClone: false });
+            }
+          }}
+        >
+          <CustomRenderCell value={params.value} />
+        </span>
       </Link>
     </span>
   );
@@ -339,7 +339,7 @@ const Address = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.address.title}]} />
+          <CustomBreadCrumbs routes={[{ title: routes.address.title }]} />
         </Grid>
         {/* <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
@@ -487,7 +487,7 @@ const Address = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete Address ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.addressName : '') : ''}?`}
+            message={`Are you sure you want to delete Address ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -498,16 +498,11 @@ const Address = () => {
 
         {open?.open && (
           <ManageAddressDialog
-            addressData={addressResource}
-            isEdit={open?.edit}
-            title={open.title}
-            open={open?.open}
-            close={() => setOpen({ title: '', open: false, edit: false, isClone: false })}
+            onClose={() => setOpen({ title: '', open: false, edit: false, isClone: false })}
             onSuccess={() => {
               setOpen({ title: '', open: false, edit: false, isClone: false });
               fetchAddresses();
             }}
-            isClone={open?.isClone}
           />
         )}
         {showUpdateWarningConfirmBox ? (

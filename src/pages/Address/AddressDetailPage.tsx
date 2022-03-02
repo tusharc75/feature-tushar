@@ -99,28 +99,20 @@ const AddressDetailPage = () => {
 
   return (
     <>
-
       {openUpdateDialog && (
         <ManageAddressDialog
-          open={openUpdateDialog}
-          close={closeUpdateDialog}
-          fetchData={() => {
-            fetchAddressData();
-          }}
-          addressResource={addressResource}
-          isClone={false}
+          onClose={closeUpdateDialog}
+          addressData={addressData}
           onSuccess={() => {
             fetchAddressData();
             closeUpdateDialog();
           }}
-
-
         />
       )}
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes.warehouse.title.toLowerCase()} ${headingLbl}?`}
+          message={`Are you sure you want to delete ${headingLbl}?`}
           onClose={() => {
             setShowConfirmBox(false)
           }}
