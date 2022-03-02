@@ -356,8 +356,8 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                     allowSwipe={true}
                     permissions={true}
                     primaryField={columns?.find(d => d.field)}
-                    onClick={() => {
-                        // history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
+                    onClick={(data) => {
+                        history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
                     }}
                     dataRows={dataRows}
                     selectedRecords={selectedRecords}
@@ -414,7 +414,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             showRemoveAssetFromReceivingTicketDialog && (
                 <ConfirmationDialog
                     open={showRemoveAssetFromReceivingTicketDialog}
-                    message={`Are you sure you want to remove selected records from Receiving Ticket(s) ?`}
+                    message={`Are you sure you want to remove selected records from Receiving Ticket(s) ? `}
                     onClose={() => {
                         setShowRemoveAssetFromReceivingTicketDialog(false);
                     }}
@@ -423,7 +423,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                         const groupByCalls = groupBy(selectedRecords, "receivingTicketId");
                         let apiCalls = [];
                         Object.keys(groupByCalls).forEach((key) => {
-                            apiCalls.push(axiosInstance().put(`${deliveryTicket.api}/${key}/assets`, { ids: groupByCalls[key].map(m => m._id) }));
+                            apiCalls.push(axiosInstance().put(`${deliveryTicket.api} / ${key} / assets`, { ids: groupByCalls[key].map(m => m._id) }));
                         })
                         Promise.all(apiCalls).then(() => {
                             toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged Receiving Ticket(s)` });
@@ -466,13 +466,13 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             />}
         {repairAssetDialog.open && <ConfirmationDialog
             open={true}
-            message={`Are you sure you want to complete repair of ${repairAssetDialog.assetId ? repairAssetDialog.assetName : "selected asset(s)"} ?`}
+            message={`Are you sure you want to complete repair of ${repairAssetDialog.assetId ? repairAssetDialog.assetName : "selected asset(s)"} ? `}
             onClose={() => {
                 setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] })
             }}
             onOk={() => {
                 setOkBtnLoading(true)
-                axiosInstance().put(`${repairJob.api}/${repairJobData._id}/assets/repaired`, { assets: repairAssetDialog.assetId ? [repairAssetDialog.assetId] : repairAssetDialog.assetIds, repaired: true }).then(({ data }) => {
+                axiosInstance().put(`${repairJob.api} / ${repairJobData._id} / assets / repaired`, { assets: repairAssetDialog.assetId ? [repairAssetDialog.assetId] : repairAssetDialog.assetIds, repaired: true }).then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
                         type: "success",

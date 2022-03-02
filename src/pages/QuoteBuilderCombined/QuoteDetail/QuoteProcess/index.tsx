@@ -1135,6 +1135,22 @@ export default function QuoteProcess(props) {
     });
   }
 
+
+  const handleOfferToCustomer = () => {
+    axiosInstance()
+      .patch(`/quote-builder/send-offer/${quoteData._id}/${currentVersion}`)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  }
+
   const fetchUserEmails = () => {
     let ownerCollaboratorEmails = [];
     if (quoteData?.collaborator && quoteData.collaborator.length) {
@@ -1442,6 +1458,22 @@ export default function QuoteProcess(props) {
                       {isMobile && !isTablet ? '' : `${buttonMessage}`}
                     </Button>
                   )}
+                  <span className="d-flex align-items-center justify-content-end ml-3">
+                    {!ifQuoteApproved.approved && buttonMessage === "Send to Customer" && !quoteData?.offered && (
+                      <Button
+                        onClick={() => {
+                          handleOfferToCustomer()
+                        }}
+                        disabled={!allowedToEdit || (!DOAreq && !Customerreq) || loading}
+                        startIcon={<BiMailSend />}
+                        variant="contained"
+                        size="small"
+                        color="primary"
+                      >
+                        {isMobile && !isTablet ? '' : `Offer to Customer`}
+                      </Button>
+                    )}</span>
+
                 </div>
               ) : null}
             </Grid>
