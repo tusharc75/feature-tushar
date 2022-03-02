@@ -30,9 +30,7 @@ import NoDataCell from "../../../components/Helpers/NoDataCell";
 import { camelCase } from "lodash";
 
 
-const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
-
-    const renderedFrom = camelCase(`${routes.rentalManagement.title}2`);
+const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
