@@ -538,17 +538,20 @@ export const profileMenuItems = {
 };
 
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
-  let selectedEntity = localStorage.getItem("selectedEntity")
+  
+  //let selectedEntity = localStorage.getItem("selectedEntity")
+  //let isCreate = (val === "") ? true : false
 
-  let isCreate = (val === "") ? true : false
   const obj = {};
   for (const key of arr) {
-    let isEntityField = key?.fieldName === "entity"
 
     let value = key.isDefaultValue ? key.defaultValue : val;
-    if (isEntityField && selectedEntity && isCreate) {
-      value = key?.type === "multiSelect" ? [selectedEntity] : selectedEntity
-    }
+
+    //let isEntityField = key?.fieldName === "entity"
+    // if (isEntityField && selectedEntity && isCreate) {
+    //   value = key?.type === "multiSelect" ? [selectedEntity] : selectedEntity
+    // }
+
     if (key.type === 'dropDown') {
       let option = key.option?.find((data: any) => data.default === true);
       if (!option && key.required && key.option?.length === 1) {
