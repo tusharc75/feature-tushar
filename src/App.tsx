@@ -142,16 +142,21 @@ function App() {
   };
 
   const onServiceWorkerUpdate = (registration) => {
+    localStorage.setItem('newVersionAvailable', 'true');
     setRefreshSnackBar(true);
     setServiceWorkerData({
       waitingWorker: registration && registration.waiting,
       newVersionAvailable: true
     });
-    updateServiceWorker();
   };
 
   useEffect(() => {
     serviceWorkerRegistration.register({ onUpdate: onServiceWorkerUpdate });
+  });
+
+  useEffect(() => {
+    const newVersionAvailable = localStorage.getItem('newVersionAvailable');
+    if (newVersionAvailable === 'true') updateServiceWorker();
   });
 
   const toast = useContext(CustomToastContext);
