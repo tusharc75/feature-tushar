@@ -136,9 +136,9 @@ function App() {
 
   const updateServiceWorker = () => {
     const { waitingWorker } = serviceWorkerData;
-    waitingWorker && waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-    setServiceWorkerData({ ...serviceWorkerData, newVersionAvailable: false });
     localStorage.removeItem('newVersionAvailable');
+    waitingWorker && waitingWorker.postMessage && waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    setServiceWorkerData({ ...serviceWorkerData, newVersionAvailable: false });
     window.location.reload();
   };
 
@@ -308,8 +308,21 @@ function App() {
     <ThemeProvider theme={theme}>
       <AnimatePresence initial={false} exitBeforeEnter>
         <ErrorBoundaryComponent>
-          <Snackbar open={refreshSnackBar} autoHideDuration={null} onClose={() => setRefreshSnackBar(false)}>
-            <Alert onClose={() => setRefreshSnackBar(false)} severity="success">
+          <Snackbar
+            open={refreshSnackBar}
+            autoHideDuration={null}
+            onClose={(event, reason) => {
+              if (reason === 'clickaway') return;
+              setRefreshSnackBar(false);
+            }}
+          >
+            <Alert
+              onClose={() => {
+                setRefreshSnackBar(false);
+                updateServiceWorker();
+              }}
+              severity="success"
+            >
               <div style={{ display: 'flex', width: '100%', alignItems: 'start', justifyContent: 'space-between', gap: 20 }}>
                 <div style={{ flex: 1 }}>New Version of eQuip-T OM is available. Please refresh to get the latest changes.</div>
                 <Button className="snackbar-button" size="medium" variant="contained" color="secondary" onClick={updateServiceWorker}>
