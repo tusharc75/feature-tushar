@@ -138,6 +138,7 @@ function App() {
     const { waitingWorker } = serviceWorkerData;
     waitingWorker && waitingWorker.postMessage({ type: 'SKIP_WAITING' });
     setServiceWorkerData({ ...serviceWorkerData, newVersionAvailable: false });
+    localStorage.removeItem('newVersionAvailable');
     window.location.reload();
   };
 
