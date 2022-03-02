@@ -23,11 +23,8 @@ import { prepareDataForGrid } from "src/constants/helpers";
 import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "src/constants/columns"
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
-import { camelCase } from "lodash";
 
-let renderedFrom = camelCase(routes.purchaseOrderDetail.title)
-
-const Product = ({ purchaseOrderData }) => {
+const Product = ({ purchaseOrderData, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -52,7 +49,7 @@ const Product = ({ purchaseOrderData }) => {
         axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderService}`).then(({ data: { data } }) => {
             const fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
             let rendererNames = [];
-            genrateColoum(fields, columns, rendererNames, false);
+            genrateColoum(fields, columns, rendererNames, false, renderedFrom);
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
                 commonRenderer: CommonRenderer,
@@ -239,7 +236,7 @@ const Product = ({ purchaseOrderData }) => {
                     onCreate={null}
                     showClone={false}
                     fullHeight={true}
-                    renderedFrom={`${renderedFrom}_grid-2`}
+                    renderedFrom={renderedFrom}
                     onClone={() => { }}
                 />
                 :
@@ -261,7 +258,7 @@ const Product = ({ purchaseOrderData }) => {
                     onCellValueChanged={(row) => {
                         //handleUpdateOrderProduct(row.data)
                     }}
-                    renderedFrom={`${renderedFrom}_grid-2`}
+                    renderedFrom={renderedFrom}
                     refreshGrid={fetchPurchaseOrderService}
                     fromPurchaseOrderGrid={true}
                     currency={purchaseOrderData?.currency?.toLowerCase()}

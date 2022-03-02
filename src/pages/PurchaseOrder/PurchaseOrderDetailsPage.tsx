@@ -46,9 +46,10 @@ import { GrStatusGood, GrStatusInfo } from 'react-icons/all';
 import accountClass from '../Account/account.module.scss';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Steps from '../RentalManagement/Steps';
+import { camelCase } from 'lodash';
 
 const PurchaseOrderDetailsPage = () => {
-
+  const renderedFrom = camelCase(routes?.purchaseOrder.title)
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -418,11 +419,13 @@ const PurchaseOrderDetailsPage = () => {
                               purchaseOrderData={purchaseOrderData}
                               setNextStep={setNextStep}
                               setPurchaseOrderProduct={setPurchaseOrderProduct}
+                              renderedFrom={`${renderedFrom}_grid-1`}
                             />
                           )}
                           {currentStep === 1 &&
                             <Service
                               purchaseOrderData={purchaseOrderData}
+                              renderedFrom={`${renderedFrom}_grid-2`}
                             />}
                           {currentStep === 2 && (
                             <IssuePo
@@ -433,6 +436,7 @@ const PurchaseOrderDetailsPage = () => {
                               currentStep={currentStep}
                               handleAttachments={handleAttachments}
                               statusOptions={statusOptions}
+                              renderedFrom={`${renderedFrom}_grid-3`}
                             />
                           )}
                           {(currentStep === 3) && (
@@ -443,6 +447,7 @@ const PurchaseOrderDetailsPage = () => {
                               statusOptions={statusOptions}
                               handleViewPdf={handleViewPdf}
                               handleAttachments={handleAttachments}
+                              renderedFrom={`${renderedFrom}_grid-4`}
                             />
                           )}
                         </Paper>

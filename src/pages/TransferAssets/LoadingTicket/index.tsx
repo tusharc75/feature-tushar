@@ -8,7 +8,7 @@ import { deliveryTicket, sidebarResource, DELIVERY_TICKET_STATUS } from 'src/con
 import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { groupBy } from 'lodash';
-import ManageDeliveryTicket from '../DeliveryTicket/ManageDeliveryTicket';
+import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import { CommonRenderer, DateRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
@@ -31,6 +31,7 @@ interface LoadingGridProps {
   handleViewPdf?: any;
   fileDownloading?: boolean;
   isTransferEnded: boolean;
+  renderedFrom?: string;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
@@ -46,7 +47,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     updateTransferStatus,
     handleViewPdf,
     fileDownloading,
-    isTransferEnded
+    isTransferEnded,
+    renderedFrom
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -321,7 +323,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             onCreate={false}
             showClone={false}
             onClone={(data) => { }}
-            renderedFrom="transferAssetPage"
+            renderedFrom={renderedFrom}
           />
         ) : (
           <CustomAgGrid
@@ -339,7 +341,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             allowSelection={true}
             isClientSideGrid={true}
             loading={loading}
-            renderedFrom="transferAssetPage"
+            renderedFrom={renderedFrom}
             refreshGrid={() => fetchAssetsData(true)}
           />
         )}

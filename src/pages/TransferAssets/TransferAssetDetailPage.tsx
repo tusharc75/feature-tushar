@@ -16,9 +16,9 @@ import { transferAsset } from 'src/constants/helpers';
 import ManageTransferAsset from './ManageTransferAsset';
 import queryString from 'query-string';
 import TransferStepper from './TransferAssetSteps';
-import AssetsGrid from './AssetsGrid';
-import LoadingTicketGrid from './LoadingTicketGrid';
-import ReceivingTicketGrid from './ReceivingTicketGrid';
+import AssetsGrid from './AssetGrid';
+import LoadingTicketGrid from './LoadingTicket';
+import ReceivingTicketGrid from './ReceivingTicket';
 import { MdEdit } from 'react-icons/md';
 import { defaultActivityShow } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
@@ -26,11 +26,14 @@ import TabPanel from 'src/components/TabPanel';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import HideWhenOffline from 'src/components/HideWhenOffline';
+import { camelCase } from 'lodash';
+
 const transferSteps = ['Add Assets', 'Loading Ticket'];
 const transferSteps1 = ['Add Assets', 'Loading Ticket', 'Receiving Ticket'];
 const status = ['New', 'In Progress', 'Completed'];
 
 const TransferAssetDetailPage = () => {
+  const renderedFrom = camelCase(routes?.transferAsset.title)
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -433,6 +436,7 @@ const TransferAssetDetailPage = () => {
                       transferAssetData={transferAssetData}
                       handleViewPdf={handleViewPdf}
                       fileDownloading={fileDownloading}
+                      renderedFrom={`${renderedFrom}_grid-1`}
                     />
                   )}
                   {currentStep === 1 && (
@@ -451,6 +455,7 @@ const TransferAssetDetailPage = () => {
                       handleViewPdf={handleViewPdf}
                       fileDownloading={fileDownloading}
                       isTransferEnded={isTransferEnded}
+                      renderedFrom={`${renderedFrom}_grid-2`}
                     />
                   )}
                   {currentStep === 2 && (
@@ -468,6 +473,7 @@ const TransferAssetDetailPage = () => {
                       handleViewPdf={handleViewPdf}
                       fileDownloading={fileDownloading}
                       isTransferEnded={isTransferEnded}
+                      renderedFrom={`${renderedFrom}_grid-3`}
                     />
                   )}
                 </Box>
