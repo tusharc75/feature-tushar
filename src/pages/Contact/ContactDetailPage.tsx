@@ -734,7 +734,7 @@ const ContactDetailsPage = (props) => {
               showHeading={true}
             >
               {
-                permissions.eCommerce?.isRead && contactResource === customerContact.contactResource &&
+                permissions.eCommercePolicy?.isRead && contactResource === customerContact.contactResource &&
                 <Button
                   color="primary"
                   size="small"
@@ -746,7 +746,7 @@ const ContactDetailsPage = (props) => {
                 </Button>
               }
               {
-                permissions.eCommerce?.isRead && user.user?.userType === userType.brandAdmin &&
+                permissions.eCommercePolicy?.isRead && user.user?.userType === userType.brandAdmin &&
                 <Button
                   color="primary"
                   size="small"
