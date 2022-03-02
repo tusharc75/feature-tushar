@@ -41,9 +41,9 @@ import {
   SET_SELECTED_ENTITY,
 } from "../../StateProvider/actionTypes";
 import { PERMISSION } from "../../constants/Roles";
-import { camelCase, roleTypes } from "../../constants/helpers";
+import { roleTypes } from "../../constants/helpers";
 import React from "react";
-import { startCase } from "lodash";
+import { startCase, camelCase } from "lodash";
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
