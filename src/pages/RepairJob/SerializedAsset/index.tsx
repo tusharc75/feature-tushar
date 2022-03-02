@@ -114,7 +114,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                     let res = {
                         ...prepareDataForGrid(u, user)
                     };
-                    res["hideSelection"] = [INVENTORY_STATUS.lost].includes(u.status);
+                    res["hideSelection"] = [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].includes(u.status);
                     return res;
                 });
                 dispatch({ type: "initialize", data: rows, count: rows.length });
@@ -132,7 +132,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                     <CheckCircleIcon color="primary" fontSize="small" />
                 </HtmlTooltip>
                 :
-                ![INVENTORY_STATUS.lost].includes(params.data?.status) && params.data?.currentOwnerType === INVENTORY_OWNER_TYPE.brand ?
+                ![INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].includes(params.data?.status) && params.data?.currentOwnerType === INVENTORY_OWNER_TYPE.brand ?
                     <HtmlTooltip title="Repair Asset">
                         <IconButton
                             size="small"
@@ -327,18 +327,18 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                             onClose={closeActions}
                         >
                             <MenuItem
-                                disabled={(selectedRecords.length === 0 || checkUniqWarehouseAndOwner())}
+                                disabled={(selectedRecords.length === 0 || checkUniqWarehouseAndOwner() || selectedRecords.some(s => s.repaired === true))}
                                 onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant) }}>
                                 Send to Plant
                             </MenuItem>
                             <MenuItem
-                                disabled={(selectedRecords.length === 0 || checkUniqWarehouseAndOwner())}
-                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier) }}>
+                                disabled={(selectedRecords.length === 0 || checkUniqWarehouseAndOwner() || selectedRecords.some(s => s.repaired === true))}
+                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.loading, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier) }}>
                                 Send to Supplier
                             </MenuItem>
                             <MenuItem
-                                disabled={(selectedRecords.length === 0 || checkUniqSupplier())}
-                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant) }}>
+                                disabled={(selectedRecords.length === 0 || checkUniqSupplier() || selectedRecords.some(s => s.repaired === true))}
+                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant) }}>
                                 Receiving from Supplier
                             </MenuItem>
                         </Menu>
