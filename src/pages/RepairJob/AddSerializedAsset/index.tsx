@@ -100,7 +100,11 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           u["hideSelection"] = u.status === INVENTORY_STATUS.lost;
-          return prepareDataForGrid(u, user);
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject["canDelete"] = false;
+          finalObject["isChecked"] = false;
+          finalObject["allowedToEdit"] = true;
+          return finalObject;
         });
         if (rows.length) {
           setNextStep(true)
@@ -269,7 +273,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
             permissions={permissions}
             primaryField={columns?.find(d => d.field)}
             onClick={(data) => {
-              history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
+              setShowEditAssetDialog({ open: true, asset: data, selectedRecords: [] })
             }}
             dataRows={dataRows}
             selectedRecords={true}

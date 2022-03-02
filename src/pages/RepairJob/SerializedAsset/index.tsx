@@ -113,11 +113,12 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         axiosInstance().get(`${repairJob.api}/${repairJobData._id}/assets`)
             .then(({ data }) => {
                 let rows: any = data?.data.map((u) => {
-                    let res = {
-                        ...prepareDataForGrid(u, user)
-                    };
-                    res["hideSelection"] = [INVENTORY_STATUS.lost].includes(u.status);
-                    return res;
+                    let finalObject = prepareDataForGrid(u, user);
+                    finalObject["canDelete"] = false;
+                    finalObject["isChecked"] = false;
+                    finalObject["allowedToEdit"] = true;
+                    finalObject["hideSelection"] = [INVENTORY_STATUS.lost].includes(u.status);
+                    return finalObject;
                 });
                 dispatch({ type: "initialize", data: rows, count: rows.length });
                 setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);

@@ -1218,11 +1218,10 @@ export default function QuoteProcess(props) {
     setAnchorEl(null);
   };
 
-  const findProfitPercentage = (CP,SP) => {
-    let parsedCP = parseInt(CP.amountWithouCurrencyCode.split(',').join(''))
-    let parsedSP = parseInt(SP.amountWithouCurrencyCode.split(',').join(''))
-    let profit = parsedSP - parsedCP;
-    return (profit*100/parsedCP).toFixed(2);
+  const findProfitPercentage = (CP, Profit) => {
+    let parsedCP = parseInt(CP?.amountWithouCurrencyCode.replace(/[^0-9]/g, ""))
+    let profit = parseInt(Profit?.amountWithouCurrencyCode.replace(/[^0-9]/g, ""))
+    return (profit * 100 / parsedCP).toFixed(2);
   }
 
   return (
@@ -1729,7 +1728,7 @@ export default function QuoteProcess(props) {
             <Grid item className="quoteHeader">
               <div className={redCard ? 'quoteBox quoteRed' : 'quoteBox quoteProfit'}>
                 <span className="quoteAmount" title={totalProfit.fullFormatAmount}>
-                  {totalProfit.fullFormatAmount ? totalProfit.fullFormatAmount : defaultTotalValue} {totalcost.fullFormatAmount ? `(${findProfitPercentage(totalcost,totalsale)} %)`: ''}
+                  {totalProfit.fullFormatAmount ? totalProfit.fullFormatAmount : defaultTotalValue} {totalcost.fullFormatAmount ? `(${findProfitPercentage(totalcost, totalProfit)} %)` : ''}
                 </span>
                 <div className={'quoteBoxContent'}>
                   <span className={'quoteDetailHeading'}>Total Profit </span>
@@ -1819,7 +1818,7 @@ export default function QuoteProcess(props) {
                     getOptionLabel={(option) => option}
                     renderOption={(option, { selected }) => (
                       <React.Fragment>
-                        <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={(showExcelArrangeColumns && ["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumnsExcel].sort().toString()) ||(showPDFArrangeColumns && ["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumns].sort().toString()) ? true : selected} />
+                        <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={(showExcelArrangeColumns && ["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumnsExcel].sort().toString()) || (showPDFArrangeColumns && ["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumns].sort().toString()) ? true : selected} />
                         {option}
                       </React.Fragment>
                     )}
