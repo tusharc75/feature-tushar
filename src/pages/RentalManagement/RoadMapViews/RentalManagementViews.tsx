@@ -131,22 +131,22 @@ const RentalManagementViews = (props) => {
     const subLease = viewsData?.data?.data?.sublease;
     const transferAsset = viewsData?.data?.data?.transferAsset;
 
-    const allData = await Promise.all(
-      transferAsset?.map((transfer) => {
-        return axiosInstance()
-          .get(`transfer-asset/get-asset/${transfer._id}`)
-          .then((item) => {
-            return { transferId: transfer._id, docs: item?.data?.data };
-          });
-      })
-    ).then((data: any) => data);
+    // const allData = await Promise.all(
+    //   transferAsset?.map((transfer) => {
+    //     return axiosInstance()
+    //       .get(`transfer-asset/get-asset/${transfer._id}`)
+    //       .then((item) => {
+    //         return { transferId: transfer._id, docs: item?.data?.data };
+    //       });
+    //   })
+    // ).then((data: any) => data);
 
-    var allAssets = {};
-    allData.map((item) => {
-      item.docs?.map((data) => {
-        allAssets[data.assetNumber] = item.transferId;
-      });
-    });
+    const allAssets = viewsData?.data?.data?.transferAssetData;
+    // allData.map((item) => {
+    //   item.docs?.map((data) => {
+    //     allAssets[data.assetNumber] = item.transferId;
+    //   });
+    // });
 
     const loadingTicket = ticketData?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.loading);
     const receivingTicket = ticketData?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.receiving);
