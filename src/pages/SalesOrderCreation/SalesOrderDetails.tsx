@@ -30,10 +30,11 @@ import { GrStatusInfo } from "react-icons/all";
 import HideWhenOffline from '../../components/HideWhenOffline';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from '../../components/Activity';
+import { camelCase } from 'lodash';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
-
+  const renderedFrom = camelCase(routes?.salesOrder.title)
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -346,12 +347,16 @@ const SalesOrderDetails = () => {
                       <Productpackage
                         salesOrderData={salesOrderData}
                         setNextStep={setNextStep}
-                        currencySymbol={currencySymbol} />
+                        currencySymbol={currencySymbol} 
+                        renderedFrom={`${renderedFrom}_grid-1`}
+                        />
                     )}
                     {currentStep === 1 && salesOrderData &&
                       <AdditionalCost
                         salesOrderData={salesOrderData}
-                        setNextStep={setNextStep} />}
+                        setNextStep={setNextStep} 
+                        renderedFrom={`${renderedFrom}_grid-2`}  
+                      />}
                     {currentStep === 2 && salesOrderData && (
                       <SerializedAsset
                         salesOrderData={salesOrderData}
@@ -360,6 +365,7 @@ const SalesOrderDetails = () => {
                         isTabletScreen={isTabletScreen}
                         showActivity={showActivity}
                         currencySymbol={currencySymbol}
+                        renderedFrom={`${renderedFrom}_grid-3`}  
                       />
                     )}
                     {currentStep === 3 && salesOrderData && (
@@ -368,6 +374,7 @@ const SalesOrderDetails = () => {
                         salesOrderData={salesOrderData}
                         currentStep={currentStep}
                         setNextStep={setNextStep}
+                        renderedFrom={`${renderedFrom}_grid-4`}  
                       />
                     )}
 
@@ -378,6 +385,7 @@ const SalesOrderDetails = () => {
                         fetchSalesOrderData={fetchSalesOrderData}
                         updateJobStatus={updateJobStatus}
                         statusOptions={statusOptions}
+                        renderedFrom={`${renderedFrom}_grid-5`}  
                       />
                     )}
                   </Paper>

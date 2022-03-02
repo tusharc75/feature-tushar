@@ -31,9 +31,10 @@ import { useHistory } from "react-router-dom";
 import { FaSuitcase } from "react-icons/fa";
 import MobileSortDialog from "../../components/MobileSortDialog";
 import MobileFilterDialog from "../../components/MobileFilterDialog"
+import { camelCase } from "lodash";
 
 const Sublease = () => {
-
+    const renderedFrom = camelCase(routes?.sublease.title)
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
 
@@ -71,7 +72,7 @@ const Sublease = () => {
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = getColumnData(routes.sublease?.title, o?.fieldData, routes.subleaseDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.subleaseDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -442,7 +443,7 @@ const Sublease = () => {
                             onCreate={false}
                             showClone={true}
                             onClone={(data) => { setShowManageDialog({ open: true, isClone: true, idToClone: data._id }); }}
-                            renderedFrom={routes.sublease?.title}
+                            renderedFrom={renderedFrom}
                         /> :
                         <CustomAgGrid
                             columns={columns}
@@ -456,7 +457,7 @@ const Sublease = () => {
                             page={page}
                             actionWidth={150}
                             loading={loading}
-                            renderedFrom={routes.sublease?.title}
+                            renderedFrom={renderedFrom}
                             refreshGrid={fetchData}
                             showOnlyShowFilteredRecordSwitch={true}
                         /> : null
