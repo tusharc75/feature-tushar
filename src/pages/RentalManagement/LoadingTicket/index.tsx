@@ -55,9 +55,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
-
-  const renderedFrom = camelCase(`${routes.rentalManagement.title}4`);
+const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();

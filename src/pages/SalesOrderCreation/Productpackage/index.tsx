@@ -461,7 +461,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
         }
         {addExistingProductDialog.open &&
             <AddExistingProductInventory
-                renderedFrom={renderedFrom}
+                renderedFrom={addExistingProductDialog.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
                 isAddingProducts={isAddingProducts}
                 addProductInventory={handleAdd}
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
