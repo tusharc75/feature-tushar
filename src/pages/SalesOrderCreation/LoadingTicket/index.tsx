@@ -27,9 +27,7 @@ import CustomSwipableList from "../../../components/SwipableListComponents/Custo
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 
 
-const renderedFrom = "salesOrderPageDeliveryTicket"
-
-const LoadingTicket = ({ currentStep, salesOrderData, fetchSalesOrderData, setNextStep }) => {
+const LoadingTicket = ({renderedFrom, currentStep, salesOrderData, fetchSalesOrderData, setNextStep }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();

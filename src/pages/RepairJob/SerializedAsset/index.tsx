@@ -28,9 +28,7 @@ import { GiAutoRepair } from 'react-icons/gi';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { groupBy, uniq, map } from "lodash";
 
-const renderedFrom = "repairJob_assets"
-
-const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus }) => {
+const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions, selectedEntity } }: any = useData();
@@ -83,7 +81,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -135,7 +133,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                     <CheckCircleIcon color="primary" fontSize="small" />
                 </HtmlTooltip>
                 :
-                ![INVENTORY_STATUS.lost].includes(params.data?.status) && params.data?.currentOwnerType === INVENTORY_OWNER_TYPE.brand ?
+                ![INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].includes(params.data?.status) && params.data?.currentOwnerType === INVENTORY_OWNER_TYPE.brand ?
                     <HtmlTooltip title="Repair Asset">
                         <IconButton
                             size="small"
@@ -330,18 +328,18 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                             onClose={closeActions}
                         >
                             <MenuItem
-                                disabled={(selectedRecords.length === 0 || checkUniqWarehouseAndOwner())}
+                                disabled={(selectedRecords.length === 0 || checkUniqWarehouseAndOwner() || selectedRecords.some(s => s.repaired === true))}
                                 onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant) }}>
                                 Send to Plant
                             </MenuItem>
                             <MenuItem
-                                disabled={(selectedRecords.length === 0 || checkUniqWarehouseAndOwner())}
-                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier) }}>
+                                disabled={(selectedRecords.length === 0 || checkUniqWarehouseAndOwner() || selectedRecords.some(s => s.repaired === true))}
+                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.loading, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier) }}>
                                 Send to Supplier
                             </MenuItem>
                             <MenuItem
-                                disabled={(selectedRecords.length === 0 || checkUniqSupplier())}
-                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant) }}>
+                                disabled={(selectedRecords.length === 0 || checkUniqSupplier() || selectedRecords.some(s => s.repaired === true))}
+                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant) }}>
                                 Receiving from Supplier
                             </MenuItem>
                         </Menu>

@@ -1,13 +1,12 @@
 import { DELIVERY_TICKET_REFRENCE_TYPE } from '../../../constants/helpers';
 import TypewiseTickets from '../../../components/DeliveryTicket/TypewiseTickets';
 
-const renderedFrom = 'repairJobTickets';
 
-const Tickets = ({ repairJobData }) => {
+const Tickets = ({ repairJobId, renderedFrom = 'repairJobTickets' }) => {
     return (
         <TypewiseTickets
             refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.repairJob}
-            refrenceId={repairJobData._id}
+            refrenceId={repairJobId}
             renderedFrom={renderedFrom}
         />
     );
