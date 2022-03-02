@@ -18,15 +18,15 @@ import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 
-const ManageAddressDialog = (props) => {
+const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const { onClose, onSuccess, isEdit, isClone, addressData: oldData, title, detailedAddress = false } = props;
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [formsData, setFormsData] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [addressData, setAddressData] = useState(null);
+  const [addressDetail, setAddressDetail] = useState(null);
 
   const formikRef = {
     current: null
@@ -44,30 +44,10 @@ const ManageAddressDialog = (props) => {
       .then(({ data: { data } }) => {
         const fieldsCreateData = data.filter((d) => d.isCreate).map((d: any) => d.fieldData);
         const fieldsEditData = data.filter((d) => d.isUpdate).map((d: any) => d.fieldData);
-        let dataAddress: any = {};
-        if ((isEdit || isClone) && oldData) {
-          dataAddress = {
-            fullAddress: oldData.fullAddress ?? '',
-            streetAddress: oldData.streetAddress ?? '',
-            additionalComments: oldData.additionalComments ?? '',
-            city: oldData.city ?? '',
-            country: oldData.country ?? '',
-            // ['state/Province']: oldData['state/Province'] ?? '',
-            // ['zipCode/PostalCode']: oldData['zipCode/PostalCode'] ?? '',
-            longitude: oldData.longitude ?? '',
-            latitude: oldData.latitude ?? ''
-          };
-        }
-
-        if (isEdit) {
+        if (addressData) {
           setInitialData({
             fields: fieldsEditData,
-            values: getObjKeysWithValues(dataAddress, fieldsEditData)
-          });
-        } else if (isClone) {
-          setInitialData({
-            fields: fieldsCreateData,
-            values: getObjKeysWithValues(dataAddress, fieldsCreateData)
+            values: getObjKeysWithValues(addressData, fieldsEditData)
           });
         } else {
           setInitialData({
@@ -84,22 +64,35 @@ const ManageAddressDialog = (props) => {
   const handleSubmit = (values) => {
     // const {zipCodePostalCode, stateProvince, ...restValues} = values
     setLoading(true);
-    axiosInstance()
-      .post(`${address.addressApi}`, values)
-      .then(({ data: { data } }) => {
-        setLoading(false);
-        onSuccess(data);
-      })
-      .catch((error) => {
-        setLoading(false);
-        if (error?.data?.isAlreadyExist) {
-          values['isAlreadyExist'] = true;
-          values['_id'] = error?.data?.alreadyExistId;
-          onSuccess(values);
-        } else {
+    if (addressData) {
+      values._id = addressData._id
+      axiosInstance().put(`${address.addressApi}`, values)
+        .then(({ data: { data } }) => {
+          setLoading(false);
+          onSuccess(data);
+        })
+        .catch((error) => {
           toastConfig.setToastConfig(error);
-        }
-      });
+        });
+    }
+    else {
+      axiosInstance()
+        .post(`${address.addressApi}`, values)
+        .then(({ data: { data } }) => {
+          setLoading(false);
+          onSuccess(data);
+        })
+        .catch((error) => {
+          setLoading(false);
+          if (error?.data?.isAlreadyExist) {
+            values['isAlreadyExist'] = true;
+            values['_id'] = error?.data?.alreadyExistId;
+            onSuccess(values);
+          } else {
+            toastConfig.setToastConfig(error);
+          }
+        });
+    }
   };
 
   const getFullAddress = (val: any) => {
@@ -107,24 +100,19 @@ const ManageAddressDialog = (props) => {
       const { place_id: placeId } = val;
       const element = document.createElement('div');
       let placesService = new window.google.maps.places.PlacesService(element);
-
       placesService.getDetails({ placeId }, (results) => {
         type addressType = {
           long_name: string;
           short_name: string;
           types: any[];
         };
-
         const addressess = results.address_components;
         let fullAddress: any = {};
-
         addressess.forEach((address: addressType) => {
           const type = address.types[0];
-
           if (type === 'locality') {
             fullAddress.city = address.long_name;
           }
-
           // if (type === 'administrative_area_level_1') {
           //   if(initialData.values.hasOwnProperty("state")) {
           //     fullAddress['state'] = address.long_name;
@@ -132,15 +120,12 @@ const ManageAddressDialog = (props) => {
           //     fullAddress['state/Province'] = address.long_name;
           //   }
           // }
-
           if (type === 'administrative_area_level_2') {
             fullAddress.county = address.long_name;
           }
-
           if (type === 'country') {
             fullAddress.country = address.long_name;
           }
-
           // if (type === 'postal_code') {
           //   if(initialData.values.hasOwnProperty("zipCode")) {
           //     fullAddress['zipCode'] = address.long_name;
@@ -149,67 +134,30 @@ const ManageAddressDialog = (props) => {
           //   }
           // }
         });
-
         fullAddress.latitude = results.geometry.location.lat().toLocaleString();
         fullAddress.longitude = results.geometry.location.lng().toLocaleString();
         fullAddress.streetAddress = results.formatted_address;
         fullAddress.fullAddress = val.description;
-
-        setAddressData(fullAddress);
+        setAddressDetail(fullAddress);
       });
     }
   };
 
   useEffect(() => {
-    if (formikRef.current && addressData) {
+    if (formikRef.current && addressDetail) {
       const setFieldValue = formikRef.current.setFieldValue;
-      // if (addressData?.streetAddress) {
-      //   setFieldValue('streetAddress', addressData.streetAddress);
-      // } else {
-      //   setFieldValue('city', '');
-      // }
-      // if (addressData?.city) {
-      //   setFieldValue('city', addressData.city);
-      // } else {
-      //   setFieldValue('city', '');
-      // }
-      // // if (addressData['state/Province']) {
-      // //   setFieldValue('state/Province', addressData['state/Province']);
-      // // } else {
-      // //   setFieldValue('state/Province', '');
-      // // }
-      // if (addressData?.country) {
-      //   setFieldValue('country', addressData.country);
-      // } else {
-      //   setFieldValue('country', '');
-      // }
-      // // if (addressData['zipCode/PostalCode']) {
-      // //   setFieldValue('zipCode/PostalCode', addressData['zipCode/PostalCode']);
-      // // } else {
-      // //   setFieldValue('zipCode/PostalCode', '');
-      // // }
-      // if (addressData?.latitude) {
-      //   setFieldValue('latitude', addressData.latitude);
-      // } else {
-      //   setFieldValue('latitude', '');
-      // }
-      // if (addressData?.longitude) {
-      //   setFieldValue('longitude', addressData.longitude);
-      // } else {
-      //   setFieldValue('longitude', '');
-      // }
-      const keys = Object.keys(addressData);
+      const keys = Object.keys(addressDetail);
       if (keys.length > 0) {
         Object.keys(initialData.values).forEach((k) => {
-          setFieldValue(k, addressData[k]);
+          setFieldValue(k, addressDetail[k]);
         });
       }
     }
-  }, [addressData]);
+  }, [addressDetail]);
 
   const onCordChange = (position: google.maps.MapMouseEvent) => {
     if (!formikRef.current) return;
-    setAddressData((prevState) => ({
+    setAddressDetail((prevState) => ({
       ...prevState,
       longitude: position.latLng.lng().toLocaleString(),
       latitude: position.latLng.lat().toLocaleString()
@@ -246,7 +194,7 @@ const ManageAddressDialog = (props) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={title ? title : 'Add Address'}
+                title={addressData ? 'Edit Address' : 'Add Address'}
                 onClose={() => {
                   if (
                     isFieldNotTouched(
@@ -305,7 +253,7 @@ const ManageAddressDialog = (props) => {
                                             if (typeof val !== 'object') return;
                                             getFullAddress(val);
                                             if (!val?.place_id) {
-                                              setAddressData(null);
+                                              setAddressDetail(null);
                                             }
                                           }
                                           : null
@@ -380,17 +328,17 @@ const ManageAddressDialog = (props) => {
                       // onLoad={onLoad}
                       // onUnmount={onUnmount}
                       center={
-                        addressData?.latitude && addressData?.longitude
-                          ? new google.maps.LatLng(addressData?.latitude, addressData?.longitude)
+                        addressDetail?.latitude && addressDetail?.longitude
+                          ? new google.maps.LatLng(addressDetail?.latitude, addressDetail?.longitude)
                           : new google.maps.LatLng(37.09, -95.713)
                       }
                       zoom={4}
                     >
-                      {addressData?.latitude && addressData?.longitude && (
+                      {addressDetail?.latitude && addressDetail?.longitude && (
                         <Marker
                           draggable
                           onDragEnd={(position) => onCordChange(position)}
-                          position={new google.maps.LatLng(addressData?.latitude, addressData?.longitude)}
+                          position={new google.maps.LatLng(addressDetail?.latitude, addressDetail?.longitude)}
                         />
                       )}
                     </GoogleMap>

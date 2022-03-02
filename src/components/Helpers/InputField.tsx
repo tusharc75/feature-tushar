@@ -14,7 +14,7 @@ const InputField = (props) => {
 
   const [formsData, setFormsData] = useState([]);
   const [addressOptions, setAddressOptions] = useState([]);
-  const [addressOpen, setAddressOpen] = useState({open:false, isClone: false})
+  const [addressOpen, setAddressOpen] = useState({ open: false, isClone: false })
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const {
     state: { user, permissions }
@@ -22,7 +22,7 @@ const InputField = (props) => {
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(fieldsData));
-    const addressOption = fieldsData.find((obj) => obj?.fieldName==="address")
+    const addressOption = fieldsData.find((obj) => obj?.fieldName === "address")
     setAddressOptions(addressOption?.option);
     // eslint-disable-next-line
   }, [fieldsData]);
@@ -77,20 +77,20 @@ const InputField = (props) => {
                             fieldData={field}
                           />
                         </Grid>
-                        {permissions?.warehouse?.isCreate &&(
-                        <Grid item xs={1} sm={1} md={1}>
-                          <Tooltip title="Add Address" className="mt-1">
-                            <IconButton
-                              onClick={() => {
-                                setAddressOpen({ open: true, isClone: false });
-                              }}
-                              disabled={ field.disableOnEdit}
-                              size="small"
-                            >
-                              <AddIcon color={'primary'} />
-                            </IconButton>
-                          </Tooltip>
-                        </Grid>
+                        {permissions?.warehouse?.isCreate && (
+                          <Grid item xs={1} sm={1} md={1}>
+                            <Tooltip title="Add Address" className="mt-1">
+                              <IconButton
+                                onClick={() => {
+                                  setAddressOpen({ open: true, isClone: false });
+                                }}
+                                disabled={field.disableOnEdit}
+                                size="small"
+                              >
+                                <AddIcon color={'primary'} />
+                              </IconButton>
+                            </Tooltip>
+                          </Grid>
                         )}
 
                         {field?.tooltipMessage ? (
@@ -127,25 +127,25 @@ const InputField = (props) => {
                         onChange={
                           field.fieldName === 'currency'
                             ? (e, val) => {
-                                if (val && val.currencyCode) {
-                                  setFieldValue(field.fieldName, val.currencyCode);
-                                  setCurrencySymbol(val.symbolNative);
-                                } else {
-                                  setFieldValue(field.fieldName, '');
-                                  setCurrencySymbol(null);
-                                }
+                              if (val && val.currencyCode) {
+                                setFieldValue(field.fieldName, val.currencyCode);
+                                setCurrencySymbol(val.symbolNative);
+                              } else {
+                                setFieldValue(field.fieldName, '');
+                                setCurrencySymbol(null);
                               }
+                            }
                             : field.type === 'dropDown'
-                            ? (e, val) => {
+                              ? (e, val) => {
                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
                               }
-                            : null
+                              : null
                         }
                         imageOrFileUploadCompletePercentage={
                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                             ? (completePercentage) => {
-                                onImageUploadCompletePercentage(completePercentage);
-                              }
+                              onImageUploadCompletePercentage(completePercentage);
+                            }
                             : null
                         }
                         fields={fieldsData}
@@ -156,24 +156,22 @@ const InputField = (props) => {
                 )}
                 {addressOpen?.open && (
                   <ManageAddressDialog
-                  open={addressOpen?.open}
-                  onClose={() => setAddressOpen({open:false,isClone:false}) }
-                  onSuccess={(data) => {
-                    setFieldValue("address",data._id)
-                    setAddressOptions((prevState) => {
-                      return [
-                        ...prevState,
-                        {
-                          optionValue: data._id,
-                          optionLabel: data.fullAddress,
-                          order: addressOptions.length,
-                          default: false
-                        }
-                      ]
-                    })
-                    setAddressOpen({open:false,isClone:false})
-                  }}
-               
+                    onClose={() => setAddressOpen({ open: false, isClone: false })}
+                    onSuccess={(data) => {
+                      setFieldValue("address", data._id)
+                      setAddressOptions((prevState) => {
+                        return [
+                          ...prevState,
+                          {
+                            optionValue: data._id,
+                            optionLabel: data.fullAddress,
+                            order: addressOptions.length,
+                            default: false
+                          }
+                        ]
+                      })
+                      setAddressOpen({ open: false, isClone: false })
+                    }}
                   />
                 )}
               </Grid>
