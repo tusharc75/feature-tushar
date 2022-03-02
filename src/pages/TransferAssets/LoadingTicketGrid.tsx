@@ -1,11 +1,10 @@
 import { useState, useReducer, Fragment, useContext, useEffect, FC } from 'react';
 import { Button, Box } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
-
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { deliveryTicket, sidebarResource } from 'src/constants/helpers';
+import { deliveryTicket, sidebarResource, DELIVERY_TICKET_STATUS } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { groupBy } from 'lodash';
@@ -54,7 +53,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [openLoadingTicketDialog, setOpenLoadingTicketDialog] = useState(false);
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [assetsDelivered, setAssetsDelivered] = useState([]);
-  const [assetsIntransit, setAssetsIntransit] = useState([]);
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const history = useHistory();
@@ -164,10 +162,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   useEffect(() => {
     if (selectedRecords.length > 0) {
       const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty('loadingTicket'));
-      const selectedInventoryIntransit = selectedRecords.filter((asset: any) => asset['loadingTicketStatus'] === 'In-Transit');
       const selectedInventoryDelivered = selectedRecords.filter((asset: any) => asset['loadingTicketStatus'] === 'Delivered');
       setAssetsDelivered(selectedInventoryDelivered);
-      setAssetsIntransit(selectedInventoryIntransit);
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
 
@@ -224,23 +220,22 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     <Fragment>
       <Box display="flex" flexDirection={isMobile ? "row-reverse" : 'row'} justifyContent={isMobile ? "flex-end" : "space-between"} mx="4px">
         <Box>
-          {/* {permissions?.transferAsset?.isRead && (
+          {(permissions?.transferAsset?.isRead && !isMobile) && (
             <Button
-              variant={isMobile && !isTablet ? "text" : "outlined"}
+              variant={"outlined"}
               color="primary"
               type="button"
               size="small"
-              style={isMobile && !isTablet ? {color:"var(--info-dark)"} : {}}
-              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              startIcon={<AiFillFilePdf />}
               disabled={fileDownloading}
               onClick={() => {
                 handleViewPdf(false);
               }}
             >
-              {isMobile && !isTablet ? <AiFillFilePdf size={18} /> :  fileDownloading ? 'Please wait...' : 'Preview'}
+              {fileDownloading ? 'Please wait...' : 'Preview'}
             </Button>
-          )} */}
-          {/* <Box component="span" mx={1} /> */}
+          )}
+          <Box component="span" mx={1} />
           {permissions?.transferAsset?.isRead && (
             <Button
               variant={isMobile && !isTablet ? "text" : "outlined"}
@@ -260,7 +255,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           <Box component="span" mx={1} />
         </Box>
         {!isTransferEnded && <Box >
-          {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isCreate && (
+          {permissions?.transferAsset.isUpdate && (
             <Button
               variant="contained"
               size="small"
@@ -276,22 +271,16 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             </Button>
           )}
           <Box component="span" mx={1} />
-          {/* {permissions?.transferAsset.isUpdate && permissions?.deliveryTicket.isUpdate && (
+          {permissions?.transferAsset.isUpdate && (selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("loadingTicket") &&
+            f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedRecords?.length) ?
             <Button
               variant="contained"
               size="small"
               color="primary"
-              disabled={
-                assetsDelivered.length > 0 ||
-                assetsIntransit.length > 0 ||
-                selectedRecords.filter((asset) => asset?.hasOwnProperty('loadingTicket')).length === 0 ||
-                selectedRecords.filter((asset) => !asset?.hasOwnProperty('loadingTicket')).length > 0
-              }
               onClick={() => setShowConfirmBox(true)}
             >
               Remove Loading Ticket
-            </Button>
-          )} */}
+            </Button> : null}
         </Box>}
       </Box>
 

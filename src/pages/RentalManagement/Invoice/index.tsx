@@ -28,10 +28,9 @@ import { fetch_rental_product_fields } from '../../../components/RentalManagment
 import { camelCase } from "lodash";
 
 
-const renderedFrom = camelCase(`${routes.rentalManagement.title}_6`);
-
 const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJobStatus, statusOptions }) => {
 
+  const renderedFrom = camelCase(`${routes.rentalManagement.title}6`);
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
 

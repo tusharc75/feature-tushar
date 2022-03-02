@@ -106,8 +106,6 @@ const TransferAssetDetailPage = () => {
  
   const handleMainPoints = (data) => {
     let mainPoint = {};
-    mainPoint['Transfer Asset Number'] = data.transferAssetNumber;
-    mainPoint['Transfer Type'] = data.transferType;
     setMainPoints(mainPoint);
   };
 

@@ -42,7 +42,6 @@ import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 import { groupBy, uniq, map } from "lodash";
 import { camelCase } from "lodash";
 
-const renderedFrom = camelCase(`${routes.rentalManagement.title}_4`);
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -57,6 +56,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
+
+  const renderedFrom = camelCase(`${routes.rentalManagement.title}4`);
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -341,18 +342,20 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           }}>Lost</MenuItem>
         </Menu>
         <Box mx={1} />
-        <Tooltip title="Create Loading Ticket">
-          <Button
-            onClick={() => { handleDeliveryTicketDialog() }}
-            variant={isMobile && !isTablet ? "text" : "outlined"}
-            color="primary"
-            size="small"
-            style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
-            disabled={(selectedRecords.length === 0)
-              || (selectedRecords.some(f => f.hasOwnProperty("loadingTicketId")) || checkUniqWarehouse())}
-          >
-            {isMobile && !isTablet ? <AiOutlineLoading3Quarters size={18} /> : 'Create Loading Ticket'}
-          </Button>
+        <Tooltip title={selectedRecords.length === 0 ? "Create Loading Ticket" : "Selected assets are located in various locations."}>
+          <span>
+            <Button
+              onClick={() => { handleDeliveryTicketDialog() }}
+              variant={isMobile && !isTablet ? "text" : "outlined"}
+              color="primary"
+              size="small"
+              style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
+              disabled={(selectedRecords.length === 0)
+                || (selectedRecords.some(f => f.hasOwnProperty("loadingTicketId")) || checkUniqWarehouse())}
+            >
+              {isMobile && !isTablet ? <AiOutlineLoading3Quarters size={18} /> : 'Create Loading Ticket'}
+            </Button>
+          </span>
         </Tooltip>
         <Box mx={1} />
         {(selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("loadingTicketId") &&

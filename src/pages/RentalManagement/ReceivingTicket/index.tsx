@@ -45,7 +45,6 @@ import ExistingRentalJob from "./ExistingRentalJob";
 import { groupBy, uniq, map } from "lodash";
 import { camelCase } from "lodash";
 
-const renderedFrom = camelCase(`${routes.rentalManagement.title}_5`);
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -60,6 +59,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
+
+  const renderedFrom = camelCase(`${routes.rentalManagement.title}5`);
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
