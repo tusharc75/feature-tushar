@@ -28,9 +28,7 @@ import { GiAutoRepair } from 'react-icons/gi';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { groupBy, uniq, map } from "lodash";
 
-const renderedFrom = "repairJob_assets"
-
-const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus }) => {
+const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions, selectedEntity } }: any = useData();

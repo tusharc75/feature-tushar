@@ -2,31 +2,32 @@ import { useState, useEffect, useContext } from 'react';
 import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { repairJob, sidebarResource, repairJobProcessSteps, REPAIR_JOB_STATUS } from '../../constants/helpers';
-import Activity from '../../components/Activity';
+import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import DetailsPageHeader from 'src/components/DetailsPageHeader';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import { useData } from 'src/StateProvider/Provider';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { repairJob, sidebarResource, repairJobProcessSteps, REPAIR_JOB_STATUS } from 'src/constants/helpers';
+import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRepairJob from './ManageRepairJob';
 import queryString from "query-string";
 import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-import TabPanel from '../../components/TabPanel';
-import HideWhenOffline from '../../components/HideWhenOffline';
-import { defaultActivityShow } from '../../constants/helpers';
+import TabPanel from 'src/components/TabPanel';
+import HideWhenOffline from 'src/components/HideWhenOffline';
+import { defaultActivityShow } from 'src/constants/helpers';
 import AddSerializedAsset from './AddSerializedAsset';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
-import DeleteButton from "../../components/Helpers/DeleteButton";
+import DeleteButton from "src/components/Helpers/DeleteButton";
 import Steps from "../RentalManagement/Steps";
 import { GiAbstract055 } from 'react-icons/gi';
+import { camelCase } from 'lodash';
 
 function a11yProps(index: any) {
   return {
@@ -36,7 +37,7 @@ function a11yProps(index: any) {
 }
 
 const RepairJobDetails = () => {
-
+  const renderedFrom = camelCase(routes?.repairJob.title)
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -286,6 +287,7 @@ const RepairJobDetails = () => {
                             setNextStep={setNextStep}
                             updateJobStatus={updateJobStatus}
                             repairedAssetStatus={repairedAssetStatus}
+                            renderedFrom={`${renderedFrom}_grid-1`}
                           />
                         )}
                         {(currentStep === 1) && (
@@ -293,6 +295,7 @@ const RepairJobDetails = () => {
                             repairJobData={repairJobData}
                             fetchRepairJobData={fetchRepairJobData}
                             repairedAssetStatus={repairedAssetStatus}
+                            renderedFrom={`${renderedFrom}_grid-2`}
                           />
                         )}
                       </Grid>
@@ -303,7 +306,8 @@ const RepairJobDetails = () => {
               <TabPanel value={tabValue} index={2}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
                   <Tickets
-                    repairJobData={repairJobData}
+                    repairJobId={id}
+                    renderedFrom={`${renderedFrom}_grid-3`}
                   />
                 </Grid>
               </TabPanel>
