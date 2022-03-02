@@ -200,12 +200,12 @@ const RoleDetailsPage = () => {
       };
       setCurrentData(JSON.stringify(current));
       setCustomizedRoutes([routes.role, { title: data.name }]);
-      if (data?.policy) { 
-      let copyOfResourcePolicy = {}
+      if (data?.policy) {
+        let copyOfResourcePolicy = {}
         for (const item in data?.policy) {
           copyOfResourcePolicy[item] = data?.policy[item];
         }
-        SetPolicyFieldCheckBox((prevState) => ({...prevState,...copyOfResourcePolicy}))
+        SetPolicyFieldCheckBox((prevState) => ({ ...prevState, ...copyOfResourcePolicy }))
         handlePolicyResourceCheckBox(copyOfResourcePolicy)
       }
 

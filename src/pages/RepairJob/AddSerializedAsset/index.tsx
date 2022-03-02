@@ -27,9 +27,7 @@ import CustomSwipableList from '../../../components/SwipableListComponents/Custo
 import ManageAssetDialog from './ManageAssetDialog';
 import AssetScrapRepairDialog from '../../../components/AssetScrapRepairDialog/AssetScrapRepairDialog';
 
-const renderedFrom = "repairJob_add_assets"
-
-const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus }) => {
+const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus, renderedFrom }) => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const toastConfig = useContext(CustomToastContext);

@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState, lazy } from 'react';
-import { ThemeProvider } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
+import { Grid, ThemeProvider } from '@material-ui/core';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { theme } from './constants/AppConfig';
@@ -8,7 +8,7 @@ import { CustomNotificationCountContext } from './StateProvider/CustomNotificati
 import axiosInstance from './axios/axiosInstance';
 import { CustomChatNotificationCountContext } from './StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import queryString from 'query-string';
-import { SET_USER, SET_SELECTED_ENTITY, SET_GRID_METADATA } from './StateProvider/actionTypes';
+import { SET_USER, SET_SELECTED_ENTITY } from './StateProvider/actionTypes';
 import routes from './components/Helpers/Routes';
 import { termsAndCondition, customerAccount, customerContact, supplierAccount, supplierContact } from './constants/helpers';
 import CustomToaster from './components/Helpers/CustomToast';
@@ -109,20 +109,19 @@ import EcommercePolicy from './pages/EcommercePolicy';
 import Sublease from './pages/Sublease';
 import SubleaseDetailsPage from './pages/Sublease/SubleaseDetailsPage';
 import NewDashboard from './pages/NewDashboard';
-import ProductInventory from './pages/SerializedAsset';
 import TransferInventory from './pages/TransferInventory';
 import TransferInventoryDetailPage from './pages/TransferInventory/TransferInventoryDetailPage';
 import Zone from './pages/zone';
 import ZoneDetailPage from './pages/zone/ZoneDetailPage';
-// import { Button, Snackbar } from '@material-ui/core';
+import { Button, Snackbar } from '@material-ui/core';
 import * as serviceWorkerRegistration from 'src/serviceWorkerRegistration';
-// import MuiAlert from '@material-ui/lab/Alert';
+import MuiAlert from '@material-ui/lab/Alert';
 
 var notificationInterval: any = null;
 
-// function Alert(props) {
-//   return <MuiAlert elevation={6} variant="filled" {...props} />;
-// }
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 function App() {
   const [serviceWorkerData, setServiceWorkerData] = useState<{
@@ -133,35 +132,33 @@ function App() {
     waitingWorker: {}
   });
 
-  // const [refreshSnackBar, setRefreshSnackBar] = useState(false);
+  const [refreshSnackBar, setRefreshSnackBar] = useState(false);
 
   const updateServiceWorker = () => {
     const { waitingWorker } = serviceWorkerData;
     waitingWorker && waitingWorker.postMessage({ type: 'SKIP_WAITING' });
     setServiceWorkerData({ ...serviceWorkerData, newVersionAvailable: false });
+    localStorage.removeItem('newVersionAvailable');
     window.location.reload();
   };
 
   const onServiceWorkerUpdate = (registration) => {
-    // setRefreshSnackBar(true);
+    localStorage.setItem('newVersionAvailable', 'true');
+    setRefreshSnackBar(true);
     setServiceWorkerData({
       waitingWorker: registration && registration.waiting,
       newVersionAvailable: true
     });
-    updateServiceWorker();
   };
-
-  // const refreshAction = () => {
-  //   return (
-  //     <Button className="snackbar-button" size="medium" onClick={updateServiceWorker}>
-  //       Refresh
-  //     </Button>
-  //   );
-  // };
 
   useEffect(() => {
     serviceWorkerRegistration.register({ onUpdate: onServiceWorkerUpdate });
-  });
+  }, []);
+
+  useEffect(() => {
+    const newVersionAvailable = localStorage.getItem('newVersionAvailable');
+    if (newVersionAvailable === 'true') setRefreshSnackBar(true);
+  }, [setRefreshSnackBar]);
 
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
@@ -311,11 +308,16 @@ function App() {
     <ThemeProvider theme={theme}>
       <AnimatePresence initial={false} exitBeforeEnter>
         <ErrorBoundaryComponent>
-          {/*<Snackbar open={refreshSnackBar} autoHideDuration={null} onClose={() => setRefreshSnackBar(false)} action={refreshAction}>*/}
-          {/*  <Alert onClose={() => setRefreshSnackBar(false)} severity="info">*/}
-          {/*    New Version of eQuip-T OM is available. Please refresh to get the latest changes.*/}
-          {/*  </Alert>*/}
-          {/*</Snackbar>*/}
+          <Snackbar open={refreshSnackBar} autoHideDuration={null} onClose={() => setRefreshSnackBar(false)}>
+            <Alert onClose={() => setRefreshSnackBar(false)} severity="success">
+              <div style={{ display: 'flex', width: '100%', alignItems: 'start', justifyContent: 'space-between', gap: 20 }}>
+                <div style={{ flex: 1 }}>New Version of eQuip-T OM is available. Please refresh to get the latest changes.</div>
+                <Button className="snackbar-button" size="medium" variant="contained" color="secondary" onClick={updateServiceWorker}>
+                  Refresh
+                </Button>
+              </div>
+            </Alert>
+          </Snackbar>
           {/* <Switch location={location} key={location.key}> */}
           <Switch>
             <Route

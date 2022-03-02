@@ -71,7 +71,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
 
     const [showAddWarehouseDialog, setShowAddWarehouseDialog] = useState(false);
     const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
-    const [statusOptions, setStatusOptions] = useState([]);
 
     const [showAddressDialog, setShowAddressDialog] = useState(false);
     const [addressType, setAddressType] = useState('');

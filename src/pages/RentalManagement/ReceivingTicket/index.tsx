@@ -34,8 +34,6 @@ import CustomSwipableList from '../../../components/SwipableListComponents/Custo
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { RiExchangeFundsLine } from 'react-icons/ri';
-import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 import ManageRepairJob from '../../RepairJob/ManageRepairJob'
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
@@ -45,7 +43,6 @@ import ExistingRentalJob from "./ExistingRentalJob";
 import { groupBy, uniq, map } from "lodash";
 import { camelCase } from "lodash";
 
-const renderedFrom = camelCase(`${routes.rentalManagement.title}_5`);
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -60,6 +57,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
+
+  const renderedFrom = camelCase(`${routes.rentalManagement.title}5`);
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -126,7 +126,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
-        productAssets = productAssets.map(d => ({ ...d.inventory, rentalAssetStatus: d.status })).map(u => ({
+        productAssets = productAssets.map(d => ({ ...d.inventory, rentalAssetStatus: d.status, startDate: d.startDate, endDate: d.endDate })).map(u => ({
           ...u,
           productName: u?.product?.optionLabel,
           warehouse: u?.warehouse?.optionLabel,
@@ -268,6 +268,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     { field: "receivingTicket", headerName: "Receiving Ticket", show: true, cellRenderer: "receivingTicketRenderer" },
     { field: "returnTicket", headerName: "Return Ticket", show: true, cellRenderer: "returnTicketRenderer" },
     { field: "status", headerName: "Asset Status", show: true, cellRenderer: "commonRenderer" },
+    { field: "startDate", headerName: "Actual Start Date", show: true, cellRenderer: "dateRenderer" },
+    { field: "endDate", headerName: "Actual End Date", show: true, cellRenderer: "dateRenderer" },
     { field: "rentalAssetStatus", headerName: "Rental Asset Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
@@ -329,7 +331,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
       <Box display="flex" alignItems="center">
-        <Button
+        {!isMobile && <Button
           onClick={() => {
             setDownlodingFile(true);
             axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
@@ -364,8 +366,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
 
         >
-          {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
-        </Button>
+          {downlodingFile ? "Please wait..." : "Preview"}
+        </Button>}
         <Box mx={1} />
         <Button variant={isMobile && !isTablet ? 'text' : 'outlined'} color="primary" aria-controls="simple-menu"
           aria-haspopup="true"
@@ -374,8 +376,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           onClick={handleClick}
           style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
           endIcon={<ArrowDropDownIcon />}>
-          {isMobile && !isTablet ? <RiExchangeFundsLine size={20} /> : 'Change Status'}
-
+          {'Change Status'}
         </Button>
         <Menu
           id="simple-menu"

@@ -165,7 +165,7 @@ export const sidebarResource = {
   pricingCondition: 'Pricing Condition',
   repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
-  eCommerce: 'e-Commerce',
+  eCommercePolicy: 'e-Commerce Policy',
   packages: 'Packages',
   supplierContact: 'Supplier Contact',
   supplierAccount: 'Supplier Account',
@@ -225,9 +225,8 @@ export const resourceNames = {
   pricingCondition: 'Pricing Condition',
   repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
-  eCommerce: 'e-Commerce',
+  eCommercePolicy: 'e-Commerce Policy',
   packages: 'Packages',
-
   supplierContact: 'Supplier Contact',
   supplierAccount: 'Supplier Account',
   pricing: 'Pricing',
@@ -263,7 +262,7 @@ export const RESOURCE_LABEL = {
   opportunity: 'Opportunities',
   field: 'Fields',
   productCategory: 'Product Categories',
-  //productInventory: 'Serialized Assets',
+  productInventory: 'Product Inventory',
   serializedAsset: 'Serialized Assets',
   priceTemplate: 'Price Templates',
   product: 'Product Master',
@@ -295,7 +294,7 @@ export const RESOURCE_LABEL = {
   pricingCondition: 'Pricing Setup',
   repairJob: 'Repair Jobs',
   salesOrder: 'Sales Order',
-  eCommerce: 'e-Commerce',
+  eCommercePolicy: 'e-Commerce Policy',
   packages: 'Packages',
   purchaseOrder: 'Purchase Orders',
   transferAsset: 'Transfer Assets',
@@ -538,17 +537,20 @@ export const profileMenuItems = {
 };
 
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
-  let selectedEntity = localStorage.getItem("selectedEntity")
+  
+  //let selectedEntity = localStorage.getItem("selectedEntity")
+  //let isCreate = (val === "") ? true : false
 
-  let isCreate = (val === "") ? true : false
   const obj = {};
   for (const key of arr) {
-    let isEntityField = key?.fieldName === "entity"
 
     let value = key.isDefaultValue ? key.defaultValue : val;
-    if (isEntityField && selectedEntity && isCreate) {
-      value = key?.type === "multiSelect" ? [selectedEntity] : selectedEntity
-    }
+
+    //let isEntityField = key?.fieldName === "entity"
+    // if (isEntityField && selectedEntity && isCreate) {
+    //   value = key?.type === "multiSelect" ? [selectedEntity] : selectedEntity
+    // }
+
     if (key.type === 'dropDown') {
       let option = key.option?.find((data: any) => data.default === true);
       if (!option && key.required && key.option?.length === 1) {
