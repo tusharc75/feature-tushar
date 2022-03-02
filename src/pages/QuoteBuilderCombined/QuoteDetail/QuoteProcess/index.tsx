@@ -1140,6 +1140,7 @@ export default function QuoteProcess(props) {
     axiosInstance()
       .patch(`/quote-builder/send-offer/${quoteData._id}/${currentVersion}`)
       .then(({ data }) => {
+        fetchQuoteData(currentVersion);
         toastConfig.setToastConfig({
           open: true,
           type: "success",
@@ -1459,7 +1460,7 @@ export default function QuoteProcess(props) {
                     </Button>
                   )}
                   <span className="d-flex align-items-center justify-content-end ml-3">
-                    {!ifQuoteApproved.approved && buttonMessage === "Send to Customer" && !quoteData?.offered && (
+                    {!ifQuoteApproved.approved && buttonMessage === "Send to Customer" && !quoteData?.versions[currentVersion]?.offered && (
                       <Button
                         onClick={() => {
                           handleOfferToCustomer()
