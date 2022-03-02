@@ -29,11 +29,8 @@ import CustomRenderCell from "../../../components/Helpers/CustomRenderCell";
 import InfoIcon from "@material-ui/icons/Info";
 import { MdAdd } from "react-icons/md";
 import { RiEditCircleLine } from "react-icons/ri";
-import { camelCase } from "lodash";
 
-let renderedFrom = camelCase(routes.purchaseOrderDetail.title)
-
-const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) => {
+const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -79,7 +76,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                 }
             });
             let rendererNames = [];
-            genrateColoum(fields, columns, rendererNames, false);
+            genrateColoum(fields, columns, rendererNames, false, renderedFrom);
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
                 nameRenderer: NameRenderer,
@@ -385,7 +382,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                     onCreate={null}
                     showClone={false}
                     fullHeight={true}
-                    renderedFrom={`${renderedFrom}_grid-1`}
+                    renderedFrom={renderedFrom}
                     onClone={() => { }}
 
                 /> :
@@ -407,7 +404,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                     onCellValueChanged={(row) => {
                         //handleUpdateOrderProduct(row.data)
                     }}
-                    renderedFrom={`${renderedFrom}_grid-1`}
+                    renderedFrom={renderedFrom}
                     refreshGrid={fetchPurchaseOrderProduct}
                     currency={purchaseOrderData?.currency?.toLowerCase()}
                     fromPurchaseOrderGrid={true}

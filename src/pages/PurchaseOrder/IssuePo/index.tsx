@@ -21,12 +21,9 @@ import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum }
 import { prepareDataForGrid } from "src/constants/helpers";
 import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
 import { Link } from "react-router-dom";
-import { camelCase } from "lodash";
 
-let renderedFrom = camelCase(routes.purchaseOrderDetail.title)
 
-const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrentStep, currentStep, handleAttachments, statusOptions }) => {
-
+const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrentStep, currentStep, handleAttachments, statusOptions, renderedFrom }) => {
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
 
@@ -65,7 +62,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
             axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderService}`).then(({ data: { data } }) => {
                 fields = [...fields, ...CURReplaceByCurrencySingle(data, purchaseOrderData.currency)]
                 let rendererNames = [];
-                genrateColoum(fields, columns, rendererNames, false);
+                genrateColoum(fields, columns, rendererNames, false, renderedFrom);
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
                 tempFrameworkComponent = {
                     commonRenderer: CommonRenderer,
@@ -298,7 +295,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                     onCreate={null}
                     showClone={false}
                     fullHeight={true}
-                    renderedFrom={`${renderedFrom}_grid-3`}
+                    renderedFrom={renderedFrom}
                     onClone={() => { }}
                 /> :
                     <CustomAgGridEditable
@@ -315,7 +312,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         loading={loading}
                         allowSelection={false}
                         isClientSideGrid={true}
-                        renderedFrom={`${renderedFrom}_grid-3`}
+                        renderedFrom={renderedFrom}
                         onCellValueChanged={(row) => {
                         }}
                         fromPurchaseOrderGrid={true}

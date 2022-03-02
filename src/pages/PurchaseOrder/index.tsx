@@ -33,11 +33,9 @@ import MobileSortDialog from "src/components/MobileSortDialog";
 import MobileFilterDialog from "src/components/MobileFilterDialog"
 import { camelCase } from "lodash";
 
-let renderedFrom = camelCase(routes.purchaseOrder?.title)
-
-const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
 const PurchaseOrder = () => {
+    let renderedFrom = camelCase(routes.purchaseOrder?.title)
 
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
@@ -603,7 +601,7 @@ const PurchaseOrder = () => {
             showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.purchaseOrder?.title?.toLowerCase() : RESOURCE_LABEL.purchaseOrder?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
+                message={`Are you sure you want to delete the ${routes?.purchaseOrder.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />

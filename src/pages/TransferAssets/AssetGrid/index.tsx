@@ -15,7 +15,7 @@ import CustomSwipableList from "src/components/SwipableListComponents/CustomSwip
 import { FaSuitcase } from "react-icons/fa";
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { MdAdd } from 'react-icons/md';
-import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
+import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
 
 interface AssetsGridProps {
   permissions?: any;
@@ -27,10 +27,11 @@ interface AssetsGridProps {
   transferAssetData?: any;
   handleViewPdf?: any;
   fileDownloading?: boolean
+  renderedFrom?: string;
 }
 
 const AssetsGrid: FC<AssetsGridProps> = (props) => {
-  const { permissions, user, fetchAssets, currentStep, setNextStep, updateTransferStatus, transferAssetData } = props
+  const { permissions, user, fetchAssets, currentStep, setNextStep, updateTransferStatus, transferAssetData, renderedFrom } = props
   const toastConfig = useContext(CustomToastContext);
 
 
@@ -63,7 +64,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
         let columns = []
         let rendererNames = []
         data.forEach(o => {
-          let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path)
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData]
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -263,7 +264,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
               onCreate={false}
               showClone={false}
               onClone={(data) => { }}
-              renderedFrom="transferAssetPage"
+              renderedFrom={renderedFrom}
             /> :
             <CustomAgGrid
               columns={columns}
@@ -280,7 +281,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
               allowSelection={true}
               isClientSideGrid={true}
               loading={gridLoading}
-              renderedFrom="transferAssetPage"
+              renderedFrom={renderedFrom}
               refreshGrid={() => fetchAssetsData(true)}
             /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
       </Box>
