@@ -513,7 +513,7 @@ const RoleDetailsPage = () => {
                           >
                             <TableHead>
                               <TableRow>
-                                <TableCell>Policy Names</TableCell>
+                                <TableCell>Policy</TableCell>
                                 <TableCell align="center">
                                   <FormControlLabel
                                     control={<Checkbox
