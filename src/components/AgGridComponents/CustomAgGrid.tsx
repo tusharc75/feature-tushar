@@ -124,7 +124,7 @@ export const intialState = {
 };
 
 export default function CustomAgGrid({
-  columns,
+  columns:cols,
   dataRows,
   frameworkComponents,
   dispatch,
@@ -157,11 +157,15 @@ export default function CustomAgGrid({
   selectedReportView = null,
   setSelectedReportView = null
 }) {
-  const [, setColumns] = useState(columns);
+  const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
 
   const [currentGridApi, setCurrentGridApi] = useState<GridApi | any>(null);
-  const enableRowDrag = columns.some((d) => d.rowDrag);
+  const enableRowDrag = cols.some((d) => d.rowDrag);
+
+  useEffect(() => {
+    setColumns(cols)
+  },[cols])
 
   //  If you want to do something once grid binding done
   const onGridReady = (params) => {
@@ -192,6 +196,7 @@ export default function CustomAgGrid({
     try {
       if (localStorage.getItem(renderedFrom)) {
         const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+
         setTimeout(() => {
           if (columnApi) columnApi.setColumnState(columnState);
         }, 500)
@@ -204,6 +209,7 @@ export default function CustomAgGrid({
       currentGridApi.sizeColumnsToFit()
     }
   }
+
 
   const onColumnMoved = (params) => {
     if (params?.source === "uiColumnDragged") {

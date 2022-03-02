@@ -37,8 +37,10 @@ import { AiFillCrown, MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
+import { camelCase } from 'lodash';
 
 const Address = () => {
+  const renderedFrom = camelCase(routes?.address.title)
   const location = useLocation();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -72,10 +74,10 @@ const Address = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
-  const localStorageSelectedRecords = 'address_selected';
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
-  const columnState = JSON.parse(localStorage.getItem('addressResourcePage'));
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
     columns.forEach((item) => {
       columnState.forEach((d) => {
@@ -121,7 +123,7 @@ const Address = () => {
               }
             ];
           } else {
-            let currentColumn = getColumnData(routes.address.title, o?.fieldData, routes.address.path);
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.address.path);
 
             if (currentColumn !== null) {
               columns = [...columns, currentColumn?.columnData];
@@ -461,7 +463,7 @@ const Address = () => {
               onCreate={false}
               showClone={false}
               onClone={() => { }}
-              renderedFrom={'address'}
+              renderedFrom={renderedFrom}
             />
           ) : (
             <CustomAgGrid
@@ -476,7 +478,7 @@ const Address = () => {
               page={page}
               actionWidth={110}
               loading={loading}
-              renderedFrom="address"
+              renderedFrom={renderedFrom}
               refreshGrid={fetchAddresses}
             />
           )

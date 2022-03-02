@@ -34,6 +34,7 @@ import { AiFillFilePdf } from "react-icons/ai";
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
 import { updateSignatureOffline } from './deliveryTicketOfflineHelper';
+import { camelCase } from 'lodash';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -57,10 +58,10 @@ function a11yProps(index: any) {
   };
 }
 
-const renderedFrom = "deliveryTicketDetailInventoryPage"
 
 
 export default function DeliveryTicketDetail(props) {
+  const renderedFrom = `${camelCase(routes?.deliveryTicket.title)}_grid-1`
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -267,7 +268,7 @@ export default function DeliveryTicketDetail(props) {
       let columns = []
       let rendererNames = []
       data.forEach(o => {
-        let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
+        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path)
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData]
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -724,7 +725,7 @@ export default function DeliveryTicketDetail(props) {
                           onCreate={null}
                           showClone={false}
                           fullHeight={true}
-                          renderedFrom={"receivingTicketDetailInventoryPage"}
+                          renderedFrom={renderedFrom}
                           onClone={() => {
                           }}
                         /> :
