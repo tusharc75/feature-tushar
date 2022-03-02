@@ -41,9 +41,9 @@ import {
   SET_SELECTED_ENTITY,
 } from "../../StateProvider/actionTypes";
 import { PERMISSION } from "../../constants/Roles";
-import { camelCase, roleTypes } from "../../constants/helpers";
+import { roleTypes } from "../../constants/helpers";
 import React from "react";
-import { startCase } from "lodash";
+import { startCase, camelCase } from "lodash";
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -200,12 +200,12 @@ const RoleDetailsPage = () => {
       };
       setCurrentData(JSON.stringify(current));
       setCustomizedRoutes([routes.role, { title: data.name }]);
-      if (data?.policy) { 
-      let copyOfResourcePolicy = {}
+      if (data?.policy) {
+        let copyOfResourcePolicy = {}
         for (const item in data?.policy) {
           copyOfResourcePolicy[item] = data?.policy[item];
         }
-        SetPolicyFieldCheckBox((prevState) => ({...prevState,...copyOfResourcePolicy}))
+        SetPolicyFieldCheckBox((prevState) => ({ ...prevState, ...copyOfResourcePolicy }))
         handlePolicyResourceCheckBox(copyOfResourcePolicy)
       }
 
