@@ -252,7 +252,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             <Box mx={1} />
           </Fragment>
         }
-        {permissions?.rentalManagement?.isRead && (
+        {permissions?.rentalManagement?.isRead && !isMobile && (
           <Button
             variant={isMobile && !isTablet ? "text" : "outlined"}
             color="primary"
