@@ -470,7 +470,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             }}
             onOk={() => {
                 setOkBtnLoading(true)
-                axiosInstance().put(`${repairJob.api} / ${repairJobData._id} / assets / repaired`, { assets: repairAssetDialog.assetId ? [repairAssetDialog.assetId] : repairAssetDialog.assetIds, repaired: true }).then(({ data }) => {
+                axiosInstance().put(`${repairJob.api}/${repairJobData._id}/assets/repaired`, { assets: repairAssetDialog.assetId ? [repairAssetDialog.assetId] : repairAssetDialog.assetIds, repaired: true }).then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
                         type: "success",
