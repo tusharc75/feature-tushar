@@ -417,7 +417,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                         }
                     </Box>
                     <Box display="flex">
-                        <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
+                        <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Bulk edit selected records" : "Select records to edit"}>
                             <span>
                                 <Button
                                     variant={isMobile && !isTablet ? "text" : "contained"}

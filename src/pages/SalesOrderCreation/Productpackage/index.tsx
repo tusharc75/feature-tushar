@@ -371,7 +371,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
                 </Button>
             </Box>
             <Box display="flex">
-                <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
+                <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Bulk edit selected records" : "Select records to edit"}>
                     <span>
                         <Button
                             variant="contained"

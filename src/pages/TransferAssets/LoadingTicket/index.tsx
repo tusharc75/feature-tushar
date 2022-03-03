@@ -222,7 +222,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     <Fragment>
       <Box display="flex" flexDirection={isMobile ? "row-reverse" : 'row'} justifyContent={isMobile ? "flex-end" : "space-between"} mx="4px">
         <Box>
-          {(permissions?.transferAsset?.isRead && !isMobile) && (
+          {(permissions?.transferAsset?.isRead && !isMobile) && !isMobile && (
             <Button
               variant={"outlined"}
               color="primary"

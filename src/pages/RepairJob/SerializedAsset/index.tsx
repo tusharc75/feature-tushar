@@ -219,7 +219,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     return (<>
         <Box display="flex" justifyContent="flex-end" m={1} >
             <Box display="flex" alignItems="center">
-                <Button
+                {!isMobile && <Button
                     onClick={() => {
                         setDownlodingFile(true);
                         axiosInstance().get(`/repair-job/${repairJobData._id}/pdf`)
@@ -253,7 +253,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                     startIcon={<AiFillFilePdf />}
                 >
                     {downlodingFile ? "Please wait..." : "Preview"}
-                </Button>
+                </Button>}
                 <Box mx={1} />
                 {repairJobData?.status !== REPAIR_JOB_STATUS.completed &&
                     <Fragment>
