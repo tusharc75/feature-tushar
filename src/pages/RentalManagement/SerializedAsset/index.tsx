@@ -82,7 +82,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           {row.original.isSublease &&
             <HtmlTooltip title={`${routes.sublease.title}`}>
               <IconButton size="small" onClick={() => {
-                history.push(routes.purchaseOrder.path, {
+                history.push(routes.sublease.path, {
                   rental: rentalManagementData,
                 })
               }}>

@@ -241,7 +241,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
       data["startDate"] = rentalManagementData?.estimateStartDate;
       data["endDate"] = rentalManagementData?.estimateStartDate;
-
+      data["isPickupFromDisable"] = true;
+      data["isDeliveryToDisable"] = true;
       setShowTicketDialog({ open: true, data: data });
     }
   };
