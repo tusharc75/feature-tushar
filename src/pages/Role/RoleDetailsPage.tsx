@@ -44,6 +44,8 @@ import { PERMISSION } from "../../constants/Roles";
 import { roleTypes } from "../../constants/helpers";
 import React from "react";
 import { startCase, camelCase } from "lodash";
+import { RiNurseFill } from "react-icons/ri";
+import PolicyResources from "./PolicyResources";
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -76,7 +78,11 @@ const RoleDetailsPage = () => {
   const showRecordsBeforeViewAll = 2;
   const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
   const [entityAccess, setEntityAccess] = useState([]);
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState({
+    rentalManagement: false,
+    sublease: false,
+    purchaseOrder: false,
+  })
   const [policyFieldCheckBox, SetPolicyFieldCheckBox] = useState(
     {
       isPricingRentalManagement: false,
@@ -164,6 +170,31 @@ const RoleDetailsPage = () => {
     }
 
   }, [resourceCheckbox])
+
+  const handlePolicyCheckBox = (checkBoxType, e, type = null, resourceObject = null) => {
+    if (checkBoxType === "Select-All") {
+      setIsPolicyCheckBoxChecked(e.target.checked)
+      setResourceCheckBox({
+        rentalManagement: e.target.checked,
+        purchaseOrder: e.target.checked,
+        sublease: e.target.checked
+      })
+      SetPolicyFieldCheckBox({
+        isPricingPurchaseOrder: e.target.checked,
+        isPricingRentalManagement: e.target.checked,
+        isPricingSublease: e.target.checked
+      })
+    }
+    if (checkBoxType === "Policy-CheckBox") {
+      setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(type.resource)]: e.target.checked }))
+      SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [type.fieldName]: e.target.checked }))
+    }
+
+    if (checkBoxType === "Fields") {
+      SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [type.field]: e.target.checked }))
+      setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(resourceObject.resource)]: e.target.checked }))
+    }
+  }
 
   const handlePolicyResourceCheckBox = async (field) => {
     const resources = Object.keys(resourceCheckbox);
@@ -505,89 +536,17 @@ const RoleDetailsPage = () => {
                       />
                       {
                         isPolicyTableVisible() &&
-                        <TableContainer style={{ height: 400, minHeight: 400, marginTop: 20 }}>
-                          <Table
-                            stickyHeader
-                            aria-label="policy"
-                            className="roles-table"
-                          >
-                            <TableHead>
-                              <TableRow>
-                                <TableCell>Policy</TableCell>
-                                <TableCell align="center">
-                                  <FormControlLabel
-                                    control={<Checkbox
-                                      disabled={false}
-                                      checked={isPolicyCheckBoxChecked}
-                                      onChange={(e) => {
-                                        setIsPolicyCheckBoxChecked(e.target.checked)
-                                        setResourceCheckBox({ rentalManagement: e.target.checked, purchaseOrder: e.target.checked, sublease: e.target.checked })
-                                        SetPolicyFieldCheckBox({ isPricingPurchaseOrder: e.target.checked, isPricingRentalManagement: e.target.checked, isPricingSublease: e.target.checked })
-                                      }}
-                                    />}
-                                    label="Select All"
-                                  />
-                                </TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {policyResources.filter((item) => permissions[camelCase(item.resource)].isRead).map((resource, outerIndex) => (
-                                <>
-                                  <TableRow>
-                                    <TableCell style={{ minWidth: 300 }}>
-                                      <Box display='flex' justifyContent={'flex-start'} alignItems={'center'}>
-                                        <Typography className="tableMainHeader">{resource.resource}</Typography>
-                                        {fieldOfPolicyResources.length > 0 && <Box ml={1}>
-                                          <IconButton
-                                            size="small"
-                                            aria-label="expand row"
-                                            onClick={() => setOpen(!open)}
-                                          >
-                                            {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                                          </IconButton>
-                                        </Box>}
-                                      </Box>
-                                    </TableCell>
-                                    <TableCell align="center">
-                                      <Checkbox
-                                        checked={resourceCheckbox[camelCase(resource.resource)]}
-                                        onChange={(e) => {
-                                          setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(resource.resource)]: e.target.checked }))
-                                          SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [resource.fieldName]: e.target.checked }))
-                                        }}
-                                      />
-                                    </TableCell>
-                                  </TableRow>
-                                  {
-                                    open && fieldOfPolicyResources.filter((item) => item.resource === resource.resource).map((obj) => (
-                                      <TableRow key={2}>
-                                        <TableCell>
-                                          <Typography variant="body1">
-                                            &emsp;{" "}
-                                            {obj?.fieldLabel}
-                                          </Typography>
-                                        </TableCell>
-                                        <TableCell align="center">
-                                          <Checkbox
-                                            disabled={false}
-                                            checked={policyFieldCheckBox[obj.field]}
-                                            onChange={(e) => {
-                                              SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [obj.field]: e.target.checked }))
-                                              setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(resource.resource)]: e.target.checked }))
-
-                                            }}
-                                          />
-                                        </TableCell>
-                                      </TableRow>
-                                    ))
-                                  }
-                                </>
-
-                              ))
-                              }
-                            </TableBody>
-                          </Table>
-                        </TableContainer>
+                        <PolicyResources
+                          policyResources={policyResources}
+                          fieldOfPolicyResources={fieldOfPolicyResources}
+                          resourceCheckbox={resourceCheckbox}
+                          policyFieldCheckBox={policyFieldCheckBox}
+                          isPolicyCheckBoxChecked={isPolicyCheckBoxChecked}
+                          handlePolicyCheckBox={handlePolicyCheckBox}
+                          open={open}
+                          setOpen={setOpen}
+                          permissions={permissions}
+                        />
                       }
                     </>
                   )
