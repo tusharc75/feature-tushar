@@ -129,8 +129,8 @@ const ProjectSalesDetails = () => {
         .then(({ data }) => {
           setLoadingGraphData(false);
           setGraphData({
-            nodes: data.data.nodes,
-            edges: data.data.edges,
+            nodes: [...data.data.nodes],
+            edges: [...data.data.edges],
             colorPalette: data.colorPalette
           });
         })
