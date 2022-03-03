@@ -195,7 +195,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
     return (<>
         <Box display="flex" justifyContent="space-between" m={1}>
             <Box display="flex" alignItems="center">
-                {permissions?.purchaseOrder?.isRead && (
+                {permissions?.purchaseOrder?.isRead && !isMobile &&  (
                     <Button
                         variant={isMobile && !isTablet ? "text" : "outlined"}
                         color="primary"

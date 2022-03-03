@@ -251,7 +251,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     <Fragment>
       <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} justifyContent="space-between" mx="4px">
         <Box>
-          {(permissions?.transferAsset?.isRead && !isMobile) && (
+          {(permissions?.transferAsset?.isRead && !isMobile) && !isMobile && (
             <Button
               variant={isMobile && !isTablet ? "text" : "outlined"}
               color="primary"

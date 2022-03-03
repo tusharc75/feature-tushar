@@ -665,7 +665,7 @@ export default function DeliveryTicketDetail(props) {
                           </IconButton>
                         }
                         <Box mx={1} />
-                        {permissions?.deliveryTicket?.isRead && (
+                        {permissions?.deliveryTicket?.isRead && !isMobile &&  (
                           <Button
                             variant={isMobile && !isTablet ? "text" : "outlined"}
                             color="primary"
