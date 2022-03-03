@@ -1,3 +1,7 @@
+$isPurchaseOrder: #ffa500;
+$isSublease: #ffb3c6;
+$isTransferAsset: #ecc19c;
+
 .custom-react-table {
     // padding: 1rem;
 
@@ -50,15 +54,45 @@
             background: #efcccc !important;
         }
 
+        .td.isPurchaseOrder[data-sticky-td="true"] {
+            background: $isPurchaseOrder !important;
+        }
+
+        .td.isSublease[data-sticky-td="true"] {
+            background: $isSublease !important;
+        }
+
+        .td.isTransferAsset[data-sticky-td="true"] {
+            background: $isTransferAsset !important;
+        }
+
         .td {
             padding: 5px 10px;
             border-bottom: 1px solid #ddd;
             border-right: 1px solid #ddd;
 
-            td.error {
+            .error {
                 background: #efcccc;
                 border-bottom: 1px solid #efcccc;
                 border-right: 1px solid #efcccc;
+            }
+
+            .isPurchaseOrder {
+                background: $isPurchaseOrder;
+                border-bottom: 1px solid $isPurchaseOrder;
+                border-right: 1px solid $isPurchaseOrder;
+            }
+
+            .isSublease {
+                background: $isSublease;
+                border-bottom: 1px solid $isSublease;
+                border-right: 1px solid $isSublease;
+            }
+
+            .isTransferAsset {
+                background: $isTransferAsset;
+                border-bottom: 1px solid $isTransferAsset;
+                border-right: 1px solid $isTransferAsset;
             }
 
             // background-color: #fff;
@@ -112,6 +146,18 @@
             .body {
                 position: relative;
                 z-index: 0;
+
+                td.isPurchaseOrder {
+                    background: $isPurchaseOrder;
+                }
+
+                td.isSublease {
+                    background: $isSublease;
+                }
+
+                td.isTransferAsset {
+                    background: $isTransferAsset;
+                }
 
                 td.error {
                     background: #efcccc;

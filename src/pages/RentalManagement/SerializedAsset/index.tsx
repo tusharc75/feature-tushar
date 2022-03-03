@@ -489,7 +489,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       </Box>
     </Box>
     <Grid container spacing={2}>
-      <Grid item xs={12} md={12} sm={12} >
+      <Grid item xs={12} md={12} sm={12}>
         {columns && rowsData ?
           <Box
             zIndex={5}
@@ -506,7 +506,13 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               height="calc(100vh - 365px)"
               columns={columns}
               data={rowsData}
-              isInValidCheck={(rowData) => !rowData.isValid}
+              setCellColor={(rowData) => {
+                if (rowData.isPurchaseOrder) return "isPurchaseOrder";
+                if (rowData.isSublease) return "isSublease";
+                if (rowData.isTransferAsset) return "isTransferAsset";
+                if (!rowData.isValid) return "error";
+                return "";
+              }}
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
