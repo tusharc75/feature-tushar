@@ -359,7 +359,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
     }
     if (rowData && rowData.hideSelection) {
       if (values.qty < rowData.assetQty) {
-        errors['qty'] = 'Qty is not less than assigned asset qty.';
+        errors['qty'] = 'Quantity is less than that which has been assigned.';
       }
     }
     return errors;
