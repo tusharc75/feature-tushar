@@ -13,8 +13,6 @@ import { prepareDataForGrid, deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELI
 import useColumns, { getStaticFields, getFrameworkComponents } from "src/constants/useColumns"
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import { FaSuitcase } from "react-icons/fa";
-import { IoRemoveCircleOutline } from 'react-icons/io5';
-import { MdAdd } from 'react-icons/md';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
 
 interface AssetsGridProps {

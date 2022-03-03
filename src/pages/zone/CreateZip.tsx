@@ -1,6 +1,5 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
+import { useState, useContext } from 'react';
 import Button from '@material-ui/core/Button';
-import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -8,29 +7,18 @@ import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
-import routes from '../../components/Helpers/Routes';
 import { TextField } from "@material-ui/core";
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, isFieldNotTouched } from './../../constants/helpers';
-import InputField from '../../components/Helpers/InputField';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box } from '@material-ui/core';
-import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import { CustomDialogTransition } from './../../constants/helpers';
 
 const CreateZip = (props) => {
-  const { setToastConfig, toastConfig } = useContext(CustomToastContext)
+  const { setToastConfig } = useContext(CustomToastContext)
   const { zoneId, onClose, onSuccess, isUpdateDisabled = false, isClone = false } = props;
   const [loading, setLoading] = useState(false);
-  const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [formValues, setFormValues] = useState({});
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [saveClick, setSaveClick] = useState(false);
-  const [cloneHeading, setCloneHeading] = useState('')
   const [value, setValue] = useState('')
-
-
 
   const handleSubmit = () => {
     let newValues = { zoneZips: [value] };
