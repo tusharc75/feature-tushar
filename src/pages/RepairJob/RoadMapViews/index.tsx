@@ -130,7 +130,7 @@ const RepairJobViews = (props) => {
           type: 'default',
           data: {
             ref_type: 'deliveryTicket',
-            ref_id: item._id,
+            ref_id: item.ticketId,
             label: (
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {item.ticketName}
