@@ -6,6 +6,7 @@ import {
   deliveryTicket,
   DELIVERY_TICKET_REFRENCE_TYPE,
   DELIVERY_TICKET_TYPE,
+  INVENTORY_STATUS,
   rentalManagement,
   RENTAL_STATUS,
   sublease
@@ -49,6 +50,11 @@ const customNodeStyles = {
     name: 'Assets',
     background: '#ffd65b',
     borderColor: '#f5c431'
+  },
+  lostOrScrapAssets: {
+    name: 'Assets',
+    background: '#ff9980',
+    borderColor: '#db765c'
   },
   loadingTicket: {
     name: 'Loading Ticket',
@@ -286,6 +292,9 @@ const RentalManagementViews = (props) => {
     });
 
     xPosition += 300;
+    const lostOrScrapInventory = product?.inventory
+      ?.filter((item) => item?.inventoryDetail?.status === INVENTORY_STATUS.scrap || item?.inventoryDetail?.status === INVENTORY_STATUS.lost)
+      .map((item) => item.inventory);
     product?.inventory?.map((item: any, index) => {
       flow.push({
         id: `${item.inventoryDetail.assetNumber}`,
@@ -298,7 +307,10 @@ const RentalManagementViews = (props) => {
           label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.inventoryDetail.assetNumber}</div>
         },
         position: { x: xPosition, y: index * 80 },
-        style: customNodeStyles.productAssets
+        style:
+          item?.inventoryDetail?.status === INVENTORY_STATUS.scrap || item?.inventoryDetail?.status === INVENTORY_STATUS.lost
+            ? customNodeStyles.lostOrScrapAssets
+            : customNodeStyles.productAssets
       });
 
       flowEdge.push({
@@ -350,7 +362,7 @@ const RentalManagementViews = (props) => {
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.optionLabel}</div>
           },
           position: { x: xPosition + 300, y: loadingAssets * 80 },
-          style: customNodeStyles.productAssets
+          style: lostOrScrapInventory.includes(product.optionValue) ? customNodeStyles.lostOrScrapAssets : customNodeStyles.productAssets
         });
         loadingAssets += 1;
         flowEdge.push({
@@ -475,6 +487,8 @@ const RentalManagementViews = (props) => {
 
   const onElementClick = (event, element) => {
     switch (element.data.ref_type) {
+      case 'rentalJob':
+        break;
       case 'product':
         history.push(`${routes.productDetail.path}/${element.data.ref_id}`);
         break;
@@ -488,6 +502,9 @@ const RentalManagementViews = (props) => {
         history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
       case 'receiving':
+        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'return':
         history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
       case 'purchaseOrder':
@@ -548,7 +565,7 @@ const RentalManagementViews = (props) => {
           <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
         )
       ) : (
-        <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Map...</div>
+        <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Views...</div>
       )}
     </div>
   );
