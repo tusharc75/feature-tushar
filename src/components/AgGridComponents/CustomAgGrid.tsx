@@ -322,7 +322,7 @@ export default function CustomAgGrid({
         // width={getWidth(column.field, column.width) ?? 180}
         // flex={1}
         rowDrag={column.rowDrag ?? false}
-        hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
+        hide={staticColumns.indexOf(column.field) >= 0 ? column?.show === false ? true : checkStaticField(renderedFrom, column.field) :
           (column.hasOwnProperty("show") && !column?.show) ? true : false}
         floatingFilterComponent="customFloatingFilter"
         valueGetter={column.valueGetter ?? null}
@@ -345,7 +345,8 @@ export default function CustomAgGrid({
         // width={getWidth(column.field, column.width) ?? 180}
         // flex={1}
         filterParams={customFilterParams}
-        hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
+        hide={staticColumns.indexOf(column.field) >= 0 ? column?.show === false ? true : checkStaticField(renderedFrom, column.field) :
+          (column.hasOwnProperty("show") && !column?.show) ? true : false}
         comparator={() => {
           return 0;
         }}

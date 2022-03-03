@@ -30,6 +30,7 @@ import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../comp
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import queryString from 'query-string';
 import ProductConfiguration from './ProductConfiguration';
+import { camelCase } from 'lodash';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -49,7 +50,7 @@ function TabPanel(props: TabPanelProps) {
 
 const ProductDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
-
+  const renderedFrom = camelCase(routes?.product.title)
   const { id } = useParams();
   const history = useHistory();
   const {
@@ -439,7 +440,7 @@ const ProductDetailsPage = () => {
                 <Tab label="Parent Product" aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
                 {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <Tab label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />}
               </Tabs>
-              <TabPanel value={tabValue} index={0}>
+              {tabValue === 0 &&
                 <Box>
                   {loading || !productFields.length ? (
                     <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -451,8 +452,8 @@ const ProductDetailsPage = () => {
                     </div>
                   )}
                 </Box>
-              </TabPanel>
-              <TabPanel value={tabValue} index={1}>
+              }
+             {tabValue === 1 &&
                 <CustomAgGrid
                   allowSelection={false}
                   allowAction={false}
@@ -467,11 +468,12 @@ const ProductDetailsPage = () => {
                   page={page}
                   actionWidth={150}
                   loading={gridLoading}
-                  renderedFrom="productMasterDetailsPage"
+                  isClientSideGrid={true}
+                  renderedFrom={`${renderedFrom}_grid-1`}
                   refreshGrid={getColumns}
                 />
-              </TabPanel>
-              <TabPanel value={tabValue} index={2}>
+              }
+              {tabValue === 2 &&
                 <CustomAgGrid
                   allowSelection={false}
                   allowAction={false}
@@ -486,17 +488,19 @@ const ProductDetailsPage = () => {
                   page={page}
                   actionWidth={150}
                   loading={gridLoading}
-                  renderedFrom="productMasterDetailsPage"
+                  isClientSideGrid={true}
+                  renderedFrom={`${renderedFrom}_grid-2`}
                   refreshGrid={getColumns}
                 />
-              </TabPanel>
-              <TabPanel value={tabValue} index={3}>
+              }
+              
                 {tabValue === 3 && permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <ProductConfiguration
                   productFields={productFields.map((_f: any) => _f.fieldData)}
                   productData={productData}
                   id={id}
+                  renderedFrom={`${renderedFrom}_grid-3`}
                 />}
-              </TabPanel>
+              
             </Paper>
           </Grid>
           {process.env.REACT_APP_ENV === 'staging' ? null : (

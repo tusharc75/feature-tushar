@@ -2,44 +2,46 @@ import React, { useState, useEffect, Fragment, useContext, useReducer } from 're
 import { Link } from "react-router-dom";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import MessageDialog from '../../components/Helpers/MessageDialog';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
 import { FaWarehouse } from 'react-icons/fa';
 import styles from '../Leads/Header.module.scss';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import CustomContainer from 'src/components/CustomContainer';
 import ManageWarehouse from './ManageWarehouse';
-import routes from '../../components/Helpers/Routes';
+import routes from 'src/components/Helpers/Routes';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
-import SearchBox from '../../components/Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../constants/helpers';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { useData } from '../../StateProvider/Provider';
-import EntitySelectionsDialog from "../../components/EntitySelections"
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { gridLoadingTimeout, isObjectEmpty, sidebarResource } from 'src/constants/helpers';
+import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
+import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import { useData } from 'src/StateProvider/Provider';
+import EntitySelectionsDialog from "src/components/EntitySelections"
 import { AiOutlineDeploymentUnit } from "react-icons/ai"
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import Chip from "@material-ui/core/Chip"
-import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
-import { prepareDataForGrid } from "../../constants/helpers"
+import useColumns, { getStaticFields, getFrameworkComponents } from "src/constants/useColumns"
+import { prepareDataForGrid } from "src/constants/helpers"
 import { useLocation } from "react-router-dom";
 import queryString from "query-string";
 import { MdSort, MdFilterList } from "react-icons/md";
 import { MdAdd } from "react-icons/all";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
-import MobileSortDialog from "../../components/MobileSortDialog"
-import MobileFilterDialog from "../../components/MobileFilterDialog"
+import MobileSortDialog from "src/components/MobileSortDialog"
+import MobileFilterDialog from "src/components/MobileFilterDialog"
+import {camelCase} from 'lodash'
 
 const AddressResource = () => {
+  const renderedFrom = camelCase(routes?.warehouse.title)
   const location = useLocation();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -77,7 +79,7 @@ const AddressResource = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([])
-  const localStorageSelectedRecords = "warehouse_selected";
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [sortOpen, setSortOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false)
 
@@ -85,7 +87,7 @@ const AddressResource = () => {
 
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
-  const columnState = JSON.parse(localStorage.getItem('addressResourcePage'));
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
     columns.forEach((item) => {
       columnState.forEach((d) => {
@@ -96,8 +98,6 @@ const AddressResource = () => {
     });
   }
   //  Grid Variables - End
-
-  const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
   useEffect(() => {
     if (permissions && permissions.warehouse) {
@@ -129,7 +129,7 @@ const AddressResource = () => {
             { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, primaryField: true, show: true, disabled: true, cellRenderer: 'nameRenderer' }]
           }
           else {
-            let currentColumn = getColumnData(routes.warehouse.title, o?.fieldData, routes.warehouse.path)
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.warehouse.path)
 
             if (currentColumn !== null) {
               columns = [...columns, currentColumn?.columnData]
@@ -598,7 +598,7 @@ const AddressResource = () => {
               onCreate={false}
               showClone={false}
               onClone={() => { }}
-              renderedFrom={"warehouse"}
+              renderedFrom={renderedFrom}
             /> : <CustomAgGrid
               columns={columns}
               dataRows={dataRows}
@@ -611,7 +611,7 @@ const AddressResource = () => {
               page={page}
               actionWidth={150}
               loading={loading}
-              renderedFrom="warehouse"
+              renderedFrom={renderedFrom}
               refreshGrid={fetchWarehouses}
             /> : null}
 

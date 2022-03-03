@@ -70,6 +70,7 @@ const QuoteType = [
 const arr = [...Array(9).keys()];
 
 const QuoteBuilders = () => {
+  const renderedFrom = camelCase(routes?.quoteBuilder.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -145,8 +146,7 @@ const QuoteBuilders = () => {
     showFilteredRecordsOnly
   } = state;
 
-  const pageTitle = camelCase(`${routes.quoteBuilder.title}`)
-  const localStorageSelectedRecords = `${pageTitle}_selected`;
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   useEffect(() => {
     fetchGridColumns()
@@ -174,7 +174,7 @@ const QuoteBuilders = () => {
         }]
       }
       else {
-        let currentColumn = getColumnData(pageTitle, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
+        let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData]
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -895,7 +895,7 @@ const QuoteBuilders = () => {
                 onCreate={false}
                 showClone={false}
                 onClone={() => { }}
-                renderedFrom={pageTitle}
+                renderedFrom={renderedFrom}
               /> : (
                 Object.keys(frameWorkComponent).length > 0 ?
                   <CustomAgGrid
@@ -910,7 +910,7 @@ const QuoteBuilders = () => {
                     page={page}
                     actionWidth={100}
                     loading={loading}
-                    renderedFrom={pageTitle}
+                    renderedFrom={renderedFrom}
                     refreshGrid={fetchQuoteBuilder}
                     showOnlyShowFilteredRecordSwitch={true}
                   /> : null

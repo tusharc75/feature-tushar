@@ -23,6 +23,7 @@ import { FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
 
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { camelCase } from 'lodash';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -48,6 +49,7 @@ function a11yProps(index: any) {
 }
 
 const PackageDetails = () => {
+  const renderedFrom = camelCase(routes?.packages.title)
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -278,6 +280,7 @@ const PackageDetails = () => {
 
                       {products.length ? (
                         <ProductsTable
+                          renderedFrom={`${renderedFrom}_grid-1`}
                           productList={products}
                           handleUpdateQuantity={handleUpdateQuantity}
                           handleAssignProduct={setShowProductAssignDialog}

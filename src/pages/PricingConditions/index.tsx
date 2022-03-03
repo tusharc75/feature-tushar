@@ -1,38 +1,40 @@
 import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
 import { Box, Button, Menu, MenuItem, Grid } from '@material-ui/core';
-import { useData } from '../../StateProvider/Provider';
+import { useData } from 'src/StateProvider/Provider';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import SearchBox from '../../components/Helpers/SearchBox';
-import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import CustomContainer from 'src/components/CustomContainer';
 import styles from '../Leads/Header.module.scss';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { MdContacts, MdSort, MdFilterList } from 'react-icons/md';
-import axiosInstance from '../../axios/axiosInstance';
-import { isObjectEmpty, gridLoadingTimeout, pricingCondition } from '../../constants/helpers';
-import routes from './../../components/Helpers/Routes';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import axiosInstance from 'src/axios/axiosInstance';
+import { isObjectEmpty, gridLoadingTimeout, pricingCondition } from 'src/constants/helpers';
+import routes from 'src/components/Helpers/Routes';
+import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import { Link, useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, FaSuitcase } from 'react-icons/all';
 import PricingConditionsDialog from './PricingConditionsDialog';
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import useColumns, { getFrameworkComponents, getStaticFields } from '../../constants/useColumns';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { prepareDataForGrid } from '../../constants/helpers';
+import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
+import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { prepareDataForGrid } from 'src/constants/helpers';
 import { startCase } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileSortDialog from 'src/components/MobileSortDialog';
+import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import {camelCase} from 'lodash'
 
 let timeout;
 
 const PricingConditions = () => {
+  const renderedFrom = camelCase(routes?.pricingCondition.title)
   const {
     state: { permissions }
   }: any = useData();
@@ -70,7 +72,7 @@ const PricingConditions = () => {
           if (o?.fieldData?.fieldName === 'conditionName') {
             o.fieldData.primaryField = true;
           }
-          let currentColumn = getColumnData(pricingCondition.resource, o?.fieldData, `${pricingCondition.route}/detail`);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${pricingCondition.route}/detail`);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -412,7 +414,7 @@ const PricingConditions = () => {
               onCreate={false}
               showClone={true}
               onClone={(data) => { }}
-              renderedFrom={pricingCondition}
+              renderedFrom={renderedFrom}
             />
           ) : (
             <Box component="div">
@@ -428,7 +430,7 @@ const PricingConditions = () => {
                 page={page}
                 actionWidth={100}
                 loading={loading}
-                renderedFrom="pricingConditionPage"
+                renderedFrom={renderedFrom}
                 refreshGrid={fetchPriceConditionList}
               />
             </Box>

@@ -24,10 +24,12 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import { MdAdd,MdSort, MdFilterList,FaSuitcase} from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
+import {camelCase} from 'lodash'
 
 let quotePdfTemplateTimeout;
 
 const QuotePdfTemplate: FC = () => {
+  const renderedFrom = camelCase(routes?.quotePdfTemplate.title)
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const { qbApi } = quoteBuilder;
@@ -462,7 +464,7 @@ const QuotePdfTemplate: FC = () => {
             onCreate={false}
             showClone={false}
             onClone={() => {}}
-            renderedFrom={'quotePdfTmeplate'}
+            renderedFrom={renderedFrom}
           />
         ) : (
           <CustomAgGrid
@@ -477,7 +479,7 @@ const QuotePdfTemplate: FC = () => {
             page={page}
             actionWidth={200}
             loading={loading}
-            renderedFrom="quotePdfPage"
+            renderedFrom={renderedFrom}
             refreshGrid={fetchQuotePdfTemplate}
           />
         )}

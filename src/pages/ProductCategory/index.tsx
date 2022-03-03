@@ -36,6 +36,7 @@ import { useHistory } from 'react-router-dom';
 import { FaSuitcase } from 'react-icons/fa';
 import MobileSortDialog from "../../components/MobileSortDialog"
 import MobileFilterDialog from "../../components/MobileFilterDialog"
+import { camelCase } from 'lodash';
 
 
 
@@ -131,6 +132,7 @@ const intialState = {
 };
 
 const ProductCategory = () => {
+  const renderedFrom = camelCase(routes?.productCategory.title)
   const history = useHistory();
   const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
@@ -163,10 +165,10 @@ const ProductCategory = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
-  const columnState = JSON.parse(localStorage.getItem('productCategoryPage'));
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
-  const localStorageSelectedRecords = `${routes.productCategory.title}_selected`;
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [isOpenDialog, setisOpenDialog] = useState(false)
   const [sortOpen, setSortOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -231,7 +233,7 @@ const ProductCategory = () => {
                 { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }
               ];
             } else {
-              let currentColumn = getColumnData(routes.productCategory.title, o?.fieldData, routes.productCategory.path);
+              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productCategory.path);
 
               if (currentColumn !== null) {
                 columns = [...columns, currentColumn?.columnData];
@@ -728,7 +730,7 @@ const ProductCategory = () => {
                 setProductCategoryId(data.id);
                 setOpen({ open: true, isClone: true });
               }}
-              renderedFrom={routes.productCategory.title}
+              renderedFrom={renderedFrom}
             />
           ) : (
             <CustomAgGrid
@@ -743,7 +745,7 @@ const ProductCategory = () => {
               page={page}
               allowAction={true}
               loading={loading}
-              renderedFrom={routes.productCategory.title}
+              renderedFrom={renderedFrom}
               refreshGrid={fetchProductCategory}
             />
           )

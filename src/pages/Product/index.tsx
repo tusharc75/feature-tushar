@@ -34,11 +34,12 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { IoPricetagsSharp } from 'react-icons/io5';
 import MobileSortDialog from "../../components/MobileSortDialog";
 import MobileFilterDialog from "../../components/MobileFilterDialog"
+import { camelCase } from "lodash";
 
 const ignoreField = ["qty", "priceTemplate"]
 
 const Product = () => {
-
+    const renderedFrom = camelCase(routes?.product.title)
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
     const [open, setOpen] = useState(false);
@@ -145,7 +146,7 @@ const Product = () => {
                         }]
                     }
                     else {
-                        let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.product.path, true)
+                        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.product.path, true)
                         if (currentColumn !== null) {
                             columns = [...columns, currentColumn?.columnData]
                             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -295,7 +296,7 @@ const Product = () => {
             }
             else {
                 if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-                    let currentColumn: any = getColumnData(routes.product.title, ele, routes.product.path, true)
+                    let currentColumn: any = getColumnData(renderedFrom, ele, routes.product.path, true)
                     column.push({ ...currentColumn.columnData, leval: "product-template" });
                     if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
                         rendererNames.push(currentColumn?.rendererName)
@@ -795,7 +796,7 @@ const Product = () => {
                     onClone={(data) => {
                         OpenProduct(data._id); setIsClone(true)
                     }}
-                    renderedFrom={routes.product.title}
+                    renderedFrom={renderedFrom}
                 /> :
                     <CustomAgGrid
                         columns={columns}
@@ -809,7 +810,7 @@ const Product = () => {
                         page={page}
                         actionWidth={150}
                         loading={loading}
-                        renderedFrom={routes.product.title}
+                        renderedFrom={renderedFrom}
                         refreshGrid={fetchProduct}
                     />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
