@@ -32,9 +32,6 @@ const PolicyResources = (
                                     disabled={false}
                                     checked={isPolicyCheckBoxChecked}
                                     onChange={(e) => {
-                                        // setIsPolicyCheckBoxChecked(e.target.checked)
-                                        // setResourceCheckBox({ rentalManagement: e.target.checked, purchaseOrder: e.target.checked, sublease: e.target.checked })
-                                        // SetPolicyFieldCheckBox({ isPricingPurchaseOrder: e.target.checked, isPricingRentalManagement: e.target.checked, isPricingSublease: e.target.checked })
                                         handlePolicyCheckBox("Select-All", e)
                                     }}
                                 />}
@@ -65,8 +62,6 @@ const PolicyResources = (
                                     <Checkbox
                                         checked={resourceCheckbox[camelCase(resource.resource)]}
                                         onChange={(e) => {
-                                            // setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(resource.resource)]: e.target.checked }))
-                                            // SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [resource.fieldName]: e.target.checked }))
                                             handlePolicyCheckBox("Policy-CheckBox", e, resource)
                                         }}
                                     />
@@ -86,8 +81,6 @@ const PolicyResources = (
                                                 disabled={false}
                                                 checked={policyFieldCheckBox[obj.field]}
                                                 onChange={(e) => {
-                                                    // SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [obj.field]: e.target.checked }))
-                                                    // setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(resource.resource)]: e.target.checked }))
                                                     handlePolicyCheckBox("Fields", e, obj, resource)
                                                 }}
                                             />
