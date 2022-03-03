@@ -32,11 +32,12 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from "@material-ui/lab";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import { camelCase } from "lodash";
 
 const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
 const ProductInventory = () => {
-
+    const renderedFrom = camelCase(routes?.serializedAsset.title)
     const toastConfig = useContext(CustomToastContext)
     const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
@@ -116,7 +117,7 @@ const ProductInventory = () => {
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -588,7 +589,7 @@ const ProductInventory = () => {
                     onCreate={false}
                     showClone={true}
                     onClone={(data) => { setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id }); }}
-                    renderedFrom={routes.serializedAsset?.title} /> :
+                    renderedFrom={renderedFrom} /> :
                     Object.keys(frameWorkComponent).length > 0 ?
                         <CustomAgGrid
                             columns={columns}
@@ -602,7 +603,7 @@ const ProductInventory = () => {
                             page={page}
                             actionWidth={150}
                             loading={loading}
-                            renderedFrom={routes.serializedAsset?.title}
+                            renderedFrom={renderedFrom}
                             refreshGrid={fetchProductInventory}
                         /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}

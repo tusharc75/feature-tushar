@@ -67,18 +67,15 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     let newCols = new Array();
 
     let gridLayedCols = columnApi.getAllGridColumns();
-    gridLayedCols = gridLayedCols.filter((col) => col.pinned === null)
+    gridLayedCols = gridLayedCols.filter((col) => col.pinned === null);
 
     let layedCols = gridLayedCols.map((col: any) => col.colId);
-    
+
     columns.forEach((col) => {
       const index = layedCols.indexOf(col.field);
       if (index > -1) {
-
-        if(isClientSideGrid) {
-          const _col = gridLayedCols.find(_c => _c.colId === col.field)
-          col = {...col, show: _col ? _col.visible : col.show}
-        }
+        const _col = gridLayedCols.find((_c) => _c.colId === col.field);
+        col = { ...col, show: _col ? _col.visible : col.show };
 
         newCols[index] = col;
       }

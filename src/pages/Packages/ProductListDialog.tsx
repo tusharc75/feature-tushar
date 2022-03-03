@@ -8,7 +8,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import ProductsTable from './ProductsTable';
 import { packages } from '../../constants/helpers';
 
-const ProductListDialog = ({ id, onClose, toastConfig }) => {
+const ProductListDialog = ({ id, onClose, toastConfig,renderedFrom }) => {
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [products, setProducts] = useState([]);
 
@@ -35,7 +35,7 @@ const ProductListDialog = ({ id, onClose, toastConfig }) => {
       <CustomDialogHeader title="Products" onClose={onClose} />
       <CustomDialogContent>
         <Box p={2}>
-          <ProductsTable productList={products} />
+          <ProductsTable renderedFrom={renderedFrom} productList={products} />
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>

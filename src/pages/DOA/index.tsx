@@ -18,8 +18,10 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
+import { camelCase } from "lodash";
 
 const DOARequest = () => {
+  const renderedFrom = camelCase(routes?.DOARequest.title)
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const history = useHistory()
@@ -34,7 +36,7 @@ const DOARequest = () => {
     limit,
     pageSizes
   } = state;
-  const columnState = JSON.parse(localStorage.getItem("doaRequestPage"));
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
   const [columns] = useState([
     {
@@ -274,7 +276,7 @@ const DOARequest = () => {
             onCreate={() => { }}
             showClone={false}
             onClone={() => { }}
-            renderedFrom={"doa-request"}
+            renderedFrom={renderedFrom}
 
           /> : <CustomAgGrid
             columns={columns}
@@ -291,7 +293,7 @@ const DOARequest = () => {
             allowAction={false}
             isClientSideGrid={true}
             loading={loading}
-            renderedFrom="doaRequestPage"
+            renderedFrom={renderedFrom}
             refreshGrid={fetchProductBuilder}
           />}
       </CustomContainer>

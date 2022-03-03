@@ -12,6 +12,7 @@ import CustomGridHeaderOptions from "./CustomGridHeaderOptions";
 import { CustomLoadingOverlay, CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomFloatingFilter from "../../components/AgGridComponents/CustomAgGridFilter";
 import { orderBy, uniqBy } from "lodash";
+import { checkStaticField, staticColumns } from "../../constants/columns"
 import NumericEditor from "./NumericEditor";
 import DateEditor from "./DateEditor";
 
@@ -321,7 +322,8 @@ export default function CustomAgGridEditable({
         // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
         //   suppressFilterButton: true,
         // }}
-        hide={column?.show === false ? true : false}
+        hide={staticColumns.indexOf(column.field) >= 0 ? column?.show === false ? true : checkStaticField(renderedFrom, column.field) :
+          (column.hasOwnProperty("show") && !column?.show) ? true : false}
         valueGetter={column.valueGetter ?? null}
       ></AgGridColumn>
     ) : (
@@ -348,7 +350,8 @@ export default function CustomAgGridEditable({
         // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
         //   suppressFilterButton: true,
         // }}
-        hide={column?.show === false ? true : false}
+        hide={staticColumns.indexOf(column.field) >= 0 ? column?.show === false ? true : checkStaticField(renderedFrom, column.field) :
+          (column.hasOwnProperty("show") && !column?.show) ? true : false}
         valueGetter={column.valueGetter ?? null}
       ></AgGridColumn>
     );
