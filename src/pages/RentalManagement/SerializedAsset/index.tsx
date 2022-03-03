@@ -9,16 +9,12 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import {
-  dateFormat, formatAmountWithCurrency, rentalManagement, purchaseOrder, transferAsset, sublease,
-  sidebarResource, treeToFlatArray, serializedAsset, INVENTORY_STATUS, CHILD_RESOURCE
-} from "../../../constants/helpers";
+import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, serializedAsset, INVENTORY_STATUS } from "../../../constants/helpers";
 import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
 import ManagePurchaseOrder from "../../PurchaseOrder/ManagePurchaseOrder";
 import ManageSublease from "../../Sublease/ManageSublease";
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { uniqBy } from 'lodash';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
@@ -26,12 +22,7 @@ import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { useHistory } from "react-router-dom";
 import InfoIcon from '@material-ui/icons/Info';
 import { isMobile, isTablet } from "react-device-detect";
-import { CgAssign } from "react-icons/cg";
-import { IoCreate } from "react-icons/io5";
-import { MdDelete, MdDeleteSweep } from "react-icons/md";
 import { useData } from "../../../StateProvider/Provider";
-import { BiChevronDown } from "react-icons/bi";
-import React from "react";
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { ExpandMore } from '@material-ui/icons';
 
@@ -55,9 +46,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
 
   const [anchorActionEl, setAnchorActionEl] = useState(null);
 
-  const [purchaseOrderCount, setPurchaseOrderCount] = useState(0);
-  const [subleaseCount, setSubleaseCount] = useState(0);
-
   const { state: { user, permissions, selectedEntity } }: any = useData();
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -80,6 +68,28 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               <a className="link text-truncate" href={`${serializedAsset.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
               row.original.detail}
           </p>
+          {row.original.isPurchaseOrder &&
+            <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
+              <IconButton size="small" onClick={() => {
+                history.push(routes.purchaseOrder.path, {
+                  rental: rentalManagementData,
+                })
+              }}>
+                <InfoIcon fontSize="small" color={"primary"} />
+              </IconButton>
+            </HtmlTooltip>
+          }
+          {row.original.isSublease &&
+            <HtmlTooltip title={`${routes.sublease.title}`}>
+              <IconButton size="small" onClick={() => {
+                history.push(routes.purchaseOrder.path, {
+                  rental: rentalManagementData,
+                })
+              }}>
+                <InfoIcon fontSize="small" color={"primary"} />
+              </IconButton>
+            </HtmlTooltip>
+          }
           {row.original?.type === "asset" &&
             <span className="d-flex align-items-center gap-2">
               <Chip label="Asset" size="small" color="primary" />
@@ -97,7 +107,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                       rental: rentalManagementData,
                     })
                   }}>
-                    <InfoIcon color={"primary"} />
+                    <InfoIcon fontSize="small" color={"primary"} />
                   </IconButton>
                 </HtmlTooltip>
               }
@@ -198,6 +208,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     try {
       var data: any = []
       var transferAssets: any = []
+      var purchaseOrderProduct: any = []
+      var subleaseProduct: any = []
 
       if (isOffline) {
         data = await findOne(objectStore.rentalManagement, rentalManagementData._id)
@@ -210,16 +222,16 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         const result = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`)
         const transactionData = result?.data?.data
 
-        setSubleaseCount(transactionData?.sublease?.length)
-        setPurchaseOrderCount(transactionData?.purchaseOrder?.length)
         transferAssets = transactionData?.transferAsset;
+        purchaseOrderProduct = transactionData?.purchaseOrder
+        subleaseProduct = transactionData?.sublease
       }
-      
+
       const rows = data.material.filter((e) => e.parentId === null)
       rows.forEach((parent, i) => {
         parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
         const subRows = []
-        const inventory = data.inventory.filter((e) => e._id === parent._id);
+        const inventory = data.inventory?.filter((e) => e._id === parent._id);
         inventory?.forEach((_inventory, k) => {
           const isTransferAsset = transferAssets.some(e => e.assetId === _inventory.inventory);
           subRows.push({
@@ -234,16 +246,18 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           })
         })
         parent.subRows = subRows;
+        parent.isSublease = subleaseProduct?.some(e => e.materialId === parent.materialId)
         if (parent.type === "product") {
           parent.isValid = parent?.qty === subRows?.length ? true : false;
+          parent.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === parent.materialId)
         }
         if (parent.type === "package") {
-          const child: any = [...data.material.filter((e) => e.parentId === parent._id)];
+          const child: any = [...data.material?.filter((e) => e.parentId === parent._id)];
           child.forEach((_child, j) => {
             _child.detail = `${(i + 1)}.${(j + 1)} - ${_child.productDetail?.productName}`
             _child.qty = _child.qty * parent.qty
             const subRows = []
-            const inventory = data.inventory.filter((e) => e._id === _child._id);
+            const inventory = data.inventory?.filter((e) => e._id === _child._id);
             inventory?.forEach((_inventory, l) => {
               const isTransferAsset = transferAssets.some(e => e.assetId === _inventory.inventory);
               subRows.push({
@@ -259,6 +273,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             })
             _child.subRows = subRows;
             _child.isValid = _child?.qty === subRows?.length ? true : false;
+            _child.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === _child.materialId)
+            _child.isSublease = subleaseProduct?.some(e => e.materialId === _child.materialId)
           })
           if (child.filter(e => e.isValid === false).length > 0) {
             parent.isValid = false
@@ -469,29 +485,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             >
               {`Remove ${routes.serializedAsset.title}`}</MenuItem>
           </Menu>
-
-          {purchaseOrderCount > 0 && <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
-            <IconButton size="small" onClick={() => {
-              history.push(routes.purchaseOrder.path, {
-                rental: rentalManagementData,
-              })
-            }}>
-              <InfoIcon color={"primary"} />
-            </IconButton>
-          </HtmlTooltip>}
-          {permissions?.sublease?.isCreate &&
-            <Fragment>
-              {subleaseCount > 0 && <HtmlTooltip title={`Created ${routes.sublease.title}`}>
-                <IconButton size="small" onClick={() => {
-                  history.push(routes.sublease.path, {
-                    rental: rentalManagementData,
-                  })
-                }}>
-                  <InfoIcon color={"primary"} />
-                </IconButton>
-              </HtmlTooltip>}
-            </Fragment>
-          }
         </Box>
       </Box>
     </Box>
