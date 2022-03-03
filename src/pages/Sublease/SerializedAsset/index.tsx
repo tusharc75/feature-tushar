@@ -14,12 +14,10 @@ import useColumns, { getStaticFields, getFrameworkComponents } from "../../../co
 import { prepareDataForGrid, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, DELIVERY_FROM_TO_TYPE, sublease, SUBLEASE_STATUS, INVENTORY_OWNER_TYPE } from "../../../constants/helpers"
 import { useData } from "../../../StateProvider/Provider";
 import {
-    Button, Tooltip, IconButton, Menu, MenuItem,
-    Dialog, TextField, CircularProgress
-} from "@material-ui/core";
-import { AiFillFilePdf, AiOutlineDeliveredProcedure } from 'react-icons/ai';
+    Button, Tooltip} from "@material-ui/core";
+import { AiFillFilePdf } from 'react-icons/ai';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { groupBy, uniq, map } from "lodash";
+import { uniq, map } from "lodash";
 
 const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, renderedFrom }) => {
 

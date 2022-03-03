@@ -3,10 +3,8 @@ import Grid from '@material-ui/core/Grid';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import AddIcon from '@material-ui/icons/Add';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { FaThemeisle } from 'react-icons/fa';
 import styles from '../Leads/Header.module.scss';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomContainer from '../../components/CustomContainer';
@@ -20,25 +18,20 @@ import { gridLoadingTimeout, gridPageSizes, isObjectEmpty } from '../../constant
 import CustomAgGrid from '../../components/AgGridComponents/CustomAgGrid';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
-import { Box, Chip, Menu, MenuItem } from '@material-ui/core';
+import { Box, Menu, MenuItem } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import NoDataCell from '../../components/Helpers/NoDataCell';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
-import { MdAccountCircle } from 'react-icons/md';
-import { GiFireZone, MdAdd, MdSort, MdFilterList, AiOutlineBgColors } from 'react-icons/all';
+import { GiFireZone, MdAdd, MdSort, MdFilterList } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { FaSuitcase } from 'react-icons/fa';
 import MobileSortDialog from "../../components/MobileSortDialog"
 import MobileFilterDialog from "../../components/MobileFilterDialog"
-
-
-
 
 function reducer(state, action) {
   switch (action.type) {

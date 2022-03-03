@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs, ButtonGroup, Container, InputAdornment, TextField } from "@material-ui/core";
-import { Autocomplete, Skeleton } from "@material-ui/lab";
+import React, { useState, useEffect, useContext, Fragment } from "react";
+import { Grid, Box, Button, Paper, Tab, Tabs } from "@material-ui/core";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
@@ -14,7 +13,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { sublease, SUBLEASE_STATUS, subleaseSteps } from "../../constants/helpers";
 import ManageSublease from "./ManageSublease";
 import Steps from "../RentalManagement/Steps";
-import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from "react-icons/fa";
+import { FaWpforms } from "react-icons/fa";
 import { BiEdit, BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
 import queryString from 'query-string';
