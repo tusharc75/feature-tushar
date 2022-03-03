@@ -23,7 +23,7 @@ import { getColumnData, getFrameworkComponents, getStaticFields } from "../../..
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, salesOrderData }) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, salesOrderData, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext)
     const {
@@ -120,8 +120,8 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 let rendererNames = []
                 data.forEach(o => {
                     let currentColumn = type === "product" ?
-                        getColumnData(routes.product?.title, o?.fieldData, routes.productDetail.path)
-                        : getColumnData(routes.packages?.title, o?.fieldData, routes.packagesDetail.path)
+                        getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
+                        : getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -234,6 +234,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                         loading={loading}
                         onCellValueChanged={onCellValueChanged}
                         showOnlyShowFilteredRecordSwitch={true}
+                        renderedFrom={renderedFrom}
                     />
                     : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
             </div>

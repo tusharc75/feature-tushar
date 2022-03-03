@@ -24,9 +24,10 @@ import Productpackage from './Productpackage';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
 import { GiAbstract055 } from 'react-icons/gi';
+import { camelCase } from "lodash";
 
 const SubleaseDetailsPage = () => {
-
+    const renderedFrom = camelCase(routes?.sublease.title)
     const toastConfig = useContext(CustomToastContext);
 
     const { id } = useParams();
@@ -248,6 +249,7 @@ const SubleaseDetailsPage = () => {
                                                             setNextStep={setNextStep}
                                                             fetchData={fetchData}
                                                             isIssued={isIssued}
+                                                            renderedFrom={`${renderedFrom}_grid-1`}
                                                         />
                                                     )}
                                                     {(currentStep === 1 || currentStep === 2) && subleaseData && (
@@ -256,6 +258,7 @@ const SubleaseDetailsPage = () => {
                                                             subleaseData={subleaseData}
                                                             setNextStep={setNextStep}
                                                             currentStep={currentStep}
+                                                            renderedFrom={`${renderedFrom}_grid-2`}
                                                         />
                                                     )}
                                                 </Paper>
@@ -272,7 +275,8 @@ const SubleaseDetailsPage = () => {
                                 <Grid item xs={12} sm={12} md={12} lg={12} >
                                     {subleaseData ?
                                         <Tickets
-                                            subleaseData={subleaseData}
+                                           subleaseId={id}
+                                           renderedFrom={`${renderedFrom}_grid-3`}
                                         />
                                         : (
                                             <Grid container spacing={2} style={{ padding: "8px" }}>

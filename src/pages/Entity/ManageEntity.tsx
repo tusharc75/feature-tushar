@@ -23,8 +23,8 @@ import { getObjKeys, yupSchema, isFieldNotTouched, setFieldsInAscendingOrder, ge
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import FormTypes from "../../components/Helpers/FormTypes";
 import { useData } from '../../StateProvider/Provider';
-import { isMobile , isTablet } from 'react-device-detect';
-import {FaDiceOne} from "react-icons/fa";
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from "react-icons/fa";
 import ManageAddressDialog from "../../components/Address/ManageAddressDialog"
 interface InitialData {
   fields: any[];
@@ -46,7 +46,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
   const [formsData, setFormsData] = useState([]);
   const [parentEntityDataSource, setParentEntityDataSource] = useState([]);
   const [addressOptions, setAddressOptions] = useState([]);
-  const [addressOpen, setAddressOpen] = useState({open:false, isClone: false})
+  const [addressOpen, setAddressOpen] = useState({ open: false, isClone: false })
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [formValues, setFormValues] = useState({})
@@ -86,10 +86,10 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
     axiosInstance()
       .get("/field?resource=Entity")
       .then(async ({ data: { data } }) => {
-      
+
         const fieldsData = isNew ? data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
           : data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-          let tempData = getObjKeys("", fieldsData)
+        let tempData = getObjKeys("", fieldsData)
         if (isClone) {
           const { data: { data } } = await axiosInstance().get(`/entity/${entityId}`);
           const { entityName, ...rest } = data
@@ -172,7 +172,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
       fullWidth
       fullScreen={fullScreen || (isMobile || isTablet)}
     >
-      <CustomDialogHeader title={isClone ? `Clone - ${cloneHeading}`: isNew ? "Create New Entities" : "Update Entity"}
+      <CustomDialogHeader title={isClone ? `Clone - ${cloneHeading}` : isNew ? "Create New Entities" : "Update Entity"}
         onClose={() => {
           if (isFieldNotTouched({
             ...initialData,
@@ -223,10 +223,10 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                     formsData &&
                     formsData.map((form, i) => (
                       <div key={i}>
-                          <div className={"detail-box-content"}>
-                              <FaDiceOne size={16} color={"var(--white)"} style={{marginRight:"5px"}}/>
-                              <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
-                          </div>
+                        <div className={"detail-box-content"}>
+                          <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                          <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                        </div>
                         <Box marginY={2}>
                           <Grid spacing={3} container>
                             {form.sectionFields.map((field, index2) => (
@@ -253,48 +253,48 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                                       tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                     />
-                                  ) :field.fieldName === 'address' ? (
+                                  ) : field.fieldName === 'address' ? (
                                     <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                       <Grid container spacing={1}>
                                         <Grid item xs={permissions?.entity?.isCreate ? 10 : 11} sm={permissions?.entity?.isCreate ? 10 : 11} md={permissions?.entity?.isCreate ? 10 : 11}>
-                                        <FormTypes
-                                      isNew={isNew}
-                                      {...field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      // options={addressOptions}
-                                      setFieldValue={(name, value) => {
-                                        // handleValuesChange({ [name]: value })
-                                        setFieldValue(name, value)
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      
-                                    />
+                                          <FormTypes
+                                            isNew={isNew}
+                                            {...field}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            // options={addressOptions}
+                                            setFieldValue={(name, value) => {
+                                              // handleValuesChange({ [name]: value })
+                                              setFieldValue(name, value)
+                                            }}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+
+                                          />
                                         </Grid>
                                         {permissions?.entity?.isCreate && (
-                                        <Grid item xs={1} sm={1} md={1}>
-                                          <Tooltip title="Add Address" className="mt-1">
-                                            <IconButton
-                                              onClick={() => {
-                                                setAddressOpen({ open: true, isClone: false });
-                                              }}
-                                              // disabled={!isNew && field.disableOnEdit}
-                                              size="small"
-                                            >
-                                              <AddIcon color={'primary'} />
-                                            </IconButton>
-                                          </Tooltip>
-                                        </Grid>
+                                          <Grid item xs={1} sm={1} md={1}>
+                                            <Tooltip title="Add Address" className="mt-1">
+                                              <IconButton
+                                                onClick={() => {
+                                                  setAddressOpen({ open: true, isClone: false });
+                                                }}
+                                                // disabled={!isNew && field.disableOnEdit}
+                                                size="small"
+                                              >
+                                                <AddIcon color={'primary'} />
+                                              </IconButton>
+                                            </Tooltip>
+                                          </Grid>
                                         )}
-                
+
                                         {field?.tooltipMessage ? (
                                           <Grid item xs={1} sm={1} md={1}>
                                             <Tooltip title={field?.tooltipMessage ?? ''}>
@@ -347,25 +347,23 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                 </Form>
                 {addressOpen?.open && (
                   <ManageAddressDialog
-                  open={addressOpen?.open}
-                  onClose={() => setAddressOpen({open:false,isClone:false}) }
-                  onSuccess={(data) => {
-            
-                    setAddressOpen({open:false,isClone:false})
-                    setFieldValue("address",data.fullAddress)
-                    setAddressOptions((prevState) => {
-                      return [
-                        ...prevState,
-                        {
-                          optionValue: data?.brand,
-                          optionLabel: data?.fullAddress,
-                          order: addressOptions.length,
-                          default: false
-                        }
-                      ]
-                    })
-                  }}
-               
+                    onClose={() => setAddressOpen({ open: false, isClone: false })}
+                    onSuccess={(data) => {
+
+                      setAddressOpen({ open: false, isClone: false })
+                      setFieldValue("address", data.fullAddress)
+                      setAddressOptions((prevState) => {
+                        return [
+                          ...prevState,
+                          {
+                            optionValue: data?.brand,
+                            optionLabel: data?.fullAddress,
+                            order: addressOptions.length,
+                            default: false
+                          }
+                        ]
+                      })
+                    }}
                   />
                 )}
               </CustomDialogContent>
@@ -391,7 +389,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                   color="primary"
                   size="small"
                   onClick={submitForm}
-                  disabled={isSubmitting || loading || 
+                  disabled={isSubmitting || loading ||
                     uploadingImageOrFileProgress > 0}
                 >
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}

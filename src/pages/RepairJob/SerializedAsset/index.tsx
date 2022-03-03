@@ -81,7 +81,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -111,11 +111,12 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         axiosInstance().get(`${repairJob.api}/${repairJobData._id}/assets`)
             .then(({ data }) => {
                 let rows: any = data?.data.map((u) => {
-                    let res = {
-                        ...prepareDataForGrid(u, user)
-                    };
-                    res["hideSelection"] = [INVENTORY_STATUS.lost].includes(u.status);
-                    return res;
+                    let finalObject = prepareDataForGrid(u, user);
+                    finalObject["canDelete"] = false;
+                    finalObject["isChecked"] = false;
+                    finalObject["allowedToEdit"] = true;
+                    finalObject["hideSelection"] = [INVENTORY_STATUS.lost].includes(u.status);
+                    return finalObject;
                 });
                 dispatch({ type: "initialize", data: rows, count: rows.length });
                 setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
@@ -132,7 +133,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                     <CheckCircleIcon color="primary" fontSize="small" />
                 </HtmlTooltip>
                 :
-                ![INVENTORY_STATUS.lost].includes(params.data?.status) && params.data?.currentOwnerType === INVENTORY_OWNER_TYPE.brand ?
+                ![INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].includes(params.data?.status) && params.data?.currentOwnerType === INVENTORY_OWNER_TYPE.brand ?
                     <HtmlTooltip title="Repair Asset">
                         <IconButton
                             size="small"
@@ -327,18 +328,18 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                             onClose={closeActions}
                         >
                             <MenuItem
-                                disabled={(selectedRecords.length === 0 || checkUniqWarehouseAndOwner())}
+                                disabled={(selectedRecords.length === 0 || checkUniqWarehouseAndOwner() || selectedRecords.some(s => s.repaired === true))}
                                 onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant) }}>
                                 Send to Plant
                             </MenuItem>
                             <MenuItem
-                                disabled={(selectedRecords.length === 0 || checkUniqWarehouseAndOwner())}
-                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier) }}>
+                                disabled={(selectedRecords.length === 0 || checkUniqWarehouseAndOwner() || selectedRecords.some(s => s.repaired === true))}
+                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.loading, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier) }}>
                                 Send to Supplier
                             </MenuItem>
                             <MenuItem
-                                disabled={(selectedRecords.length === 0 || checkUniqSupplier())}
-                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant) }}>
+                                disabled={(selectedRecords.length === 0 || checkUniqSupplier() || selectedRecords.some(s => s.repaired === true))}
+                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant) }}>
                                 Receiving from Supplier
                             </MenuItem>
                         </Menu>
@@ -353,8 +354,8 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                     allowSwipe={true}
                     permissions={true}
                     primaryField={columns?.find(d => d.field)}
-                    onClick={() => {
-                        // history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
+                    onClick={(data) => {
+                        history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
                     }}
                     dataRows={dataRows}
                     selectedRecords={selectedRecords}
@@ -411,7 +412,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             showRemoveAssetFromReceivingTicketDialog && (
                 <ConfirmationDialog
                     open={showRemoveAssetFromReceivingTicketDialog}
-                    message={`Are you sure you want to remove selected records from Receiving Ticket(s) ?`}
+                    message={`Are you sure you want to remove selected records from Receiving Ticket(s) ? `}
                     onClose={() => {
                         setShowRemoveAssetFromReceivingTicketDialog(false);
                     }}
@@ -420,7 +421,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                         const groupByCalls = groupBy(selectedRecords, "receivingTicketId");
                         let apiCalls = [];
                         Object.keys(groupByCalls).forEach((key) => {
-                            apiCalls.push(axiosInstance().put(`${deliveryTicket.api}/${key}/assets`, { ids: groupByCalls[key].map(m => m._id) }));
+                            apiCalls.push(axiosInstance().put(`${deliveryTicket.api} / ${key} / assets`, { ids: groupByCalls[key].map(m => m._id) }));
                         })
                         Promise.all(apiCalls).then(() => {
                             toastConfig.setToastConfig({ open: true, type: "success", message: `Selected records removed from assiged Receiving Ticket(s)` });
@@ -463,13 +464,13 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             />}
         {repairAssetDialog.open && <ConfirmationDialog
             open={true}
-            message={`Are you sure you want to complete repair of ${repairAssetDialog.assetId ? repairAssetDialog.assetName : "selected asset(s)"} ?`}
+            message={`Are you sure you want to complete repair of ${repairAssetDialog.assetId ? repairAssetDialog.assetName : "selected asset(s)"} ? `}
             onClose={() => {
                 setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] })
             }}
             onOk={() => {
                 setOkBtnLoading(true)
-                axiosInstance().put(`${repairJob.api}/${repairJobData._id}/assets/repaired`, { assets: repairAssetDialog.assetId ? [repairAssetDialog.assetId] : repairAssetDialog.assetIds, repaired: true }).then(({ data }) => {
+                axiosInstance().put(`${repairJob.api} / ${repairJobData._id} / assets / repaired`, { assets: repairAssetDialog.assetId ? [repairAssetDialog.assetId] : repairAssetDialog.assetIds, repaired: true }).then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
                         type: "success",

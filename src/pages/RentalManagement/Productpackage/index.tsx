@@ -28,7 +28,7 @@ import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 
-const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity }) => {
+const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
@@ -608,6 +608,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       )}
       {addExistingProductDialog.open && (
         <AddExistingProductInventory
+          renderedFrom={addExistingProductDialog?.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
           isAddingProducts={isAddingProducts}
           addProductInventory={handleAdd}
           handleProductInventoryClose={() => {

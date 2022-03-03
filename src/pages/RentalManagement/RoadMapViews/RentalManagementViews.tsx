@@ -92,7 +92,7 @@ const customDeliveredNodeStyle = {
   },
   closedRentalJob: {
     name: 'Return Ticket',
-    background: '4BB543',
+    background: '#4BB543',
     borderColor: '#999999'
   }
 };
@@ -111,42 +111,12 @@ const RentalManagementViews = (props) => {
   const fetchData = async () => {
     setLoading(true);
     const viewsData = await axiosInstance().get(`${rentalManagement.api}/views/${rentalId}`);
-    // .then((res) => {
-    //   // debugger;
-    //   setLoading(false);
-    // })
-    // .catch((err) => {
-    //   setLoading(false);
-    // });
-    // const product = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}`);
-    // const ticketData = await axiosInstance().get(
-    //   `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalId}`
-    // );
-    // const purchaseOrder = await axiosInstance().get(`purchase-order?filterById=[{"field":"rentalJob","term":"${rentalId}"}]`);
-    // const subLease = await axiosInstance().get(`${sublease.api}?filterById=[{"field":"rentalJob","term":"${rentalId}"}]`);
-    // const transferAsset = await axiosInstance().get(`transfer-asset?filterById=[{"field":"rentalJob","term":"${rentalId}"}]`);
     const product = viewsData?.data?.data?.product;
     const ticketData = viewsData?.data?.data?.ticketData;
     const purchaseOrder = viewsData?.data?.data?.purchaseOrder;
     const subLease = viewsData?.data?.data?.sublease;
     const transferAsset = viewsData?.data?.data?.transferAsset;
-
-    // const allData = await Promise.all(
-    //   transferAsset?.map((transfer) => {
-    //     return axiosInstance()
-    //       .get(`transfer-asset/get-asset/${transfer._id}`)
-    //       .then((item) => {
-    //         return { transferId: transfer._id, docs: item?.data?.data };
-    //       });
-    //   })
-    // ).then((data: any) => data);
-
     const allAssets = viewsData?.data?.data?.transferAssetData;
-    // allData.map((item) => {
-    //   item.docs?.map((data) => {
-    //     allAssets[data.assetNumber] = item.transferId;
-    //   });
-    // });
 
     const loadingTicket = ticketData?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.loading);
     const receivingTicket = ticketData?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.receiving);
@@ -280,21 +250,28 @@ const RentalManagementViews = (props) => {
         }
       });
     });
-
+    const allInventories = product?.inventory?.map((data) => data?.inventoryDetail?.assetNumber);
+    const taFromAssets = Object.keys(allAssets).map((i) => {
+      if (allInventories.includes(i)) {
+        return allAssets[i];
+      }
+    });
     transferAsset?.map((item: any, index) => {
-      flow.push({
-        id: `${item._id}`,
-        sourcePosition: 'right',
-        targetPosition: 'left',
-        type: 'default',
-        data: {
-          ref_type: 'transferAsset',
-          ref_id: item._id,
-          label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.transferAssetNumber}</div>
-        },
-        position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
-        style: customNodeStyles.transferAsset
-      });
+      if (taFromAssets.includes(item._id)) {
+        flow.push({
+          id: `${item._id}`,
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          type: 'default',
+          data: {
+            ref_type: 'transferAsset',
+            ref_id: item._id,
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.transferAssetNumber}</div>
+          },
+          position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
+          style: customNodeStyles.transferAsset
+        });
+      }
       purchaseAndSubLeaseIdx += 1;
       product?.inventory?.map((data) => {
         if (allAssets[data.inventoryDetail.assetNumber] !== undefined && allPackagesAndProductIds.includes(data._id)) {

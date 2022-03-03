@@ -41,7 +41,7 @@ const TypewiseTickets = ({ refrenceType, refrenceId, renderedFrom }) => {
                 let rendererNames = []
                 data = data.filter((e) => !["productInventory", "pickupFromType", "deliveryToType"].includes(e?.fieldData?.fieldName))
                 data.forEach(o => {
-                    let currentColumn = getColumnData(routes.deliveryTicket.title, o?.fieldData, routes.deliveryTicketDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.deliveryTicketDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
