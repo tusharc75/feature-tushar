@@ -391,18 +391,21 @@ const ProductCategory = () => {
   }
 
   const isContrastRatioLow = (hexColor) => {
-
-    let rgb = hexToRgb(hexColor.length === 0 || hexColor.length === undefined ? '#E0E0E0' : hexColor);
-    let splitRgb = rgb.split(",");
-    let rgbNum = splitRgb.map(function (x) {
-      return parseInt(x, 10);
-    });
-    let contrastRatio = contrast(rgbNum, [0, 0, 238]);
-
-    if (contrastRatio < 3) {
-      return true
-    } else {
-      return false
+    try {
+      let rgb = hexToRgb(hexColor?.length === 0 || hexColor?.length === undefined ? '#E0E0E0' : hexColor);
+      let splitRgb = rgb?.split(",");
+      let rgbNum = splitRgb?.map(function (x) {
+        return parseInt(x, 10);
+      });
+      let contrastRatio = contrast(rgbNum, [0, 0, 238]);
+      if (contrastRatio < 3) {
+        return true
+      } else {
+        return false
+      }
+    }
+    catch (e) {
+      console.log(e)
     }
   }
 
@@ -423,11 +426,9 @@ const ProductCategory = () => {
           finalObject['canDelete'] = permissions.productCategory.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions.productCategory.isUpdate;
-          finalObject['isLowContrast'] = isContrastRatioLow(u.chipColour);
-
+          finalObject['isLowContrast'] = u?.chipColour ? isContrastRatioLow(u?.chipColour) : false;
           return {
             ...finalObject
-
           };
         });
         setIsAllChecked(false);
@@ -447,7 +448,6 @@ const ProductCategory = () => {
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
-
         if (gridApi) {
           try {
             let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)

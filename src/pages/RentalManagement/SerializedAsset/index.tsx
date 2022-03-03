@@ -82,7 +82,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           {row.original.isSublease &&
             <HtmlTooltip title={`${routes.sublease.title}`}>
               <IconButton size="small" onClick={() => {
-                history.push(routes.purchaseOrder.path, {
+                history.push(routes.sublease.path, {
                   rental: rentalManagementData,
                 })
               }}>
@@ -234,6 +234,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         const inventory = data.inventory?.filter((e) => e._id === parent._id);
         inventory?.forEach((_inventory, k) => {
           const isTransferAsset = transferAssets.some(e => e.assetId === _inventory.inventory);
+          const isPurchaseOrderAsset = purchaseOrderProduct.some(e => e._id === _inventory?.inventoryDetail?.purchaseOrder);
           subRows.push({
             ..._inventory,
             detail: `${(i + 1)}.${(k + 1)} - ${_inventory.inventoryDetail?.assetNumber}`,
@@ -242,7 +243,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             manualStatus: _inventory.inventoryDetail?.manualStatus,
             _id: _inventory.inventory,
             isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
+            isPurchaseOrderAsset: isPurchaseOrderAsset,
             isTransferAsset: isTransferAsset,
+            isSubleaseAsset: _inventory.inventoryDetail?.subleaseAsset
           })
         })
         parent.subRows = subRows;
@@ -260,15 +263,19 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             const inventory = data.inventory?.filter((e) => e._id === _child._id);
             inventory?.forEach((_inventory, l) => {
               const isTransferAsset = transferAssets.some(e => e.assetId === _inventory.inventory);
+              const isPurchaseOrderAsset = purchaseOrderProduct.some(e => e._id === _inventory?.inventoryDetail?.purchaseOrder);
+
               subRows.push({
                 ..._inventory,
-                detail: `${(i + 1)}.${(j + 1)}.${(l + 1)} - ${_inventory.inventoryDetail?.assetNumber}`,
+                detail: `${(i + 1)}.${(j + 1)}.${(l + 1)} - ${_inventory?.inventoryDetail?.assetNumber}`,
                 type: "asset",
                 status: _inventory.inventoryDetail?.status,
                 manualStatus: _inventory.inventoryDetail?.manualStatus,
                 _id: _inventory.inventory,
                 isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
+                isPurchaseOrderAsset: isPurchaseOrderAsset,
                 isTransferAsset: isTransferAsset,
+                isSubleaseAsset: _inventory?.inventoryDetail?.subleaseAsset
               })
             })
             _child.subRows = subRows;
@@ -507,10 +514,10 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               columns={columns}
               data={rowsData}
               setCellColor={(rowData) => {
-                if (rowData.isPurchaseOrder) return "isPurchaseOrder";
-                if (rowData.isSublease) return "isSublease";
                 if (rowData.isTransferAsset) return "isTransferAsset";
                 if (!rowData.isValid) return "error";
+                if (rowData.isPurchaseOrderAsset) return "isPurchaseOrder";
+                if (rowData.isSubleaseAsset) return "isSublease";
                 return "";
               }}
               onSelect={setSelectedProducts}

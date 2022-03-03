@@ -167,6 +167,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         data["pickupFromAddress"] = selectedRecords[0]?.currentLocationId;
 
         data["deliveryToType"] = deliveryToType;
+        data["isPickupFromDisable"] = true;
         setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
         closeActions()
     };

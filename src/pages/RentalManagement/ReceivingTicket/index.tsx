@@ -302,6 +302,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     }
     data["startDate"] = rentalManagementData?.estimateStartDate;
     data["endDate"] = rentalManagementData?.estimateStartDate;
+    data["isPickupFromDisable"] = true;
+
     setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
     closeActions()
   };

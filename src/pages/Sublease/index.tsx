@@ -152,6 +152,7 @@ const Sublease = () => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
+
         let filterById = [];
 
         if (fromRental) {
@@ -168,14 +169,15 @@ const Sublease = () => {
 
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
-            Object.keys(filters).forEach(field => {
+            Object.keys(filters).forEach((field) => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
-                    term: filters[field].filter
-                })
+                    term: filters[field].filter,
+                });
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
         }
+
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
