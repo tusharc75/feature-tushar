@@ -34,7 +34,10 @@ import MobileFilterDialog from "../../components/MobileFilterDialog"
 import { camelCase } from "lodash";
 
 const Sublease = () => {
+
     const renderedFrom = camelCase(routes?.sublease.title)
+    const localStorageSelectedRecords = `${renderedFrom}_selected`
+
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
 
@@ -47,7 +50,7 @@ const Sublease = () => {
     const [columns, setColumns] = useState([])
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
 
     const [isOpenDialog, setisOpenDialog] = useState(false)
     const [fromRental, setFromRental] = useState(history.location?.state?.rental);
@@ -63,7 +66,7 @@ const Sublease = () => {
 
     useEffect(() => {
         fetchData()
-    }, [page, limit, filters, sorting, search, selectedEntity, fromRental]);
+    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, showFilteredRecordsOnly]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -157,6 +160,12 @@ const Sublease = () => {
         if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
         }
+
+        if (showFilteredRecordsOnly) {
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+        }
+
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
             Object.keys(filters).forEach(field => {
@@ -175,7 +184,7 @@ const Sublease = () => {
         }
         return deepFilter;
     };
-    
+
     const handleDelete = () => {
         let ids = []
         if (deleteRecord) {
