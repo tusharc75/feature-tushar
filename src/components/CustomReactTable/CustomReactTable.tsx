@@ -36,7 +36,7 @@ export default function CustomReactTable({
     columns,
     data,
     onSelect,
-    isInValidCheck = null,
+    setCellColor = null,
     childrenProperty,
     uniqueKey,
     height = "100%",
@@ -260,7 +260,7 @@ export default function CustomReactTable({
                                     <TableRow {...row.getRowProps()} key={row.original._id ?? index} className="tr">
                                         {row.cells.map(cell => {
                                             return (
-                                                <TableCell {...cell.getCellProps()} className={`td ${isInValidCheck ? (isInValidCheck(row.original) ? "error" : "") : ""}`}>
+                                                <TableCell {...cell.getCellProps()} className={`td ${setCellColor ? setCellColor(row.original) : ""}`}>
                                                     {cell.render('Cell')}
                                                 </TableCell>
                                             )

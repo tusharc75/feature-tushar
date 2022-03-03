@@ -242,7 +242,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                     {`Create Asset`}
                 </Button>
                 <Box mx={1}/>
-                    {permissions?.purchaseOrder?.isRead && (
+                    {permissions?.purchaseOrder?.isRead && !isMobile && (
                         <Button
                             variant={isMobile && !isTablet ? "text" : "outlined"}
                             color="primary"

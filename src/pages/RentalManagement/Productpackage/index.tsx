@@ -503,7 +503,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                   className="add-product-action-menu"
                 >
                   <HtmlTooltip
-                    title={Boolean(selectedProducts && selectedProducts.length) ? 'Buld edit selected records' : 'Select records to edit'}
+                    title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}
                   >
                     <MenuItem onClick={() => setIsProductEdit({ open: true, isBulkedit: true })} disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}>
                       <ListItemIcon>
@@ -525,7 +525,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
               </Box>
             ) : (
               <Box display="flex">
-                <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Buld edit selected records' : 'Select records to edit'}>
+                <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
                   <span>
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -567,7 +567,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 height="calc(100vh - 345px)"
                 columns={columns}
                 data={rowsData}
-                isInValidCheck={(rowData) => !rowData.isValid}
+                setCellColor={(rowData) => !rowData.isValid ? "error" : ""}
                 onSelect={setSelectedProducts}
                 childrenProperty="subRows"
                 uniqueKey="_id"

@@ -122,7 +122,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
 
     return (<>
         <Box display="flex" justifyContent="flex-end" pt={1}>
-            <Button
+            {!isMobile && <Button
                 onClick={() => {
                     setDownlodingFile(true);
                     axiosInstance().get(`${sublease.api}/${subleaseData._id}/pdf`)
@@ -157,7 +157,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                 startIcon={isMobile ? '' : <AiFillFilePdf />}
             >
                 {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
-            </Button>
+            </Button>}
             <Box mx={1} />
             {SUBLEASE_STATUS.completed != subleaseData?.status &&
                 <Fragment>
