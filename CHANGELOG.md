@@ -2,6 +2,58 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.70.1](https://github.com/vebholic/oms_frontend/compare/v2.70.0...v2.70.1) (2022-03-03)
+
+
+### Bug Fixes
+
+* **ag grid editable:** fix arrange columns ([8431b38](https://github.com/vebholic/oms_frontend/commit/8431b3808c652d62052d373baa0744d4f68b9cbd))
+* **ag grid:** render from fix ([3741106](https://github.com/vebholic/oms_frontend/commit/37411064631efd95bd517ffa218bc292ba218e49))
+* **aggridfix:** render from fix ([ea6fe86](https://github.com/vebholic/oms_frontend/commit/ea6fe860f2d89337a988b312d296b879cff63ee0))
+* **App.tsx:** Change flow for hard refresh ([8bcf843](https://github.com/vebholic/oms_frontend/commit/8bcf843038e96b55f03d93e0b7800ab77d7b9a9d))
+* **App.tsx:** Change flow for hard refresh ([df2c587](https://github.com/vebholic/oms_frontend/commit/df2c5870549e50bb96bd5f5eb4c7057b41d11a34))
+* **App.tsx:** Change flow for hard refresh ([63a0b81](https://github.com/vebholic/oms_frontend/commit/63a0b81b5a2352f7aa789cc2dd0d0b08a0b90168))
+* **App.tsx:** Change flow for hard refresh ([04d66da](https://github.com/vebholic/oms_frontend/commit/04d66dac6b59a91b85594b0170d9956604e356d5))
+* **App.tsx:** Change flow for hard refresh ([3c8a5d9](https://github.com/vebholic/oms_frontend/commit/3c8a5d950b48d64aae1b818086d521f4d31ebbdb))
+* **App.tsx:** Change flow for hard refresh ([ed2c379](https://github.com/vebholic/oms_frontend/commit/ed2c379061517b8babdafc06c32adc81a526e3d5))
+* **App.tsx:** Change flow for hard refresh ([058e7b0](https://github.com/vebholic/oms_frontend/commit/058e7b07723376bd389f1f8905dc20f73aa811c6))
+* **App.tsx:** Change flow for hard refresh ([9da917a](https://github.com/vebholic/oms_frontend/commit/9da917aa21c395776f2d845a0cfd9ba893ffb437))
+* **App.tsx:** Change flow for hard refresh ([669795b](https://github.com/vebholic/oms_frontend/commit/669795b14dfe0d5cc2dcd92d97322d151f9f01ce))
+* **App.tsx:** Change flow for hard refresh ([22ed865](https://github.com/vebholic/oms_frontend/commit/22ed865baed53982569ba5cc2b414461b3f120a3))
+* **App.tsx:** Change flow for hard refresh ([6877d39](https://github.com/vebholic/oms_frontend/commit/6877d3968582e849dfb2d9829964ce522f5eef6e))
+* bug fix ([966de43](https://github.com/vebholic/oms_frontend/commit/966de436742f2cc389a24e3bcadc6d9f98c010a8))
+* bug fix ([a980763](https://github.com/vebholic/oms_frontend/commit/a9807634e6651eb191cafbc586f99e3ad7b80df0))
+* bug fix ([9b243ff](https://github.com/vebholic/oms_frontend/commit/9b243ff3dab724d118d096d873e25e8f203434c4))
+* bug fix ([356de39](https://github.com/vebholic/oms_frontend/commit/356de39f5c713e654de41df0a6d5225fba08a17e))
+* bug fix ([aaf5b0a](https://github.com/vebholic/oms_frontend/commit/aaf5b0a4da7fb9409aef54e01908219ffeae86d5))
+* bug fix ([16a9507](https://github.com/vebholic/oms_frontend/commit/16a95074814ce4b208c3a8dff59042288356a604))
+* bug fix ([0de6b68](https://github.com/vebholic/oms_frontend/commit/0de6b6871a800d132806e08f17f332fc4de637f3))
+* bug fix ([5c012e9](https://github.com/vebholic/oms_frontend/commit/5c012e9b20ce82e45733e8f6aa9066560b6d200b))
+* bug fix ([ff1c45f](https://github.com/vebholic/oms_frontend/commit/ff1c45f6243fb599937183efb40d9b85efae63d6))
+* bug fix ([38f5660](https://github.com/vebholic/oms_frontend/commit/38f56601f6ace92718c85d93b914fe0d54d94597))
+* bug fix ([a305bde](https://github.com/vebholic/oms_frontend/commit/a305bde64ea5bc310f63c842a63039f0f79abda3))
+* mobile ui check box in repair job details ([f535512](https://github.com/vebholic/oms_frontend/commit/f535512c2f4520c6b37b6dcdc40030d181c07a2b))
+* offer to customer ([d83ab43](https://github.com/vebholic/oms_frontend/commit/d83ab43916a618bf66595391f67fd581739c7451))
+* offer to customer in quote ([e952b8d](https://github.com/vebholic/oms_frontend/commit/e952b8d2e29b86fbf8c9e253366cb7b0180c2407))
+* **render from:** render from fix ([ca9ca26](https://github.com/vebholic/oms_frontend/commit/ca9ca269ed21728c2bcbd9f6ca3d24ce0f7c5989))
+* rental Api for views tab, all formatted data will come from backend one api PO-1186 ([d68779e](https://github.com/vebholic/oms_frontend/commit/d68779e0a2b16aec7a5c8380160799a18c9cc7b9))
+* rentalJob views little fix ([342135e](https://github.com/vebholic/oms_frontend/commit/342135e280cfdf2e948c0365b7c315efbab9aace))
+* **repair job:** render from fix ([4095973](https://github.com/vebholic/oms_frontend/commit/4095973db7f42d476af8edfa860a2480eb346320))
+* repairJob Ticket page access from direct url giving error issue fixed ([6c751a7](https://github.com/vebholic/oms_frontend/commit/6c751a71c89ea71bef3d1e146eb4a9d5e9dbb249))
+* **sublease:** render from fix ([d58efc6](https://github.com/vebholic/oms_frontend/commit/d58efc6c8badda097af18d34ccede2fe9c86d903))
+
+## [2.70.0](https://github.com/vebholic/oms_frontend/compare/v2.69.0...v2.70.0) (2022-03-02)
+
+
+### Features
+
+* rental Api for views tab, all formatted data will come from backend one api PO-1186 ([2c2810c](https://github.com/vebholic/oms_frontend/commit/2c2810c5377fc482353e698b66af4ee15ddb009a))
+
+
+### Bug Fixes
+
+* bug fix ([f04fad3](https://github.com/vebholic/oms_frontend/commit/f04fad34af6c05209094759d6aeaabdab6cabd62))
+
 ## [2.69.0](https://github.com/vebholic/oms_frontend/compare/v2.68.2...v2.69.0) (2022-03-01)
 
 

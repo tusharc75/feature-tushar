@@ -29,9 +29,8 @@ import { Link } from 'react-router-dom'
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import { camelCase } from "lodash";
 
-const renderedFrom = camelCase(`${routes.rentalManagement.title}_2`);
 
-const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
+const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();

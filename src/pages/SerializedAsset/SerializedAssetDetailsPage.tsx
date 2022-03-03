@@ -31,7 +31,7 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 import CustomTimeline from "../../components/CustomTimeline";
 import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
 import { MdEdit } from "react-icons/md";
-import { startCase } from "lodash";
+import { camelCase, startCase } from "lodash";
 import moment from 'moment';
 
 interface TabPanelProps {
@@ -54,7 +54,7 @@ function TabPanel(props: TabPanelProps) {
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
-
+  const renderedFrom = camelCase(routes?.serializedAsset.title)
   const { id } = useParams();
   const history = useHistory();
   const {
@@ -611,7 +611,7 @@ const SerializedAssetDetailsPage = () => {
                             allowSelection={false}
                             isClientSideGrid={true}
                             loading={loading}
-                            renderedFrom="rentalManagementDetailsPageInventory"
+                            renderedFrom={`${renderedFrom}_grid-1`}
                             refreshGrid={fetchProductInventoryHistory}
                           />
                           : <Box

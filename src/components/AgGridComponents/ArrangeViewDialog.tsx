@@ -66,12 +66,17 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     if (!columnApi) return;
     let newCols = new Array();
 
-    let layedCols = columnApi.getAllGridColumns();
-    layedCols = layedCols.filter((col) => col.pinned === null).map((col: any) => col.colId);
+    let gridLayedCols = columnApi.getAllGridColumns();
+    gridLayedCols = gridLayedCols.filter((col) => col.pinned === null);
+
+    let layedCols = gridLayedCols.map((col: any) => col.colId);
 
     columns.forEach((col) => {
       const index = layedCols.indexOf(col.field);
       if (index > -1) {
+        const _col = gridLayedCols.find((_c) => _c.colId === col.field);
+        col = { ...col, show: _col ? _col.visible : col.show };
+
         newCols[index] = col;
       }
       if (col.hasOwnProperty('pivotIndex') || (col.hasOwnProperty('lockPosition') && col.lockPosition)) {
@@ -83,7 +88,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     setSortedColumns(newCols);
     setOldDate(JSON.stringify(newCols));
     setNewData(JSON.stringify(newCols));
-  }, [columns]);
+  }, []);
 
   React.useEffect(() => {
     if (oldData === newData) {

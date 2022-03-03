@@ -2,31 +2,34 @@ import { useState, useEffect, useContext } from 'react';
 import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { repairJob, sidebarResource, repairJobProcessSteps, REPAIR_JOB_STATUS } from '../../constants/helpers';
-import Activity from '../../components/Activity';
+import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import DetailsPageHeader from 'src/components/DetailsPageHeader';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import { useData } from 'src/StateProvider/Provider';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { repairJob, sidebarResource, repairJobProcessSteps, REPAIR_JOB_STATUS } from 'src/constants/helpers';
+import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRepairJob from './ManageRepairJob';
-import queryString from "query-string";
+import queryString from 'query-string';
 import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-import TabPanel from '../../components/TabPanel';
-import HideWhenOffline from '../../components/HideWhenOffline';
-import { defaultActivityShow } from '../../constants/helpers';
+import TabPanel from 'src/components/TabPanel';
+import HideWhenOffline from 'src/components/HideWhenOffline';
+import { defaultActivityShow } from 'src/constants/helpers';
 import AddSerializedAsset from './AddSerializedAsset';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
-import DeleteButton from "../../components/Helpers/DeleteButton";
-import Steps from "../RentalManagement/Steps";
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import Steps from '../RentalManagement/Steps';
 import { GiAbstract055 } from 'react-icons/gi';
+import { camelCase } from 'lodash';
+import { RiFlowChart } from 'react-icons/ri';
+import RepairJobViews from './RoadMapViews/index';
 
 function a11yProps(index: any) {
   return {
@@ -36,7 +39,7 @@ function a11yProps(index: any) {
 }
 
 const RepairJobDetails = () => {
-
+  const renderedFrom = camelCase(routes?.repairJob.title);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -44,7 +47,9 @@ const RepairJobDetails = () => {
 
   const parsed = queryString.parse(history.location.search);
   const { openEdit, tab }: any = parsed;
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const [repairJobData, setRepairJobData] = useState(null);
 
@@ -63,33 +68,31 @@ const RepairJobDetails = () => {
   const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
 
-  const [locationKeys, setLocationKeys] = useState([])
+  const [locationKeys, setLocationKeys] = useState([]);
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity);
   };
 
   useEffect(() => {
-    return history.listen(location => {
+    return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
       if (history.action === 'PUSH') {
-        setLocationKeys([location.key])
+        setLocationKeys([location.key]);
       }
       if (history.action === 'POP') {
         if (locationKeys[1] === location.key) {
-          setLocationKeys(([_, ...keys]) => keys)
+          setLocationKeys(([_, ...keys]) => keys);
           // Handle forward event
-          setTabValue(tab ? parseInt(tab) : 1)
-
+          setTabValue(tab ? parseInt(tab) : 1);
         } else {
-          setLocationKeys((keys) => [location.key, ...keys])
+          setLocationKeys((keys) => [location.key, ...keys]);
           // Handle back event
-          setTabValue(tab ? parseInt(tab) : 1)
-
+          setTabValue(tab ? parseInt(tab) : 1);
         }
       }
-    })
-  }, [locationKeys])
+    });
+  }, [locationKeys]);
 
   useEffect(() => {
     if (id) {
@@ -98,7 +101,7 @@ const RepairJobDetails = () => {
   }, [id]);
 
   useEffect(() => {
-    getResourceFields()
+    getResourceFields();
   }, []);
 
   useEffect(() => {
@@ -108,7 +111,8 @@ const RepairJobDetails = () => {
   }, [currentStep]);
 
   const getResourceFields = () => {
-    axiosInstance().get(`/field?resource=${sidebarResource.repairJob}`)
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.repairJob}`)
       .then(({ data: { data } }) => {
         setRepairJobFields(data);
       })
@@ -118,16 +122,18 @@ const RepairJobDetails = () => {
   };
 
   const fetchRepairJobData = () => {
-    axiosInstance().get(`${routes.repairJob.path}/${id}`).then(({ data: { data } }) => {
-      setRepairJobData({ ...data })
-      setCurrentStep(repairJobProcessSteps.indexOf(data?.processStatus) !== -1 ? repairJobProcessSteps.indexOf(data?.processStatus) : 0);
-      if (permissions?.repairJob?.isUpdate && openEdit === "true") {
-        setOpenUpdateDialog(true)
-        const params = new URLSearchParams()
-        params.delete("openEdit")
-        history.push({ search: params.toString() })
-      }
-    })
+    axiosInstance()
+      .get(`${routes.repairJob.path}/${id}`)
+      .then(({ data: { data } }) => {
+        setRepairJobData({ ...data });
+        setCurrentStep(repairJobProcessSteps.indexOf(data?.processStatus) !== -1 ? repairJobProcessSteps.indexOf(data?.processStatus) : 0);
+        if (permissions?.repairJob?.isUpdate && openEdit === 'true') {
+          setOpenUpdateDialog(true);
+          const params = new URLSearchParams();
+          params.delete('openEdit');
+          history.push({ search: params.toString() });
+        }
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -159,7 +165,9 @@ const RepairJobDetails = () => {
   };
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance().put(`${repairJob.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
+    axiosInstance()
+      .put(`${repairJob.api}/${id}/process-status`, { processStatus: processStatus })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -168,19 +176,21 @@ const RepairJobDetails = () => {
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => {
-      })
+      .then(({ data: { data } }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
   const repairedAssetStatus = (assets) => {
-    axiosInstance().put(`${repairJob.api}/${id}/assets/repaired`, { assets: assets, repaired: true }).then(({ data }) => {
-      fetchRepairJobData()
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    })
+    axiosInstance()
+      .put(`${repairJob.api}/${id}/assets/repaired`, { assets: assets, repaired: true })
+      .then(({ data }) => {
+        fetchRepairJobData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
@@ -191,7 +201,7 @@ const RepairJobDetails = () => {
       <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
         <div>
           <div>
-            <Paper style={{ height: "650px" }}>
+            <Paper style={{ height: '650px' }}>
               {repairJobData ? (
                 <DetailsPageHeader heading={repairJobData?.repairJobName} mainPoints={null} showHeading={true}>
                   {permissions?.repairJob?.isUpdate && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
@@ -252,7 +262,20 @@ const RepairJobDetails = () => {
                       <GiAbstract055 className="mr-1" fontSize="inherit" /> Delivery Tickets
                     </div>
                   }
-                  {...a11yProps(1)}
+                  {...a11yProps(2)}
+                />
+                <Tab
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 4 ? 'white' : '',
+                    color: tabValue === 4 ? '#163340' : '#163340'
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+                    </div>
+                  }
+                  {...a11yProps(3)}
                 />
                 <div className={'uio'}> </div>
               </Tabs>
@@ -280,19 +303,21 @@ const RepairJobDetails = () => {
                     />
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={12} md={12} lg={12}>
-                        {(currentStep === 0) && (
+                        {currentStep === 0 && (
                           <AddSerializedAsset
                             repairJobData={repairJobData}
                             setNextStep={setNextStep}
                             updateJobStatus={updateJobStatus}
                             repairedAssetStatus={repairedAssetStatus}
+                            renderedFrom={`${renderedFrom}_grid-1`}
                           />
                         )}
-                        {(currentStep === 1) && (
+                        {currentStep === 1 && (
                           <SerializedAsset
                             repairJobData={repairJobData}
                             fetchRepairJobData={fetchRepairJobData}
                             repairedAssetStatus={repairedAssetStatus}
+                            renderedFrom={`${renderedFrom}_grid-2`}
                           />
                         )}
                       </Grid>
@@ -302,10 +327,13 @@ const RepairJobDetails = () => {
               </TabPanel>
               <TabPanel value={tabValue} index={2}>
                 <Grid item xs={12} sm={12} md={12} lg={12}>
-                  <Tickets
-                    repairJobData={repairJobData}
-                  />
+                  {repairJobData && <Tickets repairJobData={repairJobData} renderedFrom={`${renderedFrom}_grid-3`} />}
                 </Grid>
+              </TabPanel>
+              <TabPanel value={tabValue} index={3}>
+                <Box>
+                  <RepairJobViews repairJobName={repairJobData?.repairJobName} repairId={id} repairStatus={repairJobData?.status} />
+                </Box>
               </TabPanel>
             </Paper>
           </div>
@@ -328,9 +356,7 @@ const RepairJobDetails = () => {
                           resourceId={repairJobData._id}
                           resource={repairJobData.repairJobResource}
                           restrictedAddActivities={
-                            permissions && permissions['repairJob'] && permissions['repairJob'].isUpdate
-                              ? []
-                              : ['Attachment', 'Case']
+                            permissions && permissions['repairJob'] && permissions['repairJob'].isUpdate ? [] : ['Attachment', 'Case']
                           }
                           relatedTo={[
                             {
@@ -339,7 +365,7 @@ const RepairJobDetails = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>

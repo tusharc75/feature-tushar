@@ -27,6 +27,7 @@ import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField }
 import { StayPrimaryPortraitSharp } from "@material-ui/icons";
 import { BiDollar } from "react-icons/bi";
 import { SiMarketo,AiFillFileMarkdown,GiArrowScope,FaPercentage,FaAward,SiStatuspage,GoVersions} from "react-icons/all";
+import { camelCase } from "lodash";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -120,6 +121,7 @@ const intialState = {
 
 let projectSalesTimeout;
 const ProjectSales: FC = () => {
+  const renderedFrom = camelCase(routes?.projectSales.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -160,7 +162,7 @@ const ProjectSales: FC = () => {
     selectedRecords,
     appendRows
   } = state;
-  const columnState = JSON.parse(localStorage.getItem("projectSalesPage"));
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([])
   const localStorageSelectedRecords = `${routes.projectSales.title}_selected`;
@@ -179,7 +181,7 @@ const ProjectSales: FC = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      let currentColumn = getColumnData(routes.projectSales.title, o?.fieldData, 'project-sales/detail')
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, 'project-sales/detail')
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData]
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -196,7 +198,7 @@ const ProjectSales: FC = () => {
     setFrameWorkComponent({ ...tempFrameworkComponent })
     let staticFields = getStaticFields()
     staticFields.forEach(field => {
-      columns.push(checkStaticField(routes.projectSales.title, field))
+      columns.push(checkStaticField(renderedFrom, field))
     })
     setColumns([...columns])
   }
@@ -629,7 +631,7 @@ const ProjectSales: FC = () => {
                   onClone={(data) => {
                     setIsOpen({ open: true, isClone: true, idToClone: data._id })
                    }}
-                  renderedFrom={routes.projectSales.title}
+                  renderedFrom={renderedFrom}
                 />
                  :
                 <CustomAgGrid
@@ -644,7 +646,7 @@ const ProjectSales: FC = () => {
                   actionWidth={150}
                   page={page}
                   loading={loading}
-                  renderedFrom={routes.projectSales.title}
+                  renderedFrom={renderedFrom}
                   refreshGrid={fetchProjects}
                 /> : null
           }

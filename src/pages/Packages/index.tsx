@@ -36,10 +36,11 @@ import { isMobile, isTablet } from 'react-device-detect';
 let packagesTimeout;
 
 const PackageList = () => {
+    const renderedFrom = camelCase(routes?.packages.title)
     const toastConfig = useContext(CustomToastContext);
     const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
 
-    const pageTitle = camelCase(`${routes.packages.title}Page`);
+   
     const history = useHistory();
     const {
         state: { user, permissions, selectedEntity }
@@ -103,7 +104,7 @@ const PackageList = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-            let currentColumn = getColumnData(pageTitle, o?.fieldData, `${routes.packagesDetail.path}`);
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${routes.packagesDetail.path}`);
             if (currentColumn !== null) {
                 if (isOffline) {
                     currentColumn.columnData['filter'] = false;
@@ -124,11 +125,11 @@ const PackageList = () => {
         setFrameWorkComponent({ ...tempFrameworkComponent });
         let staticFields = getStaticFields();
         staticFields.forEach((field) => {
-            columns.push(checkStaticField(pageTitle, field));
+            columns.push(checkStaticField(renderedFrom, field));
         });
         setColumns([...columns]);
     };
-    const columnState = JSON.parse(localStorage.getItem('packagesPage'));
+    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
     if (columnState) {
         columns.forEach((item) => {
             columnState.forEach((d) => {
@@ -548,7 +549,7 @@ const PackageList = () => {
                             onCreate={false}
                             showClone={true}
                             onClone={(data) => { setShowManagePackageDialog({ open: true, isClone: true, idToClone: data._id }); }}
-                            renderedFrom={pageTitle}
+                            renderedFrom={renderedFrom}
                         /> :
                             <CustomAgGrid
                                 columns={columns}
@@ -562,7 +563,7 @@ const PackageList = () => {
                                 page={page}
                                 actionWidth={140}
                                 loading={loading}
-                                renderedFrom={pageTitle}
+                                renderedFrom={renderedFrom}
                                 allowSelection={!isOffline}
                                 isClientSideGrid={isOffline}
                                 refreshGrid={fetchPackages}
@@ -592,7 +593,7 @@ const PackageList = () => {
                     {singlePackageDelete.show ? (
                         <ConfirmationDialog
                             open={singlePackageDelete.show}
-                            message={`Are you sure you want to delete this Package: ${deleteRecord?.packageName} ?`}
+                            message={`Are you sure you want to delete this Package: ${singlePackageDelete?.packageName} ?`}
                             onClose={() =>
                                 setSinglePackageDelete({
                                     id: null,
@@ -632,6 +633,7 @@ const PackageList = () => {
             )}
             {openProductListDialog.open && (
                 <ProductListDialog
+                    renderedFrom={`${renderedFrom}_i-grid-1`}
                     id={openProductListDialog.id}
                     onClose={() => setOpenProductListDialog({ open: false, id: null })}
                     toastConfig={toastConfig} />

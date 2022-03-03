@@ -47,10 +47,12 @@ import LoadingTicket from './LoadingTicket';
 import ReceivingTicket from './ReceivingTicket';
 import Invoice from './Invoice';
 import RentalManagementViews from './RoadMapViews/RentalManagementViews';
+import { camelCase } from 'lodash';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, updateOfflineGridData } = useContext(CustomOfflineContext);
+  const renderedFrom = camelCase(routes?.rentalManagement.title)
 
   const { id } = useParams();
   const history = useHistory();
@@ -235,7 +237,7 @@ const RentalManagementDetailsPage = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -264,7 +266,7 @@ const RentalManagementDetailsPage = () => {
   return (
     <>
       <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.rentalManagement, { title: `${rentalManagementData?.rentalJobName}` }]} />
+        <CustomBreadCrumbs routes={[routes.rentalManagement, { title: `${rentalManagementData ? rentalManagementData?.rentalJobName : ""}` }]} />
       </Grid>
       <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
         <div>
@@ -430,10 +432,11 @@ const RentalManagementDetailsPage = () => {
                       isSmallScreen={isSmallScreen}
                       isTabletScreen={isTabletScreen}
                       showActivity={showActivity}
+                      renderedFrom={`${renderedFrom}_grid-1`}
                     />
                   )}
                   {currentStep === 1 && rentalManagementData && (
-                    <AdditionalCost rentalManagementData={rentalManagementData} setNextStep={setNextStep} />
+                    <AdditionalCost rentalManagementData={rentalManagementData} setNextStep={setNextStep}  renderedFrom={`${renderedFrom}_grid-2`} />
                   )}
                   {currentStep === 2 && rentalManagementData && (
                     <SerializedAsset
@@ -451,6 +454,7 @@ const RentalManagementDetailsPage = () => {
                       rentalManagementData={rentalManagementData}
                       currentStep={currentStep}
                       setNextStep={setNextStep}
+                      renderedFrom={`${renderedFrom}_grid-3`}
                     />
                   )}
                   {currentStep === 4 && rentalManagementData && (
@@ -459,6 +463,7 @@ const RentalManagementDetailsPage = () => {
                       rentalManagementData={rentalManagementData}
                       currentStep={currentStep}
                       setNextStep={setNextStep}
+                      renderedFrom={`${renderedFrom}_grid-4`}
                     />
                   )}
                   {currentStep === 5 && rentalManagementData && (
@@ -468,6 +473,7 @@ const RentalManagementDetailsPage = () => {
                       fetchRentalData={fetchRentalManagementData}
                       updateJobStatus={updateJobStatus}
                       statusOptions={statusOptions}
+                      renderedFrom={`${renderedFrom}_grid-5`}
                     />
                   )}
                 </Paper>
@@ -507,7 +513,7 @@ const RentalManagementDetailsPage = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                           emails={[]}
                         />
                       </div>

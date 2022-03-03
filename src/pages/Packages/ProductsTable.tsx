@@ -1,23 +1,23 @@
-import { useEffect, useReducer, useState } from 'react'
-import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
-import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import axiosInstance from '../../axios/axiosInstance'
-import routes from "../../components/Helpers/Routes";
-import { prepareDataForGrid } from "../../constants/helpers"
-import useColumns, { getFrameworkComponents, getStaticFields } from "../../constants/useColumns"
+import { useEffect, useReducer, useState } from 'react';
+import CustomAgGrid from '../../components/AgGridComponents/CustomAgGrid';
+import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import axiosInstance from '../../axios/axiosInstance';
+import routes from '../../components/Helpers/Routes';
+import { prepareDataForGrid } from '../../constants/helpers';
+import useColumns, { getFrameworkComponents, getStaticFields } from '../../constants/useColumns';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 
-const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQuantity = null, handleAssignProduct = null }) => {
+const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQuantity = null, handleAssignProduct = null, renderedFrom }) => {
   const history = useHistory();
   const {
     state: { permissions }
   }: any = useData();
-  const [columns, setColumns] = useState([])
+  const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const { getColumnData } = useColumns();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
@@ -27,116 +27,118 @@ const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQu
       if (gridApi) {
         gridApi.setRowData([]);
       }
-      handleProductsColumnsAndData(productList)
+      handleProductsColumnsAndData(productList);
     }
-  }, [productList])
+  }, [productList]);
 
   const handleProductsColumnsAndData = (data) => {
-    let rows = data.map(u => {
+    let rows = data.map((u) => {
       let res = {
         ...prepareDataForGrid(u),
         inventoryCount: u?.qty,
-        warehouses: u.warehouse?.map(w => w.warehouseName).join(", "),
-        productCategoryChipColor: u.productCategory?.chipColour,
-      }
+        warehouses: u.warehouse?.map((w) => w.warehouseName).join(', '),
+        productCategoryChipColor: u.productCategory?.chipColour
+      };
       for (let col in res) {
         if (res[col] && res[col].optionLabel) {
           res[col] = res[col].optionLabel;
         }
       }
       return res;
-    })
+    });
     dispatch({ type: 'initialize', data: rows, count: data.length });
-  }
+  };
 
   useEffect(() => {
-    fetchGridColumns()
-  }, [])
+    fetchGridColumns();
+  }, []);
 
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=Product`)
       .then(({ data: { data } }) => {
-        let columns = []
-        let rendererNames = []
-        data.forEach(o => {
-
-          let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.productDetail.path)
+        let columns = [];
+        let rendererNames = [];
+        data.forEach((o) => {
+          let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.productDetail.path);
 
           if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData]
+            columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName)
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
-        })
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent
-        }
+        };
         setFrameWorkComponent({
           ...tempFrameworkComponent,
           actionsRenderer: ActionsRenderer
-        })
-        columns = [...columns, ...getStaticFields()]
-        setColumns([...columns])
-      })
-  }
-  const ActionsRenderer = (params) => (<span>{params?.data?.qty}</span>)
+        });
+        columns = [...columns, ...getStaticFields()];
+        setColumns([...columns]);
+      });
+  };
+  const ActionsRenderer = (params) => <span>{params?.data?.qty}</span>;
   return (
     <>
-      {
-        isMobile && !isTablet ? <CustomSwipableList
+      {isMobile && !isTablet ? (
+        <CustomSwipableList
           allowSelection={true}
           allowSwipe={true}
           permissions={permissions.product}
-          primaryField={columns?.find(d => d.primaryField)}
+          primaryField={columns?.find((d) => d.primaryField)}
           onClick={(data) => {
-            history.push(`${routes.productDetail.path}/${data._id}`)
+            history.push(`${routes.productDetail.path}/${data._id}`);
           }}
           dataRows={dataRows}
           selectedRecords={[]}
           dispatch={dispatch}
-          onEdit={(data) => { }}
+          onEdit={(data) => {}}
           extraParamsToCheckDelete={true}
-          onDelete={(data) => { }}
+          onDelete={(data) => {}}
           rowCount={rowCount}
           page={page}
           loading={loading}
-          additionalDetails={[
-          ]}
+          additionalDetails={[]}
           chips={[
             {
-              label: "Quantity : ",
-              field: "qty",
-            },
+              label: 'Quantity : ',
+              field: 'qty'
+            }
           ]}
           owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-          onCreate={() => { handleAssignProduct(true) }}
+          onCreate={() => {
+            handleAssignProduct(true);
+          }}
           showClone={true}
-          onClone={(data) => { }}
-          renderedFrom={"productPackageDetails"}
-        /> :
-          Object.keys(frameWorkComponent).length > 0 ?
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={150}
-              loading={loading || updateLoading}
-              allowSelection={false}
-              actionLabel="Quantity"
-              renderedFrom="productPage"
-              actionEditable={true}
-              onCellValueChanged={handleUpdateQuantity}
-            /> : null}
-    </ >
+          onClone={(data) => {}}
+          renderedFrom={renderedFrom}
+        />
+      ) : Object.keys(frameWorkComponent).length > 0 ? (
+        <CustomAgGrid
+          columns={columns}
+          dataRows={dataRows}
+          frameworkComponents={frameWorkComponent}
+          setGridApi={setGridApi}
+          dispatch={dispatch}
+          rowCount={rowCount}
+          limit={limit}
+          pageSizes={pageSizes}
+          page={page}
+          isClientSideGrid={true}
+          actionWidth={150}
+          loading={loading || updateLoading}
+          allowSelection={false}
+          actionLabel="Quantity"
+          renderedFrom={renderedFrom}
+          actionEditable={true}
+          onCellValueChanged={handleUpdateQuantity}
+        />
+      ) : null}
+    </>
   );
 };
 

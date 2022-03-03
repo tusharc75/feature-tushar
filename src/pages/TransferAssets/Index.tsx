@@ -30,10 +30,11 @@ import { FaSuitcase } from 'react-icons/fa';
 import { MdAdd, MdFilterList, MdSort, RiFileTransferFill, GiCargoShip, RiFolderTransferFill, SiStatuspage } from 'react-icons/all';
 import MobileSortDialog from "src/components/MobileSortDialog"
 import MobileFilterDialog from "src/components/MobileFilterDialog"
+import { camelCase } from 'lodash';
 
 
 const TransferAsset = () => {
-
+  let renderedFrom = camelCase(routes?.transferAsset.title)
   const toastConfig = useContext(CustomToastContext);
   const [showManageTransferAssetDialog, setShowManageTransferAssetDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -71,7 +72,7 @@ const TransferAsset = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes.transferAsset?.title, o?.fieldData, routes.transferAssetDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.transferAssetDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -488,7 +489,7 @@ const TransferAsset = () => {
                 onClone={(data) => {
                   setShowManageTransferAssetDialog({ open: true, isClone: true, idToClone: data._id });
                 }}
-                renderedFrom={routes.transferAsset?.title}
+                renderedFrom={renderedFrom}
               />
             ) : (
               <CustomAgGrid
@@ -504,7 +505,7 @@ const TransferAsset = () => {
                 actionWidth={150}
                 loading={loading}
                 isClientSideGrid={true}
-                renderedFrom={routes.transferAsset?.title}
+                renderedFrom={renderedFrom}
                 refreshGrid={fetchTransferAsset}
               />
             )

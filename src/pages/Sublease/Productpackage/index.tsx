@@ -26,7 +26,7 @@ import { FiPackage } from "react-icons/fi";
 import { RiEditCircleLine } from "react-icons/ri";
 import { fetch_sublease_product_fields } from "../../../components/Sublease/helper";
 
-const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
+const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -417,7 +417,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                         }
                     </Box>
                     <Box display="flex">
-                        <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
+                        <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Bulk edit selected records" : "Select records to edit"}>
                             <span>
                                 <Button
                                     variant={isMobile && !isTablet ? "text" : "contained"}
@@ -485,7 +485,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                             height="calc(100vh - 345px)"
                             columns={columns}
                             data={rowsData}
-                            isInValidCheck={(rowData) => !rowData.isValid}
+                            setCellColor={(rowData) => !rowData.isValid ? "error" : ""}
                             onSelect={setSelectedProducts}
                             childrenProperty="subRows"
                             uniqueKey="_id"
@@ -526,6 +526,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                 addProductInventory={handleAdd}
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
                 type={addExistingProductDialog.type}
+                renderedFrom={addExistingProductDialog.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
             />
         }
     </Fragment>

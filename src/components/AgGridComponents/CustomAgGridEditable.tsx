@@ -12,6 +12,7 @@ import CustomGridHeaderOptions from "./CustomGridHeaderOptions";
 import { CustomLoadingOverlay, CommonRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomFloatingFilter from "../../components/AgGridComponents/CustomAgGridFilter";
 import { orderBy, uniqBy } from "lodash";
+import { checkStaticField, staticColumns } from "../../constants/columns"
 import NumericEditor from "./NumericEditor";
 import DateEditor from "./DateEditor";
 
@@ -126,7 +127,7 @@ export const intialState = {
 };
 
 export default function CustomAgGridEditable({
-  columns,
+  columns:cols,
   dataRows,
   frameworkComponents,
   dispatch,
@@ -162,11 +163,15 @@ export default function CustomAgGridEditable({
   idProperty = "_id",
   rowClassRules = null,
 }) {
-  const [, setColumns] = useState(columns);
+  const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
 
   const [currentGridApi, setCurrentGridApi] = useState(null);
-  const enableRowDrag = columns.some((d) => d.rowDrag);
+  const enableRowDrag = cols.some((d) => d.rowDrag);
+
+  useEffect(( ) => {
+    setColumns(cols)
+  },[cols])
 
   useEffect(() => {
     if (currentGridApi && selectedRecords.length) {
@@ -317,7 +322,8 @@ export default function CustomAgGridEditable({
         // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
         //   suppressFilterButton: true,
         // }}
-        hide={column?.show === false ? true : false}
+        hide={staticColumns.indexOf(column.field) >= 0 ? column?.show === false ? true : checkStaticField(renderedFrom, column.field) :
+          (column.hasOwnProperty("show") && !column?.show) ? true : false}
         valueGetter={column.valueGetter ?? null}
       ></AgGridColumn>
     ) : (
@@ -344,7 +350,8 @@ export default function CustomAgGridEditable({
         // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
         //   suppressFilterButton: true,
         // }}
-        hide={column?.show === false ? true : false}
+        hide={staticColumns.indexOf(column.field) >= 0 ? column?.show === false ? true : checkStaticField(renderedFrom, column.field) :
+          (column.hasOwnProperty("show") && !column?.show) ? true : false}
         valueGetter={column.valueGetter ?? null}
       ></AgGridColumn>
     );

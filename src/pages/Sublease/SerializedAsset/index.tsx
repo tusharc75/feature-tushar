@@ -21,9 +21,7 @@ import { AiFillFilePdf, AiOutlineDeliveredProcedure } from 'react-icons/ai';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { groupBy, uniq, map } from "lodash";
 
-const renderedFrom = 'SubleasingSerializedAsset';
-
-const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) => {
+const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
@@ -53,7 +51,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -124,7 +122,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
 
     return (<>
         <Box display="flex" justifyContent="flex-end" pt={1}>
-            <Button
+            {!isMobile && <Button
                 onClick={() => {
                     setDownlodingFile(true);
                     axiosInstance().get(`${sublease.api}/${subleaseData._id}/pdf`)
@@ -159,7 +157,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
                 startIcon={isMobile ? '' : <AiFillFilePdf />}
             >
                 {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
-            </Button>
+            </Button>}
             <Box mx={1} />
             {SUBLEASE_STATUS.completed != subleaseData?.status &&
                 <Fragment>
@@ -178,6 +176,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
                                         data["pickupFrom"] = subleaseData?.supplierAccount?.optionValue;
                                         data["pickupFromAddress"] = subleaseData?.shippingAddress?.optionValue;
                                         data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                                        data["isPickupFromDisable"] = true;
                                         setShowTicketDialog({ open: true, data: data });
                                     }}
                                     disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse")
@@ -208,6 +207,8 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
                                         data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.supplier;
                                         data["deliveryTo"] = subleaseData?.supplierAccount?.optionValue;
                                         data["deliveryToAddress"] = subleaseData?.shippingAddress?.optionValue;
+                                        data["isPickupFromDisable"] = true;
+                                        data["isDeliveryToDisable"] = true;
                                         setShowTicketDialog({ open: true, data: data });
                                     }}
                                 >

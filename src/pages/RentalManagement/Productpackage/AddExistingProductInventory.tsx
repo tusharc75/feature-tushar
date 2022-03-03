@@ -19,12 +19,10 @@ import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 
 
-const renderedFrom = "rentalJobManagementAddProducts";
-const localStorageSelectedRecords = `${renderedFrom}_selected`
 
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, rentalManagementData }) => {
-
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, rentalManagementData, renderedFrom }) => {
+    const localStorageSelectedRecords = `${renderedFrom}_selected`
     const toastConfig = useContext(CustomToastContext)
     const {
         state: { selectedEntity }
@@ -130,8 +128,8 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 let rendererNames = []
                 data.forEach(o => {
                     let currentColumn = type === "product" ?
-                        getColumnData(routes.product?.title, o?.fieldData, routes.productDetail.path)
-                        : getColumnData(routes.packages?.title, o?.fieldData, routes.packagesDetail.path)
+                        getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
+                        : getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

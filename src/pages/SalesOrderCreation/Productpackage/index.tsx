@@ -24,7 +24,7 @@ import SalesOrderQtyDialog from './SalesOrderQtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
 import InfoIcon from "@material-ui/icons/Info";
 
-const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
+const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -371,7 +371,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
                 </Button>
             </Box>
             <Box display="flex">
-                <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
+                <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Bulk edit selected records" : "Select records to edit"}>
                     <span>
                         <Button
                             variant="contained"
@@ -426,7 +426,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
                         height="calc(100vh - 345px)"
                         columns={columns}
                         data={rowsData}
-                        isInValidCheck={(rowData) => !rowData.isValid}
+                        setCellColor={(rowData) => !rowData.isValid ? "error" : ""}
                         onSelect={setSelectedProducts}
                         childrenProperty="subRows"
                         uniqueKey="_id"
@@ -461,6 +461,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol }) => {
         }
         {addExistingProductDialog.open &&
             <AddExistingProductInventory
+                renderedFrom={addExistingProductDialog.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
                 isAddingProducts={isAddingProducts}
                 addProductInventory={handleAdd}
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
