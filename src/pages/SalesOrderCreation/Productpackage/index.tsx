@@ -426,7 +426,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
                         height="calc(100vh - 345px)"
                         columns={columns}
                         data={rowsData}
-                        isInValidCheck={(rowData) => !rowData.isValid}
+                        setCellColor={(rowData) => !rowData.isValid ? "error" : ""}
                         onSelect={setSelectedProducts}
                         childrenProperty="subRows"
                         uniqueKey="_id"
