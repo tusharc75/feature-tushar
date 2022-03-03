@@ -29,11 +29,13 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import MobileSortDialog from "../../components/MobileSortDialog";
 import MobileFilterDialog from "../../components/MobileFilterDialog"
+import { camelCase } from 'lodash';
 
 
 
 let timeout;
 function Budget() {
+  const renderedFrom = camelCase(routes?.budget.title)
   const location = useLocation();
   const history = useHistory();
   const {
@@ -121,7 +123,7 @@ function Budget() {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes.budget.title, o?.fieldData, routes.budget.path, true);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.budget.path, true);
 
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
@@ -141,7 +143,7 @@ function Budget() {
       });
   };
 
-  const columnState = JSON.parse(localStorage.getItem('budgetPage'));
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
   if (columnState) {
     columns.map((item) => {
@@ -530,7 +532,7 @@ function Budget() {
                   onCreate={() => setShowManageBudgetDialog({ show: true, id: null, isClone: null })}
                   showClone={false}
                   onClone={() => {}}
-                  renderedFrom={budget.resource}
+                  renderedFrom={renderedFrom}
                 />
               ) :
               <CustomAgGrid
@@ -545,7 +547,7 @@ function Budget() {
                 page={page}
                 actionWidth={100}
                 loading={loading}
-                renderedFrom={routes.budget.title}
+                renderedFrom={renderedFrom}
                 refreshGrid={fetchBudgetList}
               />
             ) : null}

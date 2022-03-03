@@ -55,9 +55,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
-
-  const renderedFrom = camelCase(`${routes.rentalManagement.title}4`);
+const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -243,7 +241,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
       data["startDate"] = rentalManagementData?.estimateStartDate;
       data["endDate"] = rentalManagementData?.estimateStartDate;
-
+      data["isPickupFromDisable"] = true;
+      data["isDeliveryToDisable"] = true;
       setShowTicketDialog({ open: true, data: data });
     }
   };
@@ -344,7 +343,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           }}>Lost</MenuItem>
         </Menu>
         <Box mx={1} />
-        <Tooltip title={selectedRecords.length === 0 ? "Create Loading Ticket" : "Selected assets are located in various locations."}>
+        <Tooltip title={selectedRecords.length === 0 ? "Create Loading Ticket" : "Selected assets are located in several locations."}>
           <span>
             <Button
               onClick={() => { handleDeliveryTicketDialog() }}

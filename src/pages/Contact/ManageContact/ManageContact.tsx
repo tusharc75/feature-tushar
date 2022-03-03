@@ -631,7 +631,6 @@ export default function ManageContact(props) {
                     </Form>
                     {addressOpen?.open && (
                       <ManageAddressDialog
-                        open={addressOpen?.open}
                         onClose={() => setAddressOpen({ open: false, isClone: false })}
                         onSuccess={(data) => {
 
@@ -652,7 +651,6 @@ export default function ManageContact(props) {
                           }]);
                         }
                         }}
-
                       />
                     )}
                   </CustomDialogContent>

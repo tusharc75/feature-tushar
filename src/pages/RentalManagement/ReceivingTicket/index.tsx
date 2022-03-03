@@ -56,9 +56,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
-
-  const renderedFrom = camelCase(`${routes.rentalManagement.title}5`);
+const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom }) => {
 
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -304,6 +302,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     }
     data["startDate"] = rentalManagementData?.estimateStartDate;
     data["endDate"] = rentalManagementData?.estimateStartDate;
+    data["isPickupFromDisable"] = true;
+
     setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
     closeActions()
   };

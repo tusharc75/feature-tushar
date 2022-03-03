@@ -28,9 +28,7 @@ import { fetch_rental_product_fields } from '../../../components/RentalManagment
 import { camelCase } from "lodash";
 
 
-const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJobStatus, statusOptions }) => {
-
-  const renderedFrom = camelCase(`${routes.rentalManagement.title}6`);
+const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJobStatus, statusOptions, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
 
@@ -254,7 +252,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             <Box mx={1} />
           </Fragment>
         }
-        {permissions?.rentalManagement?.isRead && (
+        {permissions?.rentalManagement?.isRead && !isMobile && (
           <Button
             variant={isMobile && !isTablet ? "text" : "outlined"}
             color="primary"

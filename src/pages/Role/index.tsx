@@ -26,11 +26,12 @@ import { useHistory } from 'react-router-dom'
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaSuitcase, MdDescription, IoCreateSharp } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { camelCase } from "lodash";
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 let roleTimeout;
 
-const Roles: FC = () => {
+const Roles: FC = () => { 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory()
   const {
@@ -49,7 +50,7 @@ const Roles: FC = () => {
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
-  const renderedFrom = routes.role.title
+  const renderedFrom = camelCase(routes.role.title)
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -416,6 +417,7 @@ const Roles: FC = () => {
             renderedFrom={"role"} /> : <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
               dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
               loading={loading}
+              isClientSideGrid={true}
               refreshGrid={fetchRoles}
               renderedFrom={renderedFrom}
           />}

@@ -37,8 +37,10 @@ import { isMobile } from 'react-device-detect';
 import { useHistory } from "react-router-dom";
 import styles from "../Leads/Header.module.scss";
 import {MdAdd} from "react-icons/all";
+import { camelCase } from "lodash";
 
 const ProductBuilder = () => {
+  const renderedFrom = camelCase(routes?.productBuilder.title)
   const {
     state: {
       permissions: { productBuilder: permission },
@@ -312,7 +314,7 @@ const ProductBuilder = () => {
           onCreate={false}
           showClone={false}
           onClone={() => { }}
-          renderedFrom={routes.productBuilder.title} /> :
+          renderedFrom={renderedFrom} /> :
           <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
@@ -327,6 +329,7 @@ const ProductBuilder = () => {
             actionWidth={100}
             isClientSideGrid={true}
             loading={loading}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchProductBuilder}
           />
         }

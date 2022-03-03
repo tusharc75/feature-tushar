@@ -101,7 +101,7 @@ const ManageDeliveryTicket = (props) => {
         }
     }, [initialData.fields, refrenceData]);
 
-    const updateFieldProperty = (fields, pickupFromType, deliveryToType, ticketType) => {
+    const updateFieldProperty = (fields, pickupFromType, deliveryToType, ticketType, pickupFrom, deliveryTo, isPickupFromDisable, isDeliveryToDisable) => {
         var warehouse = [];
         var customerAccount = [];
         var supplierAccount = [];
@@ -137,12 +137,23 @@ const ManageDeliveryTicket = (props) => {
                     element.option = supplierAccount
                 }
             }
+            if (isPickupFromDisable && element.fieldName === "pickupFrom") {
+                element.isUneditable = true
+            }
+            if (isDeliveryToDisable && element.fieldName === "deliveryTo") {
+                element.isUneditable = true
+            }
             if (pickupFromType === DELIVERY_FROM_TO_TYPE.plant && element.fieldName === "pickupFromAddress") {
                 element.isUneditable = true
             }
             if (deliveryToType === DELIVERY_FROM_TO_TYPE.plant && element.fieldName === "deliveryToAddress") {
                 element.isUneditable = true
             }
+
+            if (pickupFromType === DELIVERY_FROM_TO_TYPE.plant && deliveryToType === DELIVERY_FROM_TO_TYPE.plant && element.fieldName === "deliveryTo") {
+                element.option = element.option?.filter((e) => e.optionValue !== pickupFrom);
+            }
+
             if (ticketType === DELIVERY_TICKET_TYPE.return && element.fieldName === "returnReason") {
                 element.required = true;
             }
@@ -177,7 +188,8 @@ const ManageDeliveryTicket = (props) => {
                 }
                 setDeliveryTicketData(data)
                 setDisableOwnerSelection(deliveryTicketId && user.user._id !== data?.owner?.optionValue);
-                fieldsDataForUpdate = updateFieldProperty(fieldsDataForUpdate, data?.pickupFromType, data?.deliveryToType, data?.ticketType);
+                fieldsDataForUpdate = updateFieldProperty(fieldsDataForUpdate, data?.pickupFromType,
+                    data?.deliveryToType, data?.ticketType, data?.pickupFrom, data?.deliveryTo, true, true);
                 setInitialData({
                     fields: fieldsDataForUpdate,
                     values: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -185,13 +197,19 @@ const ManageDeliveryTicket = (props) => {
             }
             else {
                 const tempInitialData = getObjKeys("", fieldsDataForCreate)
+                var isPickupFromDisable = false;
+                var isDeliveryToDisable = false;
                 if (productInventory && refrenceType && refrenceData) {
 
                     tempInitialData["type"] = refrenceType;
                     tempInitialData["ticketType"] = ticketType;
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
 
+                    isPickupFromDisable = refrenceData?.isPickupFromDisable ? true : false;
+                    isDeliveryToDisable = refrenceData?.isDeliveryToDisable ? true : false;
+
                     if ((refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder)) {
+
                         if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob) {
                             tempInitialData["ticketName"] = `${refrenceData?.ticketName}_${generateUniqueIdOnly()}`
                             tempInitialData["rentalJob"] = refrenceData?.refrenceId
@@ -290,7 +308,9 @@ const ManageDeliveryTicket = (props) => {
                         }
                     }
                 }
-                fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, tempInitialData["pickupFromType"], tempInitialData["deliveryToType"], tempInitialData["ticketType"]);
+                fieldsDataForCreate = updateFieldProperty(fieldsDataForCreate, tempInitialData["pickupFromType"],
+                    tempInitialData["deliveryToType"], tempInitialData["ticketType"], tempInitialData["pickupFrom"], tempInitialData["deliveryTo"],
+                    isPickupFromDisable, isDeliveryToDisable);
                 setInitialData({
                     fields: fieldsDataForCreate,
                     values: tempInitialData,
