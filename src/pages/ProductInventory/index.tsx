@@ -19,9 +19,10 @@ import { prepareDataForGrid } from "src/constants/helpers"
 import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from "@material-ui/lab";
 import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
-
+import {camelCase} from 'lodash'
 
 const InventoryProduct = () => {
+    const renderedFrom = camelCase(routes?.productInventory.title)
     const toastConfig = useContext(CustomToastContext)
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -154,7 +155,7 @@ const InventoryProduct = () => {
                 <ImportExportLinks
       
                     additionalParams={`wareHouse=${plantId}`}
-                    permissions={permissions.serializedAsset}
+                    permissions={permissions?.productInventory}
                     module="product inventory"
                     api={productInventory.api}
                     afterImportCompleted={() => {
@@ -260,7 +261,7 @@ const InventoryProduct = () => {
                         onCellValueChanged={onCellValueChanged}
                         actionWidth={150}
                         loading={loading}
-                        renderedFrom={routes.serializedAsset?.title}
+                        renderedFrom={renderedFrom}
                         refreshGrid={fetchProductInventory}
                     /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}

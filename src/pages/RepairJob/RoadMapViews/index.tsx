@@ -3,11 +3,11 @@ import ReactFlow, { Controls, ReactFlowProvider } from 'react-flow-renderer';
 import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, REPAIR_JOB_STATUS } from 'src/constants/helpers';
+import { deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, INVENTORY_STATUS, REPAIR_JOB_STATUS } from 'src/constants/helpers';
 
 const customNodeStyles = {
   repairJob: {
-    name: 'Rental Job',
+    name: 'Repair Job',
     background: '#c3d5e6',
     borderColor: '#6c89a6'
   },
@@ -16,13 +16,18 @@ const customNodeStyles = {
     background: '#ffd65b',
     borderColor: '#f5c431'
   },
+  lostOrScrapAssets: {
+    name: 'Lost/Scrap Assets',
+    background: '#ff9980',
+    borderColor: '#db765c'
+  },
   loadingTicket: {
     name: 'Loading Ticket',
     background: '#e6c6e6',
     borderColor: '#b38fb3'
   },
   closedRepairJob: {
-    name: 'Return Ticket',
+    name: 'Completed Repair Job',
     background: '#4BB543',
     borderColor: '#999999'
   }
@@ -83,7 +88,10 @@ const RepairJobViews = (props) => {
           label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.assetNumber}</div>
         },
         position: { x: xPosition, y: index * 80 },
-        style: customNodeStyles.asset
+        style:
+          item?.status === INVENTORY_STATUS.scrap || item?.status === INVENTORY_STATUS.lost
+            ? customNodeStyles.lostOrScrapAssets
+            : customNodeStyles.asset
       });
 
       flowEdge.push({
@@ -94,37 +102,66 @@ const RepairJobViews = (props) => {
       });
     });
 
-    if (tickets?.data?.data?.length) xPosition += 300;
-    tickets?.data?.data?.map((item, index) => {
-      flow.push({
-        id: `${item._id}`,
-        sourcePosition: 'right',
-        targetPosition: 'left',
-        type: 'default',
-        data: {
-          ref_type: 'deliveryTicket',
-          ref_id: item._id,
-          label: (
-            <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {item.ticketName}
-              <br />
-              {item.ticketType} Ticket
-            </div>
-          )
-        },
-        position: { x: xPosition, y: index * 80 },
-        style: item.status === 'Delivered' ? customDeliveredNodeStyle.loadingTicket : customNodeStyles.loadingTicket
+    const allTicketsAssets = assets?.data?.data?.map((asset) => {
+      var assetsTicket = [];
+      tickets?.data?.data?.map((t) => {
+        const ticketInventory = t?.productInventory?.map((i) => i.optionValue);
+        if (ticketInventory.includes(asset.inventory)) {
+          const ticketData = {
+            ticketId: t._id,
+            ticketName: t.ticketName,
+            ticketType: t.ticketType,
+            inventory: asset.inventory,
+            status: t.status
+          };
+          assetsTicket.push(ticketData);
+        }
       });
-      item?.productInventory?.map((i) => {
+      return assetsTicket;
+    });
+
+    var edgeFromTicketToClosed = [];
+    allTicketsAssets?.map((i, index) => {
+      i?.map((item, idx) => {
+        flow.push({
+          id: `${item.ticketId}-${index}-${idx}`,
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          type: 'default',
+          data: {
+            ref_type: 'deliveryTicket',
+            ref_id: item.ticketId,
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {item.ticketName}
+                <br />
+                {item.ticketType} Ticket
+              </div>
+            )
+          },
+          position: { x: xPosition + (idx + 1) * 300, y: index * 80 },
+          style: item.status === 'Delivered' ? customDeliveredNodeStyle.loadingTicket : customNodeStyles.loadingTicket
+        });
         flowEdge.push({
-          id: `edge-asset-${item._id}-${i.optionValue}`,
-          source: `${i.optionValue}`,
+          id: `edge-asset-${item.inventory}-${item.ticketId}-${index}-${idx}`,
+          source: idx === 0 ? `${item.inventory}` : `${i[idx - 1].ticketId}-${index}-${idx - 1}`,
           arrowHeadType: 'arrow',
-          target: `${item._id}`
+          target: `${item.ticketId}-${index}-${idx}`
         });
       });
+      var data = { target: `${i[i.length - 1].ticketId}-${index}-${i.length - 1}` };
+      edgeFromTicketToClosed.push(data);
     });
-    if (repairStatus == REPAIR_JOB_STATUS.completed) {
+
+    var indexData = 0;
+    allTicketsAssets?.map((item) => {
+      if (indexData <= item.length) {
+        indexData = item.length;
+      }
+    });
+    if (indexData !== 0) xPosition += 300 * indexData;
+
+    if (repairStatus === REPAIR_JOB_STATUS.completed) {
       xPosition += 300;
       flow.push({
         id: `${repairId}-closed`,
@@ -139,10 +176,11 @@ const RepairJobViews = (props) => {
         position: { x: xPosition, y: 70 },
         style: customNodeStyles.closedRepairJob
       });
-      tickets?.data?.data?.map((item) => {
+
+      edgeFromTicketToClosed?.map((item, index) => {
         flowEdge.push({
-          id: `edge-asset-${item._id}-closed`,
-          source: `${item._id}`,
+          id: `edge-asset-${repairId}-${index}-closed`,
+          source: `${item.target}`,
           arrowHeadType: 'arrow',
           target: `${repairId}-closed`
         });
@@ -157,7 +195,6 @@ const RepairJobViews = (props) => {
   const onElementClick = (event, element) => {
     switch (element.data.ref_type) {
       case 'repairJob':
-        history.push(`${routes.repairJobDetail.path}/${element.data.ref_id}`);
         break;
       case 'deliveryTicket':
         history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
@@ -165,8 +202,6 @@ const RepairJobViews = (props) => {
       case 'asset':
         history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
-      default:
-        history.push(`${routes.rentalManagementDetail.path}/${element.data.ref_id}?tab=2`);
     }
   };
 

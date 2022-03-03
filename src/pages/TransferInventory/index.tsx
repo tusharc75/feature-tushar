@@ -30,8 +30,10 @@ import { FaSuitcase } from 'react-icons/fa';
 import { MdAdd, MdFilterList, MdSort, RiFileTransferFill, GiCargoShip, RiFolderTransferFill, SiStatuspage } from 'react-icons/all';
 import MobileSortDialog from 'src/components/MobileSortDialog';
 import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import { camelCase } from 'lodash';
 
 const TransferInventory = () => {
+  const renderedFrom = camelCase(routes?.transferInventory.title)
   const toastConfig = useContext(CustomToastContext);
   const [showManageTransferInventoryDialog, setShowManageTransferInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -69,7 +71,7 @@ const TransferInventory = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes.transferInventory?.title, o?.fieldData, routes.transferInventoryDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.transferInventoryDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -482,7 +484,7 @@ const TransferInventory = () => {
                 onClone={(data) => {
                   setShowManageTransferInventoryDialog({ open: true, isClone: true, idToClone: data._id });
                 }}
-                renderedFrom={routes.transferInventory?.title}
+                renderedFrom={renderedFrom}
               />
             ) : (
               <CustomAgGrid
@@ -498,7 +500,7 @@ const TransferInventory = () => {
                 actionWidth={150}
                 loading={loading}
                 isClientSideGrid={true}
-                renderedFrom={routes.transferInventory?.title}
+                renderedFrom={renderedFrom}
                 refreshGrid={fetchTransferInventory}
               />
             )

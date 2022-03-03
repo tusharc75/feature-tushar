@@ -23,11 +23,12 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd,MdSort,MdFilterList } from 'react-icons/all';
 import MobileFilterDialog from "../../components/MobileFilterDialog";
 import MobileSortDialog from "../../components/MobileSortDialog";
-
+import {camelCase} from 'lodash'
 
 let priceTemplateTimeout;
 
 const PriceTemplate: FC = () => {
+  const renderedFrom = camelCase(routes?.priceTemplate.title)
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -439,7 +440,7 @@ const PriceTemplate: FC = () => {
             onClone={(data) => {
               CreateNew(data.id, true);
             }}
-            renderedFrom={'priceTemplatePage'}
+            renderedFrom={renderedFrom}
           />
         ) : (
           <CustomAgGrid
@@ -454,7 +455,7 @@ const PriceTemplate: FC = () => {
             page={page}
             actionWidth={150}
             loading={loading}
-            renderedFrom="priceTemplatePage"
+            renderedFrom={renderedFrom}
             refreshGrid={fetchpriceTemplate}
           />
         )}

@@ -174,6 +174,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                                         data["pickupFrom"] = subleaseData?.supplierAccount?.optionValue;
                                         data["pickupFromAddress"] = subleaseData?.shippingAddress?.optionValue;
                                         data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                                        data["isPickupFromDisable"] = true;
                                         setShowTicketDialog({ open: true, data: data });
                                     }}
                                     disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse")
@@ -204,6 +205,8 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                                         data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.supplier;
                                         data["deliveryTo"] = subleaseData?.supplierAccount?.optionValue;
                                         data["deliveryToAddress"] = subleaseData?.shippingAddress?.optionValue;
+                                        data["isPickupFromDisable"] = true;
+                                        data["isDeliveryToDisable"] = true;
                                         setShowTicketDialog({ open: true, data: data });
                                     }}
                                 >

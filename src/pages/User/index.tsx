@@ -23,7 +23,7 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import { userType, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid } from './../../constants/helpers'
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
-import { uniqBy } from "lodash";
+import { camelCase, uniqBy } from "lodash";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import ApprovalProcessDialog from "./ApprovalProcessDialog";
@@ -39,6 +39,7 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 let userTimeout: ReturnType<typeof setTimeout>;
 
 const User: FC = () => {
+  const renderedFrom = camelCase(routes?.user.title)
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions },
@@ -72,7 +73,7 @@ const User: FC = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-  const columnState = JSON.parse(localStorage.getItem("userPage"));
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteUser, setDeleteUser] = useState<any>({})
   const [allUsers, setAllUsers] = useState([])
@@ -808,7 +809,7 @@ const User: FC = () => {
             onCreate={false}
             showClone={false}
             onClone={() => { }}
-            renderedFrom={"user"} /> 
+            renderedFrom={renderedFrom} /> 
             
             : 
             <CustomAgGrid
@@ -823,7 +824,7 @@ const User: FC = () => {
             page={page}
             actionWidth={110}
             loading={loading}
-            renderedFrom={routes.user.title}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchUsers}
           />}
 

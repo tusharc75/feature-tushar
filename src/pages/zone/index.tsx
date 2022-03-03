@@ -32,6 +32,7 @@ import { useHistory } from 'react-router-dom';
 import { FaSuitcase } from 'react-icons/fa';
 import MobileSortDialog from "../../components/MobileSortDialog"
 import MobileFilterDialog from "../../components/MobileFilterDialog"
+import { camelCase } from 'lodash';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -124,6 +125,7 @@ const intialState = {
 };
 
 const Zone = () => {
+  const renderedFrom = camelCase(routes?.zone.title)
   const history = useHistory();
   const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
@@ -131,13 +133,6 @@ const Zone = () => {
     state: { permissions, user, selectedEntity }
   }: any = useData();
   const { getColumnData } = useColumns();
-
-  const [productCategoryPermissions, setProductCategoryPermissions] = useState({
-    isCreate: permissions.productCategory?.isCreate,
-    isUpdate: permissions.productCategory?.isUpdate,
-    isRead: permissions.productCategory?.isRead,
-    isDelete: permissions.productCategory?.isDelete
-  });
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -148,10 +143,9 @@ const Zone = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
-  const columnState = JSON.parse(localStorage.getItem('productCategoryPage'));
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
-  const localStorageSelectedRecords = `${routes.zone.title}_selected`;
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [isOpenDialog, setisOpenDialog] = useState(false)
   const [sortOpen, setSortOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -165,11 +159,6 @@ const Zone = () => {
     }
   }, [location]);
 
-  useEffect(() => {
-    if (permissions && permissions.productCategory) {
-      setProductCategoryPermissions(permissions.productCategory);
-    }
-  }, [permissions]);
 
   useEffect(() => {
     fetchZone();
@@ -207,7 +196,7 @@ const Zone = () => {
                 { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }
               ];
             } else {
-              let currentColumn = getColumnData(routes.zone.title, o?.fieldData, routes.zone.path);
+              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.zone.path);
 
               if (currentColumn !== null) {
                 columns = [...columns, currentColumn?.columnData];
@@ -240,8 +229,8 @@ const Zone = () => {
   const ActionsRenderer = (params) => (
     <Fragment>
       <Tooltip
-        className={productCategoryPermissions.isCreate ? '' : 'cursor-stop'}
-        title={productCategoryPermissions.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
+        className={permissions.zone.isCreate ? '' : 'cursor-stop'}
+        title={permissions.zone.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
       >
         <IconButton
           size="small"
@@ -254,7 +243,7 @@ const Zone = () => {
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
       </Tooltip>
-      {productCategoryPermissions.isDelete && params?.data?.createdById == user?.user?._id ? (
+      {permissions.zone.isDelete && params?.data?.createdById == user?.user?._id ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -330,9 +319,9 @@ const Zone = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions.productCategory.isDelete;
+          finalObject['canDelete'] = permissions.zone.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions.productCategory.isUpdate;
+          finalObject['allowedToEdit'] = permissions.zone.isUpdate;
           return {
             ...finalObject
 
@@ -438,7 +427,7 @@ const Zone = () => {
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.productCategory}
+            permissions={permissions.zone}
             module="zone"
             api={'/zone'}
             afterImportCompleted={() => {
@@ -531,7 +520,7 @@ const Zone = () => {
                 </Grid>
 
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {productCategoryPermissions.isCreate && (
+                  {permissions.zone.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
@@ -546,7 +535,7 @@ const Zone = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {productCategoryPermissions.isDelete && (
+                  {permissions.zone.isDelete && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="default"
@@ -572,7 +561,7 @@ const Zone = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={!(productCategoryPermissions?.isDelete && !selectedRecords?.some((record) => record.createdById !== user?.user?._id))}
+                      disabled={!(permissions?.zone.isDelete && !selectedRecords?.some((record) => record.createdById !== user?.user?._id))}
                       onClick={() => {
                         closeActions();
                         {
@@ -595,7 +584,7 @@ const Zone = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.productCategory}
+              permissions={permissions.zone}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
                 setZoneId(data.id);
@@ -632,7 +621,7 @@ const Zone = () => {
                 setZoneId(data.id);
                 setOpen({ open: true, isClone: true });
               }}
-              renderedFrom={routes.productCategory.title}
+              renderedFrom={renderedFrom}
             />
           ) : (
             <CustomAgGrid
@@ -647,7 +636,7 @@ const Zone = () => {
               page={page}
               allowAction={true}
               loading={loading}
-              renderedFrom={routes.productCategory.title}
+              renderedFrom={renderedFrom}
               refreshGrid={fetchZone}
             />
           )
@@ -664,7 +653,7 @@ const Zone = () => {
 
         {open?.open && (
           <CreateZone
-            isUpdateDisaCreateProductCategorybled={false}
+          isUpdateDisabled={false}
             zoneId={zoneId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}

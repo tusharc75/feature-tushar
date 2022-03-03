@@ -12,7 +12,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 
 const CompletedGrid = (props) => {
-  const { transferData, setTransferIsEnded } = props;
+  const { transferData, setTransferIsEnded, renderedFrom } = props;
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions }
@@ -55,7 +55,7 @@ const CompletedGrid = (props) => {
           finalObject['productName'] = u.productDetail.productName;
           finalObject['qty'] = u.qty;
 
-          setTransferIsEnded(true)
+          setTransferIsEnded(true);
 
           return {
             ...finalObject
@@ -106,16 +106,16 @@ const CompletedGrid = (props) => {
             loading={loading}
             chips={[
               {
-                label: "Quantity: ",
-                field: "qty",
-              },
+                label: 'Quantity: ',
+                field: 'qty'
+              }
             ]}
             additionalDetails={[]}
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
             onCreate={false}
             showClone={false}
             onClone={() => {}}
-            renderedFrom="transferInentoryPage"
+            renderedFrom={renderedFrom}
           />
         ) : (
           <CustomAgGrid
@@ -133,7 +133,7 @@ const CompletedGrid = (props) => {
             allowSelection={false}
             isClientSideGrid={true}
             loading={loading}
-            renderedFrom="transferInentory_completedInventory"
+            renderedFrom={renderedFrom}
             refreshGrid={() => {}}
           />
         )}

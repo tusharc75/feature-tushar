@@ -210,8 +210,8 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                     variant="contained"
                                     disabled={!getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length || isAddingProducts}
                                     endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
-                                    {getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? "(" + getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length + ")  " : ""}
-                                    Add</Button>
+                                    Add{getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length + ")" : ""}
+                                </Button>
                             </Box>
                         </Grid>
                     </Grid>
