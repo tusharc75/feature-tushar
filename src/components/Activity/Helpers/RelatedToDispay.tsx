@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { makeStyles } from "@material-ui/core/styles";
 import { Chip, Box, Typography } from "@material-ui/core";
 import { purple } from "@material-ui/core/colors";
-import { startCase } from "lodash";
 import { resActivityColors } from "./utils";
 import { useHistory } from 'react-router-dom';
 import routes from "../../Helpers/Routes";
@@ -24,7 +23,7 @@ export const RelatedToDispay = ({ relatedTo }) => {
   const history = useHistory();
   const handleClick = (obj, resourceName) => {
     history.push(
-      `${routes[resourceName].path}/detail/${obj?._id}` 
+      `${routes[resourceName].path}/detail/${obj?._id}`
     )
   }
   return (
@@ -44,7 +43,7 @@ export const RelatedToDispay = ({ relatedTo }) => {
           >
             <Chip
               key={index}
-              label={startCase(_element.type) + " - " + _element.name}
+              label={routes[_element?.type]?.title + " - " + _element.name}
               size="medium"
               style={{
                 backgroundColor: resActivityColors[_element.type],
