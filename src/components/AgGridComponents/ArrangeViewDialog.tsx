@@ -64,7 +64,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const [newData, setNewData] = React.useState('');
   const [allChecked, setAllChecked] = React.useState(false);
   const [hasChanged, setHasChanged] = React.useState(false);
-  const [isMinimized, setMinimized] = React.useState(false);
+  const [isMinimized, setMinimized] = React.useState(true);
 
   const [lockedItem, setLockedItem] = React.useState([]);
 
@@ -189,7 +189,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   }, [searchVal]);
 
   return (
-    <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized}>
       <CustomDialogHeader
         title="Arrange View"
         onClose={onClose}
