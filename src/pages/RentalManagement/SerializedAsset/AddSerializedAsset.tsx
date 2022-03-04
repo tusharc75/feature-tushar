@@ -343,7 +343,6 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                             <Grid item xs={12} sm={7}>
                                 {refrenceType === "Rental Job" &&
                                     <Grid container justifyContent={isSmallScreen ? "flex-start" : "flex-end"}>
-
                                         <FormControlLabel
                                             control={
                                                 <Checkbox
@@ -353,7 +352,12 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                                                         dispatch({ type: "selection", selectedRecords: [] })
                                                         localStorage.removeItem(localStorageSelectedRecords)
                                                         setSubleaseAsset(e.target.checked)
-                                                        setSelectedPlant(null)
+                                                        if (e.target.checked) {
+                                                            setSelectedPlant(null)
+                                                        }
+                                                        else {
+                                                            setSelectedPlant(filterByPlant)
+                                                        }
                                                     }}
                                                     color="primary"
                                                 />
