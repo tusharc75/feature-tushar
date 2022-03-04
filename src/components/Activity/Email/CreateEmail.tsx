@@ -517,22 +517,16 @@ export const CreateEmail = ({
                           : "attachment"}
                       </Typography>
                       <div className={emailStyles.actionButton}>
-                        <IconButton >
-                          <GetAppIcon
-                            onClick={() => handleDownloadFile(attachment)}
-                          />
-                        </IconButton>
                         <IconButton className={emailStyles.text}>
-                          {emailId ? (
-                            <a href={`${attachment} `} download={true}>
+                        <a href={`${attachment} `} download={true}>
                               <GoArrowDown color="white" size={21} />
                             </a>
-                          ) : (
+                        </IconButton>
+                        <IconButton className={emailStyles.text}>
                             <DeleteIcon
                               className={emailStyles.deleteIcon}
                               onClick={() => handleDeleteAttachment(attachment)}
                             />
-                          )}
                         </IconButton>
                       </div>
                     </div>
