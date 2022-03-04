@@ -23,12 +23,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
 
   const checkAccess = async () => {
     let path = camelCase(pathnames[0]);
-
     if (path === 'quotes') {
       path = 'quoteBuilder';
-    }
-    if (path === "projectSales") {
-      path = "projectStrategy"
     }
     if (permissions && permissions[path]) {
       if (permissions[path].isRead) {

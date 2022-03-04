@@ -990,7 +990,7 @@ export default function QuoteDetail() {
                           handleSetSteps={handleSetSteps}
                         />
                       )}
-                      {permissions?.projectStrategy?.isRead && (
+                      {permissions?.projectSales?.isRead && (
                         <ProjectInAccordion
                           recordsPerLine={3}
                           projectSales={(relatedTo && relatedTo['Project Sales']?.Quotes) || []}
