@@ -1660,7 +1660,6 @@ export const ACTIVITY_RESOURCE = {
   deliveryTicket: 'deliveryTicket',
   sublease: 'sublease',
   salesOrder: 'salesOrder',
-  transferInventory: 'transferInventory'
 };
 
 export const REPORT_LIST = [

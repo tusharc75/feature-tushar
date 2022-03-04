@@ -12,7 +12,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { ACTIVITY_RESOURCE, transferInventory } from 'src/constants/helpers';
+import { transferInventory } from 'src/constants/helpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
 import TransferStepper from './TransferInventorySteps';
@@ -314,7 +314,7 @@ const TransferInventoryDetailPage = () => {
                       <div>
                         <Activity
                           resourceId={transferInventoryData?._id}
-                          resource={ACTIVITY_RESOURCE.transferInventory}
+                          resource={transferInventory.resource}
                           // restrictedAddActivities={
                           //   permissions && permissions['transferInventory'] && permissions['rentalManagement'].isUpdate
                           //   ? []
@@ -324,10 +324,10 @@ const TransferInventoryDetailPage = () => {
                             {
                               access: true,
                               referenceId: transferInventoryData?._id,
-                              type: ACTIVITY_RESOURCE.transferInventory
+                              type: 'transferInventory'
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>
