@@ -162,7 +162,6 @@ function OpportunityDetailsPage() {
       axiosInstance()
         .get(`${opportunityApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
-          console.log(data,"data")
           let modifiedData = {};
           Object.assign(modifiedData, data);
           modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).fullFormatAmount;
@@ -346,12 +345,12 @@ function OpportunityDetailsPage() {
       axiosInstance()
         .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
-          const filteredFields = data.filter((currentField) => currentField.fieldData?.fieldName !== 'supplierAccountName');
+          const filteredFields = data.filter((currentField) => currentField.fieldData?.fieldName !== 'supplierAccount');
 
           const processSteps = data.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
 
           if (data && data.length) {
-            let fieldData = data.find((currentField) => currentField?.fieldData?.fieldName === 'supplierAccountName')?.fieldData;
+            let fieldData = data.find((currentField) => currentField?.fieldData?.fieldName === 'supplierAccount')?.fieldData;
             if (fieldData?.option && fieldData.option.length) {
               setSupplierAccountOptions(
                 fieldData.option.map((option) => ({
@@ -563,8 +562,8 @@ function OpportunityDetailsPage() {
   };
 
   let selectedSupplierAccounts = [];
-  if (opportunityData?.supplierAccountName && opportunityData.supplierAccountName.length) {
-    selectedSupplierAccounts = opportunityData.supplierAccountName.map((s) => s.optionValue);
+  if (opportunityData?.supplierAccount && opportunityData.supplierAccount.length) {
+    selectedSupplierAccounts = opportunityData.supplierAccount.map((s) => s.optionValue);
   }
 
   return (

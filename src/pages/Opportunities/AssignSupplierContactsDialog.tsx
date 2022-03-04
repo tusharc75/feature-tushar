@@ -9,7 +9,8 @@ import {
     ListItemIcon,
     ListItemText,
     Typography,
-    TextField
+    TextField,
+    Chip
 } from "@material-ui/core";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -128,6 +129,15 @@ export default function AssignSupplierContactsDialog({
                             options={supplierAccountOptions}
                             value={supplierAccountOptions.filter(o => selectedSupplierAccounts.indexOf(o.optionValue) >= 0)}
                             getOptionLabel={(option) => option["optionLabel"] || ''}
+                            // renderTags={(value, getTagProps) =>
+                            //     value.map((option, index) => (
+                            //       <Chip
+                            //         variant="outlined"
+                            //         label={option}
+                            //         {...getTagProps({ index })}
+                            //       />
+                            //     ))
+                            //   }
                             style={{ padding: '10px 5px' }}
                             renderInput={(params) => <TextField {...params} label="Supplier Accounts" variant="outlined" />}
                             onChange={handleSupplierAccountChange}
