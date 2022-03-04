@@ -129,15 +129,6 @@ export default function AssignSupplierContactsDialog({
                             options={supplierAccountOptions}
                             value={supplierAccountOptions.filter(o => selectedSupplierAccounts.indexOf(o.optionValue) >= 0)}
                             getOptionLabel={(option) => option["optionLabel"] || ''}
-                            // renderTags={(value, getTagProps) =>
-                            //     value.map((option, index) => (
-                            //       <Chip
-                            //         variant="outlined"
-                            //         label={option}
-                            //         {...getTagProps({ index })}
-                            //       />
-                            //     ))
-                            //   }
                             style={{ padding: '10px 5px' }}
                             renderInput={(params) => <TextField {...params} label="Supplier Accounts" variant="outlined" />}
                             onChange={handleSupplierAccountChange}
