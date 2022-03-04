@@ -14,7 +14,8 @@ import { useData } from '../../../../StateProvider/Provider';
 
 import { BoardList } from './BoardList';
 import axiosInstance from '../../../../axios/axiosInstance';
-import { getApi, getData, resourceOptions } from '../../../../constants/helpers';
+import { getApi, getData } from '../../../../constants/helpers';
+import { get_activity_resource } from '../../../Activity/Helpers/utils';
 
 const useStyles = makeStyles((theme) => ({
   block: {
@@ -39,10 +40,15 @@ const Board = ({ type, filter }) => {
   const {
     state: { user, permissions }
   }: any = useData();
-  const [resource, setResource] = useState('');
+  const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
+  const [resourceOptions, setResourceOptions] = useState([]);
+
+  useEffect(() => {
+    setResourceOptions(get_activity_resource(permissions))
+  }, []);
 
   useEffect(() => {
     fetchBoard();
@@ -61,26 +67,26 @@ const Board = ({ type, filter }) => {
 
   // Data for Autocomplete
   useEffect(() => {
-    if (!resource) return;
-    setLoadingResources(true);
-    axiosInstance()
-      .get(`${getApi(resource)}?limit=100`)
-      .then(({ data: { data } }) => {
-        if (data.length) {
-          const mappedData = data.map((_d) => getData(resource, _d));
-          setResourceData(mappedData || []);
-        }
-        setLoadingResources(false);
-      })
-      .catch((error) => {
-        setLoadingResources(false);
-      });
+    if (resource && resource?.optionValue) {
+      setLoadingResources(true);
+      axiosInstance()
+        .get(`${getApi(resource?.optionValue)}?limit=100`)
+        .then(({ data: { data } }) => {
+          if (data.length) {
+            const mappedData = data.map((_d) => getData(resource?.optionValue, _d));
+            setResourceData(mappedData || []);
+          }
+          setLoadingResources(false);
+        })
+        .catch((error) => {
+          setLoadingResources(false);
+        });
 
-    return () => {
-      setSelectedResourceData(null);
-      setResourceData(null);
-    };
-    // eslint-disable-next-line
+      return () => {
+        setSelectedResourceData(null);
+        setResourceData(null);
+      };
+    }
   }, [resource]);
 
   const handleChangeStatus = (activityId: string, status: string, newIndex: string) => {
@@ -115,78 +121,12 @@ const Board = ({ type, filter }) => {
       });
   };
 
-
-  let newResourceOptions = [];
-
-  for(let i=0; i<resourceOptions.length; i++){
-    if(resourceOptions[i] === 'Customer Account'){
-       if(permissions.customerAccount.isRead === true ){
-         newResourceOptions.push(resourceOptions[i]);
-         i++;
-       }
-    }
-    if(resourceOptions[i] === 'Customer Contact'){
-      if(permissions.customerContact.isRead === true ){
-        newResourceOptions.push(resourceOptions[i]);
-      }
-   }
-   if(resourceOptions[i] === 'Supplier Account'){
-    if(permissions.supplierAccount.isRead === true ){
-      newResourceOptions.push(resourceOptions[i]);
-    }
- }
- if(resourceOptions[i] === 'Supplier Contact'){
-  if(permissions.supplierContact.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-if(resourceOptions[i] === 'Lead'){
-  if(permissions.lead.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-if(resourceOptions[i] === 'Opportunity'){
-  if(permissions.opportunity.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-if(resourceOptions[i] === 'Customer Account'){
-  if(permissions.customerAccount.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-if(resourceOptions[i] === 'Quote'){
-  if(permissions.quoteBuilder.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-if(resourceOptions[i] === 'Rental Management'){
-  if(permissions.rentalManagement.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-if(resourceOptions[i] === 'Delivery Ticket'){
-  if(permissions.deliveryTicket.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-if(resourceOptions[i] === "Project Sales"){
-  if(permissions.projectSales.isRead === true ){
-    newResourceOptions.push(resourceOptions[i]);
-  }
-}
-  }
-
-
-
-
-
   return (
     <>
       <Box display="flex" pb={1}>
         <Autocomplete
-          options={newResourceOptions}
-          getOptionLabel={(option) => option}
+          options={resourceOptions}
+          getOptionLabel={(option) => option.optionLabel}
           style={{ width: '50%' }}
           value={resource}
           onChange={(event, newValue) => {
@@ -202,7 +142,7 @@ if(resourceOptions[i] === "Project Sales"){
           }
         />
         <Box mx={isMobile ? 0 : 1} />
-        {Boolean(resource) && resourceData && (
+        {resource && resourceData && (
           <Autocomplete
             disabled={loadingResources}
             options={resourceData}
@@ -214,7 +154,7 @@ if(resourceOptions[i] === "Project Sales"){
               setSelectedResourceData(newValue);
             }}
             size="small"
-            renderInput={(params) => <TextField {...params} label={`Select ${resource}`} variant="outlined" />}
+            renderInput={(params) => <TextField {...params} label={`Select ${resource.optionLabel}`} variant="outlined" />}
           />
         )}
       </Box>
@@ -238,7 +178,7 @@ if(resourceOptions[i] === "Project Sales"){
                 <BoardList
                   loading={loading}
                   selectedResource={selectedResourceData}
-                  resource={resource}
+                  resource={resource?.optionValue}
                   status={data.status}
                   activity={activities.filter(function (o) {
                     return o.status === data.status;
