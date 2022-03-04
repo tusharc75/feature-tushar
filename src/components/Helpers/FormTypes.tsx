@@ -156,8 +156,7 @@ const GreenSwitch = withStyles({
   track: {}
 })(Switch);
 
-const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, name, handleChange, isMultiple = false }) => {
-  //const [values, setValues] = React.useState([]);
+const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, name, handleChange, isMultiple = false, values }) => {
   const [inputVal, setInputVal] = React.useState("")
   const [error, setError] = React.useState(null)
 
@@ -181,7 +180,7 @@ const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, 
       const newOption = { order: order, default: false, optionLabel: inputVal, optionValue: inputVal }
       addFieldOption([newOption])
       setOptions([...options, newOption])
-      handleChange(name, isMultiple ? [inputVal] : inputVal);
+      handleChange(name, isMultiple ? [...values[name], inputVal] : inputVal);
       setOpen(false)
     }
   }
@@ -906,7 +905,7 @@ const FormTypes = (props) => {
                           addFieldOption(newOption);
                           setOptionsList([...option, newOption]);
                         }
-                        if (addAdditionalOption) {
+                        if (addAdditionalOption || fieldData?.addAdditionalOption) {
                           handleChange(name, val);
                         }
                       } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
@@ -923,7 +922,7 @@ const FormTypes = (props) => {
                           setOptionsList([...option, newOption]);
                           addFieldOption(newOption);
                         }
-                        if (addAdditionalOption) {
+                        if (addAdditionalOption || fieldData?.addAdditionalOption) {
                           handleChange(name, val.inputValue);
                         }
                       } else {
@@ -995,7 +994,7 @@ const FormTypes = (props) => {
               <AddCircleIcon />
             </IconButton>
 
-            {optionSaveDialog && <AddOptionDialog handleChange={handleChange} name={name} label={label} addFieldOption={addFieldOption} options={option} setOptions={setOptionsList} setOpen={setOptionSaveDialog} />}
+            {optionSaveDialog && <AddOptionDialog values={values} handleChange={handleChange} name={name} label={label} addFieldOption={addFieldOption} options={option} setOptions={setOptionsList} setOpen={setOptionSaveDialog} />}
           </Grid>
         )}
       </Grid>
@@ -1515,7 +1514,7 @@ const FormTypes = (props) => {
                             addFieldOption(newOption);
                             setOptionsList([...option, newOption]);
                           }
-                          if (addAdditionalOption) {
+                          if (addAdditionalOption || fieldData?.addAdditionalOption) {
                             setFieldValue(name, [...values[name], val]);
                           }
                         } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
@@ -1530,7 +1529,7 @@ const FormTypes = (props) => {
                             addFieldOption(newOption);
                             setOptionsList([...option, newOption]);
                           }
-                          if (addAdditionalOption) {
+                          if (addAdditionalOption || fieldData?.addAdditionalOption) {
                             setFieldValue(name, [...values[name], val.inputValue]);
                           }
                         } else {
@@ -1602,7 +1601,7 @@ const FormTypes = (props) => {
             <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
               <AddCircleIcon />
             </IconButton>
-            {optionSaveDialog && <AddOptionDialog handleChange={handleChange} name={name} label={label} addFieldOption={addFieldOption} options={option} setOptions={setOptionsList} setOpen={setOptionSaveDialog} isMultiple={Boolean(type === 'multiSelect')} />}
+            {optionSaveDialog && <AddOptionDialog values={values} handleChange={handleChange} name={name} label={label} addFieldOption={addFieldOption} options={option} setOptions={setOptionsList} setOpen={setOptionSaveDialog} isMultiple={Boolean(type === 'multiSelect')} />}
           </Grid>
         )}
       </Grid>

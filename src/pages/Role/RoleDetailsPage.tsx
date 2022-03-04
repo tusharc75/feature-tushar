@@ -8,8 +8,16 @@ import {
   CircularProgress,
   Typography,
   IconButton,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  FormControlLabel,
+  Checkbox
 } from "@material-ui/core";
-import { ControlPoint } from "@material-ui/icons";
+import { ControlPoint, KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -34,6 +42,10 @@ import {
 } from "../../StateProvider/actionTypes";
 import { PERMISSION } from "../../constants/Roles";
 import { roleTypes } from "../../constants/helpers";
+import React from "react";
+import { startCase, camelCase } from "lodash";
+import { RiNurseFill } from "react-icons/ri";
+import PolicyResources from "./PolicyResources";
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -66,11 +78,70 @@ const RoleDetailsPage = () => {
   const showRecordsBeforeViewAll = 2;
   const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
   const [entityAccess, setEntityAccess] = useState([]);
+  const [open, setOpen] = useState({
+    rentalManagement: false,
+    sublease: false,
+    purchaseOrder: false,
+  })
+  const [policyFieldCheckBox, SetPolicyFieldCheckBox] = useState(
+    {
+      isPricingRentalManagement: false,
+      isPricingSublease: false,
+      isPricingPurchaseOrder: false
+    })
+  const [resourceCheckbox, setResourceCheckBox] = useState({
+    rentalManagement: false,
+    sublease: false,
+    purchaseOrder: false,
+  })
+  const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false)
+
+
+  const policyResources = [
+    {
+      resource: "Rental Management",
+      fieldLabel: "Pricing Information",
+      fieldName: "isPricingRentalManagement"
+    },
+    {
+      resource: "Sublease",
+      fieldLabel: "Pricing Information",
+      fieldName: "isPricingSublease"
+    },
+    {
+      resource: "Purchase Order",
+      fieldLabel: "Pricing Information",
+      fieldName: "isPricingPurchaseOrder"
+    }];
+
+  const fieldOfPolicyResources = policyResources?.map((obj) => {
+    if (obj?.fieldName) {
+      return (
+        {
+          resource: obj?.resource,
+          field: obj?.fieldName,
+          fieldLabel: obj?.fieldLabel,
+        }
+      )
+    }
+  });
+
+  const isPolicyTableVisible = () => {
+    let accessArray = []
+    policyResources.map((item) => {
+      accessArray.push(permissions[camelCase(item.resource)]?.isRead)
+    })
+    return accessArray.filter(item => item === true).length > 0
+  }
+
+
+
 
   useEffect(() => {
     if (id) {
       fetchRoleData();
       fetchLoggedInUserEntities();
+
     }
     // eslint-disable-next-line
   }, [id]);
@@ -90,6 +161,51 @@ const RoleDetailsPage = () => {
     };
     setUpdatedData(JSON.stringify(data));
   }, [values, field, resource]);
+
+  useEffect(() => {
+    if (resourceCheckbox.purchaseOrder && resourceCheckbox.rentalManagement && resourceCheckbox.sublease) {
+      setIsPolicyCheckBoxChecked(true)
+    } else {
+      setIsPolicyCheckBoxChecked(false)
+    }
+
+  }, [resourceCheckbox])
+
+  const handlePolicyCheckBox = (checkBoxType, e, type = null, resourceObject = null) => {
+    if (checkBoxType === "Select-All") {
+      setIsPolicyCheckBoxChecked(e.target.checked)
+      setResourceCheckBox({
+        rentalManagement: e.target.checked,
+        purchaseOrder: e.target.checked,
+        sublease: e.target.checked
+      })
+      SetPolicyFieldCheckBox({
+        isPricingPurchaseOrder: e.target.checked,
+        isPricingRentalManagement: e.target.checked,
+        isPricingSublease: e.target.checked
+      })
+    }
+    if (checkBoxType === "Policy-CheckBox") {
+      setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(type.resource)]: e.target.checked }))
+      SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [type.fieldName]: e.target.checked }))
+    }
+
+    if (checkBoxType === "Fields") {
+      SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [type.field]: e.target.checked }))
+      setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(resourceObject.resource)]: e.target.checked }))
+    }
+  }
+
+  const handlePolicyResourceCheckBox = async (field) => {
+    const resources = Object.keys(resourceCheckbox);
+    resources.map((key) => {
+      const isAllFieldChecked = policyResources.filter((item) => item.resource === startCase(key)).some((obj) => field[obj.fieldName] === false)
+      if (!isAllFieldChecked) {
+        setResourceCheckBox((prevState) => ({ ...prevState, [key]: true }))
+      }
+    })
+  }
+
 
   const fetchLoggedInUserEntities = async () => {
     const entityIds = user.entity?.map((e) => e._id);
@@ -115,6 +231,15 @@ const RoleDetailsPage = () => {
       };
       setCurrentData(JSON.stringify(current));
       setCustomizedRoutes([routes.role, { title: data.name }]);
+      if (data?.policy) {
+        let copyOfResourcePolicy = {}
+        for (const item in data?.policy) {
+          copyOfResourcePolicy[item] = data?.policy[item];
+        }
+        SetPolicyFieldCheckBox((prevState) => ({ ...prevState, ...copyOfResourcePolicy }))
+        handlePolicyResourceCheckBox(copyOfResourcePolicy)
+      }
+
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -144,7 +269,6 @@ const RoleDetailsPage = () => {
 
   const handleUpdateRole = () => {
     setUpdating(true);
-
     axiosInstance()
       .put(`/role`, {
         _id: id,
@@ -152,6 +276,8 @@ const RoleDetailsPage = () => {
         field,
         resource,
         type: roleData.type,
+        policy:
+          policyFieldCheckBox
       })
       .then(({ data }) => {
         fetchRoleData();
@@ -332,7 +458,7 @@ const RoleDetailsPage = () => {
                 <DetailsPageHeader heading={headingLbl} showHeading={true}>
                   {permissions.role.isUpdate && !isEditDeleteDisable ? (
                     <Button
-                      disabled={currentData === updatedData || isUpdating || checkError()}
+                      disabled={isUpdating || checkError()}
                       variant="contained"
                       color="primary"
                       size="small"
@@ -393,20 +519,36 @@ const RoleDetailsPage = () => {
                 ) : (
                   field.length &&
                   resource.length && (
-                    <RoleEngine
-                      style={{height: "70vh",}}
-                      field={field}
-                      resource={resource}
-                      setField={setField}
-                      setResource={setResource}
-                      isDisable={
-                        permissions.role.isUpdate
-                          ? isEditDeleteDisable
-                            ? true
-                            : false
-                          : true
+                    <>
+                      <RoleEngine
+                        style={{ height: "70vh", }}
+                        field={field}
+                        resource={resource}
+                        setField={setField}
+                        setResource={setResource}
+                        isDisable={
+                          permissions.role.isUpdate
+                            ? isEditDeleteDisable
+                              ? true
+                              : false
+                            : true
+                        }
+                      />
+                      {
+                        isPolicyTableVisible() &&
+                        <PolicyResources
+                          policyResources={policyResources}
+                          fieldOfPolicyResources={fieldOfPolicyResources}
+                          resourceCheckbox={resourceCheckbox}
+                          policyFieldCheckBox={policyFieldCheckBox}
+                          isPolicyCheckBoxChecked={isPolicyCheckBoxChecked}
+                          handlePolicyCheckBox={handlePolicyCheckBox}
+                          open={open}
+                          setOpen={setOpen}
+                          permissions={permissions}
+                        />
                       }
-                    />
+                    </>
                   )
                 )}
                 {/* </TableBody>

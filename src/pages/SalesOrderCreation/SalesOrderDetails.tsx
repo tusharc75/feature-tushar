@@ -11,7 +11,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { salesOrder, defaultActivityShow, salesOrderProcessSteps, getUniqueCurrencies } from '../../constants/helpers';
+import { salesOrder, defaultActivityShow, salesOrderProcessSteps, getUniqueCurrencies, ACTIVITY_RESOURCE } from '../../constants/helpers';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog/ManageSalesOrderDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
@@ -30,10 +30,11 @@ import { GrStatusInfo } from "react-icons/all";
 import HideWhenOffline from '../../components/HideWhenOffline';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from '../../components/Activity';
+import { camelCase } from 'lodash';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
-
+  const renderedFrom = camelCase(routes?.salesOrder.title)
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -346,12 +347,16 @@ const SalesOrderDetails = () => {
                       <Productpackage
                         salesOrderData={salesOrderData}
                         setNextStep={setNextStep}
-                        currencySymbol={currencySymbol} />
+                        currencySymbol={currencySymbol} 
+                        renderedFrom={`${renderedFrom}_grid-1`}
+                        />
                     )}
                     {currentStep === 1 && salesOrderData &&
                       <AdditionalCost
                         salesOrderData={salesOrderData}
-                        setNextStep={setNextStep} />}
+                        setNextStep={setNextStep} 
+                        renderedFrom={`${renderedFrom}_grid-2`}  
+                      />}
                     {currentStep === 2 && salesOrderData && (
                       <SerializedAsset
                         salesOrderData={salesOrderData}
@@ -360,6 +365,7 @@ const SalesOrderDetails = () => {
                         isTabletScreen={isTabletScreen}
                         showActivity={showActivity}
                         currencySymbol={currencySymbol}
+                        renderedFrom={`${renderedFrom}_grid-3`}  
                       />
                     )}
                     {currentStep === 3 && salesOrderData && (
@@ -368,6 +374,7 @@ const SalesOrderDetails = () => {
                         salesOrderData={salesOrderData}
                         currentStep={currentStep}
                         setNextStep={setNextStep}
+                        renderedFrom={`${renderedFrom}_grid-4`}  
                       />
                     )}
 
@@ -378,6 +385,7 @@ const SalesOrderDetails = () => {
                         fetchSalesOrderData={fetchSalesOrderData}
                         updateJobStatus={updateJobStatus}
                         statusOptions={statusOptions}
+                        renderedFrom={`${renderedFrom}_grid-5`}  
                       />
                     )}
                   </Paper>
@@ -440,15 +448,15 @@ const SalesOrderDetails = () => {
                         <div>
                           <Activity
                             resourceId={salesOrderData._id}
-                            resource={salesOrder.resource}
+                            resource={ACTIVITY_RESOURCE.salesOrder}
                             restrictedAddActivities={
-                              permissions && permissions['salesOrder'] && permissions['salesOrder'].isUpdate
+                              permissions && permissions[`${ACTIVITY_RESOURCE.salesOrder}`] && permissions[`${ACTIVITY_RESOURCE.salesOrder}`].isUpdate
                                 ? []
                                 : ['Attachment', 'Case']
                             }
                             relatedTo={[
                               {
-                                type: salesOrder,
+                                type: ACTIVITY_RESOURCE.salesOrder,
                                 referenceId: salesOrderData._id,
                                 access: true
                               }

@@ -40,6 +40,7 @@ const RepairJobType = [
 ];
 
 const RepairJob = () => {
+  const renderedFrom = camelCase(routes?.repairJob.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -564,7 +565,7 @@ const RepairJob = () => {
                 onCreate={false}
                 showClone={false}
                 onClone={() => { }}
-                renderedFrom='repairJobPage'
+                renderedFrom={renderedFrom}
               /> :
               <CustomAgGrid
                 columns={columns}
@@ -578,7 +579,7 @@ const RepairJob = () => {
                 page={page}
                 actionWidth={100}
                 loading={loading}
-                renderedFrom='repairJobPage'
+                renderedFrom={renderedFrom}
                 refreshGrid={fetchRepairJobs}
               /> : null
         }

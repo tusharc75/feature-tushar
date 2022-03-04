@@ -22,7 +22,7 @@ import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { useHistory } from "react-router-dom";
 import InfoIcon from '@material-ui/icons/Info';
 
-const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
+const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -431,7 +431,7 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
               height="calc(100vh - 365px)"
               columns={columns}
               data={rowsData}
-              isInValidCheck={(rowData) => !rowData.isValid}
+              setCellColor={(rowData) => !rowData.isValid ? "error" : ""}
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
@@ -443,6 +443,7 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
     </Grid>
     {addSerializedAssetDialog &&
       <AddSerializedAsset
+        renderedFrom={renderedFrom}
         addSerializedAsset={handleAddSerializedAsset}
         handleSerializedAssetClose={() => {
           setAddSerializedAssetDialog(false);

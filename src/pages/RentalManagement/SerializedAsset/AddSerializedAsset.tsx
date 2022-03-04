@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
-import { Box, CircularProgress , useMediaQuery, useTheme} from "@material-ui/core";
+import { Box, CircularProgress, useMediaQuery, useTheme } from "@material-ui/core";
 import SearchBox from '../../../components/Helpers/SearchBox'
 import routes from "../../../components/Helpers/Routes";
 import { Link, useHistory } from 'react-router-dom';
@@ -26,12 +26,13 @@ import TextField from "@material-ui/core/TextField";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 
-const addSerializedAssetsRenderedFrom = "addSerializedAssets";
-const localStorageSelectedRecords = `${addSerializedAssetsRenderedFrom}_selected`;
 
-const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, refrenceType = null,
+const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, refrenceType = null,
     refrenceData = null,
     rentalId = null, repairJobId = null, transferAssetId = null, salesOrderId = null, notIn = null, queryString = null, filterByPlant = null }) => {
+
+    const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
     const theme = useTheme()
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('xs'))
     const toastConfig = useContext(CustomToastContext)
@@ -73,7 +74,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
             let columns = []
             let rendererNames = []
             data.forEach(o => {
-                let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
+                let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path)
                 if (currentColumn !== null) {
                     columns = [...columns, currentColumn?.columnData]
                     if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -281,48 +282,47 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
         >
             <CustomDialogHeader title={`Add ${routes.serializedAsset.title}`} onClose={handleSerializedAssetClose} ></CustomDialogHeader>
             <CustomDialogContent>
-            <Grid container justifyContent='flex-end' alignItems="flex-start">
-                <Box mb={isSmallScreen ? 1 : 0}>
+                <Grid container justifyContent='flex-end' alignItems="flex-start">
+                    <Box mb={isSmallScreen ? 1 : 0}>
 
-                <SearchBox
-                    onSearch={handleSearch}
-                    searchbox="terms_header_search_bar"
-                    value={search}
-                    width={isMobile ? '200px' : '242px'}
-                    style={isMobile ? { flex: 1 } : {}}
-                />
-                </Box>
-                <Box ml={1} display='flex' alignItems={'center'}>
-                {(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) &&
+                        <SearchBox
+                            onSearch={handleSearch}
+                            searchbox="terms_header_search_bar"
+                            value={search}
+                            width={isMobile ? '200px' : '242px'}
+                            style={isMobile ? { flex: 1 } : {}}
+                        />
+                    </Box>
+                    <Box ml={1} display='flex' alignItems={'center'}>
+                        {(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) &&
+                            <Button
+                                color="primary"
+                                onClick={() => { setShowTransferAssetDialog(true) }}
+                                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                                disabled={isAdding || serializedProducts.some(d => d?.qty < 0)}
+                                className={isMobile && !isTablet ? 'mobile_button' : ""}
+                                endIcon={isAdding && <CircularProgress size={20} />}
+                            >
+                                {isMobile && !isTablet ? <MdAdd size={23} /> : 'Create Transfer Asset'}
+                                {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")" : ""}
+                            </Button>
+
+                        }
+                        <Box ml={1} />
                         <Button
                             color="primary"
-                            onClick={() => { setShowTransferAssetDialog(true) }}
+                            onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
                             variant={isMobile && !isTablet ? 'text' : 'contained'}
-                            disabled={isAdding || serializedProducts.some(d => d?.qty < 0)}
+                            disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 || isAdding ||
+                                serializedProducts.some(d => d?.qty < 0)}
                             className={isMobile && !isTablet ? 'mobile_button' : ""}
                             endIcon={isAdding && <CircularProgress size={20} />}
-                            >
-                            {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? "(" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")  " : ""}
-                            {isMobile && !isTablet ? <MdAdd size={23} /> : 'Create Transfer Asset'}
+                        >
+                            {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                            {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")" : ""}
                         </Button>
-                    
-                   }
-                    <Box ml={1} /> 
-                    <Button
-                        color="primary"
-                        onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 || isAdding ||
-                            serializedProducts.some(d => d?.qty < 0)}
-                        className={isMobile && !isTablet ? 'mobile_button' : ""}
-                        endIcon={isAdding && <CircularProgress size={20} />}
-                    >
-                        {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? "(" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")  " : ""}
-                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                    </Button>
                     </Box>
-               
-            </Grid>
+                </Grid>
                 <div className={isMobile ? "listing-grid" : "listing-grid"}>
                     <Box my={2}>
                         <Grid container spacing={1} alignItems='center'>
@@ -341,68 +341,72 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                                 }
                             </Grid>
                             <Grid item xs={12} sm={7}>
-                                    {refrenceType === "Rental Job" &&
-                                        <Grid container justifyContent={isSmallScreen ? "flex-start" : "flex-end"}>
-                                            
-                                            <FormControlLabel
-                                                control={
-                                                    <Checkbox
-                                                        name="subleaseAsset"
-                                                        checked={subleaseAsset}
-                                                        onChange={(e) => {
-                                                            setSubleaseAsset(e.target.checked)
+                                {refrenceType === "Rental Job" &&
+                                    <Grid container justifyContent={isSmallScreen ? "flex-start" : "flex-end"}>
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    name="subleaseAsset"
+                                                    checked={subleaseAsset}
+                                                    onChange={(e) => {
+                                                        dispatch({ type: "selection", selectedRecords: [] })
+                                                        localStorage.removeItem(localStorageSelectedRecords)
+                                                        setSubleaseAsset(e.target.checked)
+                                                        if (e.target.checked) {
                                                             setSelectedPlant(null)
-                                                        }}
-                                                        color="primary"
-                                                    />
+                                                        }
+                                                        else {
+                                                            setSelectedPlant(filterByPlant)
+                                                        }
+                                                    }}
+                                                    color="primary"
+                                                />
+                                            }
+                                            label="Sublease Assets"
+                                        />
+                                        <Autocomplete
+                                            style={{ width: "250px", }}
+                                            options={plantList}
+                                            getOptionLabel={(option: any) => option ? option?.warehouseName : ""}
+                                            getOptionSelected={(option: any, val) =>
+                                                option._id === val
+                                            }
+                                            value={plantList.filter((data) => data._id === selectedPlant).length
+                                                ? plantList.filter((data) => data._id === selectedPlant)[0]
+                                                : ""
+                                            }
+                                            onChange={(e, val) => {
+                                                if (selectedRecords.length > 0 && val?._id !== selectedPlant) {
+                                                    toastConfig.setToastConfig({
+                                                        open: true,
+                                                        message: "All pre-selected records will be deselected if you change the plant.",
+                                                        type: "warning"
+                                                    })
+                                                    dispatch({
+                                                        type: "selection",
+                                                        selectedRecords: []
+                                                    })
+                                                    localStorage.removeItem(localStorageSelectedRecords)
                                                 }
-                                                label="Sublease Assets"
-                                            />
-                                           
-                                                
-                                            <Autocomplete
-                                                style={{ width: "250px", }}
-                                                options={plantList}
-                                                getOptionLabel={(option: any) => option ? option?.warehouseName : ""}
-                                                getOptionSelected={(option: any, val) =>
-                                                    option._id === val
-                                                }
-                                                value={plantList.filter((data) => data._id === selectedPlant).length
-                                                    ? plantList.filter((data) => data._id === selectedPlant)[0]
-                                                    : ""
-                                                }
-                                                onChange={(e, val) => {
-                                                    if(selectedRecords.length > 0 && val?._id !== selectedPlant ) {
-                                                        toastConfig.setToastConfig({
-                                                            open: true,
-                                                            message: "All pre-selected records will be deselected if you change the plant.",
-                                                            type: "warning"
-                                                        })
-                                                        dispatch({
-                                                            type: "selection",
-                                                            selectedRecords: []
-                                                        })
-                                                        localStorage.removeItem(addSerializedAssetsRenderedFrom)
-                                                    }
-                                                    setSelectedPlant(val && val._id ? val._id : null)
-                                                }}
-                                                renderInput={(params) => (
-                                                    <TextField
-                                                        {...params}
-                                                        margin="dense"
-                                                        name="plant"
-                                                        placeholder="Plant"
-                                                        label="Plant"
-                                                        variant="outlined"
-                                                        fullWidth
-                                                        className="m-0"
-                                                    />
-                                                )}
-                                            />
-                                       
-                                        </Grid>
-                                    }
-                                   
+                                                setSelectedPlant(val && val._id ? val._id : null)
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="plant"
+                                                    placeholder="Plant"
+                                                    label="Plant"
+                                                    variant="outlined"
+                                                    fullWidth
+                                                    className="m-0"
+                                                />
+                                            )}
+                                        />
+
+                                    </Grid>
+                                }
+
                             </Grid>
                         </Grid>
                     </Box>
@@ -445,7 +449,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                         //         showClone={false}
                         //         onClone={false}
                         //         fullHeight={true}
-                        //         renderedFrom={addSerializedAssetsRenderedFrom}
+                        //         renderedFrom={renderedFrom}
                         //     /> :
                         <CustomAgGrid
                             columns={columns}
@@ -460,7 +464,7 @@ const AddSerializedAsset = ({ isAdding, addSerializedAsset, handleSerializedAsse
                             allowAction={false}
                             loading={loading}
                             customGridOptions={{ getRowStyle: getRowStyleScheduled }}
-                            renderedFrom={addSerializedAssetsRenderedFrom}
+                            renderedFrom={renderedFrom}
                             showOnlyShowFilteredRecordSwitch={true}
                             refreshGrid={fetchProductInventory}
                         />

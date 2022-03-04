@@ -12,13 +12,13 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { transferAsset } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, transferAsset } from 'src/constants/helpers';
 import ManageTransferAsset from './ManageTransferAsset';
 import queryString from 'query-string';
 import TransferStepper from './TransferAssetSteps';
-import AssetsGrid from './AssetsGrid';
-import LoadingTicketGrid from './LoadingTicketGrid';
-import ReceivingTicketGrid from './ReceivingTicketGrid';
+import AssetsGrid from './AssetGrid';
+import LoadingTicketGrid from './LoadingTicket';
+import ReceivingTicketGrid from './ReceivingTicket';
 import { MdEdit } from 'react-icons/md';
 import { defaultActivityShow } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
@@ -26,11 +26,14 @@ import TabPanel from 'src/components/TabPanel';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import HideWhenOffline from 'src/components/HideWhenOffline';
+import { camelCase } from 'lodash';
+
 const transferSteps = ['Add Assets', 'Loading Ticket'];
 const transferSteps1 = ['Add Assets', 'Loading Ticket', 'Receiving Ticket'];
 const status = ['New', 'In Progress', 'Completed'];
 
 const TransferAssetDetailPage = () => {
+  const renderedFrom = camelCase(routes?.transferAsset.title)
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -106,8 +109,6 @@ const TransferAssetDetailPage = () => {
  
   const handleMainPoints = (data) => {
     let mainPoint = {};
-    mainPoint['Transfer Asset Number'] = data.transferAssetNumber;
-    mainPoint['Transfer Type'] = data.transferType;
     setMainPoints(mainPoint);
   };
 
@@ -435,6 +436,7 @@ const TransferAssetDetailPage = () => {
                       transferAssetData={transferAssetData}
                       handleViewPdf={handleViewPdf}
                       fileDownloading={fileDownloading}
+                      renderedFrom={`${renderedFrom}_grid-1`}
                     />
                   )}
                   {currentStep === 1 && (
@@ -453,6 +455,7 @@ const TransferAssetDetailPage = () => {
                       handleViewPdf={handleViewPdf}
                       fileDownloading={fileDownloading}
                       isTransferEnded={isTransferEnded}
+                      renderedFrom={`${renderedFrom}_grid-2`}
                     />
                   )}
                   {currentStep === 2 && (
@@ -470,6 +473,7 @@ const TransferAssetDetailPage = () => {
                       handleViewPdf={handleViewPdf}
                       fileDownloading={fileDownloading}
                       isTransferEnded={isTransferEnded}
+                      renderedFrom={`${renderedFrom}_grid-3`}
                     />
                   )}
                 </Box>
@@ -497,7 +501,7 @@ const TransferAssetDetailPage = () => {
                  <div>
                    <Activity
                     resourceId={transferAssetData?._id}
-                    resource={transferAsset.resource}
+                    resource={ACTIVITY_RESOURCE.transferAsset}
                     // restrictedAddActivities={
                     //   permissions && permissions['transferAsset'] && permissions['rentalManagement'].isUpdate
                     //   ? []
@@ -508,7 +512,7 @@ const TransferAssetDetailPage = () => {
                                  
                         access: true,
                         referenceId: transferAssetData?._id,
-                        type: "transferAsset",
+                        type: ACTIVITY_RESOURCE.transferAsset,
                       }
                     ]}
                     handleActivityRefresh={() => { }}

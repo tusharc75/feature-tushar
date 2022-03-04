@@ -15,11 +15,12 @@ interface ConfigProps {
   productFields: any[];
   productData: any | {};
   id: string;
+  renderedFrom: string;
 }
 
 const ProductConfiguration = (props: ConfigProps) => {
   const initialRender = React.useRef(true);
-  const { productData, id } = props;
+  const { productData, id, renderedFrom } = props;
   const {setToastConfig} = React.useContext(CustomToastContext)
   const [specFields, setSpecFields] = React.useState([]);
   const [configData, setConfigData] = React.useState([]);
@@ -95,7 +96,7 @@ const ProductConfiguration = (props: ConfigProps) => {
       let columns = [];
       let rendererNames = [];
       fields.forEach((o) => {
-        let currentColumn = getColumnData(routes.product.title, o, routes.product.path);
+        let currentColumn = getColumnData(renderedFrom, o, routes.product.path);
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData];
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -210,7 +211,7 @@ const ProductConfiguration = (props: ConfigProps) => {
             actionWidth={150}
             loading={gridLoading}
             isClientSideGrid
-            renderedFrom="productMasterDetailsPageProductImages"
+            renderedFrom={renderedFrom}
           />
         )}
       </Box>

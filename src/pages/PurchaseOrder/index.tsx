@@ -15,7 +15,7 @@ import SearchBox from 'src/components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "src/components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "src/components/AgGridComponents/CustomAgGrid";
-import { purchaseOrder, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from 'src/constants/helpers';
+import { purchaseOrder, isObjectEmpty, gridLoadingTimeout } from 'src/constants/helpers';
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { useData } from "src/StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -24,20 +24,18 @@ import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
 import useColumns, { getStaticFields, getFrameworkComponents } from "src/constants/useColumns"
 import { prepareDataForGrid } from "src/constants/helpers"
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
-import { AiFillCrown, MdAdd,MdSort,MdFilterList } from "react-icons/all";
+import { AiFillCrown, MdAdd, MdSort, MdFilterList } from "react-icons/all";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from "react-router-dom";
-import {FaSuitcase} from "react-icons/fa";
+import { FaSuitcase } from "react-icons/fa";
 import MobileSortDialog from "src/components/MobileSortDialog";
 import MobileFilterDialog from "src/components/MobileFilterDialog"
 import { camelCase } from "lodash";
 
-let renderedFrom = camelCase(routes.purchaseOrder?.title)
-
-const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
 const PurchaseOrder = () => {
+    let renderedFrom = camelCase(routes.purchaseOrder?.title)
 
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
@@ -47,7 +45,7 @@ const PurchaseOrder = () => {
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
     const [gridApi, setGridApi] = useState(null);
-    const [sortOpen, setSortOpen]= useState(false);
+    const [sortOpen, setSortOpen] = useState(false);
     const [columns, setColumns] = useState([])
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -309,28 +307,28 @@ const PurchaseOrder = () => {
 
     const handleOpen = () => {
         setisOpenDialog(true);
-      };
-      
-      const handleClickOpen = () => {
+    };
+
+    const handleClickOpen = () => {
         setSortOpen(true);
-      };
-    
-      const handleClickClose = () => {
+    };
+
+    const handleClickClose = () => {
         setSortOpen(false);
-    
-      };
-    
-      const handleFilterClose = () => {
+
+    };
+
+    const handleFilterClose = () => {
         setisOpenDialog(false);
-      };
-      
+    };
 
-    
-    
-    
-    
 
-    
+
+
+
+
+
+
 
     return (<Fragment>
         <Grid container className="headerbox">
@@ -360,64 +358,64 @@ const PurchaseOrder = () => {
         <div className="main-container">
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
-                <div className="d-flex align-items-center">
-                        <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
-                        <span className="listingHeader">{routes.purchaseOrder?.title} </span>
-                    </div>
+                    <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+                        <div className="d-flex align-items-center">
+                            <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
+                            <span className="listingHeader">{routes.purchaseOrder?.title} </span>
+                        </div>
                         {isMobile && (
-                  <>
-                    <Grid style={{ display: 'inline-flex'}}>
-                      <Button
-                        onClick={handleClickOpen}
-                        id="demo-customized-button"
-                        aria-controls="demo-customized-menu"
-                        aria-haspopup="true"
-                        aria-expanded={ 'true'}
-                        color="secondary"
-                        variant="text"
-                        disableElevation
-                        startIcon={<MdSort />}
-                        className={'sort-filter-tablet'}
-                        style={isTablet ? { marginLeft: '50px' } : {}}
-                      >
-                        Sort
-                      </Button>
-                      <MobileSortDialog
-                        isOpen={sortOpen}
-                        handleClose={handleClickClose}
-                        contentPart={null}
-                        secHeading={['Sort Purchase Order']}
-                        columns={columns}
-                        dispatch={dispatch}
-                      />
+                            <>
+                                <Grid style={{ display: 'inline-flex' }}>
+                                    <Button
+                                        onClick={handleClickOpen}
+                                        id="demo-customized-button"
+                                        aria-controls="demo-customized-menu"
+                                        aria-haspopup="true"
+                                        aria-expanded={'true'}
+                                        color="secondary"
+                                        variant="text"
+                                        disableElevation
+                                        startIcon={<MdSort />}
+                                        className={'sort-filter-tablet'}
+                                        style={isTablet ? { marginLeft: '50px' } : {}}
+                                    >
+                                        Sort
+                                    </Button>
+                                    <MobileSortDialog
+                                        isOpen={sortOpen}
+                                        handleClose={handleClickClose}
+                                        contentPart={null}
+                                        secHeading={['Sort Purchase Order']}
+                                        columns={columns}
+                                        dispatch={dispatch}
+                                    />
 
-                      <Button
-                        id="demo-customized-button"
-                        aria-controls="demo-customized-menu"
-                        aria-haspopup="true"
-                        aria-expanded={'true'}
-                        variant="text"
-                        color="secondary"
-                        disableElevation
-                        className={'sort-filter-tablet'}
-                        startIcon={<MdFilterList />}
-                        onClick={handleOpen}
-                      >
-                        Filter
-                      </Button>
+                                    <Button
+                                        id="demo-customized-button"
+                                        aria-controls="demo-customized-menu"
+                                        aria-haspopup="true"
+                                        aria-expanded={'true'}
+                                        variant="text"
+                                        color="secondary"
+                                        disableElevation
+                                        className={'sort-filter-tablet'}
+                                        startIcon={<MdFilterList />}
+                                        onClick={handleOpen}
+                                    >
+                                        Filter
+                                    </Button>
 
-                      <MobileFilterDialog
-                        isOpen={isOpenDialog}
-                        handleClose={handleFilterClose}
-                        contentPart={null}
-                        secHeading={['Filter Purchase Order']}
-                        columns={columns}
-                        dispatch={dispatch}
-                      />
-                    </Grid>
-                  </>
-                )}
+                                    <MobileFilterDialog
+                                        isOpen={isOpenDialog}
+                                        handleClose={handleFilterClose}
+                                        contentPart={null}
+                                        secHeading={['Filter Purchase Order']}
+                                        columns={columns}
+                                        dispatch={dispatch}
+                                    />
+                                </Grid>
+                            </>
+                        )}
 
 
 
@@ -444,7 +442,7 @@ const PurchaseOrder = () => {
                     </Grid>
                     <Grid xs={12} sm={12} md={6} container className={styles.filter_side} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
-                            <Grid style={{ display: "flex", flex: 1, gap:"5px" }} className={styles.content_box }>
+                            <Grid style={{ display: "flex", flex: 1, gap: "5px" }} className={styles.content_box}>
                                 <SearchBox
                                     onSearch={handleSearch}
                                     searchbox={isMobile ? styles.search_box_input : ""}
@@ -529,10 +527,10 @@ const PurchaseOrder = () => {
                             loading={loading}
                             additionalDetails={[
                                 {
-                                  icon: <FaSuitcase size={18} />,
-                                  field: 'supplierAccount'
+                                    icon: <FaSuitcase size={18} />,
+                                    field: 'supplierAccount'
                                 }
-                              ]}
+                            ]}
                             chips={[
                                 {
                                     label: "Delivery Date: ",
@@ -560,9 +558,9 @@ const PurchaseOrder = () => {
                                     label: "SupplierContact:  ",
                                     field: "supplierContact",
                                 },
-                                
-                                
-                                
+
+
+
                             ]}
                             onCreate={false}
                             showClone={true}
@@ -603,7 +601,7 @@ const PurchaseOrder = () => {
             showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.purchaseOrder?.title?.toLowerCase() : RESOURCE_LABEL.purchaseOrder?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
+                message={`Are you sure you want to delete the ${routes?.purchaseOrder.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />

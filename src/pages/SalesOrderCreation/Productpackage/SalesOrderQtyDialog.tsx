@@ -359,7 +359,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
     }
     if (rowData && rowData.hideSelection) {
       if (values.qty < rowData.assetQty) {
-        errors['qty'] = 'Qty is not less than assigned asset qty.';
+        errors['qty'] = 'Quantity is less than that which has been assigned.';
       }
     }
     return errors;
@@ -549,7 +549,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
             {
               showConfirmationDialog && <ConfirmationDialog
                 open={showConfirmationDialog}
-                message="Would you like to override the price configured at the product level?"
+                message="Would you prefer to override the product-level price configuration?"
                 onOk={() => {
                   submitForm()
                 }}

@@ -19,9 +19,7 @@ import reactHtmlparser, { convertNodeToElement } from 'react-html-parser';
 import { HiOutlineMail } from 'react-icons/hi';
 import Dialog from '@material-ui/core/Dialog';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import { getApi, getData, isObjectEmpty, resourceOptions } from '../../../constants/helpers';
+import { getApi, getData, isObjectEmpty } from '../../../constants/helpers';
 import styles from '../../Leads/Header.module.scss';
 import emailStyles from './email.module.scss';
 import './email.scss';
@@ -31,13 +29,11 @@ import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridCo
 import { AddOutlined } from '@material-ui/icons';
 import { displayDate } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
-import { MdAccountCircle } from 'react-icons/md';
 import { AiFillCrown, MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import { Autocomplete } from '@material-ui/lab';
-import { camelCase } from 'lodash';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { startCase } from "lodash";
+import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
 
 const tabs = {
   Inbox: 1,
@@ -77,7 +73,7 @@ const Email = () => {
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = 'emailPage_selected';
-  const [resource, setResource] = useState('');
+  const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
@@ -118,76 +114,11 @@ const Email = () => {
     });
   }
 
+  const [resourceOptions, setResourceOptions] = useState([]);
 
-
-  let newResourceOptions = [];
-
-  for (let i = 0; i < resourceOptions.length; i++) {
-    if (resourceOptions[i] === 'Customer Account') {
-      if (permissions.customerAccount.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-        i++;
-      }
-    }
-    if (resourceOptions[i] === 'Customer Contact') {
-      if (permissions.customerContact.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Supplier Account') {
-      if (permissions.supplierAccount.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Supplier Contact') {
-      if (permissions.supplierContact.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Lead') {
-      if (permissions.lead.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Opportunity') {
-      if (permissions.opportunity.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Customer Account') {
-      if (permissions.customerAccount.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Quote') {
-      if (permissions.quoteBuilder.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Rental Management') {
-      if (permissions.rentalManagement.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Delivery Ticket') {
-      if (permissions.deliveryTicket.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === "Project Sales") {
-      if (permissions.projectSales.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-  }
-
-
-
-
-
-
-
-
+  useEffect(() => {
+    setResourceOptions(get_activity_resource(permissions))
+  }, []);
 
   useEffect(() => {
     fetchUsersEmails();
@@ -208,26 +139,26 @@ const Email = () => {
   }, [page, limit, filters, filter, sorting]);
 
   useEffect(() => {
-    if (!resource) return;
-    setLoadingResources(true);
-    axiosInstance()
-      .get(`${getApi(resource)}?limit=100`)
-      .then(({ data: { data } }) => {
-        if (data.length) {
-          const mappedData = data.map((_d) => getData(resource, _d));
-          setResourceData(mappedData || []);
-        }
-        setLoadingResources(false);
-      })
-      .catch((error) => {
-        setLoadingResources(false);
-      });
+    if (resource && resource?.optionValue) {
+      setLoadingResources(true);
+      axiosInstance()
+        .get(`${getApi(resource?.optionValue)}?limit=100`)
+        .then(({ data: { data } }) => {
+          if (data.length) {
+            const mappedData = data.map((_d) => getData(resource?.optionValue, _d));
+            setResourceData(mappedData || []);
+          }
+          setLoadingResources(false);
+        })
+        .catch((error) => {
+          setLoadingResources(false);
+        });
 
-    return () => {
-      setSelectedResourceData(null);
-      setResourceData(null);
-    };
-    // eslint-disable-next-line
+      return () => {
+        setSelectedResourceData(null);
+        setResourceData(null);
+      };
+    }
   }, [resource]);
 
   const redirectToResource = (type, id) => {
@@ -350,7 +281,7 @@ const Email = () => {
           <Chip
             className="ml-3"
             color="primary"
-            label={`${startCase(d.type)}`}
+            label={`${routes[d?.type]?.title}`}
           />
         </>
       )
@@ -437,7 +368,6 @@ const Email = () => {
 
   const handleDeleteEmails = async () => {
     setDeleteLoading(true);
-
     if (deleteRecord?.id || selectedRecords.length > 0) {
       axiosInstance()
         .put('/email', { emails: deleteRecord?.id ? [deleteRecord.id] : selectedRecords.map((d) => d._id) })
@@ -487,12 +417,13 @@ const Email = () => {
             <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1">
               <HiOutlineMail className="headerLogo" /> <span className="listingHeader">{routes.activityEmail.title}</span>
               <Autocomplete
-                options={newResourceOptions}
-                getOptionLabel={(option) => option}
-                style={{ width: "200px" }}
+                options={resourceOptions}
+                getOptionLabel={(option) => option.optionLabel}
+                style={{ width: "250px" }}
                 value={resource}
                 onChange={(event, newValue) => {
                   setResource(newValue);
+                  setFilter([])
                 }}
                 size="small"
                 renderInput={(params) =>
@@ -503,25 +434,25 @@ const Email = () => {
                   )
                 }
               />
-              {Boolean(resource) && resourceData && (
+              {resource && resourceData && (
                 <Autocomplete
                   disabled={loadingResources}
                   options={resourceData}
                   getOptionLabel={(option: any) => option.name}
                   getOptionSelected={(option: any, value: any) => option.name === value.name}
-                  style={{ width: "200px" }}
+                  style={{ width: "250px" }}
                   value={selectedResourceData}
                   onChange={(event, newValue) => {
                     setSelectedResourceData(newValue);
                     if (newValue?.id) {
-                      setFilter((prevState) => ([...prevState, { _id: newValue.id, type: camelCase(resource), name: newValue.name }]))
+                      setFilter((prevState) => ([...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]))
                     }
                     else {
                       setFilter([])
                     }
                   }}
                   size="small"
-                  renderInput={(params) => <TextField {...params} label={`Select ${resource}`} variant="outlined" />}
+                  renderInput={(params) => <TextField {...params} label={`Select ${resource.optionLabel}`} variant="outlined" />}
                 />
               )}
             </Grid>
@@ -669,7 +600,7 @@ const Email = () => {
               fetchData={fetchEmails}
               relatedTo={[
                 {
-                  type: resource && selectedResourceData ? camelCase(resource) : "user",
+                  type: resource && selectedResourceData ? resource.optionValue : "user",
                   referenceId: resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
                   access: true,
                 },

@@ -330,8 +330,8 @@ const ContactDetailsPage = (props) => {
         );
 
         setProjectSales(
-          data[sidebarResource.projectStrategy] && data[sidebarResource.projectStrategy][sidebarResource[contactResource].replaceAll(' ', '_')]
-            ? data[sidebarResource.projectStrategy][sidebarResource[contactResource].replaceAll(' ', '_')]
+          data[sidebarResource.projectSales] && data[sidebarResource.projectSales][sidebarResource[contactResource].replaceAll(' ', '_')]
+            ? data[sidebarResource.projectSales][sidebarResource[contactResource].replaceAll(' ', '_')]
             : []
         );
 
@@ -734,7 +734,7 @@ const ContactDetailsPage = (props) => {
               showHeading={true}
             >
               {
-                permissions.eCommerce?.isRead && contactResource === customerContact.contactResource &&
+                permissions.eCommercePolicy?.isRead && contactResource === customerContact.contactResource &&
                 <Button
                   color="primary"
                   size="small"
@@ -746,7 +746,7 @@ const ContactDetailsPage = (props) => {
                 </Button>
               }
               {
-                permissions.eCommerce?.isRead && user.user?.userType === userType.brandAdmin &&
+                permissions.eCommercePolicy?.isRead && user.user?.userType === userType.brandAdmin &&
                 <Button
                   color="primary"
                   size="small"
@@ -858,7 +858,7 @@ const ContactDetailsPage = (props) => {
                   />
                 </span>
               )}
-              {permissions?.projectStrategy?.isRead && accountResource === customerAccount.accountResource && (
+              {permissions?.projectSales?.isRead && accountResource === customerAccount.accountResource && (
                 <span id="projectsAccordion">
                   <ProjectInAccordion
                     recordsPerLine={3}

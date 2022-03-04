@@ -30,6 +30,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog/ManageSalesOrderDialog';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
+import {camelCase} from 'lodash'
 
 let salesOrderTimeout;
 const SalesOrderType = [
@@ -44,6 +45,7 @@ const SalesOrderType = [
 ];
 
 const SalesOrder = () => {
+  const renderedFrom = camelCase(routes?.salesOrder.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -87,7 +89,7 @@ const SalesOrder = () => {
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      let currentColumn = getColumnData(salesOrderResource, o?.fieldData, routes.salesOrderDetail.path);
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.salesOrderDetail.path);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -516,7 +518,7 @@ const SalesOrder = () => {
               onCreate={false}
               showClone={true}
               onClone={(data) => { setShowManageSalesOrderDialog({ open: true, isClone: true, idToClone: data._id }) }}
-              renderedFrom={salesOrderResource}
+              renderedFrom={renderedFrom}
             />
           ) : (
             <CustomAgGrid
@@ -531,7 +533,7 @@ const SalesOrder = () => {
               page={page}
               actionWidth={100}
               loading={loading}
-              renderedFrom={'salesOrderPage'}
+              renderedFrom={renderedFrom}
               refreshGrid={fetchSalesOrder}
             />
           ) : null}

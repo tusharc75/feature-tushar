@@ -71,7 +71,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
 
     const [showAddWarehouseDialog, setShowAddWarehouseDialog] = useState(false);
     const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
-    const [statusOptions, setStatusOptions] = useState([]);
 
     const [showAddressDialog, setShowAddressDialog] = useState(false);
     const [addressType, setAddressType] = useState('');
@@ -561,6 +560,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                         isNew={!rentalManagementId}
                                                                                         values={values}
                                                                                         errors={errors}
+                                                                                        fieldData={field}
                                                                                         touched={touched}
                                                                                         label={field.fieldLabel}
                                                                                         name={field.fieldName}
@@ -636,6 +636,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                         {...field}
                                                                                         isNew={!rentalManagementId}
                                                                                         values={values}
+                                                                                        fieldData={field}
                                                                                         errors={errors}
                                                                                         touched={touched}
                                                                                         label={field.fieldLabel}
@@ -702,6 +703,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 {...field}
                                                                                 values={values}
                                                                                 errors={errors}
+                                                                                fieldData={field}
                                                                                 touched={touched}
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
@@ -766,6 +768,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 disabled={!rentalManagementId && field.disableOnEdit}
                                                                                 values={values}
                                                                                 errors={errors}
+                                                                                fieldData={field}
                                                                                 touched={touched}
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
@@ -792,6 +795,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 {...field}
                                                                                 values={values}
                                                                                 errors={errors}
+                                                                                fieldData={field}
                                                                                 touched={touched}
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
@@ -813,6 +817,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 values={values}
                                                                                 errors={errors}
                                                                                 touched={touched}
+                                                                                fieldData={field}
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
                                                                                 type={field.type}
@@ -1017,6 +1022,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                                         {...field}
                                                                                                         disabled={rentalDetails && rentalDetails?.productInventory?.length ? true : false}
                                                                                                         values={values}
+                                                                                                        fieldData={field}
                                                                                                         errors={errors}
                                                                                                         touched={touched}
                                                                                                         label={field.fieldLabel}

@@ -2,20 +2,18 @@ import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import AddIcon from "@material-ui/icons/Add";
 import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import { GiStockpiles } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import { AddOutlined, ExpandMore } from "@material-ui/icons";
+import { AddOutlined } from "@material-ui/icons";
 import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { sublease, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
+import { sublease, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -24,15 +22,19 @@ import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers"
 import ManageSublease from "./ManageSublease";
-import { AiFillCrown, MdAdd, MdSort, MdFilterList } from "react-icons/all";
+import { MdAdd, MdSort, MdFilterList } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from "react-router-dom";
 import { FaSuitcase } from "react-icons/fa";
 import MobileSortDialog from "../../components/MobileSortDialog";
 import MobileFilterDialog from "../../components/MobileFilterDialog"
+import { camelCase } from "lodash";
 
 const Sublease = () => {
+
+    const renderedFrom = camelCase(routes?.sublease.title)
+    const localStorageSelectedRecords = `${renderedFrom}_selected`
 
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
@@ -46,7 +48,7 @@ const Sublease = () => {
     const [columns, setColumns] = useState([])
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
 
     const [isOpenDialog, setisOpenDialog] = useState(false)
     const [fromRental, setFromRental] = useState(history.location?.state?.rental);
@@ -62,7 +64,7 @@ const Sublease = () => {
 
     useEffect(() => {
         fetchData()
-    }, [page, limit, filters, sorting, search, selectedEntity, fromRental]);
+    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, showFilteredRecordsOnly]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -71,7 +73,7 @@ const Sublease = () => {
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = getColumnData(routes.sublease?.title, o?.fieldData, routes.subleaseDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.subleaseDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -148,6 +150,7 @@ const Sublease = () => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
+
         let filterById = [];
 
         if (fromRental) {
@@ -156,16 +159,23 @@ const Sublease = () => {
         if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
         }
+
+        if (showFilteredRecordsOnly) {
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+        }
+
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
-            Object.keys(filters).forEach(field => {
+            Object.keys(filters).forEach((field) => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
-                    term: filters[field].filter
-                })
+                    term: filters[field].filter,
+                });
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
         }
+
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
@@ -174,7 +184,7 @@ const Sublease = () => {
         }
         return deepFilter;
     };
-    
+
     const handleDelete = () => {
         let ids = []
         if (deleteRecord) {
@@ -442,7 +452,7 @@ const Sublease = () => {
                             onCreate={false}
                             showClone={true}
                             onClone={(data) => { setShowManageDialog({ open: true, isClone: true, idToClone: data._id }); }}
-                            renderedFrom={routes.sublease?.title}
+                            renderedFrom={renderedFrom}
                         /> :
                         <CustomAgGrid
                             columns={columns}
@@ -456,7 +466,7 @@ const Sublease = () => {
                             page={page}
                             actionWidth={150}
                             loading={loading}
-                            renderedFrom={routes.sublease?.title}
+                            renderedFrom={renderedFrom}
                             refreshGrid={fetchData}
                             showOnlyShowFilteredRecordSwitch={true}
                         /> : null

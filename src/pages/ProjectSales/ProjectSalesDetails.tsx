@@ -129,8 +129,8 @@ const ProjectSalesDetails = () => {
         .then(({ data }) => {
           setLoadingGraphData(false);
           setGraphData({
-            nodes: data.data.nodes,
-            edges: data.data.edges,
+            nodes: [...data.data.nodes],
+            edges: [...data.data.edges],
             colorPalette: data.colorPalette
           });
         })
@@ -385,7 +385,7 @@ const ProjectSalesDetails = () => {
                 </Box>
               ) : (
                 <DetailsPageHeader heading={headingLbl} logo={undefined} mainPoints={mainPoints} showHeading={true}>
-                  {(permissions?.projectStrategy?.isUpdate && isTeamMember) || isManager ? (
+                  {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
@@ -397,7 +397,7 @@ const ProjectSalesDetails = () => {
                       {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   ) : null}
-                  {permissions?.projectStrategy?.isDelete && isManager ? (
+                  {permissions?.projectSales?.isDelete && isManager ? (
                     <DeleteButton
                       text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
                       onClick={() => {
@@ -495,7 +495,7 @@ const ProjectSalesDetails = () => {
                         <Box style={{ padding: '0px', maxHeight: '450px' }}>
                           <Box width="100%" padding={1} bgcolor="grey.200" display="flex" alignItems="center" justifyContent="space-between">
                             <Typography variant="subtitle2">Project Team</Typography>
-                            {(permissions?.projectStrategy?.isUpdate && isTeamMember) || isManager ? (
+                            {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
                               <IconButton color="primary" size="small" onClick={() => handleOpenDialog('user')}>
                                 <ControlPoint />
                               </IconButton>
@@ -548,7 +548,7 @@ const ProjectSalesDetails = () => {
                           estimatedAmount={projectSalesData?.amount}
                           marketSegmentId={projectSalesData?.marketSegment?.optionValue}
                           subMarketSegmentId={projectSalesData?.subMarketSegment?.optionValue}
-                          permissions={permissions?.projectStrategy}
+                          permissions={permissions?.projectSales}
                           fetchProjectData={getSalesData}
                           projectId={id}
                           users={teamUsers}
@@ -624,7 +624,7 @@ const ProjectSalesDetails = () => {
             {/*        estimatedAmount={projectSalesData?.amount}*/}
             {/*        marketSegmentId={projectSalesData?.marketSegment?.optionValue}*/}
             {/*        subMarketSegmentId={projectSalesData?.subMarketSegment?.optionValue}*/}
-            {/*        permissions={permissions?.projectStrategy}*/}
+            {/*        permissions={permissions?.projectSales}*/}
             {/*        fetchProjectData={getSalesData}*/}
             {/*        projectId={id}*/}
             {/*        users={teamUsers}*/}
@@ -637,7 +637,7 @@ const ProjectSalesDetails = () => {
                 <Box style={{ padding: '0px', maxHeight: '450px' }}>
                   <Box width="100%" padding={1} bgcolor="grey.200" display="flex" alignItems="center" justifyContent="space-between">
                     <Typography variant="subtitle2">Project Team</Typography>
-                    {(permissions?.projectStrategy?.isUpdate && isTeamMember) || isManager ? (
+                    {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
                       <IconButton color="primary" size="small" onClick={() => handleOpenDialog('user')}>
                         <ControlPoint />
                       </IconButton>

@@ -20,10 +20,11 @@ interface Props {
   close: () => any;
   isAdding?: boolean;
   submit: (p: any[]) => any;
+  renderedFrom: string;
 }
 
 const AddInventory = (props: Props) => {
-  const { plantId, close, isAdding, submit } = props;
+  const { plantId, close, isAdding, submit, renderedFrom } = props;
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -226,7 +227,7 @@ const AddInventory = (props: Props) => {
             onCellValueChanged={onCellValueChanged}
             actionWidth={150}
             loading={loading}
-            renderedFrom={'transferInventory_addInventory'}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchProductInventory}
           />
         )}

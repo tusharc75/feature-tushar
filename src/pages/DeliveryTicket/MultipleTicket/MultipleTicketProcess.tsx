@@ -15,10 +15,11 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { useHistory } from 'react-router-dom';
 import SignatureDialog from '../../../components/Helpers/SignatureDialog';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
+import { camelCase } from 'lodash';
 
 
 const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
-
+    const renderedFrom = `${camelCase(routes?.deliveryTicket.title)}_grid-2`
     const { state: { user, selectedEntity, permissions } }: any = useData();
     const { getColumnData } = useColumns();
     const toastConfig = useContext(CustomToastContext);
@@ -55,7 +56,7 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-            let currentColumn = getColumnData(deliveryTicket.resource, o?.fieldData, `${routes.deliveryTicket.path}/detail`);
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${routes.deliveryTicket.path}/detail`);
             if (currentColumn !== null) {
                 columns = [...columns, currentColumn?.columnData];
                 if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -215,7 +216,7 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
                         onCreate={null}
                         showClone={false}
                         onClone={() => { }}
-                        renderedFrom={`TicketProcess_${deliveryTicket.resource}`}
+                        renderedFrom={renderedFrom}
                     />
                 ) : Object.keys(frameWorkComponent).length > 0 ? (
                     <CustomAgGrid
@@ -233,7 +234,7 @@ const MultipleTicketProcess = ({ refrenceData, ticketType, refrenceType }) => {
                         loading={loading}
                         allowSelection={true}
                         allowAction={false}
-                        renderedFrom={`TicketProcess_${deliveryTicket.resource}`}
+                        renderedFrom={renderedFrom}
                         refreshGrid={fetchDeliveryTicket}
                     />
                 ) : null :

@@ -9,12 +9,13 @@ import {
 } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { startCase } from "lodash";
-
 import { SearchActivity } from "../../../axios/activity";
 import { useData } from "../../../StateProvider/Provider";
 import { resActivityColors } from "../Helpers/utils";
 import ActivityModelHandler from "../ActivityModelHandler";
 import { isMobile, isTablet } from "react-device-detect";
+import { get_activity_resource } from '../Helpers/utils';
+import routes from '../../Helpers/Routes';
 
 export const capitalize = (string) => {
   return string && typeof string === "string"
@@ -36,50 +37,32 @@ export const SearchFilter = ({
   const [loading, setLoading] = React.useState(false);
   const [selectedActivityId, setSelectedActivityId] = React.useState(null);
   const [selectedActivityType, setSelectedActivityType] = React.useState(null);
-
-  const allSearch = [
-    { type: "customerAccount", name: "All", isAll: true },
-    { type: "customerContact", name: "All", isAll: true },
-    { type: "supplierAccount", name: "All", isAll: true },
-    { type: "supplierContact", name: "All", isAll: true },
-    { type: "lead", name: "All", isAll: true },
-    { type: "opportunity", name: "All", isAll: true },
-    { type: "quote", name: "All", isAll: true },
-    { type: "projectSales", name: "All", isAll: true },
-    { type: "rentalManagement", name: "All", isAll: true },
-    { type: "repairJob", name: "All", isAll: true },
-    { type: "transferAsset", name: "All", isAll: true },
-    { type: "purchaseOrder", name: "All", isAll: true },
-    { type: "deliveryTicket", name: "All", isAll: true },
-    { type: "my", name: user?._id, isAll: true },
-  ];
-
-
-  let permissionsSearch = allSearch.filter((item) => permissions[item.type]?.isRead === true)
-
+  const [permissionsSearch, setPermissionsSearch] = React.useState([]);
 
   useEffect(() => {
-    if(permissions['quoteBuilder'].isRead === true){
-      permissionsSearch.push({ type: "quote", name: "All", isAll: true })
-    }
-    if(permissions['projectStrategy'].isRead === true){
-      permissionsSearch.push({ type: "projectSales", name: "All", isAll: true })
-    }
-    if(permissions['user'].isRead === true){
-      permissionsSearch.push( { type: "my", name: user?._id, isAll: true })
-    }
-  },[permissionsSearch])
+    const resourceOptions = get_activity_resource(permissions)
+    const data = []
+    resourceOptions.forEach((ele) => {
+      data.push({ label: ele.optionLabel, type: ele.optionValue, name: "All", isAll: true })
+    })
+    data.push({ label: "my", type: "my", name: user?._id, isAll: true })
+    setPermissionsSearch(data)
+  }, []);
 
   const activityType = ["task", "event", "case", "note", "email", "attachment"]
 
   useEffect(() => {
-    setValue(filter.filter(d => permissionsSearch.some(f => f.type === d.type)));
+    filter?.forEach((e) => {
+      e.label = routes[e.type] ? routes[e.type].title : e.type
+    })
+    setValue(filter.filter(d => permissionsSearch?.some(f => f.type === d.type)));
   }, [filter]);
 
   useEffect(() => {
     if (inputValue === "") {
-      let filteredSearch = dontShowMyActivity ? permissionsSearch.filter((_o) => _o.type !== "my") : permissionsSearch; setOptions(filteredSearch);
-    } else {
+      let filteredSearch = dontShowMyActivity ? permissionsSearch?.filter((_o) => _o.type !== "my") : permissionsSearch; setOptions(filteredSearch);
+    }
+    else {
       setLoading(true);
       let _activityName = activityName;
       if (_activityName === "calendar") {
@@ -88,13 +71,16 @@ export const SearchFilter = ({
       SearchActivity(inputValue, _activityName)
         .then(({ data }) => {
           setLoading(false);
+          data?.forEach((e) => {
+            e.label = routes[e.type] && routes[e.type]?.title ? routes[e.type]?.title : e.type
+          })
           setOptions(data);
         })
         .catch((err) => {
           setLoading(false);
         });
     }
-  }, [inputValue]);
+  }, [inputValue, permissionsSearch]);
 
   const handleChangeValue = (newValue) => {
     let filterActivity = newValue.slice().reverse().find(d => activityType.includes(d.type))
@@ -102,8 +88,8 @@ export const SearchFilter = ({
       setSelectedActivityId(filterActivity._id)
       setSelectedActivityType(filterActivity.type)
     }
-    setValue(newValue.filter(d => permissionsSearch.some(f => f.type === d.type)));
-    handleChangeFilter(newValue.filter(d => permissionsSearch.some(f => f.type === d.type)));
+    setValue(newValue.filter(d => permissionsSearch?.some(f => f.type === d.type)));
+    handleChangeFilter(newValue.filter(d => permissionsSearch?.some(f => f.type === d.type)));
   };
 
   return (
@@ -131,9 +117,8 @@ export const SearchFilter = ({
                 color: "white",
               }}
               label={
-                option && option.type === "my"
-                  ? activityName ? "My" + " " + startCase(activityName) : "My activities"
-                  : startCase(option.type) + " - " + option.name
+                option && option.type === "my" ? activityName ? "My" + " " + startCase(activityName) : "My activities"
+                  : option.label + " - " + option.name
               }
               {...getTagProps({ index })}
             />
@@ -159,7 +144,6 @@ export const SearchFilter = ({
               ),
             }}
           /> :
-
             <TextField
               {...params}
               size="small"
@@ -194,8 +178,8 @@ export const SearchFilter = ({
                     option.isAll
                       ? option.type === "my"
                         ? activityName ? "My" + " " + startCase(activityName) : "My activities"
-                        : option.name + " " + startCase(option.type)
-                      : startCase(option.type)
+                        : option.name + " " + option.label
+                      : option.label
                   }
                 />
               </Grid>

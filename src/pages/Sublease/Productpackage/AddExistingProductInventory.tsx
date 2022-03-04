@@ -19,10 +19,9 @@ import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 
 
-const renderedFrom = "subleasingAddProducts";
-const localStorageSelectedRecords = `${renderedFrom}_selected`
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, isAddingProducts }) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, isAddingProducts, renderedFrom }) => {
+    const localStorageSelectedRecords = `${renderedFrom}_selected`
 
     const toastConfig = useContext(CustomToastContext)
     const { state: { selectedEntity } }: any = useData();
@@ -115,8 +114,8 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 let rendererNames = []
                 data.forEach(o => {
                     let currentColumn = type === "product" ?
-                        getColumnData(routes.product?.title, o?.fieldData, routes.productDetail.path)
-                        : getColumnData(routes.packages?.title, o?.fieldData, routes.packagesDetail.path)
+                        getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
+                        : getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -181,8 +180,8 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                     variant="contained"
                                     disabled={!getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length || isAddingProducts}
                                     endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
-                                    {getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? "(" + getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length + ")  " : ""}
-                                    Add</Button>
+                                    Add{getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length + ")" : ""}
+                                    </Button>
                             </Box>
                         </Grid>
                     </Grid>

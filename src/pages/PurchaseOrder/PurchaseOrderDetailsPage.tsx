@@ -25,7 +25,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { purchaseOrder, getObjKeysWithValues, supplierAccount, customerAccount, purchaseOrderSteps, PURCHASE_ORDER_STATUS } from '../../constants/helpers';
+import { purchaseOrder, getObjKeysWithValues, supplierAccount, customerAccount, purchaseOrderSteps, PURCHASE_ORDER_STATUS, ACTIVITY_RESOURCE } from '../../constants/helpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -46,9 +46,10 @@ import { GrStatusGood, GrStatusInfo } from 'react-icons/all';
 import accountClass from '../Account/account.module.scss';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Steps from '../RentalManagement/Steps';
+import { camelCase } from 'lodash';
 
 const PurchaseOrderDetailsPage = () => {
-
+  const renderedFrom = camelCase(routes?.purchaseOrder.title)
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -418,11 +419,13 @@ const PurchaseOrderDetailsPage = () => {
                               purchaseOrderData={purchaseOrderData}
                               setNextStep={setNextStep}
                               setPurchaseOrderProduct={setPurchaseOrderProduct}
+                              renderedFrom={`${renderedFrom}_grid-1`}
                             />
                           )}
                           {currentStep === 1 &&
                             <Service
                               purchaseOrderData={purchaseOrderData}
+                              renderedFrom={`${renderedFrom}_grid-2`}
                             />}
                           {currentStep === 2 && (
                             <IssuePo
@@ -433,6 +436,7 @@ const PurchaseOrderDetailsPage = () => {
                               currentStep={currentStep}
                               handleAttachments={handleAttachments}
                               statusOptions={statusOptions}
+                              renderedFrom={`${renderedFrom}_grid-3`}
                             />
                           )}
                           {(currentStep === 3) && (
@@ -443,6 +447,7 @@ const PurchaseOrderDetailsPage = () => {
                               statusOptions={statusOptions}
                               handleViewPdf={handleViewPdf}
                               handleAttachments={handleAttachments}
+                              renderedFrom={`${renderedFrom}_grid-4`}
                             />
                           )}
                         </Paper>
@@ -470,15 +475,15 @@ const PurchaseOrderDetailsPage = () => {
                       <div>
                         <Activity
                           resourceId={purchaseOrderData._id}
-                          resource={purchaseOrder.resource}
+                          resource={ACTIVITY_RESOURCE.purchaseOrder}
                           restrictedAddActivities={
-                            permissions && permissions['purchaseOrder'] && permissions['purchaseOrder'].isUpdate
+                            permissions && permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`] && permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`].isUpdate
                               ? []
                               : ['Attachment', 'Case']
                           }
                           relatedTo={[
                             {
-                              type: "purchaseOrder",
+                              type: ACTIVITY_RESOURCE.purchaseOrder,
                               referenceId: purchaseOrderData._id,
                               access: true
                             }

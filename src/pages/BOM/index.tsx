@@ -20,9 +20,11 @@ import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../comp
 import AssignProductDialog from '../../components/AssignRolesDialog/AssignProductDialog';
 import ConfirmationDialogRaw from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { camelCase } from 'lodash';
 
 const BOMTable = () => {
   const { id } = useParams();
+  const renderedFrom = `${camelCase(routes?.product.title)}_bom`
 
   const { setToastConfig } = useContext(CustomToastContext);
   const [loadingBOMData, setLoadingBOMData] = useState(false);
@@ -359,7 +361,7 @@ const BOMTable = () => {
             page={page}
             actionWidth={150}
             loading={gridLoading}
-            renderedFrom={routes.productDetail.title}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchBOMData}
           />
         </Box>

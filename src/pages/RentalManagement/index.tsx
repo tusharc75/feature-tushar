@@ -37,21 +37,21 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 import { setUpindexDB, objectStore, insertUpdate, findAll, findOne } from '../../constants/indexdbhelper';
 
 let rentalManagementTimeout;
-const RentalManagementType = [
-  {
-    key: `All ${routes.rentalManagement.title}`,
-    value: 1,
-  },
-  {
-    key: `My ${routes.rentalManagement.title}`,
-    value: 2,
-  },
-];
-
-const renderedFrom = camelCase(`${routes.rentalManagement.title}`);
-const localStorageSelectedRecords = `${renderedFrom}_selected`
 
 const RentalManagement = () => {
+
+  const RentalManagementType = [
+    {
+      key: `All ${routes.rentalManagement.title}`,
+      value: 1,
+    },
+    {
+      key: `My ${routes.rentalManagement.title}`,
+      value: 2,
+    },
+  ];
+  const renderedFrom = camelCase(`${routes.rentalManagement.title}`);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`
 
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, isSynch } = useContext(CustomOfflineContext);

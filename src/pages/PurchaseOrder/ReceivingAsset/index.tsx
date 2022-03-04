@@ -29,7 +29,6 @@ import { genrateColoum, getFrameworkComponents } from "src/constants/columns";
 import { useHistory } from "react-router-dom";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
 import { IoMdDownload } from "react-icons/io";
-import { camelCase } from "lodash";
 
 const useStyles = makeStyles(() => ({
     equal: {
@@ -44,9 +43,7 @@ const useStyles = makeStyles(() => ({
 
 }));
 
-let renderedFrom = camelCase(routes.purchaseOrderDetail.title)
-
-const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, statusOptions, handleViewPdf, handleAttachments }) => {
+const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, statusOptions, handleViewPdf, handleAttachments, renderedFrom }) => {
     const toastConfig = useContext(CustomToastContext);
     const {
         state: { user, permissions }
@@ -120,7 +117,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
         axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
             let fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
             let rendererNames = [];
-            genrateColoum(fields, columns, rendererNames, false);
+            genrateColoum(fields, columns, rendererNames, false, renderedFrom);
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
                 nameRenderer: NameRenderer,
@@ -245,7 +242,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                     {`Create Asset`}
                 </Button>
                 <Box mx={1}/>
-                    {permissions?.purchaseOrder?.isRead && (
+                    {permissions?.purchaseOrder?.isRead && !isMobile && (
                         <Button
                             variant={isMobile && !isTablet ? "text" : "outlined"}
                             color="primary"
@@ -337,7 +334,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                             onCreate={null}
                             showClone={false}
                             fullHeight={true}
-                            renderedFrom={`${renderedFrom}_grid-3`}
+                            renderedFrom={renderedFrom}
                             onClone={() => { }}
 
                         /> : <CustomAgGridEditable
@@ -354,7 +351,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                             loading={loading}
                             allowSelection={true}
                             isClientSideGrid={true}
-                            renderedFrom={`${renderedFrom}_grid-3`}
+                            renderedFrom={renderedFrom}
                             onCellValueChanged={(row) => {
                             }}
                             currency={purchaseOrderData?.currency?.toLowerCase()}
