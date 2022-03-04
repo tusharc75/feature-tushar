@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   makeStyles,
   Theme,
@@ -11,7 +11,10 @@ import {
   ListItemSecondaryAction,
   ListSubheader,
   Switch,
-  Button
+  Button,
+  Box,
+  TextField,
+  Typography
 } from '@material-ui/core';
 import { DragHandle } from '@material-ui/icons';
 import { XYCoord } from 'dnd-core';
@@ -55,10 +58,13 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const { onClose, columns, setColumns, columnApi, isClientSideGrid, updateGridHiddenColumns, renderedFrom, saveColumnOptions } = props;
   const classes = useStyles();
   const [sortedColumns, setSortedColumns] = React.useState([]);
+  const [searchedColumns, setSearchedColumns] = React.useState([]);
+  const [searchVal, setSearchVal] = React.useState('');
   const [oldData, setOldDate] = React.useState('');
   const [newData, setNewData] = React.useState('');
   const [allChecked, setAllChecked] = React.useState(false);
   const [hasChanged, setHasChanged] = React.useState(false);
+  const [isMinimized, setMinimized] = React.useState(true);
 
   const [lockedItem, setLockedItem] = React.useState([]);
 
@@ -86,6 +92,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
 
     newCols = newCols.filter((item) => item);
     setSortedColumns(newCols);
+    setColumns(newCols);
     setOldDate(JSON.stringify(newCols));
     setNewData(JSON.stringify(newCols));
   }, []);
@@ -170,16 +177,45 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     [sortedColumns]
   );
 
+  useEffect(() => {
+    if (!searchVal) return;
+
+    const matchedColumns = sortedColumns.filter((col) => {
+      const fieldName = col.headerName.toLowerCase();
+      return fieldName.includes(searchVal.toLowerCase());
+    });
+
+    setSearchedColumns(matchedColumns);
+  }, [searchVal]);
+
   return (
-    <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
-      <CustomDialogHeader title="Arrange View" onClose={onClose} showRequiredLabel={false} />
+    <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized}>
+      <CustomDialogHeader
+        title="Arrange View"
+        onClose={onClose}
+        showRequiredLabel={false}
+        showManimizeMaximize={true}
+        isMinimized={isMinimized}
+        onMinimizeMaximize={() => setMinimized((prevState) => !prevState)}
+      />
       <CustomDialogContent>
         <List
           disablePadding
           subheader={
-            <ListSubheader disableGutters disableSticky>
-              Toggle and Drag & Drop to arrange
-            </ListSubheader>
+            <Box display="flex" alignItems="center">
+              <ListSubheader style={{ width: '50%' }} disableGutters disableSticky>
+                Toggle and Drag & Drop to arrange
+              </ListSubheader>
+              <TextField
+                type='search'
+                value={searchVal}
+                onChange={(e) => setSearchVal(e.target.value)}
+                size="small"
+                style={{ width: '50%', marginLeft: '1rem' }}
+                variant="outlined"
+                placeholder="Search"
+              />
+            </Box>
           }
           className={classes.root}
         >
@@ -203,19 +239,34 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
               </ListItemSecondaryAction>
             </ListItem>
           ))} */}
-          <DndProvider backend={HTML5Backend}>
-            {sortedColumns.map((column, index) => (
-              <RenderListItem
-                key={column.field}
-                column={column}
-                handleToggle={handleToggle}
-                moveItem={moveItem}
-                index={index}
-                id={column.field}
-                columns={sortedColumns}
-              />
-            ))}
-          </DndProvider>
+          {!searchVal ? (
+            <DndProvider backend={HTML5Backend}>
+              {sortedColumns.map((column, index) => (
+                <RenderListItem
+                  key={column.field}
+                  column={column}
+                  handleToggle={handleToggle}
+                  moveItem={moveItem}
+                  index={index}
+                  id={column.field}
+                  columns={sortedColumns}
+                />
+              ))}
+            </DndProvider>
+          ) : searchedColumns.length > 0 ? (
+            searchedColumns.map((column, index) => (
+              <ListItem key={`${column.headerName}-${index}`} divider disableGutters disabled={column.disabled}>
+                <ListItemText id="switch-list-column" primary={column.headerName} />
+                <ListItemSecondaryAction>
+                  <Switch size="small" disabled={column.disabled} checked={column.show} onChange={handleToggle(column)} />
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))
+          ) : (
+            <Box my={5}>
+              <Typography align="center">No results found!</Typography>
+            </Box>
+          )}
         </List>
       </CustomDialogContent>
       <CustomDialogFooter>
