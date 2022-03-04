@@ -282,67 +282,26 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
         >
             <CustomDialogHeader title={`Add ${routes.serializedAsset.title}`} onClose={handleSerializedAssetClose} ></CustomDialogHeader>
             <CustomDialogContent>
-                <Grid container justifyContent='flex-end' alignItems="flex-start">
-                    <Box mb={isSmallScreen ? 1 : 0}>
-
-                        <SearchBox
-                            onSearch={handleSearch}
-                            searchbox="terms_header_search_bar"
-                            value={search}
-                            width={isMobile ? '200px' : '242px'}
-                            style={isMobile ? { flex: 1 } : {}}
-                        />
-                    </Box>
-                    <Box ml={1} display='flex' alignItems={'center'}>
-                        {(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) &&
-                            <Button
-                                color="primary"
-                                onClick={() => { setShowTransferAssetDialog(true) }}
-                                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                                disabled={isAdding || serializedProducts.some(d => d?.qty < 0)}
-                                className={isMobile && !isTablet ? 'mobile_button' : ""}
-                                endIcon={isAdding && <CircularProgress size={20} />}
-                            >
-                                {isMobile && !isTablet ? <MdAdd size={23} /> : 'Create Transfer Asset'}
-                                {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")" : ""}
-                            </Button>
-
-                        }
-                        <Box ml={1} />
-                        <Button
-                            color="primary"
-                            onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
-                            variant={isMobile && !isTablet ? 'text' : 'contained'}
-                            disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 || isAdding ||
-                                serializedProducts.some(d => d?.qty < 0)}
-                            className={isMobile && !isTablet ? 'mobile_button' : ""}
-                            endIcon={isAdding && <CircularProgress size={20} />}
-                        >
-                            {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                            {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")" : ""}
-                        </Button>
-                    </Box>
-                </Grid>
-                <div className={isMobile ? "listing-grid" : "listing-grid"}>
-                    <Box my={2}>
-                        <Grid container spacing={1} alignItems='center'>
-                            <Grid item xs={12} sm={5}>
-                                <div>
-                                    {
-                                        serializedProducts.length > 0 ?
-                                            serializedProducts.map(d =>
-                                                d?.qty < 0 ? <span key={d.name} className="text-error">{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span>
-                                                    : (d?.qty === 0 ? <span key={d.name} className="text-success">{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span> : <span key={d.name}>{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span>)
-                                            ) : null
-                                    }
-                                </div>
+                <Box pt={1} pb={1}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} md={5}>
+                            <div>
                                 {
-                                    serializedProducts.length > 0 && serializedProducts.some(s => s.qty < 0) ? <div className="text-error font-weight-bold">You have selected more assets then needed.</div> : ""
+                                    serializedProducts.length > 0 ?
+                                        serializedProducts.map(d =>
+                                            d?.qty < 0 ? <span key={d.name} className="text-error">{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span>
+                                                : (d?.qty === 0 ? <span key={d.name} className="text-success">{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span> : <span key={d.name}>{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span>)
+                                        ) : null
                                 }
-                            </Grid>
-                            <Grid item xs={12} sm={7}>
-                                {refrenceType === "Rental Job" &&
-                                    <Grid container justifyContent={isSmallScreen ? "flex-start" : "flex-end"}>
+                            </div>
+                            {
+                                serializedProducts.length > 0 && serializedProducts.some(s => s.qty < 0) ? <div className="text-error font-weight-bold">You have selected more assets then needed.</div> : ""
+                            }
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                            {refrenceType === "Rental Job" &&
+                                <Grid container >
+                                    <Grid item xs={6} justifyContent={"flex-end"}>
                                         <FormControlLabel
                                             control={
                                                 <Checkbox
@@ -364,8 +323,10 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                                             }
                                             label="Sublease Assets"
                                         />
+                                    </Grid>
+                                    <Grid item xs={6} justifyContent={"flex-end"}>
                                         <Autocomplete
-                                            style={{ width: "250px", }}
+                                            fullWidth
                                             options={plantList}
                                             getOptionLabel={(option: any) => option ? option?.warehouseName : ""}
                                             getOptionSelected={(option: any, val) =>
@@ -403,13 +364,56 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                                                 />
                                             )}
                                         />
-
                                     </Grid>
-                                }
-
-                            </Grid>
+                                </Grid>
+                            }
                         </Grid>
-                    </Box>
+                        <Grid item xs={12} md={4}>
+                            <Box display="flex">
+                                <Box flexGrow={1}>
+                                    <SearchBox
+                                        onSearch={handleSearch}
+                                        searchbox="terms_header_search_bar"
+                                        value={search}
+                                        width={'100%'}
+                                    />
+                                </Box>
+                                {(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) &&
+                                    <Box pl={1}>
+                                        <Button
+                                            size="small"
+                                            color="primary"
+                                            onClick={() => { setShowTransferAssetDialog(true) }}
+                                            variant={isMobile && !isTablet ? 'text' : 'contained'}
+                                            disabled={isAdding || serializedProducts.some(d => d?.qty < 0)}
+                                            className={isMobile && !isTablet ? 'mobile_button' : ""}
+                                            endIcon={isAdding && <CircularProgress size={20} />}
+                                        >
+                                            {isMobile && !isTablet ? <MdAdd size={23} /> : 'Create Transfer Asset'}
+                                            {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")" : ""}
+                                        </Button>
+                                    </Box>
+                                }
+                                <Box pl={1}>
+                                    <Button
+                                        color="primary"
+                                        size="small"
+                                        onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
+                                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                                        disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 || isAdding ||
+                                            serializedProducts.some(d => d?.qty < 0)}
+                                        className={isMobile && !isTablet ? 'mobile_button' : ""}
+                                        endIcon={isAdding && <CircularProgress size={20} />}
+                                    >
+                                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                                        {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")" : ""}
+                                    </Button>
+                                </Box>
+                            </Box>
+                        </Grid>
+                    </Grid>
+                </Box>
+                <div className={"listing-grid"}>
                     {Object.keys(frameWorkComponent).length > 0 && columns ?
                         // isMobile && !isTablet ?
                         //     <CustomSwipableList

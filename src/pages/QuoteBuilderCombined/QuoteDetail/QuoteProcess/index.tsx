@@ -1236,8 +1236,8 @@ export default function QuoteProcess(props) {
   };
 
   const findProfitPercentage = (CP, Profit) => {
-    let parsedCP = parseInt(CP?.amountWithouCurrencyCode.replace(/[^0-9]/g, ""))
-    let profit = parseInt(Profit?.amountWithouCurrencyCode.replace(/[^0-9]/g, ""))
+    let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, "") ?? 0)
+    let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, "") ?? 0)
     return (profit * 100 / parsedCP).toFixed(2);
   }
 

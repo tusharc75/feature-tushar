@@ -73,7 +73,6 @@ const SubleaseDetailsPage = () => {
     const updateProcessStatus = (processStatus) => {
         axiosInstance().put(`${sublease.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
             .catch((error) => {
-                toastConfig.setToastConfig(error);
             });
     }
 
