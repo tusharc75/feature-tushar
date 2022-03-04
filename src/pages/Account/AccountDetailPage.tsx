@@ -603,10 +603,20 @@ export default function AccountDetailPage(props) {
     },
     {
       label: "Quotes",
-      count: 0,
-      show: permissions?.quoteBuilder?.isRead,
+      count: quotes ? quotes.length : 0,
+      show: permissions?.quoteBuilder?.isRead ?? false,
       icon: <FcMoneyTransfer />,
       class: "quotes",
+      onClick: () => {
+        history.push({
+          pathname: routes.quoteBuilder.path,
+          state: {
+            accountId: accountData._id,
+            accountName: accountData.accountName,
+            resource: accountResource,
+          },
+        });
+      }
     },
     {
       label: "Accounts Teams",
@@ -1150,9 +1160,9 @@ export default function AccountDetailPage(props) {
                               permissions[accountResource].isUpdate &&
                               canEdit
                             }
-                          accountId={accountData._id}
-                          accountName={accountData.accountName}
-                          resource={accountResource}
+                            accountId={accountData._id}
+                            accountName={accountData.accountName}
+                            resource={accountResource}
                           />
                         </span>
                       )}
