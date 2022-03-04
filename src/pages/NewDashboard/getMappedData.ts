@@ -358,7 +358,7 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
         month: moment(d.date).format('MMM/YY'),
         [chart.uniqueId === 'volumeVsBudget' ? 'totalBookedVolume MT' : 'totalBooked GM']:
           chart.uniqueId === 'volumeVsBudget' ? d.totalBookedVolume : d.totalBookedMargin,
-        ['budget']: d.volumeBudget ? d.volumeBudget : 0
+        ['totalBudget']: d.volumeBudget ? d.volumeBudget : 0
       }));
 
       Object.assign(dataObject, { tableData });
