@@ -284,7 +284,7 @@ export default function TinyMCE(props) {
 
     return <>
         {
-            !isOffline ? <div style={{ width: width }}>
+            isOffline ? <div style={{ width: width }}>
                 <div style={{ height: 175, overflow: "auto", width: "100%", textAlign: "left" }}
                     className="border p-2 border-radius-1" dangerouslySetInnerHTML={{ __html: initialValue || "" }}></div>
             </div> :
