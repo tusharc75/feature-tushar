@@ -1753,6 +1753,11 @@ export const getData = (resource: string, data: any) => {
         name: `${data.subleaseName}`,
         id: data._id
       };
+    case 'salesOrder':
+      return {
+        name: `${data.salesOrderNo}`,
+        id: data._id
+      };
     default:
       break;
   }
