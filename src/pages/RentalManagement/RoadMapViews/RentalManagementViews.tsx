@@ -15,6 +15,7 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const customNodeStyles = {
   rentalJob: {
@@ -310,7 +311,11 @@ const RentalManagementViews = (props) => {
           data: {
             ref_type: 'asset',
             ref_id: item.inventory,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.inventoryDetail.assetNumber}</div>
+            label: (
+              <HtmlTooltip arrow placement="top" title={item?.inventoryDetail?.status}>
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.inventoryDetail.assetNumber}</div>
+              </HtmlTooltip>
+            )
           },
           position: { x: xPosition, y: index * 80 },
           style:
@@ -345,11 +350,26 @@ const RentalManagementViews = (props) => {
             ref_type: 'loading',
             ref_id: item._id,
             label: (
-              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {item.ticketName}
-                <br />
-                {item.ticketType} Ticket
-              </div>
+              <HtmlTooltip
+                arrow
+                placement="top"
+                title={
+                  <>
+                    <p>
+                      From: <b>{item?.pickupFrom?.optionLabel}</b>
+                    </p>
+                    <p>
+                      To: <b>{item?.deliveryTo?.optionLabel}</b>
+                    </p>
+                  </>
+                }
+              >
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {item.ticketName}
+                  <br />
+                  {item.ticketType} Ticket
+                </div>
+              </HtmlTooltip>
             )
           },
           position: { x: xPosition, y: index * 80 },
@@ -398,11 +418,26 @@ const RentalManagementViews = (props) => {
             ref_type: 'receiving',
             ref_id: item._id,
             label: (
-              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {item.ticketName}
-                <br />
-                {item.ticketType} Ticket
-              </div>
+              <HtmlTooltip
+                arrow
+                placement="top"
+                title={
+                  <>
+                    <p>
+                      From: <b>{item?.pickupFrom?.optionLabel}</b>
+                    </p>
+                    <p>
+                      To: <b>{item?.deliveryTo?.optionLabel}</b>
+                    </p>
+                  </>
+                }
+              >
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {item.ticketName}
+                  <br />
+                  {item.ticketType} Ticket
+                </div>
+              </HtmlTooltip>
             )
           },
           position: { x: xPosition, y: receivingAndReturnIdx * 80 },
@@ -428,11 +463,26 @@ const RentalManagementViews = (props) => {
             ref_type: 'return',
             ref_id: item._id,
             label: (
-              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {item.ticketName}
-                <br />
-                {item.ticketType} Ticket
-              </div>
+              <HtmlTooltip
+                arrow
+                placement="top"
+                title={
+                  <>
+                    <p>
+                      From: <b>{item?.pickupFrom?.optionLabel}</b>
+                    </p>
+                    <p>
+                      To: <b>{item?.deliveryTo?.optionLabel}</b>
+                    </p>
+                  </>
+                }
+              >
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {item.ticketName}
+                  <br />
+                  {item.ticketType} Ticket
+                </div>
+              </HtmlTooltip>
             )
           },
           position: { x: xPosition, y: receivingAndReturnIdx * 80 },
