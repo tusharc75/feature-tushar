@@ -106,7 +106,6 @@ const PurchaseOrderDetailsPage = () => {
         .then(({ data }) => {
         })
         .catch((error) => {
-          toastConfig.setToastConfig(error);
         });
     }
   }, [currentStep]);
