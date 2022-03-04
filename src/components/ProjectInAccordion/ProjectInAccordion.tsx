@@ -14,7 +14,6 @@ import routes from '../Helpers/Routes';
 import CreateProjectSales from "../../pages/ProjectSales/CreateProjectSales";
 import { MoreVert } from '@material-ui/icons';
 import AssignProjectSalesDialog from '../AssignRolesDialog/AssignProjectSalesDialog';
-import { RESOURCE_LABEL } from '../../constants/helpers';
 import { HiExternalLink } from 'react-icons/hi';
 
 const Accordion = withStyles({
@@ -145,7 +144,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                             </Box>
                             <Box padding="5px">
                                 <Typography variant="subtitle2">
-                                    {RESOURCE_LABEL.projectStrategy} ({projectSales?.length || 0})
+                                    {routes.projectSales.title} ({projectSales?.length || 0})
                                 </Typography>
                             </Box>
                         </Box>
@@ -169,7 +168,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                                     onClose={handleCloseMenu}
                                 >
                                     <MenuItem
-                                        disabled={!permissions?.projectStrategy?.isCreate}
+                                        disabled={!permissions?.projectSales?.isCreate}
                                         onClick={() => {
                                             setShowCreateProjectSalesDialog(true);
                                             handleCloseMenu();
@@ -178,7 +177,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                                         Create New
                                     </MenuItem>
                                     <MenuItem
-                                        disabled={!permissions?.projectStrategy?.isUpdate}
+                                        disabled={!permissions?.projectSales?.isUpdate}
                                         onClick={() => {
                                             setShowAddProjectSalesDialog(true)
                                             handleCloseMenu();

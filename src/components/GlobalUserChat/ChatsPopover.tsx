@@ -32,13 +32,9 @@ const ChatsPopover = (props) => {
       user: { user }
     }
   } = useData();
-  const { open, anchorEl, setAnchorEl, getChats } = props;
+  const { open, anchorEl, onClose, getChats } = props;
   const [newChat, setNewChat] = useState(false);
   const [users, setUsers] = useState([]);
-
-  const onClose = () => {
-    setAnchorEl(null);
-  };
 
   useEffect(() => {
     fetchUsersList();

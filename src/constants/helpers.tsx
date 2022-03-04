@@ -140,7 +140,6 @@ export const sidebarResource = {
   doa: 'DOA',
   termsAndConditions: 'Terms & Conditions',
   equiptmentRentalMaster: 'Equiptment Rental Master',
-  projectStrategy: 'Project Sales',
   productBuilder: 'Product Builder',
   formBuilder: 'Form Builder',
   currencyConverter: 'Currency Converter',
@@ -172,13 +171,13 @@ export const sidebarResource = {
   pricing: 'Pricing',
   priceBuilder: 'Price Builder',
   flags: 'Flags',
-  projectSales: 'Cross-Regional Target Projects List',
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
   address: 'Address',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
-  zone: 'Zone'
+  zone: 'Zone',
+  projectSales: 'Project Sales'
 };
 
 export const resourceNames = {
@@ -192,7 +191,7 @@ export const resourceNames = {
   opportunity: 'Opportunity',
   field: 'Field',
   productCategory: 'Product Category',
-  //productInventory: 'Serialized Asset',
+  productInventory: 'Product Inventory',
   serializedAsset: "Serialized Asset",
   priceTemplate: 'Price Template',
   product: 'Product',
@@ -200,7 +199,6 @@ export const resourceNames = {
   doa: 'DOA',
   termsAndConditions: 'Terms & Conditions',
   equiptmentRentalMaster: 'Equiptment Rental Master',
-  projectStrategy: 'Project Sales',
   productBuilder: 'Product Builder',
   formBuilder: 'Form Builder',
   currencyConverter: 'Currency Converter',
@@ -270,7 +268,7 @@ export const RESOURCE_LABEL = {
   doa: 'DOA',
   termsAndConditions: 'T&Cs',
   equiptmentRentalMaster: 'Equiptment Rental Master',
-  projectStrategy: 'Cross-Regional Target Projects List',
+  projectSales: 'Project Sales',
   productBuilder: 'Price Builder',
   formBuilder: 'Form Builder',
   currencyConverter: 'Currency Converter',
@@ -300,7 +298,8 @@ export const RESOURCE_LABEL = {
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventories'
+  transferInventory: 'Transfer Inventories',
+  zone: "Zone"
 };
 
 export const CHILD_RESOURCE = {
@@ -314,15 +313,11 @@ export const CHILD_RESOURCE = {
   subleaseProduct: 'Sublease Product',
 };
 
-
 export const sidebarResourceObjectFromValues = () => {
-
   let obj: any = {};
-
   Object.keys(sidebarResource).forEach((key) => {
     obj[sidebarResource[key]] = key
   })
-  obj['Project Sales'] = "projectStrategy"
   return obj
 }
 
@@ -1690,7 +1685,7 @@ export const getData = (resource: string, data: any) => {
       };
     case 'customer-contact':
       return {
-        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+        name: `${data?.salutation} ${data?.firstName} ${data?.middleName} ${data?.lastName}`,
         id: data._id
       };
     case 'supplier-account':
@@ -1700,7 +1695,7 @@ export const getData = (resource: string, data: any) => {
       };
     case 'supplier-contact':
       return {
-        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+        name: `${data?.salutation} ${data?.firstName} ${data?.middleName} ${data?.lastName}`,
         id: data._id
       };
     case 'lead':
@@ -1751,6 +1746,11 @@ export const getData = (resource: string, data: any) => {
     case 'sublease':
       return {
         name: `${data.subleaseName}`,
+        id: data._id
+      };
+    case 'salesOrder':
+      return {
+        name: `${data.salesOrderNo}`,
         id: data._id
       };
     default:

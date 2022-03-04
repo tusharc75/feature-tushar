@@ -86,7 +86,16 @@ export default function NewCreateQuotePdfTemplate() {
     const [isLandscapChecked, setIsLandscapChecked] = useState(false)
     const [isBreakCrumbPath, setIsBreakCrumbPath] = useState("")
     const [isPreview, setIsPreview] = useState(false)
-    const typeOptions = [RESOURCE_LABEL.quoteBuilder, "Rental Job", RESOURCE_LABEL.repairJob, RESOURCE_LABEL.purchaseOrder, RESOURCE_LABEL.deliveryTicket, RESOURCE_LABEL.transferAsset, RESOURCE_LABEL.sublease].filter(d => d)
+
+    const typeOptions = [
+        RESOURCE_LABEL.quoteBuilder,
+        "Rental Job",
+        RESOURCE_LABEL.repairJob,
+        RESOURCE_LABEL.purchaseOrder,
+        RESOURCE_LABEL.deliveryTicket,
+        RESOURCE_LABEL.transferAsset,
+        RESOURCE_LABEL.sublease].filter(d => d)
+
     const [variables, setVariables] = useState([])
     const [formValues, setFormValues] = useState(null)
     const onBackButtonEvent = (e) => {

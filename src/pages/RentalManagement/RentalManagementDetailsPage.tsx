@@ -240,7 +240,6 @@ const RentalManagementDetailsPage = () => {
       .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
       .then(({ data }) => { })
       .catch((error) => {
-        toastConfig.setToastConfig(error);
       });
   };
 
