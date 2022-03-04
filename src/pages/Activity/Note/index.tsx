@@ -15,7 +15,7 @@ import { ExpandMore } from '@material-ui/icons';
 import { Button, Chip, Dialog, Link, Menu, MenuItem, TextField } from '@material-ui/core';
 import { AddOutlined } from '@material-ui/icons';
 import { CreateNote } from '../../../components/Activity/Note/CreateNote';
-import { CustomDialogTransition, getApi, getData, gridLoadingTimeout, resourceOptions } from '../../../constants/helpers';
+import { CustomDialogTransition, getApi, getData, gridLoadingTimeout } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import styles from '../../Leads/Header.module.scss';
@@ -29,6 +29,7 @@ import CustomSwipableList from '../../../components/SwipableListComponents/Custo
 import { MdAdd } from "react-icons/all";
 import { Autocomplete } from '@material-ui/lab';
 import { startCase, camelCase } from "lodash";
+import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
 
 const Note = () => {
   const {
@@ -57,12 +58,18 @@ const Note = () => {
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([])
   const localStorageSelectedRecords = "notesPage";
-  const [resource, setResource] = useState('');
+  const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('notesPage'));
+
+  const [resourceOptions, setResourceOptions] = useState([]);
+
+  useEffect(() => {
+    setResourceOptions(get_activity_resource(permissions))
+  }, []);
 
   const columns = [
     { field: 'name', headerName: 'Title', show: true, disabled: true, primaryField: true, cellRenderer: 'nameRenderer' },
@@ -70,6 +77,7 @@ const Note = () => {
     { field: 'createdByDate', headerName: 'Created At', filter: false, sortable: false, show: true, cellRenderer: 'createdAtDateRenderer' },
     { field: 'updatedByDate', headerName: 'Updated At', filter: false, sortable: false, show: true, cellRenderer: 'updatedAtDateRenderer' }
   ];
+
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
@@ -94,26 +102,25 @@ const Note = () => {
   }, [referenceId]);
 
   useEffect(() => {
-    if (!resource) return;
-    setLoadingResources(true);
-    axiosInstance()
-      .get(`${getApi(resource)}?limit=100`)
-      .then(({ data: { data } }) => {
-        if (data.length) {
-          const mappedData = data.map((_d) => getData(resource, _d));
-          setResourceData(mappedData || []);
-        }
-        setLoadingResources(false);
-      })
-      .catch((error) => {
-        setLoadingResources(false);
-      });
-
-    return () => {
-      setSelectedResourceData(null);
-      setResourceData(null);
-    };
-    // eslint-disable-next-line
+    if (resource && resource?.optionValue) {
+      setLoadingResources(true);
+      axiosInstance()
+        .get(`${getApi(resource?.optionValue)}?limit=100`)
+        .then(({ data: { data } }) => {
+          if (data.length) {
+            const mappedData = data.map((_d) => getData(resource?.optionValue, _d));
+            setResourceData(mappedData || []);
+          }
+          setLoadingResources(false);
+        })
+        .catch((error) => {
+          setLoadingResources(false);
+        });
+      return () => {
+        setSelectedResourceData(null);
+        setResourceData(null);
+      };
+    }
   }, [resource]);
 
   useEffect(() => {
@@ -290,10 +297,6 @@ const Note = () => {
   };
 
   const handleActivityOpen = (data) => {
-    // history.push({
-    //     pathname: '/activity/note',
-    //     search: '?activityType=note&activityId=' + id
-    // })
     setShowCreateDialog(true);
     setNoteData(data);
   };
@@ -313,69 +316,6 @@ const Note = () => {
     }
   };
 
-
-  let newResourceOptions = [];
-
-  for (let i = 0; i < resourceOptions.length; i++) {
-    if (resourceOptions[i] === 'Customer Account') {
-      if (permissions.customerAccount.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-        i++;
-      }
-    }
-    if (resourceOptions[i] === 'Customer Contact') {
-      if (permissions.customerContact.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Supplier Account') {
-      if (permissions.supplierAccount.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Supplier Contact') {
-      if (permissions.supplierContact.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Lead') {
-      if (permissions.lead.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Opportunity') {
-      if (permissions.opportunity.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Customer Account') {
-      if (permissions.customerAccount.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Quote') {
-      if (permissions.quoteBuilder.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Rental Management') {
-      if (permissions.rentalManagement.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === 'Delivery Ticket') {
-      if (permissions.deliveryTicket.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-    if (resourceOptions[i] === "Project Sales") {
-      if (permissions.projectSales.isRead === true) {
-        newResourceOptions.push(resourceOptions[i]);
-      }
-    }
-  }
-
-
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -383,19 +323,19 @@ const Note = () => {
           <CustomBreadCrumbs routes={[{ title: routes.activityNote.title }]} />
         </Grid>
       </Grid>
-
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={6} md={6} sm={12} className="d-flex align-items-center gap-1">
               <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title}</span>
               <Autocomplete
-                options={newResourceOptions}
-                getOptionLabel={(option) => option}
-                style={{ width: "200px" }}
+                options={resourceOptions}
+                getOptionLabel={(option) => option.optionLabel}
+                style={{ width: "250px" }}
                 value={resource}
                 onChange={(event, newValue) => {
                   setResource(newValue);
+                  setFilter([])
                 }}
                 size="small"
                 renderInput={(params) =>
@@ -406,31 +346,30 @@ const Note = () => {
                   )
                 }
               />
-              {Boolean(resource) && resourceData && (
+              {resource && resourceData && (
                 <Autocomplete
                   disabled={loadingResources}
                   options={resourceData}
                   getOptionLabel={(option: any) => option.name}
                   getOptionSelected={(option: any, value: any) => option.name === value.name}
-                  style={{ width: "200px" }}
+                  style={{ width: "250px" }}
                   value={selectedResourceData}
                   onChange={(event, newValue) => {
                     setSelectedResourceData(newValue);
                     if (newValue?.id) {
-                      setFilter((prevState) => ([...prevState, { _id: newValue.id, type: camelCase(resource), name: newValue.name }]))
+                      setFilter((prevState) => ([...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]))
                     }
                     else {
                       setFilter([])
                     }
                   }}
                   size="small"
-                  renderInput={(params) => <TextField {...params} label={`${resource}`} variant="outlined" />}
+                  renderInput={(params) => <TextField {...params} label={`${resource.optionLabel}`} variant="outlined" />}
                 />
               )}
             </Grid>
             <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
               <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-
                 <Grid style={{ width: "100%", display: "flex" }}>
                   <SearchFilter
                     handleChangeFilter={handleChangeFilter}
@@ -438,7 +377,6 @@ const Note = () => {
                     chip={{ size: 'small' }}
                     activityName="note" />
                 </Grid>
-
                 <Grid style={{ display: "flex", gap: "5px" }}>
                   {<Button
                     variant={isMobile && !isTablet ? "text" : "contained"}
@@ -577,7 +515,7 @@ const Note = () => {
             noteId={isNew ? null : noteData?.id}
             relatedTo={[
               {
-                type: resource && selectedResourceData ? camelCase(resource) : "user",
+                type: resource && selectedResourceData ? resource.optionValue : "user",
                 referenceId: resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
                 access: true,
               },

@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.71.0](https://github.com/vebholic/oms_frontend/compare/v2.70.1...v2.71.0) (2022-03-04)
+
+
+### Features
+
+* - CustomReactTable cell background color changes done ([5b73cd9](https://github.com/vebholic/oms_frontend/commit/5b73cd98594fa5c4b9263c95b064c7ff71a2eea5))
+* - CustomReactTable resize column code added ([41fd613](https://github.com/vebholic/oms_frontend/commit/41fd613509b39a6e26791e4a8906fba571574559))
+* - Nodal Structure Updated ([5ae7359](https://github.com/vebholic/oms_frontend/commit/5ae7359c73ea25db83639b251c63e83173c0ecd0))
+* roadmap views in repair job like rental job PO-1200 ([8fe4747](https://github.com/vebholic/oms_frontend/commit/8fe47478c81b4df75bde2c07d53545204082f7a1))
+* roadmap views in repair job like rental job PO-1200 ([705ac03](https://github.com/vebholic/oms_frontend/commit/705ac03301fcd2cbb262e54282d93f6c62645b6a))
+
+
+### Bug Fixes
+
+* **ag grid:** render from fix for grid ([2155732](https://github.com/vebholic/oms_frontend/commit/2155732b6d2a6c73ed89a0b2b5a7db018d6fe9b1))
+* bug fix ([b37412d](https://github.com/vebholic/oms_frontend/commit/b37412d2bec502cac3aff6cdb87d782fa231f09e))
+* bug fix ([4d39c03](https://github.com/vebholic/oms_frontend/commit/4d39c03cb2cf3a245fd74f99657accae1f864d4f))
+* bug fix ([6c56f1b](https://github.com/vebholic/oms_frontend/commit/6c56f1b507acbf7e0ac712cccaedcaff737c784e))
+* bug fix ([ad03d20](https://github.com/vebholic/oms_frontend/commit/ad03d2040b437c1b239afa09c47798f1f96c190f))
+* bug fix ([8787a0b](https://github.com/vebholic/oms_frontend/commit/8787a0bbf7830d39ef287ac6274be0df39b8e5f2))
+* bug fix ([5ae1e9e](https://github.com/vebholic/oms_frontend/commit/5ae1e9e1af73682e290a2443cd8c9fa1a3539cf7))
+* bug fix ([fc8f99b](https://github.com/vebholic/oms_frontend/commit/fc8f99bb155638a46191eec2c5526d6144929bc9))
+* bug fix ([5470db1](https://github.com/vebholic/oms_frontend/commit/5470db1795e702fbc642018aa1abc7c51bfc2a60))
+* bug fix ([ccd559f](https://github.com/vebholic/oms_frontend/commit/ccd559f177691e9fe140a866dc97d9845a5acc97))
+* **dashboard:** minor fix ([a66f572](https://github.com/vebholic/oms_frontend/commit/a66f572cc3962b4e5d302e4dbc2dd9c254a67dce))
+* **feat/avi:** feat/avi ([8bdbf4a](https://github.com/vebholic/oms_frontend/commit/8bdbf4aa72027468cbe825f709d039d5bd6f92f3))
+* hide preview button on mobile view ([791caf2](https://github.com/vebholic/oms_frontend/commit/791caf20290d2bc52f1a5d8f3ebd53853c31fb89))
+* rental View requirement PO-1195 ([dc1510f](https://github.com/vebholic/oms_frontend/commit/dc1510fca2e4c92f6eee2f2bb99c60c7be96b9fa))
+* rental View requirement PO-1195 ([53f0a88](https://github.com/vebholic/oms_frontend/commit/53f0a8869ed3444a322164bcc055c490430f3d8e))
+* route fix ([fb7d6c4](https://github.com/vebholic/oms_frontend/commit/fb7d6c42e5920e63a83dd1fdce10689150895e45))
+
 ### [2.70.1](https://github.com/vebholic/oms_frontend/compare/v2.70.0...v2.70.1) (2022-03-03)
 
 
