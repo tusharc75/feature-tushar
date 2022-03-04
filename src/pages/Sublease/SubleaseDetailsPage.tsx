@@ -145,201 +145,197 @@ const SubleaseDetailsPage = () => {
 
     return (
         <>
-            <Fragment>
-                <Grid container className="headerbox">
-                    <CustomBreadCrumbs routes={[routes.sublease, { title: subleaseData?.subleaseName }]} />
-                </Grid>
-                <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
+            <Grid container className="headerbox">
+                <CustomBreadCrumbs routes={[routes.sublease, { title: subleaseData?.subleaseName }]} />
+            </Grid>
+            <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
+                <div>
                     <div>
-                        <Grid container spacing={1} className="detail-container">
-                            <Grid item xs={12} sm={12} spacing={2}>
-                                <Paper style={{ height: "650px" }}>
-                                    <DetailsPageHeader
-                                        heading={subleaseData?.subleaseName}
-                                        mainPoints={null}
-                                        showHeading={true}
-                                    >
-                                        {(permissions?.sublease?.isUpdate && subleaseData?.status !== SUBLEASE_STATUS.completed) && (
-                                            <>
-                                                <Button
-                                                    variant={isMobile && !isTablet ? "text" : "contained"}
-                                                    color="primary"
-                                                    size="small"
-                                                    onClick={() => { setOpenUpdateDialog(true); }}
-                                                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
-                                                    style={isMobile && !isTablet ? { color: "#43aeaa" } : {}}
-                                                >
-                                                    {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
-                                                </Button>
-                                            </>
-                                        )}
-                                    </DetailsPageHeader>
-                                    <Tabs
-                                        className="quote-tab"
-                                        value={tabValue}
-                                        onChange={handleMainTabChange}
-                                        textColor="primary"
-                                        TabIndicatorProps={{
-                                            style: {
-                                                display: 'none'
-                                            }
-                                        }}
-                                    >
-                                        <Tab
-                                            className={'tabLayout'}
-                                            style={{
-                                                background: tabValue === 1 ? 'white' : '',
-                                                color: tabValue === 1 ? '#163340' : '#163340'
-                                            }}
-                                            label={
-                                                <div className="d-flex align-items-center tab-font">
-                                                    <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                                                </div>
-                                            }
-                                            {...a11yProps(0)}
-                                        />
-                                        <Tab
-                                            className={'tabLayout'}
-                                            style={{
-                                                background: tabValue === 2 ? 'white' : '',
-                                                color: tabValue === 2 ? '#163340' : '#163340'
-                                            }}
-                                            label={
-                                                <div className="d-flex align-items-center tab-font">
-                                                    <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                                                </div>
-                                            }
-                                            {...a11yProps(1)}
-                                        />
-                                        <Tab
-                                            className={'tabLayout'}
-                                            style={{
-                                                background: tabValue === 3 ? 'white' : '',
-                                                color: tabValue === 3 ? '#163340' : '#163340'
-                                            }}
-                                            label={
-                                                <div className="d-flex align-items-center tab-font">
-                                                    <GiAbstract055 className="mr-1" fontSize="inherit" />Delivery Tickets
-                                                </div>
-                                            }
-                                            {...a11yProps(1)}
-                                        />
-                                        <div className={'uio'}> </div>
-                                    </Tabs>
-                                    <TabPanel value={tabValue} index={0}>
-                                        <Box>
-                                            {subleaseData && fields.length ? (
-                                                <DetailsPage data={subleaseData} fields={fields} />
-                                            ) : (
-                                                <Grid container spacing={2} style={{ padding: "8px" }}>
-                                                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                                                </Grid>
-                                            )}
-                                        </Box>
-                                        <Grid container spacing={2}>
-                                        </Grid>
-                                    </TabPanel>
-                                    <TabPanel value={tabValue} index={1}>
-                                        <Grid item xs={12} sm={12} md={12} lg={12} >
-                                            {subleaseData ? (
-                                                <Grid item xs={12} sm={12} md={12} lg={12}>
-                                                    <>
-                                                        <Paper>
-                                                            <Steps
-                                                                isNextStep={false}
-                                                                nextStep={nextStep}
-                                                                steps={subleaseSteps}
-                                                                currentStep={currentStep}
-                                                                setCurrentStep={setCurrentStep}
-                                                                isStepEnded={[SUBLEASE_STATUS.completed].includes(subleaseData?.status)}
-                                                            />
-                                                            {currentStep === 0 && subleaseData && (
-                                                                <Productpackage
-                                                                    subleaseData={subleaseData}
-                                                                    setNextStep={setNextStep}
-                                                                    fetchData={fetchData}
-                                                                    isIssued={isIssued}
-                                                                    renderedFrom={`${renderedFrom}_grid-1`}
-                                                                />
-                                                            )}
-                                                            {(currentStep === 1 || currentStep === 2) && subleaseData && (
-                                                                <SerializedAsset
-                                                                    fetchData={fetchData}
-                                                                    subleaseData={subleaseData}
-                                                                    setNextStep={setNextStep}
-                                                                    currentStep={currentStep}
-                                                                    renderedFrom={`${renderedFrom}_grid-2`}
-                                                                />
-                                                            )}
-                                                        </Paper>
-                                                    </>
-                                                </Grid>
-                                            ) : (
-                                                <Grid container spacing={2} style={{ padding: "8px" }}>
-                                                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                                                </Grid>
-                                            )}
-                                        </Grid>
-                                    </TabPanel>
-                                    <TabPanel value={tabValue} index={2}>
-                                        <Grid item xs={12} sm={12} md={12} lg={12} >
-                                            {subleaseData ?
-                                                <Tickets
-                                                    subleaseId={id}
-                                                    renderedFrom={`${renderedFrom}_grid-3`}
-                                                />
-                                                : (
-                                                    <Grid container spacing={2} style={{ padding: "8px" }}>
-                                                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                                                    </Grid>
-                                                )
-                                            }
-                                        </Grid>
-                                    </TabPanel>
-                                </Paper>
-                            </Grid>
-                            <Box my={1} />
-                        </Grid>
-                    </div>
-                    <div className="position-relative">
-                        <HideWhenOffline>
-                            <Paper>
-                                {!isSmallScreen && (
-                                    <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                                        {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                                    </span>
+                        <Paper style={{ height: "650px" }}>
+                            <DetailsPageHeader
+                                heading={subleaseData?.subleaseName}
+                                mainPoints={null}
+                                showHeading={true}
+                            >
+                                {(permissions?.sublease?.isUpdate && subleaseData?.status !== SUBLEASE_STATUS.completed) && (
+                                    <>
+                                        <Button
+                                            variant={isMobile && !isTablet ? "text" : "contained"}
+                                            color="primary"
+                                            size="small"
+                                            onClick={() => { setOpenUpdateDialog(true); }}
+                                            className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                                            style={isMobile && !isTablet ? { color: "#43aeaa" } : {}}
+                                        >
+                                            {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
+                                        </Button>
+                                    </>
                                 )}
-                                <div style={{ display: showActivity || (isSmallScreen && tabValue === 0) ? 'block' : 'none' }}>
-                                    <Grid container>
-                                        <Grid item xs={12}>
-                                            {subleaseData && (
-                                                <div>
-                                                    <Activity
-                                                        resourceId={subleaseData._id}
-                                                        resource={ACTIVITY_RESOURCE.sublease}
-                                                        restrictedAddActivities={
-                                                            permissions && permissions[`${ACTIVITY_RESOURCE.sublease}`] && permissions[`${ACTIVITY_RESOURCE.sublease}`].isUpdate ? [] : ['Attachment', 'Case']
-                                                        }
-                                                        relatedTo={[
-                                                            {
-                                                                type: ACTIVITY_RESOURCE.sublease,
-                                                                referenceId: subleaseData._id,
-                                                                access: true
-                                                            }
-                                                        ]}
-                                                        handleActivityRefresh={() => { }}
-                                                        emails={[]}
-                                                    />
-                                                </div>
-                                            )}
+                            </DetailsPageHeader>
+                            <Tabs
+                                className="quote-tab"
+                                value={tabValue}
+                                onChange={handleMainTabChange}
+                                textColor="primary"
+                                TabIndicatorProps={{
+                                    style: {
+                                        display: 'none'
+                                    }
+                                }}
+                            >
+                                <Tab
+                                    className={'tabLayout'}
+                                    style={{
+                                        background: tabValue === 1 ? 'white' : '',
+                                        color: tabValue === 1 ? '#163340' : '#163340'
+                                    }}
+                                    label={
+                                        <div className="d-flex align-items-center tab-font">
+                                            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                                        </div>
+                                    }
+                                    {...a11yProps(0)}
+                                />
+                                <Tab
+                                    className={'tabLayout'}
+                                    style={{
+                                        background: tabValue === 2 ? 'white' : '',
+                                        color: tabValue === 2 ? '#163340' : '#163340'
+                                    }}
+                                    label={
+                                        <div className="d-flex align-items-center tab-font">
+                                            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                                        </div>
+                                    }
+                                    {...a11yProps(1)}
+                                />
+                                <Tab
+                                    className={'tabLayout'}
+                                    style={{
+                                        background: tabValue === 3 ? 'white' : '',
+                                        color: tabValue === 3 ? '#163340' : '#163340'
+                                    }}
+                                    label={
+                                        <div className="d-flex align-items-center tab-font">
+                                            <GiAbstract055 className="mr-1" fontSize="inherit" />Delivery Tickets
+                                        </div>
+                                    }
+                                    {...a11yProps(1)}
+                                />
+                                <div className={'uio'}> </div>
+                            </Tabs>
+                            <TabPanel value={tabValue} index={0}>
+                                <Box>
+                                    {subleaseData && fields.length ? (
+                                        <DetailsPage data={subleaseData} fields={fields} />
+                                    ) : (
+                                        <Grid container spacing={2} style={{ padding: "8px" }}>
+                                            <CommonSkeleton lenArray={[...Array(7).keys()]} />
                                         </Grid>
-                                    </Grid>
-                                </div>
-                            </Paper>
-                        </HideWhenOffline>
+                                    )}
+                                </Box>
+                                <Grid container spacing={2}>
+                                </Grid>
+                            </TabPanel>
+                            <TabPanel value={tabValue} index={1}>
+                                <Grid item xs={12} sm={12} md={12} lg={12} >
+                                    {subleaseData ? (
+                                        <Grid item xs={12} sm={12} md={12} lg={12}>
+                                            <>
+                                                <Paper>
+                                                    <Steps
+                                                        isNextStep={false}
+                                                        nextStep={nextStep}
+                                                        steps={subleaseSteps}
+                                                        currentStep={currentStep}
+                                                        setCurrentStep={setCurrentStep}
+                                                        isStepEnded={[SUBLEASE_STATUS.completed].includes(subleaseData?.status)}
+                                                    />
+                                                    {currentStep === 0 && subleaseData && (
+                                                        <Productpackage
+                                                            subleaseData={subleaseData}
+                                                            setNextStep={setNextStep}
+                                                            fetchData={fetchData}
+                                                            isIssued={isIssued}
+                                                            renderedFrom={`${renderedFrom}_grid-1`}
+                                                        />
+                                                    )}
+                                                    {(currentStep === 1 || currentStep === 2) && subleaseData && (
+                                                        <SerializedAsset
+                                                            fetchData={fetchData}
+                                                            subleaseData={subleaseData}
+                                                            setNextStep={setNextStep}
+                                                            currentStep={currentStep}
+                                                            renderedFrom={`${renderedFrom}_grid-2`}
+                                                        />
+                                                    )}
+                                                </Paper>
+                                            </>
+                                        </Grid>
+                                    ) : (
+                                        <Grid container spacing={2} style={{ padding: "8px" }}>
+                                            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                                        </Grid>
+                                    )}
+                                </Grid>
+                            </TabPanel>
+                            <TabPanel value={tabValue} index={2}>
+                                <Grid item xs={12} sm={12} md={12} lg={12} >
+                                    {subleaseData ?
+                                        <Tickets
+                                            subleaseId={id}
+                                            renderedFrom={`${renderedFrom}_grid-3`}
+                                        />
+                                        : (
+                                            <Grid container spacing={2} style={{ padding: "8px" }}>
+                                                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                                            </Grid>
+                                        )
+                                    }
+                                </Grid>
+                            </TabPanel>
+                        </Paper>
                     </div>
+                    <Box my={1} />
                 </div>
-            </Fragment>
+                <div className="position-relative">
+                    <HideWhenOffline>
+                        <Paper>
+                            {!isSmallScreen && (
+                                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                                    {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+                                </span>
+                            )}
+                            <div style={{ display: showActivity || (isSmallScreen && tabValue === 0) ? 'block' : 'none' }}>
+                                <Grid container>
+                                    <Grid item xs={12}>
+                                        {subleaseData && (
+                                            <div>
+                                                <Activity
+                                                    resourceId={subleaseData._id}
+                                                    resource={ACTIVITY_RESOURCE.sublease}
+                                                    restrictedAddActivities={
+                                                        permissions && permissions[`${ACTIVITY_RESOURCE.sublease}`] && permissions[`${ACTIVITY_RESOURCE.sublease}`].isUpdate ? [] : ['Attachment', 'Case']
+                                                    }
+                                                    relatedTo={[
+                                                        {
+                                                            type: ACTIVITY_RESOURCE.sublease,
+                                                            referenceId: subleaseData._id,
+                                                            access: true
+                                                        }
+                                                    ]}
+                                                    handleActivityRefresh={() => { }}
+                                                    emails={[]}
+                                                />
+                                            </div>
+                                        )}
+                                    </Grid>
+                                </Grid>
+                            </div>
+                        </Paper>
+                    </HideWhenOffline>
+                </div>
+            </div>
 
             {showConfirmBox && (
                 <ConfirmationDialog
