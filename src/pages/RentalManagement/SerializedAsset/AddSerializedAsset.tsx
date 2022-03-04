@@ -27,7 +27,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 
 
-const AddSerializedAsset = ({renderedFrom = 'addSerializedAssets', isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, refrenceType = null,
+const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, refrenceType = null,
     refrenceData = null,
     rentalId = null, repairJobId = null, transferAssetId = null, salesOrderId = null, notIn = null, queryString = null, filterByPlant = null }) => {
 
@@ -303,8 +303,8 @@ const AddSerializedAsset = ({renderedFrom = 'addSerializedAssets', isAdding, add
                                 className={isMobile && !isTablet ? 'mobile_button' : ""}
                                 endIcon={isAdding && <CircularProgress size={20} />}
                             >
-                                {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? "(" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")  " : ""}
                                 {isMobile && !isTablet ? <MdAdd size={23} /> : 'Create Transfer Asset'}
+                                {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")" : ""}
                             </Button>
 
                         }
@@ -318,11 +318,10 @@ const AddSerializedAsset = ({renderedFrom = 'addSerializedAssets', isAdding, add
                             className={isMobile && !isTablet ? 'mobile_button' : ""}
                             endIcon={isAdding && <CircularProgress size={20} />}
                         >
-                            {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? "(" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")  " : ""}
                             {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                            {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")" : ""}
                         </Button>
                     </Box>
-
                 </Grid>
                 <div className={isMobile ? "listing-grid" : "listing-grid"}>
                     <Box my={2}>
@@ -344,7 +343,6 @@ const AddSerializedAsset = ({renderedFrom = 'addSerializedAssets', isAdding, add
                             <Grid item xs={12} sm={7}>
                                 {refrenceType === "Rental Job" &&
                                     <Grid container justifyContent={isSmallScreen ? "flex-start" : "flex-end"}>
-
                                         <FormControlLabel
                                             control={
                                                 <Checkbox
@@ -354,7 +352,12 @@ const AddSerializedAsset = ({renderedFrom = 'addSerializedAssets', isAdding, add
                                                         dispatch({ type: "selection", selectedRecords: [] })
                                                         localStorage.removeItem(localStorageSelectedRecords)
                                                         setSubleaseAsset(e.target.checked)
-                                                        setSelectedPlant(null)
+                                                        if (e.target.checked) {
+                                                            setSelectedPlant(null)
+                                                        }
+                                                        else {
+                                                            setSelectedPlant(filterByPlant)
+                                                        }
                                                     }}
                                                     color="primary"
                                                 />

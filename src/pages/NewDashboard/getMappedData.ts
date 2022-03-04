@@ -3,7 +3,7 @@ import moment from 'moment';
 import { getExchangeRates, formatAmountWithCurrency } from 'src/constants/helpers';
 import { ChartDataType } from './ChartTypes';
 
-export default async (chart: ChartDataType, data: any, currencyTo: string, currencyFrom: string, status: string = "Open") => {
+export default async (chart: ChartDataType, data: any, currencyTo: string, currencyFrom: string, status: string = 'Open') => {
   if (!data) return null;
 
   let dataObject: any;
@@ -203,10 +203,12 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
       };
 
       if (chart.hasTableView) {
+        const totalOfferedCost = entitySale.map((d: any) => d.totalOfferedCost).reduce((acc: number, total: number) => acc + total);
+        const totalOfferedValue = entitySale.map((d: any) => d.totalOfferedValue).reduce((acc: number, total: number) => acc + total);
         obj = {
           entityName: entitySale[0].entity,
-          totalOfferedCost: entitySale.map((d: any) => d.totalOfferedCost).reduce((acc: number, total: number) => acc + total),
-          totalOfferedValue: entitySale.map((d: any) => d.totalOfferedValue).reduce((acc: number, total: number) => acc + total),
+          totalOfferedCost: !isNaN(totalOfferedCost) ? totalOfferedCost : 0,
+          totalOfferedValue: !isNaN(totalOfferedValue) ? totalOfferedValue : 0,
           budget: entitySale.map((d: any) => d.budget || 0).reduce((acc: number, total: number) => acc + total),
           period: `${moment(entitySale[0].date).format('MMM/YY')} - ${moment(entitySale[entitySale.length - 1].date).format('MMM/YY')}`
         };
@@ -301,9 +303,13 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
   }
 
   if (chart.uniqueId === 'volumeVsBudget' || chart.uniqueId === 'volume2VsBudget') {
-    const totalVolumeData = [];
+    const totalBookedVolumeMT = [];
+    const totalBookedGM = [];
+    let volumeUnit = '';
     const labels = [];
     const budget = [];
+
+    console.log(data);
 
     data = data.sort((a: any, b: any) => {
       const aDate = new Date(a.date).getTime();
@@ -313,7 +319,12 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     });
 
     for (let d of data) {
-      totalVolumeData.push(d.totalBookedVolume);
+      volumeUnit = d.volumeUnit;
+      if (chart.uniqueId === 'volumeVsBudget') {
+        totalBookedVolumeMT.push(d.totalBookedVolume);
+      } else {
+        totalBookedGM.push(d.totalBookedMargin);
+      }
       budget.push(d.volumeBudget);
       labels.push(moment(d.date).format('MMM/YY'));
     }
@@ -325,11 +336,11 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
       datasets: [
         {
           type: 'line',
-          label: 'Total booked value',
+          label: chart.uniqueId === 'volumeVsBudget' ? `Total booked volume (${volumeUnit})` : `Total booked (${volumeUnit})`,
           borderColor: 'rgb(54, 162, 235)',
           borderWidth: 2,
           fill: true,
-          data: totalVolumeData
+          data: chart.uniqueId === 'volumeVsBudget' ? totalBookedVolumeMT : totalBookedGM
         },
         {
           type: 'line',
@@ -345,8 +356,9 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     if (chart.hasTableView) {
       const tableData = data.map((d: any) => ({
         month: moment(d.date).format('MMM/YY'),
-        totalVolumeBooked: d.volumeBudget ? d.volumeBudget : 0,
-        totalVolume: d.totalVolume
+        [chart.uniqueId === 'volumeVsBudget' ? 'totalBookedVolume MT' : 'totalBooked GM']:
+          chart.uniqueId === 'volumeVsBudget' ? d.totalBookedVolume : d.totalBookedMargin,
+        ['totalBudget']: d.volumeBudget ? d.volumeBudget : 0
       }));
 
       Object.assign(dataObject, { tableData });

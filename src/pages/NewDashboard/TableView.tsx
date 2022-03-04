@@ -28,7 +28,11 @@ const TableView = ({ id, chartData, isScreenSmall, currency }: Props) => {
             <TableRow key={'row ' + index + 1}>
               {Object.keys(data).map((key, i) => (
                 <TableCell key={key} align={i < 1 ? 'left' : 'right'}>
-                  {isNaN(data[key]) ? data[key] : formatAmountWithCurrency(currency, Number(data[key]) ? data[key] : '00').fullFormatAmount}
+                  {isNaN(data[key])
+                    ? data[key]
+                    : id === 'volumeVsBudget'
+                    ? data[key].toFixed(2)
+                    : formatAmountWithCurrency(currency, Number(data[key]) ? data[key] : '00').fullFormatAmount}
                 </TableCell>
               ))}
             </TableRow>

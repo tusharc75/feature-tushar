@@ -11,7 +11,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { salesOrder, defaultActivityShow, salesOrderProcessSteps, getUniqueCurrencies } from '../../constants/helpers';
+import { salesOrder, defaultActivityShow, salesOrderProcessSteps, getUniqueCurrencies, ACTIVITY_RESOURCE } from '../../constants/helpers';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog/ManageSalesOrderDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
@@ -448,15 +448,15 @@ const SalesOrderDetails = () => {
                         <div>
                           <Activity
                             resourceId={salesOrderData._id}
-                            resource={salesOrder.resource}
+                            resource={ACTIVITY_RESOURCE.salesOrder}
                             restrictedAddActivities={
-                              permissions && permissions['salesOrder'] && permissions['salesOrder'].isUpdate
+                              permissions && permissions[`${ACTIVITY_RESOURCE.salesOrder}`] && permissions[`${ACTIVITY_RESOURCE.salesOrder}`].isUpdate
                                 ? []
                                 : ['Attachment', 'Case']
                             }
                             relatedTo={[
                               {
-                                type: salesOrder,
+                                type: ACTIVITY_RESOURCE.salesOrder,
                                 referenceId: salesOrderData._id,
                                 access: true
                               }

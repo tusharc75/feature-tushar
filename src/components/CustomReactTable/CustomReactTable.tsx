@@ -4,9 +4,11 @@ import MaUTable from '@material-ui/core/Table'
 import { TableBody, TableCell, TableHead, TableFooter, TableRow } from '@material-ui/core'
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
 import { treeToFlatArray } from '../../constants/helpers'
-import { uniqBy } from 'lodash';
-import { useTable, useExpanded, useRowSelect, useFlexLayout } from 'react-table'
+import { uniqBy, isString } from 'lodash';
+import { useTable, useExpanded, useRowSelect, useFlexLayout, useSortBy, useResizeColumns } from 'react-table'
 import { useSticky } from "react-table-sticky";
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 const IndeterminateCheckbox = React.forwardRef(
     ({ indeterminate, ...rest }: any, ref) => {
@@ -179,9 +181,24 @@ export default function CustomReactTable({
                 autoResetExpanded: true,
                 hiddenColumns: hideSelection ? ["selection", "action"] : []
             },
-            defaultColumn
+            defaultColumn,
+            sortTypes: {
+                alphanumeric: (row1, row2, columnName) => {
+                    const rowOneColumn = row1.values[columnName];
+                    const rowTwoColumn = row2.values[columnName];
+                    if (isString(rowOneColumn)) {
+                        return rowOneColumn.toUpperCase() >
+                            rowTwoColumn.toUpperCase()
+                            ? 1
+                            : -1;
+                    }
+                    return Number(rowOneColumn) > Number(rowTwoColumn) ? 1 : -1;
+                }
+            }
         },
         useFlexLayout,
+        useResizeColumns,
+        useSortBy,
         useExpanded, // Use the useExpanded plugin hook
         // usePagination,
         useRowSelect,
@@ -221,7 +238,7 @@ export default function CustomReactTable({
             onSelect([...uniqBy(flatSelectedData, "id")]);
         }
 
-    }, [selectedFlatRows]);
+    }, [selectedFlatRows.length]);
 
     // Render the UI for your table
     return (
@@ -241,7 +258,19 @@ export default function CustomReactTable({
                             <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
                                 {headerGroup.headers.map(column => (
                                     <TableCell {...column.getHeaderProps()} className="th text-truncate">
-                                        {column.render('Header')}
+                                        <div className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
+                                            <span>
+                                                {column.render('Header')}
+                                            </span>
+
+                                            {column.isSorted
+                                                ? column.isSortedDesc
+                                                    ? <ExpandLessIcon fontSize="small" />
+                                                    : <ExpandMoreIcon fontSize="small" />
+                                                : ''}
+                                        </div>
+
+                                        <div {...column.getResizerProps()} className="resizer" />
                                     </TableCell>
                                 ))}
                             </TableRow>

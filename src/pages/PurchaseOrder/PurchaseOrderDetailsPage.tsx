@@ -25,7 +25,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { purchaseOrder, getObjKeysWithValues, supplierAccount, customerAccount, purchaseOrderSteps, PURCHASE_ORDER_STATUS } from '../../constants/helpers';
+import { purchaseOrder, getObjKeysWithValues, supplierAccount, customerAccount, purchaseOrderSteps, PURCHASE_ORDER_STATUS, ACTIVITY_RESOURCE } from '../../constants/helpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -475,15 +475,15 @@ const PurchaseOrderDetailsPage = () => {
                       <div>
                         <Activity
                           resourceId={purchaseOrderData._id}
-                          resource={purchaseOrder.resource}
+                          resource={ACTIVITY_RESOURCE.purchaseOrder}
                           restrictedAddActivities={
-                            permissions && permissions['purchaseOrder'] && permissions['purchaseOrder'].isUpdate
+                            permissions && permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`] && permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`].isUpdate
                               ? []
                               : ['Attachment', 'Case']
                           }
                           relatedTo={[
                             {
-                              type: "purchaseOrder",
+                              type: ACTIVITY_RESOURCE.purchaseOrder,
                               referenceId: purchaseOrderData._id,
                               access: true
                             }

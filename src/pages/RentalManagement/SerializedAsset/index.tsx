@@ -94,12 +94,14 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             <span className="d-flex align-items-center gap-2">
               <Chip label="Asset" size="small" color="primary" />
               {(row.original.status === INVENTORY_STATUS.reserved && row.original?.manualStatus !== INVENTORY_STATUS.reserved && !isOffline) &&
-                <IconButton size="small" onClick={() => {
-                  setShowConfirmBox(true)
-                  setDeleteData([row.original.inventory])
-                }}>
-                  <Delete color="error" />
-                </IconButton>}
+                <HtmlTooltip title={`Remove`}>
+                  <IconButton size="small" onClick={() => {
+                    setShowConfirmBox(true)
+                    setDeleteData([row.original.inventory])
+                  }}>
+                    <Delete fontSize="small" color="error" />
+                  </IconButton>
+                </HtmlTooltip>}
               {row.original.isTransferAsset &&
                 <HtmlTooltip title={`${routes.transferAsset.title}`}>
                   <IconButton size="small" onClick={() => {

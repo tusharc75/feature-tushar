@@ -243,7 +243,8 @@ export default function ManageLeadDialog({
             .then(({ data: { data } }) => {
               
               const { _id, firstName, lastName, middleName, ...rest } = data
-              setCloneHeading(`${data.firstName} ${middleName} ${data.lastName}`)
+
+              setCloneHeading(`${firstName || ''} ${middleName || ''} ${lastName || ''}`)
               let tempData = { ...rest }
               if (marketSegmentDropdownData) {
                 setSubMarketSegmentDataSource(marketSegmentDropdownData.option.filter(d => d.parentMarketSegment === data?.marketSegment?.optionValue));

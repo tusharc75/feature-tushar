@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs } from "@material-ui/core";
+import { Grid, Box, Button, Paper, Typography, Tab, Tabs } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -11,14 +11,14 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { serializedAsset, getObjKeysWithValues, gridLoadingTimeout, product, sidebarResource, INVENTORY_STATUS, repairJob } from "../../constants/helpers";
+import { serializedAsset, getObjKeysWithValues, INVENTORY_STATUS, repairJob } from "../../constants/helpers";
 import ManageSerializedAsset from "./ManageSerializedAsset";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
 import ReasonDialog from "./ReasonDialog"
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer, DateTimeRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer, DateTimeRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import ManageRepairJob from '../RepairJob/ManageRepairJob'
 import { Link } from 'react-router-dom'
 import NoDataCell from "../../components/Helpers/NoDataCell";
@@ -27,7 +27,6 @@ import ProductHierarchy from "../Product/BOM";
 import { FaDiceOne, FaWpforms } from "react-icons/fa";
 import { isMobile, isTablet } from "react-device-detect";
 import { BiFoodMenu } from "react-icons/bi";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import CustomTimeline from "../../components/CustomTimeline";
 import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
 import { MdEdit } from "react-icons/md";

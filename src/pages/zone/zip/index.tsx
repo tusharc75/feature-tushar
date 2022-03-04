@@ -1,20 +1,17 @@
 import React from 'react';
 import { Box, Button, IconButton } from '@material-ui/core';
-import AddConfigurationDialog from '../../Product/ProductConfiguration/AddConfigurationDialog';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
 import CarouselDialog from '../../../components/CarouselDialog';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
-import { Link, useParams } from "react-router-dom"
-import { CommonRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers"
-import { Delete, Edit } from '@material-ui/icons';
+import { Delete } from '@material-ui/icons';
 import CreateZip from "../CreateZip";
 import { read, utils, writeFile } from "xlsx";
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteButton from '../../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
+import { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 
 interface ConfigProps {
   id: string;

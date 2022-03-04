@@ -15,7 +15,7 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { serializedAsset, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL, product, warehouse as warehouseHelper } from '../../constants/helpers';
+import { serializedAsset, isObjectEmpty, gridLoadingTimeout, product, warehouse as warehouseHelper } from '../../constants/helpers';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import ManageSerializedAsset from "./ManageSerializedAsset";
@@ -34,7 +34,6 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import { camelCase } from "lodash";
 
-const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
 const ProductInventory = () => {
     const renderedFrom = camelCase(routes?.serializedAsset.title)
@@ -625,7 +624,7 @@ const ProductInventory = () => {
             showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.serializedAsset?.title?.toLowerCase() : RESOURCE_LABEL.serializedAsset?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
+                message={`Are you sure you want to delete the ${routes.serializedAsset.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />
