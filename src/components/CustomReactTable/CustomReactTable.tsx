@@ -1,5 +1,5 @@
 
-import React, { useEffect, useCallback } from 'react'
+import React, { useEffect } from 'react'
 import MaUTable from '@material-ui/core/Table'
 import { TableBody, TableCell, TableHead, TableFooter, TableRow } from '@material-ui/core'
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
@@ -220,7 +220,7 @@ export default function CustomReactTable({
     //     // setPageSize(gridPageSizes[0])
     // }, [setPageSize,])
 
-    useCallback(() => {
+    useEffect(() => {
 
         const flatData = treeToFlatArray(selectedFlatRows, childrenProperty);
 
@@ -238,7 +238,7 @@ export default function CustomReactTable({
             onSelect([...uniqBy(flatSelectedData, "id")]);
         }
 
-    }, [selectedFlatRows]);
+    }, [selectedFlatRows.length]);
 
     // Render the UI for your table
     return (
