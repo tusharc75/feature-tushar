@@ -27,6 +27,7 @@ export const resActivityColors = {
   transferAsset: "#1572A1",
   purchaseOrder: "#11468F",
   deliveryTicket: "#91C483",
+  sublease: "#ffb3c6",
   my: "#990033",
   task: "#3949ab",
   event: "#e65100",

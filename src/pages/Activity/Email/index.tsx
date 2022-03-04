@@ -19,8 +19,6 @@ import reactHtmlparser, { convertNodeToElement } from 'react-html-parser';
 import { HiOutlineMail } from 'react-icons/hi';
 import Dialog from '@material-ui/core/Dialog';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { getApi, getData, isObjectEmpty } from '../../../constants/helpers';
 import styles from '../../Leads/Header.module.scss';
 import emailStyles from './email.module.scss';
@@ -31,13 +29,10 @@ import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridCo
 import { AddOutlined } from '@material-ui/icons';
 import { displayDate } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
-import { MdAccountCircle } from 'react-icons/md';
 import { AiFillCrown, MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import { Autocomplete } from '@material-ui/lab';
-import { camelCase } from 'lodash';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { startCase } from "lodash";
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
 
 const tabs = {
@@ -286,7 +281,7 @@ const Email = () => {
           <Chip
             className="ml-3"
             color="primary"
-            label={`${startCase(d.type)}`}
+            label={`${routes[d?.type]?.title}`}
           />
         </>
       )
