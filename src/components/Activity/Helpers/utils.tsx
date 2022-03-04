@@ -28,6 +28,7 @@ export const resActivityColors = {
   purchaseOrder: "#11468F",
   deliveryTicket: "#91C483",
   sublease: "#ffb3c6",
+  salesOrder: "#11468F",
   my: "#990033",
   task: "#3949ab",
   event: "#e65100",
