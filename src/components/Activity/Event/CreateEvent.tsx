@@ -51,11 +51,9 @@ const EventSchema = object().shape({
 });
 
 export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimized, onMinimizeMaximize, showManimizeMaximize }) => {
-  const {
-    state: {
-      user: { user, permissions },
-    },
-  } = useData();
+
+  const { state: { user: { user }, permissions }, } = useData();
+
   const isMobile = useMediaQuery("(max-width:599px)");
   const [initialValues, setInitialValues] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -364,8 +362,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               inputVariant="outlined"
                               label="Start Time"
                               name="startTime"
-                              placeholder="08:00 AM"
-                              mask="__:__ _M"
+                              placeholder="08:00"
+                              mask="__:__"
                               value={values.startTime}
                               invalidDateMessage="Invalid time format"
                               onChange={(date: any) => {
@@ -443,7 +441,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               inputVariant="outlined"
                               label="End Time"
                               name="endTime"
-                              placeholder="08:00 AM"
+                              placeholder="08:00"
                               mask="__:__"
                               value={values.endTime}
                               onChange={(date: any) => {
