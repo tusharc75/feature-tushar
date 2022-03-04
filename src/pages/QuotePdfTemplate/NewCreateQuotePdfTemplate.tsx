@@ -179,7 +179,7 @@ export default function NewCreateQuotePdfTemplate() {
                         setInitialValues({
                             landscape: data?.landscape,
                             productColumns: data?.productColumns,
-                            name: data?.name,
+                            name: !isClone ? data?.name : "",
                             showPageNumberInFooter: data?.pageNumberInFooter,
                             header: data?.header,
                             footer: data?.footer,
