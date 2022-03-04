@@ -17,7 +17,8 @@ import {
   rentalManagement,
   defaultActivityShow,
   RENTAL_STATUS,
-  rentalManagementSteps
+  rentalManagementSteps,
+  ACTIVITY_RESOURCE
 } from '../../constants/helpers';
 import Steps from './Steps';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
@@ -502,13 +503,13 @@ const RentalManagementDetailsPage = () => {
                       <div>
                         <Activity
                           resourceId={rentalManagementData._id}
-                          resource={rentalManagement.rentalManagementResource}
+                          resource={ACTIVITY_RESOURCE.rentalManagement}
                           restrictedAddActivities={
-                            permissions && permissions['rentalManagement'] && permissions['rentalManagement'].isUpdate ? [] : ['Attachment', 'Case']
+                            permissions && permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] && permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate ? [] : ['Attachment', 'Case']
                           }
                           relatedTo={[
                             {
-                              type: 'rentalManagement',
+                              type: `${ACTIVITY_RESOURCE.rentalManagement}`,
                               referenceId: rentalManagementData._id,
                               access: true
                             }

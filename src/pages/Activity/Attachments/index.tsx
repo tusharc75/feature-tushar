@@ -31,7 +31,6 @@ import { MdAdd } from "react-icons/all";
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { startCase } from "lodash";
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
 
 function reducer(state, action) {
@@ -249,7 +248,7 @@ export default function Attachment() {
           <Chip
             className="ml-3"
             color="primary"
-            label={`${startCase(d.type)}`}
+            label={`${routes[d?.type]?.title}`}
           />
         </>
       )

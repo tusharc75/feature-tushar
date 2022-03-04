@@ -1941,16 +1941,16 @@ export default function ManageQuoteDialog({
                                               <Grid
                                                 item
                                                 xs={
-                                                  permissions?.projectStrategy?.isCreate ? 10
+                                                  permissions?.projectSales?.isCreate ? 10
                                                     : 11
                                                 }
 
                                                 sm={
-                                                  permissions?.projectStrategy?.isCreate ? 10
+                                                  permissions?.projectSales?.isCreate ? 10
                                                     : 11
                                                 }
                                                 md={
-                                                  permissions?.projectStrategy?.isCreate ? 10
+                                                  permissions?.projectSales?.isCreate ? 10
                                                     : 11
                                                 }
                                               >
@@ -1987,7 +1987,7 @@ export default function ManageQuoteDialog({
                                                 />
                                               </Grid>
                                               {
-                                                permissions?.projectStrategy?.isCreate && (
+                                                permissions?.projectSales?.isCreate && (
                                                   <Grid item xs={1} sm={1} md={1}>
                                                     <Tooltip
                                                       title="Add Project List"

@@ -1,7 +1,6 @@
 import { Chip, Box } from "@material-ui/core";
-import { startCase } from "lodash";
-
 import { resActivityColors } from "./utils";
+import routes from '../../Helpers/Routes';
 
 export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
   let filter = originRelatedTo.filter(
@@ -17,7 +16,7 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
               <Box mr={1} mb={1} key={index}>
                 <Chip
                   className="custom-chip"
-                  label={startCase(_element.type) + " - " + _element.name}
+                  label={routes[_element?.type]?.title + " - " + _element.name}
                   size="small"
                   style={{
                     backgroundColor: resActivityColors[_element.type],
@@ -34,8 +33,8 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
         relatedTo.map((_element, index) => (
           <Box mr={1} mb={1} key={index}>
             <Chip
-                className="chip-text"
-              label={startCase(_element.type) + " - " + _element.name}
+              className="chip-text"
+              label={routes[_element?.type]?.title + " - " + _element.name}
               size="small"
               style={{
                 backgroundColor: resActivityColors[_element.type],

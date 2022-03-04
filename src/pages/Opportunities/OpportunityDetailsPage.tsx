@@ -233,9 +233,9 @@ function OpportunityDetailsPage() {
       .then(({ data: { data } }) => {
         console.log(data,'related')
         setProjectSales(
-          data[sidebarResource.projectStrategy] &&
-            data[sidebarResource.projectStrategy][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
-            ? data[sidebarResource.projectStrategy][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
+          data[sidebarResource.projectSales] &&
+            data[sidebarResource.projectSales][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
+            ? data[sidebarResource.projectSales][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
             : []
         );
 
@@ -684,7 +684,7 @@ function OpportunityDetailsPage() {
                   isAllowedToUpdate={allowedToEdit}
                 />
               )}
-              {permissions?.projectStrategy?.isRead && (
+              {permissions?.projectSales?.isRead && (
                 <ProjectInAccordion
                   recordsPerLine={3}
                   projectSales={projectSales}

@@ -330,8 +330,8 @@ const ContactDetailsPage = (props) => {
         );
 
         setProjectSales(
-          data[sidebarResource.projectStrategy] && data[sidebarResource.projectStrategy][sidebarResource[contactResource].replaceAll(' ', '_')]
-            ? data[sidebarResource.projectStrategy][sidebarResource[contactResource].replaceAll(' ', '_')]
+          data[sidebarResource.projectSales] && data[sidebarResource.projectSales][sidebarResource[contactResource].replaceAll(' ', '_')]
+            ? data[sidebarResource.projectSales][sidebarResource[contactResource].replaceAll(' ', '_')]
             : []
         );
 
@@ -858,7 +858,7 @@ const ContactDetailsPage = (props) => {
                   />
                 </span>
               )}
-              {permissions?.projectStrategy?.isRead && accountResource === customerAccount.accountResource && (
+              {permissions?.projectSales?.isRead && accountResource === customerAccount.accountResource && (
                 <span id="projectsAccordion">
                   <ProjectInAccordion
                     recordsPerLine={3}
