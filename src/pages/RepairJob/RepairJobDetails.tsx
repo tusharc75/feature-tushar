@@ -11,7 +11,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { repairJob, sidebarResource, repairJobProcessSteps, REPAIR_JOB_STATUS } from 'src/constants/helpers';
+import { repairJob, sidebarResource, repairJobProcessSteps, REPAIR_JOB_STATUS, ACTIVITY_RESOURCE } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRepairJob from './ManageRepairJob';
@@ -354,13 +354,13 @@ const RepairJobDetails = () => {
                       <div>
                         <Activity
                           resourceId={repairJobData._id}
-                          resource={repairJobData.repairJobResource}
+                          resource={ACTIVITY_RESOURCE.repairJob}
                           restrictedAddActivities={
-                            permissions && permissions['repairJob'] && permissions['repairJob'].isUpdate ? [] : ['Attachment', 'Case']
+                            permissions && permissions[`${ACTIVITY_RESOURCE.repairJob}`] && permissions[`${ACTIVITY_RESOURCE.repairJob}`].isUpdate ? [] : ['Attachment', 'Case']
                           }
                           relatedTo={[
                             {
-                              type: 'repairJob',
+                              type: ACTIVITY_RESOURCE.repairJob,
                               referenceId: repairJobData._id,
                               access: true
                             }
