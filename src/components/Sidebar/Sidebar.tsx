@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import clsx from "clsx";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -15,6 +15,7 @@ import {
 import { Link, withRouter, useHistory } from "react-router-dom";
 import Header from "../Header/Header";
 import { useData } from "../../StateProvider/Provider";
+import { GlobalChatContext } from "../../StateProvider/GlobalChatContext";
 import "./Sidebar.scss";
 import { ChevronRight, ExpandMore, ExpandLess } from "@material-ui/icons";
 import { kebabCase, lowerCase } from "lodash";
@@ -23,7 +24,8 @@ import { BsCalendarFill } from "react-icons/bs";
 import { MdDashboard, MdDescription, MdLocalActivity } from "react-icons/md";
 import { RiFolderSettingsFill, RiAccountPinCircleFill } from "react-icons/ri";
 import { SiCivicrm } from "react-icons/si";
-import { AiFillAccountBook, AiFillSetting } from "react-icons/ai"
+import {AiFillSetting } from "react-icons/ai"
+import { BsChatLeftTextFill } from "react-icons/bs"
 
 
 import { AccountCircle } from "@material-ui/icons";
@@ -98,7 +100,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const {
     state: { permissions, user, selectedEntity, tour },
   }: any = useData();
-
+  const {setOpen:setChatOpen} = useContext(GlobalChatContext)
   const history = useHistory();
   const classes = useStyles();
   const [open, setOpen] = useState({});
@@ -348,6 +350,12 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                   </Collapse>
                 </React.Fragment>
               ))}
+              <ListItem button style={{ marginTop: 'auto' }} onClick={() => setChatOpen(prevState => !prevState)}>
+                <ListItemIcon>
+                  <BsChatLeftTextFill size={16} className="sidebar-icon" />
+                </ListItemIcon>
+                <ListItemText primary="Chat" />
+              </ListItem>
           </List>
         </div>
       </Drawer>

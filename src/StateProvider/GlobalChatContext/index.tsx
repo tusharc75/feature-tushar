@@ -10,19 +10,19 @@ export const GlobalChatProvider = ({ children }) => {
   const [chatterIds, setChatterIds] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [socket, setSocket] = useState<Socket>(null);
+  const [open, setOpen] = useState(false);
 
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    if (token) {
-      const s = io(`${backendApi}/users/room`, {
-        auth: { token },
-        reconnectionAttempts: 5,
-        reconnectionDelay: 5000,
-        transports: ['websocket', 'pooling']
-      });
-      setSocket(s);
-    }
+    if (!token) return;
+    const s = io(`${backendApi}/users/room`, {
+      auth: { token },
+      reconnectionAttempts: 5,
+      reconnectionDelay: 5000,
+      transports: ['websocket', 'pooling']
+    });
+    setSocket(s);
   }, [token]);
 
   return (
@@ -34,7 +34,9 @@ export const GlobalChatProvider = ({ children }) => {
         setChatterIds,
         socket,
         selectedChat,
-        setSelectedChat
+        setSelectedChat,
+        open,
+        setOpen
       }}
     >
       {children}
