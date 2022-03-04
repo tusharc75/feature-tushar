@@ -537,7 +537,7 @@ export const profileMenuItems = {
 };
 
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
-  
+
   //let selectedEntity = localStorage.getItem("selectedEntity")
   //let isCreate = (val === "") ? true : false
 
@@ -1644,19 +1644,22 @@ export const asyncForEach = async (
   }
 };
 
-export const resourceOptions = [
-  'Customer Account',
-  'Customer Contact',
-  'Supplier Account',
-  'Supplier Contact',
-  'Lead',
-  'Opportunity',
-  'Quote',
-  'Rental Management',
-  'Delivery Ticket',
-  'Project Sales'
-];
-
+export const ACTIVITY_RESOURCE = {
+  customerAccount: 'customerAccount',
+  customerContact: 'customerContact',
+  supplierAccount: 'supplierAccount',
+  supplierContact: 'supplierContact',
+  lead: 'lead',
+  opportunity: 'opportunity',
+  quote: 'quote',
+  projectSales: 'projectSales',
+  rentalManagement: 'rentalManagement',
+  repairJob: 'repairJob',
+  transferAsset: 'transferAsset',
+  purchaseOrder: 'purchaseOrder',
+  deliveryTicket: 'deliveryTicket',
+  sublease: 'sublease'
+};
 
 export const REPORT_LIST = [
   { title: sidebarResource.rentalManagement, key: "rentalManagement" },
@@ -1667,7 +1670,6 @@ export const REPORT_LIST = [
   { title: sidebarResource.quoteBuilder, key: "quoteBuilder" },
   { title: sidebarResource.projectSales, key: "projectSales" }
 ]
-
 
 export const getApi = (resource: string) => {
   switch (kebabCase(resource)) {
@@ -1680,6 +1682,26 @@ export const getApi = (resource: string) => {
 
 export const getData = (resource: string, data: any) => {
   switch (kebabCase(resource)) {
+    case 'customer-account':
+      return {
+        name: `${data.accountName}`,
+        id: data._id
+      };
+    case 'customer-contact':
+      return {
+        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+        id: data._id
+      };
+    case 'supplier-account':
+      return {
+        name: `${data.accountName}`,
+        id: data._id
+      };
+    case 'supplier-contact':
+      return {
+        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+        id: data._id
+      };
     case 'lead':
       return {
         name: `${data.concatedName}`,
@@ -1690,34 +1712,14 @@ export const getData = (resource: string, data: any) => {
         name: `${data.opportunityName}`,
         id: data._id
       };
-    case 'customer-account':
-      return {
-        name: `${data.accountName}`,
-        id: data._id
-      };
-    case 'supplier-account':
-      return {
-        name: `${data.accountName}`,
-        id: data._id
-      };
-    case 'customer-contact':
-      return {
-        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-        id: data._id
-      };
-    case 'supplier-contact':
-      return {
-        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-        id: data._id
-      };
-    case 'delivery-ticket':
-      return {
-        name: `${data.ticketName}`,
-        id: data._id
-      };
     case 'quote':
       return {
         name: `${data.quoteName}`,
+        id: data._id
+      };
+    case 'project-sales':
+      return {
+        name: `${data.projectName}`,
         id: data._id
       };
     case 'rental-management':
@@ -1725,9 +1727,29 @@ export const getData = (resource: string, data: any) => {
         name: `${data.rentalJobName}`,
         id: data._id
       };
-    case 'project-sales':
+    case 'repair-job':
       return {
-        name: `${data.projectName}`,
+        name: `${data.repairJobName}`,
+        id: data._id
+      };
+    case 'transfer-asset':
+      return {
+        name: `${data.transferAssetNumber}`,
+        id: data._id
+      };
+    case 'purchase-order':
+      return {
+        name: `${data.purchaseOrderNumber}`,
+        id: data._id
+      };
+    case 'delivery-ticket':
+      return {
+        name: `${data.ticketName}`,
+        id: data._id
+      };
+    case 'sublease':
+      return {
+        name: `${data.subleaseName}`,
         id: data._id
       };
     default:
