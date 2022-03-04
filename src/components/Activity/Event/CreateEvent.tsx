@@ -51,11 +51,9 @@ const EventSchema = object().shape({
 });
 
 export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimized, onMinimizeMaximize, showManimizeMaximize }) => {
-  const {
-    state: {
-      user: { user, permissions },
-    },
-  } = useData();
+
+  const { state: { user: { user }, permissions }, } = useData();
+
   const isMobile = useMediaQuery("(max-width:599px)");
   const [initialValues, setInitialValues] = useState(null);
   const toastConfig = useContext(CustomToastContext);
