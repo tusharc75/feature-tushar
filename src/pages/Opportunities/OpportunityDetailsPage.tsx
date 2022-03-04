@@ -456,7 +456,6 @@ function OpportunityDetailsPage() {
 
     let values = {
       ...getObjKeysWithValues(opportunityData, newFields),
-      supplierAccountName: supplierAccounts,
       _id: opportunityData._id
     };
 
