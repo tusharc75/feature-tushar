@@ -38,7 +38,8 @@ import {
   formatAmountWithCurrency,
   gridLoadingTimeout,
   termsAndCondition,
-  defaultActivityShow
+  defaultActivityShow,
+  ACTIVITY_RESOURCE
 } from '../../../constants/helpers';
 import Activity from '../../../components/Activity';
 import { useData } from '../../../StateProvider/Provider';
@@ -1103,11 +1104,11 @@ export default function QuoteDetail() {
                   <div>
                     <Activity
                       resourceId={quoteData?._id}
-                      resource={quote.quoteResource}
+                      resource={ACTIVITY_RESOURCE.quote}
                       restrictedAddActivities={allowedToEdit ? [] : ['Attachment', 'Case']}
                       relatedTo={[
                         {
-                          type: quote.quoteResource,
+                          type: ACTIVITY_RESOURCE.quote,
                           referenceId: quoteData?._id,
                           access: true
                         }

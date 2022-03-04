@@ -1658,7 +1658,8 @@ export const ACTIVITY_RESOURCE = {
   transferAsset: 'transferAsset',
   purchaseOrder: 'purchaseOrder',
   deliveryTicket: 'deliveryTicket',
-  sublease: 'sublease'
+  sublease: 'sublease',
+  salesOrder: 'salesOrder',
 };
 
 export const REPORT_LIST = [

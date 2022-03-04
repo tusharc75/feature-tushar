@@ -12,7 +12,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { transferAsset } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, transferAsset } from 'src/constants/helpers';
 import ManageTransferAsset from './ManageTransferAsset';
 import queryString from 'query-string';
 import TransferStepper from './TransferAssetSteps';
@@ -501,7 +501,7 @@ const TransferAssetDetailPage = () => {
                  <div>
                    <Activity
                     resourceId={transferAssetData?._id}
-                    resource={transferAsset.resource}
+                    resource={ACTIVITY_RESOURCE.transferAsset}
                     // restrictedAddActivities={
                     //   permissions && permissions['transferAsset'] && permissions['rentalManagement'].isUpdate
                     //   ? []
@@ -512,7 +512,7 @@ const TransferAssetDetailPage = () => {
                                  
                         access: true,
                         referenceId: transferAssetData?._id,
-                        type: "transferAsset",
+                        type: ACTIVITY_RESOURCE.transferAsset,
                       }
                     ]}
                     handleActivityRefresh={() => { }}
