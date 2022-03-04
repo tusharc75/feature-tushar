@@ -235,8 +235,8 @@ const ProjectSales: FC = () => {
   const ActionsRenderer = (params) => (
     <>
       <Tooltip
-        className={permissions?.projectStrategy?.isCreate ? "" : "cursor-stop"}
-        title={permissions?.projectStrategy?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        className={permissions?.projectSales?.isCreate ? "" : "cursor-stop"}
+        title={permissions?.projectSales?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
         <IconButton
           size="small"
           aria-label="Clone"
@@ -248,14 +248,14 @@ const ProjectSales: FC = () => {
         </IconButton>
       </Tooltip>
       <GridDeleteIcon
-        hasDeletePermission={permissions?.projectStrategy?.isDelete}
+        hasDeletePermission={permissions?.projectSales?.isDelete}
         ownerId={params.data.projectManagerId}
         userId={user?.user?._id}
         onDelete={() => showConfirmBox(params.data)}
         entity="Project"
       />
       {
-        (permissions?.projectStrategy?.isUpdate && params?.data?.isTeamMember) ||
+        (permissions?.projectSales?.isUpdate && params?.data?.isTeamMember) ||
           params?.data?.isManager ?
           <Tooltip title="Entity">
             <IconButton
@@ -440,7 +440,7 @@ const ProjectSales: FC = () => {
 
   const showConfirmBox = (row) => {
     if (row === null) {
-      if (permissions?.projectStrategy?.isDelete) {
+      if (permissions?.projectSales?.isDelete) {
         const myData = selectedRecords.filter(
           (s) => s.projectManagerId === user.user._id
         );
@@ -521,7 +521,7 @@ const ProjectSales: FC = () => {
           </Grid>
           <Grid item md={8} sm={1} xs={2}>
             <ImportExportLinks
-              permissions={permissions?.projectStrategy}
+              permissions={permissions?.projectSales}
               module="project-sale(s)"
               api={"project-sales"}
               afterImportCompleted={() => {
@@ -544,7 +544,7 @@ const ProjectSales: FC = () => {
               userId={user?.user?._id}
               onSearch={handleSearch}
               searchVal={search}
-              permissions={permissions?.projectStrategy}
+              permissions={permissions?.projectSales}
               selectedType={selectedType}
               handleFilterChange={handleProjectFilter}
               onCreate={handleCreate}
@@ -578,7 +578,7 @@ const ProjectSales: FC = () => {
                 <CustomSwipableList
                   allowSelection={true}
                   allowSwipe={true}
-                  permissions={permissions?.projectStrategy}
+                  permissions={permissions?.projectSales}
                   primaryField={columns?.find(d => d.primaryField)}
                   onClick={(data) => {
                     history.push(`${routes.projectSalesDetail.path}/${data._id}`)

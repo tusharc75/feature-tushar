@@ -177,8 +177,10 @@ const RepairJobViews = (props) => {
             target: `${item.ticketId}-${index}-${idx}`
           });
         });
-        var data = { target: `${i[i.length - 1].ticketId}-${index}-${i.length - 1}` };
-        edgeFromTicketToClosed.push(data);
+        if (i.length) {
+          var data = { target: `${i[i.length - 1].ticketId}-${index}-${i.length - 1}` };
+          edgeFromTicketToClosed.push(data);
+        }
       });
 
       var indexData = 0;
@@ -240,43 +242,47 @@ const RepairJobViews = (props) => {
 
   return (
     <div style={{ height: '57vh' }}>
-      {flowData.length ? (
-        <ReactFlowProvider>
-          <ReactFlow
-            elements={flowData || []}
-            onLoad={onLoad}
-            selectNodesOnDrag={false}
-            snapToGrid={true}
-            snapGrid={[15, 15]}
-            onElementClick={onElementClick}
-          >
-            <div
-              className="d-flex justify-content-space-between"
-              style={{ width: '70%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}
+      {!loading ? (
+        flowData.length ? (
+          <ReactFlowProvider>
+            <ReactFlow
+              elements={flowData || []}
+              onLoad={onLoad}
+              selectNodesOnDrag={false}
+              snapToGrid={true}
+              snapGrid={[15, 15]}
+              onElementClick={onElementClick}
             >
-              {Object.keys(customNodeStyles).map((key) => {
-                return (
-                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {customNodeStyles[key].name}
-                    <div
-                      style={{
-                        height: '12px',
-                        width: '12px',
-                        marginLeft: '3px',
-                        borderRadius: '100%',
-                        background: `${customNodeStyles[key].background}`,
-                        borderColor: `1px solid ${customNodeStyles[key].borderColor}`
-                      }}
-                    ></div>
-                  </div>
-                );
-              })}
-            </div>
-            <Controls />
-          </ReactFlow>
-        </ReactFlowProvider>
+              <div
+                className="d-flex justify-content-space-between"
+                style={{ width: '70%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}
+              >
+                {Object.keys(customNodeStyles).map((key) => {
+                  return (
+                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {customNodeStyles[key].name}
+                      <div
+                        style={{
+                          height: '12px',
+                          width: '12px',
+                          marginLeft: '3px',
+                          borderRadius: '100%',
+                          background: `${customNodeStyles[key].background}`,
+                          borderColor: `1px solid ${customNodeStyles[key].borderColor}`
+                        }}
+                      ></div>
+                    </div>
+                  );
+                })}
+              </div>
+              <Controls />
+            </ReactFlow>
+          </ReactFlowProvider>
+        ) : (
+          <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
+        )
       ) : (
-        <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Map...</div>
+        <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Views...</div>
       )}
     </div>
   );

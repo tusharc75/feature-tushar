@@ -299,10 +299,9 @@ const RentalManagementViews = (props) => {
       });
 
       xPosition += 300;
-      const lostOrScrapInventory = product?.inventory
-        ?.filter((item) => item?.inventoryDetail?.status === INVENTORY_STATUS.scrap || item?.inventoryDetail?.status === INVENTORY_STATUS.lost)
-        .map((item) => item.inventory);
+      var productsWithStatus = {};
       product?.inventory?.map((item: any, index) => {
+        productsWithStatus[item.inventory] = item?.inventoryDetail?.status;
         flow.push({
           id: `${item.inventoryDetail.assetNumber}`,
           sourcePosition: 'right',
@@ -385,10 +384,17 @@ const RentalManagementViews = (props) => {
             data: {
               ref_type: 'asset',
               ref_id: product.optionValue,
-              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.optionLabel}</div>
+              label: (
+                <HtmlTooltip arrow placement="top" title={productsWithStatus[product.optionValue]}>
+                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.optionLabel}</div>
+                </HtmlTooltip>
+              )
             },
             position: { x: xPosition + 300, y: loadingAssets * 80 },
-            style: lostOrScrapInventory.includes(product.optionValue) ? customNodeStyles.lostOrScrapAssets : customNodeStyles.productAssets
+            style:
+              productsWithStatus[product.optionValue] === INVENTORY_STATUS.lost || productsWithStatus[product.optionValue] === INVENTORY_STATUS.scrap
+                ? customNodeStyles.lostOrScrapAssets
+                : customNodeStyles.productAssets
           });
           loadingAssets += 1;
           flowEdge.push({

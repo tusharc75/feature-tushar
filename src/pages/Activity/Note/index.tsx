@@ -28,7 +28,6 @@ import routes from '../../../components/Helpers/Routes';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import { MdAdd } from "react-icons/all";
 import { Autocomplete } from '@material-ui/lab';
-import { startCase, camelCase } from "lodash";
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
 
 const Note = () => {
@@ -170,7 +169,7 @@ const Note = () => {
           <Chip
             className="ml-3"
             color="primary"
-            label={`${startCase(d.type)}`}
+            label={`${routes[d?.type]?.title}`}
           />
         </>
       )

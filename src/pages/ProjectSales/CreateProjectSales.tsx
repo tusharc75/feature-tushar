@@ -18,7 +18,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { useHistory } from "react-router-dom";
-import { getObjKeys, yupSchema, setFieldsInAscendingOrder, getObjKeysWithValues, formFieldNames, getUniqueCurrencies, initializeDropdownById, RESOURCE_LABEL } from "../../constants/helpers";
+import { getObjKeys, yupSchema, setFieldsInAscendingOrder, getObjKeysWithValues, formFieldNames, getUniqueCurrencies, initializeDropdownById } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "../../StateProvider/Provider";
 import FormTypes from "../../components/Helpers/FormTypes";
@@ -30,6 +30,7 @@ import { simplifyValues } from "../../constants/helpers"
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from "react-icons/fa";
 import ManageAddressDialog from "../../components/Address/ManageAddressDialog";
+import routes from "src/components/Helpers/Routes";
 interface InitialData {
   fields: any[];
   values: object;
@@ -336,7 +337,7 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
           if (isFieldNotTouched(initialData, formValues)) close()
           else setShowConfirmDialog(true)
         }}
-        title={`${isClone ? `Clone - ${productSalesName}` : projectSalesId ? `Update ${productSalesName}` : `New ${RESOURCE_LABEL.projectStrategy}`}`}
+        title={`${isClone ? `Clone - ${productSalesName}` : projectSalesId ? `Update ${productSalesName}` : `New ${routes.projectSales.title}`}`}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
           setFullScreen(prevState => !prevState)
@@ -777,15 +778,15 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                                     <Grid
                                                       item
                                                       xs={
-                                                        permissions?.projectStrategy?.isCreate ? 11
+                                                        permissions?.projectSales?.isCreate ? 11
                                                           : 12
                                                       }
                                                       sm={
-                                                        permissions?.projectStrategy?.isCreate ? 11
+                                                        permissions?.projectSales?.isCreate ? 11
                                                           : 12
                                                       }
                                                       md={
-                                                        permissions?.projectStrategy?.isCreate ? 11
+                                                        permissions?.projectSales?.isCreate ? 11
                                                           : 12
                                                       }
                                                     >
@@ -810,7 +811,7 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                                       />
                                                     </Grid>
                                                     {
-                                                      permissions?.projectStrategy?.isCreate && (
+                                                      permissions?.projectSales?.isCreate && (
                                                         <Grid item xs={1} sm={1} md={1}>
                                                           <Tooltip
                                                             title="Add Address"
