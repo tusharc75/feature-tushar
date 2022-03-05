@@ -24,7 +24,7 @@ import { BsCalendarFill } from "react-icons/bs";
 import { MdDashboard, MdDescription, MdLocalActivity } from "react-icons/md";
 import { RiFolderSettingsFill, RiAccountPinCircleFill } from "react-icons/ri";
 import { SiCivicrm } from "react-icons/si";
-import {AiFillSetting } from "react-icons/ai"
+import { AiFillSetting } from "react-icons/ai"
 import { BsChatLeftTextFill } from "react-icons/bs"
 
 
@@ -100,7 +100,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const {
     state: { permissions, user, selectedEntity, tour },
   }: any = useData();
-  const {setOpen:setChatOpen} = useContext(GlobalChatContext)
+  const { setOpen: setChatOpen } = useContext(GlobalChatContext)
   const history = useHistory();
   const classes = useStyles();
   const [open, setOpen] = useState({});
@@ -247,8 +247,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             'sidebar-overflow-auto': toggleDrawer && tour.stepIndex !== 1,
           }),
         }}
-
-
       >
         <Toolbar />
         <div id="sidebarOrDrawer" >
@@ -350,14 +348,16 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                   </Collapse>
                 </React.Fragment>
               ))}
-              <ListItem button style={{ marginTop: 'auto' }} onClick={() => setChatOpen(prevState => !prevState)}>
-                <ListItemIcon>
-                  <BsChatLeftTextFill size={16} className="sidebar-icon" />
-                </ListItemIcon>
-                <ListItemText primary="Chat" />
-              </ListItem>
           </List>
         </div>
+        <List style={{ bottom: "0px", marginTop: 'auto' }}>
+          <ListItem button onClick={() => setChatOpen(prevState => !prevState)}>
+            <ListItemIcon>
+              <BsChatLeftTextFill size={16} className="sidebar-icon" />
+            </ListItemIcon>
+            <ListItemText primary="Chat" />
+          </ListItem>
+        </List>
       </Drawer>
     </div>
   );

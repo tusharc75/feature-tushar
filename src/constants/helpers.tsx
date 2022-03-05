@@ -1685,7 +1685,7 @@ export const getData = (resource: string, data: any) => {
       };
     case 'customer-contact':
       return {
-        name: `${data?.salutation} ${data?.firstName} ${data?.middleName} ${data?.lastName}`,
+        name: `${data?.salutation ? data?.salutation : ""} ${data?.firstName ? data?.firstName : ""} ${data?.middleName ? data?.middleName : ""} ${data?.lastName ? data?.lastName : ""}`,
         id: data._id
       };
     case 'supplier-account':
@@ -1695,7 +1695,7 @@ export const getData = (resource: string, data: any) => {
       };
     case 'supplier-contact':
       return {
-        name: `${data?.salutation} ${data?.firstName} ${data?.middleName} ${data?.lastName}`,
+        name: `${data?.salutation ? data?.salutation : ""} ${data?.firstName ? data?.firstName : ""} ${data?.middleName ? data?.middleName : ""} ${data?.lastName ? data?.lastName : ""}`,
         id: data._id
       };
     case 'lead':
