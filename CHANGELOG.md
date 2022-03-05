@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.72.0](https://github.com/vebholic/oms_frontend/compare/v2.71.0...v2.72.0) (2022-03-05)
+
+
+### Features
+
+* - CustomReactTable onSelect Nowt Working Issue Fixed ([594b9ab](https://github.com/vebholic/oms_frontend/commit/594b9ab2ea91ed21354a2c1e45d582844b167584))
+* - CustomReactTable onSelect Nowt Working Issue Fixed ([4f74f3c](https://github.com/vebholic/oms_frontend/commit/4f74f3c5d342d5fcdd4f3a8346480d3589475780))
+* activity in sublease details and activity resource changes in others activity ([d555cef](https://github.com/vebholic/oms_frontend/commit/d555cef94849ea474834dc258cce59e195496241))
+* **arrange view:** search on columns ([5c6c66f](https://github.com/vebholic/oms_frontend/commit/5c6c66f58937a84fb033ff2930d597c6b360e25c))
+* rentailJob assets and tickets hover details show PO-1228 ([14334ad](https://github.com/vebholic/oms_frontend/commit/14334ad47003f87b6ebfbc27a54df9e94070c80c))
+* repairJob assets and tickets hover details show ([b708449](https://github.com/vebholic/oms_frontend/commit/b7084495685b3585f8bb75b42ab3dbe248534a75))
+
+
+### Bug Fixes
+
+* **arrange view dialog:** full screen button ([52a6e54](https://github.com/vebholic/oms_frontend/commit/52a6e548eb29a935d508d81702be16b0f404b3d0))
+* bug fix ([7023d67](https://github.com/vebholic/oms_frontend/commit/7023d6715e7daa7e63194441c0c3d76bd2e5f371))
+* bug fix ([fc78406](https://github.com/vebholic/oms_frontend/commit/fc78406172dc4eac80b5074655cc02fbaed4469e))
+* bug fix ([2edb5f8](https://github.com/vebholic/oms_frontend/commit/2edb5f8dbd9d963e055c7fe0d13aa4b642116166))
+* bug fix ([7fbe933](https://github.com/vebholic/oms_frontend/commit/7fbe933f6e1505c55ea7ac064fddcc34dbd43180))
+* bug fix ([256bd18](https://github.com/vebholic/oms_frontend/commit/256bd1819784cdd0efc2942105201bef94eb3cc0))
+* bug fix ([d59d942](https://github.com/vebholic/oms_frontend/commit/d59d942798a8be630b15ac2ed588aab7e630cbc7))
+* bug fix ([766a788](https://github.com/vebholic/oms_frontend/commit/766a78870c02333e99b2d46b44ef863b9c5883d3))
+* bug fix ([7a9c22a](https://github.com/vebholic/oms_frontend/commit/7a9c22ad079dd0eebaf34e8b715a4331d2eff092))
+* bug fix ([bdca3bb](https://github.com/vebholic/oms_frontend/commit/bdca3bb10b25f1a6d7c78863ae986bdaf0820238))
+* **chatter:** add chatter to sidebar ([33be23b](https://github.com/vebholic/oms_frontend/commit/33be23b827067017bb2004c2fd640e7aacbdfd62))
+* heading issue fixed ([4df6e37](https://github.com/vebholic/oms_frontend/commit/4df6e37f672b788b423a367415606c5f98c68bc1))
+* oAT-615 and OAT-683 and sublease ui change ([33973c8](https://github.com/vebholic/oms_frontend/commit/33973c833441a18d3f8f641761f42a1e87605ebd))
+* quote link in account details page ([0abd1e1](https://github.com/vebholic/oms_frontend/commit/0abd1e1e541e45cc10ddffa31d1d97eda28bf44b))
+* remove transferinventory activity resource ([694c722](https://github.com/vebholic/oms_frontend/commit/694c722ff4bfa0a52b0206248b48c0c3fe7cefba))
+* rentalJob views assets status pass to loading assset fix ([886f57f](https://github.com/vebholic/oms_frontend/commit/886f57f263f7c274f14dc832f8f91f8c82b30ba4))
+* repairJob views on loading issue fixed ([8760dc3](https://github.com/vebholic/oms_frontend/commit/8760dc33ae697479038ad8a02ed3aedcbb42a9bb))
+
 ## [2.71.0](https://github.com/vebholic/oms_frontend/compare/v2.70.1...v2.71.0) (2022-03-04)
 
 

@@ -43,9 +43,9 @@ const GlobalUserChat = () => {
               d.group && d.group !== ''
                 ? d.group
                 : d.users
-                    .filter((d) => d._id !== user?.user?._id)
-                    .map((_d) => `${_d.firstName} ${_d.lastName}`)
-                    .join(', '),
+                  .filter((d) => d._id !== user?.user?._id)
+                  .map((_d) => `${_d.firstName} ${_d.lastName}`)
+                  .join(', '),
             message: d?.message,
             timeStamp: new Date(d?.message.date).getTime(),
             ...d
@@ -62,7 +62,7 @@ const GlobalUserChat = () => {
           dispatch({ type: SET_CHATTER, payload: null });
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [chatter, selectedChat]);
 
   useEffect(() => {
@@ -87,7 +87,7 @@ const GlobalUserChat = () => {
     setOpen(false);
   };
 
-  return ['local', 'development'].includes(process.env.REACT_APP_ENV) ? (
+  return (
     <div className="global-chat">
       <span
         ref={buttonRef}
@@ -98,8 +98,6 @@ const GlobalUserChat = () => {
       ></span>
       {open && Boolean(anchorEl) && <ChatsPopover open={open} anchorEl={anchorEl} onClose={closeChat} getChats={getChats} />}
     </div>
-  ) : (
-    <div />
   );
 };
 
