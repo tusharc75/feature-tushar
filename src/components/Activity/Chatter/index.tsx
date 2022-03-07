@@ -42,7 +42,7 @@ const Chatter = (props: any) => {
         setLoading(false);
       })
       .catch((err) => {
-        setToastConfig(err);
+        //setToastConfig(err);
         setLoading(false);
       });
   };
@@ -87,7 +87,7 @@ const Chatter = (props: any) => {
         setChatterId(data._id);
       })
       .catch((err) => {
-        setToastConfig(err);
+        //setToastConfig(err);
       });
   };
 
