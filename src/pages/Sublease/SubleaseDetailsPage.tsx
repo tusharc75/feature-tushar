@@ -216,7 +216,7 @@ const SubleaseDetailsPage = () => {
                                     }}
                                     label={
                                         <div className="d-flex align-items-center tab-font">
-                                            <GiAbstract055 className="mr-1" fontSize="inherit" />Delivery Tickets
+                                            <GiAbstract055 className="mr-1" fontSize="inherit" />{routes.deliveryTicket.title}
                                         </div>
                                     }
                                     {...a11yProps(1)}

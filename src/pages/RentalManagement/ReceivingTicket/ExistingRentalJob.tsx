@@ -171,7 +171,7 @@ const ExistingRentalJob = ({ refrenceData, refrenceType, productInventory, onClo
     aria-labelledby="customized-dialog-title"
     open={true}
   >
-    <CustomDialogHeader title={routes.rentalManagement.title} onClose={onClose} ></CustomDialogHeader>
+    <CustomDialogHeader title={`Select ${routes.rentalManagement.title}`} onClose={onClose} ></CustomDialogHeader>
     <div className="listing-grid p-3">
       <Box mb={2}>
         <Grid item xs={12} sm={12} md={12} container justify={"flex-end"}>
@@ -181,7 +181,7 @@ const ExistingRentalJob = ({ refrenceData, refrenceType, productInventory, onClo
             variant={"contained"}
             disabled={selectedRecords.length > 1 || selectedRecords.length === 0}
           >
-            {`Transfer to ${routes.rentalManagement.title}`}</Button>
+            {`Perform Transfer`}</Button>
         </Grid>
       </Box>
       {Object.keys(frameWorkComponent).length > 0 ?
@@ -203,6 +203,7 @@ const ExistingRentalJob = ({ refrenceData, refrenceType, productInventory, onClo
           isClientSideGrid={true}
           refreshGrid={fetchRentalManagement}
           showOnlyShowFilteredRecordSwitch={true}
+          isMultipleSelection={false}
         /> : null
       }
     </div>
