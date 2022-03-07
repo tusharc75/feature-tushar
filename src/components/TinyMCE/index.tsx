@@ -18,7 +18,7 @@ import CircularProgress from "@material-ui/core/CircularProgress"
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import 'tinymce/icons/default';
+// import 'tinymce/icons/default';
 import "./tinymce.scss"
 import { startCase } from 'lodash';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
