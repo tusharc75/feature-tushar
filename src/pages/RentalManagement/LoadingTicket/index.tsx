@@ -244,6 +244,9 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
       data["wellName"] = rentalManagementData?.wellName;
       data["afeNumber"] = rentalManagementData?.afeNumber;
+      if (rentalManagementData?.processor?.optionValue) {
+        data["processor"] = rentalManagementData?.processor?.optionValue;
+      }
       setShowTicketDialog({ open: true, data: data });
     }
   };
