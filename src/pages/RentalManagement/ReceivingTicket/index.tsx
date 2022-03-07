@@ -306,7 +306,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
     data["wellName"] = rentalManagementData?.wellName;
     data["afeNumber"] = rentalManagementData?.afeNumber;
-
+    if (rentalManagementData?.processor?.optionValue) {
+      data["processor"] = rentalManagementData?.processor?.optionValue;
+    }
     setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
     closeActions()
   };

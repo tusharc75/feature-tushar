@@ -207,6 +207,9 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
                     tempInitialData["wellName"] = refrenceData?.wellName;
                     tempInitialData["afeNumber"] = refrenceData?.afeNumber;
+                    if (refrenceData?.processor) {
+                        tempInitialData["deliveryPerson"] = refrenceData?.processor;
+                    }
 
                     isPickupFromDisable = refrenceData?.isPickupFromDisable ? true : false;
                     isDeliveryToDisable = refrenceData?.isDeliveryToDisable ? true : false;
