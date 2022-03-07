@@ -492,7 +492,9 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                 refrenceType={refrenceType}
                 refrenceData={{
                     transferFromPlant: getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0]?.warehouseId,
-                    transferToPlant: refrenceData?.warehouse
+                    transferToPlant: refrenceData?.warehouse,
+                    wellName: refrenceData?.wellName,
+                    afeNumber: refrenceData?.afeNumber
                 }}
             />
         )}

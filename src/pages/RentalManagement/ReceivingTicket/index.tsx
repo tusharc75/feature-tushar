@@ -306,7 +306,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
     data["wellName"] = rentalManagementData?.wellName;
     data["afeNumber"] = rentalManagementData?.afeNumber;
-    
+
     setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
     closeActions()
   };
@@ -756,7 +756,10 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     {showRepairJobDialog &&
       <ManageRepairJob
         refrenceType="Rental Job"
-        refrenceData={{ _id: rentalManagementData._id, warehouse: selectedRecords[0].warehouseId }}
+        refrenceData={{
+          _id: rentalManagementData._id, warehouse: selectedRecords[0].warehouseId,
+          wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber
+        }}
         onClose={() => setShowRepairJobDialog(false)}
         onSuccess={(obj) => {
           handleAddAssetToRepairJob(obj?._id)
