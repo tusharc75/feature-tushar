@@ -30,6 +30,7 @@ import CustomButton from '../../components/Helpers/CustomButton'
 import AddIcon from "@material-ui/icons/AddCircle";
 import ManageAddressDialog from "../../components/Address/ManageAddressDialog";
 import { isArray } from "lodash";
+import routes from './../../components/Helpers/Routes';
 
 const ManageDeliveryTicket = (props) => {
 
@@ -204,6 +205,8 @@ const ManageDeliveryTicket = (props) => {
                     tempInitialData["type"] = refrenceType;
                     tempInitialData["ticketType"] = ticketType;
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
+                    tempInitialData["wellName"] = refrenceData?.wellName;
+                    tempInitialData["afeNumber"] = refrenceData?.afeNumber;
 
                     isPickupFromDisable = refrenceData?.isPickupFromDisable ? true : false;
                     isDeliveryToDisable = refrenceData?.isDeliveryToDisable ? true : false;
@@ -523,7 +526,7 @@ const ManageDeliveryTicket = (props) => {
                                 }
                             }}
                             title={`${deliveryTicketId ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ""}`
-                                : `Create ${initialData.values?.ticketType} Ticket`}`}
+                                : `Create Transaction Ticket`}`}
                             isMinimized={!fullScreen}
                             onMinimizeMaximize={() => {
                                 setFullScreen(prevState => !prevState)
