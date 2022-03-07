@@ -332,10 +332,7 @@ export default function DeliveryTicketDetail(props) {
     if (deliveryTicketData) {
       mainPoint["Pick-Up Date:"] = yyyyMMDD(deliveryTicketData?.["pickUpDate"]) || "";
       mainPoint["Delivery Date"] = yyyyMMDD(deliveryTicketData?.deliveryDate) || "";
-      const fieldFilter = deliveryTicketFields.filter((e) => e?.fieldData?.fieldName === "deliveryPerson");
-      if (fieldFilter.length) {
-        mainPoint[fieldFilter[0].fieldData?.fieldLabel] = deliveryTicketData?.deliveryPerson?.optionLabel || ""
-      }
+      mainPoint["Processor"] = deliveryTicketData?.deliveryPerson?.optionLabel || ""
     }
     return mainPoint;
   }, [deliveryTicketData?.ticketName, deliveryTicketData?.deliveryPerson, deliveryTicketData?.deliveryDate]);
