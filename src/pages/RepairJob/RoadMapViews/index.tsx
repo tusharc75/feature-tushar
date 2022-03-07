@@ -178,7 +178,10 @@ const RepairJobViews = (props) => {
           });
         });
         if (i.length) {
-          var data = { target: `${i[i.length - 1].ticketId}-${index}-${i.length - 1}` };
+          const data = { target: `${i[i.length - 1].ticketId}-${index}-${i.length - 1}` };
+          edgeFromTicketToClosed.push(data);
+        } else {
+          const data = { target: `${assets?.data?.data[index]?._id}` };
           edgeFromTicketToClosed.push(data);
         }
       });
