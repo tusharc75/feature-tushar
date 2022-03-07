@@ -155,7 +155,8 @@ export default function CustomAgGrid({
   pinnedBottomRowData = null,
   rowClassRules = null,
   selectedReportView = null,
-  setSelectedReportView = null
+  setSelectedReportView = null,
+  isMultipleSelection = true
 }) {
   const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
@@ -465,7 +466,7 @@ export default function CustomAgGrid({
               // }}
               pinnedBottomRowData={pinnedBottomRowData ?? null}
               suppressRowClickSelection={true}
-              rowSelection={'multiple'}
+              rowSelection={!isMultipleSelection ? 'single' : 'multiple'}
               onRowSelected={(event) => {
                 if (event.rowIndex !== null && !isClientSideGrid) {
 

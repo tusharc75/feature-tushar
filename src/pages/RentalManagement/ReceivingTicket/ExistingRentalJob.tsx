@@ -203,6 +203,7 @@ const ExistingRentalJob = ({ refrenceData, refrenceType, productInventory, onClo
           isClientSideGrid={true}
           refreshGrid={fetchRentalManagement}
           showOnlyShowFilteredRecordSwitch={true}
+          isMultipleSelection={false}
         /> : null
       }
     </div>
