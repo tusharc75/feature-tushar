@@ -27,7 +27,7 @@ import ManageContactDialog from "../Contact/ManageContact";
 
 const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, productId = null, productCategory = null,
     productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null, warehouseId = null, currencyDisable = false
-    , deliveryDateMax = null, isFromSerializedAssetStepFromSalesOrder = false, salesOrderId = null }) => {
+    , deliveryDateMax = null, isFromSerializedAssetStepFromSalesOrder = false, salesOrderId = null, refrenceData = null }) => {
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
     const {
@@ -55,22 +55,17 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Purchase Order").then(({ data: { data } }) => {
-            let fieldsDataForCreate = data.filter((obj) => obj.isCreate)
-                .map((d: any) => d.fieldData);
+            let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-
             if (salesOrderId) {
                 fieldsDataForCreate = fieldsDataForCreate.filter(f => f.fieldName !== "rentalJob");
                 fieldsDataForUpdate = fieldsDataForUpdate.filter(f => f.fieldName !== "rentalJob");
             }
-
             if (purchaseOrderId) {
                 axiosInstance().get(`${purchaseOrder.api}/` + purchaseOrderId).then(({ data: { data } }) => {
                     setPurchaseOrderData(data)
                     if (isClone) {
                         const { _id, createdBy, updatedBy, serialNumber, purchaseOrderNumber, ...rest } = data
-
                         rest['purchaseOrderNumber'] = `PO_${generateUniqueIdOnly()}`
                         rest["status"] = "New"
                         setInitialData({
@@ -85,8 +80,6 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                             values: getObjKeysWithValues(data, fieldsDataForUpdate),
                         });
                     }
-
-
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
                 });
@@ -103,14 +96,19 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                 if (rentalManagementId) {
                     createValues["rentalJob"] = rentalManagementId
                 }
-                // if (salesOrderId) {
-                //     createValues["salesOrder"] = salesOrderId
-                // }
                 if (warehouseId) {
                     createValues["warehouse"] = warehouseId
                 }
                 if (currency) {
                     createValues["currency"] = currency
+                }
+                if (refrenceData) {
+                    if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
+                        createValues["wellName"] = refrenceData?.wellName
+                    }
+                    if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
+                        createValues["afeNumber"] = refrenceData?.afeNumber
+                    }
                 }
                 setInitialData({
                     fields: fieldsDataForCreate,

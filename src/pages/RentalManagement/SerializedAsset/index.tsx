@@ -580,6 +580,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         productsToSave={[...showOrderDialog.products]}
         isFromSerializedAssetStepFromRental={true}
         currency={rentalManagementData.currency}
+        refrenceData={{ wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber }}
         rentalManagementId={rentalManagementData._id}
         warehouseId={rentalManagementData?.warehouse?.optionValue}
         deliveryDateMax={rentalManagementData.estimateStartDate}
