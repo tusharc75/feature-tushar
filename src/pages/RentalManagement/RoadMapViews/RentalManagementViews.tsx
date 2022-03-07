@@ -599,13 +599,12 @@ const RentalManagementViews = (props) => {
                 snapGrid={[15, 15]}
                 onElementClick={onElementClick}
               >
-                <div
-                  className="d-flex justify-content-space-between"
-                  style={{ width: '70%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}
-                >
+                <div style={{ width: '85%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}>
                   {Object.keys(customNodeStyles).map((key) => {
                     return (
-                      <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div
+                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', paddingLeft: '5px', paddingRight: '5px' }}
+                      >
                         {customNodeStyles[key].name}
                         <div
                           style={{
