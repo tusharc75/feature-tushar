@@ -145,6 +145,13 @@ const ExistingRentalJob = ({ refrenceData, refrenceType, productInventory, onClo
     data["deliveryToAddress"] = selectedRecords[0]?.shippingAddressId;
     data["startDate"] = refrenceData?.estimateStartDate;
     data["endDate"] = refrenceData?.estimateStartDate;
+    data["wellName"] = refrenceData?.wellName;
+    data["afeNumber"] = refrenceData?.afeNumber;
+    if (refrenceData?.processor?.optionValue) {
+      data["processor"] = refrenceData?.processor?.optionValue;
+    }
+    data["isPickupFromDisable"] = true;
+    data["isDeliveryToDisable"] = true;
     setShowTicketDialog({ open: true, ticketType: DELIVERY_TICKET_TYPE.receiving, data: data });
   }
 

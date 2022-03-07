@@ -12,7 +12,7 @@ import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import {
     CustomDialogTransition, generateUniqueIdOnly, getCollaboratorDropdownDataSource,
-    getOwnerDropdownDataSource, sublease, setFieldsInAscendingOrder, supplierAccount, supplierContact
+    getOwnerDropdownDataSource, sublease, setFieldsInAscendingOrder, supplierAccount, supplierContact, SUBLEASE_STATUS
 } from "../../constants/helpers";
 import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
@@ -153,24 +153,6 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                 setShippingAddress(allAddressData.option)
                 setDeliveryToAddress(allAddressData.option)
             }
-
-
-            // const countryBillToDropdownData = fieldsDataForCreate.find(
-            //     (d) => d.fieldName === "billingAddress"
-            // );
-            // if (countryBillToDropdownData) {
-            //     setCountryBillToMainData(countryBillToDropdownData.option)
-            //     setCountryBillToDropDown(countryBillToDropdownData.option)
-            // }
-            // const countrySellToDropdownData = fieldsDataForCreate.find(
-            //     (d) => d.fieldName === "shippingAddress"
-            // );
-            // if (countrySellToDropdownData) {
-            //     setCountrySellToMainData(countrySellToDropdownData.option)
-            //     setCountrySellToDropDown(countrySellToDropdownData.option)
-            // }
-
-
         })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -242,30 +224,6 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
         );
     };
 
-    // const onCountryBillToDropDownOpen = (selectedAccount) => {
-    //     let filterAddress = supplierData.find(d => d.optionValue === selectedAccount)?.billingAddress
-    //     if (filterAddress) {
-    //         setCountryBillToDropDown(
-    //             countryBillToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue))
-    //         );
-    //     }
-    //     else {
-    //         setCountryBillToDropDown([])
-    //     }
-    // };
-
-    // const onCountrySellToDropDownOpen = (selectedAccount) => {
-    //     let filterAddress = supplierData.find(d => d.optionValue === selectedAccount)?.shippingAddress
-    //     if (filterAddress) {
-    //         setCountrySellToDropDown(
-    //             countrySellToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue))
-    //         );
-    //     }
-    //     else {
-    //         setCountrySellToDropDown([])
-    //     }
-    // };
-
     const onShippingAddressOpen = (supplierId, shippingAddress) => {
         let filterAddress = supplierData.find(d => d.optionValue === supplierId)?.shippingAddress
         if (filterAddress || shippingAddress) {
@@ -275,31 +233,6 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
             setShippingAddress([])
         }
     }
-
-    // const onDeliveryToAddressOpen = (deliveryToType, deliveryTo, deliveryToAddress) => {
-    //     if (deliveryToType === DELIVERY_FROM_TO_TYPE.supplier) {
-    //         let filterAddress = supplierData.find(d => d.optionValue === deliveryTo)?.shippingAddress
-    //         if (filterAddress || deliveryToAddress) {
-    //             setDeliveryToAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue) || d.optionValue === deliveryToAddress));
-    //         }
-    //         else {
-    //             setDeliveryToAddress([])
-    //         }
-    //     }
-    //     else if (deliveryToType === DELIVERY_FROM_TO_TYPE.customer) {
-    //         let filterAddress = customerData.find(d => d.optionValue === deliveryTo)?.shippingAddress
-    //         if (filterAddress || deliveryToAddress) {
-    //             setDeliveryToAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue) || d.optionValue === deliveryToAddress));
-    //         }
-    //         else {
-    //             setDeliveryToAddress([])
-    //         }
-    //     }
-    //     else {
-    //         setDeliveryToAddress(addressData)
-    //     }
-    // };
-
 
     const handleScroll = (errors) => {
         const err = Object.keys(errors);
@@ -398,6 +331,7 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                         <FormTypes
                                                                             {...field}
                                                                             fieldData={field}
+                                                                            disabled={[SUBLEASE_STATUS.new, SUBLEASE_STATUS.inProgress].includes(values?.status) ? false : true}
                                                                             values={values}
                                                                             errors={errors}
                                                                             touched={touched}
@@ -721,29 +655,6 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                                 </Tooltip>
                                                                             </Box>
                                                                         </Box>
-
-                                                                        // <FormTypes
-                                                                        //     {...field}
-                                                                        //     disabled={Boolean(subleaseId) && field.disableOnEdit && !isClone}
-                                                                        //     values={values}
-                                                                        //     errors={errors}
-                                                                        //     touched={touched}
-                                                                        //     label={field.fieldLabel}
-                                                                        //     name={field.fieldName}
-                                                                        //     type={field.type}
-                                                                        //     options={countrySellToDropDown}
-                                                                        //     setFieldValue={(name, value) => {
-                                                                        //         setFieldValue(name, value)
-                                                                        //     }}
-                                                                        //     required={field.required}
-                                                                        //     fullWidth
-                                                                        //     isTooltip={field?.isTooltip || false}
-                                                                        //     tooltipMessage={field?.tooltipMessage}
-                                                                        //     size="small"
-                                                                        //     onOpen={() =>
-                                                                        //         onCountrySellToDropDownOpen(values["supplierAccount"])
-                                                                        //     }
-                                                                        // />
                                                                     )
                                                                         : <FormTypes
                                                                             isNew={Boolean(subleaseId)}
