@@ -28,6 +28,7 @@ import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { Link } from 'react-router-dom'
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import { camelCase } from "lodash";
+import { fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
 
 
 const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom }) => {
@@ -53,15 +54,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom }) => 
     }, []);
 
     const fetchFields = async () => {
-        var data = []
-        if (isOffline) {
-            data = await findOne(objectStore.resource, "rentalManagementCost")
-        }
-        else {
-            const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`)
-            data = response?.data?.data
-        }
-        const fields = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
+        const fields = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
         let rendererNames = [];
         genrateColoum(fields, columns, rendererNames, false, renderedFrom);
         columns?.forEach((ele) => {
