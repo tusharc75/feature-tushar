@@ -505,7 +505,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                   MenuListProps={{
                     'aria-labelledby': 'basic-button'
                   }}
-                  className="add-product-action-menu"
+                  className={isMobile ? "add-product-action-menu-mobile" : "add-product-action-menu"}
                 >
                   <HtmlTooltip
                     title={Boolean(selectedProducts && selectedProducts.length) ? 'Buld edit selected records' : 'Select records to edit'}

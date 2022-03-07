@@ -842,6 +842,11 @@ body::-webkit-scrollbar-thumb {
 
 .add-product-action-menu{
   .MuiPaper-root{
+    top: 320px !important;
+  }
+}
+.add-product-action-menu-mobile{
+  .MuiPaper-root{
     top: 197px !important;
   }
 }

@@ -4,7 +4,7 @@ import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@material-ui/core";
+import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem , ButtonGroup } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -32,6 +32,7 @@ import { MdDelete, MdDeleteSweep } from "react-icons/md";
 import { useData } from "../../../StateProvider/Provider";
 import { BiChevronDown } from "react-icons/bi";
 import React from "react";
+import { IoMdEye } from "react-icons/io";
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
 
@@ -413,37 +414,109 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   }
 
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [actionAnchorEl, setActionAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+  const actionOpen = Boolean(actionAnchorEl);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
+  };
+
+  const actionHandleClick = (event) => {
+    setActionAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
   };
 
+  const actionHandleClose = () => {
+    setActionAnchorEl(null);
+  };
+
 
   return (<Fragment>
     <Box display="flex" justifyContent="flex-end" pt={1} pb={2} >
-      <Box display="flex" alignItems="center" justifyContent={isMobile ? "space-between" : "flex-end"} paddingX={1} gridColumnGap={8} flex={1}>
-        <Box display="flex" gridColumnGap={5}>
+      <Box display="flex" alignItems="center" paddingX={1} gridColumnGap={8} flex={1}>
+        <Box display="flex" gridColumnGap={5} flex={1} justifyContent="space-between">
 
+
+        
+             <Box display="flex" gridColumnGap={5}>
+             <Button
+            variant={isMobile && !isTablet ? "contained" : "contained"}
+            color="primary"
+            type="button"
+            size="small"
+            style={!isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
+            disabled={showOrderDialog.products.length === 0}
+            onClick={() => {
+              setOrderDialog(prevState => ({ ...prevState, open: true, type: "purchaseOrder" }))
+            }}
+          >
+            {isMobile && !isTablet ? "PO" : `Create ${routes.purchaseOrder.title}`}
+          </Button>
+
+          {/* <HtmlTooltip title={`Created ${routes.purchaseOrder.title}`}>
           <Button
+          size="small"
+          color="primary"
+          onClick={() => {
+            history.push(routes.purchaseOrder.path, {
+              rental: rentalManagementData,
+            })
+          }}
+        > 
+          <IoMdEye color="primary"/>
+         </Button>
+         </HtmlTooltip> */}
+
+          {/* <Button
             variant={isMobile && !isTablet ? "text" : "contained"}
             color="primary"
             type="button"
             size="small"
-            style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
+            style={isMobile && !isTablet ? { color: "var(--warning-darken)" , display:"none" } : {}}
             disabled={disableAssignSerializedAssets()}
             onClick={() => {
               setAddSerializedAssetDialog({ open: true })
             }}
           >
             {isMobile && !isTablet ? <CgAssign size={20} /> : `Assign ${routes.serializedAsset.title}`}
-          </Button>
+          </Button> */}
 
-          <Button
+          {permissions?.sublease?.isCreate &&
+            <Fragment>
+              <Button
+                variant={isMobile && !isTablet ? "contained" : "contained"}
+                color="primary"
+                type="button"
+                size="small"
+                style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
+                disabled={showOrderDialog.products.length === 0}
+                onClick={() => {
+                  setOrderDialog(prevState => ({ ...prevState, open: true, type: "sublease" }))
+                }}
+              >
+                {isMobile && !isTablet ? "Sublease" : `Create ${routes.sublease.title}`}
+              </Button>
+              {/* {subleaseCount > 0 && <HtmlTooltip title={`Created ${routes.sublease.title}`}>
+                <IconButton size="small" onClick={() => {
+                  history.push(routes.sublease.path, {
+                    rental: rentalManagementData,
+                  })
+                }}>
+                  <InfoIcon color={"primary"} />
+                </IconButton>
+              </HtmlTooltip>} */}
+            </Fragment>
+          }
+
+          </Box>
+          
+
+         
+          {/* <Button
             variant={isMobile && !isTablet ? "contained" : "contained"}
             color="primary"
             type="button"
@@ -465,41 +538,16 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             }}>
               <InfoIcon color={"primary"} />
             </IconButton>
-          </HtmlTooltip>}
-
-          {permissions?.sublease?.isCreate &&
-            <Fragment>
-              <Button
-                variant={isMobile && !isTablet ? "contained" : "contained"}
-                color="primary"
-                type="button"
-                size="small"
-                style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-                disabled={showOrderDialog.products.length === 0}
-                onClick={() => {
-                  setOrderDialog(prevState => ({ ...prevState, open: true, type: "sublease" }))
-                }}
-              >
-                {isMobile && !isTablet ? "Sublease" : `Create ${routes.sublease.title}`}
-              </Button>
-              {subleaseCount > 0 && <HtmlTooltip title={`Created ${routes.sublease.title}`}>
-                <IconButton size="small" onClick={() => {
-                  history.push(routes.sublease.path, {
-                    rental: rentalManagementData,
-                  })
-                }}>
-                  <InfoIcon color={"primary"} />
-                </IconButton>
-              </HtmlTooltip>}
-            </Fragment>
-          }
-
-          <Button
+          </HtmlTooltip>} */}
+          
+          
+          <Box display="flex" gridColumnGap={5}>  
+          {/* <Button
             variant={isMobile && !isTablet ? "text" : "contained"}
             color="primary"
             type="button"
             size="small"
-            style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
+            style={isMobile && !isTablet ? { color: "var(--danger-light)" , display:"none" } : {}}
             disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
             onClick={() => {
               setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
@@ -507,9 +555,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             }}
           >
             {isMobile && !isTablet ? <MdDeleteSweep size={20} /> : "Delete Assets"}
-          </Button>
-
-          {transferAssetCount > 0 && <HtmlTooltip title={`Created ${routes.transferAsset.title}`}>
+          </Button> */}
+          {/* {transferAssetCount > 0 && <HtmlTooltip title={`Created ${routes.transferAsset.title}`}>
             <IconButton size="small" onClick={() => {
               history.push(routes.transferAsset.path, {
                 rental: rentalManagementData,
@@ -517,26 +564,19 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             }}>
               <InfoIcon color={"primary"} />
             </IconButton>
-          </HtmlTooltip>}
+          </HtmlTooltip>} */}
 
-        </Box>
-
-        {isMobile &&
-          <Box display="flex" gridColumnGap={5}>
-            <Button
-              variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+          <Button
+              variant='outlined'
               color="primary"
               size="small"
-              style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
               id="demo-positioned-button"
-              aria-controls={open ? 'demo-positioned-menu' : undefined}
-              aria-haspopup="true"
-              aria-expanded={open ? 'true' : undefined}
               onClick={handleClick}
               endIcon={<BiChevronDown />}
             >
-              Actions
+              View
             </Button>
+
             <Menu
               id="basic-menu"
               anchorEl={anchorEl}
@@ -545,29 +585,91 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               MenuListProps={{
                 'aria-labelledby': 'basic-button'
               }}
-              className="add-product-action-menu"
+              className={isMobile ? "add-product-action-menu-mobile" : "add-product-action-menu"}
             >
-              <MenuItem disabled={disableAssignSerializedAssets()}
+              
+              <MenuItem disabled={transferAssetCount === 0}  onClick={() => {
+              history.push(routes.transferAsset.path, {
+                rental: rentalManagementData,
+              })
+            }}>
+              {`Created ${routes.transferAsset.title}`}
+                  
+                </MenuItem>
+                <MenuItem disabled={purchaseOrderCount === 0} onClick={() => {
+              history.push(routes.purchaseOrder.path, {
+                rental: rentalManagementData,
+              })
+            }}>
+                {`Created ${routes.purchaseOrder.title}`}
+                  
+                </MenuItem>
+
+                <MenuItem disabled={subleaseCount === 0} onClick={() => {
+                  history.push(routes.sublease.path, {
+                    rental: rentalManagementData,
+                  })
+                }} >
+                    {`Created ${routes.sublease.title}`}      
+                </MenuItem>
+
+
+              </Menu>
+
+
+
+              <Button
+              variant='outlined'
+              color="primary"
+              size="small"
+              id="demo-positioned-button"
+              aria-controls={actionOpen ? 'demo-positioned-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={actionOpen ? 'true' : undefined}
+              onClick={actionHandleClick}
+              endIcon={<BiChevronDown />}
+            >
+              Actions
+            </Button>
+
+            <Menu
+              id="basic-menu"
+              anchorEl={actionAnchorEl}
+              open={actionOpen}
+              onClose={actionHandleClose}
+              MenuListProps={{
+                'aria-labelledby': 'basic-button'
+              }}
+              className={isMobile ? "add-product-action-menu-mobile" : "add-product-action-menu"}
+            >
+             <MenuItem disabled={disableAssignSerializedAssets()}
                 onClick={() => {
                   setAddSerializedAssetDialog({ open: true })
                 }}>
-                <ListItemIcon>
-                  <CgAssign size={16} color="primary" />
-                </ListItemIcon>
-                <ListItemText>Assign assets</ListItemText>
+
+              {`Assign ${routes.serializedAsset.title}`}
               </MenuItem>
+             
+
               <MenuItem disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
-                onClick={() => {
-                  setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
-                  setShowConfirmBox(true)
-                }}>
-                <ListItemIcon >
-                  <MdDelete size={16} />
-                </ListItemIcon>
-                <ListItemText>Delete</ListItemText>
+            onClick={() => {
+              setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
+              setShowConfirmBox(true)
+            }} >
+               Delete assets
               </MenuItem>
-            </Menu>
-          </Box>}
+
+              </Menu>
+
+
+
+          </Box>
+
+         
+
+        </Box>
+
+       
       </Box>
     </Box>
     <Grid container spacing={2}>
