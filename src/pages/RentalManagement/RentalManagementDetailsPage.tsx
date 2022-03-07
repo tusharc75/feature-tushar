@@ -121,6 +121,12 @@ const RentalManagementDetailsPage = () => {
   }
 
   useEffect(() => {
+    if (isSmallScreen) {
+      setActivityShow(true)
+    }
+  }, [isSmallScreen])
+
+  useEffect(() => {
     if (id) {
       getRentalManagementFields();
       fetchRentalManagementData();
