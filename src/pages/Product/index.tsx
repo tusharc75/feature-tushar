@@ -407,7 +407,7 @@ const Product = () => {
                     </Tooltip>
             }
 
-            {productPermissions.isRead && (process.env.REACT_APP_ENV !== 'staging') ?
+            {(productPermissions.isRead && permissions?.serializedAsset) ?
                 <Tooltip title="Parts">
                     <IconButton size="small" aria-label="View Parts" onClick={() => {
                         history.push(`${routes.productDetail.path}/${params.data._id}/bom`, { productName: params.data.productName })

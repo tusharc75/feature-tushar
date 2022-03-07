@@ -156,6 +156,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         data["ticketName"] = repairJobData.repairJobName;
         data["refrenceId"] = repairJobData._id;
         data["pickupFromType"] = pickupFromType;
+        
         var pickupFrom = "";
         if (selectedRecords[0].currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
             pickupFrom = selectedRecords[0].warehouseId;
@@ -163,11 +164,16 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         else {
             pickupFrom = selectedRecords[0]?.currentOwnerId;
         }
+
         data["pickupFrom"] = pickupFrom;
         data["pickupFromAddress"] = selectedRecords[0]?.currentLocationId;
 
         data["deliveryToType"] = deliveryToType;
         data["isPickupFromDisable"] = true;
+
+        data["wellName"] = repairJobData?.wellName;
+        data["afeNumber"] = repairJobData?.afeNumber;
+
         setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
         closeActions()
     };

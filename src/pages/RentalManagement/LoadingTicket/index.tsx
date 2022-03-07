@@ -36,11 +36,9 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { makeStyles } from '@material-ui/core/styles';
-import { RiExchangeFundsLine } from 'react-icons/ri';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 import { groupBy, uniq, map } from "lodash";
-import { camelCase } from "lodash";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -243,6 +241,9 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       data["endDate"] = rentalManagementData?.estimateStartDate;
       data["isPickupFromDisable"] = true;
       data["isDeliveryToDisable"] = true;
+
+      data["wellName"] = rentalManagementData?.wellName;
+      data["afeNumber"] = rentalManagementData?.afeNumber;
       setShowTicketDialog({ open: true, data: data });
     }
   };

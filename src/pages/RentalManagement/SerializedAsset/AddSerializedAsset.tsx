@@ -25,6 +25,7 @@ import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import HtmlTooltip from "../../../components/CustomTooltipTitle";
 
 
 const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, refrenceType = null,
@@ -389,25 +390,27 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                                             className={isMobile && !isTablet ? 'mobile_button' : ""}
                                             endIcon={isAdding && <CircularProgress size={20} />}
                                         >
-                                            {isMobile && !isTablet ? <MdAdd size={23} /> : 'Create Transfer Asset'}
+                                            {isMobile && !isTablet ? <MdAdd size={23} /> : 'Transfer to Job Plant'}
                                             {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")" : ""}
                                         </Button>
                                     </Box>
                                 }
                                 <Box pl={1}>
-                                    <Button
-                                        color="primary"
-                                        size="small"
-                                        onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
-                                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                                        disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 || isAdding ||
-                                            serializedProducts.some(d => d?.qty < 0)}
-                                        className={isMobile && !isTablet ? 'mobile_button' : ""}
-                                        endIcon={isAdding && <CircularProgress size={20} />}
-                                    >
-                                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                                        {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")" : ""}
-                                    </Button>
+                                    <HtmlTooltip title={(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) ? "Direct transfer to customer location" : "Add to Job"}>
+                                        <Button
+                                            color="primary"
+                                            size="small"
+                                            onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
+                                            variant={isMobile && !isTablet ? 'text' : 'contained'}
+                                            disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 || isAdding ||
+                                                serializedProducts.some(d => d?.qty < 0)}
+                                            className={isMobile && !isTablet ? 'mobile_button' : ""}
+                                            endIcon={isAdding && <CircularProgress size={20} />}
+                                        >
+                                            {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add to Job'}
+                                            {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")" : ""}
+                                        </Button>
+                                    </HtmlTooltip>
                                 </Box>
                             </Box>
                         </Grid>
@@ -489,7 +492,9 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                 refrenceType={refrenceType}
                 refrenceData={{
                     transferFromPlant: getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0]?.warehouseId,
-                    transferToPlant: refrenceData?.warehouse
+                    transferToPlant: refrenceData?.warehouse,
+                    wellName: refrenceData?.wellName,
+                    afeNumber: refrenceData?.afeNumber
                 }}
             />
         )}
