@@ -539,7 +539,10 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setAddSerializedAssetDialog({ open: false });
         }}
         refrenceType={"Rental Job"}
-        refrenceData={{ _id: rentalManagementData?._id, warehouse: rentalManagementData?.warehouse?.optionValue }}
+        refrenceData={{
+          _id: rentalManagementData?._id, warehouse: rentalManagementData?.warehouse?.optionValue
+          , wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber
+        }}
         isAdding={isAdding}
         selectedProducts={assetAssignedProduct}
         //queryString={addSerializedAssetDialog.type === "all" ? `notInPlant=${rentalManagementData?.warehouse?.optionValue}&availableAssets=true` : ``}

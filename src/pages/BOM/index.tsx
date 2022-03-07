@@ -382,8 +382,7 @@ const BOMTable = () => {
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
           assignedProducts={BOMData}
           onSuccess={() => {
-            // getFrequentlyBoughtProduct();
-            if (process.env.REACT_APP_ENV !== 'staging') {
+            if (permissions?.serializedAsset) {
               fetchBOMData();
             }
             setOpenAssignProductDialog(false);
