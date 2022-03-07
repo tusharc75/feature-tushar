@@ -73,6 +73,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [showRemoveTicketDialog, setShowRemoveTicketDialog] = useState(false);
 
+  const [uniqueLoadingTicket, setUniqueLoadingTicket] = useState([]);
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
 
@@ -148,6 +149,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
         setNextStep(true);
       }
+
+      setUniqueLoadingTicket([...new Set(productAssets.filter(d => d.loadingTicketId !== undefined).map(d => d.loadingTicketId))]);
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -276,34 +279,37 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         {!isMobile && <Button
           onClick={() => {
             setDownlodingFile(true);
-            axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
-              .then(({ data }) => {
-                axiosInstance()
-                  .get(`user/download?fileName=${data.data.fileName}`, {
-                    responseType: "blob",
-                  })
-                  .then(({ data }) => {
-                    const file = new Blob([data], { type: "application/pdf" });
-                    const fileURL = URL.createObjectURL(file);
-                    const pdfWindow = window.open();
-                    pdfWindow.location.href = fileURL;
-                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-                    setDownlodingFile(false);
-                  })
-                  .catch((err) => {
-                    toastConfig.setToastConfig(err);
-                    setDownlodingFile(false);
-                  });
-              }).catch((err) => {
-                toastConfig.setToastConfig(err);
-                setDownlodingFile(false);
-              })
+            uniqueLoadingTicket.forEach(currentId => {
+              axiosInstance().get(`/delivery-ticket/${currentId}/pdf`)
+                .then(({ data }) => {
+                  axiosInstance()
+                    .get(`user/download?fileName=${data.data.fileName}`, {
+                      responseType: "blob",
+                    })
+                    .then(({ data }) => {
+                      const file = new Blob([data], { type: "application/pdf" });
+                      const fileURL = URL.createObjectURL(file);
+                      const pdfWindow = window.open();
+                      pdfWindow.location.href = fileURL;
+                      toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                      setDownlodingFile(false);
+                    })
+                    .catch((err) => {
+                      toastConfig.setToastConfig(err);
+                      setDownlodingFile(false);
+                    });
+                }).catch((err) => {
+                  toastConfig.setToastConfig(err);
+                  setDownlodingFile(false);
+                })
+            })
+
           }}
           variant={isMobile && !isTablet ? 'text' : 'outlined'}
           color="primary"
           type="button"
           size="small"
-          disabled={downlodingFile || isOffline}
+          disabled={downlodingFile || isOffline || uniqueLoadingTicket.length === 0}
           startIcon={<AiFillFilePdf />}
         >
           {downlodingFile ? "Please wait..." : "Preview"}
