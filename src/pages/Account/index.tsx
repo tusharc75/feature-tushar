@@ -131,7 +131,7 @@ export default function Account(props) {
   const [state, dispatch] = useReducer(reducer, intialState);
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
   const columnState = JSON.parse(localStorage.getItem(accountResource));
 
@@ -753,7 +753,21 @@ export default function Account(props) {
       };
       return res;
     });
-    dispatch({ type: 'initialize', data: rows, count: count });
+    if (appendRows) {
+      dispatch({
+        type: 'initialize',
+        data: [...dataRows, ...rows],
+        count: count,
+        selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+      });
+    } else {
+      dispatch({
+        type: 'initialize',
+        data: rows,
+        count: count,
+        selectedRecords: rows.filter((f) => f.isChecked === true)
+      });
+    }
 
     setTimeout(() => {
       dispatch({ type: 'loading', loading: false });
