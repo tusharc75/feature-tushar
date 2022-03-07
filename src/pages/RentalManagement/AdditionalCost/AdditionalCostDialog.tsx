@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment, useRef } from 'react';
+import { ChangeEvent, FC, FormEvent, useContext, useEffect, useState, Fragment, useRef } from 'react';
 import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -14,7 +14,8 @@ import CustomButton from '../../../components/Helpers/CustomButton'
 import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
+import { fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
+import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 
 interface AdditionalCostDialogProps {
   onClose: VoidFunction | any;
@@ -32,25 +33,28 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const ref = useRef(null);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
-    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`).then(({ data: { data } }) => {
-      const poFields = CURReplaceByCurrencySingle(data, currency);
-      if (costData) {
-        setInitialData({
-          fields: poFields,
-          values: getObjKeysWithValues(costData, poFields),
-        });
-      }
-      else {
-        setInitialData({
-          fields: poFields,
-          values: getObjKeys("", poFields),
-        });
-      }
-      EvaluteproductFields(poFields);
-    })
+    fetchFields()
   }, []);
+
+  const fetchFields = async () => {
+    const poFields = await fetch_rental_cost_fields(currency, isOffline);
+    if (costData) {
+      setInitialData({
+        fields: poFields,
+        values: getObjKeysWithValues(costData, poFields),
+      });
+    }
+    else {
+      setInitialData({
+        fields: poFields,
+        values: getObjKeys("", poFields),
+      });
+    }
+    EvaluteproductFields(poFields);
+  }
 
   const EvaluteproductFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));

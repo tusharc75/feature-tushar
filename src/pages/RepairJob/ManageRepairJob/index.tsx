@@ -62,7 +62,8 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
   useEffect(() => {
     setLoading(true);
     axiosInstance().get('/field?resource=Repair Job').then(({ data: { data } }) => {
-
+      data = data.filter((obj) => obj?.fieldData?.fieldName !== "rentalJob");
+      
       const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
