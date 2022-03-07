@@ -627,7 +627,6 @@ export default function Contact(props) {
           }
         }
 
-        dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
