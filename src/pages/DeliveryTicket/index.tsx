@@ -25,10 +25,12 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
 import { PickupFromRenderer, DeliveryToRenderer } from '../../components/DeliveryTicket/helper';
+import { camelCase } from 'lodash';
 
 let deliveryTicketTimeout;
 
 const DeliveryTicket = () => {
+  let renderedFrom = camelCase(routes?.deliveryTicket.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { state: { user, selectedEntity, permissions } }: any = useData();
@@ -72,7 +74,7 @@ const DeliveryTicket = () => {
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      let currentColumn = getColumnData(deliveryTicket.resource, o?.fieldData, `${routes.deliveryTicket.path}/detail`);
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${routes.deliveryTicket.path}/detail`);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -408,7 +410,7 @@ const DeliveryTicket = () => {
               onCreate={null}
               showClone={false}
               onClone={() => { }}
-              renderedFrom={deliveryTicket.resource}
+              renderedFrom={renderedFrom}
             />
           ) : Object.keys(frameWorkComponent).length > 0 ? (
             <CustomAgGrid
@@ -425,7 +427,7 @@ const DeliveryTicket = () => {
               loading={loading}
               allowSelection={true}
               allowAction={false}
-              renderedFrom={deliveryTicket.resource}
+              renderedFrom={renderedFrom}
               refreshGrid={fetchDeliveryTicket}
             />
           ) : null}
@@ -440,8 +442,7 @@ const DeliveryTicket = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : 'Delivery Tickets'}   ${deleteRecord.ticketName || ''
-                }?`}
+              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}}   ${deleteRecord.ticketName || ''}?`}
               onClose={() => {
                 if (deleteRecord) setDeleteRecord({});
                 setIsConformDialogVisible(false);

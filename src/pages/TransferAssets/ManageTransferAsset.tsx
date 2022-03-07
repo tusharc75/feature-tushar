@@ -14,7 +14,7 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, transferAsset, setFieldsInAscendingOrder, generateUniqueIdOnly } from 'src/constants/helpers';
-import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues, RESOURCE_LABEL } from 'src/constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from 'src/components/Helpers/FormTypes';
@@ -72,6 +72,8 @@ const ManageTransferAsset: FC<Props> = (props) => {
     axiosInstance()
       .get('/field?resource=Transfer Asset')
       .then(({ data: { data } }) => {
+        data = data.filter((obj) => obj?.fieldData?.fieldName !== "rentalJob");
+      
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
@@ -96,7 +98,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
             .get(`${transferAsset.api}/` + transferAssetId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, createdBy, updatedBy, entity,transferAssetNumber, ...rest } = data;
+                const { _id, createdBy, updatedBy, entity, transferAssetNumber, ...rest } = data;
                 let oldValues = { ...rest }
                 oldValues.transferAssetNumber = `TA_${generateUniqueIdOnly()}`;
                 oldValues.status = "New"
@@ -131,8 +133,13 @@ const ManageTransferAsset: FC<Props> = (props) => {
                 }
               }
             })
-            console.log(refrenceId)
             createValues["rentalJob"] = refrenceId;
+            if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
+              createValues["wellName"] = refrenceData?.wellName
+            }
+            if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
+              createValues["afeNumber"] = refrenceData?.afeNumber
+            }
           }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -257,8 +264,8 @@ const ManageTransferAsset: FC<Props> = (props) => {
                   transferAssetId
                     ? isClone
                       ? `Clone - ${cloneHeading}`
-                      : `Update ${RESOURCE_LABEL.transferAsset} (${number})`
-                    : 'Create ' + RESOURCE_LABEL.transferAsset
+                      : `Update ${routes.transferAsset.title} (${number})`
+                    : 'Create ' + routes.transferAsset.title
                 }
                 onClose={() => {
                   if (isFieldNotTouched(initialData, values)) onClose();

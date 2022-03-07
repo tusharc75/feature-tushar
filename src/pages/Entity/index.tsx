@@ -26,6 +26,7 @@ import ResourceTransferDialog from "../../components/ResourceTransferDialog"
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom'
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { camelCase } from "lodash";
 
 let entityTimeout;
 
@@ -33,6 +34,8 @@ const Entity: FC = () => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory()
+
+  const renderedFrom = camelCase(routes?.entity.title)
 
   const {
     state: { permissions, user },
@@ -55,7 +58,7 @@ const Entity: FC = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
-  const columnState = JSON.parse(localStorage.getItem("entityPage"));
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
   if (columnState) {
     columns.map((item) => {
@@ -107,7 +110,7 @@ const Entity: FC = () => {
         let columns = []
         let rendererNames = []
         data.forEach(o => {
-          let currentColumn = getColumnData(routes.entity.title, o?.fieldData, routes.entityDetail.path)
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.entityDetail.path)
 
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData]
@@ -392,12 +395,12 @@ const Entity: FC = () => {
             onCreate={false}
             showClone={false}
             onClone={() => { }}
-            renderedFrom={"entity"} />
+            renderedFrom={renderedFrom} />
           :
           Object.keys(frameWorkComponent).length > 0 ?
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameWorkComponent} setGridApi={setGridApi}
               dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
-              loading={loading} renderedFrom={routes.entity.title}
+              loading={loading} renderedFrom={renderedFrom}
               refreshGrid={fetchEntity}
             /> : null
         }

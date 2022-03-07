@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs } from "@material-ui/core";
+import { Grid, Box, Button, Paper, Typography, Tab, Tabs } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -11,14 +11,14 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { serializedAsset, getObjKeysWithValues, gridLoadingTimeout, product, sidebarResource, INVENTORY_STATUS, repairJob } from "../../constants/helpers";
+import { serializedAsset, getObjKeysWithValues, INVENTORY_STATUS, repairJob } from "../../constants/helpers";
 import ManageSerializedAsset from "./ManageSerializedAsset";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
 import ReasonDialog from "./ReasonDialog"
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer, DateTimeRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer, DateTimeRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import ManageRepairJob from '../RepairJob/ManageRepairJob'
 import { Link } from 'react-router-dom'
 import NoDataCell from "../../components/Helpers/NoDataCell";
@@ -27,11 +27,10 @@ import ProductHierarchy from "../Product/BOM";
 import { FaDiceOne, FaWpforms } from "react-icons/fa";
 import { isMobile, isTablet } from "react-device-detect";
 import { BiFoodMenu } from "react-icons/bi";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import CustomTimeline from "../../components/CustomTimeline";
 import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
 import { MdEdit } from "react-icons/md";
-import { startCase } from "lodash";
+import { camelCase, startCase } from "lodash";
 import moment from 'moment';
 
 interface TabPanelProps {
@@ -54,7 +53,7 @@ function TabPanel(props: TabPanelProps) {
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
-
+  const renderedFrom = camelCase(routes?.serializedAsset.title)
   const { id } = useParams();
   const history = useHistory();
   const {
@@ -104,22 +103,26 @@ const SerializedAssetDetailsPage = () => {
         params.data.type === "Loading Ticket" || params.data.type === "Receiving Ticket" || params.data.type === "Return Ticket" || params.data.type === "Delivery Ticket" ?
           <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
             {params.value}
-          </Link> : params.data.type.toLowerCase() === "repair" ?
+          </Link> : params.data.type?.toLowerCase() === "repair" ?
             <Link className="link" title={params.value} to={`${routes.repairJobDetail.path}/${params.data.referenceId}`}>
               {params.value}
             </Link>
-            : params.data.type.toLowerCase() === "rental" ?
+            : params.data.type?.toLowerCase() === "rental" ?
               <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
                 {params.value}
               </Link> : params.data.type === "Transfer Assets" ?
                 <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
                   {params.value}
                 </Link>
-                : params.data.type.toLowerCase().includes("purchase") ?
+                : params.data.type?.toLowerCase().includes("purchase") ?
                   <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
                     {params.value}
                   </Link>
-                  : params.value
+                  : params.data.type?.toLowerCase().includes("sublease") ?
+                    <Link className="link" title={params.value} to={`${routes.subleaseDetail.path}/${params.data.referenceId}`}>
+                      {params.value}
+                    </Link>
+                    : params.value
       ) : (
         <NoDataCell />
       )
@@ -607,7 +610,7 @@ const SerializedAssetDetailsPage = () => {
                             allowSelection={false}
                             isClientSideGrid={true}
                             loading={loading}
-                            renderedFrom="rentalManagementDetailsPageInventory"
+                            renderedFrom={`${renderedFrom}_grid-1`}
                             refreshGrid={fetchProductInventoryHistory}
                           />
                           : <Box
@@ -635,7 +638,7 @@ const SerializedAssetDetailsPage = () => {
                 alignItems="center"
               >
                 <Typography variant="subtitle2">
-                  BOM - Product
+                  Product - Parts
                 </Typography>
               </Box>
               {(
@@ -678,7 +681,7 @@ const SerializedAssetDetailsPage = () => {
                     </>
                   ) : (
                     <Box textAlign="center" padding={2} minHeight={150}>
-                      <Typography>No Product has been added </Typography>
+                      <Typography>No parts available for this product</Typography>
                     </Box>
                   )}
                 </Box>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
-import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
-import { Popover, Box, Typography, Divider, IconButton, List } from '@material-ui/core';
+import { createStyles, Theme, makeStyles, useTheme } from '@material-ui/core/styles';
+import { Popover, Box, Typography, Divider, IconButton, List, useMediaQuery } from '@material-ui/core';
 import { Create, Clear, ArrowBack, Group } from '@material-ui/icons';
 
 import ChatList from './ChatList';
@@ -11,7 +11,6 @@ import { useData } from '../../StateProvider/Provider';
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 import HtmlTooltip from '../CustomTooltipTitle';
 
-
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     listRoot: {
@@ -20,7 +19,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     inline: {
       display: 'inline'
-    },
+    }
   })
 );
 
@@ -32,28 +31,29 @@ const ChatsPopover = (props) => {
       user: { user }
     }
   } = useData();
-  const { open, anchorEl, setAnchorEl, getChats } = props;
+  const { open, anchorEl, onClose, getChats } = props;
   const [newChat, setNewChat] = useState(false);
   const [users, setUsers] = useState([]);
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const onClose = () => {
-    setAnchorEl(null);
-  };
+  useEffect(() => {
+    console.log(isSmallScreen);
+  }, [isSmallScreen]);
 
   useEffect(() => {
     fetchUsersList();
   }, []);
-  
 
   useEffect(() => {
-    if(selectedChat) {
-      msgSeen(selectedChat.id)
+    if (selectedChat) {
+      msgSeen(selectedChat.id);
     }
-  }, [selectedChat])
+  }, [selectedChat]);
 
   const msgSeen = (id) => {
     axiosInstance().put(`chatter/mark-read/${id}`);
-  }
+  };
 
   const fetchUsersList = () => {
     axiosInstance()
@@ -80,7 +80,7 @@ const ChatsPopover = (props) => {
         horizontal: 'center'
       }}
     >
-      <Box width={350} height={450} overflow="hidden">
+      <Box width={isSmallScreen ? 'calc(96vw - 4px)' : 350} height={isSmallScreen ? '95vh' : 450} overflow="hidden">
         <Box mx={1} height={50} display="flex" justifyContent="space-between" alignItems="center">
           {selectedChat || newChat ? (
             <HtmlTooltip title="Go Back">
@@ -138,11 +138,11 @@ const ChatsPopover = (props) => {
 
         <Divider orientation="horizontal" />
 
-        <Box height={400} style={{ overflowY: 'auto'}}>
+        <Box height={isSmallScreen ? '100%' : 400} style={{ overflowY: 'auto' }}>
           {newChat ? (
             <NewChat userId={user._id} setNewChat={setNewChat} setSelectedChat={setSelectedChat} users={users} />
           ) : selectedChat ? (
-            <ChatBox msgSeen={msgSeen} user={user} />
+            <ChatBox isSmallScreen={isSmallScreen} user={user} />
           ) : (
             <List disablePadding dense className={classes.listRoot}>
               {chatList.map((chat, i) => (

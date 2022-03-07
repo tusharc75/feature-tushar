@@ -64,7 +64,7 @@ export default function CustomNodalStructure({ graphData, onClick, loadingGraphD
                         <h3>Loading...</h3>
                     </div> : (
                         !loadingGraphData && nodes.length > 0 ? <Graph
-                            graph={{ nodes: nodes, edges: edges }}
+                            graph={{ nodes: nodes.map(m => { return { ...m, title: m.label, label: m.label.length <= 20 ? m.label : `${m.label.substr(0, 20)}...`, widthConstraint: { minimum: 25 } } }), edges: edges }}
                             options={graphOptions}
                             getNetwork={getNetwork}
                             getEdges={getEdges}

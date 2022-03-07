@@ -119,12 +119,12 @@ export const intialState = {
   filters: {},
   sorting: [],
   selectedRecords: [],
-  appendRows: false,
+  appendRows: isMobile,
   showFilteredRecordsOnly: false
 };
 
 export default function CustomAgGrid({
-  columns,
+  columns:cols,
   dataRows,
   frameworkComponents,
   dispatch,
@@ -155,13 +155,18 @@ export default function CustomAgGrid({
   pinnedBottomRowData = null,
   rowClassRules = null,
   selectedReportView = null,
-  setSelectedReportView = null
+  setSelectedReportView = null,
+  isMultipleSelection = true
 }) {
-  const [, setColumns] = useState(columns);
+  const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
 
   const [currentGridApi, setCurrentGridApi] = useState<GridApi | any>(null);
-  const enableRowDrag = columns.some((d) => d.rowDrag);
+  const enableRowDrag = cols.some((d) => d.rowDrag);
+
+  useEffect(() => {
+    setColumns(cols)
+  },[cols])
 
   //  If you want to do something once grid binding done
   const onGridReady = (params) => {
@@ -192,6 +197,7 @@ export default function CustomAgGrid({
     try {
       if (localStorage.getItem(renderedFrom)) {
         const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+
         setTimeout(() => {
           if (columnApi) columnApi.setColumnState(columnState);
         }, 500)
@@ -204,6 +210,7 @@ export default function CustomAgGrid({
       currentGridApi.sizeColumnsToFit()
     }
   }
+
 
   const onColumnMoved = (params) => {
     if (params?.source === "uiColumnDragged") {
@@ -316,7 +323,7 @@ export default function CustomAgGrid({
         // width={getWidth(column.field, column.width) ?? 180}
         // flex={1}
         rowDrag={column.rowDrag ?? false}
-        hide={staticColumns.indexOf(column.field) >= 0 ? checkStaticField(renderedFrom, column.field) :
+        hide={staticColumns.indexOf(column.field) >= 0 ? column?.show === false ? true : checkStaticField(renderedFrom, column.field) :
           (column.hasOwnProperty("show") && !column?.show) ? true : false}
         floatingFilterComponent="customFloatingFilter"
         valueGetter={column.valueGetter ?? null}
@@ -339,7 +346,8 @@ export default function CustomAgGrid({
         // width={getWidth(column.field, column.width) ?? 180}
         // flex={1}
         filterParams={customFilterParams}
-        hide={(column.hasOwnProperty("show") && !column?.show) ? true : false}
+        hide={staticColumns.indexOf(column.field) >= 0 ? column?.show === false ? true : checkStaticField(renderedFrom, column.field) :
+          (column.hasOwnProperty("show") && !column?.show) ? true : false}
         comparator={() => {
           return 0;
         }}
@@ -458,7 +466,7 @@ export default function CustomAgGrid({
               // }}
               pinnedBottomRowData={pinnedBottomRowData ?? null}
               suppressRowClickSelection={true}
-              rowSelection={'multiple'}
+              rowSelection={!isMultipleSelection ? 'single' : 'multiple'}
               onRowSelected={(event) => {
                 if (event.rowIndex !== null && !isClientSideGrid) {
 

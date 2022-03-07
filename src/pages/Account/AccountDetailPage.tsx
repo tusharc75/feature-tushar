@@ -320,11 +320,11 @@ export default function AccountDetailPage(props) {
             : []
         );
         setProjectSales(
-          data[sidebarResource.projectStrategy] &&
-            data[sidebarResource.projectStrategy][
+          data[sidebarResource.projectSales] &&
+            data[sidebarResource.projectSales][
             sidebarResource[accountResource].replaceAll(" ", "_")
             ]
-            ? data[sidebarResource.projectStrategy][
+            ? data[sidebarResource.projectSales][
             sidebarResource[accountResource].replaceAll(" ", "_")
             ]
             : []
@@ -570,7 +570,7 @@ export default function AccountDetailPage(props) {
     {
       label: "Projects",
       count: projectSales ? projectSales.length : 0,
-      show: permissions?.projectStrategy?.isRead,
+      show: permissions?.projectSales?.isRead,
       icon: <FcMultipleSmartphones />,
       class: "project",
       onClick: () => {
@@ -603,10 +603,20 @@ export default function AccountDetailPage(props) {
     },
     {
       label: "Quotes",
-      count: 0,
-      show: permissions?.quoteBuilder?.isRead,
+      count: quotes ? quotes.length : 0,
+      show: permissions?.quoteBuilder?.isRead ?? false,
       icon: <FcMoneyTransfer />,
       class: "quotes",
+      onClick: () => {
+        history.push({
+          pathname: routes.quoteBuilder.path,
+          state: {
+            accountId: accountData._id,
+            accountName: accountData.accountName,
+            resource: accountResource,
+          },
+        });
+      }
     },
     {
       label: "Accounts Teams",
@@ -1134,7 +1144,7 @@ export default function AccountDetailPage(props) {
                         />
                       </span>
                     )}
-                    {permissions?.projectStrategy?.isRead &&
+                    {permissions?.projectSales?.isRead &&
                       accountResource == customerAccount.accountResource && (
                         <span id="projectsAccordion">
                           <ProjectInAccordion
@@ -1150,9 +1160,9 @@ export default function AccountDetailPage(props) {
                               permissions[accountResource].isUpdate &&
                               canEdit
                             }
-                          accountId={accountData._id}
-                          accountName={accountData.accountName}
-                          resource={accountResource}
+                            accountId={accountData._id}
+                            accountName={accountData.accountName}
+                            resource={accountResource}
                           />
                         </span>
                       )}

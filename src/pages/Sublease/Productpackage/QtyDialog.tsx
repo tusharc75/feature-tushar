@@ -19,6 +19,7 @@ import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
 import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 import moment from "moment";
+import { fetch_sublease_product_fields } from "../../../components/Sublease/helper";
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -56,74 +57,79 @@ const QtyDialog: FC<EditDialogProps> = (
   const ref = useRef(null);
 
   useEffect(() => {
-    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.subleaseProduct}`).then(({ data: { data } }) => {
-      data = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
-      setAllFields(JSON.parse(JSON.stringify(data)))
-      if (isBulkedit) {
-        let unitArray: any = []
-        let pricingMethodArray: any = []
-        selectedProducts?.forEach(element => {
-          if (element?.[`${element.type}Detail`]?.unit) {
-            unitArray.push([...element?.[`${element.type}Detail`].unit])
-          }
-          if (element?.[`${element.type}Detail`].pricingMethod) {
-            pricingMethodArray.push([...element?.[`${element.type}Detail`].pricingMethod])
-          }
-        });
-        let unit: any = unitArray.shift().filter(function (v) {
-          return unitArray.every(function (a) {
-            return a.indexOf(v) !== -1;
-          });
-        });
-        let pricingMethod: any = pricingMethodArray.shift().filter(function (v) {
-          return pricingMethodArray.every(function (a) {
-            return a.indexOf(v) !== -1;
-          });
-        });
-        const unitOptions: any = arrayToDropwdownOption(unit)
-        const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
-        data.forEach((element) => {
-          if (element.fieldName === "unit") {
-            element.option = unitOptions;
-          }
-          if (element.fieldName === "pricingMethod") {
-            element.option = pricingMethodOptions;
-          }
-          element.required = false;
-          element.isFormula = false;
-          element.isMulitFormula = false;
-        })
-        data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
-        setInitialData({
-          fields: data,
-          values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", tenure: "" },
-        });
-      }
-      else {
-        let unitOptions: any = []
-        let pricingMethodOptions: any = []
-        if (rowData?.[`${rowData.type}Detail`]?.unit) {
-          unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].unit);
-        }
-        if (rowData?.[`${rowData.type}Detail`].pricingMethod) {
-          pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].pricingMethod);
-        }
-        data.forEach(element => {
-          if (element.fieldName === "unit") {
-            element.option = unitOptions;
-          }
-          if (element.fieldName === "pricingMethod") {
-            element.option = pricingMethodOptions;
-          }
-        });
-        setInitialData({
-          fields: data,
-          values: getObjKeysWithValues(rowData, data),
-        });
-      }
-      EvaluteproductFields(data);
-    })
+    fetchData()
   }, []);
+
+  const fetchData = async () => {
+    var data = await fetch_sublease_product_fields(rentalManagementData.currency);
+    setAllFields(JSON.parse(JSON.stringify(data)))
+    if (isBulkedit) {
+      let unitArray: any = []
+      let pricingMethodArray: any = []
+      selectedProducts?.forEach(element => {
+        if (element?.[`${element.type}Detail`]?.unit) {
+          unitArray.push([...element?.[`${element.type}Detail`].unit])
+        }
+        if (element?.[`${element.type}Detail`].pricingMethod) {
+          pricingMethodArray.push([...element?.[`${element.type}Detail`].pricingMethod])
+        }
+      });
+      let unit: any = unitArray.shift().filter(function (v) {
+        return unitArray.every(function (a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+      let pricingMethod: any = pricingMethodArray.shift().filter(function (v) {
+        return pricingMethodArray.every(function (a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+      const unitOptions: any = arrayToDropwdownOption(unit)
+      const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
+      data.forEach((element) => {
+        if (element.fieldName === "unit") {
+          element.option = unitOptions;
+        }
+        if (element.fieldName === "pricingMethod") {
+          element.option = pricingMethodOptions;
+        }
+        element.required = false;
+        element.isFormula = false;
+        element.isMulitFormula = false;
+      })
+      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
+      setInitialData({
+        fields: data,
+        values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", estimateJobDuration: "", actualJobDuration: "" },
+      });
+    }
+    else {
+      let unitOptions: any = []
+      let pricingMethodOptions: any = []
+      if (rowData?.[`${rowData.type}Detail`]?.unit) {
+        unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].unit);
+      }
+      if (rowData?.[`${rowData.type}Detail`].pricingMethod) {
+        pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].pricingMethod);
+      }
+      data.forEach(element => {
+        if (element.fieldName === "unit") {
+          element.option = unitOptions;
+        }
+        if (element.fieldName === "pricingMethod") {
+          element.option = pricingMethodOptions;
+        }
+      });
+      if (rowData.actualStartDate === "" || rowData.actualEndDate === "") {
+        data = data.filter((e) => !["actualStartDate", "actualEndDate", "actualJobDuration"].includes(e.fieldName))
+      }
+      setInitialData({
+        fields: data,
+        values: getObjKeysWithValues(rowData, data),
+      });
+    }
+    EvaluteproductFields(data);
+  }
 
   const EvaluteproductFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
@@ -232,6 +238,7 @@ const QtyDialog: FC<EditDialogProps> = (
   }
 
   const handleSubmit = async (values) => {
+    const currency = rentalManagementData?.currency?.toLowerCase();
     if (isBulkedit) {
       for (const x in values) {
         if (values[x] === "" || (Array.isArray(values[x]) && values[x].length === 0)) {
@@ -240,8 +247,10 @@ const QtyDialog: FC<EditDialogProps> = (
       }
       let rows: any = []
       let priceData: any = []
+      const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`
+      const fieldAll: any = allFields.filter((e) => !["actualStartDate", "actualEndDate", "actualJobDuration"].includes(e.fieldName))
 
-      if (values["unit"] || values["pricingMethod"]) {
+      if ((values["unit"] || values["pricingMethod"]) && !values[priceFieldName]) {
         const material: any = [];
         selectedProducts.forEach(d => {
           const element: any = {};
@@ -260,12 +269,12 @@ const QtyDialog: FC<EditDialogProps> = (
         const rateResult = priceData?.filter((e) => e.materialId === element.materialId &&
           e.materialType === element.type && e.unit === (values["unit"] || element.unit) && e.pricingMethod === (values["pricingMethod"] || element.pricingMethod))
 
+        const tempRate = {}
         if (rateResult.length && rateResult[0].mrp) {
-          const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`
-          values[priceFieldName] = rateResult[0].mrp;
+          tempRate[priceFieldName] = rateResult[0].mrp;
         }
 
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, fieldAll)
         if (element.type === "product" && element.parentId === null) {
           rows.push({ ...element, ...calValues })
         }
@@ -286,7 +295,7 @@ const QtyDialog: FC<EditDialogProps> = (
           const product: any = material.filter((e) => e.parentId === _packageId)
           product.forEach((element) => {
             if (packageProducts.filter((e) => element._id === e._id).length) {
-              const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
+              const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, fieldAll)
               rows.push({ ...element, ...calValues })
               for (var key in calValues) {
                 element[key] = calValues[key];
@@ -311,17 +320,19 @@ const QtyDialog: FC<EditDialogProps> = (
           rows = [...rows, ...product]
         }
         else if (rowData.type === "product" && rowData.parentId) {
-          const packages: any = material.filter((e) => e._id === rowData.parentId)
-          const product: any = material.filter((e) => e.parentId === rowData.parentId)
-          product.forEach((element) => {
-            if (element._id === rowData._id) {
-              for (var key in values) {
-                element[key] = values[key];
+          if (values[`totalPrice_${currency}`] !== rowData[`totalPrice_${currency}`]) {
+            const packages: any = material.filter((e) => e._id === rowData.parentId)
+            const product: any = material.filter((e) => e.parentId === rowData.parentId)
+            product.forEach((element) => {
+              if (element._id === rowData._id) {
+                for (var key in values) {
+                  element[key] = values[key];
+                }
               }
-            }
-          })
-          sumOnParent(packages, product)
-          rows = [...rows, ...packages]
+            })
+            sumOnParent(packages, product)
+            rows = [...rows, ...packages]
+          }
         }
         handleSaveData(rows)
         setShowConfirmationDialog(false);
@@ -354,14 +365,25 @@ const QtyDialog: FC<EditDialogProps> = (
 
   function validate(values) {
     const errors = {};
-    let startDate = moment(values?.estimateStartDate);
-    let endDate = moment(values?.estimateEndDate);
-    if (endDate.diff(startDate, 'days') < 0) {
-      errors['endDate'] = 'Please enter valid end date';
+    let estimateStartDate = moment(values?.estimateStartDate);
+    let estimateEndDate = moment(values?.estimateEndDate);
+    if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+      errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
+
     if (rowData && rowData.hideSelection) {
-      if (values.qty < rowData.assetQty) {
-        errors['qty'] = 'Qty is not less than assigned asset qty.';
+      if (rowData.parentId) {
+        const _package = material?.filter((e) => e._id === rowData.parentId);
+        if (_package.length) {
+          if ((values.qty * _package[0].qty) < rowData.assetQty) {
+            errors['qty'] = 'Quantity is less than that which has been assigned.';
+          }
+        }
+      }
+      else {
+        if (values.qty < rowData.assetQty) {
+          errors['qty'] = 'Quantity is less than that which has been assigned.';
+        }
       }
     }
     return errors;
@@ -522,32 +544,61 @@ const QtyDialog: FC<EditDialogProps> = (
                                     </Box>
                                   </Box>
                                 </Grid>
-                                : <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                  <Box display="flex" >
-                                    <Box flexGrow={1}  >
-                                      <FormTypes
-                                        {...field}
-                                        fields={initialData.fields}
-                                        fieldData={field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value)
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field.isTooltip}
-                                        tooltipMessage={field.tooltipMessage}
-                                        size="small"
-                                      />
+                                :
+                                field.fieldName === "qty" ?
+                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Box display="flex" >
+                                      <Box flexGrow={1}  >
+                                        <FormTypes
+                                          {...field}
+                                          disabled={rowData?.assetQty > 0 ? true : false}
+                                          fields={initialData.fields}
+                                          fieldData={field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value)
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field.isTooltip}
+                                          tooltipMessage={field.tooltipMessage}
+                                          size="small"
+                                        />
+                                      </Box>
                                     </Box>
-                                  </Box>
-                                </Grid>
+                                  </Grid>
+                                  : <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Box display="flex" >
+                                      <Box flexGrow={1}  >
+                                        <FormTypes
+                                          {...field}
+                                          fields={initialData.fields}
+                                          fieldData={field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value)
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field.isTooltip}
+                                          tooltipMessage={field.tooltipMessage}
+                                          size="small"
+                                        />
+                                      </Box>
+                                    </Box>
+                                  </Grid>
                         ))}
                       </Grid>
                     </Box>
@@ -581,7 +632,7 @@ const QtyDialog: FC<EditDialogProps> = (
             {
               showConfirmationDialog && <ConfirmationDialog
                 open={showConfirmationDialog}
-                message="Would you like to override the price configured at the product level?"
+                message="Would you prefer to override the product-level price configuration?"
                 onOk={() => {
                   submitForm()
                 }}

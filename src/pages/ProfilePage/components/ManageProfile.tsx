@@ -81,12 +81,13 @@ export default function ManageProfile(props) {
             setUpdating(true);
             let clonedValues = cloneDeep(values)
             axiosInstance()
-                .put(`/user/me`, { ...clonedValues })
+                .put(`/user/me`,clonedValues)
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
                         type: "success",
                         message: data.message,
+                        
                     });
                     onFetchUserData()
                     let updatedUserDetails = { ...user, user: { ...user.user, ...values } }

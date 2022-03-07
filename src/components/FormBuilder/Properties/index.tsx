@@ -17,7 +17,6 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { object, string } from 'yup';
 import { Formik, Form } from 'formik';
-import { camelCase } from '../../../constants/helpers';
 import { Vlookup } from '../AddField/vlookup';
 import { Formula } from '../AddField/formula';
 import { Converter } from '../AddField/converter';
@@ -29,7 +28,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
 import FormTypes from '../../Helpers/FormTypes';
-import { startCase } from 'lodash';
+import { camelCase } from 'lodash';
 import { checkFormula } from '../../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import styles from '../Form.module.scss';

@@ -84,7 +84,7 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
                         }
                       />
 
-                      {permissions?.projectStrategy?.isUpdate &&
+                      {permissions?.projectSales?.isUpdate &&
                         managerId !== obj._id && (
                           <ListItemSecondaryAction>
                             <IconButton

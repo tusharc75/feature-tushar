@@ -17,7 +17,7 @@ import AddInventory from './AddInventory';
 import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 
 const InventoryGrid = (props) => {
-  const { transferData, updateTransferStatus, setTransferIsEnded } = props;
+  const { transferData, updateTransferStatus, setTransferIsEnded, renderedFrom } = props;
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -267,7 +267,7 @@ const InventoryGrid = (props) => {
             onCreate={false}
             showClone={false}
             onClone={(data) => {}}
-            renderedFrom="transferInentoryPage"
+            renderedFrom={renderedFrom}
           />
         ) : (
           <CustomAgGrid
@@ -286,13 +286,13 @@ const InventoryGrid = (props) => {
             isClientSideGrid={true}
             loading={loading}
             // onCellValueChanged={onCellValueChanged}
-            renderedFrom="transferInentory_productInventory"
+            renderedFrom={renderedFrom}
             refreshGrid={() => {}}
           />
         )}
       </Box>
       {openAddNewInventory && (
-        <AddInventory isAdding={isAdding} submit={handleSave} close={closeDialog} plantId={transferData?.transferFromPlant.optionValue} />
+        <AddInventory isAdding={isAdding} submit={handleSave} close={closeDialog} plantId={transferData?.transferFromPlant.optionValue} renderedFrom={`${renderedFrom}_sub-1`} />
       )}
       {showConfirmBox && (
         <ConfirmationDialog

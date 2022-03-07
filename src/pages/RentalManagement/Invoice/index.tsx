@@ -24,10 +24,11 @@ import { startCase } from "lodash";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import AdditionalCostDialog from "../AdditionalCost/AdditionalCostDialog";
+import { fetch_rental_product_fields, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
+import { camelCase } from "lodash";
 
 
-const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJobStatus, statusOptions }) => {
-
+const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJobStatus, statusOptions, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
 
@@ -75,20 +76,11 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
   const fetchFields = async () => {
     try {
       let fields = []
-      if (isOffline) {
-        const resultProduct = await findOne(objectStore.resource, "rentalManagementProduct")
-        fields = CURReplaceByCurrencySingle(resultProduct, rentalManagementData.currency)
-        const resultCost = await findOne(objectStore.resource, "rentalManagementCost")
-        fields = [...fields, ...CURReplaceByCurrencySingle(resultCost, rentalManagementData.currency)]
-      }
-      else {
-        const resultProduct = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`)
-        fields = CURReplaceByCurrencySingle(resultProduct?.data?.data, rentalManagementData.currency)
-        const resultCost = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`)
-        fields = [...fields, ...CURReplaceByCurrencySingle(resultCost?.data?.data, rentalManagementData.currency)]
-      }
+      fields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+      const resultCost = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
+      fields = [...fields, ...resultCost]
       let rendererNames = [];
-      genrateColoum(fields, columns, rendererNames, false);
+      genrateColoum(fields, columns, rendererNames, false, renderedFrom);
       let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
       tempFrameworkComponent = {
         commonRenderer: CommonRenderer,
@@ -252,7 +244,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
             <Box mx={1} />
           </Fragment>
         }
-        {permissions?.rentalManagement?.isRead && (
+        {permissions?.rentalManagement?.isRead && !isMobile && (
           <Button
             variant={isMobile && !isTablet ? "text" : "outlined"}
             color="primary"
@@ -288,6 +280,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           size="small"
           style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
           disabled={downlodingFile === "Email" ? true : (false || isOffline)}
+          startIcon={isMobile ? '' : <MdEmail />}
           onClick={() => {
             fetchEmailsData()
             handlePDF("Email")
@@ -313,13 +306,13 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
           loading={loading}
           allowSelection={false}
           isClientSideGrid={true}
-          renderedFrom="rentalManagmentInvoicePage"
+          renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           fromPurchaseOrderGrid={true}
           onCellValueChanged={(row) => {
           }}
           currency={rentalManagementData?.currency?.toLowerCase()}
-          footerIgnoreFields={["tenure"]}
+          footerIgnoreFields={["estimateJobDuration", "actualJobDuration"]}
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
       }

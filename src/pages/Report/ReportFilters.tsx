@@ -159,7 +159,7 @@ const ReportFilters = (props: FiltersProps) => {
           getOptionLabel={(option) => option.fieldLabel}
           renderInput={(params) => <TextField {...params} variant="outlined" label="Select Filter" size="small" />}
         />
-        <Box py={2} minHeight={300} height={'70vh'} style={{ overflowY: 'auto', overflowX: 'hidden' }}>
+        <Box py={2} >
           <Grid container spacing={2}>
             {selectedResources.length > 0 ? (
               selectedResources.map((field: any) => (

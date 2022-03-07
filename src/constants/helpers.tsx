@@ -21,7 +21,7 @@ import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
-import { kebabCase, orderBy, uniqBy } from 'lodash';
+import { kebabCase, orderBy, uniqBy, camelCase } from 'lodash';
 
 // export const ORDER_TYPES =
 // {
@@ -132,7 +132,7 @@ export const sidebarResource = {
   opportunity: 'Opportunity',
   field: 'Field',
   productCategory: 'Product Category',
-  //productInventory: 'Product Inventory',
+  productInventory: 'Product Inventory',
   serializedAsset: "Serialized Asset",
   priceTemplate: 'Price Template',
   product: 'Product',
@@ -140,7 +140,6 @@ export const sidebarResource = {
   doa: 'DOA',
   termsAndConditions: 'Terms & Conditions',
   equiptmentRentalMaster: 'Equiptment Rental Master',
-  projectStrategy: 'Project Sales',
   productBuilder: 'Product Builder',
   formBuilder: 'Form Builder',
   currencyConverter: 'Currency Converter',
@@ -165,19 +164,20 @@ export const sidebarResource = {
   pricingCondition: 'Pricing Condition',
   repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
-  eCommerce: 'e-Commerce',
+  eCommercePolicy: 'e-Commerce Policy',
   packages: 'Packages',
   supplierContact: 'Supplier Contact',
   supplierAccount: 'Supplier Account',
   pricing: 'Pricing',
   priceBuilder: 'Price Builder',
   flags: 'Flags',
-  projectSales: 'Cross-Regional Target Projects List',
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
   address: 'Address',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventory'
+  transferInventory: 'Transfer Inventory',
+  zone: 'Zone',
+  projectSales: 'Project Sales'
 };
 
 export const resourceNames = {
@@ -191,7 +191,7 @@ export const resourceNames = {
   opportunity: 'Opportunity',
   field: 'Field',
   productCategory: 'Product Category',
-  //productInventory: 'Serialized Asset',
+  productInventory: 'Product Inventory',
   serializedAsset: "Serialized Asset",
   priceTemplate: 'Price Template',
   product: 'Product',
@@ -199,7 +199,6 @@ export const resourceNames = {
   doa: 'DOA',
   termsAndConditions: 'Terms & Conditions',
   equiptmentRentalMaster: 'Equiptment Rental Master',
-  projectStrategy: 'Project Sales',
   productBuilder: 'Product Builder',
   formBuilder: 'Form Builder',
   currencyConverter: 'Currency Converter',
@@ -224,9 +223,8 @@ export const resourceNames = {
   pricingCondition: 'Pricing Condition',
   repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
-  eCommerce: 'e-Commerce',
+  eCommercePolicy: 'e-Commerce Policy',
   packages: 'Packages',
-
   supplierContact: 'Supplier Contact',
   supplierAccount: 'Supplier Account',
   pricing: 'Pricing',
@@ -262,7 +260,7 @@ export const RESOURCE_LABEL = {
   opportunity: 'Opportunities',
   field: 'Fields',
   productCategory: 'Product Categories',
-  //productInventory: 'Serialized Assets',
+  productInventory: 'Product Inventory',
   serializedAsset: 'Serialized Assets',
   priceTemplate: 'Price Templates',
   product: 'Product Master',
@@ -270,7 +268,7 @@ export const RESOURCE_LABEL = {
   doa: 'DOA',
   termsAndConditions: 'T&Cs',
   equiptmentRentalMaster: 'Equiptment Rental Master',
-  projectStrategy: 'Cross-Regional Target Projects List',
+  projectSales: 'Project Sales',
   productBuilder: 'Price Builder',
   formBuilder: 'Form Builder',
   currencyConverter: 'Currency Converter',
@@ -294,13 +292,14 @@ export const RESOURCE_LABEL = {
   pricingCondition: 'Pricing Setup',
   repairJob: 'Repair Jobs',
   salesOrder: 'Sales Order',
-  eCommerce: 'e-Commerce',
+  eCommercePolicy: 'e-Commerce Policy',
   packages: 'Packages',
   purchaseOrder: 'Purchase Orders',
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventories'
+  transferInventory: 'Transfer Inventories',
+  zone: "Zone"
 };
 
 export const CHILD_RESOURCE = {
@@ -314,15 +313,11 @@ export const CHILD_RESOURCE = {
   subleaseProduct: 'Sublease Product',
 };
 
-
 export const sidebarResourceObjectFromValues = () => {
-
   let obj: any = {};
-
   Object.keys(sidebarResource).forEach((key) => {
     obj[sidebarResource[key]] = key
   })
-  obj['Project Sales'] = "projectStrategy"
   return obj
 }
 
@@ -537,17 +532,20 @@ export const profileMenuItems = {
 };
 
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
-  let selectedEntity = localStorage.getItem("selectedEntity")
 
-  let isCreate = (val === "") ? true : false
+  //let selectedEntity = localStorage.getItem("selectedEntity")
+  //let isCreate = (val === "") ? true : false
+
   const obj = {};
   for (const key of arr) {
-    let isEntityField = key?.fieldName === "entity"
 
     let value = key.isDefaultValue ? key.defaultValue : val;
-    if (isEntityField && selectedEntity && isCreate) {
-      value = key?.type === "multiSelect" ? [selectedEntity] : selectedEntity
-    }
+
+    //let isEntityField = key?.fieldName === "entity"
+    // if (isEntityField && selectedEntity && isCreate) {
+    //   value = key?.type === "multiSelect" ? [selectedEntity] : selectedEntity
+    // }
+
     if (key.type === 'dropDown') {
       let option = key.option?.find((data: any) => data.default === true);
       if (!option && key.required && key.option?.length === 1) {
@@ -744,13 +742,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
   return object().shape(schema);
 };
 
-export const camelCase = (str) => {
-  return str
-    .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
-      return index === 0 ? word.toLowerCase() : word.toUpperCase();
-    })
-    .replace(/\s+/g, '');
-};
+
 
 export const UnCamelCase = (str) => {
   return str
@@ -1419,11 +1411,7 @@ export const generateUniqueIdOnly = () => {
 export const prepareDataForGrid = (data, user = {}) => {
   let objectValues = {};
   let restProperties = {};
-  let mappedEntities = JSON.parse(localStorage.getItem("mappedEntities"))
 
-  if (data.entity && data.entity.length === 0 && mappedEntities.length) {
-    data.entity = [...mappedEntities]
-  }
   Object.keys(data).forEach((key) => {
     if (typeof data[key] === "object") {
 
@@ -1651,19 +1639,23 @@ export const asyncForEach = async (
   }
 };
 
-export const resourceOptions = [
-  'Customer Account',
-  'Customer Contact',
-  'Supplier Account',
-  'Supplier Contact',
-  'Lead',
-  'Opportunity',
-  'Quote',
-  'Rental Management',
-  'Delivery Ticket',
-  'Project Sales'
-];
-
+export const ACTIVITY_RESOURCE = {
+  customerAccount: 'customerAccount',
+  customerContact: 'customerContact',
+  supplierAccount: 'supplierAccount',
+  supplierContact: 'supplierContact',
+  lead: 'lead',
+  opportunity: 'opportunity',
+  quote: 'quote',
+  projectSales: 'projectSales',
+  rentalManagement: 'rentalManagement',
+  repairJob: 'repairJob',
+  transferAsset: 'transferAsset',
+  purchaseOrder: 'purchaseOrder',
+  deliveryTicket: 'deliveryTicket',
+  sublease: 'sublease',
+  salesOrder: 'salesOrder',
+};
 
 export const REPORT_LIST = [
   { title: sidebarResource.rentalManagement, key: "rentalManagement" },
@@ -1674,7 +1666,6 @@ export const REPORT_LIST = [
   { title: sidebarResource.quoteBuilder, key: "quoteBuilder" },
   { title: sidebarResource.projectSales, key: "projectSales" }
 ]
-
 
 export const getApi = (resource: string) => {
   switch (kebabCase(resource)) {
@@ -1687,6 +1678,26 @@ export const getApi = (resource: string) => {
 
 export const getData = (resource: string, data: any) => {
   switch (kebabCase(resource)) {
+    case 'customer-account':
+      return {
+        name: `${data.accountName}`,
+        id: data._id
+      };
+    case 'customer-contact':
+      return {
+        name: `${data?.salutation ? data?.salutation : ""} ${data?.firstName ? data?.firstName : ""} ${data?.middleName ? data?.middleName : ""} ${data?.lastName ? data?.lastName : ""}`,
+        id: data._id
+      };
+    case 'supplier-account':
+      return {
+        name: `${data.accountName}`,
+        id: data._id
+      };
+    case 'supplier-contact':
+      return {
+        name: `${data?.salutation ? data?.salutation : ""} ${data?.firstName ? data?.firstName : ""} ${data?.middleName ? data?.middleName : ""} ${data?.lastName ? data?.lastName : ""}`,
+        id: data._id
+      };
     case 'lead':
       return {
         name: `${data.concatedName}`,
@@ -1697,34 +1708,14 @@ export const getData = (resource: string, data: any) => {
         name: `${data.opportunityName}`,
         id: data._id
       };
-    case 'customer-account':
-      return {
-        name: `${data.accountName}`,
-        id: data._id
-      };
-    case 'supplier-account':
-      return {
-        name: `${data.accountName}`,
-        id: data._id
-      };
-    case 'customer-contact':
-      return {
-        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-        id: data._id
-      };
-    case 'supplier-contact':
-      return {
-        name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-        id: data._id
-      };
-    case 'delivery-ticket':
-      return {
-        name: `${data.ticketName}`,
-        id: data._id
-      };
     case 'quote':
       return {
         name: `${data.quoteName}`,
+        id: data._id
+      };
+    case 'project-sales':
+      return {
+        name: `${data.projectName}`,
         id: data._id
       };
     case 'rental-management':
@@ -1732,9 +1723,34 @@ export const getData = (resource: string, data: any) => {
         name: `${data.rentalJobName}`,
         id: data._id
       };
-    case 'project-sales':
+    case 'repair-job':
       return {
-        name: `${data.projectName}`,
+        name: `${data.repairJobName}`,
+        id: data._id
+      };
+    case 'transfer-asset':
+      return {
+        name: `${data.transferAssetNumber}`,
+        id: data._id
+      };
+    case 'purchase-order':
+      return {
+        name: `${data.purchaseOrderNumber}`,
+        id: data._id
+      };
+    case 'delivery-ticket':
+      return {
+        name: `${data.ticketName}`,
+        id: data._id
+      };
+    case 'sublease':
+      return {
+        name: `${data.subleaseName}`,
+        id: data._id
+      };
+    case 'salesOrder':
+      return {
+        name: `${data.salesOrderNo}`,
         id: data._id
       };
     default:

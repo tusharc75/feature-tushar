@@ -15,7 +15,7 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { serializedAsset, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL, product, warehouse as warehouseHelper } from '../../constants/helpers';
+import { serializedAsset, isObjectEmpty, gridLoadingTimeout, product, warehouse as warehouseHelper } from '../../constants/helpers';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import ManageSerializedAsset from "./ManageSerializedAsset";
@@ -32,11 +32,11 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from "@material-ui/lab";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import { camelCase } from "lodash";
 
-const storedRoutes = localStorage.getItem("routes") ? JSON.parse(localStorage.getItem("routes")) : null;
 
 const ProductInventory = () => {
-
+    const renderedFrom = camelCase(routes?.serializedAsset.title)
     const toastConfig = useContext(CustomToastContext)
     const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
@@ -116,7 +116,7 @@ const ProductInventory = () => {
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -164,7 +164,7 @@ const ProductInventory = () => {
                     selectedRecords: rows.filter(f => f.isChecked === true)
                 });
             }
-            dispatch({ type: "initialize", data: rows, count: data.count });
+            // dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
@@ -588,7 +588,7 @@ const ProductInventory = () => {
                     onCreate={false}
                     showClone={true}
                     onClone={(data) => { setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id }); }}
-                    renderedFrom={routes.serializedAsset?.title} /> :
+                    renderedFrom={renderedFrom} /> :
                     Object.keys(frameWorkComponent).length > 0 ?
                         <CustomAgGrid
                             columns={columns}
@@ -602,7 +602,7 @@ const ProductInventory = () => {
                             page={page}
                             actionWidth={150}
                             loading={loading}
-                            renderedFrom={routes.serializedAsset?.title}
+                            renderedFrom={renderedFrom}
                             refreshGrid={fetchProductInventory}
                         /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
@@ -624,7 +624,7 @@ const ProductInventory = () => {
             showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the ${storedRoutes ? storedRoutes.serializedAsset?.title?.toLowerCase() : RESOURCE_LABEL.serializedAsset?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
+                message={`Are you sure you want to delete the ${routes.serializedAsset.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />

@@ -6,7 +6,7 @@ import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { gridLoadingTimeout, serializedAsset } from '../../../constants/helpers';
+import { gridLoadingTimeout, INVENTORY_STATUS, serializedAsset } from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
@@ -14,16 +14,12 @@ import useColumns, { getStaticFields, getFrameworkComponents } from "../../../co
 import { prepareDataForGrid, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, DELIVERY_FROM_TO_TYPE, sublease, SUBLEASE_STATUS, INVENTORY_OWNER_TYPE } from "../../../constants/helpers"
 import { useData } from "../../../StateProvider/Provider";
 import {
-    Button, Tooltip, IconButton, Menu, MenuItem,
-    Dialog, TextField, CircularProgress
-} from "@material-ui/core";
-import { AiFillFilePdf, AiOutlineDeliveredProcedure } from 'react-icons/ai';
+    Button, Tooltip} from "@material-ui/core";
+import { AiFillFilePdf } from 'react-icons/ai';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { groupBy, uniq, map } from "lodash";
+import { uniq, map } from "lodash";
 
-const renderedFrom = 'SubleasingSerializedAsset';
-
-const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) => {
+const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
@@ -44,7 +40,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
 
     useEffect(() => {
         fetchGridColumns()
-    }, []);
+    }, [currentStep]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -53,7 +49,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -80,7 +76,8 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
         const response = await axiosInstance().get(`${sublease.api}/${subleaseData._id}/serialized-asset`)
         var isComplate = true;
         let rows = response?.data?.data.map((u) => {
-            if (u?.currentOwner?.optionValue !== subleaseData?.supplierAccount?.optionValue) {
+            if (u?.currentOwner?.optionValue !== subleaseData?.supplierAccount?.optionValue ||
+                [INVENTORY_STATUS.reserved, INVENTORY_STATUS.inUse, INVENTORY_STATUS.repair].includes(u.status)) {
                 isComplate = false;
             }
             let res = {
@@ -123,7 +120,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
 
     return (<>
         <Box display="flex" justifyContent="flex-end" pt={1}>
-            <Button
+            {!isMobile && <Button
                 onClick={() => {
                     setDownlodingFile(true);
                     axiosInstance().get(`${sublease.api}/${subleaseData._id}/pdf`)
@@ -158,7 +155,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
                 startIcon={isMobile ? '' : <AiFillFilePdf />}
             >
                 {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
-            </Button>
+            </Button>}
             <Box mx={1} />
             {SUBLEASE_STATUS.completed != subleaseData?.status &&
                 <Fragment>
@@ -177,10 +174,11 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
                                         data["pickupFrom"] = subleaseData?.supplierAccount?.optionValue;
                                         data["pickupFromAddress"] = subleaseData?.shippingAddress?.optionValue;
                                         data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                                        data["isPickupFromDisable"] = true;
                                         setShowTicketDialog({ open: true, data: data });
                                     }}
                                     disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse")
-                                        || f.currentOwnerType !== INVENTORY_OWNER_TYPE.supplierAccount)))}
+                                        || f.currentOwnerType !== INVENTORY_OWNER_TYPE.supplierAccount || [INVENTORY_STATUS.reserved].includes(f.status))))}
                                 >
                                     Receiving to Plant
                                 </Button>
@@ -207,6 +205,8 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep }) 
                                         data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.supplier;
                                         data["deliveryTo"] = subleaseData?.supplierAccount?.optionValue;
                                         data["deliveryToAddress"] = subleaseData?.shippingAddress?.optionValue;
+                                        data["isPickupFromDisable"] = true;
+                                        data["isDeliveryToDisable"] = true;
                                         setShowTicketDialog({ open: true, data: data });
                                     }}
                                 >

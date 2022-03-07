@@ -30,6 +30,7 @@ import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../comp
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import queryString from 'query-string';
 import ProductConfiguration from './ProductConfiguration';
+import { camelCase } from 'lodash';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -49,7 +50,7 @@ function TabPanel(props: TabPanelProps) {
 
 const ProductDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
-
+  const renderedFrom = camelCase(routes?.product.title)
   const { id } = useParams();
   const history = useHistory();
   const {
@@ -94,7 +95,7 @@ const ProductDetailsPage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (process.env.REACT_APP_ENV !== 'staging') {
+    if (permissions?.serializedAsset) {
       getProductTree();
       if (productData) {
         getWarehouses();
@@ -400,7 +401,7 @@ const ProductDetailsPage = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={process.env.REACT_APP_ENV === 'staging' ? 12 : 8} lg={process.env.REACT_APP_ENV === 'staging' ? 12 : 8}>
+          <Grid item xs={12} sm={12} md={permissions?.serializedAsset ? 8 : 12} lg={permissions?.serializedAsset ? 8 : 12}>
             <Paper>
               {!productData ? (
                 <div>
@@ -437,9 +438,9 @@ const ProductDetailsPage = () => {
                 <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
                 <Tab label="Packages" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
                 <Tab label="Parent Product" aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
-                {permissions?.eCommerce?.isRead && productData?.productTemplate && <Tab label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />}
+                {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <Tab label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />}
               </Tabs>
-              <TabPanel value={tabValue} index={0}>
+              {tabValue === 0 &&
                 <Box>
                   {loading || !productFields.length ? (
                     <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -451,8 +452,8 @@ const ProductDetailsPage = () => {
                     </div>
                   )}
                 </Box>
-              </TabPanel>
-              <TabPanel value={tabValue} index={1}>
+              }
+              {tabValue === 1 &&
                 <CustomAgGrid
                   allowSelection={false}
                   allowAction={false}
@@ -467,11 +468,12 @@ const ProductDetailsPage = () => {
                   page={page}
                   actionWidth={150}
                   loading={gridLoading}
-                  renderedFrom="productMasterDetailsPage"
+                  isClientSideGrid={true}
+                  renderedFrom={`${renderedFrom}_grid-1`}
                   refreshGrid={getColumns}
                 />
-              </TabPanel>
-              <TabPanel value={tabValue} index={2}>
+              }
+              {tabValue === 2 &&
                 <CustomAgGrid
                   allowSelection={false}
                   allowAction={false}
@@ -486,20 +488,22 @@ const ProductDetailsPage = () => {
                   page={page}
                   actionWidth={150}
                   loading={gridLoading}
-                  renderedFrom="productMasterDetailsPage"
+                  isClientSideGrid={true}
+                  renderedFrom={`${renderedFrom}_grid-2`}
                   refreshGrid={getColumns}
                 />
-              </TabPanel>
-              <TabPanel value={tabValue} index={3}>
-                {tabValue === 3 && permissions?.eCommerce?.isRead && productData?.productTemplate && <ProductConfiguration
-                  productFields={productFields.map((_f: any) => _f.fieldData)}
-                  productData={productData}
-                  id={id}
-                />}
-              </TabPanel>
+              }
+
+              {tabValue === 3 && permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <ProductConfiguration
+                productFields={productFields.map((_f: any) => _f.fieldData)}
+                productData={productData}
+                id={id}
+                renderedFrom={`${renderedFrom}_grid-3`}
+              />}
+
             </Paper>
           </Grid>
-          {process.env.REACT_APP_ENV === 'staging' ? null : (
+          {permissions?.serializedAsset ? (
             <Grid item xs={12} sm={12} md={4} lg={4}>
               <Paper style={{ overflow: 'hidden' }}>
                 <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
@@ -560,7 +564,7 @@ const ProductDetailsPage = () => {
                       </>
                     ) : (
                       <Box textAlign="center" padding={2} minHeight={150}>
-                        <Typography>No Product has been assigned </Typography>
+                        <Typography>No parts available for this product</Typography>
                       </Box>
                     )}
                   </Box>
@@ -569,7 +573,6 @@ const ProductDetailsPage = () => {
               <Paper className="mt-2" style={{ overflow: 'hidden' }}>
                 <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
                   <Typography variant="subtitle2">Plants ({inventoriesData?.length || 0})</Typography>
-
                   {permissions?.serializedAsset?.isCreate && (
                     <IconButton
                       title="Manage Plant(s)"
@@ -729,7 +732,7 @@ const ProductDetailsPage = () => {
                 }
               </Paper>
             </Grid>
-          )}
+          ) : null}
         </Grid>
       </Fragment>
       {showConfirmBox && (
@@ -760,8 +763,7 @@ const ProductDetailsPage = () => {
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
           assignedProducts={BOMData}
           onSuccess={() => {
-            // getFrequentlyBoughtProduct();
-            if (process.env.REACT_APP_ENV !== 'staging') {
+            if (permissions?.serializedAsset) {
               getProductTree();
             }
             setOpenAssignProductDialog(false);
@@ -778,7 +780,7 @@ const ProductDetailsPage = () => {
             onClose={() => setOpenProductInventoryDialog(false)}
             onSuccess={() => {
               setOpenProductInventoryDialog(false);
-              if (process.env.REACT_APP_ENV !== 'staging') {
+              if (permissions?.serializedAsset) {
                 getWarehouses();
               }
             }}
@@ -789,7 +791,7 @@ const ProductDetailsPage = () => {
             onClose={() => setOpenProductInventoryDialog(false)}
             onSuccess={() => {
               setOpenProductInventoryDialog(false);
-              if (process.env.REACT_APP_ENV !== 'staging') {
+              if (permissions?.serializedAsset) {
                 getWarehouses();
               }
             }}

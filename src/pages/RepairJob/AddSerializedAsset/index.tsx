@@ -27,9 +27,7 @@ import CustomSwipableList from '../../../components/SwipableListComponents/Custo
 import ManageAssetDialog from './ManageAssetDialog';
 import AssetScrapRepairDialog from '../../../components/AssetScrapRepairDialog/AssetScrapRepairDialog';
 
-const renderedFrom = "repairJob_add_assets"
-
-const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus }) => {
+const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus, renderedFrom }) => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -77,7 +75,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
     axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`).then(({ data: { data } }) => {
       const columns = [...commonColumns];
       let rendererNames = [];
-      genrateColoum(data, columns, rendererNames, false);
+      genrateColoum(data, columns, rendererNames, false, renderedFrom);
       setSerializedAssetFields(data)
       let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
       tempFrameworkComponent = {
@@ -100,7 +98,11 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           u["hideSelection"] = u.status === INVENTORY_STATUS.lost;
-          return prepareDataForGrid(u, user);
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject["canDelete"] = false;
+          finalObject["isChecked"] = false;
+          finalObject["allowedToEdit"] = true;
+          return finalObject;
         });
         if (rows.length) {
           setNextStep(true)
@@ -269,7 +271,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
             permissions={permissions}
             primaryField={columns?.find(d => d.field)}
             onClick={(data) => {
-              history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
+              setShowEditAssetDialog({ open: true, asset: data, selectedRecords: [] })
             }}
             dataRows={dataRows}
             selectedRecords={true}

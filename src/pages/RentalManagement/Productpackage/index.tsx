@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, MenuList, ListItemIcon, ListItemText } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -25,9 +26,9 @@ import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
 import { FiPackage } from 'react-icons/fi';
 import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
-import React from 'react';
+import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 
-const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity }) => {
+const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
@@ -61,14 +62,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
   }, [columns]);
 
   const fetchFields = async () => {
-    var data = [];
-    if (isOffline) {
-      data = await findOne(objectStore.resource, 'rentalManagementProduct');
-    } else {
-      const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`);
-      data = response?.data?.data;
-    }
-    data = CURReplaceByCurrencySingle(data, rentalManagementData.currency);
+    var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
       {
@@ -301,13 +295,14 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.estimateStartDate = rentalManagementData ? rentalManagementData?.estimateStartDate : new Date();
       element.estimateEndDate = rentalManagementData ? rentalManagementData?.estimateEndDate : new Date();
-      element.actualStartDate = rentalManagementData ? rentalManagementData?.estimateStartDate : new Date();
-      element.actualEndDate = rentalManagementData ? rentalManagementData?.estimateEndDate : new Date();
+      element.actualStartDate = "";
+      element.actualEndDate = "";
+      element.actualJobDuration = "";
       element.parentId = addExistingProductDialog.parentId;
       const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-      element.tenure = 1;
-      if (calValues && calValues['tenure']) {
-        element.tenure = calValues['tenure'];
+      element.estimateJobDuration = 1;
+      if (calValues && calValues['estimateJobDuration']) {
+        element.estimateJobDuration = calValues['estimateJobDuration'];
       }
       material.push(element);
     });
@@ -508,7 +503,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                   className={isMobile ? "add-product-action-menu-mobile" : "add-product-action-menu"}
                 >
                   <HtmlTooltip
-                    title={Boolean(selectedProducts && selectedProducts.length) ? 'Buld edit selected records' : 'Select records to edit'}
+                    title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}
                   >
                     <MenuItem onClick={() => setIsProductEdit({ open: true, isBulkedit: true })} disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}>
                       <ListItemIcon>
@@ -530,7 +525,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
               </Box>
             ) : (
               <Box display="flex">
-                <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Buld edit selected records' : 'Select records to edit'}>
+                <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
                   <span>
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -572,7 +567,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 height="calc(100vh - 345px)"
                 columns={columns}
                 data={rowsData}
-                isInValidCheck={(rowData) => !rowData.isValid}
+                setCellColor={(rowData) => !rowData.isValid ? "error" : ""}
                 onSelect={setSelectedProducts}
                 childrenProperty="subRows"
                 uniqueKey="_id"
@@ -613,6 +608,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       )}
       {addExistingProductDialog.open && (
         <AddExistingProductInventory
+          renderedFrom={addExistingProductDialog?.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
           isAddingProducts={isAddingProducts}
           addProductInventory={handleAdd}
           handleProductInventoryClose={() => {

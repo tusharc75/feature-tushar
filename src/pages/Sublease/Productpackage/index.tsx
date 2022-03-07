@@ -24,8 +24,9 @@ import { isMobile, isTablet } from "react-device-detect";
 import { MdAdd, MdDelete } from "react-icons/md";
 import { FiPackage } from "react-icons/fi";
 import { RiEditCircleLine } from "react-icons/ri";
+import { fetch_sublease_product_fields } from "../../../components/Sublease/helper";
 
-const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
+const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -58,10 +59,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
     }, [columns]);
 
     const fetchFields = async () => {
-        var data = []
-        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.subleaseProduct}`)
-        data = response?.data?.data
-        data = CURReplaceByCurrencySingle(data, subleaseData.currency)
+        var data = await fetch_sublease_product_fields(subleaseData.currency)
         setAllFields(JSON.parse(JSON.stringify(data)))
         const coloum: any = [{
             accessor: 'detail',
@@ -233,16 +231,19 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             parent.assetQty = parent.assetQty;
             if (parent.type === "package") {
                 const subRows: any = data.material.filter((e) => e.parentId === parent._id);
+                var assetQty = 0;
                 subRows.forEach((_subRow, j) => {
                     _subRow.detail = (i + 1) + "." + (j + 1) + " - " + _subRow.productDetail?.productName
                     _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`
                     _subRow.isValid = _subRow["finalPrice_" + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
                     _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
                     _subRow.assetQty = _subRow.assetQty;
+                    assetQty += _subRow.assetQty
                 })
                 if (subRows.length === 0) {
                     parent.isValid = false
                 }
+                parent.assetQty = assetQty;
                 parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
                 parent.subRows = subRows
             }
@@ -268,13 +269,15 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             element.qty = d.qty ? parseFloat(d.qty) : 1;
             element.estimateStartDate = subleaseData ? subleaseData?.estimateStartDate : new Date();
             element.estimateEndDate = subleaseData ? subleaseData?.estimateEndDate : new Date();
-            element.actualStartDate = subleaseData ? subleaseData?.actualStartDate : new Date();
-            element.actualEndDate = subleaseData ? subleaseData?.actualEndDate : new Date();
+            element.actualStartDate = "";
+            element.actualEndDate = "";
+            element.actualJobDuration = "";
+            element.assetQty = 0;
             element.parentId = addExistingProductDialog.parentId;
             const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields)
-            element.tenure = 1;
-            if (calValues && calValues["tenure"]) {
-                element.tenure = calValues["tenure"];
+            element.estimateJobDuration = 1;
+            if (calValues && calValues['estimateJobDuration']) {
+                element.estimateJobDuration = calValues['estimateJobDuration'];
             }
             material.push(element);
         });
@@ -309,7 +312,6 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
             delete element.qtyDisplay
             delete element.isValid
             delete element.hideSelection
-            delete element.assetQty
             delete element.productDetail
             delete element.packageDetail
             delete element.subRows
@@ -415,7 +417,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                         }
                     </Box>
                     <Box display="flex">
-                        <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Buld edit selected records" : "Select records to edit"}>
+                        <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Bulk edit selected records" : "Select records to edit"}>
                             <span>
                                 <Button
                                     variant={isMobile && !isTablet ? "text" : "contained"}
@@ -452,7 +454,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                             </Button>
                         </HtmlTooltip>
                         <Box mx={1} />
-                        {(material.length && !isIssued && !rowsData?.some(f => !f.isValid)) &&
+                        {(material.length && !isIssued && !rowsData?.some(f => !f.isValid)) ?
                             <Fragment>
                                 <HtmlTooltip title={"Start Sublease"}>
                                     <Button
@@ -468,7 +470,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                                 </HtmlTooltip>
                                 <Box mx={1} />
                             </Fragment>
-                        }
+                            : null}
                     </Box>
                 </Box>
             </Grid>
@@ -483,7 +485,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                             height="calc(100vh - 345px)"
                             columns={columns}
                             data={rowsData}
-                            isInValidCheck={(rowData) => !rowData.isValid}
+                            setCellColor={(rowData) => !rowData.isValid ? "error" : ""}
                             onSelect={setSelectedProducts}
                             childrenProperty="subRows"
                             uniqueKey="_id"
@@ -524,6 +526,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued }) => {
                 addProductInventory={handleAdd}
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
                 type={addExistingProductDialog.type}
+                renderedFrom={addExistingProductDialog.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
             />
         }
     </Fragment>

@@ -4,16 +4,15 @@
   left: 70px;
   z-index: 1001;
 
- .chat_box_text{
-   word-break: break-all;
- }
+  .chat_box_text {
+    word-break: break-all;
+  }
   @media screen and (max-width: 960px) {
     left: 5px;
   }
 }
 
 .global-chatbox {
-  height: 400px;
   overflow: hidden;
   position: relative;
 
@@ -40,7 +39,6 @@
   }
 
   .chatbox-container {
-    height: 360px;
     padding: 0px 8px;
     display: flex;
     flex-direction: column-reverse;
@@ -57,32 +55,40 @@
 
       .message-outlet {
         width: fit-content;
-        background-color: rgb(230, 230, 230);
+        background-color: #ececec;
         color: rgb(32, 32, 32);
-        border-radius: 18px;
+        border-radius: 14px;
         padding: 6px 10px;
         margin-top: 10px;
         overflow: hidden;
 
-        .username {
-          font-weight: 500;
-          color: #810000;
-        }
-
         .msg-data {
-          display: flex;
-          align-items: center;
-          .message-time {
-            align-self: flex-end;
-            font-size: 12px;
-            margin-left: 8px;
+          .msg-text {
+            font-size: 16px;
+            font-weight: normal;
+          }
+
+          .msg-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+
+            .name {
+              margin-right: 10px;
+              font-weight: bold;
+            }
+
+            .time {
+              font-size: 0.85em;
+            }
           }
         }
       }
 
       .my-color {
-        background-color: #163340;
-        color: whitesmoke;
+        background-color: #43AEA7;
+        color: white;
       }
 
       &:first-child {
@@ -110,6 +116,26 @@
       margin-right: 10px;
       font-size: 16px;
       padding: 0px 10px;
+    }
+  }
+  .chatbox-input_mobile {
+    display: flex;
+    align-items: center;
+    justify-self: flex-end;
+    justify-content: space-between;
+    background-color: #eeeeee;
+    height: 70px;
+    padding: 0 10px;
+
+    input {
+      background-color: #fafafa;
+      border: none;
+      padding: 10px;
+      outline: none;
+      border-radius: 4px;
+      width: 100%;
+      margin-right: 10px;
+      font-size: 16px;
     }
   }
 }

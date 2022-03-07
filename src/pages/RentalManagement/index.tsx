@@ -37,26 +37,25 @@ import CustomSwipableList from "../../components/SwipableListComponents/CustomSw
 import { setUpindexDB, objectStore, insertUpdate, findAll, findOne } from '../../constants/indexdbhelper';
 
 let rentalManagementTimeout;
-const RentalManagementType = [
-  {
-    key: `All ${routes.rentalManagement.title}`,
-    value: 1,
-  },
-  {
-    key: `My ${routes.rentalManagement.title}`,
-    value: 2,
-  },
-];
-
-const renderedFrom = "rental_management";
-const localStorageSelectedRecords = `${renderedFrom}_selected`
 
 const RentalManagement = () => {
+
+  const RentalManagementType = [
+    {
+      key: `All ${routes.rentalManagement.title}`,
+      value: 1,
+    },
+    {
+      key: `My ${routes.rentalManagement.title}`,
+      value: 2,
+    },
+  ];
+  const renderedFrom = camelCase(`${routes.rentalManagement.title}`);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`
 
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, isSynch } = useContext(CustomOfflineContext);
 
-  const pageTitle = camelCase(`${routes.rentalManagement.title}`)
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
 
@@ -133,7 +132,7 @@ const RentalManagement = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      let currentColumn = getColumnData(pageTitle, o?.fieldData, routes.rentalManagementDetail.path)
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.rentalManagementDetail.path)
       if (currentColumn !== null) {
         if (isOffline) {
           currentColumn.columnData["filter"] = false
@@ -154,7 +153,7 @@ const RentalManagement = () => {
     setFrameWorkComponent({ ...tempFrameworkComponent })
     let staticFields = getStaticFields()
     staticFields.forEach(field => {
-      columns.push(checkStaticField(pageTitle, field))
+      columns.push(checkStaticField(renderedFrom, field))
     })
     setColumns([...columns])
   }
@@ -548,7 +547,7 @@ const RentalManagement = () => {
                   onCreate={false}
                   showClone={true}
                   onClone={(data) => { setShowManageRentalManagementDialog({ open: true, isClone: true, idToClone: data._id }) }}
-                  renderedFrom={pageTitle}
+                  renderedFrom={renderedFrom}
                 /> :
                 <CustomAgGrid
                   columns={columns}

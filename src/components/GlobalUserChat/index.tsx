@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback, useEffect } from 'react';
+import React, { useState, useContext, useCallback, useEffect, useRef } from 'react';
 import { Badge, Fab } from '@material-ui/core';
 import { Chat, Clear } from '@material-ui/icons';
 
@@ -14,22 +14,22 @@ const GlobalUserChat = () => {
     state: { user, chatter },
     dispatch
   } = useData();
-  const { socket, chatterIds, setChatList, setChatterIds, selectedChat } = useContext(GlobalChatContext);
+  const { socket, chatterIds, setChatList, setChatterIds, selectedChat, setSelectedChat, open, setOpen } = useContext(GlobalChatContext);
   const [unseen, setUnseen] = useState<boolean>(false);
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const open = Boolean(anchorEl);
-
-  const handleOpenPopup = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(e.currentTarget);
-  };
+  const [anchorEl, setAnchorEl] = useState<HTMLSpanElement>(null);
+  const buttonRef = useRef<HTMLSpanElement>();
 
   useEffect(() => {
-    if (socket !== null) {
-      socket.on('data', () => {
-        getChats();
-      });
-    }
+    if (!socket) return;
+    socket.on('data', () => {
+      getChats();
+    });
   }, [socket]);
+
+  useEffect(() => {
+    if (!open) return;
+    buttonRef.current.click();
+  }, [open]);
 
   const getChats = useCallback(() => {
     axiosInstance()
@@ -39,10 +39,13 @@ const GlobalUserChat = () => {
         data.forEach((d: any) => {
           const obj = {
             id: d.id,
-            chatTitle: d.group && d.group !== '' ? d.group : d.users
-              .filter((d) => d._id !== user?.user?._id)
-              .map((_d) => `${_d.firstName} ${_d.lastName}`)
-              .join(', '),
+            chatTitle:
+              d.group && d.group !== ''
+                ? d.group
+                : d.users
+                  .filter((d) => d._id !== user?.user?._id)
+                  .map((_d) => `${_d.firstName} ${_d.lastName}`)
+                  .join(', '),
             message: d?.message,
             timeStamp: new Date(d?.message.date).getTime(),
             ...d
@@ -59,7 +62,7 @@ const GlobalUserChat = () => {
           dispatch({ type: SET_CHATTER, payload: null });
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [chatter, selectedChat]);
 
   useEffect(() => {
@@ -78,17 +81,23 @@ const GlobalUserChat = () => {
     joinRooms();
   }, [chatterIds, socket]);
 
-  return ['local', 'development'].includes(process.env.REACT_APP_ENV) ? (
+  const closeChat = () => {
+    setSelectedChat(null);
+    setAnchorEl(null);
+    setOpen(false);
+  };
+
+  return (
     <div className="global-chat">
-      <Badge color="secondary" badgeContent=" " invisible={!unseen} variant="dot">
-        <Fab id={open ? 'chats-popover' : undefined} onClick={handleOpenPopup} size="small" color="primary" aria-label="Chats">
-          {!open ? <Chat /> : <Clear />}
-        </Fab>
-      </Badge>
-      {open && <ChatsPopover open={open} anchorEl={anchorEl} setAnchorEl={setAnchorEl} getChats={getChats} />}
+      <span
+        ref={buttonRef}
+        id={open ? 'chats-popover' : undefined}
+        onClick={(e) => setAnchorEl(e.currentTarget)}
+        color="primary"
+        aria-label="Chats"
+      ></span>
+      {open && Boolean(anchorEl) && <ChatsPopover open={open} anchorEl={anchorEl} onClose={closeChat} getChats={getChats} />}
     </div>
-  ) : (
-    <div />
   );
 };
 

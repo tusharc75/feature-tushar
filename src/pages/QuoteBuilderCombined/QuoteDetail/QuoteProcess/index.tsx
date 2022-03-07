@@ -1135,6 +1135,23 @@ export default function QuoteProcess(props) {
     });
   }
 
+
+  const handleOfferToCustomer = () => {
+    axiosInstance()
+      .patch(`/quote-builder/send-offer/${quoteData._id}/${currentVersion}`)
+      .then(({ data }) => {
+        fetchQuoteData(currentVersion);
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  }
+
   const fetchUserEmails = () => {
     let ownerCollaboratorEmails = [];
     if (quoteData?.collaborator && quoteData.collaborator.length) {
@@ -1218,11 +1235,10 @@ export default function QuoteProcess(props) {
     setAnchorEl(null);
   };
 
-  const findProfitPercentage = (CP,SP) => {
-    let parsedCP = parseInt(CP.amountWithouCurrencyCode.split(',').join(''))
-    let parsedSP = parseInt(SP.amountWithouCurrencyCode.split(',').join(''))
-    let profit = parsedSP - parsedCP;
-    return (profit*100/parsedCP).toFixed(2);
+  const findProfitPercentage = (CP, Profit) => {
+    let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, "") ?? 0)
+    let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, "") ?? 0)
+    return (profit * 100 / parsedCP).toFixed(2);
   }
 
   return (
@@ -1443,6 +1459,22 @@ export default function QuoteProcess(props) {
                       {isMobile && !isTablet ? '' : `${buttonMessage}`}
                     </Button>
                   )}
+                  <span className="d-flex align-items-center justify-content-end ml-3">
+                    {!ifQuoteApproved.approved && buttonMessage === "Send to Customer" && !quoteData?.versions[currentVersion]?.offered && (
+                      <Button
+                        onClick={() => {
+                          handleOfferToCustomer()
+                        }}
+                        disabled={!allowedToEdit || (!DOAreq && !Customerreq) || loading}
+                        startIcon={<BiMailSend />}
+                        variant="contained"
+                        size="small"
+                        color="primary"
+                      >
+                        {isMobile && !isTablet ? '' : `Offer to Customer`}
+                      </Button>
+                    )}</span>
+
                 </div>
               ) : null}
             </Grid>
@@ -1729,7 +1761,7 @@ export default function QuoteProcess(props) {
             <Grid item className="quoteHeader">
               <div className={redCard ? 'quoteBox quoteRed' : 'quoteBox quoteProfit'}>
                 <span className="quoteAmount" title={totalProfit.fullFormatAmount}>
-                  {totalProfit.fullFormatAmount ? totalProfit.fullFormatAmount : defaultTotalValue} {totalcost.fullFormatAmount ? `(${findProfitPercentage(totalcost,totalsale)} %)`: ''}
+                  {totalProfit.fullFormatAmount ? totalProfit.fullFormatAmount : defaultTotalValue} {totalcost.fullFormatAmount ? `(${findProfitPercentage(totalcost, totalProfit)} %)` : ''}
                 </span>
                 <div className={'quoteBoxContent'}>
                   <span className={'quoteDetailHeading'}>Total Profit </span>
@@ -1819,7 +1851,7 @@ export default function QuoteProcess(props) {
                     getOptionLabel={(option) => option}
                     renderOption={(option, { selected }) => (
                       <React.Fragment>
-                        <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={(showExcelArrangeColumns && ["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumnsExcel].sort().toString()) ||(showPDFArrangeColumns && ["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumns].sort().toString()) ? true : selected} />
+                        <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={(showExcelArrangeColumns && ["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumnsExcel].sort().toString()) || (showPDFArrangeColumns && ["Select All", ...ColumnName].sort().toString() === ["Select All", ...visibleColumns].sort().toString()) ? true : selected} />
                         {option}
                       </React.Fragment>
                     )}

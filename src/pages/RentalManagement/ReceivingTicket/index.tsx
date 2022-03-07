@@ -34,8 +34,6 @@ import CustomSwipableList from '../../../components/SwipableListComponents/Custo
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { RiExchangeFundsLine } from 'react-icons/ri';
-import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 import ManageRepairJob from '../../RepairJob/ManageRepairJob'
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
@@ -43,8 +41,8 @@ import InfoIcon from '@material-ui/icons/Info';
 import { ExpandMore } from '@material-ui/icons';
 import ExistingRentalJob from "./ExistingRentalJob";
 import { groupBy, uniq, map } from "lodash";
+import { camelCase } from "lodash";
 
-const renderedFrom = 'rentalManagementDetailsPageReceivingTicket';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -58,7 +56,8 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
+const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom }) => {
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -84,6 +83,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
+  const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -125,7 +125,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
-        productAssets = productAssets.map(d => ({ ...d.inventory, rentalAssetStatus: d.status })).map(u => ({
+        productAssets = productAssets.map(d => ({ ...d.inventory, rentalAssetStatus: d.status, startDate: d.startDate, endDate: d.endDate })).map(u => ({
           ...u,
           productName: u?.product?.optionLabel,
           warehouse: u?.warehouse?.optionLabel,
@@ -178,6 +178,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         === productAssets.length) {
         setNextStep(true)
       }
+
+      setUniqueReceivingTicket([...new Set(productAssets.filter(d => d.receivingTicketId !== undefined).map(d => d.receivingTicketId))]);
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -259,18 +261,20 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   };
 
   const columns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "inventoryRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "inventoryRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
-    { field: "warehouse", headerName: "Plant", show: false, disabled: true, cellRenderer: "warehouseRenderer" },
+    { field: "productName", headerName: "Product Type", show: true, cellRenderer: "productNameRenderer" },
+    { field: "warehouse", headerName: "Plant", show: false, cellRenderer: "warehouseRenderer" },
     { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "deliveryTicketRenderer" },
     { field: "receivingTicket", headerName: "Receiving Ticket", show: true, cellRenderer: "receivingTicketRenderer" },
     { field: "returnTicket", headerName: "Return Ticket", show: true, cellRenderer: "returnTicketRenderer" },
     { field: "status", headerName: "Asset Status", show: true, cellRenderer: "commonRenderer" },
+    { field: "startDate", headerName: "Actual Start Date", show: true, cellRenderer: "dateRenderer" },
+    { field: "endDate", headerName: "Actual End Date", show: true, cellRenderer: "dateRenderer" },
     { field: "rentalAssetStatus", headerName: "Rental Asset Status", show: true, cellRenderer: "commonRenderer" },
   ];
 
-  const columnState = JSON.parse(localStorage.getItem('rentalManagementDetailsPageReceivingTicket'));
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
     columns.forEach((item) => {
       columnState.forEach((d) => {
@@ -287,7 +291,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     data["refrenceId"] = rentalManagementData._id;
     data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
     data["pickupFrom"] = rentalManagementData?.customerAccount?.optionValue;
-    data["pickupFromAddress"] = rentalManagementData.shippingAddress?.optionValue;
+    data["pickupFromAddress"] = selectedRecords[0]?.currentLocation;
     data["deliveryToType"] = deliveryToType;
     if (deliveryToType === DELIVERY_FROM_TO_TYPE.supplier) {
       if (selectedRecords.length) {
@@ -301,6 +305,13 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     }
     data["startDate"] = rentalManagementData?.estimateStartDate;
     data["endDate"] = rentalManagementData?.estimateStartDate;
+    data["isPickupFromDisable"] = true;
+
+    data["wellName"] = rentalManagementData?.wellName;
+    data["afeNumber"] = rentalManagementData?.afeNumber;
+    if (rentalManagementData?.processor?.optionValue) {
+      data["processor"] = rentalManagementData?.processor?.optionValue;
+    }
     setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
     closeActions()
   };
@@ -328,43 +339,45 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
       <Box display="flex" alignItems="center">
-        <Button
+        {!isMobile && <Button
           onClick={() => {
             setDownlodingFile(true);
-            axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
-              .then(({ data }) => {
-                axiosInstance()
-                  .get(`user/download?fileName=${data.data.fileName}`, {
-                    responseType: "blob",
-                  })
-                  .then(({ data }) => {
-                    const file = new Blob([data], { type: "application/pdf" });
-                    const fileURL = URL.createObjectURL(file);
-                    const pdfWindow = window.open();
-                    pdfWindow.location.href = fileURL;
-                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-                    setDownlodingFile(false);
-                  })
-                  .catch((err) => {
-                    toastConfig.setToastConfig(err);
-                    setDownlodingFile(false);
-                  });
-              }).catch((err) => {
-                toastConfig.setToastConfig(err);
-                setDownlodingFile(false);
-              })
+            uniqueReceivingTicket.forEach(currentId => {
+              axiosInstance().get(`/delivery-ticket/${currentId}/pdf`)
+                .then(({ data }) => {
+                  axiosInstance()
+                    .get(`user/download?fileName=${data.data.fileName}`, {
+                      responseType: "blob",
+                    })
+                    .then(({ data }) => {
+                      const file = new Blob([data], { type: "application/pdf" });
+                      const fileURL = URL.createObjectURL(file);
+                      const pdfWindow = window.open();
+                      pdfWindow.location.href = fileURL;
+                      toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                      setDownlodingFile(false);
+                    })
+                    .catch((err) => {
+                      toastConfig.setToastConfig(err);
+                      setDownlodingFile(false);
+                    });
+                }).catch((err) => {
+                  toastConfig.setToastConfig(err);
+                  setDownlodingFile(false);
+                })
+            })
           }}
           variant={isMobile && !isTablet ? 'text' : 'outlined'}
           color="primary"
           type="button"
           size="small"
-          disabled={downlodingFile || isOffline}
+          disabled={downlodingFile || isOffline || uniqueReceivingTicket.length === 0}
           startIcon={isMobile ? '' : <AiFillFilePdf />}
           style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
 
         >
-          {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
-        </Button>
+          {downlodingFile ? "Please wait..." : "Preview"}
+        </Button>}
         <Box mx={1} />
         <Button variant={isMobile && !isTablet ? 'text' : 'outlined'} color="primary" aria-controls="simple-menu"
           aria-haspopup="true"
@@ -373,8 +386,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           onClick={handleClick}
           style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
           endIcon={<ArrowDropDownIcon />}>
-          {isMobile && !isTablet ? <RiExchangeFundsLine size={20} /> : 'Change Status'}
-
+          {'Change Status'}
         </Button>
         <Menu
           id="simple-menu"
@@ -751,7 +763,10 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     {showRepairJobDialog &&
       <ManageRepairJob
         refrenceType="Rental Job"
-        refrenceData={{ _id: rentalManagementData._id, warehouse: selectedRecords[0].warehouseId }}
+        refrenceData={{
+          _id: rentalManagementData._id, warehouse: selectedRecords[0].warehouseId,
+          wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber
+        }}
         onClose={() => setShowRepairJobDialog(false)}
         onSuccess={(obj) => {
           handleAddAssetToRepairJob(obj?._id)

@@ -27,6 +27,7 @@ import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField }
 import { StayPrimaryPortraitSharp } from "@material-ui/icons";
 import { BiDollar } from "react-icons/bi";
 import { SiMarketo,AiFillFileMarkdown,GiArrowScope,FaPercentage,FaAward,SiStatuspage,GoVersions} from "react-icons/all";
+import { camelCase } from "lodash";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -120,6 +121,7 @@ const intialState = {
 
 let projectSalesTimeout;
 const ProjectSales: FC = () => {
+  const renderedFrom = camelCase(routes?.projectSales.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -160,7 +162,7 @@ const ProjectSales: FC = () => {
     selectedRecords,
     appendRows
   } = state;
-  const columnState = JSON.parse(localStorage.getItem("projectSalesPage"));
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([])
   const localStorageSelectedRecords = `${routes.projectSales.title}_selected`;
@@ -179,7 +181,7 @@ const ProjectSales: FC = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      let currentColumn = getColumnData(routes.projectSales.title, o?.fieldData, 'project-sales/detail')
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, 'project-sales/detail')
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData]
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -196,7 +198,7 @@ const ProjectSales: FC = () => {
     setFrameWorkComponent({ ...tempFrameworkComponent })
     let staticFields = getStaticFields()
     staticFields.forEach(field => {
-      columns.push(checkStaticField(routes.projectSales.title, field))
+      columns.push(checkStaticField(renderedFrom, field))
     })
     setColumns([...columns])
   }
@@ -233,8 +235,8 @@ const ProjectSales: FC = () => {
   const ActionsRenderer = (params) => (
     <>
       <Tooltip
-        className={permissions?.projectStrategy?.isCreate ? "" : "cursor-stop"}
-        title={permissions?.projectStrategy?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+        className={permissions?.projectSales?.isCreate ? "" : "cursor-stop"}
+        title={permissions?.projectSales?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
         <IconButton
           size="small"
           aria-label="Clone"
@@ -246,14 +248,14 @@ const ProjectSales: FC = () => {
         </IconButton>
       </Tooltip>
       <GridDeleteIcon
-        hasDeletePermission={permissions?.projectStrategy?.isDelete}
+        hasDeletePermission={permissions?.projectSales?.isDelete}
         ownerId={params.data.projectManagerId}
         userId={user?.user?._id}
         onDelete={() => showConfirmBox(params.data)}
         entity="Project"
       />
       {
-        (permissions?.projectStrategy?.isUpdate && params?.data?.isTeamMember) ||
+        (permissions?.projectSales?.isUpdate && params?.data?.isTeamMember) ||
           params?.data?.isManager ?
           <Tooltip title="Entity">
             <IconButton
@@ -438,7 +440,7 @@ const ProjectSales: FC = () => {
 
   const showConfirmBox = (row) => {
     if (row === null) {
-      if (permissions?.projectStrategy?.isDelete) {
+      if (permissions?.projectSales?.isDelete) {
         const myData = selectedRecords.filter(
           (s) => s.projectManagerId === user.user._id
         );
@@ -519,7 +521,7 @@ const ProjectSales: FC = () => {
           </Grid>
           <Grid item md={8} sm={1} xs={2}>
             <ImportExportLinks
-              permissions={permissions?.projectStrategy}
+              permissions={permissions?.projectSales}
               module="project-sale(s)"
               api={"project-sales"}
               afterImportCompleted={() => {
@@ -542,7 +544,7 @@ const ProjectSales: FC = () => {
               userId={user?.user?._id}
               onSearch={handleSearch}
               searchVal={search}
-              permissions={permissions?.projectStrategy}
+              permissions={permissions?.projectSales}
               selectedType={selectedType}
               handleFilterChange={handleProjectFilter}
               onCreate={handleCreate}
@@ -576,7 +578,7 @@ const ProjectSales: FC = () => {
                 <CustomSwipableList
                   allowSelection={true}
                   allowSwipe={true}
-                  permissions={permissions?.projectStrategy}
+                  permissions={permissions?.projectSales}
                   primaryField={columns?.find(d => d.primaryField)}
                   onClick={(data) => {
                     history.push(`${routes.projectSalesDetail.path}/${data._id}`)
@@ -629,7 +631,7 @@ const ProjectSales: FC = () => {
                   onClone={(data) => {
                     setIsOpen({ open: true, isClone: true, idToClone: data._id })
                    }}
-                  renderedFrom={routes.projectSales.title}
+                  renderedFrom={renderedFrom}
                 />
                  :
                 <CustomAgGrid
@@ -644,7 +646,7 @@ const ProjectSales: FC = () => {
                   actionWidth={150}
                   page={page}
                   loading={loading}
-                  renderedFrom={routes.projectSales.title}
+                  renderedFrom={renderedFrom}
                   refreshGrid={fetchProjects}
                 /> : null
           }

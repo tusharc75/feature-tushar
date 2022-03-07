@@ -39,7 +39,8 @@ import { useAccount, useMsal } from "@azure/msal-react";
 import axiosInstance from "../../../axios/axiosInstance";
 import { useData } from "../../../StateProvider/Provider";
 import Loader from "../../Loader";
-import { dateFormat, getData, resourceOptions } from "../../../constants/helpers";
+import { dateFormat, getData } from "../../../constants/helpers";
+import { get_activity_resource } from '../Helpers/utils';
 
 const EventSchema = object().shape({
   name: string().required("Please enter event name").min(3, "Too Short"),
@@ -50,21 +51,25 @@ const EventSchema = object().shape({
 });
 
 export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimized, onMinimizeMaximize, showManimizeMaximize }) => {
-  const {
-    state: {
-      user: { user },
-    },
-  } = useData();
+
+  const { state: { user: { user }, permissions }, } = useData();
+
   const isMobile = useMediaQuery("(max-width:599px)");
   const [initialValues, setInitialValues] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const { instance, accounts } = useMsal();
   const azureAccount = useAccount(accounts[0] || {});
   const [isSubmitting, setSubmitting] = useState(false);
-  const [resource, setResource] = useState("");
+  const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
+  const [resourceOptions, setResourceOptions] = useState([]);
+
+  useEffect(() => {
+    setResourceOptions(get_activity_resource(permissions))
+  }, []);
+
 
   useEffect(() => {
     fetchEventDetail();
@@ -104,26 +109,26 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
 
   // Data for Autocomplete
   useEffect(() => {
-    if (!resource) return;
-    setLoadingResources(true);
-    axiosInstance()
-      .get(`${kebabCase(resource)}?limit=100`)
-      .then(({ data: { data } }) => {
-        if (data.length) {
-          const mappedData = data.map((_d) => getData(resource, _d));
-          setResourceData(mappedData);
-        }
-        setLoadingResources(false);
-      })
-      .catch((error) => {
-        setLoadingResources(false);
-      });
+    if (resource && resource?.optionValue) {
+      setLoadingResources(true);
+      axiosInstance()
+        .get(`${kebabCase(resource?.optionValue)}?limit=100`)
+        .then(({ data: { data } }) => {
+          if (data.length) {
+            const mappedData = data.map((_d) => getData(resource?.optionValue, _d));
+            setResourceData(mappedData);
+          }
+          setLoadingResources(false);
+        })
+        .catch((error) => {
+          setLoadingResources(false);
+        });
 
-    return () => {
-      setSelectedResourceData(null);
-      setResourceData(null);
-    };
-    // eslint-disable-next-line
+      return () => {
+        setSelectedResourceData(null);
+        setResourceData(null);
+      };
+    }
   }, [resource]);
 
   const handleSave = async (values) => {
@@ -158,7 +163,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
         if (resource && selectedResourceData) {
           values.relatedTo = [
             {
-              type: camelCase(resource),
+              type: resource?.optionValue,
               referenceId: selectedResourceData.id,
               access: true,
             },
@@ -270,7 +275,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                         <Box mt={2}>
                           <Autocomplete
                             options={resourceOptions}
-                            getOptionLabel={(option) => option}
+                            getOptionLabel={(option) => option.optionLabel}
                             value={resource}
                             fullWidth
                             onChange={(event, newValue) => {
@@ -286,7 +291,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                             )}
                           />
                           <Box mt={2} />
-                          {Boolean(resource) && resourceData && (
+                          {resource && resourceData && (
                             <Autocomplete
                               disabled={loadingResources}
                               options={resourceData}
@@ -303,7 +308,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               renderInput={(params) => (
                                 <TextField
                                   {...params}
-                                  label={`Select ${resource}`}
+                                  label={`Select ${resource.optionValue}`}
                                   variant="outlined"
                                   required={Boolean(resource)}
                                 />
@@ -357,8 +362,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               inputVariant="outlined"
                               label="Start Time"
                               name="startTime"
-                              placeholder="08:00 AM"
-                              mask="__:__ _M"
+                              placeholder="08:00"
+                              mask="__:__"
                               value={values.startTime}
                               invalidDateMessage="Invalid time format"
                               onChange={(date: any) => {
@@ -407,9 +412,9 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               onChange={(date: any) => {
                                 setFieldValue("endDate", date);
                                 setFieldValue(
-                                  "endTime", 
+                                  "endTime",
                                   new Date(
-                                    getTime(date ? date._d: new Date()).getTime() + 30 * 60000
+                                    getTime(date ? date._d : new Date()).getTime() + 30 * 60000
                                   )
                                 );
                               }}
@@ -436,13 +441,13 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               inputVariant="outlined"
                               label="End Time"
                               name="endTime"
-                              placeholder="08:00 AM"
+                              placeholder="08:00"
                               mask="__:__"
                               value={values.endTime}
                               onChange={(date: any) => {
                                 const nDate = new Date(values.startTime).toISOString().split("T")[0];
                                 let nTime = ""
-                                if(date) {
+                                if (date) {
                                   if ((date._d + "").includes("Invalid Date")) {
                                     setFieldValue("endTime", `${date._i}`)
                                   }

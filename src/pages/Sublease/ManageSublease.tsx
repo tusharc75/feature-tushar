@@ -12,7 +12,7 @@ import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import {
     CustomDialogTransition, generateUniqueIdOnly, getCollaboratorDropdownDataSource,
-    getOwnerDropdownDataSource, sublease, setFieldsInAscendingOrder, supplierAccount, supplierContact
+    getOwnerDropdownDataSource, sublease, setFieldsInAscendingOrder, supplierAccount, supplierContact, SUBLEASE_STATUS
 } from "../../constants/helpers";
 import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
@@ -28,6 +28,7 @@ import ManageAccountDialog from "../Account/ManageAccount";
 import ManageContactDialog from "../Contact/ManageContact";
 import { isEqual } from 'lodash';
 import moment from "moment";
+import ManageAddressDialog from "src/components/Address/ManageAddressDialog";
 
 const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess, currency = null,
     refrenceType = null, refrenceId = null, refrenceData = null }) => {
@@ -44,7 +45,7 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
     const [subleaseData, setSubleaseData] = useState(null);
 
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-    const [accountData, setAccountData] = useState([]);
+    const [supplierData, setSupplierData] = useState([]);
     const [contactData, setContactData] = useState([]);
     const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
     const [ownerData, setOwnerData] = useState([]);
@@ -53,10 +54,19 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
     const [showAddSupplierAccountDialog, setShowAddSupplierAccountDialog] = useState(false);
     const [showAddSupplierContactDialog, setShowAddSupplierContactDialog] = useState(false);
 
-    const [countryBillToDropDown, setCountryBillToDropDown] = useState([]);
-    const [countrySellToDropDown, setCountrySellToDropDown] = useState([]);
-    const [countryBillToMainData, setCountryBillToMainData] = useState([]);
-    const [countrySellToMainData, setCountrySellToMainData] = useState([]);
+    // const [countryBillToDropDown, setCountryBillToDropDown] = useState([]);
+    // const [countrySellToDropDown, setCountrySellToDropDown] = useState([]);
+    // const [countryBillToMainData, setCountryBillToMainData] = useState([]);
+    // const [countrySellToMainData, setCountrySellToMainData] = useState([]);
+
+
+    const [addressData, setAddressData] = useState([]);
+    const [shippingAddress, setShippingAddress] = useState([]);
+    const [deliveryToAddress, setDeliveryToAddress] = useState([]);
+
+    const [showAddressDialog, setShowAddressDialog] = useState(false);
+    const [addressType, setAddressType] = useState('');
+
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Sublease").then(({ data: { data } }) => {
@@ -69,12 +79,23 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                         const { _id, createdBy, updatedBy, serialNumber, ...rest } = data
                         rest['subleaseName'] = `SL_${generateUniqueIdOnly()}`
                         rest["status"] = "New"
+                        rest['estimateStartDate'] = new Date();
+                        rest['estimateEndDate'] = "";
+                        rest['actualStartDate'] = "";
+                        rest['actualEndDate'] = "";
+                        fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !["actualStartDate", "actualEndDate"].includes(obj.fieldName));
                         setInitialData({
                             fields: fieldsDataForCreate,
                             values: getObjKeysWithValues(rest, fieldsDataForCreate),
                         });
                         setLoading(false)
                     } else {
+                        if (data?.actualStartDate === "") {
+                            fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualStartDate"].includes(obj.fieldName));
+                        }
+                        if (data?.actualEndDate === "") {
+                            fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualEndDate"].includes(obj.fieldName));
+                        }
                         setInitialData({
                             fields: fieldsDataForUpdate,
                             values: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -85,6 +106,7 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                 });
             }
             else {
+                fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !["actualStartDate", "actualEndDate"].includes(obj.fieldName));
                 let createValues: any = getObjKeys("", fieldsDataForCreate)
                 createValues["subleaseName"] = `SL_${generateUniqueIdOnly()}`
                 if (currency) {
@@ -93,10 +115,10 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                 if (refrenceType === "rentalJob") {
                     createValues["rentalJob"] = refrenceId
                     createValues["estimateStartDate"] = refrenceData.estimateStartDate
-                    createValues["actualStartDate"] = refrenceData.actualStartDate
                     createValues["estimateEndDate"] = refrenceData.estimateEndDate
-                    createValues["actualEndDate"] = refrenceData.actualEndDate
                 }
+                createValues["actualStartDate"] = ""
+                createValues["actualEndDate"] = ""
                 setInitialData({
                     fields: fieldsDataForCreate,
                     values: createValues
@@ -109,8 +131,9 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                 (d) => d.fieldName === "supplierAccount"
             );
             if (supplierAccountOptions) {
-                setAccountData(supplierAccountOptions.option);
+                setSupplierData(supplierAccountOptions.option);
             }
+
             const supplierContactOptions = fieldsDataForCreate.find(
                 (d) => d.fieldName === "supplierContact"
             );
@@ -122,19 +145,13 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                 setOwnerData(ownerCollaboratorOptions[0].option);
                 setCollaboratorData(ownerCollaboratorOptions[0].option);
             }
-            const countryBillToDropdownData = fieldsDataForCreate.find(
-                (d) => d.fieldName === "billingAddress"
-            );
-            if (countryBillToDropdownData) {
-                setCountryBillToMainData(countryBillToDropdownData.option)
-                setCountryBillToDropDown(countryBillToDropdownData.option)
-            }
-            const countrySellToDropdownData = fieldsDataForCreate.find(
-                (d) => d.fieldName === "shippingAddress"
-            );
-            if (countrySellToDropdownData) {
-                setCountrySellToMainData(countrySellToDropdownData.option)
-                setCountrySellToDropDown(countrySellToDropdownData.option)
+
+
+            const allAddressData = fieldsDataForCreate.find((d) => d.fieldName === "shippingAddress");
+            if (allAddressData) {
+                setAddressData(allAddressData.option)
+                setShippingAddress(allAddressData.option)
+                setDeliveryToAddress(allAddressData.option)
             }
         })
             .catch((error) => {
@@ -173,8 +190,9 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                         element.parentId = null;
                         element.estimateStartDate = refrenceData?.estimateStartDate;
                         element.estimateEndDate = refrenceData?.estimateEndDate;
-                        element.actualStartDate = refrenceData?.estimateStartDate;
-                        element.actualEndDate = refrenceData?.estimateEndDate;
+                        element.actualStartDate = "";
+                        element.actualEndDate = "";
+                        element.assetQty = 0;
                         material.push(element);
                     });
                     axiosInstance().post(`${sublease.api}/productpackage/${data._id}`, { material })
@@ -206,29 +224,15 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
         );
     };
 
-    const onCountryBillToDropDownOpen = (selectedAccount) => {
-        let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.billingAddress
-        if (filterAddress) {
-            setCountryBillToDropDown(
-                countryBillToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue))
-            );
+    const onShippingAddressOpen = (supplierId, shippingAddress) => {
+        let filterAddress = supplierData.find(d => d.optionValue === supplierId)?.shippingAddress
+        if (filterAddress || shippingAddress) {
+            setShippingAddress(addressData.filter((d) => filterAddress?.some(u => u === d.optionValue) || d.optionValue === shippingAddress));
         }
         else {
-            setCountryBillToDropDown([])
+            setShippingAddress([])
         }
-    };
-
-    const onCountrySellToDropDownOpen = (selectedAccount) => {
-        let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.shippingAddress
-        if (filterAddress) {
-            setCountrySellToDropDown(
-                countrySellToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue))
-            );
-        }
-        else {
-            setCountrySellToDropDown([])
-        }
-    };
+    }
 
     const handleScroll = (errors) => {
         const err = Object.keys(errors);
@@ -242,6 +246,23 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                 inline: 'start',
             });
         }
+    }
+
+    function validate(values) {
+        const errors = {};
+        let estimateStartDate = moment(values?.estimateStartDate);
+        let estimateEndDate = moment(values?.estimateEndDate);
+        if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+            errors['estimateEndDate'] = 'Please enter valid estimate end date';
+        }
+        let actualStartDate = moment(values?.actualStartDate);
+        let actualEndDate = moment(values?.actualEndDate);
+        if (actualStartDate.format("YYYY-MM-DD") !== actualEndDate.format("YYYY-MM-DD")) {
+            if (actualEndDate.diff(actualStartDate, 'days') <= 0) {
+                errors['actualEndDate'] = 'Please enter valid actual end date';
+            }
+        }
+        return errors;
     }
 
     return (<Dialog
@@ -263,6 +284,7 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                 initialValues={initialData.values}
                 validationSchema={yupSchema(initialData.fields)}
                 validateOnMount
+                validate={validate}
                 onSubmit={handleSubmit}
             >
                 {({ values,
@@ -309,13 +331,14 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                         <FormTypes
                                                                             {...field}
                                                                             fieldData={field}
+                                                                            disabled={[SUBLEASE_STATUS.new, SUBLEASE_STATUS.inProgress].includes(values?.status) ? false : true}
                                                                             values={values}
                                                                             errors={errors}
                                                                             touched={touched}
                                                                             label={field.fieldLabel}
                                                                             name={field.fieldName}
                                                                             type={field.type}
-                                                                            options={accountData}
+                                                                            options={supplierData}
                                                                             required={field.required}
                                                                             fullWidth
                                                                             isTooltip={
@@ -520,17 +543,12 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                         options={field.option}
                                                                         setFieldValue={(name, value) => {
                                                                             setFieldValue(name, value)
-                                                                            if (!subleaseId || isClone) {
-                                                                                setFieldValue("actualStartDate", value)
-                                                                            }
                                                                         }}
                                                                         required={field.required}
                                                                         fullWidth
                                                                         isTooltip={field?.isTooltip || false}
                                                                         tooltipMessage={field?.tooltipMessage}
                                                                         size="small"
-                                                                        minDate={new Date()}
-                                                                        maxDate={values["estimateEndDate"] ? moment(values["estimateEndDate"]).subtract(1, "day") : moment().add(5, "years")}
                                                                     />
                                                                 ) : field.fieldName === "estimateEndDate" ? (
                                                                     <FormTypes
@@ -544,16 +562,12 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                         options={field.option}
                                                                         setFieldValue={(name, value) => {
                                                                             setFieldValue(name, value)
-                                                                            if (!subleaseId || isClone) {
-                                                                                setFieldValue("actualEndDate", value)
-                                                                            }
                                                                         }}
                                                                         required={field.required}
                                                                         fullWidth
                                                                         isTooltip={field?.isTooltip || false}
                                                                         tooltipMessage={field?.tooltipMessage}
                                                                         size="small"
-                                                                        minDate={moment(values["estimateStartDate"]).add(1, "day")}
                                                                     />
                                                                 ) : ["actualStartDate", "actualEndDate"].includes(field.fieldName) ? (
                                                                     <FormTypes
@@ -576,17 +590,84 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                         size="small"
                                                                     />
                                                                 )
-                                                                    : field.fieldName === "billingAddress" ? (
-                                                                        <FormTypes
+                                                                    // : field.fieldName === "billingAddress" ? (
+                                                                    //     <FormTypes
+                                                                    //         {...field}
+                                                                    //         disabled={Boolean(subleaseId) && field.disableOnEdit && !isClone}
+                                                                    //         values={values}
+                                                                    //         errors={errors}
+                                                                    //         touched={touched}
+                                                                    //         label={field.fieldLabel}
+                                                                    //         name={field.fieldName}
+                                                                    //         type={field.type}
+                                                                    //         options={countryBillToDropDown}
+                                                                    //         setFieldValue={(name, value) => {
+                                                                    //             setFieldValue(name, value)
+                                                                    //         }}
+                                                                    //         required={field.required}
+                                                                    //         fullWidth
+                                                                    //         isTooltip={field?.isTooltip || false}
+                                                                    //         tooltipMessage={field?.tooltipMessage}
+                                                                    //         size="small"
+                                                                    //         onOpen={() =>
+                                                                    //             onCountryBillToDropDownOpen(values["supplierAccount"])
+                                                                    //         }
+                                                                    //     />)
+                                                                    : field.fieldName === "shippingAddress" ? (
+                                                                        <Box display="flex">
+                                                                            <Box flexGrow={1}>
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    disabled={Boolean(subleaseId) && field.disableOnEdit && !isClone}
+                                                                                    fieldData={field}
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={shippingAddress}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={field?.isTooltip || false}
+                                                                                    tooltipMessage={field?.tooltipMessage}
+                                                                                    size="small"
+                                                                                    onOpen={() =>
+                                                                                        onShippingAddressOpen(values["supplierAccount"], values["shippingAddress"])
+                                                                                    }
+                                                                                />
+                                                                            </Box>
+                                                                            <Box>
+                                                                                <Tooltip title={`Add ${field.fieldLabel}`} className="mt-1">
+                                                                                    <IconButton
+                                                                                        onClick={() => {
+                                                                                            setShowAddressDialog(true);
+                                                                                            setAddressType('shippingAddress');
+                                                                                        }}
+                                                                                        disabled={field.disableOnEdit}
+                                                                                        size="small"
+                                                                                    >
+                                                                                        <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
+                                                                                    </IconButton>
+                                                                                </Tooltip>
+                                                                            </Box>
+                                                                        </Box>
+                                                                    )
+                                                                        : <FormTypes
+                                                                            isNew={Boolean(subleaseId)}
                                                                             {...field}
-                                                                            disabled={Boolean(subleaseId) && field.disableOnEdit && !isClone}
+                                                                            fieldData={field}
+                                                                            disabled={(Boolean(subleaseId) && field.disableOnEdit && !isClone)}
                                                                             values={values}
                                                                             errors={errors}
                                                                             touched={touched}
                                                                             label={field.fieldLabel}
                                                                             name={field.fieldName}
                                                                             type={field.type}
-                                                                            options={countryBillToDropDown}
+                                                                            options={field.option}
                                                                             setFieldValue={(name, value) => {
                                                                                 setFieldValue(name, value)
                                                                             }}
@@ -595,54 +676,7 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                             isTooltip={field?.isTooltip || false}
                                                                             tooltipMessage={field?.tooltipMessage}
                                                                             size="small"
-                                                                            onOpen={() =>
-                                                                                onCountryBillToDropDownOpen(values["supplierAccount"])
-                                                                            }
-                                                                        />)
-                                                                        : field.fieldName === "shippingAddress" ? (
-                                                                            <FormTypes
-                                                                                {...field}
-                                                                                disabled={Boolean(subleaseId) && field.disableOnEdit && !isClone}
-                                                                                values={values}
-                                                                                errors={errors}
-                                                                                touched={touched}
-                                                                                label={field.fieldLabel}
-                                                                                name={field.fieldName}
-                                                                                type={field.type}
-                                                                                options={countrySellToDropDown}
-                                                                                setFieldValue={(name, value) => {
-                                                                                    setFieldValue(name, value)
-                                                                                }}
-                                                                                required={field.required}
-                                                                                fullWidth
-                                                                                isTooltip={field?.isTooltip || false}
-                                                                                tooltipMessage={field?.tooltipMessage}
-                                                                                size="small"
-                                                                                onOpen={() =>
-                                                                                    onCountrySellToDropDownOpen(values["supplierAccount"])
-                                                                                }
-                                                                            />)
-                                                                            : <FormTypes
-                                                                                isNew={Boolean(subleaseId)}
-                                                                                {...field}
-                                                                                fieldData={field}
-                                                                                disabled={(Boolean(subleaseId) && field.disableOnEdit && !isClone)}
-                                                                                values={values}
-                                                                                errors={errors}
-                                                                                touched={touched}
-                                                                                label={field.fieldLabel}
-                                                                                name={field.fieldName}
-                                                                                type={field.type}
-                                                                                options={field.option}
-                                                                                setFieldValue={(name, value) => {
-                                                                                    setFieldValue(name, value)
-                                                                                }}
-                                                                                required={field.required}
-                                                                                fullWidth
-                                                                                isTooltip={field?.isTooltip || false}
-                                                                                tooltipMessage={field?.tooltipMessage}
-                                                                                size="small"
-                                                                            />
+                                                                        />
                                                             }
                                                         </Grid>
                                                     ))}
@@ -703,13 +737,13 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                 accountApi={supplierAccount.accountApi}
                                 isGetAccountData={true}
                                 onGetAddedAccount={({ data, addressDataSource }) => {
-                                    setAccountData((prevState) => {
+                                    setSupplierData((prevState) => {
                                         return [
                                             ...prevState,
                                             {
                                                 optionValue: data._id,
                                                 optionLabel: data.accountName,
-                                                order: accountData.length,
+                                                order: supplierData.length,
                                                 default: false,
                                                 billingAddress: data?.billingAddress,
                                                 shippingAddress: data?.shippingAddress
@@ -755,6 +789,44 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                 isAccountFieldDisable={true}
                             />
                         )}
+
+                        {showAddressDialog &&
+                            <ManageAddressDialog
+                                onClose={() => {
+                                    setShowAddressDialog(false);
+                                }}
+                                onSuccess={(obj) => {
+                                    if (obj) {
+                                        setShowAddressDialog(false);
+                                        if (obj?.isAlreadyExist === true) {
+                                            let tempAddress = addressType === 'shippingAddress' ? addressData.find(d => d?.optionLabel === obj?.fullAddress) : addressData.find(d => d?.optionLabel === obj?.fullAddress)
+                                            onShippingAddressOpen(values.supplierAccount, tempAddress?.optionValue)
+
+                                            setFieldValue(addressType, tempAddress?.optionValue);
+                                        }
+                                        else {
+                                            setAddressData((prevState) => [...prevState,
+                                            {
+                                                default: false,
+                                                optionLabel: obj?.fullAddress,
+                                                optionValue: obj._id,
+                                                order: addressData.length + 1,
+                                            }])
+                                            setShippingAddress((prevState) => [...prevState,
+                                            {
+                                                default: false,
+                                                optionLabel: obj?.fullAddress,
+                                                optionValue: obj._id,
+                                                order: shippingAddress.length + 1,
+                                            }])
+
+                                            setFieldValue(addressType, obj._id);
+                                        }
+                                    }
+                                }}
+                            />
+                        }
+
                     </Fragment>
                 )}
             </Formik>

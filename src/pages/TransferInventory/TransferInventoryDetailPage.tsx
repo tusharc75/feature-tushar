@@ -27,8 +27,10 @@ import HideWhenOffline from 'src/components/HideWhenOffline';
 import { TRANSFER_STEPS, STATUS } from './transferInventoryHelpers';
 import InventoryGrid from './InventoryGrid';
 import CompletedGrid from './InventoryGrid/CompletedGrid';
+import { camelCase } from 'lodash';
 
 const TransferInventoryDetailPage = () => {
+  const renderedFrom = camelCase(routes?.transferInventory.title);
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -278,9 +280,16 @@ const TransferInventoryDetailPage = () => {
                         transferData={transferInventoryData}
                         updateTransferStatus={updateTransferStatus}
                         setTransferIsEnded={setTransferIsEnded}
+                        renderedFrom={`${renderedFrom}_grid-1`}
                       />
                     )}
-                    {currentStep === 1 && <CompletedGrid transferData={transferInventoryData} setTransferIsEnded={setTransferIsEnded} />}
+                    {currentStep === 1 && (
+                      <CompletedGrid
+                        transferData={transferInventoryData}
+                        setTransferIsEnded={setTransferIsEnded}
+                        renderedFrom={`${renderedFrom}_grid-2`}
+                      />
+                    )}
                   </Box>
                 </Box>
               </TabPanel>

@@ -2,35 +2,35 @@ import React, { useState, useEffect, useContext, Fragment, useReducer } from "re
 import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs, ButtonGroup, Container, InputAdornment, TextField, MenuItem, Menu } from "@material-ui/core";
 import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
-import axiosInstance from "../../../axios/axiosInstance";
-import routes from "../../../components/Helpers/Routes";
-import { useData } from "../../../StateProvider/Provider";
-import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder } from "../../../constants/helpers";
+import axiosInstance from "src/axios/axiosInstance";
+import routes from "src/components/Helpers/Routes";
+import { useData } from "src/StateProvider/Provider";
+import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
+import { purchaseOrder } from "src/constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
-import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
-import AddProductDialog from "./AddProductDialog";
-import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
-import CreateProduct from "../../../components/Product/CreateProduct";
-import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
+import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
+import { CommonRenderer, DateRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
+import AddExistingProductInventory from "../../Sublease/Productpackage/AddExistingProductInventory";
+import GridDeleteIcon from "src/components/Helpers/GridDeleteIcon";
+import CreateProduct from "src/components/Product/CreateProduct";
+import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
 import PurchaseOrderQtyDialog from "./PurchaseOrderQtyDialog";
 import { FaCartArrowDown, FaCartPlus, FaLaptopHouse } from "react-icons/fa";
 import { isMobile, isTablet } from "react-device-detect";
-import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
-import HtmlTooltip from "../../../components/CustomTooltipTitle";
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
-import { prepareDataForGrid, CHILD_RESOURCE } from "../../../constants/helpers";
-import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
+import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
+import HtmlTooltip from "src/components/CustomTooltipTitle";
+import { CURReplaceByCurrencySingle } from "src/constants/formulaUtility";
+import { prepareDataForGrid, CHILD_RESOURCE } from "src/constants/helpers";
+import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "src/constants/columns"
 import { ExpandMore } from "@material-ui/icons";
-import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
-import CustomRenderCell from "../../../components/Helpers/CustomRenderCell";
+import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
+import CustomRenderCell from "src/components/Helpers/CustomRenderCell";
 import InfoIcon from "@material-ui/icons/Info";
 import { MdAdd } from "react-icons/md";
 import { RiEditCircleLine } from "react-icons/ri";
 
-const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) => {
+const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -43,7 +43,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
     const [isAddingProducts, setAddingProducts] = useState(false);
     const [isAddNewProduct, setIsAddNewProduct] = useState(false)
 
-    const [productList, setProductList] = useState([]);
     const [showProductDialog, setShowProductDialog] = useState(false)
     const [selectedProductData, setSelectedProductData] = useState(null)
     const [isBulkEdit, setIsBulkEdit] = useState(false)
@@ -77,7 +76,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                 }
             });
             let rendererNames = [];
-            genrateColoum(fields, columns, rendererNames, false);
+            genrateColoum(fields, columns, rendererNames, false, renderedFrom);
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
                 nameRenderer: NameRenderer,
@@ -195,11 +194,12 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
         setAnchorEl(null);
     };
 
-    const handleAddProduct = (products) => {
+    const handleAddProduct = (rows) => {
+        console.log(rows)
         setAddingProducts(true)
-        let tempProductArray = products.map(d => ({
-            "productId": d.id || d.productId,
-            "qty": parseInt(d.quantity) || 0,
+        let tempProductArray = rows.map(d => ({
+            "productId": d._id,
+            "qty": d.qty ? parseInt(d.qty) : 1,
             "expectedDelivery": purchaseOrderData?.deliveryDate
         }))
         axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/add`, { "orderDetails": tempProductArray })
@@ -382,7 +382,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                     onCreate={null}
                     showClone={false}
                     fullHeight={true}
-                    renderedFrom={routes.purchaseOrderDetail.title}
+                    renderedFrom={renderedFrom}
                     onClone={() => { }}
 
                 /> :
@@ -404,14 +404,13 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                     onCellValueChanged={(row) => {
                         //handleUpdateOrderProduct(row.data)
                     }}
-                    renderedFrom="purchaseOrderDetailsPageInventory"
+                    renderedFrom={renderedFrom}
                     refreshGrid={fetchPurchaseOrderProduct}
                     currency={purchaseOrderData?.currency?.toLowerCase()}
                     fromPurchaseOrderGrid={true}
                     rowClassRules={{
                         "red-data-row":
                             function (params) {
-                                console.log(params)
                                 return !params?.data?.isValid
                             },
                     }}
@@ -424,12 +423,12 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct }) =>
                 </Box>
             }
             {addProductDialog &&
-                <AddProductDialog
+                <AddExistingProductInventory
                     isAddingProducts={isAddingProducts}
-                    addProductInPurchaseOrder={handleAddProduct}
-                    handleProductInPurchaseOrderClose={() => { setAddProductDialog(false) }}
-                    productInPurchaseOrder={productList}
+                    addProductInventory={handleAddProduct}
+                    handleProductInventoryClose={() => { setAddProductDialog(false) }}
                     type={"product"}
+                    renderedFrom={renderedFrom}
                 />
             }
             {isAddNewProduct && (

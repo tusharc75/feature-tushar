@@ -184,7 +184,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 </Button>
             </Box>
             <Box display="flex">
-                <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length > 1) ? "Buld edit selected records" : "Select records to edit"}>
+                <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length > 1) ? "Bulk edit selected records" : "Select records to edit"}>
                     <span>
                         <Button
                             variant="contained"

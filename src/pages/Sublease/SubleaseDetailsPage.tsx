@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs, ButtonGroup, Container, InputAdornment, TextField } from "@material-ui/core";
-import { Autocomplete, Skeleton } from "@material-ui/lab";
+import React, { useState, useEffect, useContext, Fragment } from "react";
+import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from "@material-ui/core";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
@@ -11,10 +10,10 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { sublease, SUBLEASE_STATUS, subleaseSteps } from "../../constants/helpers";
+import { sublease, SUBLEASE_STATUS, subleaseSteps, defaultActivityShow, ACTIVITY_RESOURCE } from "../../constants/helpers";
 import ManageSublease from "./ManageSublease";
 import Steps from "../RentalManagement/Steps";
-import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from "react-icons/fa";
+import { FaWpforms } from "react-icons/fa";
 import { BiEdit, BiFoodMenu } from "react-icons/bi";
 import TabPanel from "../../components/TabPanel";
 import queryString from 'query-string';
@@ -24,10 +23,16 @@ import Productpackage from './Productpackage';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
 import { GiAbstract055 } from 'react-icons/gi';
+import { camelCase } from "lodash";
+import HideWhenOffline from "src/components/HideWhenOffline";
+import Activity from '../../components/Activity';
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 
 const SubleaseDetailsPage = () => {
-
+    const renderedFrom = camelCase(routes?.sublease.title)
     const toastConfig = useContext(CustomToastContext);
+    const isSmallScreen = useMediaQuery('(max-width:1300px)');
+    const [showActivity, setActivityShow] = useState(defaultActivityShow);
 
     const { id } = useParams();
     const history = useHistory();
@@ -68,7 +73,6 @@ const SubleaseDetailsPage = () => {
     const updateProcessStatus = (processStatus) => {
         axiosInstance().put(`${sublease.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
             .catch((error) => {
-                toastConfig.setToastConfig(error);
             });
     }
 
@@ -134,14 +138,18 @@ const SubleaseDetailsPage = () => {
         setAnchorEl(null);
     };
 
+    const handleActivityHideShow = () => {
+        setActivityShow(!showActivity);
+    };
+
     return (
         <>
-            <Fragment>
-                <Grid container className="headerbox">
-                    <CustomBreadCrumbs routes={[routes.sublease, { title: subleaseData?.subleaseName }]} />
-                </Grid>
-                <Grid container spacing={1} className="detail-container">
-                    <Grid item xs={12} sm={12} spacing={2}>
+            <Grid container className="headerbox">
+                <CustomBreadCrumbs routes={[routes.sublease, { title: subleaseData?.subleaseName }]} />
+            </Grid>
+            <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
+                <div>
+                    <div>
                         <Paper style={{ height: "650px" }}>
                             <DetailsPageHeader
                                 heading={subleaseData?.subleaseName}
@@ -208,7 +216,7 @@ const SubleaseDetailsPage = () => {
                                     }}
                                     label={
                                         <div className="d-flex align-items-center tab-font">
-                                            <GiAbstract055 className="mr-1" fontSize="inherit" />Delivery Tickets
+                                            <GiAbstract055 className="mr-1" fontSize="inherit" />{routes.deliveryTicket.title}
                                         </div>
                                     }
                                     {...a11yProps(1)}
@@ -248,6 +256,7 @@ const SubleaseDetailsPage = () => {
                                                             setNextStep={setNextStep}
                                                             fetchData={fetchData}
                                                             isIssued={isIssued}
+                                                            renderedFrom={`${renderedFrom}_grid-1`}
                                                         />
                                                     )}
                                                     {(currentStep === 1 || currentStep === 2) && subleaseData && (
@@ -256,6 +265,7 @@ const SubleaseDetailsPage = () => {
                                                             subleaseData={subleaseData}
                                                             setNextStep={setNextStep}
                                                             currentStep={currentStep}
+                                                            renderedFrom={`${renderedFrom}_grid-2`}
                                                         />
                                                     )}
                                                 </Paper>
@@ -272,7 +282,8 @@ const SubleaseDetailsPage = () => {
                                 <Grid item xs={12} sm={12} md={12} lg={12} >
                                     {subleaseData ?
                                         <Tickets
-                                            subleaseData={subleaseData}
+                                            subleaseId={id}
+                                            renderedFrom={`${renderedFrom}_grid-3`}
                                         />
                                         : (
                                             <Grid container spacing={2} style={{ padding: "8px" }}>
@@ -283,10 +294,48 @@ const SubleaseDetailsPage = () => {
                                 </Grid>
                             </TabPanel>
                         </Paper>
-                    </Grid>
+                    </div>
                     <Box my={1} />
-                </Grid>
-            </Fragment>
+                </div>
+                <div className="position-relative">
+                    <HideWhenOffline>
+                        <Paper>
+                            {!isSmallScreen && (
+                                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                                    {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+                                </span>
+                            )}
+                            <div style={{ display: showActivity || (isSmallScreen && tabValue === 0) ? 'block' : 'none' }}>
+                                <Grid container>
+                                    <Grid item xs={12}>
+                                        {subleaseData && (
+                                            <div>
+                                                <Activity
+                                                    resourceId={subleaseData._id}
+                                                    resource={ACTIVITY_RESOURCE.sublease}
+                                                    restrictedAddActivities={
+                                                        permissions && permissions[`${ACTIVITY_RESOURCE.sublease}`] && permissions[`${ACTIVITY_RESOURCE.sublease}`].isUpdate ? [] : ['Attachment', 'Case']
+                                                    }
+                                                    relatedTo={[
+                                                        {
+                                                            type: ACTIVITY_RESOURCE.sublease,
+                                                            referenceId: subleaseData._id,
+                                                            access: true
+                                                        }
+                                                    ]}
+                                                    handleActivityRefresh={() => { }}
+                                                    emails={[]}
+                                                />
+                                            </div>
+                                        )}
+                                    </Grid>
+                                </Grid>
+                            </div>
+                        </Paper>
+                    </HideWhenOffline>
+                </div>
+            </div>
+
             {showConfirmBox && (
                 <ConfirmationDialog
                     open={showConfirmBox}

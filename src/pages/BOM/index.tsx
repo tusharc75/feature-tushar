@@ -20,9 +20,11 @@ import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../comp
 import AssignProductDialog from '../../components/AssignRolesDialog/AssignProductDialog';
 import ConfirmationDialogRaw from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { camelCase } from 'lodash';
 
 const BOMTable = () => {
   const { id } = useParams();
+  const renderedFrom = `${camelCase(routes?.product.title)}_bom`
 
   const { setToastConfig } = useContext(CustomToastContext);
   const [loadingBOMData, setLoadingBOMData] = useState(false);
@@ -79,7 +81,7 @@ const BOMTable = () => {
         setCustomizedRoutes([
           { title: "Product Master", path: routes.product.path },
           { title: productData?.productName, path: `${routes.productDetail.path}/${id}` },
-          { title: 'BOM' }
+          { title: 'Parts' }
         ]);
       })
   }
@@ -359,7 +361,7 @@ const BOMTable = () => {
             page={page}
             actionWidth={150}
             loading={gridLoading}
-            renderedFrom={routes.productDetail.title}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchBOMData}
           />
         </Box>
@@ -380,8 +382,7 @@ const BOMTable = () => {
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
           assignedProducts={BOMData}
           onSuccess={() => {
-            // getFrequentlyBoughtProduct();
-            if (process.env.REACT_APP_ENV !== 'staging') {
+            if (permissions?.serializedAsset) {
               fetchBOMData();
             }
             setOpenAssignProductDialog(false);

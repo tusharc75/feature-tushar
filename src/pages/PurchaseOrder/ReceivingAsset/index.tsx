@@ -1,33 +1,33 @@
 
 import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useReducer, useContext } from "react";
-import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
+import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
 import { Button, Chip, Dialog, IconButton, makeStyles, useMediaQuery } from "@material-ui/core";
-import axiosInstance from "../../../axios/axiosInstance";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "../../../components/Helpers/NoDataCell";
+import axiosInstance from "src/axios/axiosInstance";
+import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
+import NoDataCell from "src/components/Helpers/NoDataCell";
 import {
     CustomDialogTransition, dateFormat, defaultActivityShow, gridLoadingTimeout, serializedAsset,
     purchaseOrder, PURCHASE_ORDER_STATUS, CHILD_RESOURCE, prepareDataForGrid
-} from "../../../constants/helpers";
-import { useData } from "../../../StateProvider/Provider";
+} from "src/constants/helpers";
+import { useData } from "src/StateProvider/Provider";
 import moment from "moment";
 import { startCase } from "lodash";
 import CreateSeriaizedAsset from "./CreateSerializedAsset";
-import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
+import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
 import { isMobile, isTablet } from "react-device-detect";
-import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
-import routes from "../../../components/Helpers/Routes";
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
+import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
+import routes from "src/components/Helpers/Routes";
+import { CURReplaceByCurrencySingle } from "src/constants/formulaUtility";
 import { Link } from "react-router-dom";
-import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
+import { CreateEmail } from "src/components/Activity/Email/CreateEmail";
 import { AiFillFilePdf } from "react-icons/ai";
 import { MdAdd, MdEmail } from "react-icons/md";
-import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
-import { genrateColoum, getFrameworkComponents } from "../../../constants/columns";
+import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
+import { genrateColoum, getFrameworkComponents } from "src/constants/columns";
 import { useHistory } from "react-router-dom";
-import HtmlTooltip from "../../../components/CustomTooltipTitle";
+import HtmlTooltip from "src/components/CustomTooltipTitle";
 import { IoMdDownload } from "react-icons/io";
 
 const useStyles = makeStyles(() => ({
@@ -43,7 +43,7 @@ const useStyles = makeStyles(() => ({
 
 }));
 
-const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, statusOptions, handleViewPdf, handleAttachments }) => {
+const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, statusOptions, handleViewPdf, handleAttachments, renderedFrom }) => {
     const toastConfig = useContext(CustomToastContext);
     const {
         state: { user, permissions }
@@ -117,7 +117,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
         axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
             let fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
             let rendererNames = [];
-            genrateColoum(fields, columns, rendererNames, false);
+            genrateColoum(fields, columns, rendererNames, false, renderedFrom);
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
                 nameRenderer: NameRenderer,
@@ -141,6 +141,9 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                     productDescription: item?.productDetail?.productName,
                     productId: item?.productDetail?._id,
                 };
+                if (item.qty === item.actualReceived) {
+                    res["hideSelection"] = true
+                }
                 return res;
             });
             if (rows.every(d => d.qty === d.actualReceived)) {
@@ -231,18 +234,18 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
         <Box display="flex" justifyContent="space-between" m={1}>
             <Box display="flex" alignItems="center">
                 <Box display="flex">
-                <Button
-                    variant={"contained"}
-                    color="primary"
-                    size="small"
-                    style={isMobile && !isTablet ? {color:"var(--secondary)"} : {}}
-                    disabled={selectedRecords.length === 0 || disableCreateAsset}
-                    onClick={() => { setShowCreateAssetDialog(true) }}
-                >
-                    {`Create Asset`}
-                </Button>
-                <Box mx={1}/>
-                    {permissions?.purchaseOrder?.isRead && (
+                    <Button
+                        variant={"contained"}
+                        color="primary"
+                        size="small"
+                        style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
+                        disabled={selectedRecords.length === 0 || disableCreateAsset}
+                        onClick={() => { setShowCreateAssetDialog(true) }}
+                    >
+                        {`Create Asset`}
+                    </Button>
+                    <Box mx={1} />
+                    {permissions?.purchaseOrder?.isRead && !isMobile && (
                         <Button
                             variant={isMobile && !isTablet ? "text" : "outlined"}
                             color="primary"
@@ -287,7 +290,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                     </Button>}
                 </Box>
                 <Box mx={1} />
-                
+
             </Box>
         </Box>
         {columns && !loadingColumns ?
@@ -334,7 +337,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                             onCreate={null}
                             showClone={false}
                             fullHeight={true}
-                            renderedFrom={routes.purchaseOrderDetail.title}
+                            renderedFrom={renderedFrom}
                             onClone={() => { }}
 
                         /> : <CustomAgGridEditable
@@ -351,7 +354,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                             loading={loading}
                             allowSelection={true}
                             isClientSideGrid={true}
-                            renderedFrom="purchaseOrderDetailsPageReceivingAsset"
+                            renderedFrom={renderedFrom}
                             onCellValueChanged={(row) => {
                             }}
                             currency={purchaseOrderData?.currency?.toLowerCase()}

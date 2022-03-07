@@ -114,11 +114,12 @@ export default function CustomSwipableList({
             scrollableTarget="scrollableDiv"
             endMessage={loading == false && dataRows.length === rowCount ? <h3 className="text-center border p-3">{"Total no. of records found " + dataRows.length}</h3> : <></>}
           >
-            {loading ? (
+            {/* {loading ? (
              <Grid container alignItems="center" justifyContent="center" style={{minHeight:"20vh"}}>
                 <div className="spinner"></div>
                 </Grid>
-            ) : (
+            ) : ( */}
+            {
               dataRows.map((d, index) => (
                 <Grid
                   key={d._id}
@@ -243,7 +244,7 @@ export default function CustomSwipableList({
                   </Grid>
                 </Grid>
               ))
-            )}
+            }
 
             <Menu
               id="menu-actions"

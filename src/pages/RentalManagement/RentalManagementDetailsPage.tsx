@@ -11,7 +11,15 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { getUniqueCurrencies, gridLoadingTimeout, rentalManagement, defaultActivityShow, RENTAL_STATUS, rentalManagementSteps } from '../../constants/helpers';
+import {
+  getUniqueCurrencies,
+  gridLoadingTimeout,
+  rentalManagement,
+  defaultActivityShow,
+  RENTAL_STATUS,
+  rentalManagementSteps,
+  ACTIVITY_RESOURCE
+} from '../../constants/helpers';
 import Steps from './Steps';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import { MdEdit, MdDelete } from 'react-icons/md';
@@ -40,10 +48,12 @@ import LoadingTicket from './LoadingTicket';
 import ReceivingTicket from './ReceivingTicket';
 import Invoice from './Invoice';
 import RentalManagementViews from './RoadMapViews/RentalManagementViews';
+import { camelCase } from 'lodash';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, updateOfflineGridData } = useContext(CustomOfflineContext);
+  const renderedFrom = camelCase(routes?.rentalManagement.title)
 
   const { id } = useParams();
   const history = useHistory();
@@ -111,16 +121,17 @@ const RentalManagementDetailsPage = () => {
   }
 
   useEffect(() => {
-    if (id) {
-      getRentalManagementFields();
+    if (isSmallScreen) {
+      setActivityShow(true)
     }
-  }, [id]);
+  }, [isSmallScreen])
 
   useEffect(() => {
     if (id) {
+      getRentalManagementFields();
       fetchRentalManagementData();
     }
-  }, [rentalManagementFields]);
+  }, [id]);
 
   useEffect(() => {
     if (!isOffline && currentStep !== null && currentStep >= 0 && currentStep <= 5) {
@@ -142,15 +153,9 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
-      if (statusOptions?.findIndex(d => d.optionLabel === RENTAL_STATUS.jobPartiallyStarted) > statusOptions.findIndex(d => d.optionLabel === data?.status)) {
-        data["actualStartDate"] = null;
-      }
-      if (statusOptions?.findIndex(d => d.optionLabel === RENTAL_STATUS.jobPartiallyEnded) > statusOptions.findIndex(d => d.optionLabel === data?.status)) {
-        data["actualEndDate"] = null;
-      }
+
       setRentalManagementData(data);
       setCurrentStep(rentalManagementSteps.indexOf(data?.processStatus) !== -1 ? rentalManagementSteps.indexOf(data?.processStatus) : 0);
-
       handleMainPoints(data);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
@@ -237,9 +242,10 @@ const RentalManagementDetailsPage = () => {
   };
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance().put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
+    axiosInstance()
+      .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
+      .then(({ data }) => { })
       .catch((error) => {
-        toastConfig.setToastConfig(error);
       });
   };
 
@@ -266,7 +272,7 @@ const RentalManagementDetailsPage = () => {
   return (
     <>
       <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.rentalManagement, { title: `${rentalManagementData?.rentalJobName}` }]} />
+        <CustomBreadCrumbs routes={[routes.rentalManagement, { title: `${rentalManagementData ? rentalManagementData?.rentalJobName : ""}` }]} />
       </Grid>
       <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
         <div>
@@ -407,8 +413,10 @@ const RentalManagementDetailsPage = () => {
               </Tabs>
               <TabPanel value={tabValue} index={0}>
                 <Box>
+
                   {(!loadingDetails && rentalManagementFields.length > 0 ?
-                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields} /> : null
+                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields}
+                    /> : null
                   )}
                 </Box>
               </TabPanel>
@@ -430,10 +438,11 @@ const RentalManagementDetailsPage = () => {
                       isSmallScreen={isSmallScreen}
                       isTabletScreen={isTabletScreen}
                       showActivity={showActivity}
+                      renderedFrom={`${renderedFrom}_grid-1`}
                     />
                   )}
                   {currentStep === 1 && rentalManagementData && (
-                    <AdditionalCost rentalManagementData={rentalManagementData} setNextStep={setNextStep} />
+                    <AdditionalCost rentalManagementData={rentalManagementData} setNextStep={setNextStep}  renderedFrom={`${renderedFrom}_grid-2`} />
                   )}
                   {currentStep === 2 && rentalManagementData && (
                     <SerializedAsset
@@ -451,6 +460,7 @@ const RentalManagementDetailsPage = () => {
                       rentalManagementData={rentalManagementData}
                       currentStep={currentStep}
                       setNextStep={setNextStep}
+                      renderedFrom={`${renderedFrom}_grid-3`}
                     />
                   )}
                   {currentStep === 4 && rentalManagementData && (
@@ -458,7 +468,9 @@ const RentalManagementDetailsPage = () => {
                       fetchRentalData={fetchRentalManagementData}
                       rentalManagementData={rentalManagementData}
                       currentStep={currentStep}
-                      setNextStep={setNextStep} />
+                      setNextStep={setNextStep}
+                      renderedFrom={`${renderedFrom}_grid-4`}
+                    />
                   )}
                   {currentStep === 5 && rentalManagementData && (
                     <Invoice
@@ -467,13 +479,14 @@ const RentalManagementDetailsPage = () => {
                       fetchRentalData={fetchRentalManagementData}
                       updateJobStatus={updateJobStatus}
                       statusOptions={statusOptions}
+                      renderedFrom={`${renderedFrom}_grid-5`}
                     />
                   )}
                 </Paper>
               </TabPanel>
               <TabPanel value={tabValue} index={2}>
                 <Box>
-                  <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} />
+                  <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
                 </Box>
               </TabPanel>
             </Paper>
@@ -495,13 +508,13 @@ const RentalManagementDetailsPage = () => {
                       <div>
                         <Activity
                           resourceId={rentalManagementData._id}
-                          resource={rentalManagement.rentalManagementResource}
+                          resource={ACTIVITY_RESOURCE.rentalManagement}
                           restrictedAddActivities={
-                            permissions && permissions['rentalManagement'] && permissions['rentalManagement'].isUpdate ? [] : ['Attachment', 'Case']
+                            permissions && permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] && permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate ? [] : ['Attachment', 'Case']
                           }
                           relatedTo={[
                             {
-                              type: 'rentalManagement',
+                              type: `${ACTIVITY_RESOURCE.rentalManagement}`,
                               referenceId: rentalManagementData._id,
                               access: true
                             }
@@ -518,45 +531,39 @@ const RentalManagementDetailsPage = () => {
           </HideWhenOffline>
         </div>
       </div>
-      {
-        showConfirmBox && (
-          <ConfirmationDialog
-            open={showConfirmBox}
-            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ?`}
-            onClose={() => {
-              setShowConfirmBox(false);
-            }}
-            onOk={handleDelete}
-          />
-        )
-      }
-      {
-        showCancelConfirmBox && (
-          <ConfirmationDialog
-            open={showCancelConfirmBox}
-            message={`Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`}
-            onClose={() => {
-              setShowCancelConfirmBox(false);
-            }}
-            onOk={handleCancelRentalJob}
-          />
-        )
-      }
-      {
-        openUpdateDialog && (
-          <ManageRentalManagementDialog
-            isClone={false}
-            open={openUpdateDialog}
-            rentalManagementId={id}
-            rentalManagementData={rentalManagementData}
-            onClose={() => setOpenUpdateDialog(false)}
-            onSuccess={() => {
-              setOpenUpdateDialog(false);
-              fetchRentalManagementData();
-            }}
-          />
-        )
-      }
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
+      {showCancelConfirmBox && (
+        <ConfirmationDialog
+          open={showCancelConfirmBox}
+          message={`Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`}
+          onClose={() => {
+            setShowCancelConfirmBox(false);
+          }}
+          onOk={handleCancelRentalJob}
+        />
+      )}
+      {openUpdateDialog && (
+        <ManageRentalManagementDialog
+          isClone={false}
+          open={openUpdateDialog}
+          rentalManagementId={id}
+          rentalManagementData={rentalManagementData}
+          onClose={() => setOpenUpdateDialog(false)}
+          onSuccess={() => {
+            setOpenUpdateDialog(false);
+            fetchRentalManagementData();
+          }}
+        />
+      )}
     </>
   );
 };

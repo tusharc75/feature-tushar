@@ -38,11 +38,12 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { prepareDataForGrid } from "../../constants/helpers";
 import MobileFilterDialog from "../../components/MobileFilterDialog";
 import MobileSortDialog from "../../components/MobileSortDialog";
+import { camelCase } from "lodash";
 
 let productTemplateTimeout;
 
 const ProductTemplate: FC = () => {
-
+    const renderedFrom = camelCase(routes?.productTemplate.title)
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext);
 
@@ -463,12 +464,12 @@ const ProductTemplate: FC = () => {
                         CreateNew(data.id, true)
                     }
                     }
-                    renderedFrom={"productTemplatePage"}
+                    renderedFrom={renderedFrom}
                 /> :
                     <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                         dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
                         loading={loading}
-                        renderedFrom={routes?.productTemplate?.title}
+                        renderedFrom={renderedFrom}
                         refreshGrid={fetchProductTemplate}
                     />
                 }

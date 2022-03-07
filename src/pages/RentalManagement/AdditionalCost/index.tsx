@@ -25,8 +25,13 @@ import { GiSabersChoc, GrBusinessService } from "react-icons/all";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
+import { Link } from 'react-router-dom'
+import NoDataCell from "../../../components/Helpers/NoDataCell";
+import { camelCase } from "lodash";
+import { fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
 
-const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
+
+const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -49,20 +54,18 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
     }, []);
 
     const fetchFields = async () => {
-        var data = []
-        if (isOffline) {
-            data = await findOne(objectStore.resource, "rentalManagementCost")
-        }
-        else {
-            const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`)
-            data = response?.data?.data
-        }
-        const fields = CURReplaceByCurrencySingle(data, rentalManagementData.currency)
+        const fields = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
         let rendererNames = [];
-        genrateColoum(fields, columns, rendererNames, false);
+        genrateColoum(fields, columns, rendererNames, false, renderedFrom);
+        columns?.forEach((ele) => {
+            if (ele.field === "costType") {
+                ele.cellRenderer = "costTypeRenderer";
+            }
+        })
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
             commonRenderer: CommonRenderer,
+            costTypeRenderer: CostTypeRenderer,
             actionsRenderer: ActionsRenderer,
             ...tempFrameworkComponent,
         }
@@ -90,9 +93,9 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                 let res: any = {
                     ...prepareDataForGrid(item),
                 };
-                // res["canDelete"] = permissions?.rentalManagement?.isDelete;
-                // res["allowedToEdit"] = permissions?.rentalManagement?.isUpdate;
-                // res["isChecked"] = false;
+                res["canDelete"] = permissions?.rentalManagement?.isDelete;
+                res["allowedToEdit"] = permissions?.rentalManagement?.isUpdate;
+                res["isChecked"] = false;
                 return res;
             });
             setNextStep(true)
@@ -130,6 +133,18 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
             />
         </Fragment>
     );
+
+    const CostTypeRenderer = (params) =>
+        params?.value ? (
+            <a className="link" title={params.value} onClick={() => {
+                setShowCostDialog(true)
+                setSelectedCostData(params.data)
+            }} >
+                {params.value}
+            </a>
+        ) : (
+            <NoDataCell />
+        );
 
     const handleAddCost = (rows) => {
         axiosInstance().post(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/add`, { additionalCost: rows })
@@ -229,7 +244,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                     onCreate={null}
                     showClone={false}
                     fullHeight={true}
-                    renderedFrom={routes.rentalManagement.title}
+                    renderedFrom={renderedFrom}
                     onClone={() => { }}
                 />
                 :
@@ -251,7 +266,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep }) => {
                     onCellValueChanged={(row) => {
                         //handleUpdateOrderProduct(row.data)
                     }}
-                    renderedFrom="rentalmanagmentadditionalcost"
+                    renderedFrom={renderedFrom}
                     refreshGrid={fetchAdditionalCost}
                     isFooter={true}
                     currency={rentalManagementData?.currency?.toLowerCase()}

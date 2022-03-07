@@ -33,8 +33,10 @@ import { MdAdd,MdSort, MdFilterList} from 'react-icons/md';
 import { FaSuitcase,IoIosCreate} from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
+import { camelCase } from 'lodash';
 
 const MarketSegment = () => {
+  const renderedFrom = camelCase(routes?.marketSegment.title);
   const location = useLocation();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -59,7 +61,7 @@ const MarketSegment = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
-  const columnState = JSON.parse(localStorage.getItem(routes.marketSegment.title));
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
 
   const handleOpen = () => {
@@ -107,7 +109,7 @@ const MarketSegment = () => {
               { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }
             ];
           } else {
-            let currentColumn = getColumnData(routes.marketSegment.title, o?.fieldData, routes.marketSegment.path);
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.marketSegment.path);
 
             if (currentColumn !== null) {
               columns = [...columns, currentColumn?.columnData];
@@ -487,7 +489,7 @@ const MarketSegment = () => {
             onCreate={() => setOpen({ open: true, idToClone: null, isClone: null })}
             showClone={false}
             onClone={() => {}}
-            renderedFrom={marketSegment.marketSegmentResource}
+            renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
           <CustomAgGrid
@@ -502,7 +504,7 @@ const MarketSegment = () => {
             page={page}
             actionWidth={100}
             loading={loading}
-            renderedFrom={routes.marketSegment.title}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchMarketSegment}
           />
         ) : null}

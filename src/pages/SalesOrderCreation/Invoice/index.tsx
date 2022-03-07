@@ -23,7 +23,7 @@ import { Link } from "react-router-dom";
 import { startCase } from "lodash";
 
 
-const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobStatus, statusOptions }) => {
+const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobStatus, statusOptions, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
@@ -74,7 +74,7 @@ const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobSt
       fields = [...fields, ...CURReplaceByCurrencySingle(resultCost?.data?.data, salesOrderData.currency)]
 
       let rendererNames = [];
-      genrateColoum(fields, columns, rendererNames, false);
+      genrateColoum(fields, columns, rendererNames, false, renderedFrom);
       let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
       tempFrameworkComponent = {
         commonRenderer: CommonRenderer,
@@ -262,7 +262,7 @@ const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobSt
           loading={loading}
           allowSelection={false}
           isClientSideGrid={true}
-          renderedFrom="SalesOrderInvoicePage"
+          renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           fromPurchaseOrderGrid={true}
           onCellValueChanged={(row) => {

@@ -19,10 +19,9 @@ import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 
 
-const renderedFrom = "subleasingAddProducts";
-const localStorageSelectedRecords = `${renderedFrom}_selected`
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, isAddingProducts }) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, isAddingProducts, renderedFrom }) => {
+    const localStorageSelectedRecords = `${renderedFrom}_selected`
 
     const toastConfig = useContext(CustomToastContext)
     const { state: { selectedEntity } }: any = useData();
@@ -49,7 +48,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(type === "product" ? product.api + queryString : packages.packageApi + queryString).then(({ data: { data, count } }) => {
+        axiosInstance().get(`${type === "product" ? product.api + queryString : packages.packageApi + queryString}`).then(({ data: { data, count } }) => {
             setMaterialList(JSON.parse(JSON.stringify(data)));
             let rows = data.map((u) => {
                 let finalObject = prepareDataForGrid(u);
@@ -74,7 +73,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     };
 
     const getQueryString = () => {
-        let deepFilter = '?';
+        let deepFilter = `?page=${page}&limit=${limit}`;
 
         if (type !== "product") {
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'packageType', term: 'product' }]))}&filterType=and`
@@ -115,8 +114,8 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 let rendererNames = []
                 data.forEach(o => {
                     let currentColumn = type === "product" ?
-                        getColumnData(routes.product?.title, o?.fieldData, routes.productDetail.path)
-                        : getColumnData(routes.packages?.title, o?.fieldData, routes.packagesDetail.path)
+                        getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
+                        : getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -139,7 +138,18 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         dispatch({ type: "search", search: e.target.value });
     };
 
-    const onCellValueChanged = (row) => {
+    const onCellValueChanged = ({ data }: any) => {
+        const selectedFromStorage = [...getLocalStorageArrayData(localStorageSelectedRecords)]
+        if (!selectedFromStorage || selectedFromStorage.length === 0) return
+
+        const updatedRecords = selectedFromStorage.map(d => {
+            if (data._id === d._id) {
+                d.qty = data.qty
+            }
+            return d
+        })
+        localStorage.setItem(localStorageSelectedRecords, JSON.stringify(updatedRecords))
+
     }
 
     return (<Fragment>
@@ -170,8 +180,8 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                     variant="contained"
                                     disabled={!getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length || isAddingProducts}
                                     endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
-                                    {getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? "(" + getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length + ")  " : ""}
-                                    Add</Button>
+                                    Add{getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length + ")" : ""}
+                                    </Button>
                             </Box>
                         </Grid>
                     </Grid>

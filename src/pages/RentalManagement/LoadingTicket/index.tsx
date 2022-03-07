@@ -36,12 +36,10 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { makeStyles } from '@material-ui/core/styles';
-import { RiExchangeFundsLine } from 'react-icons/ri';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 import { groupBy, uniq, map } from "lodash";
 
-const renderedFrom = 'rentalManagementDetailsPageDeliveryTicket';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -55,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep }) => {
+const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -75,6 +73,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [showRemoveTicketDialog, setShowRemoveTicketDialog] = useState(false);
 
+  const [uniqueLoadingTicket, setUniqueLoadingTicket] = useState([]);
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
 
@@ -150,6 +149,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
         setNextStep(true);
       }
+
+      setUniqueLoadingTicket([...new Set(productAssets.filter(d => d.loadingTicketId !== undefined).map(d => d.loadingTicketId))]);
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -200,10 +201,10 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   };
 
   const columns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, cellRenderer: "inventoryRenderer" },
+    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "inventoryRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "productNameRenderer" },
-    { field: "warehouse", headerName: "Plant", show: false, disabled: true, cellRenderer: "warehouseRenderer" },
+    { field: "productName", headerName: "Product Type", show: true, cellRenderer: "productNameRenderer" },
+    { field: "warehouse", headerName: "Plant", show: false, cellRenderer: "warehouseRenderer" },
     { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "ticketRenderer" },
     { field: "status", headerName: "Asset Status", show: true, cellRenderer: "commonRenderer" },
   ];
@@ -241,7 +242,14 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
       data["startDate"] = rentalManagementData?.estimateStartDate;
       data["endDate"] = rentalManagementData?.estimateStartDate;
+      data["isPickupFromDisable"] = true;
+      data["isDeliveryToDisable"] = true;
 
+      data["wellName"] = rentalManagementData?.wellName;
+      data["afeNumber"] = rentalManagementData?.afeNumber;
+      if (rentalManagementData?.processor?.optionValue) {
+        data["processor"] = rentalManagementData?.processor?.optionValue;
+      }
       setShowTicketDialog({ open: true, data: data });
     }
   };
@@ -268,51 +276,56 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
       <Box display="flex" alignItems="center">
-        <Button
+        {!isMobile && <Button
           onClick={() => {
             setDownlodingFile(true);
-            axiosInstance().get(`/rental-management/${rentalManagementData._id}/pdf`)
-              .then(({ data }) => {
-                axiosInstance()
-                  .get(`user/download?fileName=${data.data.fileName}`, {
-                    responseType: "blob",
-                  })
-                  .then(({ data }) => {
-                    const file = new Blob([data], { type: "application/pdf" });
-                    const fileURL = URL.createObjectURL(file);
-                    const pdfWindow = window.open();
-                    pdfWindow.location.href = fileURL;
-                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-                    setDownlodingFile(false);
-                  })
-                  .catch((err) => {
-                    toastConfig.setToastConfig(err);
-                    setDownlodingFile(false);
-                  });
-              }).catch((err) => {
-                toastConfig.setToastConfig(err);
-                setDownlodingFile(false);
-              })
+            uniqueLoadingTicket.forEach(currentId => {
+              axiosInstance().get(`/delivery-ticket/${currentId}/pdf`)
+                .then(({ data }) => {
+                  axiosInstance()
+                    .get(`user/download?fileName=${data.data.fileName}`, {
+                      responseType: "blob",
+                    })
+                    .then(({ data }) => {
+                      const file = new Blob([data], { type: "application/pdf" });
+                      const fileURL = URL.createObjectURL(file);
+                      const pdfWindow = window.open();
+                      pdfWindow.location.href = fileURL;
+                      toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                      setDownlodingFile(false);
+                    })
+                    .catch((err) => {
+                      toastConfig.setToastConfig(err);
+                      setDownlodingFile(false);
+                    });
+                }).catch((err) => {
+                  toastConfig.setToastConfig(err);
+                  setDownlodingFile(false);
+                })
+            })
+
           }}
           variant={isMobile && !isTablet ? 'text' : 'outlined'}
           color="primary"
           type="button"
           size="small"
-          disabled={downlodingFile || isOffline}
-          style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-          startIcon={isMobile ? '' : <AiFillFilePdf />}
+          disabled={downlodingFile || isOffline || uniqueLoadingTicket.length === 0}
+          startIcon={<AiFillFilePdf />}
         >
-          {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
-        </Button>
+          {downlodingFile ? "Please wait..." : "Preview"}
+        </Button>}
         <Box mx={1} />
-        <Button variant={isMobile && !isTablet ? 'text' : 'outlined'} color="primary" aria-controls="simple-menu"
+        <Button
+          variant={isMobile && !isTablet ? 'text' : 'outlined'}
+          color="primary"
+          aria-controls="simple-menu"
           aria-haspopup="true"
           disabled={selectedRecords.length === 0 || isOffline}
           size="small"
           onClick={handleClick}
           style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
           endIcon={<ArrowDropDownIcon />}>
-          {isMobile && !isTablet ? <RiExchangeFundsLine size={20} /> : 'Change Status'}
+          {'Change Status'}
         </Button>
         <Menu
           id="simple-menu"
@@ -340,19 +353,20 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           }}>Lost</MenuItem>
         </Menu>
         <Box mx={1} />
-        <Tooltip
-          title="Create Loading Ticket">
-          <Button
-            onClick={() => { handleDeliveryTicketDialog() }}
-            variant={isMobile && !isTablet ? "text" : "outlined"}
-            color="primary"
-            size="small"
-            style={isMobile && !isTablet ? { color: "#FFD700" } : {}}
-            disabled={(selectedRecords.length === 0)
-              || (selectedRecords.some(f => f.hasOwnProperty("loadingTicketId")) || checkUniqWarehouse())}
-          >
-            {isMobile && !isTablet ? <AiOutlineLoading3Quarters size={18} /> : 'Create Loading Ticket'}
-          </Button>
+        <Tooltip title={(checkUniqWarehouse() && selectedRecords.length > 1) ? "Selected assets are located in several locations."
+          : "Create Loading Ticket"}>
+          <span>
+            <Button
+              onClick={() => { handleDeliveryTicketDialog() }}
+              variant={isMobile && !isTablet ? "text" : "outlined"}
+              color="primary"
+              size="small"
+              disabled={(selectedRecords.length === 0)
+                || (selectedRecords.some(f => f.hasOwnProperty("loadingTicketId")) || checkUniqWarehouse())}
+            >
+              {'Create Loading Ticket'}
+            </Button>
+          </span>
         </Tooltip>
         <Box mx={1} />
         {(selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("loadingTicketId") &&
@@ -460,20 +474,22 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
       }
     </Grid>
-    {showTicketDialog.open && (
-      <ManageDeliveryTicket
-        ticketType={DELIVERY_TICKET_TYPE.loading}
-        refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
-        refrenceData={showTicketDialog.data}
-        onClose={() => setShowTicketDialog({ open: false, data: {} })}
-        productInventory={selectedRecords}
-        onSuccess={() => {
-          setShowTicketDialog({ open: false, data: {} });
-          fetchRecords();
-          fetchRentalData()
-        }}
-      />
-    )}
+    {
+      showTicketDialog.open && (
+        <ManageDeliveryTicket
+          ticketType={DELIVERY_TICKET_TYPE.loading}
+          refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
+          refrenceData={showTicketDialog.data}
+          onClose={() => setShowTicketDialog({ open: false, data: {} })}
+          productInventory={selectedRecords}
+          onSuccess={() => {
+            setShowTicketDialog({ open: false, data: {} });
+            fetchRecords();
+            fetchRentalData()
+          }}
+        />
+      )
+    }
     {
       showRemoveTicketDialog && (
         <ConfirmationDialog
@@ -513,83 +529,87 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           }}
           okBtnLoading={okBtnLoading}
         />
-      )}
-    {statusToUpdate.open && (
-      <Dialog
-        open
-        classes={{
-          paper: classes.paper
-        }}
-        onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
-      >
-        <CustomDialogHeader
-          title="Are you sure ?"
-          showRequiredLabel={false}
+      )
+    }
+    {
+      statusToUpdate.open && (
+        <Dialog
+          open
+          classes={{
+            paper: classes.paper
+          }}
           onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
-        />
+        >
+          <CustomDialogHeader
+            title="Are you sure ?"
+            showRequiredLabel={false}
+            onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
+          />
 
-        <CustomDialogContent>
-          <Box className="my-2">
-            {statusToUpdate.status === 'Repair' ? (
-              <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
-            ) : (
-              <TextField
-                id="outlined-multiline-static"
-                label={`Please enter the reason for ${statusToUpdate.status}`}
-                multiline
-                fullWidth
-                rows={4}
-                value={statusToUpdate.message}
-                variant="outlined"
-                onChange={(e) => {
-                  setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
-                }}
-              />
-            )}
-          </Box>
-        </CustomDialogContent>
-        <CustomDialogFooter>
-          <Button
-            size="small"
-            variant="outlined" color="primary" onClick={() => setStatusToUpdate(prevState => ({ ...prevState, open: false }))}>
-            Cancel
-          </Button>
-          <Button
-            size="small"
-            onClick={() => {
-              setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
-              axiosInstance().put(`${serializedAsset.api}/update-status`, {
-                comment: statusToUpdate.message,
-                assets: selectedRecords.map(m => m?._id ?? m?.id),
-                status: statusToUpdate.status,
-                reference: {
-                  _id: rentalManagementData._id,
-                  type: "Rental"
-                }
-              }).then(({ data }) => {
-                toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
-                setStatusToUpdate({ open: false, isUpdating: false, status: "", message: "" });
-                fetchRecords();
-              }).catch((error) => {
-                setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false }));
-                toastConfig.setToastConfig(error)
-              })
-            }}
-            disabled={statusToUpdate.isUpdating}
-            variant="contained"
-            color="primary"
-          >
-            {
-              statusToUpdate.isUpdating ? <CircularProgress
-                style={{ marginRight: "8px" }}
-                size={20} color="inherit" /> : null
-            }
-            Change Status
-          </Button>
-        </CustomDialogFooter>
-      </Dialog>
-    )}
-    {openDeliveryTicketDialog &&
+          <CustomDialogContent>
+            <Box className="my-2">
+              {statusToUpdate.status === 'Repair' ? (
+                <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
+              ) : (
+                <TextField
+                  id="outlined-multiline-static"
+                  label={`Please enter the reason for ${statusToUpdate.status}`}
+                  multiline
+                  fullWidth
+                  rows={4}
+                  value={statusToUpdate.message}
+                  variant="outlined"
+                  onChange={(e) => {
+                    setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
+                  }}
+                />
+              )}
+            </Box>
+          </CustomDialogContent>
+          <CustomDialogFooter>
+            <Button
+              size="small"
+              variant="outlined" color="primary" onClick={() => setStatusToUpdate(prevState => ({ ...prevState, open: false }))}>
+              Cancel
+            </Button>
+            <Button
+              size="small"
+              onClick={() => {
+                setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
+                axiosInstance().put(`${serializedAsset.api}/update-status`, {
+                  comment: statusToUpdate.message,
+                  assets: selectedRecords.map(m => m?._id ?? m?.id),
+                  status: statusToUpdate.status,
+                  reference: {
+                    _id: rentalManagementData._id,
+                    type: "Rental"
+                  }
+                }).then(({ data }) => {
+                  toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
+                  setStatusToUpdate({ open: false, isUpdating: false, status: "", message: "" });
+                  fetchRecords();
+                }).catch((error) => {
+                  setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false }));
+                  toastConfig.setToastConfig(error)
+                })
+              }}
+              disabled={statusToUpdate.isUpdating}
+              variant="contained"
+              color="primary"
+            >
+              {
+                statusToUpdate.isUpdating ? <CircularProgress
+                  style={{ marginRight: "8px" }}
+                  size={20} color="inherit" /> : null
+              }
+              Change Status
+            </Button>
+          </CustomDialogFooter>
+        </Dialog>
+      )
+    }
+    {
+      openDeliveryTicketDialog &&
       <MultipleTicket
         refrenceData={rentalManagementData}
         ticketType={[DELIVERY_TICKET_TYPE.loading]}
@@ -598,7 +618,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           setOpenDeliveryTicketDialog(false)
           fetchRecords()
         }}
-      />}
+      />
+    }
   </>
   );
 };

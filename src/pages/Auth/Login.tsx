@@ -9,7 +9,10 @@ import axiosInstance from './../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
-
+import InputAdornment from '@material-ui/core/InputAdornment';
+import IconButton from '@material-ui/core/IconButton';
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
 import { isEmpty } from 'lodash';
 import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
@@ -54,6 +57,8 @@ const Login = () => {
   const account = useAccount(accounts[0] || {});
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   const { entityApi } = entity;
 
   useEffect(() => {
@@ -227,7 +232,7 @@ const Login = () => {
                           data-testid="password"
                           style={{ width: 260 }}
                           variant="outlined"
-                          type="password"
+                          type={showPassword ? 'text' : 'password'}
                           size="small"
                           label="Password"
                           name="password"
@@ -235,6 +240,15 @@ const Login = () => {
                           error={touched['password'] && Boolean(errors['password'])}
                           helperText={touched['password'] && errors['password']}
                           onChange={(e) => setFieldValue('password', e.target.value)}
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton className="p-0" onClick={() => setShowPassword(!showPassword)}>
+                                  {showPassword ? <Visibility /> : <VisibilityOff />}
+                                </IconButton>
+                              </InputAdornment>
+                            )
+                          }}
                         />
                       </Box>
                       <Box width={260} mt={1}>

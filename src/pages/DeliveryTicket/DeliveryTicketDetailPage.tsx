@@ -34,6 +34,7 @@ import { AiFillFilePdf } from "react-icons/ai";
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
 import { updateSignatureOffline } from './deliveryTicketOfflineHelper';
+import { camelCase } from 'lodash';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -57,10 +58,10 @@ function a11yProps(index: any) {
   };
 }
 
-const renderedFrom = "deliveryTicketDetailInventoryPage"
 
 
 export default function DeliveryTicketDetail(props) {
+  const renderedFrom = `${camelCase(routes?.deliveryTicket.title)}_grid-1`
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -225,6 +226,7 @@ export default function DeliveryTicketDetail(props) {
         if (startDeliverySignatures && startDeliverySignatures.length > 0) {
           setStartDeliveryDate(moment(startDeliverySignatures[startDeliverySignatures.length - 1].date).format(dateTimeFormat));
         }
+        setSignOffDate(data?.actualDeliveryDate)
         const signOffSignatures = data?.signatures?.filter(f => f.status === "Sign-Off" && f.date);
         if (signOffSignatures && signOffSignatures.length > 0) {
           setSignOffDate(moment(signOffSignatures[signOffSignatures.length - 1].date).format(dateTimeFormat));
@@ -266,7 +268,7 @@ export default function DeliveryTicketDetail(props) {
       let columns = []
       let rendererNames = []
       data.forEach(o => {
-        let currentColumn = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path)
+        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path)
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData]
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -330,7 +332,7 @@ export default function DeliveryTicketDetail(props) {
     if (deliveryTicketData) {
       mainPoint["Pick-Up Date:"] = yyyyMMDD(deliveryTicketData?.["pickUpDate"]) || "";
       mainPoint["Delivery Date"] = yyyyMMDD(deliveryTicketData?.deliveryDate) || "";
-      mainPoint["delivery Person"] = deliveryTicketData?.deliveryPerson?.optionLabel || ""
+      mainPoint["Processor"] = deliveryTicketData?.deliveryPerson?.optionLabel || ""
     }
     return mainPoint;
   }, [deliveryTicketData?.ticketName, deliveryTicketData?.deliveryPerson, deliveryTicketData?.deliveryDate]);
@@ -543,7 +545,7 @@ export default function DeliveryTicketDetail(props) {
                       {isMobile && !isTablet ? <FaSignature size={20} /> : "View Signatures"}
                     </Button> : null
                   }
-                  {(deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading
+                  {/* {(deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading
                     && deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob && deliveryTicketData?.status === DELIVERY_TICKET_STATUS.delivered) ?
                     <Button
                       variant={isMobile && !isTablet ? "text" : "contained"}
@@ -554,7 +556,7 @@ export default function DeliveryTicketDetail(props) {
                     >
                       {isMobile && !isTablet ? <FaMailchimp size={20} /> : "Send To Customer"}
                     </Button> : null
-                  }
+                  } */}
                 </DetailsPageHeader>
               )}
               {loading ? (
@@ -613,21 +615,16 @@ export default function DeliveryTicketDetail(props) {
                   <TabPanel value={tabValue} index={0}>
                     {(deliveryTicketData && deliveryTicketFields.length > 0 ?
                       <DetailsPage
-                        data={{ ...deliveryTicketData, actualDispatchedDate: startDeliveryDate, actualDeliveredDate: signOffDate }}
+                        data={{ ...deliveryTicketData, actualDispatchedDate: startDeliveryDate, actualDeliveryDate: signOffDate }}
                         fields={[...deliveryTicketFields
-                        //   , {
-                        //   fieldData: {
-                        //     fieldLabel: "Actual Dispatched Date",
-                        //     fieldName: "actualDispatchedDate",
-                        //     sectionName: "Sign-off Information"
-                        //   }
-                        // }, {
-                        //   fieldData: {
-                        //     fieldLabel: "Actual Delivered Date",
-                        //     fieldName: "actualDeliveredDate",
-                        //     sectionName: "Sign-off Information"
-                        //   }
-                        // }
+                          , {
+                          fieldData: {
+                            type: "date",
+                            fieldLabel: "Actual Delivery Date",
+                            fieldName: "actualDeliveryDate",
+                            sectionName: "Actuals"
+                          }
+                        }
                         ]} /> : null
                     )}
                   </TabPanel>
@@ -668,7 +665,7 @@ export default function DeliveryTicketDetail(props) {
                           </IconButton>
                         }
                         <Box mx={1} />
-                        {permissions?.deliveryTicket?.isRead && (
+                        {permissions?.deliveryTicket?.isRead && !isMobile && (
                           <Button
                             variant={isMobile && !isTablet ? "text" : "outlined"}
                             color="primary"
@@ -728,7 +725,7 @@ export default function DeliveryTicketDetail(props) {
                           onCreate={null}
                           showClone={false}
                           fullHeight={true}
-                          renderedFrom={"receivingTicketDetailInventoryPage"}
+                          renderedFrom={renderedFrom}
                           onClone={() => {
                           }}
                         /> :
