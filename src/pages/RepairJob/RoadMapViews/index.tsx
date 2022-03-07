@@ -178,7 +178,10 @@ const RepairJobViews = (props) => {
           });
         });
         if (i.length) {
-          var data = { target: `${i[i.length - 1].ticketId}-${index}-${i.length - 1}` };
+          const data = { target: `${i[i.length - 1].ticketId}-${index}-${i.length - 1}` };
+          edgeFromTicketToClosed.push(data);
+        } else {
+          const data = { target: `${assets?.data?.data[index]?._id}` };
           edgeFromTicketToClosed.push(data);
         }
       });
@@ -253,13 +256,10 @@ const RepairJobViews = (props) => {
               snapGrid={[15, 15]}
               onElementClick={onElementClick}
             >
-              <div
-                className="d-flex justify-content-space-between"
-                style={{ width: '70%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}
-              >
+              <div style={{ width: '58%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}>
                 {Object.keys(customNodeStyles).map((key) => {
                   return (
-                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', paddingLeft: '5px', paddingRight: '5px' }}>
                       {customNodeStyles[key].name}
                       <div
                         style={{

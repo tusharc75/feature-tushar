@@ -103,7 +103,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                   </IconButton>
                 </HtmlTooltip>}
               {row.original.isTransferAsset &&
-                <HtmlTooltip title={`${routes.transferAsset.title}`}>
+                <HtmlTooltip title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`}>
                   <IconButton size="small" onClick={() => {
                     history.push(routes.transferAsset.path, {
                       rental: rentalManagementData,
@@ -235,7 +235,13 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         const subRows = []
         const inventory = data.inventory?.filter((e) => e._id === parent._id);
         inventory?.forEach((_inventory, k) => {
-          const isTransferAsset = transferAssets.some(e => e.assetId === _inventory.inventory);
+          const transferFilter = transferAssets.filter(e => e.assetId === _inventory.inventory);
+          var isTransferAsset = false;
+          var transferData = {};
+          if (transferFilter.length) {
+            isTransferAsset = true
+            transferData = transferFilter[0]
+          }
           const isPurchaseOrderAsset = purchaseOrderProduct.some(e => e._id === _inventory?.inventoryDetail?.purchaseOrder);
           subRows.push({
             ..._inventory,
@@ -247,6 +253,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
             isPurchaseOrderAsset: isPurchaseOrderAsset,
             isTransferAsset: isTransferAsset,
+            transferData: transferData,
             isSubleaseAsset: _inventory.inventoryDetail?.subleaseAsset
           })
         })
@@ -264,9 +271,14 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             const subRows = []
             const inventory = data.inventory?.filter((e) => e._id === _child._id);
             inventory?.forEach((_inventory, l) => {
-              const isTransferAsset = transferAssets.some(e => e.assetId === _inventory.inventory);
+              const transferFilter = transferAssets.filter(e => e.assetId === _inventory.inventory);
+              var isTransferAsset = false;
+              var transferData = {};
+              if (transferFilter.length) {
+                isTransferAsset = true
+                transferData = transferFilter[0]
+              }
               const isPurchaseOrderAsset = purchaseOrderProduct.some(e => e._id === _inventory?.inventoryDetail?.purchaseOrder);
-
               subRows.push({
                 ..._inventory,
                 detail: `${(i + 1)}.${(j + 1)}.${(l + 1)} - ${_inventory?.inventoryDetail?.assetNumber}`,
@@ -277,6 +289,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                 isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
                 isPurchaseOrderAsset: isPurchaseOrderAsset,
                 isTransferAsset: isTransferAsset,
+                transferData: transferData,
                 isSubleaseAsset: _inventory?.inventoryDetail?.subleaseAsset
               })
             })
@@ -539,7 +552,10 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           setAddSerializedAssetDialog({ open: false });
         }}
         refrenceType={"Rental Job"}
-        refrenceData={{ _id: rentalManagementData?._id, warehouse: rentalManagementData?.warehouse?.optionValue }}
+        refrenceData={{
+          _id: rentalManagementData?._id, warehouse: rentalManagementData?.warehouse?.optionValue
+          , wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber
+        }}
         isAdding={isAdding}
         selectedProducts={assetAssignedProduct}
         //queryString={addSerializedAssetDialog.type === "all" ? `notInPlant=${rentalManagementData?.warehouse?.optionValue}&availableAssets=true` : ``}
@@ -577,6 +593,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         productsToSave={[...showOrderDialog.products]}
         isFromSerializedAssetStepFromRental={true}
         currency={rentalManagementData.currency}
+        refrenceData={{ wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber }}
         rentalManagementId={rentalManagementData._id}
         warehouseId={rentalManagementData?.warehouse?.optionValue}
         deliveryDateMax={rentalManagementData.estimateStartDate}
