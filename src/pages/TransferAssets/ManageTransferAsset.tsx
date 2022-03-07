@@ -131,8 +131,13 @@ const ManageTransferAsset: FC<Props> = (props) => {
                 }
               }
             })
-            console.log(refrenceId)
             createValues["rentalJob"] = refrenceId;
+            if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
+              createValues["wellName"] = refrenceData?.wellName
+            }
+            if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
+              createValues["afeNumber"] = refrenceData?.afeNumber
+            }
           }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),

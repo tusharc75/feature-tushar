@@ -638,7 +638,7 @@ const SerializedAssetDetailsPage = () => {
                 alignItems="center"
               >
                 <Typography variant="subtitle2">
-                  BOM - Product
+                  Product - Parts
                 </Typography>
               </Box>
               {(
@@ -681,7 +681,7 @@ const SerializedAssetDetailsPage = () => {
                     </>
                   ) : (
                     <Box textAlign="center" padding={2} minHeight={150}>
-                      <Typography>No Product has been added </Typography>
+                      <Typography>No parts available for this product</Typography>
                     </Box>
                   )}
                 </Box>

@@ -95,7 +95,7 @@ const ProductDetailsPage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (process.env.REACT_APP_ENV !== 'staging') {
+    if (permissions?.serializedAsset) {
       getProductTree();
       if (productData) {
         getWarehouses();
@@ -401,7 +401,7 @@ const ProductDetailsPage = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={process.env.REACT_APP_ENV === 'staging' ? 12 : 8} lg={process.env.REACT_APP_ENV === 'staging' ? 12 : 8}>
+          <Grid item xs={12} sm={12} md={permissions?.serializedAsset ? 8 : 12} lg={permissions?.serializedAsset ? 8 : 12}>
             <Paper>
               {!productData ? (
                 <div>
@@ -453,7 +453,7 @@ const ProductDetailsPage = () => {
                   )}
                 </Box>
               }
-             {tabValue === 1 &&
+              {tabValue === 1 &&
                 <CustomAgGrid
                   allowSelection={false}
                   allowAction={false}
@@ -493,17 +493,17 @@ const ProductDetailsPage = () => {
                   refreshGrid={getColumns}
                 />
               }
-              
-                {tabValue === 3 && permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <ProductConfiguration
-                  productFields={productFields.map((_f: any) => _f.fieldData)}
-                  productData={productData}
-                  id={id}
-                  renderedFrom={`${renderedFrom}_grid-3`}
-                />}
-              
+
+              {tabValue === 3 && permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <ProductConfiguration
+                productFields={productFields.map((_f: any) => _f.fieldData)}
+                productData={productData}
+                id={id}
+                renderedFrom={`${renderedFrom}_grid-3`}
+              />}
+
             </Paper>
           </Grid>
-          {process.env.REACT_APP_ENV === 'staging' ? null : (
+          {permissions?.serializedAsset ? (
             <Grid item xs={12} sm={12} md={4} lg={4}>
               <Paper style={{ overflow: 'hidden' }}>
                 <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
@@ -564,7 +564,7 @@ const ProductDetailsPage = () => {
                       </>
                     ) : (
                       <Box textAlign="center" padding={2} minHeight={150}>
-                        <Typography>No Product has been assigned </Typography>
+                        <Typography>No parts available for this product</Typography>
                       </Box>
                     )}
                   </Box>
@@ -573,7 +573,6 @@ const ProductDetailsPage = () => {
               <Paper className="mt-2" style={{ overflow: 'hidden' }}>
                 <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
                   <Typography variant="subtitle2">Plants ({inventoriesData?.length || 0})</Typography>
-
                   {permissions?.serializedAsset?.isCreate && (
                     <IconButton
                       title="Manage Plant(s)"
@@ -733,7 +732,7 @@ const ProductDetailsPage = () => {
                 }
               </Paper>
             </Grid>
-          )}
+          ) : null}
         </Grid>
       </Fragment>
       {showConfirmBox && (
@@ -764,8 +763,7 @@ const ProductDetailsPage = () => {
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
           assignedProducts={BOMData}
           onSuccess={() => {
-            // getFrequentlyBoughtProduct();
-            if (process.env.REACT_APP_ENV !== 'staging') {
+            if (permissions?.serializedAsset) {
               getProductTree();
             }
             setOpenAssignProductDialog(false);
@@ -782,7 +780,7 @@ const ProductDetailsPage = () => {
             onClose={() => setOpenProductInventoryDialog(false)}
             onSuccess={() => {
               setOpenProductInventoryDialog(false);
-              if (process.env.REACT_APP_ENV !== 'staging') {
+              if (permissions?.serializedAsset) {
                 getWarehouses();
               }
             }}
@@ -793,7 +791,7 @@ const ProductDetailsPage = () => {
             onClose={() => setOpenProductInventoryDialog(false)}
             onSuccess={() => {
               setOpenProductInventoryDialog(false);
-              if (process.env.REACT_APP_ENV !== 'staging') {
+              if (permissions?.serializedAsset) {
                 getWarehouses();
               }
             }}

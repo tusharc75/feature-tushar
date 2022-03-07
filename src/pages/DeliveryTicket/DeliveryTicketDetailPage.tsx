@@ -332,7 +332,10 @@ export default function DeliveryTicketDetail(props) {
     if (deliveryTicketData) {
       mainPoint["Pick-Up Date:"] = yyyyMMDD(deliveryTicketData?.["pickUpDate"]) || "";
       mainPoint["Delivery Date"] = yyyyMMDD(deliveryTicketData?.deliveryDate) || "";
-      mainPoint["delivery Person"] = deliveryTicketData?.deliveryPerson?.optionLabel || ""
+      const fieldFilter = deliveryTicketFields.filter((e) => e?.fieldData?.fieldName === "deliveryPerson");
+      if (fieldFilter.length) {
+        mainPoint[fieldFilter[0].fieldData?.fieldLabel] = deliveryTicketData?.deliveryPerson?.optionLabel || ""
+      }
     }
     return mainPoint;
   }, [deliveryTicketData?.ticketName, deliveryTicketData?.deliveryPerson, deliveryTicketData?.deliveryDate]);
@@ -545,7 +548,7 @@ export default function DeliveryTicketDetail(props) {
                       {isMobile && !isTablet ? <FaSignature size={20} /> : "View Signatures"}
                     </Button> : null
                   }
-                  {(deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading
+                  {/* {(deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading
                     && deliveryTicketData?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob && deliveryTicketData?.status === DELIVERY_TICKET_STATUS.delivered) ?
                     <Button
                       variant={isMobile && !isTablet ? "text" : "contained"}
@@ -556,7 +559,7 @@ export default function DeliveryTicketDetail(props) {
                     >
                       {isMobile && !isTablet ? <FaMailchimp size={20} /> : "Send To Customer"}
                     </Button> : null
-                  }
+                  } */}
                 </DetailsPageHeader>
               )}
               {loading ? (
@@ -665,7 +668,7 @@ export default function DeliveryTicketDetail(props) {
                           </IconButton>
                         }
                         <Box mx={1} />
-                        {permissions?.deliveryTicket?.isRead && !isMobile &&  (
+                        {permissions?.deliveryTicket?.isRead && !isMobile && (
                           <Button
                             variant={isMobile && !isTablet ? "text" : "outlined"}
                             color="primary"
