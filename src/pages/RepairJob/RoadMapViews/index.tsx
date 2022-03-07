@@ -181,7 +181,7 @@ const RepairJobViews = (props) => {
           const data = { target: `${i[i.length - 1].ticketId}-${index}-${i.length - 1}` };
           edgeFromTicketToClosed.push(data);
         } else {
-          const data = { target: `${assets?.data?.data[index]._id}` };
+          const data = { target: `${assets?.data?.data[index]?._id}` };
           edgeFromTicketToClosed.push(data);
         }
       });
