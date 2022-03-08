@@ -1,8 +1,7 @@
 import { Typography, Box } from '@material-ui/core';
-import { Info } from '@material-ui/icons';
 
-import Tooltip from 'src/components/CustomTooltipTitle';
 import { formatAmountWithCurrency } from 'src/constants/helpers';
+import styles from '../KpiDashboard/dashboard.module.scss';
 
 interface Props {
   title: string;
@@ -18,40 +17,53 @@ const EyeTooltip = (props: Props) => {
       case 'Total Booked Value':
         return (
           <>
-            <Typography>
-              Total Offered Value: {data?.totalOfferedValue ? formatAmountWithCurrency(currency, data?.totalOfferedValue).fullFormatAmount : 0}
+            <Typography className={styles.sub_price}>
+              {data?.totalOfferedValue ? formatAmountWithCurrency(currency, data?.totalOfferedValue).fullFormatAmount : 0}
             </Typography>
-            <Typography>Hit Ratio: {data?.hitRatioValue?.toFixed(2)}</Typography>
+            <Typography variant="h6" className={styles.title}>
+              Total Offered Value
+            </Typography>
+            <p className={styles.hit_ratio}>Hit Ratio: {data?.hitRatioValue ? (data.hitRatioValue / 100).toFixed(2) : 0} %</p>
           </>
         );
 
       case 'Total Booked Cost':
         return (
           <>
-            <Typography>
-              Total Offered Cost: {data?.totalOfferedCost ? formatAmountWithCurrency(currency, data?.totalOfferedCost).fullFormatAmount : 0}
+            <Typography className={styles.sub_price}>
+              {data?.totalOfferedCost ? formatAmountWithCurrency(currency, data?.totalOfferedCost).fullFormatAmount : 0}
             </Typography>
-            <Typography>Hit Ratio: {data?.hitRatioCost?.toFixed(2)}</Typography>
+            <Typography variant="h6" className={styles.title}>
+              Total Offered Cost
+            </Typography>
+            <p className={styles.hit_ratio}>Hit Ratio: {data?.hitRatioCost ? (data?.hitRatioCost / 100).toFixed(2) : 0} % </p>
           </>
         );
 
       case 'Booked Gross Margin':
         return (
           <>
-            <Typography>
-              {`Offered Gross Margin:  ${data?.offeredMargin ? formatAmountWithCurrency(currency, data?.offeredMargin).fullFormatAmount : 0} (${
-                data?.offeredMarginPercent || 0
-              }%)`}
+            <Typography className={styles.sub_price}>
+              {data?.offeredMargin ? formatAmountWithCurrency(currency, data?.offeredMargin).fullFormatAmount : 0}
             </Typography>
-            <Typography>Hit Ratio: {data?.hitRatioMargin?.toFixed(2)}</Typography>
+            <Typography variant="h6" className={styles.title}>
+              Offered Gross Margin
+            </Typography>
+
+            <p className={styles.hit_ratio}>Hit Ratio: {data?.hitRatioMargin ? (data?.hitRatioMargin / 100).toFixed(2) : 0} %</p>
           </>
         );
 
       case 'Total Booked Volume':
         return (
           <>
-            <Typography>{`Total Offered Volume: ${data?.offeredMargin?.toFixed(2)} ${data?.volumeUnit}`}</Typography>
-            <Typography>Hit Ratio: {data?.hitRatioVolume?.toFixed(2)}</Typography>
+            <Typography className={styles.sub_price}>
+              {data?.offeredMargin?.toFixed(2)} {data?.volumeUnit}
+            </Typography>
+            <Typography variant="h6" className={styles.title}>
+              Total Offered Volume
+            </Typography>{' '}
+            <p className={styles.hit_ratio}>Hit Ratio: {data?.hitRatioVolume ? (data?.hitRatioVolume / 100).toFixed(2) : 0}%</p>
           </>
         );
 
@@ -60,13 +72,7 @@ const EyeTooltip = (props: Props) => {
     }
   };
 
-  return (
-    <Tooltip interactive arrow title={getValue()}>
-      <Box display={'flex'} alignItems="center" ml={1}>
-        <Info color="action" fontSize="small" />
-      </Box>
-    </Tooltip>
-  );
+  return <Box mt={'4px'}>{getValue()}</Box>;
 };
 
 export default EyeTooltip;

@@ -17,6 +17,7 @@ import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import EyeTooltip from './EyeTooltip';
+import { startCase } from 'lodash';
 
 export type ChartDataType = {
   col: any;
@@ -60,14 +61,14 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
       user: { user }
     }
   } = useData();
-  const currency = (user && user.currency) || '';
+  const currency = (user && user.currency) || 'USD';
   const [chartData, setChartData] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [tableView, setTableView] = React.useState(false);
   const [filterValues, setFilterValues] = React.useState(null);
   const [anchorElFilter, setAnchorElFilter] = React.useState(null);
   const [anchorElExport, setAnchorElExport] = React.useState(null);
-  const [invisible, setInvisible] = React.useState(false)
+  const [invisible, setInvisible] = React.useState(false);
 
   const handleOpenFilter = React.useCallback((e: React.MouseEvent) => {
     setAnchorElFilter(e.target);
@@ -78,22 +79,22 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
   }, []);
 
   React.useEffect(() => {
-    if(!filterValues) return
-    const keys = Object.keys(filterValues)
-    let values = []
-    keys.forEach((key:string) => {
-      if(!filterValues[key]) return
-      const isEmpty  = Object.keys(filterValues[key]).length === 0
-      if(!isEmpty) {
-        values.push(key)
+    if (!filterValues) return;
+    const keys = Object.keys(filterValues);
+    let values = [];
+    keys.forEach((key: string) => {
+      if (!filterValues[key]) return;
+      const isEmpty = Object.keys(filterValues[key]).length === 0;
+      if (!isEmpty) {
+        values.push(key);
       }
-    })
-    if(values.length > 0) {
-      setInvisible(false)
+    });
+    if (values.length > 0) {
+      setInvisible(false);
     } else {
-      setInvisible(true)
+      setInvisible(true);
     }
-  },[filterValues])
+  }, [filterValues]);
 
   const getParams = () => {
     let url = '';
@@ -141,7 +142,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
     axiosInstance()
       .get(`dashboard/${chart.kpi}?entity=${selectedEntity}&${urlParams}`)
       .then(async ({ data: { data } }) => {
-        const statusForQuoteChart = chart.uniqueId === "openQuote" && filterValues ? filterValues?.status?.optionLabel : null
+        const statusForQuoteChart = chart.uniqueId === 'openQuote' && filterValues ? filterValues?.status?.optionLabel : null;
         const chartData = await getMappedData(chart, data, globalFilters.currency, currency, statusForQuoteChart);
         setChartData(chartData);
         setLoading(false);
@@ -152,7 +153,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
       });
   };
 
-  const idsWithAdditionStatus = ['openQuote', 'openOpportinityByCustomer', 'openQuoteByRep'];
+  const idsWithAdditionStatus = ['openQuotesByCustomer', 'openQuoteByRep'];
 
   return (
     <Grid item xs={12} md={chart.col}>
@@ -172,14 +173,17 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
             : Object.keys(chartData?.cardData).map((key, index) => (
                 <Grid item xs={12} sm={6} md={3} key={index + 1}>
                   <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
-                    <Box display="flex">
+                    <Box>
                       <Typography className={styles.price}>{chartData?.cardData[key] ? chartData?.cardData[key] : 0}</Typography>
-
-                      <EyeTooltip title={key} data={chartData?.addtionalData} currency={globalFilters.currency || currency} />
+                      <Typography variant="h6" className={styles.title}>
+                        {key}
+                      </Typography>
+                      {chartData?.additionalData && (
+                        <p className={styles.hit_ratio}>
+                          Hit Ratio: {chartData?.additionalData[key] ? (chartData?.additionalData[key]).toFixed(2) : 0} %
+                        </p>
+                      )}
                     </Box>
-                    <Typography variant="h6" className={styles.title}>
-                      {key}
-                    </Typography>
                   </Box>
                 </Grid>
               ))}
@@ -235,7 +239,11 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
 
             {chart.title && (
               <Typography component="div" align="center" color="textPrimary">
-                <h4>{chart.title.includes("currency") ?  chart.title.replace(/currency/gi, globalFilters.currency || currency) : chart.title.replace(/Status/gi, filterValues?.status?.optionLabel || "Open")}</h4>
+                <h4>
+                  {chart.title.includes('currency')
+                    ? startCase(chart.title.replace(/currency/gi, globalFilters.currency || currency))
+                    : startCase(chart.title.replace(/Type/gi, filterValues?.status?.optionLabel || 'Open'))}
+                </h4>
               </Typography>
             )}
           </Box>
