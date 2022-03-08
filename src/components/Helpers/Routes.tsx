@@ -348,6 +348,10 @@ const routes = {
     title: (storedRoutes && storedRoutes.wellMaster && storedRoutes.wellMaster.title) ? storedRoutes.wellMaster?.title : RESOURCE_LABEL.wellMaster,
     path: "/well-master",
   },
+  wellMasterDetail: {
+    title: (storedRoutes && storedRoutes.wellMaster && storedRoutes.wellMaster.title) ? storedRoutes.wellMaster?.title : RESOURCE_LABEL.wellMaster,
+    path: "/well-master/detail",
+  },
 };
 
 export default routes;
