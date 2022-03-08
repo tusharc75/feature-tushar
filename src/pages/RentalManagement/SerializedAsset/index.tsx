@@ -4,7 +4,7 @@ import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@material-ui/core";
+import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem , ButtonGroup } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -23,6 +23,9 @@ import { useHistory } from "react-router-dom";
 import InfoIcon from '@material-ui/icons/Info';
 import { isMobile, isTablet } from "react-device-detect";
 import { useData } from "../../../StateProvider/Provider";
+import { BiChevronDown } from "react-icons/bi";
+import React from "react";
+import { IoMdEye } from "react-icons/io";
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { ExpandMore } from '@material-ui/icons';
 
@@ -452,7 +455,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             size="small"
             disabled={disableAssignSerializedAssets()}
             onClick={() => {
-              setAddSerializedAssetDialog({ open: true })
+              setOrderDialog(prevState => ({ ...prevState, open: true, type: "purchaseOrder" }))
             }}
           >
             {`Assign ${routes.serializedAsset.title}`}
