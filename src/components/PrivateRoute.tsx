@@ -65,6 +65,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'new-dashboard',
         'transfer-inventory',
         'zone',
+        'well-master',
         'dashboard-builder'
       ].indexOf(pathnames[0]) >= 0
     ) {
