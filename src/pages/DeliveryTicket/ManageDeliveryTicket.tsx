@@ -202,11 +202,13 @@ const ManageDeliveryTicket = (props) => {
                 var isDeliveryToDisable = false;
                 if (productInventory && refrenceType && refrenceData) {
 
+                    tempInitialData["ticketName"] = `${refrenceData?.ticketName}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = refrenceType;
                     tempInitialData["ticketType"] = ticketType;
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
                     tempInitialData["wellName"] = refrenceData?.wellName;
                     tempInitialData["afeNumber"] = refrenceData?.afeNumber;
+
                     if (refrenceData?.processor) {
                         tempInitialData["deliveryPerson"] = refrenceData?.processor;
                     }
@@ -214,89 +216,28 @@ const ManageDeliveryTicket = (props) => {
                     isPickupFromDisable = refrenceData?.isPickupFromDisable ? true : false;
                     isDeliveryToDisable = refrenceData?.isDeliveryToDisable ? true : false;
 
-                    if ((refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob || refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder)) {
-
-                        if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob) {
-                            tempInitialData["ticketName"] = `${refrenceData?.ticketName}_${generateUniqueIdOnly()}`
-                            tempInitialData["rentalJob"] = refrenceData?.refrenceId
-                        } else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
-                            tempInitialData["ticketName"] = `${refrenceData?.salesOrderNo}_${generateUniqueIdOnly()}`
-                            tempInitialData["salesOrder"] = refrenceData?._id
-                        }
-
-                        tempInitialData["pickupFromType"] = refrenceData?.pickupFromType;
-                        tempInitialData["pickupFrom"] = refrenceData?.pickupFrom;
-                        tempInitialData["pickupFromAddress"] = refrenceData?.pickupFromAddress;
-                        tempInitialData["deliveryToType"] = refrenceData?.deliveryToType;
-                        tempInitialData["deliveryTo"] = refrenceData?.deliveryTo;
-                        tempInitialData["deliveryToAddress"] = refrenceData?.deliveryToAddress;
-
+                    if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob) {
+                        tempInitialData["rentalJob"] = refrenceData?.refrenceId
+                    }
+                    else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
+                        tempInitialData["salesOrder"] = refrenceData?._id
                     }
                     else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
-                        tempInitialData["ticketName"] = `${refrenceData?.ticketName}_${generateUniqueIdOnly()}`
                         tempInitialData["repairJob"] = refrenceData?.refrenceId
-                        tempInitialData["pickupFromType"] = refrenceData?.pickupFromType;
-                        tempInitialData["pickupFrom"] = refrenceData?.pickupFrom;
-                        tempInitialData["pickupFromAddress"] = refrenceData?.pickupFromAddress;
-                        tempInitialData["deliveryToType"] = refrenceData?.deliveryToType;
-                        tempInitialData["deliveryTo"] = refrenceData?.deliveryTo;
-                        tempInitialData["deliveryToAddress"] = refrenceData?.deliveryToAddress;
                     }
                     else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-                        tempInitialData["ticketName"] = `${refrenceData?.transferAssetNumber}_${generateUniqueIdOnly()}`
-                        tempInitialData["transferAsset"] = refrenceData?._id;
-                        if (ticketType === DELIVERY_TICKET_TYPE.loading) {
-                            tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
-                            tempInitialData["pickupFrom"] = warehouseId;
-                            tempInitialData["pickupFromAddress"] = refrenceData?.transferFromPlant.address ?? "";
-                            if (refrenceData?.transferType === "Internal") {
-                                tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
-                                tempInitialData["deliveryTo"] = refrenceData?.transfertoPlant?.optionValue;
-                                tempInitialData["deliveryToAddress"] = refrenceData?.plantShipTo?.optionValue;
-                            }
-                            else if (refrenceData?.transferType === "External Customer") {
-                                tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.customer;
-                                tempInitialData["deliveryTo"] = refrenceData?.transfertoCustomer?.optionValue;
-                                tempInitialData["deliveryToAddress"] = refrenceData?.customerShipTo?.optionValue;
-                            }
-                            else if (refrenceData?.transferType === "External Supplier") {
-                                tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.supplier;
-                                tempInitialData["deliveryTo"] = refrenceData?.transfertoSupplier?.optionValue;
-                                tempInitialData["deliveryToAddress"] = refrenceData?.supplierShipTo?.optionValue;
-                            }
-                        }
-                        else {
-                            if (refrenceData?.transferType === "Internal") {
-                                tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
-                                tempInitialData["pickupFrom"] = refrenceData?.transfertoPlant?.optionValue;
-                                tempInitialData["pickupFromAddress"] = refrenceData?.plantShipTo?.optionValue;
-                            }
-                            else if (refrenceData?.transferType === "External Customer") {
-                                tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
-                                tempInitialData["pickupFrom"] = refrenceData?.transfertoCustomer?.optionValue;
-                                tempInitialData["pickupFromAddress"] = refrenceData?.customerShipTo?.optionValue;
-                            }
-                            else if (refrenceData?.transferType === "External Supplier") {
-                                tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
-                                tempInitialData["pickupFrom"] = refrenceData?.transfertoSupplier?.optionValue;
-                                tempInitialData["pickupFromAddress"] = refrenceData?.supplierShipTo?.optionValue;
-                            }
-                            tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
-                            tempInitialData["deliveryTo"] = warehouseId;
-                            tempInitialData["deliveryToAddress"] = refrenceData?.transferFromPlant.address
-                        }
-                        tempInitialData["deliveryDate"] = moment(new Date()).add(7, 'days');
+                        tempInitialData["transferAsset"] = refrenceData?.refrenceId;
                     }
                     else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.sublease) {
-                        tempInitialData["ticketName"] = `${refrenceData?.ticketName}_${generateUniqueIdOnly()}`
                         tempInitialData["sublease"] = refrenceData?.refrenceId;
-                        tempInitialData["pickupFromType"] = refrenceData?.pickupFromType;
-                        tempInitialData["pickupFrom"] = refrenceData?.pickupFrom;
-                        tempInitialData["pickupFromAddress"] = refrenceData?.pickupFromAddress;
-                        tempInitialData["deliveryToType"] = refrenceData?.deliveryToType;
-                        tempInitialData["deliveryTo"] = refrenceData?.deliveryTo;
-                        tempInitialData["deliveryToAddress"] = refrenceData?.deliveryToAddress;
                     }
+
+                    tempInitialData["pickupFromType"] = refrenceData?.pickupFromType;
+                    tempInitialData["pickupFrom"] = refrenceData?.pickupFrom;
+                    tempInitialData["pickupFromAddress"] = refrenceData?.pickupFromAddress;
+                    tempInitialData["deliveryToType"] = refrenceData?.deliveryToType;
+                    tempInitialData["deliveryTo"] = refrenceData?.deliveryTo;
+                    tempInitialData["deliveryToAddress"] = refrenceData?.deliveryToAddress;
 
                     const warehouse = fieldsDataForUpdate.find((d) => d.fieldName === "warehouse");
                     if (warehouse && warehouse?.option?.length) {

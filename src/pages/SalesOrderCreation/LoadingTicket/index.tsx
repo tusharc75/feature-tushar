@@ -15,7 +15,10 @@ import {
   deliveryTicket,
   gridLoadingTimeout,
   salesOrder,
-  sidebarResource
+  sidebarResource,
+  DELIVERY_TICKET_TYPE,
+  DELIVERY_TICKET_REFRENCE_TYPE,
+  DELIVERY_FROM_TO_TYPE
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { useHistory } from "react-router-dom";
@@ -27,7 +30,7 @@ import CustomSwipableList from "../../../components/SwipableListComponents/Custo
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 
 
-const LoadingTicket = ({renderedFrom, currentStep, salesOrderData, fetchSalesOrderData, setNextStep }) => {
+const LoadingTicket = ({ renderedFrom, currentStep, salesOrderData, fetchSalesOrderData, setNextStep }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -41,8 +44,7 @@ const LoadingTicket = ({renderedFrom, currentStep, salesOrderData, fetchSalesOrd
   const [okBtnLoading, setOkBtnLoading] = useState(false)
 
 
-  const [productInventoryForDeliveryTicket, setProductInventoryForDeliveryTicket] = useState<any[]>([]);
-  const [showDeliveryTicketDialog, setShowDeliveryTicketDialog] = useState(false);
+  const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
 
   useEffect(() => {
     fetchRecords();
@@ -144,9 +146,19 @@ const LoadingTicket = ({renderedFrom, currentStep, salesOrderData, fetchSalesOrd
     });
   }
 
-  const handleDeliveryTicketDialog = (selectedProductInventory, warehouse) => {
-    setProductInventoryForDeliveryTicket(selectedProductInventory);
-    setShowDeliveryTicketDialog(true);
+  const handleDeliveryTicketDialog = () => {
+    const data = {}
+    data["ticketName"] = salesOrderData.salesOrderNo;
+    data["refrenceId"] = salesOrderData._id;
+    data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
+    data["pickupFrom"] = salesOrderData?.plant?.optionValue;
+    data["pickupFromAddress"] = salesOrderData?.plant?.address;
+    data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.customer;
+    data["deliveryTo"] = salesOrderData?.customerAccount?.optionValue;
+    data["deliveryToAddress"] = salesOrderData?.shippingAddress?.optionValue;
+    data["isPickupFromDisable"] = true;
+    data["isDeliveryToDisable"] = true;
+    setShowTicketDialog({ open: true, data: data });
   };
 
   return (<>
@@ -190,7 +202,7 @@ const LoadingTicket = ({renderedFrom, currentStep, salesOrderData, fetchSalesOrd
       <IconButton
         disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => f.hasOwnProperty("deliveryTicketId")))}
         onClick={() => {
-          handleDeliveryTicketDialog(selectedRecords, warehouse)
+          handleDeliveryTicketDialog()
         }}
         color='primary'
         size="small"
@@ -269,16 +281,15 @@ const LoadingTicket = ({renderedFrom, currentStep, salesOrderData, fetchSalesOrd
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
       }
     </Grid>
-    {showDeliveryTicketDialog && (
+    {showTicketDialog.open && (
       <ManageDeliveryTicket
-        ticketType="Loading"
-        refrenceType="Sales Order"
-        refrenceData={salesOrderData}
-        onClose={() => setShowDeliveryTicketDialog(false)}
-        productInventory={productInventoryForDeliveryTicket}
-        warehouseId={salesOrderData?.warehouse ?? salesOrderData?.plant}
+        ticketType={DELIVERY_TICKET_TYPE.loading}
+        refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.salesOrder}
+        refrenceData={showTicketDialog.data}
+        productInventory={selectedRecords}
+        onClose={() => setShowTicketDialog({ open: false, data: {} })}
         onSuccess={() => {
-          setShowDeliveryTicketDialog(false);
+          setShowTicketDialog({ open: false, data: {} });
           fetchRecords();
         }}
       />
