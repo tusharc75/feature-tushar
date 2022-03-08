@@ -455,7 +455,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             size="small"
             disabled={disableAssignSerializedAssets()}
             onClick={() => {
-              setOrderDialog(prevState => ({ ...prevState, open: true, type: "purchaseOrder" }))
+              setAddSerializedAssetDialog({ open: true })
             }}
           >
             {`Assign ${routes.serializedAsset.title}`}

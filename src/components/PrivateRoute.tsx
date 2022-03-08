@@ -64,7 +64,9 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'sublease',
         'new-dashboard',
         'transfer-inventory',
-        'zone'
+        'zone',
+        'well-master',
+        'dashboard-builder'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);

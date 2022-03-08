@@ -21,16 +21,17 @@ import { useData } from "../../../StateProvider/Provider";
 
 
 const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, isAddingProducts, renderedFrom }) => {
-    const localStorageSelectedRecords = `${renderedFrom}_selected`
 
+    const localStorageSelectedRecords = `${renderedFrom}_selected`
     const toastConfig = useContext(CustomToastContext)
     const { state: { selectedEntity } }: any = useData();
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
+
     const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
-    const [materialList, setMaterialList] = useState([]);
 
     const defaultColumns = [{ field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true }]
 
@@ -49,7 +50,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         }
         const queryString = getQueryString();
         axiosInstance().get(`${type === "product" ? product.api + queryString : packages.packageApi + queryString}`).then(({ data: { data, count } }) => {
-            setMaterialList(JSON.parse(JSON.stringify(data)));
             let rows = data.map((u) => {
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = false;
@@ -113,16 +113,13 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = type === "product" ?
-                        getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
-                        : getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, type === "product" ? routes.productDetail.path : routes.packagesDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
                             rendererNames.push(currentColumn?.rendererName)
                         }
                     }
-
                 })
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
                 tempFrameworkComponent = {
@@ -141,7 +138,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const onCellValueChanged = ({ data }: any) => {
         const selectedFromStorage = [...getLocalStorageArrayData(localStorageSelectedRecords)]
         if (!selectedFromStorage || selectedFromStorage.length === 0) return
-
         const updatedRecords = selectedFromStorage.map(d => {
             if (data._id === d._id) {
                 d.qty = data.qty
@@ -149,7 +145,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             return d
         })
         localStorage.setItem(localStorageSelectedRecords, JSON.stringify(updatedRecords))
-
     }
 
     return (<Fragment>
@@ -181,7 +176,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                     disabled={!getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length || isAddingProducts}
                                     endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
                                     Add{getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length + ")" : ""}
-                                    </Button>
+                                </Button>
                             </Box>
                         </Grid>
                     </Grid>

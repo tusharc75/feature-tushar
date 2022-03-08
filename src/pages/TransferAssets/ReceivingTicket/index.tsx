@@ -5,7 +5,7 @@ import { Link, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { deliveryTicket, sidebarResource, DELIVERY_TICKET_STATUS } from 'src/constants/helpers';
+import { deliveryTicket, sidebarResource, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_FROM_TO_TYPE } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { groupBy } from 'lodash';
@@ -52,10 +52,10 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
-  const [openReceivingTicketDialog, setOpenReceivingTicketDialog] = useState(false);
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
-  const [assetsDelivered, setAssetsDelivered] = useState([]);
   const [loadingTicketsNotDelivered, setLoadingTicketsNotDelivered] = useState([]);
+
+  const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
 
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -63,6 +63,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+
   const columns = [
     { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
@@ -194,9 +195,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       const selectedInventoryDelivered = selectedRecords.filter(
         (asset: any) => asset?.receivingTicketStatus === 'Delivered' || asset?.receivingTicketStatus === 'In-Transit'
       );
-
       setLoadingTicketsNotDelivered(loadingTicketsNotDelivered);
-      setAssetsDelivered(selectedInventoryDelivered);
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
 
@@ -297,7 +296,40 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
                 selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0 ||
                 selectedRecords.filter((asset: any) => asset.hasOwnProperty('receivingTicket')).length > 0
               }
-              onClick={() => setOpenReceivingTicketDialog(true)}
+              onClick={() => {
+                const data: any = {}
+                data["refrenceId"] = transferAssetData._id
+                data["ticketName"] = transferAssetData.transferAssetNumber
+               
+                if (transferAssetData?.transferType === "Internal") {
+                  data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
+                  data["pickupFrom"] = transferAssetData?.transfertoPlant?.optionValue;
+                  data["pickupFromAddress"] = transferAssetData?.plantShipTo?.optionValue;
+                }
+                else if (transferAssetData?.transferType === "External Customer") {
+                  data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
+                  data["pickupFrom"] = transferAssetData?.transfertoCustomer?.optionValue;
+                  data["pickupFromAddress"] = transferAssetData?.customerShipTo?.optionValue;
+                }
+                else if (transferAssetData?.transferType === "External Supplier") {
+                  data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
+                  data["pickupFrom"] = transferAssetData?.transfertoSupplier?.optionValue;
+                  data["pickupFromAddress"] = transferAssetData?.supplierShipTo?.optionValue;
+                }
+                
+                data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                data["deliveryTo"] = transferAssetData?.transferFromPlant?.optionValue;
+                data["deliveryToAddress"] = transferAssetData?.transferFromPlant?.address;
+
+                data["wellName"] = transferAssetData?.wellName;
+                data["afeNumber"] = transferAssetData?.afeNumber;
+                if (transferAssetData?.processor?.optionValue) {
+                  data["processor"] = transferAssetData?.processor?.optionValue;
+                }
+                data["isPickupFromDisable"] = true;
+                data["isDeliveryToDisable"] = false;
+                setShowTicketDialog({ open: true, data: data })
+              }}
             >
               Create Receiving Ticket
             </Button>
@@ -381,24 +413,19 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           />
         )}
       </Box>
-
-      {/* Receiving ticket create dialog */}
-      {openReceivingTicketDialog && (
+      {showTicketDialog.open && (
         <ManageDeliveryTicket
-          ticketType="Receiving"
-          refrenceType="Transfer Asset"
-          refrenceData={transferAssetData}
-          onClose={() => setOpenReceivingTicketDialog(false)}
+          ticketType={DELIVERY_TICKET_TYPE.receiving}
+          refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.transferAsset}
+          refrenceData={showTicketDialog.data}
           productInventory={assetWithNoTicket}
-          warehouseId={transferAssetData?.transferFromPlant?.optionValue}
+          onClose={() => setShowTicketDialog({ open: false, data: {} })}
           onSuccess={() => {
-            setOpenReceivingTicketDialog(false);
+            setShowTicketDialog({ open: false, data: {} });
             fetchAssetsData(true);
           }}
-
         />
       )}
-      {/* Confirm Delete Dialog */}
       {showConfirmBox && (
         <ConfirmationDialog
           okBtnLoading={isRemovingTicket}

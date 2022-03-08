@@ -38,10 +38,6 @@ const ChatsPopover = (props) => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
-    console.log(isSmallScreen);
-  }, [isSmallScreen]);
-
-  useEffect(() => {
     fetchUsersList();
   }, []);
 
