@@ -52,7 +52,8 @@ import {
   customerAccount,
   supplierAccount,
   customerContact,
-  supplierContact
+  supplierContact,
+  quoteBuilder
 } from '../../constants/helpers';
 import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
 import LeadAccordionInUserDetailPage from './LeadAccordionInUserDetailPage';
@@ -77,6 +78,7 @@ import accountClass from '../Account/account.module.scss';
 import { BiReset } from 'react-icons/all';
 import { BiEdit } from 'react-icons/bi';
 import { MdDelete } from 'react-icons/md';
+import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -114,6 +116,7 @@ const UserDetailsPage = () => {
   const [customerAccountRelatedData, setCustomerAccountRelatedData] = useState(null);
   const [supplierAccountRelatedData, setSupplierAccountRelatedData] = useState(null);
   const [supplierContactRelatedData, setSupplierContactRelatedData] = useState(null);
+  const [quotesRelatedData, setQuotesRelatedData] = useState(null)
   const [userPermissions, setUserPermissions] = useState(null);
   const [unionRoleData, setUnionRoleData] = useState(null);
   const [entityAccess, setEntityAccess] = useState([]);
@@ -411,6 +414,7 @@ const UserDetailsPage = () => {
         setSupplierContactRelatedData(data['Supplier Contact']);
         setLeadsRelatedData(data['Lead']);
         setOpportunityRelatedData(data['Opportunity']);
+        setQuotesRelatedData(data['Quotes']);
       })
       .catch((error) => {
         // setUserRelatedLoading(false);
@@ -1214,7 +1218,7 @@ const UserDetailsPage = () => {
                     onSuccess={() => {
                       fetchUserRelatedDetail();
                     }}
-                    isAllowedToEdit={permissions.user.isUpdate}
+                    isAllowedToEdit={false}
                   />
                 )}
                 {permissions[lead.leadResource]?.isRead && (
@@ -1226,7 +1230,7 @@ const UserDetailsPage = () => {
                     onSuccess={() => {
                       fetchUserRelatedDetail();
                     }}
-                    isAllowedToEdit={permissions.user.isUpdate}
+                    isAllowedToEdit={false}
                   />
                 )}
                 {permissions[customerAccount.accountResource]?.isRead && (
@@ -1239,7 +1243,7 @@ const UserDetailsPage = () => {
                     onSuccess={() => {
                       fetchUserRelatedDetail();
                     }}
-                    isAllowedToEdit={permissions.user.isUpdate}
+                    isAllowedToEdit={false}
                   />
                 )}
                 {permissions[supplierAccount.accountResource]?.isRead && (
@@ -1252,7 +1256,7 @@ const UserDetailsPage = () => {
                     onSuccess={() => {
                       fetchUserRelatedDetail();
                     }}
-                    isAllowedToEdit={permissions.user.isUpdate}
+                    isAllowedToEdit={false}
                   />
                 )}
                 {permissions[customerContact.contactResource]?.isRead && (
@@ -1265,7 +1269,7 @@ const UserDetailsPage = () => {
                     onSuccess={() => {
                       fetchUserRelatedDetail();
                     }}
-                    isAllowedToEdit={permissions.user.isUpdate}
+                    isAllowedToEdit={false}
                   />
                 )}
                 {permissions[supplierContact.contactResource]?.isRead && (
@@ -1278,9 +1282,21 @@ const UserDetailsPage = () => {
                     onSuccess={() => {
                       fetchUserRelatedDetail();
                     }}
-                    isAllowedToEdit={permissions.user.isUpdate}
+                    isAllowedToEdit={false}
                   />
                 )}
+                {
+                  permissions[quoteBuilder.qbResource]?.isRead && (
+                    <QuotesInAccordion  
+                      recordsPerLine={3}
+                      quotes={[...(quotesRelatedData?.Owner ?? []), ...(quotesRelatedData?.Collaborator ?? [])]}
+                      expanded={false}
+                      fetchData={() => fetchUserRelatedDetail()}
+                      quoteBuilderPermission={permissions[quoteBuilder.qbResource]}
+                      isAllowedToUpdate={false}
+                    />
+                  )                
+                }
               </div>
             </Paper>
           </div>

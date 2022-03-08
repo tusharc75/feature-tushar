@@ -4,7 +4,7 @@ import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@material-ui/core";
+import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, ButtonGroup } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -15,7 +15,7 @@ import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
 import ManagePurchaseOrder from "../../PurchaseOrder/ManagePurchaseOrder";
 import ManageSublease from "../../Sublease/ManageSublease";
-import { uniqBy } from 'lodash';
+import { uniqBy, uniq } from 'lodash';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
@@ -23,6 +23,9 @@ import { useHistory } from "react-router-dom";
 import InfoIcon from '@material-ui/icons/Info';
 import { isMobile, isTablet } from "react-device-detect";
 import { useData } from "../../../StateProvider/Provider";
+import { BiChevronDown } from "react-icons/bi";
+import React from "react";
+import { IoMdEye } from "react-icons/io";
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { ExpandMore } from '@material-ui/icons';
 
@@ -339,6 +342,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const handleAddSerializedAsset = (assets) => {
     let data = [];
     let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product");
+    flatArray = uniqBy(flatArray, '_id')
     flatArray?.forEach((e: any) => {
       if (e.type === "product") {
         let qty = e.qty - e.subRows.length;
@@ -399,10 +403,20 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty !== f.subRows?.length);
     flatArray = uniqBy(flatArray, '_id')
     const products = flatArray.map(m => { return { _id: m.materialId, unit: m.unit, assetsCount: m.qty - (m.subRows?.length ?? 0) } })
+    const uniqProduct = []
+    products.forEach((element: any) => {
+      const foundProduct = uniqProduct.filter((e) => e._id === element._id)
+      if (foundProduct.length) {
+        foundProduct[0].assetsCount += element.assetsCount
+      }
+      else {
+        uniqProduct.push(element)
+      }
+    })
     setOrderDialog(prevState => {
       return {
         ...prevState,
-        products: products
+        products: uniqProduct
       }
     });
     const assetProduct = []

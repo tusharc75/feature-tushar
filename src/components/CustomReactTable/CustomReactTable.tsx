@@ -1,14 +1,20 @@
 
 import React, { useEffect } from 'react'
 import MaUTable from '@material-ui/core/Table'
-import { TableBody, TableCell, TableHead, TableFooter, TableRow } from '@material-ui/core'
+import { TableBody, TableCell, TableHead, TableFooter, TableRow, TextField } from '@material-ui/core'
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
-import { treeToFlatArray } from '../../constants/helpers'
+import { gridPageSizes, treeToFlatArray } from '../../constants/helpers'
 import { uniqBy, isString } from 'lodash';
-import { useTable, useExpanded, useRowSelect, useFlexLayout, useSortBy, useResizeColumns } from 'react-table'
+import {
+    useTable, useExpanded, useRowSelect, useFlexLayout,
+    useSortBy, useResizeColumns, useFilters, usePagination
+} from 'react-table'
 import { useSticky } from "react-table-sticky";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import FilterListIcon from '@material-ui/icons/FilterList';
+// import TablePagination from '@material-ui/core/TablePagination';
+import { matchSorter } from 'match-sorter'
 
 const IndeterminateCheckbox = React.forwardRef(
     ({ indeterminate, ...rest }: any, ref) => {
@@ -34,6 +40,33 @@ const IndeterminateCheckbox = React.forwardRef(
     }
 )
 
+function DefaultColumnFilter({
+    column: {
+        filterValue,
+        // preFilteredRows,
+        setFilter
+    },
+}) {
+    // const count = preFilteredRows.length
+    return (
+        <TextField
+            autoComplete="off"
+            type="search"
+            id="search"
+            style={{ padding: 0 }}
+            fullWidth
+            value={filterValue || ''}
+            size="small"
+            InputProps={{
+                startAdornment: <FilterListIcon fontSize="small" className="mr-2" />,
+            }}
+            onChange={e => {
+                setFilter(e.target.value || undefined) // Set undefined to remove the filter entirely
+            }}
+        />
+    )
+}
+
 export default function CustomReactTable({
     columns,
     data,
@@ -52,6 +85,7 @@ export default function CustomReactTable({
             minWidth: 150, // minWidth is only used as a limit for resizing
             width: 150, // width is used for both the flex-basis and flex-grow
             // maxWidth: 250, // maxWidth is only used as a limit for resizing
+            Filter: DefaultColumnFilter,
         }),
         []
     )
@@ -144,6 +178,25 @@ export default function CustomReactTable({
         []
     )
 
+    function fuzzyTextFilterFn(rows, id, filterValue) {
+        return matchSorter(rows, filterValue, { keys: [(row: any) => row.values[id]] })
+    }
+
+    // Let the table remove the filter if the string is empty
+    fuzzyTextFilterFn.autoRemove = val => !val
+
+    const filterTypes = React.useMemo(
+        () => ({
+            filterRowsWithSubrows: (rows, id, filterValue) => {
+                return rows.filter((row) => {
+                    const rowValue = row.values[id];
+                    return rowValue !== undefined ? String(rowValue).toLowerCase() === String(filterValue).toLowerCase() : true;
+                });
+            },
+        }),
+        [],
+    );
+
     // Use the state and functions returned from useTable to build your UI
 
     const {
@@ -167,9 +220,9 @@ export default function CustomReactTable({
         toggleRowExpanded,
         toggleAllRowsExpanded,
         // state: {
-        //         pageIndex,
-        //         pageSize,
-        //         // selectedRowIds
+        //     pageIndex,
+        //     pageSize,
+        //     // selectedRowIds
         //     expanded
         // },
     } = useTable(
@@ -177,11 +230,14 @@ export default function CustomReactTable({
             columns: newColumns,
             data,
             onSelect,
+            defaultColumn,
+            filterTypes,
             initialState: {
+                // pageIndex: 0,
                 autoResetExpanded: true,
                 hiddenColumns: hideSelection ? ["selection", "action"] : []
             },
-            defaultColumn,
+            getSubRows: (row: any) => row.subRows,
             sortTypes: {
                 alphanumeric: (row1, row2, columnName) => {
                     const rowOneColumn = row1.values[columnName];
@@ -198,6 +254,7 @@ export default function CustomReactTable({
         },
         useFlexLayout,
         useResizeColumns,
+        useFilters,
         useSortBy,
         useExpanded, // Use the useExpanded plugin hook
         // usePagination,
@@ -255,25 +312,38 @@ export default function CustomReactTable({
                 <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
                     <TableHead style={{ overflowY: "auto", overflowX: "hidden" }} className="header">
                         {headerGroups.map(headerGroup => (
-                            <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
-                                {headerGroup.headers.map(column => (
-                                    <TableCell {...column.getHeaderProps()} className="th text-truncate">
-                                        <div className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
-                                            <span>
-                                                {column.render('Header')}
-                                            </span>
+                            <>
+                                <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
+                                    {headerGroup.headers.map(column => (
+                                        <TableCell {...column.getHeaderProps()} className="th text-truncate">
+                                            <div className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
+                                                <span>
+                                                    {column.render('Header')}
+                                                </span>
 
-                                            {column.isSorted
-                                                ? column.isSortedDesc
-                                                    ? <ExpandLessIcon fontSize="small" />
-                                                    : <ExpandMoreIcon fontSize="small" />
-                                                : ''}
-                                        </div>
+                                                {column.isSorted
+                                                    ? column.isSortedDesc
+                                                        ? <ExpandLessIcon fontSize="small" />
+                                                        : <ExpandMoreIcon fontSize="small" />
+                                                    : ''}
+                                            </div>
 
-                                        <div {...column.getResizerProps()} className="resizer" />
-                                    </TableCell>
-                                ))}
-                            </TableRow>
+                                            <div {...column.getResizerProps()} className="resizer" />
+
+                                            {/* <div>{column.canFilter ? column.render('Filter') : null}</div> */}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+
+                                <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
+                                    {headerGroup.headers.map(column => (
+                                        <TableCell {...column.getHeaderProps()} className="th text-truncate">
+                                            <div>{column.canFilter ? column.render('Filter') : null}</div>
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+
+                            </>
                         ))}
                     </TableHead>
 
@@ -320,7 +390,6 @@ export default function CustomReactTable({
                 component="div"
                 count={data.length}
                 page={pageIndex}
-                className="agPagination"
                 onPageChange={(event, newPage) => {
                     gotoPage(newPage);
                 }}

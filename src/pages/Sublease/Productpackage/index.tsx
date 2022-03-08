@@ -184,6 +184,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
             minWidth: 50,
             width: 50,
             sticky: "right",
+            disableFilters: true,
             Cell: ({ row }) => (
                 !row.original.hideSelection &&
                 <IconButton
