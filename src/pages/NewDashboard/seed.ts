@@ -9,7 +9,20 @@ export default [
         type: 'cards',
         numberOfCards: 4,
         hasFilter: false,
-        uniqueId: 'revenueCard',
+        uniqueId: 'bookedRevenueCard',
+        axis: '',
+        hasExport: false,
+        hasTableView: false,
+        filters: []
+      },
+      {
+        col: 12,
+        title: '',
+        kpi: 'sales',
+        type: 'cards',
+        numberOfCards: 4,
+        hasFilter: false,
+        uniqueId: 'offeredRevenueCard',
         axis: '',
         hasExport: false,
         hasTableView: false,
@@ -17,7 +30,7 @@ export default [
       },
       {
         col: 8,
-        title: 'Total Booked value in currency vs Budget',
+        title: 'Total Booked Value in currency vs Total Offered Value in currency vs Budget',
         kpi: 'sales',
         type: 'line',
         hasFilter: true,
@@ -50,7 +63,7 @@ export default [
           { key: 'customerAccount', title: 'Customer Account', multiple: false },
           { key: 'marketSegment', title: 'Market Segment', multiple: false },
           { key: 'subMarketSegment', title: 'Sub Market Segment', multiple: false },
-          { key: 'productCategory', title: 'Product Category', multiple: false },
+          { key: 'productCategory', title: 'Product Category', multiple: false }
         ]
       },
       {
@@ -93,7 +106,7 @@ export default [
       },
       {
         col: 6,
-        title: 'Total Booked Volume in MT vs Budget',
+        title: 'Total Booked Volume in MT vs Total Offered Volume in MT vs Budget',
         kpi: 'sales',
         type: 'line',
         hasFilter: true,
@@ -112,7 +125,7 @@ export default [
       },
       {
         col: 6,
-        title: 'Total Booked GM in currency vs Budget',
+        title: 'Total Booked GM in currency vs Total Offered GM in currency vs Budget',
         kpi: 'sales',
         type: 'line',
         hasFilter: true,
@@ -131,7 +144,7 @@ export default [
       },
       {
         col: 5,
-        title: 'Status Quotes',
+        title: 'Quotes Status',
         kpi: 'open-quote',
         type: 'doughnut',
         hasFilter: true,
@@ -140,7 +153,6 @@ export default [
         hasExport: false,
         hasTableView: false,
         filters: [
-          { key: 'status', title: 'Status', multiple: false },
           { key: 'subMarketSegment', title: 'Sub Market Segment', multiple: false },
           { key: 'marketSegment', title: 'Market Segment', multiple: false },
           { key: 'countrySellTo', title: 'Country Sell To', multiple: false },
@@ -149,11 +161,11 @@ export default [
       },
       {
         col: 7,
-        title: 'Status opportunities by Customer Account',
-        kpi: 'opportunities/customer-account',
+        title: 'Type Quotes by Customer Account',
+        kpi: 'quote/customer-account',
         type: 'bar',
         hasFilter: true,
-        uniqueId: 'openOpportinityByCustomer',
+        uniqueId: 'openQuotesByCustomer',
         axis: 'y',
         hasExport: false,
         hasTableView: false,
@@ -168,7 +180,7 @@ export default [
 
       {
         col: 6,
-        title: 'Status quotes by Sales Rep',
+        title: 'Type quotes by Sales Rep',
         kpi: 'quote/sales-rep',
         type: 'pie',
         hasFilter: true,
@@ -359,7 +371,7 @@ export default [
           { key: 'countrySellTo', title: 'Country Sell To', multiple: false },
           { key: 'countryBillTo', title: 'Country Bill To', multiple: false }
         ]
-      },
+      }
     ]
   }
 ];

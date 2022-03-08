@@ -12,20 +12,23 @@ interface Props {
 }
 
 const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values, setValues }: Props) => {
-  
   React.useEffect(() => {
     if (!filters) return;
     filters.forEach((filter) => {
       setValues((prevState: any) => ({
         ...prevState,
-        [filter.key]: filter.multiple ? [] : {}
+        [filter.key]: filter.multiple ? [] : filter.key === 'status' ? { optionValue: 'open', optionLabel: 'Open' } : {}
       }));
     });
   }, [filters]);
 
-  const handleChange = React.useCallback((key, val) => {
+  const handleChange = (key: string, val: any) => {
+    if (key === 'status' && !val) {
+      setValues((prevState: any) => ({ ...prevState, [key]: { optionValue: 'open', optionLabel: 'Open' } }));
+      return;
+    }
     setValues((prevState: any) => ({ ...prevState, [key]: val }));
-  }, []);
+  };
 
   if (!values) return <p>Loading...</p>;
 
@@ -51,9 +54,11 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                 size="small"
                 multiple={filter.multiple}
                 fullWidth
-                options={filter.key.includes("subMarket") 
-                  ? filterOptions[filter.key].filter((d:any) => d?.parentMarketSegment === values["marketSegment"]?.optionValue) 
-                  : filterOptions[filter.key]}
+                options={
+                  filter.key.includes('subMarket')
+                    ? filterOptions[filter.key].filter((d: any) => d?.parentMarketSegment === values['marketSegment']?.optionValue)
+                    : filterOptions[filter.key]
+                }
                 autoHighlight
                 value={values[filter.key]}
                 getOptionLabel={(option: any) => option.optionLabel}
