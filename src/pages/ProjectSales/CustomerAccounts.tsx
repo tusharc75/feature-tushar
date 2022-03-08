@@ -37,7 +37,7 @@ import { AiFillCaretLeft, AiFillCaretRight } from "react-icons/ai";
 
 
 function TabPanel(props) {
-  const { children, value, index, classes, ...other  } = props;
+  const { children, value, index, classes, ...other } = props;
 
   return <div {...other}>{value === index && <Box p={3}>{children}</Box>}</div>;
 }
@@ -59,7 +59,7 @@ function a11yProps(index) {
 const Accordion = withStyles({
   root: {
     border: "1px solid rgba(0, 0, 0, .125)",
-    backgroundColor:"#F6F6F6",
+    backgroundColor: "#F6F6F6",
     // boxShadow: "none",
     "&:not(:last-child)": {
       borderBottom: 0,
@@ -78,7 +78,7 @@ const Accordion = withStyles({
 const AccordionSummary = withStyles({
   root: {
     backgroundColor: "f5f5f5",
-    borderRadius:"10px 10px 0 0",
+    borderRadius: "10px 10px 0 0",
     // borderBottom: "1px solid rgba(0, 0, 0, .125)",
     marginBottom: -1,
     minHeight: 46,
@@ -98,7 +98,7 @@ const AccordionDetails = withStyles((theme) => ({
   root: {
     padding: theme.spacing(2),
     backgroundColor: "#fff",
-    borderRadius:"0 0 10px 10px"
+    borderRadius: "0 0 10px 10px"
   },
 }))(MuiAccordionDetails);
 
@@ -119,61 +119,61 @@ const useStyles = makeStyles((theme) => ({
   addBtn: {
     // marginLeft: "auto",
   },
-  cusName:{
+  cusName: {
     fontWeight: 700,
     color: "#43ADAA"
   },
-  tabProject:{
+  tabProject: {
     // position:"static",
     // borderRadius:"40px !important",
-    backgroundColor:"#efefef !important",
+    backgroundColor: "#efefef !important",
     rippleVisible: {
       animation: "none !important"
     },
-    "&.Mui-selected":{
+    "&.Mui-selected": {
       backgroundColor: "#43AEAA !important",
-      color:"#ffff !important",
-        borderBottom:"0px solid #808080 !important",
-      borderTop:"0px solid #808080 !important",
-      "&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child":{
-        display:"flex",
-        marginBottom:"0px",
-        position:"absolute",
-        left:"92.5%",
-    },
-  //   "&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child":{
-  //     display:"flex",
-  //     marginBottom:"0px",
-  //     position:"absolute",
-  //     left:"244px",
-  //     color:"#43AEAA"
-  // },
+      color: "#ffff !important",
+      borderBottom: "0px solid #808080 !important",
+      borderTop: "0px solid #808080 !important",
+      "&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child": {
+        display: "flex",
+        marginBottom: "0px",
+        position: "absolute",
+        left: "92.5%",
+      },
+      //   "&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child":{
+      //     display:"flex",
+      //     marginBottom:"0px",
+      //     position:"absolute",
+      //     left:"244px",
+      //     color:"#43AEAA"
+      // },
 
     },
-    "& span.MuiTab-wrapper" :{
-         display:"flex",
-         flexDirection:"row-reverse",
-        //  position:"static"
+    "& span.MuiTab-wrapper": {
+      display: "flex",
+      flexDirection: "row-reverse",
+      //  position:"static"
     },
-    
-    "&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child":{
-        display:"none",
-        
+
+    "&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child": {
+      display: "none",
+
     },
-    
-    "&.MuiTab-labelIcon .MuiTab-wrapper > *:after":{
-      position:"relative",
-      left:"30%"
-  },
-    
-    margin:"0 -1px",
-    borderBottom:"0px solid #808080 !important",
-      borderTop:"0px solid #808080 !important",
-    tab:{
-       "&.MuiTabPanel-root":{
-      flex: 1
-      
-  },
+
+    "&.MuiTab-labelIcon .MuiTab-wrapper > *:after": {
+      position: "relative",
+      left: "30%"
+    },
+
+    margin: "0 -1px",
+    borderBottom: "0px solid #808080 !important",
+    borderTop: "0px solid #808080 !important",
+    tab: {
+      "&.MuiTabPanel-root": {
+        flex: 1
+
+      },
     },
   },
 
@@ -224,10 +224,10 @@ const CustomerAccounts = (props) => {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
-  
 
 
-  
+
+
 
   useEffect(() => {
     if (!users.length) return;
@@ -343,15 +343,15 @@ const CustomerAccounts = (props) => {
       });
   };
 
-  const handleRemoveAccount = () => {
+  const handleRemoveAccount = (account) => {
     setShowConfirmBox(true);
-    setAccountDeleteRec(currentAccount._id);
+    setAccountDeleteRec(account._id);
   };
 
-  const removeAccount = () => {
+  const removeAccount = (id) => {
     if (!currentAccount) return;
 
-    const id = currentAccount._id;
+    // const id = currentAccount._id;
 
     const newAccountData = customerAccounts
       ?.filter((ca) => ca._id !== id)
@@ -530,21 +530,21 @@ const CustomerAccounts = (props) => {
         {/*  onChange={() => setExpandedParent(!expandedParent)}*/}
         {/*>*/}
         <div className="customer_account_box">
-        <AccordionSummary aria-controls="panel1d-content" id="panel1d-header" style={{background:"white"}}>
-          <Box
+          <AccordionSummary aria-controls="panel1d-content" id="panel1d-header" style={{ background: "white" }}>
+            <Box
               display="flex"
               alignItems="center"
               className={clsx(classes.expand, {
                 [classes.expandOpen]: expandedParent,
               })}
-          >
-            {/*<ExpandMore />*/}
-          </Box>
-          <Box component="span" mx={1} />
-          <Typography variant="subtitle1" className={classes.cusName}>Customer Accounts</Typography>
-          {(permissions?.isUpdate && isTeamMember) || isManager ? (
+            >
+              {/*<ExpandMore />*/}
+            </Box>
+            <Box component="span" mx={1} />
+            <Typography variant="subtitle1" className={classes.cusName}>Customer Accounts</Typography>
+            {(permissions?.isUpdate && isTeamMember) || isManager ? (
               <>
-              {/* {customerAccounts.length > 0 &&
+                {/* {customerAccounts.length > 0 &&
                 opportunities.filter(
                     (o) => o.customerAccountName === currentAccount?._id
                 ).length < 1 ? (
@@ -578,9 +578,9 @@ const CustomerAccounts = (props) => {
                   variant="contained"
                   color="primary"
                   size="small"
-                  style={{marginLeft:"auto"}}
+                  style={{ marginLeft: "auto" }}
                   onClick={() => {
-                      setShowAccountCreateDialog(true);
+                    setShowAccountCreateDialog(true);
 
                   }}
                 >
@@ -589,14 +589,14 @@ const CustomerAccounts = (props) => {
                 </Button>
 
                 <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    style={{marginLeft:"10px"}}
-                    onClick={() => {
-                      handleOpenDialog("customer-account");
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  style={{ marginLeft: "10px" }}
+                  onClick={() => {
+                    handleOpenDialog("customer-account");
 
-                    }}
+                  }}
                 >
                   Add Existing
 
@@ -616,24 +616,24 @@ const CustomerAccounts = (props) => {
                 {/*</IconButton>*/}
 
                 {/*<Box component="span" mx={1} />*/}
-             
+
               </>
-          ) : null}
-        </AccordionSummary>
+            ) : null}
+          </AccordionSummary>
 
 
 
-        <AccordionDetails>
+          <AccordionDetails>
             {loading ? (
               <Typography>Loading...</Typography>
             ) : customerAccounts.length ? (
               <Box width="100%" className="tab_Box_layout">
                 <>
-              
+
                   <Tabs
 
-                     orientation="vertical"
-                     variant="scrollable"
+                    orientation="vertical"
+                    variant="scrollable"
                     scrollButtons="auto"
                     className="oms-tab dynamic-vertical-tab"
                     value={currentTabIndex}
@@ -649,48 +649,48 @@ const CustomerAccounts = (props) => {
                       }
                     }}
                   >
-                    
+
                     {customerAccounts.map((c, i) => (
                       <Tab
                         wrapped
                         key={i}
                         tabIndex={i}
                         label={<Box component={'h4'} fontWeight={'bold'}>
-                          {c.accountName}
-                          <IconButton
-                            title={`Remove Account: ${currentAccount?.accountName}`}
-                            aria-haspopup="true"
-                            color="primary"
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveAccount();
-                            }}
-                        >
-                          <Delete color="error" fontSize="small"/>
-                        </IconButton>
+                            {c.accountName}
+                              <IconButton
+                                title={`Remove Account: ${c?.accountName}`}
+                                aria-haspopup="true"
+                                color="primary"
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveAccount(c);
+                                }}
+                              >
+                                <Delete color="error" fontSize="small" />
+                              </IconButton>
                         </Box>}
                         aria-controls={`vertical-tabpanel-${i}`}
                         id={`vertical-tab-${i}`}
                         className={classes.tabProject}
-                        style={{borderRight:"5px" , borderColor:"green" , marginRight:"-1px" }}
-                        icon={<AiFillCaretLeft size={18}/>}
-                        // icon={<AiFillCaretRight size={18}/>}
+                        style={{ borderRight: "5px", borderColor: "green", marginRight: "-1px" }}
+                        icon={<AiFillCaretLeft size={18} />}
+                      // icon={<AiFillCaretRight size={18}/>}
 
                       />
                     ))}
                   </Tabs>
-                  
+
 
                   {/* <Box component="span" mx={1} /> */}
 
-                  
+
                   {customerAccounts.map((c, i) => (
-  
+
                     <Box hidden={currentTabIndex !== i} key={c._id} className="tabpanel_layout">
                       <Grid container >
-                        <Grid item xs={12} style={{marginTop:"15px"}}>
-                          
+                        <Grid item xs={12} style={{ marginTop: "15px" }}>
+
                           <Accordion
                             expanded={expandCustomerContact}
 
@@ -865,9 +865,9 @@ const CustomerAccounts = (props) => {
                         </Grid>
                       </Grid>
                     </Box>
-                
+
                   ))}
-                  
+
 
 
                 </>
@@ -876,7 +876,7 @@ const CustomerAccounts = (props) => {
               <Typography>No Customer Accounts</Typography>
             )}
           </AccordionDetails>
-          </div>
+        </div>
         {/*</Accordion>*/}
       </Paper>
       {
@@ -894,13 +894,16 @@ const CustomerAccounts = (props) => {
               setShowConfirmBox(false);
               setAccountDeleteRec(null);
             }}
-            onOk={
-              accountDeleteRec
-                ? removeAccount
-                : contactDeleteRec
-                  ? removeContact
-                  : null
+            onOk={() => {
+              if (accountDeleteRec) {
+                removeAccount(accountDeleteRec)
+              }
+              
+              if (contactDeleteRec) {
+                removeContact()
+              }
             }
+          }
             okBtnLoading={isRemoving}
           />
         )

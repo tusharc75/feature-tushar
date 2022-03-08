@@ -307,7 +307,7 @@ export default function QuoteDetail() {
         if (
           quoteData.versions[v]?.status.includes('Rejected by Customer') ||
           quoteData.versions[v]?.status.includes('Not Booked by Customer') ||
-          quoteData.versions[v]?.status.includes('Invalid by Customer')
+          quoteData.versions[v]?.status.includes('Other by Customer')
         ) {
           disapproved = true;
           versionDisapproved = Number(v);

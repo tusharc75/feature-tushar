@@ -378,7 +378,7 @@ export default function QuoteProcess(props) {
             versionStatus === 'Accepted by Customer' ||
             versionStatus === 'Rejected by Customer' ||
             versionStatus === 'Not Booked by Customer' ||
-            versionStatus === 'Invalid by Customer' ||
+            versionStatus === 'Other by Customer' ||
             versionStatus === 'Booked by Customer'
           ) {
             setDOAreq(false);
@@ -692,7 +692,7 @@ export default function QuoteProcess(props) {
         versionStatus === 'Accepted by Customer' ||
         versionStatus === 'Rejected by Customer' ||
         versionStatus === 'Not Booked by Customer' ||
-        versionStatus === 'Invalid by Customer' ||
+        versionStatus === 'Other by Customer' ||
         versionStatus === 'Booked by Customer'
       ) {
         setDOAreq(false);
