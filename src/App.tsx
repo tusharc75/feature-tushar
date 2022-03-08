@@ -116,6 +116,7 @@ import ZoneDetailPage from './pages/zone/ZoneDetailPage';
 import { Button, Snackbar } from '@material-ui/core';
 import * as serviceWorkerRegistration from 'src/serviceWorkerRegistration';
 import MuiAlert from '@material-ui/lab/Alert';
+import WellMaster from './pages/WellMaster';
 
 var notificationInterval: any = null;
 
@@ -221,7 +222,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -646,6 +647,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.eCommercePolicy.path}`}>
               <EcommercePolicy />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.wellMaster.path}`}>
+              <WellMaster />
             </PrivateRoute>
 
             <Route exact path={'/customer-sign/:id'}>
