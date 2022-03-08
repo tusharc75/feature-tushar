@@ -13,7 +13,8 @@ import { useSticky } from "react-table-sticky";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import FilterListIcon from '@material-ui/icons/FilterList';
-import TablePagination from '@material-ui/core/TablePagination';
+// import TablePagination from '@material-ui/core/TablePagination';
+import { matchSorter } from 'match-sorter'
 
 const IndeterminateCheckbox = React.forwardRef(
     ({ indeterminate, ...rest }: any, ref) => {
@@ -49,6 +50,7 @@ function DefaultColumnFilter({
     // const count = preFilteredRows.length
     return (
         <TextField
+            autoComplete="off"
             type="search"
             id="search"
             style={{ padding: 0 }}
@@ -176,6 +178,25 @@ export default function CustomReactTable({
         []
     )
 
+    function fuzzyTextFilterFn(rows, id, filterValue) {
+        return matchSorter(rows, filterValue, { keys: [(row: any) => row.values[id]] })
+    }
+
+    // Let the table remove the filter if the string is empty
+    fuzzyTextFilterFn.autoRemove = val => !val
+
+    const filterTypes = React.useMemo(
+        () => ({
+            filterRowsWithSubrows: (rows, id, filterValue) => {
+                return rows.filter((row) => {
+                    const rowValue = row.values[id];
+                    return rowValue !== undefined ? String(rowValue).toLowerCase() === String(filterValue).toLowerCase() : true;
+                });
+            },
+        }),
+        [],
+    );
+
     // Use the state and functions returned from useTable to build your UI
 
     const {
@@ -209,12 +230,14 @@ export default function CustomReactTable({
             columns: newColumns,
             data,
             onSelect,
+            defaultColumn,
+            filterTypes,
             initialState: {
                 // pageIndex: 0,
                 autoResetExpanded: true,
                 hiddenColumns: hideSelection ? ["selection", "action"] : []
             },
-            defaultColumn,
+            getSubRows: (row: any) => row.subRows,
             sortTypes: {
                 alphanumeric: (row1, row2, columnName) => {
                     const rowOneColumn = row1.values[columnName];
