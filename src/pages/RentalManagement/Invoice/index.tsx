@@ -121,7 +121,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         }
       });
       additionalcost?.forEach((e) => {
-        e.type = "Ad-hoc Charges";
+        e.type = "Services and Consumables";
       })
       combinedData = [...combinedData, ...additionalcost];
       let rows = combinedData?.map((item) => {
@@ -239,7 +239,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
                 setShowCostDialog(true);
               }}
             >
-              Add Ad-hoc Charges
+              Add Services and Consumables
             </Button>
             <Box mx={1} />
           </Fragment>

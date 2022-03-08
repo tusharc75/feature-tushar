@@ -65,47 +65,21 @@ const AssignProductDialog = ({
     ]);
 
     const [filter, setFilter] = useState(`All ${routes.product.title}`);
+    const [isProductType, setIsProductType] = useState(false);
 
-    const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}&filterProducts=${selectedType}`;
-
-        if (selectedEntity) {
-            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
-        }
-        if (!isObjectEmpty(filters)) {
-            const updatedFilters = [{
-                field: "productType",
-                term: "Part"
-            }];
-            Object.keys(filters).forEach(field => {
-                updatedFilters.push({
-                    field: field,
-                    term: filters[field].filter
-                })
-            });
-            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
-        } else {
-            const updatedFilters = [{
-                field: "productType",
-                term: "Part"
-            }];
-            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
-        }
-
-        if (sorting.length > 0) {
-            deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
-        }
-
-        if (search) {
-            deepFilter = `${deepFilter}&search=${search}`;
-        }
-
-        return deepFilter;
-    };
+    useEffect(() => {
+        axiosInstance().get("/field?resource=Product&view=true").then(({ data: { data } }) => {
+            const productTypes = data.find((e) => e.fieldData.fieldName === "productType")
+            if (productTypes) {
+                setIsProductType(true)
+            } else {
+                setIsProductType(false)
+            }
+        })
+    }, [])
 
     useEffect(() => {
         fetchProduct()
-        // eslint-disable-next-line
     }, [page, limit, filters, sorting, search, selectedEntity, selectedType]);
 
     const fetchProduct = () => {
@@ -115,7 +89,7 @@ const AssignProductDialog = ({
         }
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            data.data = data.data.filter(obj => !assignedProducts.some(item => item?.childProduct === obj?._id))
+            data.data = data.data.filter(obj => obj._id !== productId && !assignedProducts.some(item => item?.childProduct === obj?._id))
             data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
@@ -128,6 +102,38 @@ const AssignProductDialog = ({
             .catch((error) => {
                 toastConfig.setToastConfig(error);
             });
+    };
+
+    const getQueryString = () => {
+        let deepFilter = `?page=${page}&limit=${limit}&filterProducts=${selectedType}`;
+        if (selectedEntity) {
+            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+        }
+        const updatedFilters = []
+        if (isProductType) {
+            updatedFilters.push({
+                field: "productType",
+                term: "Part"
+            })
+        }
+        if (!isObjectEmpty(filters)) {
+            Object.keys(filters).forEach(field => {
+                updatedFilters.push({
+                    field: field,
+                    term: filters[field].filter
+                })
+            });
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
+        } else {
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
+        }
+        if (sorting.length > 0) {
+            deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
+        }
+        if (search) {
+            deepFilter = `${deepFilter}&search=${search}`;
+        }
+        return deepFilter;
     };
 
     const ActionsRenderer = params => {
@@ -160,7 +166,6 @@ const AssignProductDialog = ({
         actionsRenderer: ActionsRenderer,
         commonRenderer: CommonRenderer,
     };
-
 
     const handleAssignProduct = async () => {
         setAssigning(true);
