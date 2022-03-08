@@ -111,8 +111,16 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
           },
           {
             type: 'line',
+            label: 'Total offered value',
+            borderColor: 'rgb(253, 126, 20)',
+            borderWidth: 2,
+            fill: true,
+            data: offeredValueData
+          },
+          {
+            type: 'line',
             label: 'Budget',
-            borderColor: 'rgb(254, 162, 35)',
+            borderColor: 'rgb(254, 97, 104)',
             borderWidth: 2,
             fill: false,
             data: budget
@@ -123,8 +131,8 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
       if (chart.hasTableView) {
         const tableData = data.map((d) => ({
           month: moment(d.date).format('MMM/YY'),
-          totalSell: d.totalBookedValue ? d.totalBookedValue : 0,
-          totalCost: d.totalBookedCost ? d.totalBookedCost : 0,
+          totalBookedValue: d.totalBookedValue ? d.totalBookedValue : 0,
+          totalOfferedValue: d.totalOfferedValue ? d.totalOfferedValue : 0,
           budget: d.budget ? d.budget : 0
         }));
         Object.assign(dataObject, { tableData });
@@ -304,12 +312,12 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
 
   if (chart.uniqueId === 'volumeVsBudget' || chart.uniqueId === 'volume2VsBudget') {
     const totalBookedVolumeMT = [];
+    const totalOfferedVolumeMT = [];
+    const totalOfferedGM = [];
     const totalBookedGM = [];
     let volumeUnit = '';
     const labels = [];
     const budget = [];
-
-    console.log(data);
 
     data = data.sort((a: any, b: any) => {
       const aDate = new Date(a.date).getTime();
@@ -321,11 +329,13 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     for (let d of data) {
       volumeUnit = d.volumeUnit;
       if (chart.uniqueId === 'volumeVsBudget') {
-        totalBookedVolumeMT.push(d.totalBookedVolume);
+        totalBookedVolumeMT.push(d.totalBookedVolume || 0);
+        totalOfferedVolumeMT.push(d.totalOfferedVolume || 0);
       } else {
-        totalBookedGM.push(d.totalBookedMargin);
+        totalBookedGM.push(d.totalBookedMargin || 0);
+        totalOfferedGM.push(d.totalOfferedMargin || 0);
       }
-      budget.push(d.volumeBudget);
+      budget.push(d.volumeBudget || 0);
       labels.push(moment(d.date).format('MMM/YY'));
     }
 
@@ -341,6 +351,14 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
           borderWidth: 2,
           fill: true,
           data: chart.uniqueId === 'volumeVsBudget' ? totalBookedVolumeMT : totalBookedGM
+        },
+        {
+          type: 'line',
+          label: chart.uniqueId === 'volumeVsBudget' ? `Total booked volume (${volumeUnit})` : `Total booked (${volumeUnit})`,
+          borderColor: 'rgb(254, 97, 104)',
+          borderWidth: 2,
+          fill: true,
+          data: chart.uniqueId === 'volumeVsBudget' ? totalOfferedVolumeMT : totalOfferedGM
         },
         {
           type: 'line',
@@ -365,7 +383,7 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     }
   }
 
-  if (chart.uniqueId === 'openOpportinityByCustomer') {
+  if (chart.uniqueId === 'openQuotesByCustomer') {
     const labels = [];
     const datasets = [];
     for (let d of data) {
@@ -405,14 +423,14 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
 
   if (chart.uniqueId === 'openQuote') {
     const open = data.open;
-    const total = data.count;
+    const won = data.won;
     dataObject = {
-      labels: [status, 'Total'],
+      labels: [`Open (${open})`, `Won (${won})`],
       datasets: [
         {
-          label: '',
-          data: [open, total],
-          backgroundColor: ['rgba(22, 51, 64, 1.0)', 'rgba(0, 0, 0, 0.2)']
+          label: `Total (${data.count})`,
+          data: [open, won],
+          backgroundColor: ['rgb(54, 162, 235)', 'rgba(253, 126, 20, 0.7)']
         }
       ]
     };
