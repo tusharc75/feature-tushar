@@ -31,6 +31,7 @@ import MobileSortDialog from "../../components/MobileSortDialog";
 import MobileFilterDialog from "../../components/MobileFilterDialog"
 import { camelCase } from "lodash";
 import DeleteIcon from "@material-ui/icons/Delete";
+import { Link } from "react-router-dom";
 
 const WellMaster = () => {
 
@@ -207,14 +208,9 @@ const WellMaster = () => {
     }
 
     const NameRenderer = (params) => (
-        <span className={permissions?.note?.isUpdate ? "link cursor-pointer" : ""}
-            onClick={() => {
-                if (permissions?.wellMaster?.isUpdate) {
-                    setShowManageDialog({ open: true, isClone: false, idToClone: params.data._id });
-                }
-            }}>
+        <Link className="link" title={params.value} to={`${routes.wellMasterDetail.path}/${params.data._id}`}>
             {params.value}
-        </span>
+        </Link>
     );
 
     const ActionsRenderer = params => (
