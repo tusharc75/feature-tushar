@@ -7,8 +7,9 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
   if (!data) return null;
 
   let dataObject: any;
+  let cardsId = ['bookedRevenueCard', 'offeredRevenueCard'];
 
-  if (chart.kpi === 'sales' && (chart.uniqueId === 'bookedVSBudget' || chart.uniqueId === 'revenueCard')) {
+  if (chart.kpi === 'sales' && (chart.uniqueId === 'bookedVSBudget' || cardsId.includes(chart.uniqueId))) {
     const bookedValueData = [];
     const bookedCostData = [];
     const bookedVolumeData = [];
@@ -55,7 +56,7 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
 
     if (labels.length === 0) return null;
 
-    if (chart.uniqueId === 'revenueCard') {
+    if (cardsId.includes(chart.uniqueId)) {
       let totalBookedValue = bookedValueData.reduce((acc, val) => acc + val);
       let totalBookedCost = bookedCostData.reduce((acc, val) => acc + val);
       let totalBookedVolume = bookedVolumeData.reduce((acc, val) => acc + val);
@@ -73,31 +74,46 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
       const hitRatioMargin = grossMargin && offeredMargin ? grossMargin / offeredMargin : 0;
       const hitRatioVolume = totalBookedVolume && totalOfferedVolume ? totalBookedVolume / totalOfferedVolume : 0;
 
-      dataObject = {
-        addtionalData: {
-          volumeUnit,
-          currency,
-          totalOfferedValue,
-          totalOfferedCost,
-          totalOfferedVolume,
-          offeredMarginPercent,
-          offeredMargin,
-          grossMarginPercent,
-          hitRatioValue: isNaN(hitRatioValue) ? 0 : hitRatioValue,
-          hitRatioCost: isNaN(hitRatioCost) ? 0 : hitRatioCost,
-          hitRatioMargin: isNaN(hitRatioMargin) ? 0 : hitRatioMargin,
-          hitRatioVolume: isNaN(hitRatioVolume) ? 0 : hitRatioVolume
-        },
-        cardData: {
+      if (chart.uniqueId === 'bookedRevenueCard') {
+        const cardData = {
+          ['Total Booked Volume']: `${totalBookedVolume.toFixed(2)} ${volumeUnit}`,
           ['Total Booked Value']: totalBookedValue ? formatAmountWithCurrency(currencyTo || currencyFrom, totalBookedValue).fullFormatAmount : 0,
           ['Total Booked Cost']: totalBookedCost ? formatAmountWithCurrency(currencyTo || currencyFrom, totalBookedCost).fullFormatAmount : 0,
           ['Booked Gross Margin']: `${
             grossMargin ? formatAmountWithCurrency(currencyTo || currencyFrom, grossMargin).fullFormatAmount : 0
-          } (${grossMarginPercent}%)`,
-          ['Total Booked Volume']: `${totalBookedVolume.toFixed(2)} ${volumeUnit}`
-        }
-      };
-    } else {
+          } (${grossMarginPercent}%)`
+        };
+
+        dataObject = {
+          additionalData: {
+            volumeUnit,
+            currency,
+            ['Total Booked Volume']: isNaN(hitRatioValue) ? 0 : hitRatioValue / 100,
+            ['Total Booked Value']: isNaN(hitRatioCost) ? 0 : hitRatioCost / 100,
+            ['Total Booked Cost']: isNaN(hitRatioMargin) ? 0 : hitRatioMargin / 100,
+            ['Booked Gross Margin']: isNaN(hitRatioVolume) ? 0 : hitRatioVolume / 100
+          },
+          cardData
+        };
+      }
+
+      if (chart.uniqueId === 'offeredRevenueCard') {
+        const cardData = {
+          ['Total Offered Volume']: `${totalOfferedVolume.toFixed(2)} ${volumeUnit}`,
+          ['Total Offered Value']: totalOfferedValue ? formatAmountWithCurrency(currencyTo || currencyFrom, totalOfferedValue).fullFormatAmount : 0,
+          ['Total Offered Cost']: totalOfferedCost ? formatAmountWithCurrency(currencyTo || currencyFrom, totalOfferedCost).fullFormatAmount : 0,
+          ['Offered Gross Margin']: `${
+            offeredMargin ? formatAmountWithCurrency(currencyTo || currencyFrom, offeredMargin).fullFormatAmount : 0
+          } (${offeredMarginPercent}%)`
+        };
+
+        dataObject = {
+          cardData
+        };
+      }
+    }
+
+    if (!cardsId.includes(chart.uniqueId)) {
       dataObject = {
         labels,
         datasets: [
@@ -354,7 +370,7 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
         },
         {
           type: 'line',
-          label: chart.uniqueId === 'volumeVsBudget' ? `Total booked volume (${volumeUnit})` : `Total booked (${volumeUnit})`,
+          label: chart.uniqueId === 'volumeVsBudget' ? `Total Offered volume (${volumeUnit})` : `Total Offered (${volumeUnit})`,
           borderColor: 'rgb(254, 97, 104)',
           borderWidth: 2,
           fill: true,
@@ -376,6 +392,8 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
         month: moment(d.date).format('MMM/YY'),
         [chart.uniqueId === 'volumeVsBudget' ? 'totalBookedVolume MT' : 'totalBooked GM']:
           chart.uniqueId === 'volumeVsBudget' ? d.totalBookedVolume : d.totalBookedMargin,
+        [chart.uniqueId === 'volumeVsBudget' ? 'totalOfferedVolume MT' : 'totalOffered GM']:
+          chart.uniqueId === 'volumeVsBudget' ? d.totalOfferedVolume : d.totalOfferedMargin,
         ['totalBudget']: d.volumeBudget ? d.volumeBudget : 0
       }));
 

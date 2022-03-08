@@ -178,8 +178,12 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                       <Typography variant="h6" className={styles.title}>
                         {key}
                       </Typography>
+                      {chartData?.additionalData && (
+                        <p className={styles.hit_ratio}>
+                          Hit Ratio: {chartData?.additionalData[key] ? (chartData?.additionalData[key]).toFixed(2) : 0} %
+                        </p>
+                      )}
                     </Box>
-                    <EyeTooltip title={key} data={chartData?.addtionalData} currency={globalFilters.currency || currency} />
                   </Box>
                 </Grid>
               ))}
