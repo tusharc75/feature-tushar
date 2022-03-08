@@ -8,6 +8,7 @@ import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { generateUniqueId, packages, product } from '../../constants/helpers';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 
 type DialogProps = {
   ids: string | string[];
@@ -198,111 +199,118 @@ const AssignQuantityDialog: FC<DialogProps> = (props) => {
       return updatedState;
     });
   };
+
+
   return (
     <Dialog open fullWidth maxWidth="md" onClose={onClose}>
-      <CustomDialogHeader title={title} onClose={onClose} />
-      <CustomDialogContent>
-        <Box p={2}>
-          <Grid container spacing={2}>
-            {formData.map((form, indx) => (
-              <Fragment key={form.id}>
-                <Grid item xs={5} sm={5}>
-                  <Autocomplete
-                    fullWidth
-                    size="small"
-                    options={resourceData}
-                    value={form.resource}
-                    getOptionLabel={(option) => option?.name}
-                    getOptionSelected={(option, value) => option.id === value.id}
-                    onChange={(_, val) => {
-                      handleChange('resource', form, val);
-                    }}
-                    renderInput={(params) => <TextField {...params} variant="outlined" required label={label} />}
-                  />
-                </Grid>
-                <Grid item xs={5} sm={5}>
-                  <TextField
-                    size="small"
-                    fullWidth
-                    value={form.qty}
-                    type="number"
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value);
-                      if (val > 0) {
-                        handleChange('qty', form, val);
-                      } else {
-                        handleChange('qty', form, 0);
-                      }
-                    }}
-                    variant="outlined"
-                    required
-                    label="Quantity"
-                  />
-                </Grid>
-                <Grid item xs={2} sm={2}>
-                  <Box display="flex" justifyContent="flex-end" alignItems="center">
-                    {/* {indx !== 0 && ( */}
-                    <Box ml={2}>
-                      <IconButton
+      {resourceData && resourceData?.length ?
+        <Fragment>
+          <CustomDialogHeader title={title} onClose={onClose} />
+          <CustomDialogContent>
+            <Box p={2}>
+              <Grid container spacing={2}>
+                {formData.map((form, indx) => (
+                  <Fragment key={form.id}>
+                    <Grid item xs={5} sm={5}>
+                      <Autocomplete
+                        fullWidth
                         size="small"
-                        color="primary"
-                        // disabled={!Boolean(form.resource) || !Boolean(form.qty)}
-                        onClick={() => {
-                          setFormData((prevState) => prevState.filter((s) => s.id !== form.id));
+                        options={resourceData}
+                        value={form.resource}
+                        getOptionLabel={(option) => option?.name}
+                        getOptionSelected={(option, value) => option.id === value.id}
+                        onChange={(_, val) => {
+                          handleChange('resource', form, val);
                         }}
-                      >
-                        <Delete color="error" />
-                      </IconButton>
-                    </Box>
-                    {/* )} */}
-                  </Box>
-                </Grid>
-              </Fragment>
-            ))}
-          </Grid>
-        </Box>
-        {typeof text !== 'undefined' ? (
-          <Button
-            size="small"
-            color="primary"
-            // disabled={!Boolean(form.resource) || !Boolean(form.qty)}
-            variant="outlined"
-            onClick={() => {
-              setFormData((prevState) => [...prevState, { id: generateUniqueId(), resource: null, qty: 0 }]);
-            }}
-          >
-            {`${text}`}
-            <Add color={`primary`} />
-          </Button>
-        ) : (
-          <Button
-            size="small"
-            color="primary"
-            // disabled={!Boolean(form.resource) || !Boolean(form.qty)}
-            variant="outlined"
-            onClick={() => {
-              setFormData((prevState) => [...prevState, { id: generateUniqueId(), resource: null, qty: 0 }]);
-            }}
-          >
-            Add Products
-            <Add color={`primary`} />
-          </Button>
-        )}
-      </CustomDialogContent>
-      <CustomDialogFooter>
-        <Button variant="outlined" disabled={isSubmitting} color="primary" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button
-          onClick={submitForm}
-          variant="contained"
-          disabled={isSubmitting || !Boolean(formData[formData.length - 1]?.resource) || !Boolean(formData[formData.length - 1]?.qty)}
-          color="primary"
-          endIcon={isSubmitting && <CircularProgress size={20} />}
-        >
-          Save
-        </Button>
-      </CustomDialogFooter>
+                        renderInput={(params) => <TextField {...params} variant="outlined" required label={label} />}
+                      />
+                    </Grid>
+                    <Grid item xs={5} sm={5}>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        value={form.qty}
+                        type="number"
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          if (val > 0) {
+                            handleChange('qty', form, val);
+                          } else {
+                            handleChange('qty', form, 0);
+                          }
+                        }}
+                        variant="outlined"
+                        required
+                        label="Quantity"
+                      />
+                    </Grid>
+                    <Grid item xs={2} sm={2}>
+                      <Box display="flex" justifyContent="flex-end" alignItems="center">
+                        {/* {indx !== 0 && ( */}
+                        <Box ml={2}>
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            // disabled={!Boolean(form.resource) || !Boolean(form.qty)}
+                            onClick={() => {
+                              setFormData((prevState) => prevState.filter((s) => s.id !== form.id));
+                            }}
+                          >
+                            <Delete color="error" />
+                          </IconButton>
+                        </Box>
+                        {/* )} */}
+                      </Box>
+                    </Grid>
+                  </Fragment>
+                ))}
+              </Grid>
+            </Box>
+            {typeof text !== 'undefined' ? (
+              <Button
+                size="small"
+                color="primary"
+                // disabled={!Boolean(form.resource) || !Boolean(form.qty)}
+                variant="outlined"
+                onClick={() => {
+                  setFormData((prevState) => [...prevState, { id: generateUniqueId(), resource: null, qty: 0 }]);
+                }}
+              >
+                {`${text}`}
+                <Add color={`primary`} />
+              </Button>
+            ) : (
+              <Button
+                size="small"
+                color="primary"
+                // disabled={!Boolean(form.resource) || !Boolean(form.qty)}
+                variant="outlined"
+                onClick={() => {
+                  setFormData((prevState) => [...prevState, { id: generateUniqueId(), resource: null, qty: 0 }]);
+                }}
+              >
+                Add Products
+                <Add color={`primary`} />
+              </Button>
+            )}
+          </CustomDialogContent>
+          <CustomDialogFooter>
+            <Button variant="outlined" disabled={isSubmitting} color="primary" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              onClick={submitForm}
+              variant="contained"
+              disabled={isSubmitting || !Boolean(formData[formData.length - 1]?.resource) || !Boolean(formData[formData.length - 1]?.qty)}
+              color="primary"
+              endIcon={isSubmitting && <CircularProgress size={20} />}
+            >
+              Save
+            </Button>
+          </CustomDialogFooter>
+        </Fragment> : <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
     </Dialog>
   );
 };
