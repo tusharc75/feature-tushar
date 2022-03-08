@@ -230,7 +230,6 @@ const Product = () => {
             setFrameWorkComponent({ ...tempFrameworkComponent })
             columns = [...columns, ...getStaticFields()]
             setColumns([...columns])
-            dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
