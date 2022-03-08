@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.73.0](https://github.com/vebholic/oms_frontend/compare/v2.72.2...v2.73.0) (2022-03-08)
+
+
+### Features
+
+* - Tinymce issue fixing - wip ([5ed6b90](https://github.com/vebholic/oms_frontend/commit/5ed6b90acca6ed4bc7df19f96f54a93ee5244cfe))
+* rental job loading and reciving ticket preview changes to delivery ticket specific ([1ba527f](https://github.com/vebholic/oms_frontend/commit/1ba527fcb27052461805ed19a95fbad2869b7910))
+
+
+### Bug Fixes
+
+* **aggrid:** can selecte single and multiple ([0f7064a](https://github.com/vebholic/oms_frontend/commit/0f7064a7b64e71a2e2b68d4c31840b51cf4bc782))
+* bug fix ([76c87f5](https://github.com/vebholic/oms_frontend/commit/76c87f59ae084e996359a345cc02824d28f7c06e))
+* bug fix ([336fb32](https://github.com/vebholic/oms_frontend/commit/336fb32653068f75b00e1c1db29b2529db9bffa1))
+* bug fix ([4ab5974](https://github.com/vebholic/oms_frontend/commit/4ab597467697b1389ea061068f99c10051510451))
+* bug fix ([5692e22](https://github.com/vebholic/oms_frontend/commit/5692e2288e870a706a71a0616f0dc63602a2ee44))
+* bug fix ([0012262](https://github.com/vebholic/oms_frontend/commit/0012262d7b932895847631eee9d97d5cee2a7753))
+* bug fix ([c9659ac](https://github.com/vebholic/oms_frontend/commit/c9659ac7588bfccafe143489596f8a970bcf24af))
+* bug fix ([feb92a5](https://github.com/vebholic/oms_frontend/commit/feb92a5ba41a100cf54c6d524a9707bed234f896))
+* **chat:** ui fix ([94aef06](https://github.com/vebholic/oms_frontend/commit/94aef064574874cbb56dd1abde67778773cc2243))
+* little fix ([45bd02b](https://github.com/vebholic/oms_frontend/commit/45bd02b43c76e2ccd80b703092c5b81b84cce752))
+* repair job views closed repair not connecting with assets issue fixed PO-1232 ([013f36d](https://github.com/vebholic/oms_frontend/commit/013f36dbd65cb5370bf57eb9a79da9b1291c7c2c))
+* repairJob views header tags small screen issue solved ([0a2fe1a](https://github.com/vebholic/oms_frontend/commit/0a2fe1a9f88b87d39097bb113dac6e6c64f047a3))
+
 ### [2.72.2](https://github.com/vebholic/oms_frontend/compare/v2.72.1...v2.72.2) (2022-03-07)
 
 ### [2.72.1](https://github.com/vebholic/oms_frontend/compare/v2.72.0...v2.72.1) (2022-03-06)
