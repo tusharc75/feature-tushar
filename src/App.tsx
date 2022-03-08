@@ -117,6 +117,7 @@ import { Button, Snackbar } from '@material-ui/core';
 import * as serviceWorkerRegistration from 'src/serviceWorkerRegistration';
 import MuiAlert from '@material-ui/lab/Alert';
 import WellMaster from './pages/WellMaster';
+import DashboardBuilder from './pages/DashboardBuilder';
 
 var notificationInterval: any = null;
 
@@ -650,6 +651,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.wellMaster.path}`}>
               <WellMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={"/dashboard-builder"}>
+              <DashboardBuilder />
             </PrivateRoute>
 
             <Route exact path={'/customer-sign/:id'}>
