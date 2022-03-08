@@ -24,7 +24,7 @@ import { startCase } from "lodash";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import AdditionalCostDialog from "../AdditionalCost/AdditionalCostDialog";
-import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { fetch_rental_product_fields, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
 import { camelCase } from "lodash";
 
 
@@ -76,17 +76,9 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
   const fetchFields = async () => {
     try {
       let fields = []
-      if (isOffline) {
-        const resultProduct = await findOne(objectStore.resource, "rentalManagementProduct")
-        fields = CURReplaceByCurrencySingle(resultProduct, rentalManagementData.currency)
-        const resultCost = await findOne(objectStore.resource, "rentalManagementCost")
-        fields = [...fields, ...CURReplaceByCurrencySingle(resultCost, rentalManagementData.currency)]
-      }
-      else {
-        fields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
-        const resultCost = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`)
-        fields = [...fields, ...CURReplaceByCurrencySingle(resultCost?.data?.data, rentalManagementData.currency)]
-      }
+      fields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+      const resultCost = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
+      fields = [...fields, ...resultCost]
       let rendererNames = [];
       genrateColoum(fields, columns, rendererNames, false, renderedFrom);
       let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
@@ -129,7 +121,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         }
       });
       additionalcost?.forEach((e) => {
-        e.type = "Ad-hoc Charges";
+        e.type = "Services and Consumables";
       })
       combinedData = [...combinedData, ...additionalcost];
       let rows = combinedData?.map((item) => {
@@ -247,7 +239,7 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
                 setShowCostDialog(true);
               }}
             >
-              Add Ad-hoc Charges
+              Add Services and Consumables
             </Button>
             <Box mx={1} />
           </Fragment>

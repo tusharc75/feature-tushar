@@ -72,6 +72,8 @@ const ManageTransferAsset: FC<Props> = (props) => {
     axiosInstance()
       .get('/field?resource=Transfer Asset')
       .then(({ data: { data } }) => {
+        data = data.filter((obj) => obj?.fieldData?.fieldName !== "rentalJob");
+      
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 

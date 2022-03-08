@@ -4,7 +4,7 @@ import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@material-ui/core";
+import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem , ButtonGroup } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -23,6 +23,9 @@ import { useHistory } from "react-router-dom";
 import InfoIcon from '@material-ui/icons/Info';
 import { isMobile, isTablet } from "react-device-detect";
 import { useData } from "../../../StateProvider/Provider";
+import { BiChevronDown } from "react-icons/bi";
+import React from "react";
+import { IoMdEye } from "react-icons/io";
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { ExpandMore } from '@material-ui/icons';
 
@@ -103,7 +106,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                   </IconButton>
                 </HtmlTooltip>}
               {row.original.isTransferAsset &&
-                <HtmlTooltip title={`${routes.transferAsset.title}`}>
+                <HtmlTooltip title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`}>
                   <IconButton size="small" onClick={() => {
                     history.push(routes.transferAsset.path, {
                       rental: rentalManagementData,
@@ -235,7 +238,13 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         const subRows = []
         const inventory = data.inventory?.filter((e) => e._id === parent._id);
         inventory?.forEach((_inventory, k) => {
-          const isTransferAsset = transferAssets.some(e => e.assetId === _inventory.inventory);
+          const transferFilter = transferAssets.filter(e => e.assetId === _inventory.inventory);
+          var isTransferAsset = false;
+          var transferData = {};
+          if (transferFilter.length) {
+            isTransferAsset = true
+            transferData = transferFilter[0]
+          }
           const isPurchaseOrderAsset = purchaseOrderProduct.some(e => e._id === _inventory?.inventoryDetail?.purchaseOrder);
           subRows.push({
             ..._inventory,
@@ -247,6 +256,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
             isPurchaseOrderAsset: isPurchaseOrderAsset,
             isTransferAsset: isTransferAsset,
+            transferData: transferData,
             isSubleaseAsset: _inventory.inventoryDetail?.subleaseAsset
           })
         })
@@ -264,9 +274,14 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             const subRows = []
             const inventory = data.inventory?.filter((e) => e._id === _child._id);
             inventory?.forEach((_inventory, l) => {
-              const isTransferAsset = transferAssets.some(e => e.assetId === _inventory.inventory);
+              const transferFilter = transferAssets.filter(e => e.assetId === _inventory.inventory);
+              var isTransferAsset = false;
+              var transferData = {};
+              if (transferFilter.length) {
+                isTransferAsset = true
+                transferData = transferFilter[0]
+              }
               const isPurchaseOrderAsset = purchaseOrderProduct.some(e => e._id === _inventory?.inventoryDetail?.purchaseOrder);
-
               subRows.push({
                 ..._inventory,
                 detail: `${(i + 1)}.${(j + 1)}.${(l + 1)} - ${_inventory?.inventoryDetail?.assetNumber}`,
@@ -277,6 +292,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                 isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
                 isPurchaseOrderAsset: isPurchaseOrderAsset,
                 isTransferAsset: isTransferAsset,
+                transferData: transferData,
                 isSubleaseAsset: _inventory?.inventoryDetail?.subleaseAsset
               })
             })
@@ -439,7 +455,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             size="small"
             disabled={disableAssignSerializedAssets()}
             onClick={() => {
-              setAddSerializedAssetDialog({ open: true })
+              setOrderDialog(prevState => ({ ...prevState, open: true, type: "purchaseOrder" }))
             }}
           >
             {`Assign ${routes.serializedAsset.title}`}
@@ -580,6 +596,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         productsToSave={[...showOrderDialog.products]}
         isFromSerializedAssetStepFromRental={true}
         currency={rentalManagementData.currency}
+        refrenceData={{ wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber }}
         rentalManagementId={rentalManagementData._id}
         warehouseId={rentalManagementData?.warehouse?.optionValue}
         deliveryDateMax={rentalManagementData.estimateStartDate}

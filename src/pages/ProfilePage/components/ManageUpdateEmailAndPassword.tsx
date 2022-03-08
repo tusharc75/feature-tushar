@@ -51,7 +51,7 @@ export default function ManageUpdateEmailAndPassword({
         confirmPassword: false
     });
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-    
+
     const toggleVisibility = (key) => {
         setVisibity({ ...visibity, [key]: !visibity[key] })
     }
@@ -278,8 +278,12 @@ export default function ManageUpdateEmailAndPassword({
                                 color="primary"
                                 disabled={loading ? true : ((isUpdateEmail && values.email === userData.email) || false)}
                                 onClick={() => {
-                                    let errors = validateForm(values)
-                                    if (Object.keys(errors).length === 0) {
+                                    if (isUpdatePassword) {
+                                        let errors = validateForm(values)
+                                        if (Object.keys(errors).length === 0) {
+                                            handleSubmit(values)
+                                        }
+                                    } else {
                                         handleSubmit(values)
                                     }
                                 }}

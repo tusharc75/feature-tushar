@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#378280",
     opacity: "0.95",
     border: "#03232e",
-    display: "flex",
+    // display: "flex",
     [theme.breakpoints.down("xs")]: {
       borderRadius: "4px",
       boxShadow: "2px 2px 4px #747474",
@@ -131,7 +131,7 @@ const DetailsPageHeader = (props) => {
                           <Typography
                             align="center"
                             variant="subtitle1"
-                            style={{ opacity: 0.9 }}
+                            style={{ opacity: 0.9 , fontSize:"0.8rem" }}
                             className={`text-capitalize ${classes.labelColor}`}
                           >
                             {key}
