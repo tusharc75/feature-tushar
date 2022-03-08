@@ -57,7 +57,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const repairJobProcessSteps = ["Serialized Assets", "Repair Process"];
 export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 export const purchaseOrderSteps = ['Add Product', 'Ad hoc Charges', 'Issue PO', 'Receiving Asset'];
-export const rentalManagementSteps = ['Add Products', 'Ad-hoc Charges', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Packing Slip'];
+export const rentalManagementSteps = ['Add Products', 'Services and Consumables', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Packing Slip'];
 export const subleaseSteps = ["Add Products", "Start Sublease", "End Sublease"]
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
@@ -177,7 +177,8 @@ export const sidebarResource = {
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
   zone: 'Zone',
-  projectSales: 'Project Sales'
+  projectSales: 'Project Sales',
+  wellMaster: 'Well Master'
 };
 
 export const resourceNames = {
@@ -234,7 +235,8 @@ export const resourceNames = {
   purchaseOrder: 'Purchase Order',
   transferAsset: 'Transfer Asset',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventory'
+  transferInventory: 'Transfer Inventory',
+  wellMaster: 'Well Master'
 };
 
 export const primaryFields = {
@@ -299,7 +301,8 @@ export const RESOURCE_LABEL = {
   address: 'Addresses',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventories',
-  zone: "Zone"
+  zone: "Zone",
+  wellMaster: "Well Master"
 };
 
 export const CHILD_RESOURCE = {
@@ -385,7 +388,11 @@ export const warehouse = {
   warehouseApi: '/warehouse'
 };
 
-
+export const wellMaster = {
+  resource: 'wellMaster',
+  api: '/well-master',
+  route: 'well-master'
+};
 
 export const projectSales = {
   projectSalesResource: 'projectSales',

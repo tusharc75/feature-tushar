@@ -64,6 +64,8 @@ const Product = () => {
     const [productTemplate, setProductTemplate] = useState(null);
     const [isProductTemplate, setIsProductTemplate] = useState(true);
 
+    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+
     const [productType, setProductType] = useState(null);
     const [productTypeList, setProductTypeList] = useState([]);
     const [isProductType, setIsProductType] = useState(false);
@@ -193,7 +195,6 @@ const Product = () => {
                     selectedRecords: rows.filter(f => f.isChecked === true)
                 });
             }
-
             if (gridApi) {
                 try {
                     let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
@@ -227,16 +228,24 @@ const Product = () => {
                 actionsRenderer: ActionsRenderer
             }
             setFrameWorkComponent({ ...tempFrameworkComponent })
-            setColumns(null)
             columns = [...columns, ...getStaticFields()]
             setColumns([...columns])
-            dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
         });
     };
+
+    if (columnState) {
+        columns?.map((item) => {
+            columnState?.map((d) => {
+                if (d.colId == item.field) {
+                    item.show = !d.hide;
+                }
+            });
+        });
+    }
 
     const GenrateColoum = (fields, column, rendererNames) => {
         fields.forEach((ele) => {
@@ -474,7 +483,6 @@ const Product = () => {
     };
 
     const searchInnner = (
-
         <Autocomplete
             style={{ width: "250px" }}
             options={productCategoryList}

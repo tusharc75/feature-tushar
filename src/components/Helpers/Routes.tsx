@@ -344,6 +344,14 @@ const routes = {
     title: (storedRoutes && storedRoutes.sublease && storedRoutes.sublease.title) ? storedRoutes.sublease?.title : RESOURCE_LABEL.sublease,
     path: "/sublease/detail",
   },
+  wellMaster: {
+    title: (storedRoutes && storedRoutes.wellMaster && storedRoutes.wellMaster.title) ? storedRoutes.wellMaster?.title : RESOURCE_LABEL.wellMaster,
+    path: "/well-master",
+  },
+  wellMasterDetail: {
+    title: (storedRoutes && storedRoutes.wellMaster && storedRoutes.wellMaster.title) ? storedRoutes.wellMaster?.title : RESOURCE_LABEL.wellMaster,
+    path: "/well-master/detail",
+  },
 };
 
 export default routes;
