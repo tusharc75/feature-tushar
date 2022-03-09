@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
-import ReactFlow, { Controls, ReactFlowProvider } from 'react-flow-renderer';
+import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flow-renderer';
 import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, INVENTORY_STATUS, REPAIR_JOB_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import { MdZoomOutMap } from 'react-icons/md';
 
 const customNodeStyles = {
   repairJob: {
@@ -51,6 +53,7 @@ const RepairJobViews = (props) => {
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const [fullScreenOpen, setFullScreenOpen] = useState(false);
 
   useEffect(() => {
     fetchViewsData();
@@ -244,47 +247,57 @@ const RepairJobViews = (props) => {
   };
 
   return (
-    <div style={{ height: '57vh' }}>
-      {!loading ? (
-        flowData.length ? (
-          <ReactFlowProvider>
-            <ReactFlow
-              elements={flowData || []}
-              onLoad={onLoad}
-              selectNodesOnDrag={false}
-              snapToGrid={true}
-              snapGrid={[15, 15]}
-              onElementClick={onElementClick}
-            >
-              <div style={{ width: '58%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}>
-                {Object.keys(customNodeStyles).map((key) => {
-                  return (
-                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', paddingLeft: '5px', paddingRight: '5px' }}>
-                      {customNodeStyles[key].name}
-                      <div
-                        style={{
-                          height: '12px',
-                          width: '12px',
-                          marginLeft: '3px',
-                          borderRadius: '100%',
-                          background: `${customNodeStyles[key].background}`,
-                          borderColor: `1px solid ${customNodeStyles[key].borderColor}`
-                        }}
-                      ></div>
-                    </div>
-                  );
-                })}
-              </div>
-              <Controls />
-            </ReactFlow>
-          </ReactFlowProvider>
-        ) : (
-          <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
-        )
-      ) : (
-        <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Views...</div>
-      )}
-    </div>
+    <>
+      <ContentFullScreen title="Rental Views Roadmap" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
+        <div style={fullScreenOpen ? { height: '95vh' } : { height: '57vh' }}>
+          {!loading ? (
+            flowData.length ? (
+              <ReactFlowProvider>
+                <ReactFlow
+                  elements={flowData || []}
+                  onLoad={onLoad}
+                  selectNodesOnDrag={false}
+                  snapToGrid={true}
+                  snapGrid={[15, 15]}
+                  onElementClick={onElementClick}
+                >
+                  <div style={{ width: '58%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}>
+                    {Object.keys(customNodeStyles).map((key) => {
+                      return (
+                        <div
+                          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', paddingLeft: '5px', paddingRight: '5px' }}
+                        >
+                          {customNodeStyles[key].name}
+                          <div
+                            style={{
+                              height: '12px',
+                              width: '12px',
+                              marginLeft: '3px',
+                              borderRadius: '100%',
+                              background: `${customNodeStyles[key].background}`,
+                              borderColor: `1px solid ${customNodeStyles[key].borderColor}`
+                            }}
+                          ></div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <Controls>
+                    <ControlButton onClick={() => (fullScreenOpen ? setFullScreenOpen(false) : setFullScreenOpen(true))}>
+                      <MdZoomOutMap />
+                    </ControlButton>
+                  </Controls>
+                </ReactFlow>
+              </ReactFlowProvider>
+            ) : (
+              <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
+            )
+          ) : (
+            <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Views...</div>
+          )}
+        </div>
+      </ContentFullScreen>
+    </>
   );
 };
 export default RepairJobViews;
