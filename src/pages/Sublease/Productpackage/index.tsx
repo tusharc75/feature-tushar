@@ -61,50 +61,61 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
     const fetchFields = async () => {
         var data = await fetch_sublease_product_fields(subleaseData.currency)
         setAllFields(JSON.parse(JSON.stringify(data)))
-        const coloum: any = [{
-            accessor: 'detail',
-            Header: 'Detail',
-            minWidth: 300,
-            width: 300,
-            sticky: isMobile ? "none" : "left",
-            Cell: ({ row }) => (
-                <div style={{ display: "flex", alignItems: 'center' }}>
-                    <p
-                        onClick={() => {
-                            handleOpen(row.original)
-                        }}
-                        className="link text-truncate"
-                        title={row.original.detail}
-                    >
-                        {row.original.detail}
-                    </p>
-                    {row.original?.type === 'package' &&
-                        <Box ml={1} className="d-flex align-items-center">
-                            <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
-                            <HtmlTooltip title="Add Product">
-                                <IconButton onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })} size="small" color="primary">
-                                    <Add color='disabled' fontSize="small" />
-                                </IconButton>
-                            </HtmlTooltip>
-                        </Box>
-                    }
-                    <HtmlTooltip title="Details">
-                        <IconButton
-                            size="small"
-                            aria-label="Details"
+        const coloum: any = [
+            {
+                accessor: 'srno',
+                Header: '#',
+                width: 70,
+                sticky: isMobile ? "none" : "left",
+                Cell: ({ row }) => (
+                    <p className="text-truncate"  >
+                        {row.original.srno}
+                    </p>),
+            },
+            {
+                accessor: 'detail',
+                Header: 'Detail',
+                minWidth: 300,
+                width: 300,
+                sticky: isMobile ? "none" : "left",
+                Cell: ({ row }) => (
+                    <div style={{ display: "flex", alignItems: 'center' }}>
+                        <p
                             onClick={() => {
-                                window.open(`${row.original.type === "product" ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`);
+                                handleOpen(row.original)
                             }}
+                            className="link text-truncate"
+                            title={row.original.detail}
                         >
-                            <InfoIcon fontSize="small" />
-                        </IconButton>
-                    </HtmlTooltip>
-                </div>
-            ),
-            Footer: () => {
-                return <>Total</>
-            }
-        }]
+                            {row.original.detail}
+                        </p>
+                        {row.original?.type === 'package' &&
+                            <Box ml={1} className="d-flex align-items-center">
+                                <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
+                                <HtmlTooltip title="Add Product">
+                                    <IconButton onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })} size="small" color="primary">
+                                        <Add color='disabled' fontSize="small" />
+                                    </IconButton>
+                                </HtmlTooltip>
+                            </Box>
+                        }
+                        <HtmlTooltip title="Details">
+                            <IconButton
+                                size="small"
+                                aria-label="Details"
+                                onClick={() => {
+                                    window.open(`${row.original.type === "product" ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`);
+                                }}
+                            >
+                                <InfoIcon fontSize="small" />
+                            </IconButton>
+                        </HtmlTooltip>
+                    </div>
+                ),
+                Footer: () => {
+                    return <>Total</>
+                }
+            }]
         data.forEach(element => {
             if (element.fieldName === "price" && element.required) {
                 setIsRateRequired(true);
@@ -225,7 +236,8 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
         inventory = data.inventory;
         const rows = data.material.filter((e) => e.parentId === null)
         rows.forEach((parent, i) => {
-            parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
+            parent.srno = (i + 1)
+            parent.detail = `${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
             parent.qtyDisplay = parent.qty;
             parent.isValid = parent["finalPrice_" + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
             parent.hideSelection = parent.assetQty > 0 ? true : false;
@@ -234,8 +246,9 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                 const subRows: any = data.material.filter((e) => e.parentId === parent._id);
                 var assetQty = 0;
                 subRows.forEach((_subRow, j) => {
-                    _subRow.detail = (i + 1) + "." + (j + 1) + " - " + _subRow.productDetail?.productName
-                    _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`
+                    _subRow.srno = (i + 1) + "." + (j + 1)
+                    _subRow.detail = _subRow.productDetail?.productName
+                    _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`
                     _subRow.isValid = _subRow["finalPrice_" + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
                     _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
                     _subRow.assetQty = _subRow.assetQty;
@@ -309,6 +322,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
 
     const handleSaveData = async (rows: any) => {
         rows.forEach(element => {
+            delete element.srno
             delete element.detail
             delete element.qtyDisplay
             delete element.isValid

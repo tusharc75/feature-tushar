@@ -3,7 +3,8 @@ import React, { useEffect } from 'react'
 import MaUTable from '@material-ui/core/Table'
 import { TableBody, TableCell, TableHead, TableFooter, TableRow, TextField } from '@material-ui/core'
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
-import { gridPageSizes, treeToFlatArray } from '../../constants/helpers'
+import { columnFilter } from './ReactTableHelpers'
+import { treeToFlatArray } from '../../constants/helpers'
 import { uniqBy, isString } from 'lodash';
 import {
     useTable, useExpanded, useRowSelect, useFlexLayout,
@@ -13,7 +14,6 @@ import { useSticky } from "react-table-sticky";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import FilterListIcon from '@material-ui/icons/FilterList';
-import TablePagination from '@material-ui/core/TablePagination';
 
 const IndeterminateCheckbox = React.forwardRef(
     ({ indeterminate, ...rest }: any, ref) => {
@@ -49,6 +49,7 @@ function DefaultColumnFilter({
     // const count = preFilteredRows.length
     return (
         <TextField
+            autoComplete="off"
             type="search"
             id="search"
             style={{ padding: 0 }}
@@ -80,7 +81,7 @@ export default function CustomReactTable({
     const defaultColumn = React.useMemo(
         () => ({
             // When using the useFlexLayout:
-            minWidth: 150, // minWidth is only used as a limit for resizing
+            minWidth: 80, // minWidth is only used as a limit for resizing
             width: 150, // width is used for both the flex-basis and flex-grow
             // maxWidth: 250, // maxWidth is only used as a limit for resizing
             Filter: DefaultColumnFilter,
@@ -171,12 +172,17 @@ export default function CustomReactTable({
                         </div>
                 ),
             },
-            ...columns
+            ...columns.map(m => { return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' } })
         ],
         []
     )
 
-    // Use the state and functions returned from useTable to build your UI
+    const filterTypes = React.useMemo(
+        () => ({
+            filterRowsWithSubrows: (rows, id, filterValue) => columnFilter(rows, id, filterValue)
+        }),
+        [],
+    );
 
     const {
         getTableProps,
@@ -209,12 +215,14 @@ export default function CustomReactTable({
             columns: newColumns,
             data,
             onSelect,
+            defaultColumn,
+            filterTypes,
             initialState: {
                 // pageIndex: 0,
                 autoResetExpanded: true,
                 hiddenColumns: hideSelection ? ["selection", "action"] : []
             },
-            defaultColumn,
+            getSubRows: (row: any) => row.subRows,
             sortTypes: {
                 alphanumeric: (row1, row2, columnName) => {
                     const rowOneColumn = row1.values[columnName];
@@ -307,14 +315,13 @@ export default function CustomReactTable({
 
                                             <div {...column.getResizerProps()} className="resizer" />
 
-                                            {/* <div>{column.canFilter ? column.render('Filter') : null}</div> */}
                                         </TableCell>
                                     ))}
                                 </TableRow>
 
                                 <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
                                     {headerGroup.headers.map(column => (
-                                        <TableCell {...column.getHeaderProps()} className="th text-truncate">
+                                        <TableCell {...column.getHeaderProps()} className="th text-truncate bg-white">
                                             <div>{column.canFilter ? column.render('Filter') : null}</div>
                                         </TableCell>
                                     ))}

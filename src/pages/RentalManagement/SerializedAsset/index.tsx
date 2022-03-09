@@ -4,7 +4,7 @@ import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem , ButtonGroup } from "@material-ui/core";
+import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, ButtonGroup } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -15,7 +15,7 @@ import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
 import ManagePurchaseOrder from "../../PurchaseOrder/ManagePurchaseOrder";
 import ManageSublease from "../../Sublease/ManageSublease";
-import { uniqBy } from 'lodash';
+import { uniqBy, uniq } from 'lodash';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
@@ -29,7 +29,7 @@ import { IoMdEye } from "react-icons/io";
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { ExpandMore } from '@material-ui/icons';
 
-const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
+const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol, stepFullScreen }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -59,76 +59,87 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
 
   const fetchFields = async () => {
     var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
-    const coloum: any = [{
-      accessor: 'detail',
-      Header: 'Detail',
-      width: 300,
-      sticky: isMobile ? "none" : "left",
-      Cell: ({ row }) => (
-        <div className="d-flex gap-2 align-items-center">
-          <p className="text-truncate" title={row.original.detail}  >
-            {(row.original?.type === "asset" && !isOffline) ?
-              <a className="link text-truncate" href={`${serializedAsset.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
-              row.original.detail}
-          </p>
-          {row.original.isPurchaseOrder &&
-            <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
-              <IconButton size="small" onClick={() => {
-                history.push(routes.purchaseOrder.path, {
-                  rental: rentalManagementData,
-                })
-              }}>
-                <InfoIcon fontSize="small" color={"primary"} />
-              </IconButton>
-            </HtmlTooltip>
-          }
-          {row.original.isSublease &&
-            <HtmlTooltip title={`${routes.sublease.title}`}>
-              <IconButton size="small" onClick={() => {
-                history.push(routes.sublease.path, {
-                  rental: rentalManagementData,
-                })
-              }}>
-                <InfoIcon fontSize="small" color={"primary"} />
-              </IconButton>
-            </HtmlTooltip>
-          }
-          {row.original?.type === "asset" &&
-            <span className="d-flex align-items-center gap-2">
-              <Chip label="Asset" size="small" color="primary" />
-              {(row.original.status === INVENTORY_STATUS.reserved && row.original?.manualStatus !== INVENTORY_STATUS.reserved && !isOffline) &&
-                <HtmlTooltip title={`Remove`}>
-                  <IconButton size="small" onClick={() => {
-                    setShowConfirmBox(true)
-                    setDeleteData([row.original.inventory])
-                  }}>
-                    <Delete fontSize="small" color="error" />
-                  </IconButton>
-                </HtmlTooltip>}
-              {row.original.isTransferAsset &&
-                <HtmlTooltip title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`}>
-                  <IconButton size="small" onClick={() => {
-                    history.push(routes.transferAsset.path, {
-                      rental: rentalManagementData,
-                    })
-                  }}>
-                    <InfoIcon fontSize="small" color={"primary"} />
-                  </IconButton>
-                </HtmlTooltip>
-              }
-            </span>}
-        </div>),
-      Footer: () => {
-        return <>Total</>
-      }
-    },
-    {
-      accessor: 'assets',
-      Header: 'Assets Assigned',
-      Cell: ({ row }) => (
-        getAssetAssignedValues(row)
-      )
-    }]
+    const coloum: any = [
+      {
+        accessor: 'srno',
+        Header: '#',
+        width: 70,
+        sticky: isMobile ? "none" : "left",
+        Cell: ({ row }) => (
+          <p className="text-truncate"  >
+            {row.original.srno}
+          </p>),
+      },
+      {
+        accessor: 'detail',
+        Header: 'Detail',
+        width: 300,
+        sticky: isMobile ? "none" : "left",
+        Cell: ({ row }) => (
+          <div className="d-flex gap-2 align-items-center">
+            <p className="text-truncate" title={row.original.detail}  >
+              {(row.original?.type === "asset" && !isOffline) ?
+                <a className="link text-truncate" href={`${serializedAsset.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
+                row.original.detail}
+            </p>
+            {row.original.isPurchaseOrder &&
+              <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
+                <IconButton size="small" onClick={() => {
+                  history.push(routes.purchaseOrder.path, {
+                    rental: rentalManagementData,
+                  })
+                }}>
+                  <InfoIcon fontSize="small" color={"primary"} />
+                </IconButton>
+              </HtmlTooltip>
+            }
+            {row.original.isSublease &&
+              <HtmlTooltip title={`${routes.sublease.title}`}>
+                <IconButton size="small" onClick={() => {
+                  history.push(routes.sublease.path, {
+                    rental: rentalManagementData,
+                  })
+                }}>
+                  <InfoIcon fontSize="small" color={"primary"} />
+                </IconButton>
+              </HtmlTooltip>
+            }
+            {row.original?.type === "asset" &&
+              <span className="d-flex align-items-center gap-2">
+                <Chip label="Asset" size="small" color="primary" />
+                {(row.original.status === INVENTORY_STATUS.reserved && row.original?.manualStatus !== INVENTORY_STATUS.reserved && !isOffline) &&
+                  <HtmlTooltip title={`Remove`}>
+                    <IconButton size="small" onClick={() => {
+                      setShowConfirmBox(true)
+                      setDeleteData([row.original.inventory])
+                    }}>
+                      <Delete fontSize="small" color="error" />
+                    </IconButton>
+                  </HtmlTooltip>}
+                {row.original.isTransferAsset &&
+                  <HtmlTooltip title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`}>
+                    <IconButton size="small" onClick={() => {
+                      history.push(routes.transferAsset.path, {
+                        rental: rentalManagementData,
+                      })
+                    }}>
+                      <InfoIcon fontSize="small" color={"primary"} />
+                    </IconButton>
+                  </HtmlTooltip>
+                }
+              </span>}
+          </div>),
+        Footer: () => {
+          return <>Total</>
+        }
+      },
+      {
+        accessor: 'assets',
+        Header: 'Assets Assigned',
+        Cell: ({ row }) => (
+          getAssetAssignedValues(row)
+        )
+      }]
     data.forEach(element => {
       if (element.type === "date") {
         coloum.push({
@@ -228,13 +239,18 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         const transactionData = result?.data?.data
 
         transferAssets = transactionData?.transferAsset;
-        purchaseOrderProduct = transactionData?.purchaseOrder
-        subleaseProduct = transactionData?.sublease
+        if (permissions?.purchaseOrder?.isRead) {
+          purchaseOrderProduct = transactionData?.purchaseOrder
+        }
+        if (permissions?.sublease?.isRead) {
+          subleaseProduct = transactionData?.sublease
+        }
       }
 
       const rows = data.material.filter((e) => e.parentId === null)
       rows.forEach((parent, i) => {
-        parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
+        parent.srno = i + 1;
+        parent.detail = `${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
         const subRows = []
         const inventory = data.inventory?.filter((e) => e._id === parent._id);
         inventory?.forEach((_inventory, k) => {
@@ -248,7 +264,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           const isPurchaseOrderAsset = purchaseOrderProduct.some(e => e._id === _inventory?.inventoryDetail?.purchaseOrder);
           subRows.push({
             ..._inventory,
-            detail: `${(i + 1)}.${(k + 1)} - ${_inventory.inventoryDetail?.assetNumber}`,
+            srno: `${(i + 1)}.${(k + 1)}`,
+            detail: _inventory.inventoryDetail?.assetNumber,
             type: "asset",
             status: _inventory.inventoryDetail?.status,
             manualStatus: _inventory.inventoryDetail?.manualStatus,
@@ -269,7 +286,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         if (parent.type === "package") {
           const child: any = [...data.material?.filter((e) => e.parentId === parent._id)];
           child.forEach((_child, j) => {
-            _child.detail = `${(i + 1)}.${(j + 1)} - ${_child.productDetail?.productName}`
+            _child.srno = `${(i + 1)}.${(j + 1)}`
+            _child.detail = _child.productDetail?.productName
             _child.qty = _child.qty * parent.qty
             const subRows = []
             const inventory = data.inventory?.filter((e) => e._id === _child._id);
@@ -284,7 +302,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               const isPurchaseOrderAsset = purchaseOrderProduct.some(e => e._id === _inventory?.inventoryDetail?.purchaseOrder);
               subRows.push({
                 ..._inventory,
-                detail: `${(i + 1)}.${(j + 1)}.${(l + 1)} - ${_inventory?.inventoryDetail?.assetNumber}`,
+                srno: `${(i + 1)}.${(j + 1)}.${(l + 1)}`,
+                detail: _inventory?.inventoryDetail?.assetNumber,
                 type: "asset",
                 status: _inventory.inventoryDetail?.status,
                 manualStatus: _inventory.inventoryDetail?.manualStatus,
@@ -322,7 +341,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     }
   };
 
-
   const getAssetAssignedValues = (row) => {
     if (row.original?.type === "product") {
       if (row.subRows && row.subRows?.length > 0) {
@@ -342,6 +360,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const handleAddSerializedAsset = (assets) => {
     let data = [];
     let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product");
+    flatArray = uniqBy(flatArray, '_id')
     flatArray?.forEach((e: any) => {
       if (e.type === "product") {
         let qty = e.qty - e.subRows.length;
@@ -402,10 +421,20 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty !== f.subRows?.length);
     flatArray = uniqBy(flatArray, '_id')
     const products = flatArray.map(m => { return { _id: m.materialId, unit: m.unit, assetsCount: m.qty - (m.subRows?.length ?? 0) } })
+    const uniqProduct = []
+    products.forEach((element: any) => {
+      const foundProduct = uniqProduct.filter((e) => e._id === element._id)
+      if (foundProduct.length) {
+        foundProduct[0].assetsCount += element.assetsCount
+      }
+      else {
+        uniqProduct.push(element)
+      }
+    })
     setOrderDialog(prevState => {
       return {
         ...prevState,
-        products: products
+        products: uniqProduct
       }
     });
     const assetProduct = []
@@ -481,15 +510,16 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             open={Boolean(anchorActionEl)}
             onClose={closeActions}
           >
-            <MenuItem
-              disabled={showOrderDialog.products.length === 0}
-              onClick={() => {
-                setOrderDialog(prevState => ({ ...prevState, open: true, type: "purchaseOrder" }))
-                closeActions()
-              }}
-            >
-              {`Create ${routes.purchaseOrder.title}`}</MenuItem>
-
+            {permissions?.purchaseOrder?.isCreate &&
+              <MenuItem
+                disabled={showOrderDialog.products.length === 0}
+                onClick={() => {
+                  setOrderDialog(prevState => ({ ...prevState, open: true, type: "purchaseOrder" }))
+                  closeActions()
+                }}
+              >
+                {`Create ${routes.purchaseOrder.title}`}</MenuItem>
+            }
             {permissions?.sublease?.isCreate &&
               <MenuItem
                 disabled={showOrderDialog.products.length === 0}
@@ -499,7 +529,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                 }}
               >
                 {`Create ${routes.sublease.title}`}</MenuItem>}
-
             <MenuItem
               disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
               onClick={() => {
@@ -519,16 +548,17 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           <Box
             zIndex={5}
             width={
-              isTabletScreen
-                ? "calc(100vw - 20px)"
-                : isSmallScreen
-                  ? "calc(100vw - 78px)"
-                  : showActivity ? "100%" : "calc(100vw - 103px)"
+              stepFullScreen ? "100%" :
+                isTabletScreen
+                  ? "calc(100vw - 20px)"
+                  : isSmallScreen
+                    ? "calc(100vw - 78px)"
+                    : showActivity ? "100%" : "calc(100vw - 103px)"
             }
-            height="calc(100vh - 350px)"
+            height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 350px)"}
           >
             <CustomReactTable
-              height="calc(100vh - 365px)"
+              height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 365px)"}
               columns={columns}
               data={rowsData}
               setCellColor={(rowData) => {

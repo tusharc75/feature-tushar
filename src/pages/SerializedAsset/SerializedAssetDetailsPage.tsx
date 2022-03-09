@@ -272,6 +272,13 @@ const SerializedAssetDetailsPage = () => {
     if (productId) {
       setLoadingBOMData(true)
       axiosInstance().get(`/product/${productId}/bom`).then(({ data: { data } }) => {
+        data = data.map((o) => {
+          return {
+            ...o,
+            productName: o.childProductDetail?.productName,
+            productId: o.childProductDetail?._id
+          };
+        });
         setBOMData([...data])
         setLoadingBOMData(false)
       }).catch(err => {
