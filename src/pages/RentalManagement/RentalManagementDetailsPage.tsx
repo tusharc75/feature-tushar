@@ -430,7 +430,7 @@ const RentalManagementDetailsPage = () => {
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
                     isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
-                    setStepFullScreen={setStepFullScreen}
+                    setStepFullScreen={() => setStepFullScreen(true)}
                   />
                   <ContentFullScreen title={rentalManagementSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
                     {currentStep === 0 && rentalManagementData && (
