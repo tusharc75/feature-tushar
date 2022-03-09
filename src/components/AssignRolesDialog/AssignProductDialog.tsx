@@ -14,7 +14,7 @@ import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import SearchBox from "../Helpers/SearchBox";
-import { gridLoadingTimeout, isObjectEmpty, product } from "../../constants/helpers";
+import { gridLoadingTimeout, isObjectEmpty, product, packages } from "../../constants/helpers";
 import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../Helpers/CommonSkeleton";
@@ -41,7 +41,8 @@ const AssignProductDialog = ({
     productId,
     onSuccess,
     handleCloseDialog,
-    assignedProducts
+    assignedProducts,
+    reference = 'product'
 }) => {
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const {
@@ -89,7 +90,11 @@ const AssignProductDialog = ({
         }
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            data.data = data.data.filter(obj => obj._id !== productId && !assignedProducts.some(item => item?.childProduct === obj?._id))
+            if(reference === "product") {
+                data.data = data.data.filter(obj => obj._id !== productId && !assignedProducts.some(item => item?.childProduct === obj?._id))
+            } else {
+                data.data = data.data.filter(obj => assignedProducts.findIndex(d => d._id === obj._id) < 0) 
+            }
             data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
@@ -169,7 +174,8 @@ const AssignProductDialog = ({
 
     const handleAssignProduct = async () => {
         setAssigning(true);
-        const dataObj = selectedRecords.filter(d => d.quantity > 0)
+        if(reference === 'product') {
+            const dataObj = selectedRecords.filter(d => d.quantity > 0)
             .map(d => {
                 return ({
                     "childProduct": d.id,
@@ -192,6 +198,21 @@ const AssignProductDialog = ({
                 setAssigning(false);
                 toastConfig.setToastConfig(error);
             });
+        } else {
+            axiosInstance()
+            .post(`${packages.packageApi}/add-products`, {
+              ids: [productId],
+              products: selectedRecords.map((d:any) => ({ product: d.id, qty: Number(d.quantity) }))
+            })
+            .then(() => {
+             setAssigning(false);
+              onSuccess();
+            })
+            .catch((err) => {
+             setAssigning(false);
+             toastConfig.setToastConfig(err);
+            });
+        }
 
     };
 
@@ -219,7 +240,7 @@ const AssignProductDialog = ({
         <Dialog
             fullWidth
             maxWidth="md"
-            fullScreen={fullScreen || (isMobile || isTablet)}
+            fullScreen={true}
             open={productsDialogOpen}
             onClose={handleCloseDialog}
             aria-labelledby="assign-roles-dialog"
