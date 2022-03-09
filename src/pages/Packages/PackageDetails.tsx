@@ -149,29 +149,21 @@ const PackageDetails = () => {
   };
 
   const handleUpdateQuantity = (row) => {
-    if (!row || !row?.data) return;
-    const foundProduct = products.find((p) => p._id === row.data.id);
-
-    if (!foundProduct || !foundProduct?.id) return;
-
-    setQuantityUpdateLoading(true);
     axiosInstance()
       .put(`${packages.packageApi}/${id}/update-product`, {
-        ids: [foundProduct.id],
+        ids: [row.data._id],
         qty: Number(row.data.qty)
       })
       .then(() => {
-        setQuantityUpdateLoading(false);
         getProducts();
       })
       .catch((err) => {
-        setQuantityUpdateLoading(false);
       });
   };
 
   const removeProducts = () => {
     setRemovingProducts(true);
-    const Ids = products.filter((p) => selectedRecords.findIndex((_p) => _p._id === p._id) >= 0).map((d) => d.id);
+    const Ids = products.filter((p) => selectedRecords.findIndex((_p) => _p._id === p._id) >= 0).map((d) => d._id);
     axiosInstance()
       .put(`${packages.packageApi}/${id}/remove-product`, {
         ids: Ids
@@ -187,6 +179,7 @@ const PackageDetails = () => {
         toastConfig.setToastConfig(err);
       });
   };
+
   return (
     <>
       <Grid container className="headerbox">
@@ -300,34 +293,23 @@ const PackageDetails = () => {
                           </Box>
                         </>
                       </Box>
-
-                      {products.length ? (
-                        <ProductsTable
-                          setSelectedRecords={setSelectedRecords}
-                          allowSelection={true}
-                          renderedFrom={`${renderedFrom}_grid-1`}
-                          productList={products}
-                          handleUpdateQuantity={handleUpdateQuantity}
-                          handleAssignProduct={setShowProductAssignDialog}
-                          updateLoading={quantityUpdateLoading || packagesLoading}
-                        />
-                      ) : null}
+                      <ProductsTable
+                        setSelectedRecords={setSelectedRecords}
+                        allowSelection={true}
+                        renderedFrom={`${renderedFrom}_grid-1`}
+                        productList={products}
+                        handleUpdateQuantity={handleUpdateQuantity}
+                        handleAssignProduct={setShowProductAssignDialog}
+                        updateLoading={quantityUpdateLoading || packagesLoading}
+                      />
                     </Box>
                   </TabPanel>
                 </>
               )}
             </Box>
           </Paper>
-
-          {/* {
-            packageData?.products ?
-              <ProductsTable
-                productList={packageData?.products}
-              /> : null
-          } */}
         </Grid>
       </Grid>
-
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -376,20 +358,6 @@ const PackageDetails = () => {
           onOk={removeProducts}
         />
       )}
-      {/* {showProductAssignDialog && (
-        <AssignQuantityDialog
-          ids={[id]}
-          onClose={() => setShowProductAssignDialog(false)}
-          onSuccess={() => {
-            getProducts();
-            setShowProductAssignDialog(false);
-          }}
-          resource={product.api}
-          title="Assign Products"
-          label="Select Product"
-          resourceData={products}
-        />
-      )} */}
     </>
   );
 };
