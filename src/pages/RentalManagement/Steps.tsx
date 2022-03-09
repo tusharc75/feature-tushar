@@ -117,7 +117,8 @@ const Steps = (props) => {
         steps,
         currentStep,
         setCurrentStep,
-        isStepEnded
+        isStepEnded,
+        setStepFullScreen = null
     } = props;
 
     const classes = useStyles();
