@@ -592,7 +592,7 @@ const RentalManagementViews = (props) => {
 
   return (
     <>
-      <ContentFullScreen title="Rental Views Roadmap" fullScreen={fullDialogueOpen} setFullScreen={false} isheader={false}>
+      <ContentFullScreen title="Views" fullScreen={fullDialogueOpen} setFullScreen={false} isheader={false}>
         <div style={fullDialogueOpen ? { height: '95vh' } : { height: '68vh' }}>
           {!loading ? (
             flowData.length ? (
