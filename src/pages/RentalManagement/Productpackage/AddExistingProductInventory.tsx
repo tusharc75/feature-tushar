@@ -87,28 +87,27 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     };
 
     const getQueryString = () => {
-        let deepFilter = type === "product" ? `?warehouse=${rentalManagementData?.warehouse?.optionValue}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'serializedProduct', term: 'yes' }]))}&page=${page}&limit=${limit}` : `?page=${page}&limit=${limit}`;
-
-        if (type !== "product") {
-            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'packageType', term: 'product' }]))}&filterType=and`
-        }
-
+        let deepFilter = `?warehouse=${rentalManagementData?.warehouse?.optionValue}&page=${page}&limit=${limit}`;
         if (showFilteredRecordsOnly) {
             const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
             deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
         }
-
+        const updatedFilters = [];
+        if (type === "package") {
+            updatedFilters.push({ field: 'packageType', term: 'product' })
+        }
+        if (type === "product") {
+            updatedFilters.push({ field: 'serializedProduct', term: 'yes' })
+        }
         if (!isObjectEmpty(filters)) {
-            const updatedFilters = [];
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: field,
                     term: filters[field].filter
                 })
             });
-            if (type !== "product") {
-                updatedFilters.push({ field: 'packageType', term: 'product' })
-            }
+        }
+        if (updatedFilters.length) {
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
         if (sorting.length > 0) {
@@ -136,7 +135,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                             rendererNames.push(currentColumn?.rendererName)
                         }
                     }
-
                 })
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
                 tempFrameworkComponent = {
