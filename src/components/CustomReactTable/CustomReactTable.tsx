@@ -82,7 +82,7 @@ export default function CustomReactTable({
     const defaultColumn = React.useMemo(
         () => ({
             // When using the useFlexLayout:
-            minWidth: 150, // minWidth is only used as a limit for resizing
+            minWidth: 80, // minWidth is only used as a limit for resizing
             width: 150, // width is used for both the flex-basis and flex-grow
             // maxWidth: 250, // maxWidth is only used as a limit for resizing
             Filter: DefaultColumnFilter,

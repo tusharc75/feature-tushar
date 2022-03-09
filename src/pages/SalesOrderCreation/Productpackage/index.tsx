@@ -278,6 +278,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
 
     const handleSaveData = async (rows: any) => {
         rows.forEach(element => {
+            delete element.srno
             delete element.detail
             delete element.qtyDisplay
             delete element.isValid
