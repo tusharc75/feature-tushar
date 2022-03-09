@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import MaUTable from '@material-ui/core/Table'
 import { TableBody, TableCell, TableHead, TableFooter, TableRow, TextField } from '@material-ui/core'
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
-import { gridPageSizes, treeToFlatArray } from '../../constants/helpers'
+import { reactTableColumnFilter, treeToFlatArray } from '../../constants/helpers'
 import { uniqBy, isString } from 'lodash';
 import {
     useTable, useExpanded, useRowSelect, useFlexLayout,
@@ -173,31 +173,17 @@ export default function CustomReactTable({
                         </div>
                 ),
             },
-            ...columns
+            ...columns.map(m => { return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' } })
         ],
         []
     )
 
-    function fuzzyTextFilterFn(rows, id, filterValue) {
-        return matchSorter(rows, filterValue, { keys: [(row: any) => row.values[id]] })
-    }
-
-    // Let the table remove the filter if the string is empty
-    fuzzyTextFilterFn.autoRemove = val => !val
-
     const filterTypes = React.useMemo(
         () => ({
-            filterRowsWithSubrows: (rows, id, filterValue) => {
-                return rows.filter((row) => {
-                    const rowValue = row.values[id];
-                    return rowValue !== undefined ? String(rowValue).toLowerCase() === String(filterValue).toLowerCase() : true;
-                });
-            },
+            filterRowsWithSubrows: (rows, id, filterValue) => reactTableColumnFilter(rows, id, filterValue)
         }),
         [],
     );
-
-    // Use the state and functions returned from useTable to build your UI
 
     const {
         getTableProps,
