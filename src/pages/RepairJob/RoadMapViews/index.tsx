@@ -248,7 +248,7 @@ const RepairJobViews = (props) => {
 
   return (
     <>
-      <ContentFullScreen title="Rental Views Roadmap" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
+      <ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
         <div style={fullScreenOpen ? { height: '95vh' } : { height: '57vh' }}>
           {!loading ? (
             flowData.length ? (
