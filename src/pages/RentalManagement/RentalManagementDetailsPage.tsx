@@ -28,6 +28,7 @@ import Activity from '../../components/Activity';
 import styles from './Retal.module.scss';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import HideWhenOffline from '../../components/HideWhenOffline';
+import ContentFullScreen from '../../components/ContentFullScreen';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
@@ -40,7 +41,6 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import { GrStatusInfo } from 'react-icons/all';
 import MenuItem from '@material-ui/core/MenuItem';
 import { objectStore, insertUpdate, findAll, findOne } from '../../constants/indexdbhelper';
-
 import Productpackage from './Productpackage';
 import AdditionalCost from './AdditionalCost';
 import SerializedAsset from './SerializedAsset';
@@ -83,6 +83,7 @@ const RentalManagementDetailsPage = () => {
   const [locationKeys, setLocationKeys] = useState([]);
 
   const [showCancelConfirmBox, setShowCancelConfirmBox] = useState(false);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -429,59 +430,62 @@ const RentalManagementDetailsPage = () => {
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
                     isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
+                    setStepFullScreen={setStepFullScreen}
                   />
-                  {currentStep === 0 && rentalManagementData && (
-                    <Productpackage
-                      rentalManagementData={rentalManagementData}
-                      setNextStep={setNextStep}
-                      currencySymbol={currencySymbol}
-                      isSmallScreen={isSmallScreen}
-                      isTabletScreen={isTabletScreen}
-                      showActivity={showActivity}
-                      renderedFrom={`${renderedFrom}_grid-1`}
-                    />
-                  )}
-                  {currentStep === 1 && rentalManagementData && (
-                    <AdditionalCost rentalManagementData={rentalManagementData} setNextStep={setNextStep}  renderedFrom={`${renderedFrom}_grid-2`} />
-                  )}
-                  {currentStep === 2 && rentalManagementData && (
-                    <SerializedAsset
-                      rentalManagementData={rentalManagementData}
-                      setNextStep={setNextStep}
-                      isSmallScreen={isSmallScreen}
-                      isTabletScreen={isTabletScreen}
-                      showActivity={showActivity}
-                      currencySymbol={currencySymbol}
-                    />
-                  )}
-                  {currentStep === 3 && rentalManagementData && (
-                    <LoadingTicket
-                      fetchRentalData={fetchRentalManagementData}
-                      rentalManagementData={rentalManagementData}
-                      currentStep={currentStep}
-                      setNextStep={setNextStep}
-                      renderedFrom={`${renderedFrom}_grid-3`}
-                    />
-                  )}
-                  {currentStep === 4 && rentalManagementData && (
-                    <ReceivingTicket
-                      fetchRentalData={fetchRentalManagementData}
-                      rentalManagementData={rentalManagementData}
-                      currentStep={currentStep}
-                      setNextStep={setNextStep}
-                      renderedFrom={`${renderedFrom}_grid-4`}
-                    />
-                  )}
-                  {currentStep === 5 && rentalManagementData && (
-                    <Invoice
-                      rentalManagementData={rentalManagementData}
-                      setNextStep={setNextStep}
-                      fetchRentalData={fetchRentalManagementData}
-                      updateJobStatus={updateJobStatus}
-                      statusOptions={statusOptions}
-                      renderedFrom={`${renderedFrom}_grid-5`}
-                    />
-                  )}
+                  <ContentFullScreen title={rentalManagementSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                    {currentStep === 0 && rentalManagementData && (
+                      <Productpackage
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        renderedFrom={`${renderedFrom}_grid-1`}
+                      />
+                    )}
+                    {currentStep === 1 && rentalManagementData && (
+                      <AdditionalCost rentalManagementData={rentalManagementData} setNextStep={setNextStep} renderedFrom={`${renderedFrom}_grid-2`} />
+                    )}
+                    {currentStep === 2 && rentalManagementData && (
+                      <SerializedAsset
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        currencySymbol={currencySymbol}
+                      />
+                    )}
+                    {currentStep === 3 && rentalManagementData && (
+                      <LoadingTicket
+                        fetchRentalData={fetchRentalManagementData}
+                        rentalManagementData={rentalManagementData}
+                        currentStep={currentStep}
+                        setNextStep={setNextStep}
+                        renderedFrom={`${renderedFrom}_grid-3`}
+                      />
+                    )}
+                    {currentStep === 4 && rentalManagementData && (
+                      <ReceivingTicket
+                        fetchRentalData={fetchRentalManagementData}
+                        rentalManagementData={rentalManagementData}
+                        currentStep={currentStep}
+                        setNextStep={setNextStep}
+                        renderedFrom={`${renderedFrom}_grid-4`}
+                      />
+                    )}
+                    {currentStep === 5 && rentalManagementData && (
+                      <Invoice
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        fetchRentalData={fetchRentalManagementData}
+                        updateJobStatus={updateJobStatus}
+                        statusOptions={statusOptions}
+                        renderedFrom={`${renderedFrom}_grid-5`}
+                      />
+                    )}
+                  </ContentFullScreen>
                 </Paper>
               </TabPanel>
               <TabPanel value={tabValue} index={2}>
