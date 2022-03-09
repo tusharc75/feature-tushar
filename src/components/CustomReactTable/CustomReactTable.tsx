@@ -3,7 +3,8 @@ import React, { useEffect } from 'react'
 import MaUTable from '@material-ui/core/Table'
 import { TableBody, TableCell, TableHead, TableFooter, TableRow, TextField } from '@material-ui/core'
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
-import { reactTableColumnFilter, treeToFlatArray } from '../../constants/helpers'
+import { columnFilter } from './ReactTableHelpers'
+import { treeToFlatArray } from '../../constants/helpers'
 import { uniqBy, isString } from 'lodash';
 import {
     useTable, useExpanded, useRowSelect, useFlexLayout,
@@ -13,8 +14,6 @@ import { useSticky } from "react-table-sticky";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import FilterListIcon from '@material-ui/icons/FilterList';
-// import TablePagination from '@material-ui/core/TablePagination';
-import { matchSorter } from 'match-sorter'
 
 const IndeterminateCheckbox = React.forwardRef(
     ({ indeterminate, ...rest }: any, ref) => {
@@ -180,7 +179,7 @@ export default function CustomReactTable({
 
     const filterTypes = React.useMemo(
         () => ({
-            filterRowsWithSubrows: (rows, id, filterValue) => reactTableColumnFilter(rows, id, filterValue)
+            filterRowsWithSubrows: (rows, id, filterValue) => columnFilter(rows, id, filterValue)
         }),
         [],
     );
