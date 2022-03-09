@@ -18,11 +18,8 @@ import { product, serializedAsset, warehouse } from '../../constants/helpers';
 import CreateProduct from '../../components/Product/CreateProduct';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import DeleteButton from '../../components/Helpers/DeleteButton';
-import AssignedFrequentlyBoughtProduct from './AssignedFrequentlyBoughtProduct';
-import AssignProductDialog from '../../components/AssignRolesDialog/AssignProductDialog';
 import ManageSerializedAsset from '../SerializedAsset/ManageSerializedAsset';
 import { extractFieldsForDisplay } from '../../constants/formulaUtility';
-import ProductHierarchy from './BOM';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
@@ -31,6 +28,7 @@ import NoDataCell from '../../components/Helpers/NoDataCell';
 import queryString from 'query-string';
 import ProductConfiguration from './ProductConfiguration';
 import { camelCase } from 'lodash';
+import Parts from './Parts';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -65,7 +63,6 @@ const ProductDetailsPage = () => {
   const [productData, setProductData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
   const [productFields, setProductFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -435,10 +432,11 @@ const ProductDetailsPage = () => {
                   }
                 }}
               >
-                <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-                <Tab label="Packages" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
-                <Tab label="Parent Product" aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
-                {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <Tab label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />}
+                <Tab label="Details" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+                <Tab label="Packages" value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
+                <Tab label="Parent Product" value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
+                {permissions?.serializedAsset && <Tab label="Parts" value={3} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
+                {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <Tab value={4} label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />}
               </Tabs>
               {tabValue === 0 &&
                 <Box>
@@ -493,84 +491,20 @@ const ProductDetailsPage = () => {
                   refreshGrid={getColumns}
                 />
               }
-
-              {tabValue === 3 && permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <ProductConfiguration
+              {tabValue === 3 &&
+                <Parts id={id} />
+              }
+              {tabValue === 4 && <ProductConfiguration
                 productFields={productFields.map((_f: any) => _f.fieldData)}
                 productData={productData}
                 id={id}
                 renderedFrom={`${renderedFrom}_grid-3`}
               />}
-
             </Paper>
           </Grid>
           {permissions?.serializedAsset ? (
             <Grid item xs={12} sm={12} md={4} lg={4}>
               <Paper style={{ overflow: 'hidden' }}>
-                <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="subtitle2">Parts</Typography>
-                  {permissions.product.isUpdate && (
-                    <IconButton
-                      title="Manage Product(s)"
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        setOpenAssignProductDialog(true);
-                      }}
-                    >
-                      <ControlPoint />
-                    </IconButton>
-                  )}
-                </Box>
-                {
-                  <Box style={{ paddingBottom: '8px' }}>
-                    {loading || loadingBOMData ? (
-                      [1, 2].map((i) => (
-                        <BoxWithBorder
-                          key={i}
-                          style={{
-                            margin: '8px'
-                          }}
-                        >
-                          <Box padding={1}>
-                            <Skeleton variant="text" width="100px" height="20px" />
-                            <Box marginTop={1} />
-                            <Skeleton variant="text" width="100%" height="15px" />
-                          </Box>
-                        </BoxWithBorder>
-                      ))
-                    ) : BOMData.length ? (
-                      <>
-                        {/* <AssignedFrequentlyBoughtProduct
-                                                permissions={permissions.product}
-                                                product={frequentlyBoughtProduct}
-                                                unassignProduct={unassignProduct}
-                                            /> */}
-                        <ProductHierarchy
-                          fetchData={getProductTree}
-                          data={BOMData}
-                          permissions={permissions.product}
-                          unassignProduct={unassignProduct}
-                        />
-                        <Box px={1} my={1}>
-                          <Button
-                            fullWidth
-                            variant="outlined"
-                            color="primary"
-                            onClick={() => history.push(`${routes.productDetail.path}/${id}/bom`, { productName: productData.productName })}
-                          >
-                            View All
-                          </Button>
-                        </Box>
-                      </>
-                    ) : (
-                      <Box textAlign="center" padding={2} minHeight={150}>
-                        <Typography>No parts available for this product</Typography>
-                      </Box>
-                    )}
-                  </Box>
-                }
-              </Paper>
-              <Paper className="mt-2" style={{ overflow: 'hidden' }}>
                 <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
                   <Typography variant="subtitle2">Plants ({inventoriesData?.length || 0})</Typography>
                   {permissions?.serializedAsset?.isCreate && (
@@ -756,21 +690,6 @@ const ProductDetailsPage = () => {
           openFrom="productMaster"
         />
       )}
-      {openAssignProductDialog && (
-        <AssignProductDialog
-          productsDialogOpen={openAssignProductDialog}
-          productId={id}
-          handleCloseDialog={() => setOpenAssignProductDialog(false)}
-          assignedProducts={BOMData}
-          onSuccess={() => {
-            if (permissions?.serializedAsset) {
-              getProductTree();
-            }
-            setOpenAssignProductDialog(false);
-          }}
-        />
-      )}
-
       {openProductInventoryDialog ? (
         productData.serializedProduct ? (
           <ManageSerializedAsset

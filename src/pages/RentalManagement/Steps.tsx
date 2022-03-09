@@ -21,7 +21,7 @@ import { BsCheckCircle } from "react-icons/bs";
 import { AiOutlineCloseCircle, AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
 import { FaHourglassHalf } from "react-icons/fa";
 import styles from "./Retal.module.scss";
-
+import HtmlTooltip from "../../components/CustomTooltipTitle";
 import { isMobile, isTablet } from "react-device-detect";
 import { RiShareForwardFill } from "react-icons/ri";
 import { TiArrowBack } from "react-icons/ti";
@@ -273,14 +273,16 @@ const Steps = (props) => {
                                                 className={"currentStepColor"}
                                             >
                                                 {label}
-                                                {(setStepFullScreen && currentStep === i) && <IconButton
-                                                    aria-label="Ful Screen"
-                                                    onClick={setStepFullScreen}
-                                                    size="small"
-                                                    className="ml-2 p-0"
-                                                >
-                                                    <FiMaximize2 />
-                                                </IconButton>}
+                                                {(setStepFullScreen && currentStep === i) &&
+                                                    <HtmlTooltip title={`Full Screen`}>
+                                                        <IconButton
+                                                            aria-label="Full Screen"
+                                                            onClick={setStepFullScreen}
+                                                            size="small"
+                                                            className="ml-2 p-0"
+                                                        >
+                                                            <FiMaximize2 />
+                                                        </IconButton></HtmlTooltip>}
                                             </StepLabel>
                                         </Step>
                                     ))}
