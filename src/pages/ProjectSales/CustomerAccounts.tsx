@@ -655,8 +655,14 @@ const CustomerAccounts = (props) => {
                         wrapped
                         key={i}
                         tabIndex={i}
-                        label={<Box component={'h4'} fontWeight={'bold'}>
-                            {c.accountName}
+                        label={
+                          <Grid container>
+                            <Grid item xs={8}>
+                              <Box component={'h4'} fontWeight={'bold'}>
+                                {c.accountName}
+                              </Box>
+                            </Grid>
+                            <Grid item xs={4} container justify="flex-end">
                               <IconButton
                                 title={`Remove Account: ${c?.accountName}`}
                                 aria-haspopup="true"
@@ -669,7 +675,9 @@ const CustomerAccounts = (props) => {
                               >
                                 <Delete color="error" fontSize="small" />
                               </IconButton>
-                        </Box>}
+                            </Grid>
+                          </Grid>
+                        }
                         aria-controls={`vertical-tabpanel-${i}`}
                         id={`vertical-tab-${i}`}
                         className={classes.tabProject}
@@ -898,12 +906,12 @@ const CustomerAccounts = (props) => {
               if (accountDeleteRec) {
                 removeAccount(accountDeleteRec)
               }
-              
+
               if (contactDeleteRec) {
                 removeContact()
               }
             }
-          }
+            }
             okBtnLoading={isRemoving}
           />
         )
