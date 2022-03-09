@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useState } from 'react';
-import CustomAgGrid from '../../components/AgGridComponents/CustomAgGrid';
+import CustomAgGrid from '../../components/AgGridComponents/CustomAgGridEditable';
 import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
@@ -10,7 +10,15 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 
-const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQuantity = null, handleAssignProduct = null, renderedFrom }) => {
+const ProductsTable = ({
+  productList = [],
+  updateLoading = false,
+  handleUpdateQuantity = null,
+  handleAssignProduct = null,
+  renderedFrom,
+  allowSelection = false,
+  setSelectedRecords = null
+}) => {
   const history = useHistory();
   const {
     state: { permissions }
@@ -20,7 +28,7 @@ const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQu
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const { getColumnData } = useColumns();
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   useEffect(() => {
     if (productList) {
@@ -30,6 +38,10 @@ const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQu
       handleProductsColumnsAndData(productList);
     }
   }, [productList]);
+
+  useEffect(() => {
+    setSelectedRecords(selectedRecords);
+  }, [selectedRecords]);
 
   const handleProductsColumnsAndData = (data) => {
     let rows = data.map((u) => {
@@ -131,8 +143,8 @@ const ProductsTable = ({ productList = [], updateLoading = false, handleUpdateQu
           isClientSideGrid={true}
           actionWidth={150}
           loading={loading || updateLoading}
-          allowSelection={false}
-          actionLabel="Quantity"
+          allowSelection={allowSelection}
+          actionLabel="Qty"
           renderedFrom={renderedFrom}
           actionEditable={true}
           onCellValueChanged={handleUpdateQuantity}

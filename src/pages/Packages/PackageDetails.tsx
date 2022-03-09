@@ -24,6 +24,7 @@ import { BiFoodMenu } from 'react-icons/bi';
 
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { camelCase } from 'lodash';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -49,7 +50,7 @@ function a11yProps(index: any) {
 }
 
 const PackageDetails = () => {
-  const renderedFrom = camelCase(routes?.packages.title)
+  const renderedFrom = camelCase(routes?.packages.title);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -60,15 +61,18 @@ const PackageDetails = () => {
   const [headingLabel, setHeadingLabel] = useState('');
   const [packagesLoading, setPackagesLoading] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
+  const [isRemovingProducts, setRemovingProducts] = useState(false);
   const [packageData, setPackageData] = useState(null);
   const [products, setProducts] = useState([]);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showProductConfirmBox, setShowProductConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [quantityUpdateLoading, setQuantityUpdateLoading] = useState(false);
   const [packageFields, setPackageFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
+  const [selectedRecords, setSelectedRecords] = useState([]);
 
   const [tabValue, setTabValue] = useState(0);
 
@@ -144,20 +148,17 @@ const PackageDetails = () => {
       });
   };
 
-  const handleUpdateQuantity = (updatedNode) => {
-    let productsToSend = [...products];
-    productsToSend = productsToSend.map((o) => {
-      let res = { product: o?._id, qty: o?.qty };
-      if (updatedNode?.data?._id === o?._id) {
-        res.qty = updatedNode?.newValue * 1;
-      }
-      return res;
-    });
+  const handleUpdateQuantity = (row) => {
+    if (!row || !row?.data) return;
+    const foundProduct = products.find((p) => p._id === row.data.id);
+
+    if (!foundProduct || !foundProduct?.id) return;
+
     setQuantityUpdateLoading(true);
     axiosInstance()
-      .post(`${packages.packageApi}/add-products`, {
-        ids: [packageData._id],
-        products: [...productsToSend]
+      .put(`${packages.packageApi}/${id}/update-product`, {
+        ids: [foundProduct.id],
+        qty: Number(row.data.qty)
       })
       .then(() => {
         setQuantityUpdateLoading(false);
@@ -165,6 +166,25 @@ const PackageDetails = () => {
       })
       .catch((err) => {
         setQuantityUpdateLoading(false);
+      });
+  };
+
+  const removeProducts = () => {
+    setRemovingProducts(true);
+    const Ids = products.filter((p) => selectedRecords.findIndex((_p) => _p._id === p._id) >= 0).map((d) => d.id);
+    axiosInstance()
+      .put(`${packages.packageApi}/${id}/remove-product`, {
+        ids: Ids
+      })
+      .then(() => {
+        setRemovingProducts(false);
+        setShowProductConfirmBox(false);
+        getProducts();
+      })
+      .catch((err) => {
+        setShowProductConfirmBox(false);
+        setRemovingProducts(false);
+        toastConfig.setToastConfig(err);
       });
   };
   return (
@@ -248,9 +268,13 @@ const PackageDetails = () => {
 
                   <TabPanel value={tabValue} index={1}>
                     <Box mt={2} className="bg-white">
-                      <Box mb={1}>
-                        <div className={`p-2 gap-3 ${styles.package_grid_template}`}>
-                          <h3>Product(s)</h3>
+                      <Box mb={1} p={1} display="flex" justifyContent="space-between" alignItems="center">
+                        <Box width={'118px'}>
+                          <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
+                            Add Products
+                          </Button>
+                        </Box>
+                        <>
                           <ImportExportLinks
                             permissions={permissions?.packages}
                             module="packages-products"
@@ -265,21 +289,22 @@ const PackageDetails = () => {
                             additionalParams={`refrenceId=${id}`}
                             isBackgroundWhite={true}
                           />
-                          <Button
-                            className="text-transform-none"
-                            variant="outlined"
-                            color="primary"
-                            startIcon={<Add />}
-                            size="small"
-                            onClick={() => setShowProductAssignDialog(true)}
-                          >
-                            Assign Product(s)
-                          </Button>
-                        </div>
+                          <Box ml={1}>
+                            <DeleteButton
+                              disabled={selectedRecords.length === 0 || isRemovingProducts}
+                              text={'Delete'}
+                              onClick={() => {
+                                setShowProductConfirmBox(true);
+                              }}
+                            />
+                          </Box>
+                        </>
                       </Box>
 
                       {products.length ? (
                         <ProductsTable
+                          setSelectedRecords={setSelectedRecords}
+                          allowSelection={true}
                           renderedFrom={`${renderedFrom}_grid-1`}
                           productList={products}
                           handleUpdateQuantity={handleUpdateQuantity}
@@ -328,6 +353,30 @@ const PackageDetails = () => {
         />
       )}
       {showProductAssignDialog && (
+        <AssignProductDialog
+          reference="package"
+          productsDialogOpen={true}
+          productId={id}
+          handleCloseDialog={() => setShowProductAssignDialog(false)}
+          assignedProducts={products}
+          onSuccess={() => {
+            getProducts();
+            setShowProductAssignDialog(false);
+          }}
+        />
+      )}
+      {showProductConfirmBox && (
+        <ConfirmationDialog
+          open={showProductConfirmBox}
+          message={`Are you sure you want to delete the product(s) ?`}
+          onClose={() => {
+            setShowProductConfirmBox(false);
+          }}
+          okBtnLoading={isRemovingProducts}
+          onOk={removeProducts}
+        />
+      )}
+      {/* {showProductAssignDialog && (
         <AssignQuantityDialog
           ids={[id]}
           onClose={() => setShowProductAssignDialog(false)}
@@ -340,7 +389,7 @@ const PackageDetails = () => {
           label="Select Product"
           resourceData={products}
         />
-      )}
+      )} */}
     </>
   );
 };
