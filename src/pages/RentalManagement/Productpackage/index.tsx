@@ -66,6 +66,16 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
       {
+        accessor: 'srno',
+        Header: '#',
+        width: 70,
+        sticky: isMobile ? "none" : "left",
+        Cell: ({ row }) => (
+          <p className="text-truncate"  >
+            {row.original.srno}
+          </p>),
+      },
+      {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
@@ -254,7 +264,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     }
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${i + 1} - ${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
+      parent.srno = (i + 1);
+      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -262,8 +273,9 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       if (parent.type === 'package') {
         const subRows: any = data.material.filter((e) => e.parentId === parent._id);
         subRows.forEach((_subRow, j) => {
-          _subRow.detail = i + 1 + '.' + (j + 1) + ' - ' + _subRow.productDetail?.productName;
-          _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`;
+          _subRow.srno = ((i + 1) + '.' + (j + 1));
+          _subRow.detail = _subRow.productDetail?.productName;
+          _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
           _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
           _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
           _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
@@ -341,6 +353,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
 
   const handleSaveData = async (rows: any) => {
     rows.forEach((element) => {
+      delete element.srno
       delete element.detail;
       delete element.qtyDisplay;
       delete element.isValid;
