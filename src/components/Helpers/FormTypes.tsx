@@ -57,6 +57,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import HtmlTooltip from '../CustomTooltipTitle';
 import ImageCropTool from '../ImageCropTool';
 import RichTextEditor from './FormTypes/RichTextEditor';
+import Dropdown from './FormTypes/Dropdown';
 
 
 const filter = createFilterOptions();
@@ -870,6 +871,31 @@ const FormTypes = (props) => {
         }}
       />
     </InfoLabel>
+  ) : type === 'dropDown' && lookup && ["Well Master"].includes(fieldData?.lookupResource) ? (
+    <Dropdown
+      InfoLabel={InfoLabel}
+      fieldData={fieldData}
+      addAdditionalOption={addAdditionalOption}
+      rest={rest}
+      option={option}
+      values={values}
+      type={type}
+      onChange={onChange}
+      label={label}
+      lookup={lookup}
+      name={name}
+      addFieldOption={addFieldOption}
+      setOptionsList={setOptionsList}
+      handleChange={handleChange}
+      filter={filter}
+      getLabel={getLabel}
+      touched={touched}
+      errors={errors}
+      required={required}
+      optionSaveDialog={optionSaveDialog}
+      setOptionSaveDialog={setOptionSaveDialog}
+      AddOptionDialog={AddOptionDialog}
+      setFieldValue={setFieldValue} />
   ) : type === 'dropDown' || type === 'lookup' || (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse)
     || (type === 'formula' && fieldData && fieldData.isDropdown) ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage} doNotShowInfoTooltip={doNotShowInfoTooltip}>

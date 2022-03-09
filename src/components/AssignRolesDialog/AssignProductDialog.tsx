@@ -14,7 +14,7 @@ import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import SearchBox from "../Helpers/SearchBox";
-import { gridLoadingTimeout, isObjectEmpty, product } from "../../constants/helpers";
+import { gridLoadingTimeout, isObjectEmpty, product, packages } from "../../constants/helpers";
 import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../Helpers/CommonSkeleton";
@@ -41,7 +41,8 @@ const AssignProductDialog = ({
     productId,
     onSuccess,
     handleCloseDialog,
-    assignedProducts
+    assignedProducts,
+    reference = 'product'
 }) => {
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const {
@@ -89,7 +90,11 @@ const AssignProductDialog = ({
         }
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            data.data = data.data.filter(obj => obj._id !== productId && !assignedProducts.some(item => item?.childProduct === obj?._id))
+            if (reference === "product") {
+                data.data = data.data.filter(obj => obj._id !== productId && !assignedProducts.some(item => item?.childProduct === obj?._id))
+            } else {
+                data.data = data.data.filter(obj => assignedProducts.findIndex(d => d._id === obj._id) < 0)
+            }
             data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
@@ -169,30 +174,44 @@ const AssignProductDialog = ({
 
     const handleAssignProduct = async () => {
         setAssigning(true);
-        const dataObj = selectedRecords.filter(d => d.quantity > 0)
-            .map(d => {
-                return ({
-                    "childProduct": d.id,
-                    "qty": Number(d.quantity)
+        if (reference === 'product') {
+            const dataObj = selectedRecords.filter(d => d.quantity > 0)
+                .map(d => {
+                    return ({
+                        "childProduct": d.id,
+                        "qty": Number(d.quantity)
+                    })
                 })
-            })
+            await axiosInstance().post(`/product/${productId}/bom`, dataObj)
+                .then(({ data }) => {
+                    setAssigning(false);
+                    toastConfig.setToastConfig({
+                        message: data.message,
+                        type: "success",
+                        open: true,
+                    });
 
-        await axiosInstance().post(`/product/${productId}/bom`, dataObj)
-            .then(({ data }) => {
-                setAssigning(false);
-                toastConfig.setToastConfig({
-                    message: data.message,
-                    type: "success",
-                    open: true,
+                    onSuccess();
+                })
+                .catch((error) => {
+                    setAssigning(false);
+                    toastConfig.setToastConfig(error);
                 });
-
-                onSuccess();
-            })
-            .catch((error) => {
-                setAssigning(false);
-                toastConfig.setToastConfig(error);
-            });
-
+        } else {
+            axiosInstance()
+                .post(`${packages.packageApi}/add-products`, {
+                    ids: [productId],
+                    products: selectedRecords.map((d: any) => ({ product: d.id, qty: Number(d.quantity) }))
+                })
+                .then(() => {
+                    setAssigning(false);
+                    onSuccess();
+                })
+                .catch((err) => {
+                    setAssigning(false);
+                    toastConfig.setToastConfig(err);
+                });
+        }
     };
 
     const handleSearch = (e) => {
@@ -219,7 +238,7 @@ const AssignProductDialog = ({
         <Dialog
             fullWidth
             maxWidth="md"
-            fullScreen={fullScreen || (isMobile || isTablet)}
+            fullScreen={true}
             open={productsDialogOpen}
             onClose={handleCloseDialog}
             aria-labelledby="assign-roles-dialog"
@@ -253,8 +272,7 @@ const AssignProductDialog = ({
                                 } */}
                             </Grid>
                             <Grid xs={6} container className={styles.filter_side} >
-                                <Box className={styles.filter_side_header} component="div" >
-
+                                <Box className={styles.filter_side_header} component="div"  >
                                     <SearchBox
                                         onSearch={handleSearch}
                                         searchbox={styles.search_box_input}
@@ -262,6 +280,15 @@ const AssignProductDialog = ({
                                         size="small"
                                         value={search}
                                     />
+                                    <Button
+                                        disabled={isAssigning || disableSaveButton || selectedRecords.length === 0}
+                                        onClick={handleAssignProduct}
+                                        color="primary"
+                                        size="small"
+                                        variant="contained"
+                                    >
+                                        Add
+                                    </Button>
                                 </Box>
                             </Grid>
                         </Grid>
@@ -287,25 +314,6 @@ const AssignProductDialog = ({
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </>
             </CustomDialogContent>
-            <CustomDialogFooter>
-                <Button
-                    disabled={isAssigning}
-                    onClick={handleCloseDialog}
-                    color="primary"
-                    size="small"
-                >
-                    Cancel
-                </Button>
-                <Button
-                    disabled={isAssigning || disableSaveButton || selectedRecords.length === 0}
-                    onClick={handleAssignProduct}
-                    color="primary"
-                    size="small"
-                    variant="contained"
-                >
-                    {isAssigning ? <CircularProgress size={22} /> : "Save"}
-                </Button>
-            </CustomDialogFooter>
         </Dialog>
     );
 };

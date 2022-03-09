@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, Fragment } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
@@ -21,7 +21,7 @@ import { BsCheckCircle } from "react-icons/bs";
 import { AiOutlineCloseCircle, AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
 import { FaHourglassHalf } from "react-icons/fa";
 import styles from "./Retal.module.scss";
-
+import HtmlTooltip from "../../components/CustomTooltipTitle";
 import { isMobile, isTablet } from "react-device-detect";
 import { RiShareForwardFill } from "react-icons/ri";
 import { TiArrowBack } from "react-icons/ti";
@@ -29,6 +29,7 @@ import MobileStepper from "@material-ui/core/MobileStepper";
 import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
 import CustomMobileStepperOpportunities from "../../components/CustomMobileStepperOpportunities";
+import { FiMaximize2 } from 'react-icons/fi'
 
 const useStyles = makeStyles((theme) => ({
 
@@ -117,7 +118,8 @@ const Steps = (props) => {
         steps,
         currentStep,
         setCurrentStep,
-        isStepEnded
+        isStepEnded,
+        setStepFullScreen = null
     } = props;
 
     const classes = useStyles();
@@ -271,6 +273,16 @@ const Steps = (props) => {
                                                 className={"currentStepColor"}
                                             >
                                                 {label}
+                                                {(setStepFullScreen && currentStep === i) &&
+                                                    <HtmlTooltip title={`Full Screen`}>
+                                                        <IconButton
+                                                            aria-label="Full Screen"
+                                                            onClick={setStepFullScreen}
+                                                            size="small"
+                                                            className="ml-2 p-0"
+                                                        >
+                                                            <FiMaximize2 />
+                                                        </IconButton></HtmlTooltip>}
                                             </StepLabel>
                                         </Step>
                                     ))}
@@ -278,15 +290,18 @@ const Steps = (props) => {
                             </div>
                         </Grid>
                         <Grid item xs={12} sm={isMobile ? 12 : 1} md={1} className="d-flex align-items-center justify-content-center mt-2 " >
-                            {!isMobile && !isStepEnded && <IconButton
-                                onClick={() => {
-                                    setCurrentStep(currentStep + 1)
-                                }}
-                                disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep}
-                                className={"stepperButtonNext"}
-                            >
-                                <RiShareForwardFill />
-                            </IconButton>}
+                            {!isMobile && !isStepEnded && <Fragment>
+                                <IconButton
+                                    onClick={() => {
+                                        setCurrentStep(currentStep + 1)
+                                    }}
+                                    disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep}
+                                    className={"stepperButtonNext"}
+                                >
+                                    <RiShareForwardFill />
+                                </IconButton>
+                            </Fragment>
+                            }
                         </Grid>
                     </Grid>
                 </div>

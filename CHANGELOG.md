@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.74.0](https://github.com/vebholic/oms_frontend/compare/v2.73.0...v2.74.0) (2022-03-09)
+
+
+### Features
+
+* - Filter added in react table grids ([d2d995b](https://github.com/vebholic/oms_frontend/commit/d2d995bc109d7abbb6f2e98ee7371abff4d44d71))
+* - Filter issue fixed ([a0ef615](https://github.com/vebholic/oms_frontend/commit/a0ef615de592257eb461e9ba398ddd0a2f148f86))
+* dashboard builder ([0ab1396](https://github.com/vebholic/oms_frontend/commit/0ab139683de1c8ddd1a015f89bbc36c2c0ab4007))
+* well master ([cb3d801](https://github.com/vebholic/oms_frontend/commit/cb3d80102818fd2ab07db61a60f54d29ea5a9beb))
+* well master details page ([61aed86](https://github.com/vebholic/oms_frontend/commit/61aed86cf2f40c89fedd6f621ff9e42700557a25))
+
+
+### Bug Fixes
+
+* bug fix ([7f5454b](https://github.com/vebholic/oms_frontend/commit/7f5454be07fd952621e56874c0c26816320eca63))
+* bug fix ([4c20f51](https://github.com/vebholic/oms_frontend/commit/4c20f51b5cba26ba5bb35ffa165e27504e0a7977))
+* bug fix ([1eb7ca8](https://github.com/vebholic/oms_frontend/commit/1eb7ca8734265bc183065c4a28ac7d1f8ca2cd3f))
+* bug fix ([301ccd4](https://github.com/vebholic/oms_frontend/commit/301ccd42ef0e060eeffb6393b77f0c7357edd256))
+* bug fix ([3c1dad7](https://github.com/vebholic/oms_frontend/commit/3c1dad7bd4a5c1dc24615e4ce70335db005ffc9a))
+* bug fix ([745a2dd](https://github.com/vebholic/oms_frontend/commit/745a2dd7ad17cfbddf5bd8fef0d0271fd2af56a4))
+* **dashboard:** changes in cards ([bf741ce](https://github.com/vebholic/oms_frontend/commit/bf741ce0f5f534e28e65c567bc5436dbead19a04))
+* **dashbord:** changes and fix ([8f5b4e0](https://github.com/vebholic/oms_frontend/commit/8f5b4e07d687da9f1444baa25678cc5c4f9fc393))
+* **quote:** change end reason invalid to other ([0127a17](https://github.com/vebholic/oms_frontend/commit/0127a17c08859cbeed3614795186191d6ef357c7))
+
 ## [2.73.0](https://github.com/vebholic/oms_frontend/compare/v2.72.2...v2.73.0) (2022-03-08)
 
 

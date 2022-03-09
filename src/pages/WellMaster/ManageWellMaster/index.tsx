@@ -105,7 +105,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
                 .put(`${wellMaster.api}`, values)
                 .then(({ data }) => {
                     setSubmitting(false);
-                    onSuccess();
+                    onSuccess(data.data);
                     toastConfig.setToastConfig({
                         open: true,
                         type: 'success',
