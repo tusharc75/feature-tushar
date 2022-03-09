@@ -442,6 +442,7 @@ const RentalManagementDetailsPage = () => {
                         isTabletScreen={isTabletScreen}
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-1`}
+                        stepFullScreen={stepFullScreen}
                       />
                     )}
                     {currentStep === 1 && rentalManagementData && (
@@ -455,6 +456,7 @@ const RentalManagementDetailsPage = () => {
                         isTabletScreen={isTabletScreen}
                         showActivity={showActivity}
                         currencySymbol={currencySymbol}
+                        stepFullScreen={stepFullScreen}
                       />
                     )}
                     {currentStep === 3 && rentalManagementData && (
