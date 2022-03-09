@@ -28,7 +28,7 @@ import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 
-const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom }) => {
+const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
@@ -574,11 +574,11 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
           {columns && rowsData ? (
             <Box
               zIndex={5}
-              width={isTabletScreen ? 'calc(100vw - 20px)' : isSmallScreen ? 'calc(100vw - 78px)' : showActivity ? '100%' : 'calc(100vw - 103px)'}
-              height="calc(100vh - 350px)"
+              width={stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw - 20px)' : isSmallScreen ? 'calc(100vw - 78px)' : showActivity ? '100%' : 'calc(100vw - 103px)'}
+              height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
             >
               <CustomReactTable
-                height="calc(100vh - 345px)"
+                height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
                 columns={columns}
                 data={rowsData}
                 setCellColor={(rowData) => !rowData.isValid ? "error" : ""}
