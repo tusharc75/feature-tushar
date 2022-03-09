@@ -220,6 +220,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                           touched={touched}
                                           label={field.fieldLabel}
                                           name={field.fieldName}
+                                          fieldData={field}
                                           type={field.type}
                                           options={
                                             plantFields.includes(field.fieldName) && field.fieldName === 'transfertoPlant'
@@ -285,6 +286,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                       errors={errors}
                                       touched={touched}
                                       label={field.fieldLabel}
+                                      fieldData={field}
                                       name={field.fieldName}
                                       type={field.type}
                                       options={field.option}
