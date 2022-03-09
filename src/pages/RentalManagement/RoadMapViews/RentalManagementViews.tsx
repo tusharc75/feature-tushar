@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import React, { useContext, useState, useEffect } from 'react';
-import ReactFlow, { Controls, ReactFlowProvider } from 'react-flow-renderer';
+import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
 import {
+  CustomDialogTransition,
   deliveryTicket,
   DELIVERY_TICKET_REFRENCE_TYPE,
   DELIVERY_TICKET_TYPE,
@@ -16,6 +17,9 @@ import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { MdZoomOutMap } from 'react-icons/md';
+import { Dialog } from '@material-ui/core';
+import ContentFullScreen from 'src/components/ContentFullScreen';
 
 const customNodeStyles = {
   rentalJob: {
@@ -112,6 +116,7 @@ const RentalManagementViews = (props) => {
   const [flowData, setFlowData] = useState([]);
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const [fullDialogueOpen, setFullDialogueOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -586,51 +591,66 @@ const RentalManagementViews = (props) => {
   };
 
   return (
-    <div style={{ height: '68vh' }}>
-      {!loading ? (
-        flowData.length ? (
-          <>
-            <ReactFlowProvider>
-              <ReactFlow
-                elements={flowData || []}
-                onLoad={onLoad}
-                selectNodesOnDrag={false}
-                snapToGrid={true}
-                snapGrid={[15, 15]}
-                onElementClick={onElementClick}
-              >
-                <div style={{ width: '85%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}>
-                  {Object.keys(customNodeStyles).map((key) => {
-                    return (
-                      <div
-                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', paddingLeft: '5px', paddingRight: '5px' }}
-                      >
-                        {customNodeStyles[key].name}
-                        <div
-                          style={{
-                            height: '12px',
-                            width: '12px',
-                            marginLeft: '3px',
-                            borderRadius: '100%',
-                            background: `${customNodeStyles[key].background}`,
-                            borderColor: `1px solid ${customNodeStyles[key].borderColor}`
-                          }}
-                        ></div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <Controls />
-              </ReactFlow>
-            </ReactFlowProvider>
-          </>
-        ) : (
-          <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
-        )
-      ) : (
-        <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Views...</div>
-      )}
-    </div>
+    <>
+      <ContentFullScreen title="Rental Views Roadmap" fullScreen={fullDialogueOpen} setFullScreen={false} isheader={false}>
+        <div style={fullDialogueOpen ? { height: '95vh' } : { height: '68vh' }}>
+          {!loading ? (
+            flowData.length ? (
+              <>
+                <ReactFlowProvider>
+                  <ReactFlow
+                    elements={flowData || []}
+                    onLoad={onLoad}
+                    selectNodesOnDrag={false}
+                    snapToGrid={true}
+                    snapGrid={[15, 15]}
+                    onElementClick={onElementClick}
+                  >
+                    <div style={{ width: '85%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}>
+                      {Object.keys(customNodeStyles).map((key) => {
+                        return (
+                          <div
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              paddingLeft: '5px',
+                              paddingRight: '5px'
+                            }}
+                          >
+                            {customNodeStyles[key].name}
+                            <div
+                              style={{
+                                height: '12px',
+                                width: '12px',
+                                marginLeft: '3px',
+                                borderRadius: '100%',
+                                background: `${customNodeStyles[key].background}`,
+                                borderColor: `1px solid ${customNodeStyles[key].borderColor}`
+                              }}
+                            ></div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {/* <Controls /> */}
+                    <Controls>
+                      <ControlButton onClick={() => (fullDialogueOpen ? setFullDialogueOpen(false) : setFullDialogueOpen(true))}>
+                        <MdZoomOutMap />
+                      </ControlButton>
+                    </Controls>
+                  </ReactFlow>
+                </ReactFlowProvider>
+              </>
+            ) : (
+              <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
+            )
+          ) : (
+            <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Views...</div>
+          )}
+        </div>
+      </ContentFullScreen>
+    </>
   );
 };
 
