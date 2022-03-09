@@ -315,14 +315,13 @@ export default function CustomReactTable({
 
                                             <div {...column.getResizerProps()} className="resizer" />
 
-                                            {/* <div>{column.canFilter ? column.render('Filter') : null}</div> */}
                                         </TableCell>
                                     ))}
                                 </TableRow>
 
                                 <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
                                     {headerGroup.headers.map(column => (
-                                        <TableCell {...column.getHeaderProps()} className="th text-truncate">
+                                        <TableCell {...column.getHeaderProps()} className="th text-truncate bg-white">
                                             <div>{column.canFilter ? column.render('Filter') : null}</div>
                                         </TableCell>
                                     ))}
