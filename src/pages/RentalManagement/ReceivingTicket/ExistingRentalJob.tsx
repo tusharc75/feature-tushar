@@ -145,7 +145,7 @@ const ExistingRentalJob = ({ refrenceData, refrenceType, productInventory, onClo
     data["deliveryToAddress"] = selectedRecords[0]?.shippingAddressId;
     data["startDate"] = refrenceData?.estimateStartDate;
     data["endDate"] = refrenceData?.estimateStartDate;
-    data["wellName"] = refrenceData?.wellName;
+    data["wellName"] = refrenceData?.wellName?.optionValue;
     data["afeNumber"] = refrenceData?.afeNumber;
     if (refrenceData?.processor?.optionValue) {
       data["processor"] = refrenceData?.processor?.optionValue;

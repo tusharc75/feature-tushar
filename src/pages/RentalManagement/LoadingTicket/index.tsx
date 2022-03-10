@@ -245,7 +245,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       data["isPickupFromDisable"] = true;
       data["isDeliveryToDisable"] = true;
 
-      data["wellName"] = rentalManagementData?.wellName;
+      data["wellName"] = rentalManagementData?.wellName?.optionValue;
       data["afeNumber"] = rentalManagementData?.afeNumber;
       if (rentalManagementData?.processor?.optionValue) {
         data["processor"] = rentalManagementData?.processor?.optionValue;

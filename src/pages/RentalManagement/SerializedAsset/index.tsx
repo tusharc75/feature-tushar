@@ -587,7 +587,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         refrenceType={"Rental Job"}
         refrenceData={{
           _id: rentalManagementData?._id, warehouse: rentalManagementData?.warehouse?.optionValue
-          , wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber
+          , wellName: rentalManagementData?.wellName?.optionValue, afeNumber: rentalManagementData?.afeNumber
         }}
         isAdding={isAdding}
         selectedProducts={assetAssignedProduct}
@@ -626,7 +626,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         productsToSave={[...showOrderDialog.products]}
         isFromSerializedAssetStepFromRental={true}
         currency={rentalManagementData.currency}
-        refrenceData={{ wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber }}
+        refrenceData={{ wellName: rentalManagementData?.wellName?.optionValue, afeNumber: rentalManagementData?.afeNumber }}
         rentalManagementId={rentalManagementData._id}
         warehouseId={rentalManagementData?.warehouse?.optionValue}
         deliveryDateMax={rentalManagementData.estimateStartDate}

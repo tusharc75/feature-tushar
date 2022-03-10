@@ -307,7 +307,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     data["endDate"] = rentalManagementData?.estimateStartDate;
     data["isPickupFromDisable"] = true;
 
-    data["wellName"] = rentalManagementData?.wellName;
+    data["wellName"] = rentalManagementData?.wellName?.optionValue;
     data["afeNumber"] = rentalManagementData?.afeNumber;
     if (rentalManagementData?.processor?.optionValue) {
       data["processor"] = rentalManagementData?.processor?.optionValue;
@@ -765,7 +765,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         refrenceType="Rental Job"
         refrenceData={{
           _id: rentalManagementData._id, warehouse: selectedRecords[0].warehouseId,
-          wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber
+          wellName: rentalManagementData?.wellName?.optionValue, afeNumber: rentalManagementData?.afeNumber
         }}
         onClose={() => setShowRepairJobDialog(false)}
         onSuccess={(obj) => {

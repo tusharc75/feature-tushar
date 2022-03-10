@@ -49,24 +49,13 @@ const WellMasterDetailsPage = () => {
             const {
                 data: { data },
             } = await axiosInstance().get(`${wellMaster.api}/${id}`);
-
-
-            handleMainPoints(data);
             setHeadingLbl(data.wellName);
             setWellMasterData(data);
-
             setCustomizedRoutes([routes.wellMaster, { title: data.wellName }]);
             setLoading(false);
         } catch (error) {
             toastConfig.setToastConfig(error);
         }
-    };
-
-    const handleMainPoints = (data) => {
-        let tempMp = {
-            name: `${data?.wellName}`,
-        };
-        setMainPoints(tempMp);
     };
 
     const getWellMasterFields = () => {

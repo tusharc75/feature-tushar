@@ -321,7 +321,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
                 data["deliveryTo"] = transferAssetData?.transferFromPlant?.optionValue;
                 data["deliveryToAddress"] = transferAssetData?.transferFromPlant?.address;
 
-                data["wellName"] = transferAssetData?.wellName;
+                data["wellName"] = transferAssetData?.wellName?.optionValue;
                 data["afeNumber"] = transferAssetData?.afeNumber;
                 if (transferAssetData?.processor?.optionValue) {
                   data["processor"] = transferAssetData?.processor?.optionValue;
