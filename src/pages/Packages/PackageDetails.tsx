@@ -1,30 +1,24 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import { Grid, Box, Button, Paper, Tabs, Tab } from '@material-ui/core';
-import { Add } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { packages, product } from '../../constants/helpers';
-import ManagePackageDialog from './ManagePackageDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
-import ProductsTable from './ProductsTable';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import styles from './packages.module.scss';
+import { camelCase } from 'lodash';
 import { FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
 
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { camelCase } from 'lodash';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import DetailsPageHeader from 'src/components/DetailsPageHeader';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import { useData } from 'src/StateProvider/Provider';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { packages } from 'src/constants/helpers';
+import ManagePackageDialog from './ManagePackageDialog';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import Products from './Products';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -56,23 +50,18 @@ const PackageDetails = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { permissions }
   }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
   const [packagesLoading, setPackagesLoading] = useState(false);
-  const [loadingProducts, setLoadingProducts] = useState(false);
-  const [isRemovingProducts, setRemovingProducts] = useState(false);
+
   const [packageData, setPackageData] = useState(null);
-  const [products, setProducts] = useState([]);
+
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [showProductConfirmBox, setShowProductConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [quantityUpdateLoading, setQuantityUpdateLoading] = useState(false);
   const [packageFields, setPackageFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
-  const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
-  const [selectedRecords, setSelectedRecords] = useState([]);
 
   const [tabValue, setTabValue] = useState(0);
 
@@ -83,7 +72,6 @@ const PackageDetails = () => {
   useEffect(() => {
     if (id) {
       fetchPackage();
-      getProducts();
     }
   }, [id]);
 
@@ -131,52 +119,6 @@ const PackageDetails = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setShowConfirmBox(false);
-      });
-  };
-
-  const getProducts = () => {
-    setLoadingProducts(true);
-    axiosInstance()
-      .get(`${packages.packageApi}/get-products/${id}`)
-      .then(({ data: { data } }) => {
-        setProducts(data);
-        setLoadingProducts(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setLoadingProducts(false);
-      });
-  };
-
-  const handleUpdateQuantity = (row) => {
-    axiosInstance()
-      .put(`${packages.packageApi}/${id}/update-product`, {
-        ids: [row.data._id],
-        qty: Number(row.data.qty)
-      })
-      .then(() => {
-        getProducts();
-      })
-      .catch((err) => {
-      });
-  };
-
-  const removeProducts = () => {
-    setRemovingProducts(true);
-    const Ids = products.filter((p) => selectedRecords.findIndex((_p) => _p._id === p._id) >= 0).map((d) => d._id);
-    axiosInstance()
-      .put(`${packages.packageApi}/${id}/remove-product`, {
-        ids: Ids
-      })
-      .then(() => {
-        setRemovingProducts(false);
-        setShowProductConfirmBox(false);
-        getProducts();
-      })
-      .catch((err) => {
-        setShowProductConfirmBox(false);
-        setRemovingProducts(false);
-        toastConfig.setToastConfig(err);
       });
   };
 
@@ -260,49 +202,7 @@ const PackageDetails = () => {
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={1}>
-                    <Box mt={2} className="bg-white">
-                      <Box mb={1} p={1} display="flex" justifyContent="space-between" alignItems="center">
-                        <Box width={'118px'}>
-                          <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
-                            Add Products
-                          </Button>
-                        </Box>
-                        <>
-                          <ImportExportLinks
-                            permissions={permissions?.packages}
-                            module="packages-products"
-                            api={`${packages.packageApi}/package-products`}
-                            afterImportCompleted={() => {
-                              getProducts();
-                            }}
-                            isExportAllOrSomeFeature={true}
-                            total={products?.length}
-                            recordsToExport={products.length}
-                            ids={[]}
-                            additionalParams={`refrenceId=${id}`}
-                            isBackgroundWhite={true}
-                          />
-                          <Box ml={1}>
-                            <DeleteButton
-                              disabled={selectedRecords.length === 0 || isRemovingProducts}
-                              text={'Delete'}
-                              onClick={() => {
-                                setShowProductConfirmBox(true);
-                              }}
-                            />
-                          </Box>
-                        </>
-                      </Box>
-                      <ProductsTable
-                        setSelectedRecords={setSelectedRecords}
-                        allowSelection={true}
-                        renderedFrom={`${renderedFrom}_grid-1`}
-                        productList={products}
-                        handleUpdateQuantity={handleUpdateQuantity}
-                        handleAssignProduct={setShowProductAssignDialog}
-                        updateLoading={quantityUpdateLoading || packagesLoading}
-                      />
-                    </Box>
+                    {tabValue === 1 && <Products renderedFrom={`${renderedFrom}_grid-1`} packageId={id} />}
                   </TabPanel>
                 </>
               )}
@@ -332,30 +232,6 @@ const PackageDetails = () => {
             fetchPackage();
             setOpenUpdateDialog(false);
           }}
-        />
-      )}
-      {showProductAssignDialog && (
-        <AssignProductDialog
-          reference="package"
-          productsDialogOpen={true}
-          productId={id}
-          handleCloseDialog={() => setShowProductAssignDialog(false)}
-          assignedProducts={products}
-          onSuccess={() => {
-            getProducts();
-            setShowProductAssignDialog(false);
-          }}
-        />
-      )}
-      {showProductConfirmBox && (
-        <ConfirmationDialog
-          open={showProductConfirmBox}
-          message={`Are you sure you want to delete the product(s) ?`}
-          onClose={() => {
-            setShowProductConfirmBox(false);
-          }}
-          okBtnLoading={isRemovingProducts}
-          onOk={removeProducts}
         />
       )}
     </>
