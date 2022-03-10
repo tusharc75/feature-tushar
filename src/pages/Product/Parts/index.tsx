@@ -242,6 +242,7 @@ function Parts({ id }) {
           productId={id}
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
           assignedProducts={parts}
+          renderedFrom={`${renderedFrom}_grid-sub-1`}
           onSuccess={() => {
             if (permissions?.serializedAsset) {
               fetchBOMData();

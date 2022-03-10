@@ -14,7 +14,7 @@ import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import SearchBox from "../Helpers/SearchBox";
-import { gridLoadingTimeout, isObjectEmpty, product, packages } from "../../constants/helpers";
+import { gridLoadingTimeout, isObjectEmpty, product, packages, prepareDataForGrid } from "../../constants/helpers";
 import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../Helpers/CommonSkeleton";
@@ -42,22 +42,23 @@ const AssignProductDialog = ({
     onSuccess,
     handleCloseDialog,
     assignedProducts,
-    reference = 'product'
+    reference = 'product',
+    renderedFrom
 }) => {
+    const localStorageSelectedRecords = `${renderedFrom}_selected`
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const {
         state: { permissions, selectedEntity },
     }: any = useData();
 
     const toastConfig = useContext(CustomToastContext);
-    const [selectedProducts, setSelectedProducts] = useState([]);
     const [isAssigning, setAssigning] = useState(false);
     const [disableSaveButton, setDisableSaveButton] = useState(false);
     const [productsConst, setProductsConst] = useState([]);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const [selectedType, setSelectedType] = useState(1);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
     const [columns, setColumns] = useState([
         { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
@@ -79,9 +80,14 @@ const AssignProductDialog = ({
         })
     }, [])
 
+    
+    useEffect(() => {
+        setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
+    }, [selectedRecords])
+
     useEffect(() => {
         fetchProduct()
-    }, [page, limit, filters, sorting, search, selectedEntity, selectedType]);
+    }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
     const fetchProduct = () => {
         dispatch({ type: "loading", loading: true });
@@ -95,13 +101,25 @@ const AssignProductDialog = ({
             } else {
                 data.data = data.data.filter(obj => assignedProducts.findIndex(d => d._id === obj._id) < 0)
             }
-            data.data = data.data?.map((u) => ({
-                ...u,
-                id: u._id,
-                quantity: 0,
-            }));
+
+            let rows = data.data.map((u) => {
+                let finalObject = prepareDataForGrid(u);
+                finalObject["isChecked"] = false;
+                finalObject["id"] = u._id;
+                finalObject['quantity'] = 0;
+                return {
+                    ...finalObject,
+                };
+            });
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            dispatch({
+                type: "selection",
+                selectedRecords: savedRecords
+            })
+        
+
             setProductsConst(data.data)
-            dispatch({ type: "initialize", data: data.data, count: data.data.length });
+            dispatch({ type: "initialize", data:rows, count: data.count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }) }, gridLoadingTimeout);
         })
             .catch((error) => {
@@ -113,6 +131,11 @@ const AssignProductDialog = ({
         let deepFilter = `?page=${page}&limit=${limit}&filterProducts=${selectedType}`;
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+        }
+
+        if (showFilteredRecordsOnly) {
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
         }
         const updatedFilters = []
         if (isProductType) {
@@ -230,10 +253,6 @@ const AssignProductDialog = ({
         setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
     }
 
-    useEffect(() => {
-        setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
-    }, [selectedRecords])
-
     return (
         <Dialog
             fullWidth
@@ -271,7 +290,7 @@ const AssignProductDialog = ({
                                     </ToggleButtonGroup>
                                 } */}
                             </Grid>
-                            <Grid xs={6} container className={styles.filter_side} >
+                            <Grid xs={6} className={styles.filter_side} >
                                 <Box className={styles.filter_side_header} component="div"  >
                                     <SearchBox
                                         onSearch={handleSearch}
@@ -281,7 +300,7 @@ const AssignProductDialog = ({
                                         value={search}
                                     />
                                     <Button
-                                        disabled={isAssigning || disableSaveButton || selectedRecords.length === 0}
+                                        disabled={isAssigning || disableSaveButton  ||  selectedRecords.length === 0}
                                         onClick={handleAssignProduct}
                                         color="primary"
                                         size="small"
@@ -306,10 +325,11 @@ const AssignProductDialog = ({
                             page={page}
                             allowAction={false}
                             loading={loading}
-                            renderedFrom="productDetailsPage"
+                            renderedFrom={renderedFrom}
                             refreshGrid={fetchProduct}
                             onCellValueChanged={onCellValueChanged}
                             selectedRecords={selectedRecords}
+                            showOnlyShowFilteredRecordSwitch={true}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </>

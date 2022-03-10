@@ -370,6 +370,7 @@ const BOMTable = () => {
           productId={id}
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
           assignedProducts={BOMData}
+          renderedFrom={`${renderedFrom}_grid-2`}
           onSuccess={() => {
             if (permissions?.serializedAsset) {
               fetchBOMData();
