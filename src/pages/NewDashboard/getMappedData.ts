@@ -30,23 +30,30 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
 
     for (let d of data) {
       if (currencyTo && currencyFrom && currencyTo !== currencyFrom) {
-        const bookedValue: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedValue || 0, currencyFrom, currencyTo);
-        const budgetData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget || 0, currencyFrom, currencyTo);
-        const bookedCost: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedCost || 0, currencyFrom, currencyTo);
-        const offeredValue: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedValue || 0, currencyFrom, currencyTo);
-        const offeredCost: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedCost || 0, currencyFrom, currencyTo);
+        const salesData: any = await Promise.all([
+          getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedValue || 0, currencyFrom, currencyTo),
+          getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedCost || 0, currencyFrom, currencyTo),
+          getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedValue || 0, currencyFrom, currencyTo),
+          getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedCost || 0, currencyFrom, currencyTo),
+          getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget || 0, currencyFrom, currencyTo)
+        ]);
+        const bookedValue: any = salesData[0]?.rates[currencyTo];
+        const bookedCost: any = salesData[1]?.rates[currencyTo];
+        const offeredValue: any = salesData[2]?.rates[currencyTo];
+        const offeredCost: any = salesData[3]?.rates[currencyTo];
+        const budgetData: any = salesData[4]?.rates[currencyTo];
 
-        bookedValueData.push(bookedValue ? bookedValue.rates[currencyTo] : d.totalBookedValue || 0);
-        budget.push(budgetData ? budgetData.rates[currencyTo] : d.budget || 0);
-        bookedCostData.push(bookedCost ? bookedCost.rates[currencyTo] : d.totalBookedCost || 0);
-        offeredValueData.push(offeredValue ? offeredValue.rates[currencyTo] : d.totalOfferedValue || 0);
-        offeredCostData.push(offeredValue ? offeredCost.rates[currencyTo] : d.totalOfferedCost || 0);
+        bookedValueData.push(bookedValue || 0);
+        bookedCostData.push(bookedCost || 0);
+        offeredValueData.push(offeredValue || 0);
+        offeredCostData.push(offeredCost || 0);
+        budget.push(budgetData || 0);
       } else {
         bookedValueData.push(d.totalBookedValue || 0);
-        budget.push(d.budget);
         bookedCostData.push(d.totalBookedCost || 0);
         offeredValueData.push(d.totalOfferedValue || 0);
         offeredCostData.push(d.totalOfferedCost || 0);
+        budget.push(d.budget || 0);
       }
 
       bookedVolumeData.push(d.totalBookedVolume || 0);
@@ -191,10 +198,10 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
         region: d.region,
         totalBookedValue,
         totalOfferedValue,
-        ["totalBooked GM"]: totalBookedMargin,
-        ["totalOffered GM"]: totalOfferedMargin,
-        ["totalBookedVolume MT"]:totalBookedVolume,
-        ["totalOfferedVolume MT"]:totalOfferedVolume
+        ['totalBooked GM']: totalBookedMargin,
+        ['totalOffered GM']: totalOfferedMargin,
+        ['totalBookedVolume MT']: totalBookedVolume,
+        ['totalOfferedVolume MT']: totalOfferedVolume
       });
     }
 
@@ -306,13 +313,18 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
 
     for (let d of data) {
       if (currencyTo && currencyTo !== currencyFrom) {
-        const bookedValueData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedValue || 0, currencyFrom, currencyTo);
-        const offeredValueData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedValue || 0, currencyFrom, currencyTo);
-        const budgetData: any = await getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget || 0, currencyFrom, currencyTo);
+        const salesData: any[] = await Promise.all([
+          getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedValue || 0, currencyFrom, currencyTo),
+          getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedValue || 0, currencyFrom, currencyTo),
+          getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget || 0, currencyFrom, currencyTo)
+        ]);
+        const bookedValueData: any = salesData[0]?.rates[currencyTo];
+        const offeredValueData: any = salesData[1]?.rates[currencyTo];
+        const budgetData: any = salesData[2]?.rates[currencyTo];
 
-        totalBookedData.push(bookedValueData ? bookedValueData.rates[currencyTo] : d.totalBookedValue || 0);
-        totalOfferedValueData.push(offeredValueData ? offeredValueData.rates[currencyTo] : d.totalOfferedValue || 0);
-        budget.push(budgetData ? budgetData.rates[currencyTo] : d.budget || 0);
+        totalBookedData.push(bookedValueData || 0);
+        totalOfferedValueData.push(offeredValueData || 0);
+        budget.push(budgetData || 0);
       } else {
         totalBookedData.push(d.totalBookedValue || 0);
         totalOfferedValueData.push(d.totalOfferedValue || 0);
@@ -357,13 +369,11 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
   }
 
   if (chart.uniqueId === 'volumeVsBudget' || chart.uniqueId === 'volume2VsBudget') {
-    const totalBookedVolumeMT = [];
-    const totalOfferedVolumeMT = [];
-    const totalOfferedGM = [];
-    const totalBookedGM = [];
+    let bookedData = [];
+    let offeredData = [];
+    let budget = [];
+    let labels = [];
     let volumeUnit = '';
-    const labels = [];
-    const budget = [];
 
     data = data.sort((a: any, b: any) => {
       const aDate = new Date(a.date).getTime();
@@ -374,23 +384,29 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
 
     for (let d of data) {
       volumeUnit = d.volumeUnit;
+
       if (chart.uniqueId === 'volumeVsBudget') {
-        totalBookedVolumeMT.push(d?.totalBookedVolume || 0);
-        totalOfferedVolumeMT.push(d?.totalOfferedVolume || 0);
+        bookedData.push(d?.totalBookedVolume || 0);
+        offeredData.push(d?.totalOfferedVolume || 0);
+        budget.push(d?.volumeBudget || 0);
+
       } else {
+
         if (currencyTo && currencyTo !== currencyFrom) {
           const salesData: any = await Promise.all([
             getExchangeRates(moment().format('YYYY-MM-DD'), d?.totalBookedMargin || 0, currencyFrom, currencyTo),
-            getExchangeRates(moment().format('YYYY-MM-DD'), d?.totalOfferedMargin || 0, currencyFrom, currencyTo)
+            getExchangeRates(moment().format('YYYY-MM-DD'), d?.totalOfferedMargin || 0, currencyFrom, currencyTo),
+            getExchangeRates(moment().format('YYYY-MM-DD'), d?.marginBudget || 0, currencyFrom, currencyTo),
           ]);
-          totalBookedGM.push(salesData[0]?.rates[currencyTo] || 0);
-          totalOfferedGM.push(salesData[1]?.rates[currencyTo] || 0);
+          bookedData.push(salesData[0]?.rates[currencyTo] || 0);
+          offeredData.push(salesData[1]?.rates[currencyTo] || 0);
+          budget.push(salesData[2]?.rates[currencyTo] || 0)
         } else {
-          totalBookedGM.push(d?.totalBookedMargin || 0);
-          totalOfferedGM.push(d?.totalOfferedMargin || 0);
+          bookedData.push(d?.totalBookedMargin || 0);
+          offeredData.push(d?.totalOfferedMargin || 0);
+          budget.push(d.volumeBudget || 0);
         }
       }
-      budget.push(d.volumeBudget || 0);
       labels.push(moment(d.date).format('MMM/YY'));
     }
 
@@ -405,7 +421,7 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
           borderColor: 'rgb(54, 162, 235)',
           borderWidth: 2,
           fill: true,
-          data: chart.uniqueId === 'volumeVsBudget' ? totalBookedVolumeMT : totalBookedGM
+          data: bookedData
         },
         {
           type: 'line',
@@ -413,7 +429,7 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
           borderColor: 'rgb(254, 97, 104)',
           borderWidth: 2,
           fill: true,
-          data: chart.uniqueId === 'volumeVsBudget' ? totalOfferedVolumeMT : totalOfferedGM
+          data: offeredData
         },
         {
           type: 'line',
