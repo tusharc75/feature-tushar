@@ -7,15 +7,15 @@ import axiosInstance from '../../axios/axiosInstance';
 import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
-import { AiOutlineApartment } from "react-icons/ai";
-import { MdAdd } from "react-icons/md"
+import { AiOutlineApartment } from 'react-icons/ai';
+import { MdAdd } from 'react-icons/md';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { Delete } from '@material-ui/icons';
-import { IconButton, Tooltip } from "@material-ui/core";
-import { useData } from "../../StateProvider/Provider";
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import { IconButton, Tooltip } from '@material-ui/core';
+import { useData } from '../../StateProvider/Provider';
+import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGridEditable';
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import AssignProductDialog from '../../components/AssignRolesDialog/AssignProductDialog';
 import ConfirmationDialogRaw from '../../components/Helpers/ConfirmationDialog';
@@ -24,17 +24,19 @@ import { camelCase } from 'lodash';
 
 const BOMTable = () => {
   const { id } = useParams();
-  const renderedFrom = `${camelCase(routes?.product.title)}_bom`
+  const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
 
   const { setToastConfig } = useContext(CustomToastContext);
   const [loadingBOMData, setLoadingBOMData] = useState(false);
   const [productData, setProductData] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [BOMData, setBOMData] = useState([]);
-  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null })
+  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null });
   const [isDeleting, setIsDeleting] = useState(false);
   const [gridApi, setGridApi] = useState(null);
-  const { state: { permissions, user, selectedEntity } }: any = useData();
+  const {
+    state: { permissions, user, selectedEntity }
+  }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
   const [columns, setColumns] = useState([]);
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
@@ -43,25 +45,18 @@ const BOMTable = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const { dataRows, rowCount, loading: gridLoading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
 
-
-
-
-
-
   useEffect(() => {
     if (id) {
       fetchBOMData();
       fetchProduct();
-
     }
-  }, [page, limit, filters, sorting, selectedEntity,]);
+  }, [page, limit, filters, sorting, selectedEntity]);
 
   useEffect(() => {
     if (BOMData) {
       getColumns();
     }
-
-  }, [BOMData])
+  }, [BOMData]);
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -71,69 +66,68 @@ const BOMTable = () => {
     setAnchorEl(null);
   };
 
-
-
   const fetchProduct = () => {
-    axiosInstance().get(`${routes.product.path}/` + id)
+    axiosInstance()
+      .get(`${routes.product.path}/` + id)
       .then(({ data: { data } }) => {
         const { productData } = data;
         setProductData(productData);
         setCustomizedRoutes([
-          { title: "Product Master", path: routes.product.path },
+          { title: 'Product Master', path: routes.product.path },
           { title: productData?.productName, path: `${routes.productDetail.path}/${id}` },
           { title: 'Parts' }
         ]);
-      })
-  }
+      });
+  };
 
   const fetchBOMData = () => {
-    dispatch({ type: "loading", loading: true });
+    dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
-   
+
     setLoadingBOMData(true);
     axiosInstance()
       .get(`/product/${id}/bom`)
       .then(({ data: { data } }) => {
         data = data.map((o) => {
-       
           return {
             ...o,
             productName: o.childProductDetail.productName,
             productId: o.childProductDetail._id
           };
         });
-       
 
         if (appendRows) {
           dispatch({
-            type: "initialize", data: [...dataRows, ...data],
-            count: data.count, selectedRecords: [...dataRows, ...data].filter(f => f.isChecked === true)
+            type: 'initialize',
+            data: [...dataRows, ...data],
+            count: data.count,
+            selectedRecords: [...dataRows, ...data].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
-            type: "initialize", data: data, count: data.count,
-            selectedRecords: data.filter(f => f.isChecked === true)
+            type: 'initialize',
+            data: data,
+            count: data.count,
+            selectedRecords: data.filter((f) => f.isChecked === true)
           });
         }
 
         if (gridApi) {
           try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
+              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
+              : [];
             if (oldSelectedRecords.length > 0) {
               gridApi.forEachNode(function (node) {
-                node.setSelected(
-                  oldSelectedRecords.some((o) => o === node.data._id)
-                );
+                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
               });
             }
           } catch (ex) {
-            console.error("Error in getting selected records from local storage")
+            console.error('Error in getting selected records from local storage');
           }
         }
-
-
 
         setBOMData([...data]);
         setLoadingBOMData(false);
@@ -150,60 +144,50 @@ const BOMTable = () => {
     }
   };
 
-
-
   const handleRemove = () => {
-    setIsDeleting(true)
-    const { data } = showConfirmBox
-   
+    setIsDeleting(true);
+    const { data } = showConfirmBox;
+
     if (data.length > 1) {
       data.map((i, index) => {
-        axiosInstance().put(`${product.api}/${i.product}/bom/remove`, {
-          ids: [i._id]
-        })
+        axiosInstance()
+          .put(`${product.api}/${i.product}/bom/remove`, {
+            ids: [i._id]
+          })
           .then(({ data }) => {
-            setIsDeleting(false)
-            setToastConfig({ open: true, message: "Successfully Deleted", type: "success" })
+            setIsDeleting(false);
+            setToastConfig({ open: true, message: 'Successfully Deleted', type: 'success' });
             setShowConfirmBox({ open: false, data: null });
-            fetchBOMData()
-            setAnchorEl(null)
-            selectedRecords(null)
+            fetchBOMData();
+            setAnchorEl(null);
+            selectedRecords(null);
           })
-          .catch(err => {
-            setToastConfig(err)
-            setIsDeleting(false)
-            setAnchorEl(null)
-          })
-
-      })
+          .catch((err) => {
+            setToastConfig(err);
+            setIsDeleting(false);
+            setAnchorEl(null);
+          });
+      });
     } else {
-      axiosInstance().put(`${product.api}/${data.product}/bom/remove`, {
-        ids: [data._id]
-      })
+      axiosInstance()
+        .put(`${product.api}/${data.product}/bom/remove`, {
+          ids: [data._id]
+        })
         .then(({ data }) => {
-          setIsDeleting(false)
-          setToastConfig({ open: true, message: "Successfully Deleted", type: "success" })
+          setIsDeleting(false);
+          setToastConfig({ open: true, message: 'Successfully Deleted', type: 'success' });
           setShowConfirmBox({ open: false, data: null });
-          fetchBOMData()
-          setAnchorEl(null)
-          selectedRecords(null)
+          fetchBOMData();
+          setAnchorEl(null);
+          selectedRecords(null);
         })
-        .catch(err => {
-          setToastConfig(err)
-          setIsDeleting(false)
-          setAnchorEl(null)
-        })
-
+        .catch((err) => {
+          setToastConfig(err);
+          setIsDeleting(false);
+          setAnchorEl(null);
+        });
     }
-
-
-
-
-
-
-  }
-
-
+  };
 
   const getColumns = () => {
     if (gridApi) {
@@ -214,68 +198,75 @@ const BOMTable = () => {
     let rowsData = [];
 
     if (BOMData) {
-
-      rowsData = BOMData ? BOMData.map((p) => ({
-
-        ...p,
-        productName: p?.productName,
-        qty: p?.qty,
-        productCategory: p?.childProductDetail?.productCategory?.optionLabel,
-        createdBy: p?.createdBy?.user?.concatedName
-      }))
+      rowsData = BOMData
+        ? BOMData.map((p) => ({
+            ...p,
+            productName: p?.productName,
+            qty: p?.qty,
+            productCategory: p?.childProductDetail?.productCategory?.optionLabel,
+            createdBy: p?.createdBy?.user?.concatedName
+          }))
         : [];
 
       newColumns = [
         { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer' },
-        { field: 'qty', headerName: 'Quantity', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-        { field: 'productCategory', headerName: 'Product Category', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-
-
-
-
+        {
+          field: 'qty',
+          headerName: 'Quantity',
+          show: true,
+          disabled: false,
+          cellRenderer: 'commonRenderer',
+          cellEditor: 'numericCellEditor',
+          editable: true
+        },
+        { field: 'productCategory', headerName: 'Product Category', show: true, disabled: false, cellRenderer: 'commonRenderer' }
       ];
 
       setColumns(newColumns);
       dispatch({ type: 'initialize', data: rowsData, count: rowsData.length });
       dispatch({ type: 'loading', loading: false });
-
-
     }
-  }
-
+  };
 
   const ActionsRenderer = (params) => (
     <Tooltip title="Delete">
       <IconButton
         onClick={() => {
-          setShowConfirmBox({ open: true, data: params.data })
+          setShowConfirmBox({ open: true, data: params.data });
         }}
       >
-        <Delete fontSize='small' color='error' />
+        <Delete fontSize="small" color="error" />
       </IconButton>
     </Tooltip>
-  )
-
+  );
 
   const ProductNameRenderer = (params) => (
-
     <Link className="link" title={params.value} to={`/product/detail/${params.data._id}`}>
       {params.value}
     </Link>
-
-  )
-
-
+  );
 
   const frameworkComponents = {
     actionsRenderer: ActionsRenderer,
     productNameRenderer: ProductNameRenderer,
-    commonRenderer: CommonRenderer,
-
-
+    commonRenderer: CommonRenderer
   };
 
+  const handleValueUpdate = (row) => {
+    if (!row || !row?.data) return;
+    const bomId = row.data._id;
 
+    axiosInstance()
+      .put(`${product.api}/${id}/bom/${bomId}`, {
+        qty: Number(row.data.qty)
+      })
+      .then(() => {
+        fetchBOMData();
+      })
+      .catch((err) => {
+        setToastConfig(err);
+      });
+  };
 
   return (
     <div>
@@ -285,13 +276,11 @@ const BOMTable = () => {
       <div className="main-container">
         <div className="header-panel">
           <Grid className={styles.filter_side_container} container justify="space-between">
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
               <div className="d-flex align-items-center">
                 <AiOutlineApartment className="headerLogo" />
                 <span className="listingHeader">Parts</span>
               </div>
-
-
             </Grid>
             <Grid className={styles.filter_side} item md={6} sm={12} xs={12}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -305,7 +294,6 @@ const BOMTable = () => {
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
                         setOpenAssignProductDialog(true);
-                       
                       }}
                     >
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
@@ -339,12 +327,10 @@ const BOMTable = () => {
                     >
                       <MenuItem onClick={() => setShowConfirmBox({ open: true, data: selectedRecords })}>Delete</MenuItem>
                     </Menu>
-
                   </>
                 </Grid>
               </Box>
             </Grid>
-
           </Grid>
         </div>
         <Box component="div">
@@ -363,19 +349,22 @@ const BOMTable = () => {
             loading={gridLoading}
             renderedFrom={renderedFrom}
             refreshGrid={fetchBOMData}
+            onCellValueChanged={handleValueUpdate}
           />
         </Box>
       </div>
-      {showConfirmBox.open && <ConfirmationDialogRaw
-        open={true}
-        message={`Are you sure you want to delete this product?`}
-        okBtnLoading={isDeleting}
-        onClose={() => {
-          setShowConfirmBox({ open: false, data: null });
-        }}
-        onOk={handleRemove}
-      />}
-           {openAssignProductDialog && (
+      {showConfirmBox.open && (
+        <ConfirmationDialogRaw
+          open={true}
+          message={`Are you sure you want to delete this product?`}
+          okBtnLoading={isDeleting}
+          onClose={() => {
+            setShowConfirmBox({ open: false, data: null });
+          }}
+          onOk={handleRemove}
+        />
+      )}
+      {openAssignProductDialog && (
         <AssignProductDialog
           productsDialogOpen={openAssignProductDialog}
           productId={id}
