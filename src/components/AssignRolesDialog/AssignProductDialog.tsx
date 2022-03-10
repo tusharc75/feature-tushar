@@ -10,19 +10,17 @@ import {
 } from "@material-ui/core";
 import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
-import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+
+import axiosInstance from "src/axios/axiosInstance";
+import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import SearchBox from "../Helpers/SearchBox";
-import { gridLoadingTimeout, isObjectEmpty, product, packages, prepareDataForGrid } from "../../constants/helpers";
-import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { useData } from "../../StateProvider/Provider";
-import CommonSkeleton from "../Helpers/CommonSkeleton";
+import { gridLoadingTimeout, isObjectEmpty, product, packages, prepareDataForGrid } from "src/constants/helpers";
+import { useData } from "src/StateProvider/Provider";
 import { CommonRenderer } from "../AgGridComponents/CustomAgGridCellRenderers";
 import routes from "../Helpers/Routes";
-import styles from "../../pages/Leads/Header.module.scss";
+import styles from "src/pages/Leads/Header.module.scss";
 import { AddOutlined, RemoveOutlined } from "@material-ui/icons";
-import CustomAgGridEditable from "../AgGridComponents/CustomAgGridEditable";
+import CustomAgGridEditable, { reducer, intialState } from "../AgGridComponents/CustomAgGridEditable";
 import { isMobile, isTablet } from 'react-device-detect';
 
 const options = [
@@ -285,7 +283,7 @@ const AssignProductDialog = ({
                                     </ToggleButtonGroup>
                                 } */}
                             </Grid>
-                            <Grid xs={6} className={styles.filter_side} >
+                            <Grid item xs={6} className={styles.filter_side} >
                                 <Box className={styles.filter_side_header} component="div"  >
                                     <SearchBox
                                         onSearch={handleSearch}
@@ -308,8 +306,7 @@ const AssignProductDialog = ({
                             </Grid>
                         </Grid>
                     </div>
-                    {columns ?
-                        <CustomAgGridEditable
+                    <CustomAgGridEditable
                             columns={columns}
                             dataRows={dataRows}
                             frameworkComponents={frameworkComponents}
@@ -321,13 +318,13 @@ const AssignProductDialog = ({
                             page={page}
                             allowAction={false}
                             loading={loading}
-                            renderedFrom={renderedFrom}
-                            refreshGrid={fetchProduct}
+                            allowSelection={true}
+                            // selectedRecords={selectedRecords}
                             onCellValueChanged={onCellValueChanged}
-                            selectedRecords={selectedRecords}
                             showOnlyShowFilteredRecordSwitch={true}
+                            refreshGrid={fetchProduct}
+                            renderedFrom={renderedFrom}
                         />
-                        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </>
             </CustomDialogContent>
         </Dialog>
