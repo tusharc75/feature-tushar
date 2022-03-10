@@ -32,6 +32,7 @@ import MobileFilterDialog from "../../components/MobileFilterDialog"
 import { camelCase } from "lodash";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
+import ExpandMore from "@material-ui/icons/ExpandMore";
 
 const WellMaster = () => {
 
@@ -391,23 +392,39 @@ const WellMaster = () => {
                                     }} variant={isMobile && !isTablet ? "text" : "contained"} size="small" color="primary" className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
                                         startIcon={isMobile && !isTablet ? null : <AddOutlined />}> {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}</Button>
                                 }
-                                <Menu
-                                    anchorEl={anchorEl}
-                                    keepMounted
-                                    getContentAnchorEl={null}
-                                    anchorOrigin={{
-                                        vertical: "bottom",
-                                        horizontal: "left",
-                                    }}
-                                    id="action-menu"
-                                    open={Boolean(anchorEl)}
-                                    onClose={closeActions}
-                                >
-                                    {permissions?.wellMaster?.isDelete && <MenuItem onClick={() => {
-                                        closeActions()
-                                        setShowDeleteConfirmBox(true)
-                                    }}>Delete</MenuItem>}
-                                </Menu>
+                                {permissions?.wellMaster?.isDelete && (
+                                    <>
+                                        <Button
+                                            //disabled={canDelete}
+                                            variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                                            color="default"
+                                            size="small"
+                                            className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                                            onClick={openActions}
+                                            // className={styles.action_submit_btn}
+                                            aria-controls="action-menu"
+                                        >
+                                            {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                                        </Button>
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            getContentAnchorEl={null}
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "left",
+                                            }}
+                                            id="action-menu"
+                                            open={Boolean(anchorEl)}
+                                            onClose={closeActions}
+                                        >
+                                            {permissions?.wellMaster?.isDelete && <MenuItem onClick={() => {
+                                                closeActions()
+                                                setShowDeleteConfirmBox(true)
+                                            }}>Delete</MenuItem>}
+                                        </Menu>
+                                    </>
+                                )}
                             </Grid>
                         </Box>
                     </Grid>

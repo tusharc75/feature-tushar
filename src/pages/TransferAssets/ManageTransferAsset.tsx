@@ -305,6 +305,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                               touched={touched}
                                               label={field.fieldLabel}
                                               name={field.fieldName}
+                                              fieldData={field}
                                               type={field.type}
                                               options={plantsToCategoryOptions.filter((val) => val.optionValue !== values?.transferFromPlant) ?? []}
                                               setFieldValue={(name, value) => {
@@ -343,6 +344,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                           touched={touched}
                                           label={field.fieldLabel}
                                           name={field.fieldName}
+                                          fieldData={field}
                                           type={field.type}
                                           options={plantShipToOptions.filter(plant => plant?.optionValue === plantsToCategoryOptions.find(p => p.optionValue === values?.transfertoPlant)?.address) ?? []}
                                           setFieldValue={(name, value) => {
@@ -377,6 +379,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                               touched={touched}
                                               label={field.fieldLabel}
                                               name={field.fieldName}
+                                              fieldData={field}
                                               type={field.type}
                                               options={supplierToCategoryOptions}
                                               setFieldValue={(name, value) => {
@@ -416,6 +419,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                           touched={touched}
                                           label={field.fieldLabel}
                                           name={field.fieldName}
+                                          fieldData={field}
                                           type={field.type}
                                           options={supplierShipToOptions}
                                           setFieldValue={(name, value) => setFieldValue(name, value)}
@@ -448,6 +452,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                               touched={touched}
                                               label={field.fieldLabel}
                                               name={field.fieldName}
+                                              fieldData={field}
                                               type={field.type}
                                               options={customerToCategoryOptions}
                                               setFieldValue={(name, value) => {
@@ -487,6 +492,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                           touched={touched}
                                           label={field.fieldLabel}
                                           name={field.fieldName}
+                                          fieldData={field}
                                           type={field.type}
                                           options={customerShipToOptions}
                                           setFieldValue={(name, value) => setFieldValue(name, value)}
@@ -511,6 +517,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     touched={touched}
                                     label={field.fieldLabel}
                                     name={field.fieldName}
+                                    fieldData={field}
                                     type={field.type}
                                     options={field.option}
                                     required={field.required}
@@ -544,6 +551,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                         touched={touched}
                                         label={field.fieldLabel}
                                         name={field.fieldName}
+                                        fieldData={field}
                                         type={field.type}
                                         options={plantsCategoryOptions?.filter((o: any) => o?.entity.includes(selectedEntity)) ?? []}
                                         required={field.required}
@@ -587,6 +595,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     touched={touched}
                                     label={field.fieldLabel}
                                     name={field.fieldName}
+                                    fieldData={field}
                                     type={field.type}
                                     options={field.option}
                                     setFieldValue={(name, value) => {
