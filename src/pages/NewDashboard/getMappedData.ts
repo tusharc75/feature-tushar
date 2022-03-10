@@ -173,8 +173,8 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
       let totalOfferedValue = 0;
       let totalBookedMargin = 0;
       let totalOfferedMargin = 0;
-      let totalBookedVolume = d?.totalBookedVolune || 0;
-      let totalOfferedVolume = d?.totalOfferedVolune || 0;
+      let totalBookedVolume = d?.totalBookedVolume || 0;
+      let totalOfferedVolume = d?.totalOfferedVolume || 0;
 
       if (currencyTo && currencyTo !== currencyFrom) {
         const salesData: any = await Promise.all([
