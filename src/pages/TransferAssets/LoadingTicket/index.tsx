@@ -288,7 +288,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   data["deliveryTo"] = transferAssetData?.transfertoSupplier?.optionValue;
                   data["deliveryToAddress"] = transferAssetData?.supplierShipTo?.optionValue;
                 }
-                data["wellName"] = transferAssetData?.wellName;
+                data["wellName"] = transferAssetData?.wellName?.optionValue;
                 data["afeNumber"] = transferAssetData?.afeNumber;
                 if (transferAssetData?.processor?.optionValue) {
                   data["processor"] = transferAssetData?.processor?.optionValue;
