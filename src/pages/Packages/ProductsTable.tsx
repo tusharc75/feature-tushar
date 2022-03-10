@@ -93,7 +93,9 @@ const ProductsTable = ({
         setColumns([...columns]);
       });
   };
+  
   const ActionsRenderer = (params) => <span>{params?.data?.qty}</span>;
+
   return (
     <>
       {isMobile && !isTablet ? (
