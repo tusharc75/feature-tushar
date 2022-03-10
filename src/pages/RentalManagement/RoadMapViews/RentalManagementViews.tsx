@@ -161,7 +161,11 @@ const RentalManagementViews = (props) => {
       if (allPackages.length) xPosition += 300;
       var pakcageIdx = 0;
       var productIdx = 0;
+      const productColSystem = {};
+
+      var lastIndex = 0;
       product?.material?.map((item: any, index) => {
+        if (item.type !== 'package') productColSystem[item._id] = productColSystem[item.parentId] ? productColSystem[item.parentId] + 300 : xPosition;
         flow.push({
           id: `${item._id}`,
           sourcePosition: 'right',
@@ -178,17 +182,23 @@ const RentalManagementViews = (props) => {
               </div>
             )
           },
-          position: { x: item.type === 'package' ? xPosition - 300 : xPosition, y: item.type === 'package' ? pakcageIdx * 80 : productIdx * 80 },
+          position: {
+            x: item.type === 'package' ? xPosition - 300 : productColSystem[item.parentId] ? productColSystem[item.parentId] + 300 : xPosition,
+            y: item.type === 'package' ? pakcageIdx * 80 : productIdx * 80
+          },
           style: item.type === 'package' ? customNodeStyles.package : customNodeStyles.product
         });
+        const pos = item.type === 'package' ? xPosition - 300 : productColSystem[item.parentId] ? productColSystem[item.parentId] + 300 : xPosition;
+        if (lastIndex < pos) lastIndex = pos;
         item.type === 'package' ? (pakcageIdx += 1) : (productIdx += 1);
         flowEdge.push({
-          id: `edge-product-${item._id}`,
-          source: `${item.parentId && allPackages.includes(item.parentId) ? item.parentId : rentalId}`,
+          id: `edge-product-${item._id}-${index}`,
+          source: `${item.parentId && allPackagesAndProductIds.includes(item.parentId) ? item.parentId : rentalId}`,
           arrowHeadType: 'arrow',
           target: `${item._id}`
         });
       });
+      xPosition = lastIndex;
 
       var purchaseAndSubLeaseIdx = 0;
       if (
