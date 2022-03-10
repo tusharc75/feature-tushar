@@ -109,7 +109,7 @@ export default function CustomReactTable({
                 sticky: "left",
                 width: 70,
                 minWidth: 70,
-                maxWidth: 70,
+                maxWidth: 250,
                 Cell: ({ row }) =>
                     // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
                     // to build the toggle for expanding a row
@@ -155,7 +155,7 @@ export default function CustomReactTable({
                 sticky: "left",
                 width: 100,
                 minWidth: 100,
-                maxWidth: 100,
+                maxWidth: 250,
                 // The header can use the table's getToggleAllRowsSelectedProps method
                 // to render a checkbox
                 Header: ({ getToggleAllRowsSelectedProps }) => (
