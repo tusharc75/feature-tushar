@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.75.0](https://github.com/vebholic/oms_frontend/compare/v2.74.0...v2.75.0) (2022-03-10)
+
+
+### Features
+
+* - Build error fixed ([105e8f5](https://github.com/vebholic/oms_frontend/commit/105e8f59edd95645dbe00240b8aee07bc51715ba))
+* - Grid filter header color changed to white ([4453679](https://github.com/vebholic/oms_frontend/commit/44536791964b6225678a4bac6c621ff1bb0e3de8))
+* - Sub rows filter added in react table ([288d121](https://github.com/vebholic/oms_frontend/commit/288d121eb77a04a9771a43e7105d00a251a370d2))
+* dynamic well master plus button ([81655da](https://github.com/vebholic/oms_frontend/commit/81655da046f6e9a3c17164f50044bdbda4482bc6))
+* rental views option to show in full screen PO-1249 ([268778d](https://github.com/vebholic/oms_frontend/commit/268778d3730418a843f9ae0bdd664a63d0854a58))
+* repair Job views option to show in full screen PO-1249 ([2e9d28b](https://github.com/vebholic/oms_frontend/commit/2e9d28bce056ac5039181a9ec6f134b4566f95b8))
+
+
+### Bug Fixes
+
+* bug fix ([bd84c3f](https://github.com/vebholic/oms_frontend/commit/bd84c3f118ee347b655f55e9dbb819b661714e8a))
+* bug fix ([2b144be](https://github.com/vebholic/oms_frontend/commit/2b144bea2e44a817398abd4084fd63854f2d4c2b))
+* bug fix ([d1d71d9](https://github.com/vebholic/oms_frontend/commit/d1d71d95c3aa5798fe3a5003eca2b2ccd8642991))
+* bug fix ([c6f99a9](https://github.com/vebholic/oms_frontend/commit/c6f99a9e4df97d49e93bddaf90011d193496add6))
+* bug fix ([123545d](https://github.com/vebholic/oms_frontend/commit/123545d4e9520a8dde6d3eeb951c1a2e405b9f5c))
+* bug fix ([107d4f1](https://github.com/vebholic/oms_frontend/commit/107d4f17f19716280c9804ce5b1cb4ff6506f29d))
+* bug fix ([74088e8](https://github.com/vebholic/oms_frontend/commit/74088e89de651e23a15688be02592e5d84805f3b))
+* **package:** changes in package ([908cc7e](https://github.com/vebholic/oms_frontend/commit/908cc7ecbf0e2cbd7f527a79526e6936a104702a))
+* rentalJob and repairJob name change to views PO-1249 ([879be1a](https://github.com/vebholic/oms_frontend/commit/879be1a7b7274c64b2eaf96b1378a59ede8c4ab0))
+
 ## [2.74.0](https://github.com/vebholic/oms_frontend/compare/v2.73.0...v2.74.0) (2022-03-09)
 
 

@@ -171,7 +171,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         data["deliveryToType"] = deliveryToType;
         data["isPickupFromDisable"] = true;
 
-        data["wellName"] = repairJobData?.wellName;
+        data["wellName"] = repairJobData?.wellName?.optionValue;
         data["afeNumber"] = repairJobData?.afeNumber;
 
         setShowTicketDialog({ open: true, ticketType: ticketType, data: data });

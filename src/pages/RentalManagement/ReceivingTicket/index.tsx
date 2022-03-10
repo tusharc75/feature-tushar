@@ -307,7 +307,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     data["endDate"] = rentalManagementData?.estimateStartDate;
     data["isPickupFromDisable"] = true;
 
-    data["wellName"] = rentalManagementData?.wellName;
+    data["wellName"] = rentalManagementData?.wellName?.optionValue;
     data["afeNumber"] = rentalManagementData?.afeNumber;
     if (rentalManagementData?.processor?.optionValue) {
       data["processor"] = rentalManagementData?.processor?.optionValue;
@@ -342,30 +342,28 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         {!isMobile && <Button
           onClick={() => {
             setDownlodingFile(true);
-            uniqueReceivingTicket.forEach(currentId => {
-              axiosInstance().get(`/delivery-ticket/${currentId}/pdf`)
-                .then(({ data }) => {
-                  axiosInstance()
-                    .get(`user/download?fileName=${data.data.fileName}`, {
-                      responseType: "blob",
-                    })
-                    .then(({ data }) => {
-                      const file = new Blob([data], { type: "application/pdf" });
-                      const fileURL = URL.createObjectURL(file);
-                      const pdfWindow = window.open();
-                      pdfWindow.location.href = fileURL;
-                      toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-                      setDownlodingFile(false);
-                    })
-                    .catch((err) => {
-                      toastConfig.setToastConfig(err);
-                      setDownlodingFile(false);
-                    });
-                }).catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setDownlodingFile(false);
-                })
-            })
+            axiosInstance().post(`/delivery-ticket/pdf`, { "ids": uniqueReceivingTicket })
+              .then(({ data }) => {
+                axiosInstance()
+                  .get(`user/download?fileName=${data.data.fileName}`, {
+                    responseType: "blob",
+                  })
+                  .then(({ data }) => {
+                    const file = new Blob([data], { type: "application/pdf" });
+                    const fileURL = URL.createObjectURL(file);
+                    const pdfWindow = window.open();
+                    pdfWindow.location.href = fileURL;
+                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                    setDownlodingFile(false);
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                  });
+              }).catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+              })
           }}
           variant={isMobile && !isTablet ? 'text' : 'outlined'}
           color="primary"
@@ -765,7 +763,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         refrenceType="Rental Job"
         refrenceData={{
           _id: rentalManagementData._id, warehouse: selectedRecords[0].warehouseId,
-          wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber
+          wellName: rentalManagementData?.wellName?.optionValue, afeNumber: rentalManagementData?.afeNumber
         }}
         onClose={() => setShowRepairJobDialog(false)}
         onSuccess={(obj) => {

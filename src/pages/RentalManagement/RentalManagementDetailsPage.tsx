@@ -311,7 +311,7 @@ const RentalManagementDetailsPage = () => {
                       </Fragment>
                     )}
                   {permissions?.rentalManagement?.isUpdate &&
-                    ![RENTAL_STATUS.cancelled, RENTAL_STATUS.invoiced, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
+                    [RENTAL_STATUS.new, RENTAL_STATUS.inProgress].includes(rentalManagementData?.status) && (
                       <Button variant="outlined" color="primary" size="small" onClick={() => setShowCancelConfirmBox(true)}>
                         {'Cancel ' + routes.rentalManagement.title}
                       </Button>

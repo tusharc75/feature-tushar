@@ -8,7 +8,7 @@ import { groupBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, arrayToDropwdownOption, CHILD_RESOURCE } from "..//../../constants/helpers";
+import { CustomDialogTransition, arrayToDropwdownOption } from "..//../../constants/helpers";
 import { Formik, Form } from "formik";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomButton from '../../../components/Helpers/CustomButton'
@@ -371,7 +371,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
-
     if (rowData && rowData.hideSelection) {
       if (rowData.parentId) {
         const _package = material?.filter((e) => e._id === rowData.parentId);
