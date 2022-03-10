@@ -36,12 +36,13 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const defaultColumns = [{ field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true }]
 
     useEffect(() => {
-        fetchMaterial()
-    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
-
-    useEffect(() => {
+        localStorage.removeItem(localStorageSelectedRecords)
         fetchGridColumns()
     }, [])
+
+    useEffect(() => {
+        fetchMaterial()
+    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
     const fetchMaterial = () => {
         dispatch({ type: "loading", loading: true });
@@ -56,6 +57,10 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 finalObject["id"] = u._id;
                 finalObject["type"] = type;
                 finalObject["qty"] = 0;
+                const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id)
+                if (qtyAdded.length) {
+                    finalObject["qty"] = qtyAdded[0].qty;
+                }
                 finalObject["productCategory"] = u.productCategory?.optionLabel;
                 finalObject["priceTemplate"] = u.priceTemplate?.optionLabel
                 finalObject["unitMain"] = u.unit
