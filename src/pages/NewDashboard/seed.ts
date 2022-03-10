@@ -29,7 +29,7 @@ export default [
         filters: []
       },
       {
-        col: 8,
+        col: 6,
         title: 'Total Booked Value in currency vs Total Offered Value in currency vs Budget',
         kpi: 'sales',
         type: 'line',
@@ -49,7 +49,7 @@ export default [
         ]
       },
       {
-        col: 4,
+        col: 6,
         title: 'Regional Sales',
         kpi: 'regionalsales',
         type: 'list',

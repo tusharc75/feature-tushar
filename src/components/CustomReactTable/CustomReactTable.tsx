@@ -3,7 +3,8 @@ import React, { useEffect } from 'react'
 import MaUTable from '@material-ui/core/Table'
 import { TableBody, TableCell, TableHead, TableFooter, TableRow, TextField } from '@material-ui/core'
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
-import { gridPageSizes, treeToFlatArray } from '../../constants/helpers'
+import { columnFilter } from './ReactTableHelpers'
+import { treeToFlatArray } from '../../constants/helpers'
 import { uniqBy, isString } from 'lodash';
 import {
     useTable, useExpanded, useRowSelect, useFlexLayout,
@@ -13,8 +14,6 @@ import { useSticky } from "react-table-sticky";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import FilterListIcon from '@material-ui/icons/FilterList';
-// import TablePagination from '@material-ui/core/TablePagination';
-import { matchSorter } from 'match-sorter'
 
 const IndeterminateCheckbox = React.forwardRef(
     ({ indeterminate, ...rest }: any, ref) => {
@@ -82,7 +81,7 @@ export default function CustomReactTable({
     const defaultColumn = React.useMemo(
         () => ({
             // When using the useFlexLayout:
-            minWidth: 150, // minWidth is only used as a limit for resizing
+            minWidth: 80, // minWidth is only used as a limit for resizing
             width: 150, // width is used for both the flex-basis and flex-grow
             // maxWidth: 250, // maxWidth is only used as a limit for resizing
             Filter: DefaultColumnFilter,
@@ -110,7 +109,7 @@ export default function CustomReactTable({
                 sticky: "left",
                 width: 70,
                 minWidth: 70,
-                maxWidth: 70,
+                maxWidth: 250,
                 Cell: ({ row }) =>
                     // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
                     // to build the toggle for expanding a row
@@ -156,7 +155,7 @@ export default function CustomReactTable({
                 sticky: "left",
                 width: 100,
                 minWidth: 100,
-                maxWidth: 100,
+                maxWidth: 250,
                 // The header can use the table's getToggleAllRowsSelectedProps method
                 // to render a checkbox
                 Header: ({ getToggleAllRowsSelectedProps }) => (
@@ -173,31 +172,17 @@ export default function CustomReactTable({
                         </div>
                 ),
             },
-            ...columns
+            ...columns.map(m => { return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' } })
         ],
         []
     )
 
-    function fuzzyTextFilterFn(rows, id, filterValue) {
-        return matchSorter(rows, filterValue, { keys: [(row: any) => row.values[id]] })
-    }
-
-    // Let the table remove the filter if the string is empty
-    fuzzyTextFilterFn.autoRemove = val => !val
-
     const filterTypes = React.useMemo(
         () => ({
-            filterRowsWithSubrows: (rows, id, filterValue) => {
-                return rows.filter((row) => {
-                    const rowValue = row.values[id];
-                    return rowValue !== undefined ? String(rowValue).toLowerCase() === String(filterValue).toLowerCase() : true;
-                });
-            },
+            filterRowsWithSubrows: (rows, id, filterValue) => columnFilter(rows, id, filterValue)
         }),
         [],
     );
-
-    // Use the state and functions returned from useTable to build your UI
 
     const {
         getTableProps,
@@ -330,14 +315,13 @@ export default function CustomReactTable({
 
                                             <div {...column.getResizerProps()} className="resizer" />
 
-                                            {/* <div>{column.canFilter ? column.render('Filter') : null}</div> */}
                                         </TableCell>
                                     ))}
                                 </TableRow>
 
                                 <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
                                     {headerGroup.headers.map(column => (
-                                        <TableCell {...column.getHeaderProps()} className="th text-truncate">
+                                        <TableCell {...column.getHeaderProps()} className="th text-truncate bg-white">
                                             <div>{column.canFilter ? column.render('Filter') : null}</div>
                                         </TableCell>
                                     ))}

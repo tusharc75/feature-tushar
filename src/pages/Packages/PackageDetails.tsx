@@ -1,29 +1,24 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import { Grid, Box, Button, Paper, Tabs, Tab } from '@material-ui/core';
-import { Add } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { packages, product } from '../../constants/helpers';
-import ManagePackageDialog from './ManagePackageDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
-import ProductsTable from './ProductsTable';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import styles from './packages.module.scss';
+import { camelCase } from 'lodash';
 import { FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
 
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { camelCase } from 'lodash';
+import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import DetailsPageHeader from 'src/components/DetailsPageHeader';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import { useData } from 'src/StateProvider/Provider';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { packages } from 'src/constants/helpers';
+import ManagePackageDialog from './ManagePackageDialog';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import Products from './Products';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -49,26 +44,24 @@ function a11yProps(index: any) {
 }
 
 const PackageDetails = () => {
-  const renderedFrom = camelCase(routes?.packages.title)
+  const renderedFrom = camelCase(routes?.packages.title);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { permissions }
   }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
   const [packagesLoading, setPackagesLoading] = useState(false);
-  const [loadingProducts, setLoadingProducts] = useState(false);
+
   const [packageData, setPackageData] = useState(null);
-  const [products, setProducts] = useState([]);
+
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [quantityUpdateLoading, setQuantityUpdateLoading] = useState(false);
   const [packageFields, setPackageFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
-  const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
 
   const [tabValue, setTabValue] = useState(0);
 
@@ -79,7 +72,6 @@ const PackageDetails = () => {
   useEffect(() => {
     if (id) {
       fetchPackage();
-      getProducts();
     }
   }, [id]);
 
@@ -130,43 +122,6 @@ const PackageDetails = () => {
       });
   };
 
-  const getProducts = () => {
-    setLoadingProducts(true);
-    axiosInstance()
-      .get(`${packages.packageApi}/get-products/${id}`)
-      .then(({ data: { data } }) => {
-        setProducts(data);
-        setLoadingProducts(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setLoadingProducts(false);
-      });
-  };
-
-  const handleUpdateQuantity = (updatedNode) => {
-    let productsToSend = [...products];
-    productsToSend = productsToSend.map((o) => {
-      let res = { product: o?._id, qty: o?.qty };
-      if (updatedNode?.data?._id === o?._id) {
-        res.qty = updatedNode?.newValue * 1;
-      }
-      return res;
-    });
-    setQuantityUpdateLoading(true);
-    axiosInstance()
-      .post(`${packages.packageApi}/add-products`, {
-        ids: [packageData._id],
-        products: [...productsToSend]
-      })
-      .then(() => {
-        setQuantityUpdateLoading(false);
-        getProducts();
-      })
-      .catch((err) => {
-        setQuantityUpdateLoading(false);
-      });
-  };
   return (
     <>
       <Grid container className="headerbox">
@@ -247,62 +202,14 @@ const PackageDetails = () => {
                   </TabPanel>
 
                   <TabPanel value={tabValue} index={1}>
-                    <Box mt={2} className="bg-white">
-                      <Box mb={1}>
-                        <div className={`p-2 gap-3 ${styles.package_grid_template}`}>
-                          <h3>Product(s)</h3>
-                          <ImportExportLinks
-                            permissions={permissions?.packages}
-                            module="packages-products"
-                            api={`${packages.packageApi}/package-products`}
-                            afterImportCompleted={() => {
-                              getProducts();
-                            }}
-                            isExportAllOrSomeFeature={true}
-                            total={products?.length}
-                            recordsToExport={products.length}
-                            ids={[]}
-                            additionalParams={`refrenceId=${id}`}
-                            isBackgroundWhite={true}
-                          />
-                          <Button
-                            className="text-transform-none"
-                            variant="outlined"
-                            color="primary"
-                            startIcon={<Add />}
-                            size="small"
-                            onClick={() => setShowProductAssignDialog(true)}
-                          >
-                            Assign Product(s)
-                          </Button>
-                        </div>
-                      </Box>
-
-                      {products.length ? (
-                        <ProductsTable
-                          renderedFrom={`${renderedFrom}_grid-1`}
-                          productList={products}
-                          handleUpdateQuantity={handleUpdateQuantity}
-                          handleAssignProduct={setShowProductAssignDialog}
-                          updateLoading={quantityUpdateLoading || packagesLoading}
-                        />
-                      ) : null}
-                    </Box>
+                    {tabValue === 1 && <Products renderedFrom={`${renderedFrom}_grid-1`} packageId={id} />}
                   </TabPanel>
                 </>
               )}
             </Box>
           </Paper>
-
-          {/* {
-            packageData?.products ?
-              <ProductsTable
-                productList={packageData?.products}
-              /> : null
-          } */}
         </Grid>
       </Grid>
-
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -325,20 +232,6 @@ const PackageDetails = () => {
             fetchPackage();
             setOpenUpdateDialog(false);
           }}
-        />
-      )}
-      {showProductAssignDialog && (
-        <AssignQuantityDialog
-          ids={[id]}
-          onClose={() => setShowProductAssignDialog(false)}
-          onSuccess={() => {
-            getProducts();
-            setShowProductAssignDialog(false);
-          }}
-          resource={product.api}
-          title="Assign Products"
-          label="Select Product"
-          resourceData={products}
         />
       )}
     </>

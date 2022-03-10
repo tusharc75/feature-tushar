@@ -162,6 +162,8 @@ export default function CustomAgGridEditable({
   fromPurchaseOrderGrid = false,
   idProperty = "_id",
   rowClassRules = null,
+  actionLabel = null,
+  actionEditable = false,
 }) {
   const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
@@ -564,13 +566,15 @@ export default function CustomAgGridEditable({
               {allowAction && (
                 <AgGridColumn
                   width={actionWidth}
-                  field="actions"
-                  headerName="Actions"
+                  field={actionLabel ? actionLabel.toLowerCase() : "actions"}
+                  headerName={actionLabel || "Actions"}
                   pinned={isMobile || isTablet ? false : "right"}
                   lockPinned={isMobile || isTablet ? false : true}
                   resizable={false}
                   sortable={false}
                   filter={false}
+                  editable={actionEditable}
+                  cellEditor={"numericCellEditor"}
                   cellRenderer="actionsRenderer"
                   // pinnedRowCellRenderer="commonRenderer"
                   pinnedRowCellRendererFramework={() => (

@@ -23,13 +23,10 @@ import { useHistory } from "react-router-dom";
 import InfoIcon from '@material-ui/icons/Info';
 import { isMobile, isTablet } from "react-device-detect";
 import { useData } from "../../../StateProvider/Provider";
-import { BiChevronDown } from "react-icons/bi";
-import React from "react";
-import { IoMdEye } from "react-icons/io";
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { ExpandMore } from '@material-ui/icons';
 
-const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol }) => {
+const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol, stepFullScreen }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -59,76 +56,87 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
 
   const fetchFields = async () => {
     var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
-    const coloum: any = [{
-      accessor: 'detail',
-      Header: 'Detail',
-      width: 300,
-      sticky: isMobile ? "none" : "left",
-      Cell: ({ row }) => (
-        <div className="d-flex gap-2 align-items-center">
-          <p className="text-truncate" title={row.original.detail}  >
-            {(row.original?.type === "asset" && !isOffline) ?
-              <a className="link text-truncate" href={`${serializedAsset.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
-              row.original.detail}
-          </p>
-          {row.original.isPurchaseOrder &&
-            <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
-              <IconButton size="small" onClick={() => {
-                history.push(routes.purchaseOrder.path, {
-                  rental: rentalManagementData,
-                })
-              }}>
-                <InfoIcon fontSize="small" color={"primary"} />
-              </IconButton>
-            </HtmlTooltip>
-          }
-          {row.original.isSublease &&
-            <HtmlTooltip title={`${routes.sublease.title}`}>
-              <IconButton size="small" onClick={() => {
-                history.push(routes.sublease.path, {
-                  rental: rentalManagementData,
-                })
-              }}>
-                <InfoIcon fontSize="small" color={"primary"} />
-              </IconButton>
-            </HtmlTooltip>
-          }
-          {row.original?.type === "asset" &&
-            <span className="d-flex align-items-center gap-2">
-              <Chip label="Asset" size="small" color="primary" />
-              {(row.original.status === INVENTORY_STATUS.reserved && row.original?.manualStatus !== INVENTORY_STATUS.reserved && !isOffline) &&
-                <HtmlTooltip title={`Remove`}>
-                  <IconButton size="small" onClick={() => {
-                    setShowConfirmBox(true)
-                    setDeleteData([row.original.inventory])
-                  }}>
-                    <Delete fontSize="small" color="error" />
-                  </IconButton>
-                </HtmlTooltip>}
-              {row.original.isTransferAsset &&
-                <HtmlTooltip title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`}>
-                  <IconButton size="small" onClick={() => {
-                    history.push(routes.transferAsset.path, {
-                      rental: rentalManagementData,
-                    })
-                  }}>
-                    <InfoIcon fontSize="small" color={"primary"} />
-                  </IconButton>
-                </HtmlTooltip>
-              }
-            </span>}
-        </div>),
-      Footer: () => {
-        return <>Total</>
-      }
-    },
-    {
-      accessor: 'assets',
-      Header: 'Assets Assigned',
-      Cell: ({ row }) => (
-        getAssetAssignedValues(row)
-      )
-    }]
+    const coloum: any = [
+      {
+        accessor: 'srno',
+        Header: '#',
+        width: 70,
+        sticky: isMobile ? "none" : "left",
+        Cell: ({ row }) => (
+          <p className="text-truncate"  >
+            {row.original.srno}
+          </p>),
+      },
+      {
+        accessor: 'detail',
+        Header: 'Detail',
+        width: 300,
+        sticky: isMobile ? "none" : "left",
+        Cell: ({ row }) => (
+          <div className="d-flex gap-2 align-items-center">
+            <p className="text-truncate" title={row.original.detail}  >
+              {(row.original?.type === "asset" && !isOffline) ?
+                <a className="link text-truncate" href={`${serializedAsset.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
+                row.original.detail}
+            </p>
+            {row.original.isPurchaseOrder &&
+              <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
+                <IconButton size="small" onClick={() => {
+                  history.push(routes.purchaseOrder.path, {
+                    rental: rentalManagementData,
+                  })
+                }}>
+                  <InfoIcon fontSize="small" color={"primary"} />
+                </IconButton>
+              </HtmlTooltip>
+            }
+            {row.original.isSublease &&
+              <HtmlTooltip title={`${routes.sublease.title}`}>
+                <IconButton size="small" onClick={() => {
+                  history.push(routes.sublease.path, {
+                    rental: rentalManagementData,
+                  })
+                }}>
+                  <InfoIcon fontSize="small" color={"primary"} />
+                </IconButton>
+              </HtmlTooltip>
+            }
+            {row.original?.type === "asset" &&
+              <span className="d-flex align-items-center gap-2">
+                <Chip label="Asset" size="small" color="primary" />
+                {(row.original.status === INVENTORY_STATUS.reserved && row.original?.manualStatus !== INVENTORY_STATUS.reserved && !isOffline) &&
+                  <HtmlTooltip title={`Remove`}>
+                    <IconButton size="small" onClick={() => {
+                      setShowConfirmBox(true)
+                      setDeleteData([row.original.inventory])
+                    }}>
+                      <Delete fontSize="small" color="error" />
+                    </IconButton>
+                  </HtmlTooltip>}
+                {row.original.isTransferAsset &&
+                  <HtmlTooltip title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`}>
+                    <IconButton size="small" onClick={() => {
+                      history.push(routes.transferAsset.path, {
+                        rental: rentalManagementData,
+                      })
+                    }}>
+                      <InfoIcon fontSize="small" color={"primary"} />
+                    </IconButton>
+                  </HtmlTooltip>
+                }
+              </span>}
+          </div>),
+        Footer: () => {
+          return <>Total</>
+        }
+      },
+      {
+        accessor: 'assets',
+        Header: 'Assets Assigned',
+        Cell: ({ row }) => (
+          getAssetAssignedValues(row)
+        )
+      }]
     data.forEach(element => {
       if (element.type === "date") {
         coloum.push({
@@ -228,92 +236,115 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         const transactionData = result?.data?.data
 
         transferAssets = transactionData?.transferAsset;
-        purchaseOrderProduct = transactionData?.purchaseOrder
-        subleaseProduct = transactionData?.sublease
+        if (permissions?.purchaseOrder?.isRead) {
+          purchaseOrderProduct = transactionData?.purchaseOrder
+        }
+        if (permissions?.sublease?.isRead) {
+          subleaseProduct = transactionData?.sublease
+        }
       }
 
       const rows = data.material.filter((e) => e.parentId === null)
       rows.forEach((parent, i) => {
-        parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
-        const subRows = []
-        const inventory = data.inventory?.filter((e) => e._id === parent._id);
-        inventory?.forEach((_inventory, k) => {
-          const transferFilter = transferAssets.filter(e => e.assetId === _inventory.inventory);
-          var isTransferAsset = false;
-          var transferData = {};
-          if (transferFilter.length) {
-            isTransferAsset = true
-            transferData = transferFilter[0]
-          }
-          const isPurchaseOrderAsset = purchaseOrderProduct.some(e => e._id === _inventory?.inventoryDetail?.purchaseOrder);
-          subRows.push({
-            ..._inventory,
-            detail: `${(i + 1)}.${(k + 1)} - ${_inventory.inventoryDetail?.assetNumber}`,
-            type: "asset",
-            status: _inventory.inventoryDetail?.status,
-            manualStatus: _inventory.inventoryDetail?.manualStatus,
-            _id: _inventory.inventory,
-            isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
-            isPurchaseOrderAsset: isPurchaseOrderAsset,
-            isTransferAsset: isTransferAsset,
-            transferData: transferData,
-            isSubleaseAsset: _inventory.inventoryDetail?.subleaseAsset
-          })
-        })
-        parent.subRows = subRows;
+        parent.srno = i + 1;
+        parent.detail = `${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
+        parent.serializedProduct = parent.type === "product" && !parent.productDetail?.serializedProduct ? false : true;
+        parent.assetQty = parent.serializedProduct ? parent.qty : 0;
+        parent.assetAssignedQty = data.inventory.filter((e) => e._id === parent._id).length;
+        parent.realAssetQty = parent.assetQty;
+        parent.realAssetAssignedQty = parent.assetAssignedQty;
+        parent.hideSelection = parent.type === "product" && !parent.productDetail?.serializedProduct ? true : false;
+        parent.isValid = parent.serializedProduct ? parent.assetAssignedQty === parent.assetQty ? true : false : true;
+
         parent.isSublease = subleaseProduct?.some(e => e.materialId === parent.materialId)
-        if (parent.type === "product") {
-          parent.isValid = parent?.qty === subRows?.length ? true : false;
-          parent.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === parent.materialId)
-        }
-        if (parent.type === "package") {
-          const child: any = [...data.material?.filter((e) => e.parentId === parent._id)];
-          child.forEach((_child, j) => {
-            _child.detail = `${(i + 1)}.${(j + 1)} - ${_child.productDetail?.productName}`
-            _child.qty = _child.qty * parent.qty
-            const subRows = []
-            const inventory = data.inventory?.filter((e) => e._id === _child._id);
-            inventory?.forEach((_inventory, l) => {
-              const transferFilter = transferAssets.filter(e => e.assetId === _inventory.inventory);
-              var isTransferAsset = false;
-              var transferData = {};
-              if (transferFilter.length) {
-                isTransferAsset = true
-                transferData = transferFilter[0]
-              }
-              const isPurchaseOrderAsset = purchaseOrderProduct.some(e => e._id === _inventory?.inventoryDetail?.purchaseOrder);
-              subRows.push({
-                ..._inventory,
-                detail: `${(i + 1)}.${(j + 1)}.${(l + 1)} - ${_inventory?.inventoryDetail?.assetNumber}`,
-                type: "asset",
-                status: _inventory.inventoryDetail?.status,
-                manualStatus: _inventory.inventoryDetail?.manualStatus,
-                _id: _inventory.inventory,
-                isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
-                isPurchaseOrderAsset: isPurchaseOrderAsset,
-                isTransferAsset: isTransferAsset,
-                transferData: transferData,
-                isSubleaseAsset: _inventory?.inventoryDetail?.subleaseAsset
-              })
-            })
-            _child.subRows = subRows;
-            _child.isValid = _child?.qty === subRows?.length ? true : false;
-            _child.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === _child.materialId)
-            _child.isSublease = subleaseProduct?.some(e => e.materialId === _child.materialId)
-          })
-          if (child.filter(e => e.isValid === false).length > 0) {
-            parent.isValid = false
-          } else {
-            parent.isValid = true
-          }
-          parent.subRows = child;
-        }
+        parent.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === parent.materialId)
+
+        parent.subRows = generateNestedData(data.material, data.inventory, parent, transferAssets, subleaseProduct, purchaseOrderProduct);
+
+        // const subRows = []
+        // const inventory = data.inventory?.filter((e) => e._id === parent._id);
+        // inventory?.forEach((_inventory, k) => {
+        //   const transferFilter = transferAssets.filter(e => e.assetId === _inventory.inventory);
+        //   var isTransferAsset = false;
+        //   var transferData = {};
+        //   if (transferFilter.length) {
+        //     isTransferAsset = true
+        //     transferData = transferFilter[0]
+        //   }
+        //   const isPurchaseOrderAsset = purchaseOrderProduct.some(e => e._id === _inventory?.inventoryDetail?.purchaseOrder);
+        //   subRows.push({
+        //     ..._inventory,
+        //     srno: `${(i + 1)}.${(k + 1)}`,
+        //     detail: _inventory.inventoryDetail?.assetNumber,
+        //     type: "asset",
+        //     status: _inventory.inventoryDetail?.status,
+        //     manualStatus: _inventory.inventoryDetail?.manualStatus,
+        //     _id: _inventory.inventory,
+        //     isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
+        //     isPurchaseOrderAsset: isPurchaseOrderAsset,
+        //     isTransferAsset: isTransferAsset,
+        //     transferData: transferData,
+        //     isSubleaseAsset: _inventory.inventoryDetail?.subleaseAsset
+        //   })
+        // })
+        // parent.subRows = subRows;
+        // parent.isSublease = subleaseProduct?.some(e => e.materialId === parent.materialId)
+        // if (parent.type === "product") {
+        //   parent.isValid = parent?.qty === subRows?.length ? true : false;
+        //   parent.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === parent.materialId)
+        // }
+        // if (parent.type === "package") {
+        //   const child: any = [...data.material?.filter((e) => e.parentId === parent._id)];
+        //   child.forEach((_child, j) => {
+        //     _child.srno = `${(i + 1)}.${(j + 1)}`
+        //     _child.detail = _child.productDetail?.productName
+        //     _child.qty = _child.qty * parent.qty
+        //     const subRows = []
+        //     const inventory = data.inventory?.filter((e) => e._id === _child._id);
+        //     inventory?.forEach((_inventory, l) => {
+        //       const transferFilter = transferAssets.filter(e => e.assetId === _inventory.inventory);
+        //       var isTransferAsset = false;
+        //       var transferData = {};
+        //       if (transferFilter.length) {
+        //         isTransferAsset = true
+        //         transferData = transferFilter[0]
+        //       }
+        //       const isPurchaseOrderAsset = purchaseOrderProduct.some(e => e._id === _inventory?.inventoryDetail?.purchaseOrder);
+        //       subRows.push({
+        //         ..._inventory,
+        //         srno: `${(i + 1)}.${(j + 1)}.${(l + 1)}`,
+        //         detail: _inventory?.inventoryDetail?.assetNumber,
+        //         type: "asset",
+        //         status: _inventory.inventoryDetail?.status,
+        //         manualStatus: _inventory.inventoryDetail?.manualStatus,
+        //         _id: _inventory.inventory,
+        //         isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
+        //         isPurchaseOrderAsset: isPurchaseOrderAsset,
+        //         isTransferAsset: isTransferAsset,
+        //         transferData: transferData,
+        //         isSubleaseAsset: _inventory?.inventoryDetail?.subleaseAsset
+        //       })
+        //     })
+        //     _child.subRows = subRows;
+        //     _child.isValid = _child?.qty === subRows?.length ? true : false;
+        //     _child.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === _child.materialId)
+        //     _child.isSublease = subleaseProduct?.some(e => e.materialId === _child.materialId)
+        //   })
+        //   if (child.filter(e => e.isValid === false).length > 0) {
+        //     parent.isValid = false
+        //   } else {
+        //     parent.isValid = true
+        //   }
+        //   parent.subRows = child;
+        // }
       });
+
       if (rows.filter(_rows => _rows.isValid === false).length > 0) {
         setNextStep(false)
       } else {
         setNextStep(true)
       }
+
       setRowsData(rows);
       setSelectedProducts([])
     }
@@ -322,21 +353,81 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     }
   };
 
+  const generateNestedData = (material, inventory, parent, transferAssets, subleaseProduct, purchaseOrderProduct) => {
+    const subRows: any = [];
+    const inventory_result = inventory?.filter((e) => e._id === parent._id);
+    inventory_result?.forEach((_inventory, k) => {
+      const transferFilter = transferAssets.filter(e => e.assetId === _inventory.inventory);
+      var isTransferAsset = false;
+      var transferData = {};
+      if (transferFilter.length) {
+        isTransferAsset = true
+        transferData = transferFilter[0]
+      }
+      subRows.push({
+        ..._inventory,
+        srno: `${parent.srno}.${(k + 1)}`,
+        detail: _inventory.inventoryDetail?.assetNumber,
+        type: "asset",
+        status: _inventory.inventoryDetail?.status,
+        manualStatus: _inventory.inventoryDetail?.manualStatus,
+        _id: _inventory.inventory,
+        isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
+        isTransferAsset: isTransferAsset,
+        transferData: transferData,
+        isSubleaseAsset: _inventory.inventoryDetail?.subleaseAsset
+      })
+    })
+
+    const childProduct: any = material.filter((e) => e.parentId === parent._id);
+    var assetQtySUM = 0;
+    var assetAssignedQtySUM = 0;
+    childProduct.forEach((_subRow, j) => {
+      _subRow.srno = parent.srno + '.' + (j + 1);
+      _subRow.detail = _subRow.productDetail?.productName;
+      _subRow.hideSelection = _subRow.type === "product" && !_subRow.productDetail?.serializedProduct ? true : false;
+      _subRow.serializedProduct = _subRow.type === "product" && !_subRow.productDetail?.serializedProduct ? false : true;
+      _subRow.assetQty = _subRow.serializedProduct ? _subRow.qty * parent.assetQty : 0;
+      _subRow.assetAssignedQty = inventory.filter((e) => e._id === _subRow._id).length;
+      _subRow.realAssetQty = _subRow.serializedProduct ? _subRow.qty * parent.realAssetQty : 0;
+      _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
+      _subRow.isValid = _subRow.serializedProduct ? _subRow.assetAssignedQty === _subRow.assetQty ? true : false : true;
+      _subRow.isSublease = subleaseProduct?.some(e => e.materialId === _subRow.materialId)
+      _subRow.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === _subRow.materialId)
+      _subRow.subRows = generateNestedData(material, inventory, _subRow, transferAssets, subleaseProduct, purchaseOrderProduct);
+      subRows.push(_subRow)
+      assetQtySUM += _subRow.assetQty
+      assetAssignedQtySUM += _subRow.assetAssignedQty
+    });
+
+    parent.assetQty += assetQtySUM - (parent.type === "package" ? parent.qty : 0);
+    parent.assetAssignedQty += assetAssignedQtySUM;
+    parent.isValid = parent.serializedProduct ? parent.assetAssignedQty === parent.assetQty ? true : false : true;
+
+    return subRows;
+  }
 
   const getAssetAssignedValues = (row) => {
-    if (row.original?.type === "product") {
-      if (row.subRows && row.subRows?.length > 0) {
-        return <p>{row.subRows.length} / {row.original.qty}</p>
-      }
-      return <p>0 / {row.original.qty}</p>;
+    if (row?.original?.type === "asset") {
+      return "";
     }
-    else if (row.original?.type === "package") {
-      const qty = row.original?.subRows?.reduce((sum, row) => row.qty + sum, 0);
-      const flatData = treeToFlatArray([{ ...row.original }], "subRows")
-      const getAssetsOnly = flatData.filter(f => f.type === "asset");
-      return <p>{getAssetsOnly.length} / {qty}</p>;
+    if (!row?.original?.serializedProduct) {
+      return <p>---</p>;
     }
-    return "";
+    return <p>{row?.original?.assetAssignedQty} / {row?.original?.assetQty}</p>;
+    // if (row.original?.type === "product") {
+    //   if (row.subRows && row.subRows.filter(e => e.type === "asset")?.length > 0) {
+    //     return <p>{row.subRows.filter(e => e.type === "asset")?.length} / {row.original.qty}</p>
+    //   }
+    //   return <p>0 / {row.original.qty}</p>;
+    // }
+    // else if (row.original?.type === "package") {
+    //   const qty = row.original?.subRows?.reduce((sum, row) => row.qty + sum, 0);
+    //   const flatData = treeToFlatArray([{ ...row.original }], "subRows")
+    //   const getAssetsOnly = flatData.filter(f => f.type === "asset");
+    //   return <p>{getAssetsOnly.length} / {qty}</p>;
+    // }
+    // return "";
   }
 
   const handleAddSerializedAsset = (assets) => {
@@ -345,7 +436,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     flatArray = uniqBy(flatArray, '_id')
     flatArray?.forEach((e: any) => {
       if (e.type === "product") {
-        let qty = e.qty - e.subRows.length;
+        let qty = e.realAssetQty - e.assetAssignedQty;
         while (qty) {
           const result = assets.filter(f => f.productId === e.materialId && !f.isCounted);
           if (result.length) {
@@ -400,9 +491,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   }
 
   useEffect(() => {
-    let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty !== f.subRows?.length);
+    let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty);
     flatArray = uniqBy(flatArray, '_id')
-    const products = flatArray.map(m => { return { _id: m.materialId, unit: m.unit, assetsCount: m.qty - (m.subRows?.length ?? 0) } })
+    const products = flatArray.map(m => { return { _id: m.materialId, unit: m.unit, assetsCount: m.realAssetQty - m.realAssetAssignedQty } })
     const uniqProduct = []
     products.forEach((element: any) => {
       const foundProduct = uniqProduct.filter((e) => e._id === element._id)
@@ -421,10 +512,10 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     });
     const assetProduct = []
     flatArray.forEach((element) => {
-      if (element.type === "product" && element.qty > element?.subRows?.length) {
+      if (element.type === "product" && element.realAssetQty > element.realAssetAssignedQty) {
         const foundProduct = assetProduct.filter((e) => e.materialId === element.materialId)
         if (foundProduct.length) {
-          foundProduct[0].qty += element.qty - element?.subRows?.length
+          foundProduct[0].qty += element.realAssetQty - element.realAssetAssignedQty
         }
         else {
           assetProduct.push({
@@ -432,7 +523,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             _id: element.materialId,
             id: element.materialId,
             productName: element.productDetail?.productName,
-            qty: element.qty - element?.subRows?.length
+            qty: element.realAssetQty - element.realAssetAssignedQty
           })
         }
       }
@@ -443,7 +534,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const disableAssignSerializedAssets = () => {
     if (selectedProducts.length === 0)
       return true;
-    const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.qty > f.subRows?.length);
+    const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.realAssetQty > f.realAssetAssignedQty);
     return flatArray.length === 0;
   }
 
@@ -492,15 +583,16 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             open={Boolean(anchorActionEl)}
             onClose={closeActions}
           >
-            <MenuItem
-              disabled={showOrderDialog.products.length === 0}
-              onClick={() => {
-                setOrderDialog(prevState => ({ ...prevState, open: true, type: "purchaseOrder" }))
-                closeActions()
-              }}
-            >
-              {`Create ${routes.purchaseOrder.title}`}</MenuItem>
-
+            {permissions?.purchaseOrder?.isCreate &&
+              <MenuItem
+                disabled={showOrderDialog.products.length === 0}
+                onClick={() => {
+                  setOrderDialog(prevState => ({ ...prevState, open: true, type: "purchaseOrder" }))
+                  closeActions()
+                }}
+              >
+                {`Create ${routes.purchaseOrder.title}`}</MenuItem>
+            }
             {permissions?.sublease?.isCreate &&
               <MenuItem
                 disabled={showOrderDialog.products.length === 0}
@@ -510,11 +602,10 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                 }}
               >
                 {`Create ${routes.sublease.title}`}</MenuItem>}
-
             <MenuItem
-              disabled={(selectedProducts.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
+              disabled={(treeToFlatArray(selectedProducts, "subRows")?.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
               onClick={() => {
-                setDeleteData(selectedProducts.filter(d => d.type === "asset").map(d => d?.inventory))
+                setDeleteData(treeToFlatArray(selectedProducts, "subRows")?.filter(d => d.type === "asset").map(d => d?.inventory))
                 setShowConfirmBox(true)
                 closeActions()
               }}
@@ -530,16 +621,17 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           <Box
             zIndex={5}
             width={
-              isTabletScreen
-                ? "calc(100vw - 20px)"
-                : isSmallScreen
-                  ? "calc(100vw - 78px)"
-                  : showActivity ? "100%" : "calc(100vw - 103px)"
+              stepFullScreen ? "100%" :
+                isTabletScreen
+                  ? "calc(100vw - 20px)"
+                  : isSmallScreen
+                    ? "calc(100vw - 78px)"
+                    : showActivity ? "100%" : "calc(100vw - 103px)"
             }
-            height="calc(100vh - 350px)"
+            height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 350px)"}
           >
             <CustomReactTable
-              height="calc(100vh - 365px)"
+              height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 365px)"}
               columns={columns}
               data={rowsData}
               setCellColor={(rowData) => {
@@ -568,11 +660,10 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         refrenceType={"Rental Job"}
         refrenceData={{
           _id: rentalManagementData?._id, warehouse: rentalManagementData?.warehouse?.optionValue
-          , wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber
+          , wellName: rentalManagementData?.wellName?.optionValue, afeNumber: rentalManagementData?.afeNumber
         }}
         isAdding={isAdding}
         selectedProducts={assetAssignedProduct}
-        //queryString={addSerializedAssetDialog.type === "all" ? `notInPlant=${rentalManagementData?.warehouse?.optionValue}&availableAssets=true` : ``}
         filterByPlant={rentalManagementData?.warehouse?.optionValue}
       />
     }
@@ -607,7 +698,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         productsToSave={[...showOrderDialog.products]}
         isFromSerializedAssetStepFromRental={true}
         currency={rentalManagementData.currency}
-        refrenceData={{ wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber }}
+        refrenceData={{ wellName: rentalManagementData?.wellName?.optionValue, afeNumber: rentalManagementData?.afeNumber }}
         rentalManagementId={rentalManagementData._id}
         warehouseId={rentalManagementData?.warehouse?.optionValue}
         deliveryDateMax={rentalManagementData.estimateStartDate}
