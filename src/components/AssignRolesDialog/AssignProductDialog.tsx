@@ -300,8 +300,9 @@ const AssignProductDialog = ({
                                         color="primary"
                                         size="small"
                                         variant="contained"
+                                        endIcon={isAssigning && <CircularProgress color='inherit' size={18} /> }
                                     >
-                                        Add
+                                        Add {selectedRecords.length > 0 ? "(" + selectedRecords.length + ")" : ""}
                                     </Button>
                                 </Box>
                             </Grid>

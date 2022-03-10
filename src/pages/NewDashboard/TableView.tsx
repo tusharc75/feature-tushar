@@ -13,7 +13,7 @@ interface Props {
 const TableView = ({ id, chartData, isScreenSmall, currency }: Props) => {
   return (
     <TableContainer id={id} style={{ height: isScreenSmall ? '350px' : '400px', width: 'auto' }}>
-      <Table id={'table_' + id} aria-label="simple table">
+      <Table stickyHeader id={'table_' + id} aria-label="simple table">
         <TableHead>
           <TableRow>
             {Object.keys(chartData[0]).map((key: string, index) => (
