@@ -96,9 +96,9 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         if (type === "package") {
             updatedFilters.push({ field: 'packageType', term: 'product' })
         }
-        if (type === "product") {
-            updatedFilters.push({ field: 'serializedProduct', term: 'yes' })
-        }
+        // if (type === "product") {
+        //     updatedFilters.push({ field: 'serializedProduct', term: 'yes' })
+        // }
         if (!isObjectEmpty(filters)) {
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
