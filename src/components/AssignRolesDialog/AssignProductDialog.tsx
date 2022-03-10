@@ -96,12 +96,6 @@ const AssignProductDialog = ({
         }
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            if (reference === "product") {
-                data.data = data.data.filter(obj => obj._id !== productId && !assignedProducts.some(item => item?.childProduct === obj?._id))
-            } else {
-                data.data = data.data.filter(obj => assignedProducts.findIndex(d => d._id === obj._id) < 0)
-            }
-
             let rows = data.data.map((u) => {
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = false;
@@ -128,7 +122,8 @@ const AssignProductDialog = ({
     };
 
     const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}&filterProducts=${selectedType}`;
+        const ignoreIds = assignedProducts && assignedProducts?.length > 0 ? assignedProducts.map(p => p._id) : []
+        let deepFilter = `?page=${page}&limit=${limit}&filterProducts=${selectedType}&ignoreIds=${JSON.stringify(ignoreIds)}`;
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
         }
