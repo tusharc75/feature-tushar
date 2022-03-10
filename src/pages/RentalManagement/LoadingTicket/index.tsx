@@ -279,30 +279,28 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         {!isMobile && <Button
           onClick={() => {
             setDownlodingFile(true);
-            uniqueLoadingTicket.forEach(currentId => {
-              axiosInstance().get(`/delivery-ticket/${currentId}/pdf`)
-                .then(({ data }) => {
-                  axiosInstance()
-                    .get(`user/download?fileName=${data.data.fileName}`, {
-                      responseType: "blob",
-                    })
-                    .then(({ data }) => {
-                      const file = new Blob([data], { type: "application/pdf" });
-                      const fileURL = URL.createObjectURL(file);
-                      const pdfWindow = window.open();
-                      pdfWindow.location.href = fileURL;
-                      toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-                      setDownlodingFile(false);
-                    })
-                    .catch((err) => {
-                      toastConfig.setToastConfig(err);
-                      setDownlodingFile(false);
-                    });
-                }).catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setDownlodingFile(false);
-                })
-            })
+            axiosInstance().post(`/delivery-ticket/pdf`, { "ids": uniqueLoadingTicket })
+              .then(({ data }) => {
+                axiosInstance()
+                  .get(`user/download?fileName=${data.data.fileName}`, {
+                    responseType: "blob",
+                  })
+                  .then(({ data }) => {
+                    const file = new Blob([data], { type: "application/pdf" });
+                    const fileURL = URL.createObjectURL(file);
+                    const pdfWindow = window.open();
+                    pdfWindow.location.href = fileURL;
+                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                    setDownlodingFile(false);
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                  });
+              }).catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+              })
 
           }}
           variant={isMobile && !isTablet ? 'text' : 'outlined'}
