@@ -12,12 +12,12 @@ interface Props {
 
 const TableView = ({ id, chartData, isScreenSmall, currency }: Props) => {
   return (
-    <TableContainer id={id} style={{ height: isScreenSmall ? '350px' : '500px' }}>
+    <TableContainer id={id} style={{ height: isScreenSmall ? '350px' : '400px', width: 'auto' }}>
       <Table id={'table_' + id} aria-label="simple table">
         <TableHead>
           <TableRow>
             {Object.keys(chartData[0]).map((key: string, index) => (
-              <TableCell key={key + ' ' + index + 1} align={index === 0 ? 'left' : 'right'}>
+              <TableCell style={{ minWidth: '200px' }} key={key + ' ' + index + 1} align={index === 0 ? 'left' : 'right'}>
                 {startCase(key)}
               </TableCell>
             ))}

@@ -158,19 +158,49 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
 
   if (chart.uniqueId === 'regionalSale') {
     data = data.sort((a: any, b: any) => b.totalSell - a.totalSell);
+    // Total Booked Volume, Total Offered Volume, Total Booked Value, Total Offered Value, Total Booked GM, Total Offered GM
     let regionSalesData = [];
+
     for (const d of data) {
       let totalBookedValue = 0;
-      if (d.totalSell && currencyTo && currencyTo !== currencyFrom) {
-        const rateData: any = await getExchangeRates(moment().format('YYYY-MM-DD'), d.totalSell, currencyFrom, currencyTo);
-        totalBookedValue = rateData?.rates[currencyTo] || d.totalSell;
+      let totalOfferedValue = 0;
+      let totalBookedMargin = 0;
+      let totalOfferedMargin = 0;
+      let totalBookedVolume = d?.totalBookedVolune || 0;
+      let totalOfferedVolume = d?.totalOfferedVolune || 0;
+
+      if (currencyTo && currencyTo !== currencyFrom) {
+        const salesData: any = await Promise.all([
+          getExchangeRates(moment().format('YYYY-MM-DD'), d?.totalBookedValue || 0, currencyFrom, currencyTo),
+          getExchangeRates(moment().format('YYYY-MM-DD'), d?.totalOfferedValue || 0, currencyFrom, currencyTo),
+          getExchangeRates(moment().format('YYYY-MM-DD'), d?.totalBookedMargin || 0, currencyFrom, currencyTo),
+          getExchangeRates(moment().format('YYYY-MM-DD'), d?.totalOfferedMargin || 0, currencyFrom, currencyTo)
+        ]);
+        totalBookedValue = salesData[0]?.rates[currencyTo] || 0;
+        totalOfferedValue = salesData[1]?.rates[currencyTo] || 0;
+        totalBookedMargin = salesData[2]?.rates[currencyTo] || 0;
+        totalOfferedMargin = salesData[3]?.rates[currencyTo] || 0;
       } else {
-        totalBookedValue = d.totalSell;
+        totalBookedValue = d?.totalBookedValue || 0;
+        totalOfferedValue = d?.totalOfferedValue || 0;
+        totalBookedMargin = d?.totalBookedMargin || 0;
+        totalOfferedMargin = d?.totalOfferedMargin || 0;
       }
-      regionSalesData.push({ region: d.region, totalBookedValue });
+
+      regionSalesData.push({
+        region: d.region,
+        totalBookedValue,
+        totalOfferedValue,
+        ["totalBooked GM"]: totalBookedMargin,
+        ["totalOffered GM"]: totalOfferedMargin,
+        ["totalBookedVolume MT"]:totalBookedVolume,
+        ["totalOfferedVolume MT"]:totalOfferedVolume
+      });
     }
+
     dataObject = regionSalesData;
   }
+
   if (chart.kpi === 'sales' && chart.uniqueId === 'offeredVsEntities') {
     const totalOfferedData = [];
     const labels = [];
@@ -345,11 +375,20 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     for (let d of data) {
       volumeUnit = d.volumeUnit;
       if (chart.uniqueId === 'volumeVsBudget') {
-        totalBookedVolumeMT.push(d.totalBookedVolume || 0);
-        totalOfferedVolumeMT.push(d.totalOfferedVolume || 0);
+        totalBookedVolumeMT.push(d?.totalBookedVolume || 0);
+        totalOfferedVolumeMT.push(d?.totalOfferedVolume || 0);
       } else {
-        totalBookedGM.push(d.totalBookedMargin || 0);
-        totalOfferedGM.push(d.totalOfferedMargin || 0);
+        if (currencyTo && currencyTo !== currencyFrom) {
+          const salesData: any = await Promise.all([
+            getExchangeRates(moment().format('YYYY-MM-DD'), d?.totalBookedMargin || 0, currencyFrom, currencyTo),
+            getExchangeRates(moment().format('YYYY-MM-DD'), d?.totalOfferedMargin || 0, currencyFrom, currencyTo)
+          ]);
+          totalBookedGM.push(salesData[0]?.rates[currencyTo] || 0);
+          totalOfferedGM.push(salesData[1]?.rates[currencyTo] || 0);
+        } else {
+          totalBookedGM.push(d?.totalBookedMargin || 0);
+          totalOfferedGM.push(d?.totalOfferedMargin || 0);
+        }
       }
       budget.push(d.volumeBudget || 0);
       labels.push(moment(d.date).format('MMM/YY'));
