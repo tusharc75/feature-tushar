@@ -10,11 +10,10 @@ import {
 } from "@material-ui/core";
 import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
-
 import axiosInstance from "src/axios/axiosInstance";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import SearchBox from "../Helpers/SearchBox";
-import { gridLoadingTimeout, isObjectEmpty, product, packages, prepareDataForGrid } from "src/constants/helpers";
+import { gridLoadingTimeout, isObjectEmpty, product, packages, prepareDataForGrid, getLocalStorageArrayData } from "src/constants/helpers";
 import { useData } from "src/StateProvider/Provider";
 import { CommonRenderer } from "../AgGridComponents/CustomAgGridCellRenderers";
 import routes from "../Helpers/Routes";
@@ -45,9 +44,7 @@ const AssignProductDialog = ({
 }) => {
     const localStorageSelectedRecords = `${renderedFrom}_selected`
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-    const {
-        state: { permissions, selectedEntity },
-    }: any = useData();
+    const { state: { permissions, selectedEntity } }: any = useData();
 
     const toastConfig = useContext(CustomToastContext);
     const [isAssigning, setAssigning] = useState(false);
@@ -61,7 +58,7 @@ const AssignProductDialog = ({
     const [columns, setColumns] = useState([
         { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
         { field: 'productNumber', headerName: 'Product Number', show: true, cellRenderer: 'commonRenderer' },
-        { field: 'quantity', headerName: 'Quantity', show: true, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
+        { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
     ]);
 
     const [filter, setFilter] = useState(`All ${routes.product.title}`);
@@ -78,9 +75,8 @@ const AssignProductDialog = ({
         })
     }, [])
 
-    
     useEffect(() => {
-        setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
+        setDisableSaveButton(selectedRecords.some(d => d.qty === 0))
     }, [selectedRecords])
 
     useEffect(() => {
@@ -98,7 +94,11 @@ const AssignProductDialog = ({
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = false;
                 finalObject["id"] = u._id;
-                finalObject['quantity'] = 0;
+                finalObject["qty"] = 0;
+                const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id)
+                if (qtyAdded.length) {
+                    finalObject["qty"] = qtyAdded[0].qty;
+                }
                 return {
                     ...finalObject,
                 };
@@ -108,10 +108,8 @@ const AssignProductDialog = ({
                 type: "selection",
                 selectedRecords: savedRecords
             })
-        
-
             setProductsConst(data.data)
-            dispatch({ type: "initialize", data:rows, count: data.count });
+            dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }) }, gridLoadingTimeout);
         })
             .catch((error) => {
@@ -166,7 +164,7 @@ const AssignProductDialog = ({
                         size="small"
                         aria-label="Clone"
                         onClick={() => {
-                            if (params.data.quantity > 0) rowNode.setDataValue("quantity", params.data.quantity - 1)
+                            if (params.data.qty > 0) rowNode.setDataValue("qty", params.data.qty - 1)
                         }}>
                         <RemoveOutlined fontSize="small" color="primary" />
                     </IconButton>
@@ -174,7 +172,7 @@ const AssignProductDialog = ({
                         size="small"
                         aria-label="Clone"
                         onClick={() => {
-                            rowNode.setDataValue("quantity", params.data.quantity + 1)
+                            rowNode.setDataValue("qty", params.data.qty + 1)
                         }}>
                         <AddOutlined fontSize="small" color="primary" />
                     </IconButton>
@@ -191,11 +189,11 @@ const AssignProductDialog = ({
     const handleAssignProduct = async () => {
         setAssigning(true);
         if (reference === 'product') {
-            const dataObj = selectedRecords.filter(d => d.quantity > 0)
+            const dataObj = selectedRecords.filter(d => d.qty > 0)
                 .map(d => {
                     return ({
                         "childProduct": d.id,
-                        "qty": Number(d.quantity)
+                        "qty": Number(d.qty)
                     })
                 })
             await axiosInstance().post(`/product/${productId}/bom`, dataObj)
@@ -217,7 +215,7 @@ const AssignProductDialog = ({
             axiosInstance()
                 .post(`${packages.packageApi}/add-products`, {
                     ids: [productId],
-                    products: selectedRecords.map((d: any) => ({ product: d.id, qty: Number(d.quantity) }))
+                    products: selectedRecords.map((d: any) => ({ product: d.id, qty: Number(d.qty) }))
                 })
                 .then(() => {
                     setAssigning(false);
@@ -242,8 +240,19 @@ const AssignProductDialog = ({
         }
     };
 
-    const onCellValueChanged = (row) => {
-        setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
+    const onCellValueChanged = (data) => {
+        console.log(data)
+        console.log([...getLocalStorageArrayData(localStorageSelectedRecords)])
+        const selectedFromStorage = [...getLocalStorageArrayData(localStorageSelectedRecords)]
+        if (!selectedFromStorage || selectedFromStorage.length === 0) return
+        const updatedRecords = selectedFromStorage.map(d => {
+            if (data._id === d._id) {
+                d.qty = data.qty
+            }
+            return d
+        })
+        localStorage.setItem(localStorageSelectedRecords, JSON.stringify(updatedRecords))
+        setDisableSaveButton([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some(d => d.qty === 0))
     }
 
     return (
@@ -293,12 +302,12 @@ const AssignProductDialog = ({
                                         value={search}
                                     />
                                     <Button
-                                        disabled={isAssigning || disableSaveButton  ||  selectedRecords.length === 0}
+                                        disabled={isAssigning || disableSaveButton || selectedRecords.length === 0}
                                         onClick={handleAssignProduct}
                                         color="primary"
                                         size="small"
                                         variant="contained"
-                                        endIcon={isAssigning && <CircularProgress color='inherit' size={18} /> }
+                                        endIcon={isAssigning && <CircularProgress color='inherit' size={18} />}
                                     >
                                         Add {selectedRecords.length > 0 ? "(" + selectedRecords.length + ")" : ""}
                                     </Button>
@@ -307,24 +316,24 @@ const AssignProductDialog = ({
                         </Grid>
                     </div>
                     <CustomAgGridEditable
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameworkComponents}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            allowAction={false}
-                            loading={loading}
-                            allowSelection={true}
-                            // selectedRecords={selectedRecords}
-                            onCellValueChanged={onCellValueChanged}
-                            showOnlyShowFilteredRecordSwitch={true}
-                            refreshGrid={fetchProduct}
-                            renderedFrom={renderedFrom}
-                        />
+                        columns={columns}
+                        dataRows={dataRows}
+                        frameworkComponents={frameworkComponents}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount}
+                        limit={limit}
+                        pageSizes={pageSizes}
+                        page={page}
+                        allowAction={false}
+                        loading={loading}
+                        allowSelection={true}
+                        // selectedRecords={selectedRecords}
+                        onCellValueChanged={onCellValueChanged}
+                        showOnlyShowFilteredRecordSwitch={true}
+                        refreshGrid={fetchProduct}
+                        renderedFrom={renderedFrom}
+                    />
                 </>
             </CustomDialogContent>
         </Dialog>
