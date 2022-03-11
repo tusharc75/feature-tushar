@@ -9,7 +9,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import { GiStockpiles } from 'react-icons/gi';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { Box, Chip } from '@material-ui/core';
+import { Box, Chip, Tooltip } from '@material-ui/core';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
@@ -31,9 +31,22 @@ import { MdAdd, MdFilterList, MdSort, RiFileTransferFill, GiCargoShip, RiFolderT
 import MobileSortDialog from "src/components/MobileSortDialog"
 import MobileFilterDialog from "src/components/MobileFilterDialog"
 import { camelCase } from 'lodash';
+import queryString from 'query-string';
+import HideWhenOffline from 'src/components/HideWhenOffline';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 
 
 const TransferAsset = () => {
+  const TransferAssetType = [
+    {
+      key: `All ${routes.transferAsset.title}`,
+      value: 1,
+    },
+    {
+      key: `My ${routes.transferAsset.title}`,
+      value: 2,
+    },
+  ];
   let renderedFrom = camelCase(routes?.transferAsset.title)
   const toastConfig = useContext(CustomToastContext);
   const [showManageTransferAssetDialog, setShowManageTransferAssetDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -49,7 +62,9 @@ const TransferAsset = () => {
   const [open, setOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false)
   const history = useHistory();
-
+  const { type }: any = queryString.parse(history.location.search);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [filter, setFilter] = useState(`All ${routes.transferAsset.title}`);
   const [fromRental, setFromRental] = useState(history.location?.state?.rental);
 
   const {
@@ -63,7 +78,7 @@ const TransferAsset = () => {
 
   useEffect(() => {
     fetchTransferAsset();
-  }, [page, limit, filters, sorting, search, fromRental, selectedEntity]);
+  }, [page, limit, filters, sorting, search, fromRental, selectedEntity, selectedType]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -126,7 +141,7 @@ const TransferAsset = () => {
   };
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+    let deepFilter = `?page=${page}&limit=${limit}&filterTransferAssets=${selectedType}`;
 
     if (fromRental) {
       let filterById = [];
@@ -189,6 +204,18 @@ const TransferAsset = () => {
         toastConfig.setToastConfig(error);
       });
   };
+  const handleTransferAssetTypeSel = (filterValues) => {
+    setSelectedType(filterValues);
+    history.push(`?type=${filterValues}`)
+  }
+
+  const handleFilter = (event, newFilter) => {
+    if (newFilter != null) {
+      setFilter(newFilter);
+      handleTransferAssetTypeSel(TransferAssetType.find((d) => d.key === newFilter).value);
+
+    }
+  };
 
   const ActionsRenderer = (params) => (
     <>
@@ -205,8 +232,8 @@ const TransferAsset = () => {
           </IconButton>
         </HtmlTooltip>
       )}
-      {permissions?.transferAsset?.isDelete && params?.data.status === 'New' && (
-        <HtmlTooltip title="Delete">
+      {permissions?.transferAsset?.isDelete && params?.data.status === 'New' ? (
+        <Tooltip title="Delete">
           <IconButton
             size="small"
             aria-label="Delete"
@@ -217,8 +244,18 @@ const TransferAsset = () => {
           >
             <DeleteIcon color="error" />
           </IconButton>
-        </HtmlTooltip>
-      )}
+        </Tooltip>
+      ):
+      <Tooltip title="Don't have the permissions to Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            className='cursor-stop'
+          >
+            <DeleteIcon color="disabled" />
+          </IconButton>
+        </Tooltip>
+      }
     </>
   );
 
@@ -303,7 +340,7 @@ const TransferAsset = () => {
                 <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
                 <span className="listingHeader">{routes.transferAsset?.title} </span>
               </div>
-              {isMobile && !isTablet &&
+              {isMobile && !isTablet ?
                 <div className="d-flex ">
                   <Button
                     onClick={handleClickOpen}
@@ -347,7 +384,23 @@ const TransferAsset = () => {
                     columns={columns}
                     dispatch={dispatch}
                   />
-                </div>}
+                </div>
+                :
+                <HideWhenOffline>
+                        <div className={`align-items-center gap-1 layout-for-mobile `}>
+                          {TransferAssetType && (
+                            <ToggleButtonGroup size="small" className="ml-2" value={TransferAssetType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                              {TransferAssetType.map((k, index) => {
+                                return (
+                                  <ToggleButton value={k.key} key={index}>
+                                    {k.key}
+                                  </ToggleButton>
+                                );
+                              })}
+                            </ToggleButtonGroup>
+                          )}
+                        </div>
+                      </HideWhenOffline>}
               {fromRental && (
                 <Chip
                   className="ml-3"

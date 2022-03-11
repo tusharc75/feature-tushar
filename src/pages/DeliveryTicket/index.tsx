@@ -26,13 +26,29 @@ import { CustomOfflineContext } from "../../StateProvider/OfflineContext/Offline
 import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
 import { PickupFromRenderer, DeliveryToRenderer } from '../../components/DeliveryTicket/helper';
 import { camelCase } from 'lodash';
+import queryString from 'query-string';
+import HideWhenOffline from 'src/components/HideWhenOffline';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 
 let deliveryTicketTimeout;
 
 const DeliveryTicket = () => {
+  const DeliveryTicketType = [
+    {
+      key: `All ${routes.deliveryTicket.title}`,
+      value: 1,
+    },
+    {
+      key: `My ${routes.deliveryTicket.title}`,
+      value: 2,
+    },
+  ];
   let renderedFrom = camelCase(routes?.deliveryTicket.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
+  const { type }: any = queryString.parse(history.location.search);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [filter, setFilter] = useState(`All ${routes.deliveryTicket.title}`);
   const { state: { user, selectedEntity, permissions } }: any = useData();
   const { getColumnData } = useColumns();
   const [renderCount, setRenderCount] = useState(0);
@@ -166,7 +182,7 @@ const DeliveryTicket = () => {
     if (renderCount > 0) {
       fetchDeliveryTicket();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, selectedEntity, isOffline]);
+  }, [page, limit, filters, sorting, selectedEntity, isOffline, selectedType]);
 
   const ActionsRenderer = (params) => (
     <>
@@ -206,7 +222,7 @@ const DeliveryTicket = () => {
   };
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+    let deepFilter = `?page=${page}&limit=${limit}&filterDeliveryTickets=${selectedType}`;
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -231,6 +247,19 @@ const DeliveryTicket = () => {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
+  };
+
+  const handleDeliveryTicketTypeSel = (filterValues) => {
+    setSelectedType(filterValues);
+    history.push(`?type=${filterValues}`)
+  }
+
+  const handleFilter = (event, newFilter) => {
+    if (newFilter != null) {
+      setFilter(newFilter);
+      handleDeliveryTicketTypeSel(DeliveryTicketType.find((d) => d.key === newFilter).value);
+
+    }
   };
 
   const showConfirmBox = (row) => {
@@ -324,7 +353,21 @@ const DeliveryTicket = () => {
                   <GiAbstract055 className="headerLogo" />
                   <span className="listingHeader">{routes.deliveryTicket.title} </span>
                 </Grid>
-
+                <HideWhenOffline>
+                        <div className={`align-items-center gap-1 layout-for-mobile `}>
+                          {DeliveryTicketType && (
+                            <ToggleButtonGroup size="small" className="ml-2" value={DeliveryTicketType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                              {DeliveryTicketType.map((k, index) => {
+                                return (
+                                  <ToggleButton value={k.key} key={index}>
+                                    {k.key}
+                                  </ToggleButton>
+                                );
+                              })}
+                            </ToggleButtonGroup>
+                          )}
+                        </div>
+                      </HideWhenOffline>
 
 
               </Grid>
