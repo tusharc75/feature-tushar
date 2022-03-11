@@ -177,7 +177,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           setShowProcessDeliveryTicket(false)
         }
       }
-      setUniqueLoadingTicket([...new Set(rows.filter(d => d.loadingTicketId !== undefined).map(d => d.loadingTicketId))]);
+      setUniqueLoadingTicket(deliveryTicketList?.map(d => d._id));
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
