@@ -159,6 +159,9 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
             ele.subRows.push(asset)
           })
+          if (ele.subRows.length) {
+            ele.hideSelection = ele.subRows?.some((e) => !e.hideSelection) ? false : true;
+          }
           ele.qty = ele.serializedProduct ? assets.length : element.qty;
           rows.push(ele)
         })
@@ -422,6 +425,10 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 365px)"}
           columns={columns}
           data={rowsData}
+          setCellColor={(rowData) => {
+            if ([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(rowData?.status)) return "error";
+            return "";
+          }}
           onSelect={setSelectedRecords}
           childrenProperty="subRows"
           uniqueKey="_id"
@@ -456,16 +463,13 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           }}
           onOk={() => {
             setOkBtnLoading(true);
-
             const groupByCalls = groupBy(selectedAssets, 'loadingTicketId');
             let apiCalls = [];
-
             Object.keys(groupByCalls).forEach((key) => {
               apiCalls.push(
                 axiosInstance().put(`${deliveryTicket.api}/${key}/assets`, { ids: groupByCalls[key].map((m) => m._id) })
               );
             });
-
             Promise.all(apiCalls)
               .then(() => {
                 toastConfig.setToastConfig({

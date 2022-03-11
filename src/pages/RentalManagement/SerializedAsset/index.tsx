@@ -256,88 +256,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         parent.realAssetAssignedQty = parent.assetAssignedQty;
         parent.hideSelection = parent.type === "product" && !parent.productDetail?.serializedProduct ? true : false;
         parent.isValid = parent.serializedProduct ? parent.assetAssignedQty === parent.assetQty ? true : false : true;
-
         parent.isSublease = subleaseProduct?.some(e => e.materialId === parent.materialId)
         parent.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === parent.materialId)
-
         parent.subRows = generateNestedData(data.material, data.inventory, parent, transferAssets, subleaseProduct, purchaseOrderProduct);
-
-        // const subRows = []
-        // const inventory = data.inventory?.filter((e) => e._id === parent._id);
-        // inventory?.forEach((_inventory, k) => {
-        //   const transferFilter = transferAssets.filter(e => e.assetId === _inventory.inventory);
-        //   var isTransferAsset = false;
-        //   var transferData = {};
-        //   if (transferFilter.length) {
-        //     isTransferAsset = true
-        //     transferData = transferFilter[0]
-        //   }
-        //   const isPurchaseOrderAsset = purchaseOrderProduct.some(e => e._id === _inventory?.inventoryDetail?.purchaseOrder);
-        //   subRows.push({
-        //     ..._inventory,
-        //     srno: `${(i + 1)}.${(k + 1)}`,
-        //     detail: _inventory.inventoryDetail?.assetNumber,
-        //     type: "asset",
-        //     status: _inventory.inventoryDetail?.status,
-        //     manualStatus: _inventory.inventoryDetail?.manualStatus,
-        //     _id: _inventory.inventory,
-        //     isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
-        //     isPurchaseOrderAsset: isPurchaseOrderAsset,
-        //     isTransferAsset: isTransferAsset,
-        //     transferData: transferData,
-        //     isSubleaseAsset: _inventory.inventoryDetail?.subleaseAsset
-        //   })
-        // })
-        // parent.subRows = subRows;
-        // parent.isSublease = subleaseProduct?.some(e => e.materialId === parent.materialId)
-        // if (parent.type === "product") {
-        //   parent.isValid = parent?.qty === subRows?.length ? true : false;
-        //   parent.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === parent.materialId)
-        // }
-        // if (parent.type === "package") {
-        //   const child: any = [...data.material?.filter((e) => e.parentId === parent._id)];
-        //   child.forEach((_child, j) => {
-        //     _child.srno = `${(i + 1)}.${(j + 1)}`
-        //     _child.detail = _child.productDetail?.productName
-        //     _child.qty = _child.qty * parent.qty
-        //     const subRows = []
-        //     const inventory = data.inventory?.filter((e) => e._id === _child._id);
-        //     inventory?.forEach((_inventory, l) => {
-        //       const transferFilter = transferAssets.filter(e => e.assetId === _inventory.inventory);
-        //       var isTransferAsset = false;
-        //       var transferData = {};
-        //       if (transferFilter.length) {
-        //         isTransferAsset = true
-        //         transferData = transferFilter[0]
-        //       }
-        //       const isPurchaseOrderAsset = purchaseOrderProduct.some(e => e._id === _inventory?.inventoryDetail?.purchaseOrder);
-        //       subRows.push({
-        //         ..._inventory,
-        //         srno: `${(i + 1)}.${(j + 1)}.${(l + 1)}`,
-        //         detail: _inventory?.inventoryDetail?.assetNumber,
-        //         type: "asset",
-        //         status: _inventory.inventoryDetail?.status,
-        //         manualStatus: _inventory.inventoryDetail?.manualStatus,
-        //         _id: _inventory.inventory,
-        //         isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
-        //         isPurchaseOrderAsset: isPurchaseOrderAsset,
-        //         isTransferAsset: isTransferAsset,
-        //         transferData: transferData,
-        //         isSubleaseAsset: _inventory?.inventoryDetail?.subleaseAsset
-        //       })
-        //     })
-        //     _child.subRows = subRows;
-        //     _child.isValid = _child?.qty === subRows?.length ? true : false;
-        //     _child.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === _child.materialId)
-        //     _child.isSublease = subleaseProduct?.some(e => e.materialId === _child.materialId)
-        //   })
-        //   if (child.filter(e => e.isValid === false).length > 0) {
-        //     parent.isValid = false
-        //   } else {
-        //     parent.isValid = true
-        //   }
-        //   parent.subRows = child;
-        // }
       });
 
       if (rows.filter(_rows => _rows.isValid === false).length > 0) {
@@ -416,19 +337,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       return <p>---</p>;
     }
     return <p>{row?.original?.assetAssignedQty} / {row?.original?.assetQty}</p>;
-    // if (row.original?.type === "product") {
-    //   if (row.subRows && row.subRows.filter(e => e.type === "asset")?.length > 0) {
-    //     return <p>{row.subRows.filter(e => e.type === "asset")?.length} / {row.original.qty}</p>
-    //   }
-    //   return <p>0 / {row.original.qty}</p>;
-    // }
-    // else if (row.original?.type === "package") {
-    //   const qty = row.original?.subRows?.reduce((sum, row) => row.qty + sum, 0);
-    //   const flatData = treeToFlatArray([{ ...row.original }], "subRows")
-    //   const getAssetsOnly = flatData.filter(f => f.type === "asset");
-    //   return <p>{getAssetsOnly.length} / {qty}</p>;
-    // }
-    // return "";
   }
 
   const handleAddSerializedAsset = (assets) => {

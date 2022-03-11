@@ -15,10 +15,6 @@ import { isMobile, isTablet } from "react-device-detect";
 import { AiFillFilePdf } from "react-icons/ai";
 import routes from "../../../components/Helpers/Routes";
 import { BiPurchaseTagAlt, IoMdDownload, MdEmail } from "react-icons/all";
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
-import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
-import { prepareDataForGrid, CHILD_RESOURCE } from "../../../constants/helpers";
-import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import { Link } from "react-router-dom";
 import { startCase } from "lodash";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
@@ -61,38 +57,6 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
     fetchFields()
   }, [isOffline]);
 
-
-
-  const getAssetAssignedValues = (row) => {
-    if (row?.original?.type === "asset" || row?.original?.type === "Services and Consumables") {
-      return "";
-    }
-    if (!row?.original?.serializedProduct) {
-      return <p>---</p>;
-    }
-    return <p>{row?.original?.assetAssignedQty} / {row?.original?.assetQty}</p>;
-  }
-
-  const generateNestedData = (material, inventory, parent) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
-    subRows.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow.productDetail?.productName;
-      _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
-      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
-      _subRow.subRows = generateNestedData(material, inventory, _subRow);
-    });
-    return subRows;
-  }
-
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
-  }
   const fetchFields = async () => {
     try {
       let fields = []
@@ -105,7 +69,6 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
           accessor: 'srno',
           Header: '#',
           width: 70,
-          sticky: isMobile ? "none" : "left",
           Cell: ({ row }) => (
             <p className="text-truncate"  >
               {row.original.srno}
@@ -115,17 +78,15 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
           accessor: 'type',
           Header: 'Type',
           width: 200,
-          sticky: isMobile ? "none" : "left",
           Cell: ({ row }) => (
             <p className="text-truncate"  >
-              {row.original.type}
+              {startCase(row.original.type)}
             </p>),
         },
         {
           accessor: 'detail',
           Header: 'Detail',
           width: 300,
-          sticky: isMobile ? "none" : "left",
           Cell: ({ row }) => (
             <div className="d-flex gap-2 align-items-center">
               <p className="text-truncate" title={row.original.detail}  >
@@ -133,7 +94,6 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
                   <a className="link text-truncate" href={`${serializedAsset.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
                   row.original.detail}
               </p>
-
               {row.original?.type === "asset" &&
                 <span className="d-flex align-items-center gap-2">
                   <Chip label="Asset" size="small" color="primary" />
@@ -261,14 +221,8 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
         parent.detail = `${parent.type === "Services and Consumables" ? parent.detail : parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
-        parent.serializedProduct = parent.type === "product" && !parent.productDetail?.serializedProduct ? false : true;
-        parent.assetQty = parent.serializedProduct ? parent.qty : 0;
-        parent.assetAssignedQty = inventory.filter((e) => e._id === parent._id).length;
-        parent.realAssetQty = parent.assetQty;
-        parent.realAssetAssignedQty = parent.assetAssignedQty;
-
+        parent.qty = parent.qty;
         parent.subRows = generateNestedData(material, inventory, parent);
-        // }
       });
       setRowsData(rows);
     }
@@ -276,6 +230,29 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
       toastConfig.setToastConfig(error)
     }
   };
+
+  const generateNestedData = (material, inventory, parent) => {
+    const subRows: any = [];
+    const inventory_result = inventory?.filter((e) => e._id === parent._id);
+    inventory_result?.forEach((_inventory, k) => {
+      subRows.push({
+        _id: _inventory.inventoryDetail?._id,
+        srno: `${parent.srno}.${(k + 1)}`,
+        detail: _inventory.inventoryDetail?.assetNumber,
+        type: "Asset",
+        qty: 1,
+      })
+    })
+    const childProduct: any = material.filter((e) => e.parentId === parent._id);
+    childProduct.forEach((_subRow, j) => {
+      _subRow.srno = parent.srno + '.' + (j + 1);
+      _subRow.detail = _subRow.productDetail?.productName;
+      _subRow.qty = `${parent.qty * _subRow.qty}`;
+      _subRow.subRows = generateNestedData(material, inventory, _subRow);
+      subRows.push(_subRow)
+    });
+    return subRows;
+  }
 
   const handlePDF = (type) => {
     setDownlodingFile(type);
