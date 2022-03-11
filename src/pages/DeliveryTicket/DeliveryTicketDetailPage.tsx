@@ -811,7 +811,6 @@ export default function DeliveryTicketDetail(props) {
         {openUpdateDialog && (
           <ManageDeliveryTicket
             deliveryTicketId={deliveryTicketData?._id}
-            open={openUpdateDialog}
             onClose={() => setOpenUpdateDialog(false)}
             onSuccess={() => {
               setOpenUpdateDialog(false);
