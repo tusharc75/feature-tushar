@@ -140,6 +140,9 @@ function Parts({ id }) {
         productName: p?.productName,
         qty: p?.qty,
         productCategory: p?.childProductDetail?.productCategory?.optionLabel,
+        pricingMethod: p?.childProductDetail?.pricingMethod?.join(", "),
+        unit: p?.childProductDetail?.unit?.join(", "),
+        serializedProduct: p?.childProductDetail?.serializedProduct === true ? "Yes" : "No",
         createdBy: p?.createdBy?.user?.concatedName
       }))
         : [];
@@ -147,6 +150,10 @@ function Parts({ id }) {
         { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productNameRenderer' },
         { field: 'qty', headerName: 'Quantity', show: true, disabled: false, cellRenderer: 'commonRenderer' },
         { field: 'productCategory', headerName: 'Product Category', show: true, disabled: false, cellRenderer: 'commonRenderer' },
+        { field: 'pricingMethod', headerName: 'Pricing Method', show: true, disabled: false, cellRenderer: 'commonRenderer' },
+        { field: 'unit', headerName: 'Unit', show: true, disabled: false, cellRenderer: 'commonRenderer' },
+        { field: 'serializedProduct', headerName: 'Serialized Product', show: true, disabled: false, cellRenderer: 'commonRenderer' },
+        { field: 'createdBy', headerName: 'Created By', show: true, disabled: false, cellRenderer: 'commonRenderer' },
       ];
       setColumns(newColumns);
       dispatch({ type: 'initialize', data: rowsData, count: rowsData.length });
@@ -180,7 +187,7 @@ function Parts({ id }) {
 
   return (
     <div>
-      <Box p={2}>
+      <Box p={1}>
         <Grid container xs={12} md={12} sm={12} >
           <Grid item xs={6} md={6} sm={6}>
             <Button

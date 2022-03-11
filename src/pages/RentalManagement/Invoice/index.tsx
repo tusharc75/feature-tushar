@@ -5,9 +5,9 @@ import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer, } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Dialog, IconButton } from "@material-ui/core";
+import { Button, Chip, Dialog, IconButton } from "@material-ui/core";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, rentalManagement, RENTAL_STATUS, sidebarResource } from "../../../constants/helpers";
+import { CustomDialogTransition, customerContact, dateFormat, formatAmountWithCurrency, gridLoadingTimeout, INVENTORY_STATUS, purchaseOrder, rentalManagement, RENTAL_STATUS, serializedAsset, sidebarResource } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
@@ -26,9 +26,12 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import AdditionalCostDialog from "../AdditionalCost/AdditionalCostDialog";
 import { fetch_rental_product_fields, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
 import { camelCase } from "lodash";
+import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
+import moment from "moment";
+import NoDataCell from "src/components/Helpers/NoDataCell";
 
 
-const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJobStatus, statusOptions, renderedFrom }) => {
+const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, fetchRentalData, updateJobStatus, statusOptions, renderedFrom, showActivity, stepFullScreen, currencySymbol }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
 
@@ -37,20 +40,15 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [generatingPdfFile, setGeneratingFile] = useState(false);
 
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
-  const [columns, setColumns] = useState([
-    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" }
-  ])
-  const [frameWorkComponent, setFrameWorkComponent] = useState(null)
+
 
   const [downlodingFile, setDownlodingFile] = useState(null)
   const [emailAttachments, setEmailAttachments] = useState([]);
   const { isOffline } = useContext(CustomOfflineContext);
   const [showCostDialog, setShowCostDialog] = useState(false)
 
+  const [columns, setColumns] = useState(null);
+  const [rowsData, setRowsData] = useState(null);
   useEffect(() => {
     if (statusOptions.findIndex(d => d.optionLabel === RENTAL_STATUS.readyToInvoice) > statusOptions.findIndex(d => d.optionLabel === rentalManagementData?.status)) {
       if (!isOffline && rentalManagementData?.status !== RENTAL_STATUS.cancelled) {
@@ -63,15 +61,55 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
     fetchFields()
   }, [isOffline]);
 
-  const NameRenderer = (params) => (
-    <Link
-      className="link"
-      title={params.value}
-      to={`${routes.productDetail.path}/${params.data.productId}`}
-    >
-      {params.value}
-    </Link>
-  );
+
+
+  const getAssetAssignedValues = (row) => {
+    if (row?.original?.type === "asset" || row?.original?.type === "Services and Consumables") {
+      return "";
+    }
+    if (!row?.original?.serializedProduct) {
+      return <p>---</p>;
+    }
+    return <p>{row?.original?.assetAssignedQty} / {row?.original?.assetQty}</p>;
+  }
+
+  const generateNestedData = (material, inventory, parent) => {
+    const subRows: any = [];
+    const inventory_result = inventory?.filter((e) => e._id === parent._id);
+    inventory_result?.forEach((_inventory, k) => {
+      subRows.push({
+        ..._inventory,
+        srno: `${parent.srno}.${(k + 1)}`,
+        detail: _inventory.inventoryDetail?.assetNumber,
+        type: "asset",
+        status: _inventory.inventoryDetail?.status,
+        manualStatus: _inventory.inventoryDetail?.manualStatus,
+        _id: _inventory.inventory,
+      })
+    })
+
+    const childProduct: any = material.filter((e) => e.parentId === parent._id);
+    var assetQtySUM = 0;
+    var assetAssignedQtySUM = 0;
+    childProduct.forEach((_subRow, j) => {
+      _subRow.srno = parent.srno + '.' + (j + 1);
+      _subRow.detail = _subRow.productDetail?.productName;
+      _subRow.serializedProduct = _subRow.type === "product" && !_subRow.productDetail?.serializedProduct ? false : true;
+      _subRow.assetQty = _subRow.serializedProduct ? _subRow.qty * parent.assetQty : 0;
+      _subRow.assetAssignedQty = inventory.filter((e) => e._id === _subRow._id).length;
+      _subRow.realAssetQty = _subRow.serializedProduct ? _subRow.qty * parent.realAssetQty : 0;
+      _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
+      _subRow.subRows = generateNestedData(material, inventory, _subRow);
+      subRows.push(_subRow)
+      assetQtySUM += _subRow.assetQty
+      assetAssignedQtySUM += _subRow.assetAssignedQty
+    });
+
+    parent.assetQty += assetQtySUM - (parent.type === "package" ? parent.qty : 0);
+    parent.assetAssignedQty += assetAssignedQtySUM;
+
+    return subRows;
+  }
 
   const fetchFields = async () => {
     try {
@@ -79,16 +117,133 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
       fields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
       const resultCost = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
       fields = [...fields, ...resultCost]
-      let rendererNames = [];
-      genrateColoum(fields, columns, rendererNames, false, renderedFrom);
-      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-      tempFrameworkComponent = {
-        commonRenderer: CommonRenderer,
-        nameRenderer: NameRenderer,
-        ...tempFrameworkComponent,
-      }
-      setFrameWorkComponent({ ...tempFrameworkComponent })
-      setColumns([...columns])
+      fields = [...new Map(fields.map(item => [item["fieldName"], item])).values()];
+      const coloum: any = [
+        {
+          accessor: 'srno',
+          Header: '#',
+          width: 70,
+          sticky: isMobile ? "none" : "left",
+          Cell: ({ row }) => (
+            <p className="text-truncate"  >
+              {row.original.srno}
+            </p>),
+        },
+        {
+          accessor: 'type',
+          Header: 'Type',
+          width: 200,
+          sticky: isMobile ? "none" : "left",
+          Cell: ({ row }) => (
+            <p className="text-truncate"  >
+              {row.original.type}
+            </p>),
+        },
+        {
+          accessor: 'detail',
+          Header: 'Detail',
+          width: 300,
+          sticky: isMobile ? "none" : "left",
+          Cell: ({ row }) => (
+            <div className="d-flex gap-2 align-items-center">
+              <p className="text-truncate" title={row.original.detail}  >
+                {(row.original?.type === "asset" && !isOffline) ?
+                  <a className="link text-truncate" href={`${serializedAsset.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
+                  row.original.detail}
+              </p>
+
+              {row.original?.type === "asset" &&
+                <span className="d-flex align-items-center gap-2">
+                  <Chip label="Asset" size="small" color="primary" />
+                </span>}
+            </div>),
+          Footer: () => {
+            return <>Total</>
+          }
+        },
+        {
+          accessor: 'assets',
+          Header: 'Assets Assigned',
+          Cell: ({ row }) => (
+            getAssetAssignedValues(row)
+          )
+        }]
+      fields.forEach(element => {
+        if (element.type === "date") {
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            Cell: ({ row }) => (
+              row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+            )
+          })
+        }
+        else if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
+          if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+            element.displayUnits.forEach((_unit) => {
+              let fieldName = element.fieldName + "_" + _unit.toLowerCase()
+              let fieldLabel = element.fieldLabel + " " + _unit
+              coloum.push({
+                accessor: fieldName,
+                Header: fieldLabel,
+                Cell: ({ row }) => (
+                  row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />
+                )
+              })
+            })
+          }
+          else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+            element.displayUnits.forEach((_unit) => {
+              element.displayCurrency.forEach((_currency) => {
+                let fieldName = element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
+                let fieldLabel = element.fieldLabel + " " + _unit + "/" + _currency
+                coloum.push({
+                  accessor: fieldName,
+                  Header: fieldLabel,
+                  Cell: ({ row }) => (
+                    row.original[fieldName] ? <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
+                  )
+                })
+              })
+            })
+          }
+          else if (element.type === "currencyAmount") {
+            element.displayCurrency.forEach((_currency) => {
+              let fieldName = element.fieldName + "_" + _currency.toLowerCase()
+              let fieldLabel = element.fieldLabel + " " + _currency
+              coloum.push({
+                accessor: fieldName,
+                Header: fieldLabel,
+                Cell: ({ row }) => (
+                  row.original[fieldName] ? <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p> : <NoDataCell />
+                ),
+                Footer: (info) => {
+                  const total = info?.rows?.filter(f => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName])).reduce((sum, row) => row.values[fieldName] + sum, 0)
+                  return <>{currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
+                }
+              })
+            })
+          }
+        }
+        else {
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            Cell: ({ row }) => (
+              row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />
+            )
+          })
+        }
+      });
+      coloum.forEach(element => {
+        if (element.accessor === "qty") {
+          element["Footer"] = (info) => {
+            const qtyTotal = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
+            return <>{qtyTotal}</>
+          }
+        }
+      });
+      setColumns(coloum)
       fetchData()
     }
     catch (error) {
@@ -98,43 +253,51 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
 
   const fetchData = async () => {
     let combinedData: any = []
+    let inventory: any = []
     let material: any = []
     let additionalcost: any = []
     try {
-      dispatch({ type: "loading", loading: true });
       if (isOffline) {
         const result = await findOne(objectStore.rentalManagement, rentalManagementData._id);
         material = result?.material;
         additionalcost = result?.additionalCost;
       }
       else {
-        const resultMaterial = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}?isInvoice=true`)
+        const resultMaterial = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
         material = resultMaterial?.data?.data?.material;
+        inventory = resultMaterial?.data?.data?.inventory;
         const resultCost = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`)
         additionalcost = resultCost?.data?.data;
       }
       material?.forEach((item) => {
         if (!item.parentId) {
-          item.description = `${item.type === "product" ? item.productDetail?.productName : item.packageDetail?.packageName}`
-          item.type = startCase(item.type);
+          item.detail = `${item.type === "product" ? item.productDetail?.productName : item.packageDetail?.packageName}`
+          item.type = item.type;
           combinedData.push(item);
         }
       });
       additionalcost?.forEach((e) => {
         e.type = "Services and Consumables";
+        e.detail = e.description
+        e.parentId = null;
       })
       combinedData = [...combinedData, ...additionalcost];
-      let rows = combinedData?.map((item) => {
-        let res: any = {
-          ...prepareDataForGrid(item),
-        };
-        return res;
+      const rows = combinedData.filter((e) => e.parentId === null)
+      rows.forEach((parent, i) => {
+        parent.srno = i + 1;
+        parent.detail = `${parent.type === "Services and Consumables" ? parent.detail : parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
+        parent.serializedProduct = parent.type === "product" && !parent.productDetail?.serializedProduct ? false : true;
+        parent.assetQty = parent.serializedProduct ? parent.qty : 0;
+        parent.assetAssignedQty = inventory.filter((e) => e._id === parent._id).length;
+        parent.realAssetQty = parent.assetQty;
+        parent.realAssetAssignedQty = parent.assetAssignedQty;
+
+        parent.subRows = generateNestedData(material, inventory, parent);
+        // }
       });
-      dispatch({ type: "initialize", data: rows, count: rows.length });
-      dispatch({ type: "loading", loading: false });
+      setRowsData(rows);
     }
     catch (error) {
-      dispatch({ type: "loading", loading: false });
       toastConfig.setToastConfig(error)
     }
   };
@@ -290,32 +453,34 @@ const Invoice = ({ rentalManagementData, setNextStep, fetchRentalData, updateJob
         </Button>}
       </Box>
     </Box>
-    <Grid item xs={12} md={12} sm={12} className="mt-3">
-      {columns && frameWorkComponent ?
-        <CustomAgGridEditable
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={false}
-          loading={loading}
-          allowSelection={false}
-          isClientSideGrid={true}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchData}
-          fromPurchaseOrderGrid={true}
-          onCellValueChanged={(row) => {
-          }}
-          currency={rentalManagementData?.currency?.toLowerCase()}
-          footerIgnoreFields={["estimateJobDuration", "actualJobDuration"]}
-        />
-        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-      }
+    <Grid container spacing={2}>
+      <Grid item xs={12} md={12} sm={12}>
+        {columns && rowsData ?
+          <Box
+            zIndex={5}
+            width={
+              stepFullScreen ? "100%" :
+                isTabletScreen
+                  ? "calc(100vw - 20px)"
+                  : isSmallScreen
+                    ? "calc(100vw - 78px)"
+                    : showActivity ? "100%" : "calc(100vw - 103px)"
+            }
+            height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 350px)"}
+          >
+            <CustomReactTable
+              height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 365px)"}
+              columns={columns}
+              data={rowsData}
+              setCellColor={() => { }}
+              onSelect={() => { }}
+              childrenProperty="subRows"
+              uniqueKey="_id"
+              hideSelection={true}
+            /></Box>
+          : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+        }
+      </Grid>
     </Grid>
     {sendEmail && (
       <Dialog
