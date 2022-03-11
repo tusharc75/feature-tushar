@@ -74,43 +74,25 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
   }
 
   const generateNestedData = (material, inventory, parent) => {
-    const subRows: any = [];
-    const inventory_result = inventory?.filter((e) => e._id === parent._id);
-    inventory_result?.forEach((_inventory, k) => {
-      subRows.push({
-        ..._inventory,
-        srno: `${parent.srno}.${(k + 1)}`,
-        detail: _inventory.inventoryDetail?.assetNumber,
-        type: "asset",
-        status: _inventory.inventoryDetail?.status,
-        manualStatus: _inventory.inventoryDetail?.manualStatus,
-        _id: _inventory.inventory,
-      })
-    })
-
-    const childProduct: any = material.filter((e) => e.parentId === parent._id);
-    var assetQtySUM = 0;
-    var assetAssignedQtySUM = 0;
-    childProduct.forEach((_subRow, j) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = _subRow.productDetail?.productName;
-      _subRow.serializedProduct = _subRow.type === "product" && !_subRow.productDetail?.serializedProduct ? false : true;
-      _subRow.assetQty = _subRow.serializedProduct ? _subRow.qty * parent.assetQty : 0;
-      _subRow.assetAssignedQty = inventory.filter((e) => e._id === _subRow._id).length;
-      _subRow.realAssetQty = _subRow.serializedProduct ? _subRow.qty * parent.realAssetQty : 0;
-      _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
+      _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
+      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
-      subRows.push(_subRow)
-      assetQtySUM += _subRow.assetQty
-      assetAssignedQtySUM += _subRow.assetAssignedQty
     });
-
-    parent.assetQty += assetQtySUM - (parent.type === "package" ? parent.qty : 0);
-    parent.assetAssignedQty += assetAssignedQtySUM;
-
     return subRows;
   }
 
+  const getNestedSubRows = (obj, original) => {
+    if (original?.subRows?.length) {
+      original?.subRows.forEach((element) => {
+        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
+        getNestedSubRows(obj, element);
+      });
+    }
+  }
   const fetchFields = async () => {
     try {
       let fields = []
@@ -160,13 +142,6 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
           Footer: () => {
             return <>Total</>
           }
-        },
-        {
-          accessor: 'assets',
-          Header: 'Assets Assigned',
-          Cell: ({ row }) => (
-            getAssetAssignedValues(row)
-          )
         }]
       fields.forEach(element => {
         if (element.type === "date") {
