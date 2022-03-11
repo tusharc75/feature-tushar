@@ -35,6 +35,7 @@ import { CustomOfflineContext } from "../../StateProvider/OfflineContext/Offline
 import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
 import { updateSignatureOffline } from './deliveryTicketOfflineHelper';
 import { camelCase } from 'lodash';
+import DeliveryTicketProduct from './DeliveryTicketProduct';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -557,6 +558,34 @@ export default function DeliveryTicketDetail(props) {
                       {isMobile && !isTablet ? <FaMailchimp size={20} /> : "Send To Customer"}
                     </Button> : null
                   } */}
+                  {permissions?.deliveryTicket?.isRead && !isMobile && (
+                    <Button
+                      variant={isMobile && !isTablet ? "text" : "outlined"}
+                      color="primary"
+                      type="button"
+                      size="small"
+                      style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
+                      startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
+                      disabled={downlodingFile || isOffline}
+                      onClick={() => { handleViewPdf(false) }}
+                    >
+                      {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
+                    </Button>
+                  )}
+                  {permissions?.deliveryTicket?.isRead && (
+                    <Button
+                      variant={isMobile && !isTablet ? "text" : "outlined"}
+                      color="primary"
+                      type="button"
+                      size="small"
+                      style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
+                      startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
+                      disabled={downlodingFile || isOffline}
+                      onClick={() => { handleViewPdf(true) }}
+                    >
+                      {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile ? "Please wait..." : "Download"}
+                    </Button>
+                  )}
                 </DetailsPageHeader>
               )}
               {loading ? (
@@ -601,14 +630,27 @@ export default function DeliveryTicketDetail(props) {
                       className={'tabLayout'}
                       style={{
                         background: tabValue === 2 ? 'white' : '',
-                        color: tabValue === 2 ? 'blue' : '#163340'
+                        color: tabValue === 2 ? '#163340' : '#163340'
                       }}
                       label={
                         <div className="d-flex align-items-center tab-font">
-                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Serialized Assets
                         </div>
                       }
                       {...a11yProps(1)}
+                    />
+                    <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 3 ? 'white' : '',
+                        color: tabValue === 3 ? '#163340' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Product
+                        </div>
+                      }
+                      {...a11yProps(0)}
                     />
                     <div className={'uio'}> </div>
                   </Tabs>
@@ -665,34 +707,7 @@ export default function DeliveryTicketDetail(props) {
                           </IconButton>
                         }
                         <Box mx={1} />
-                        {permissions?.deliveryTicket?.isRead && !isMobile && (
-                          <Button
-                            variant={isMobile && !isTablet ? "text" : "outlined"}
-                            color="primary"
-                            type="button"
-                            size="small"
-                            style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-                            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
-                            disabled={downlodingFile || isOffline}
-                            onClick={() => { handleViewPdf(false) }}
-                          >
-                            {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
-                          </Button>
-                        )}
-                        {permissions?.deliveryTicket?.isRead && (
-                          <Button
-                            variant={isMobile && !isTablet ? "text" : "outlined"}
-                            color="primary"
-                            type="button"
-                            size="small"
-                            style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
-                            startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
-                            disabled={downlodingFile || isOffline}
-                            onClick={() => { handleViewPdf(true) }}
-                          >
-                            {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile ? "Please wait..." : "Download"}
-                          </Button>
-                        )}
+
                       </Grid>
                       <Grid item xs={12}>
                         {isMobile && !isTablet ? <CustomSwipableList
@@ -752,7 +767,19 @@ export default function DeliveryTicketDetail(props) {
                       </Grid>
                     </Grid>
                   </TabPanel>
-
+                  <TabPanel value={tabValue} index={2}>
+                    <Grid container spacing={1} className="p-2">
+                      <Grid item xs={12} className="mt-2 d-flex gap-2">
+                        <Typography variant="subtitle1" className="font-weight-bold text-primary">
+                          Products
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <DeliveryTicketProduct renderedFrom={`${renderedFrom}_product`} deliveryTicketId={id}
+                        />
+                      </Grid>
+                    </Grid>
+                  </TabPanel>
                 </>
               )}
             </Paper>
