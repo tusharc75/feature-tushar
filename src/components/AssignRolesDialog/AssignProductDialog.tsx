@@ -15,12 +15,13 @@ import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomT
 import SearchBox from "../Helpers/SearchBox";
 import { gridLoadingTimeout, isObjectEmpty, product, packages, prepareDataForGrid, getLocalStorageArrayData } from "src/constants/helpers";
 import { useData } from "src/StateProvider/Provider";
-import { CommonRenderer } from "../AgGridComponents/CustomAgGridCellRenderers";
 import routes from "../Helpers/Routes";
 import styles from "src/pages/Leads/Header.module.scss";
 import { AddOutlined, RemoveOutlined } from "@material-ui/icons";
 import CustomAgGridEditable, { reducer, intialState } from "../AgGridComponents/CustomAgGridEditable";
-import { isMobile, isTablet } from 'react-device-detect';
+import { getColumnData, getFrameworkComponents, getStaticFields } from "src/constants/columns";
+import Loader from 'src/components/Loader'
+
 
 const options = [
     {
@@ -43,36 +44,28 @@ const AssignProductDialog = ({
     renderedFrom
 }) => {
     const localStorageSelectedRecords = `${renderedFrom}_selected`
-    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const { state: { permissions, selectedEntity } }: any = useData();
 
     const toastConfig = useContext(CustomToastContext);
     const [isAssigning, setAssigning] = useState(false);
     const [disableSaveButton, setDisableSaveButton] = useState(false);
-    const [productsConst, setProductsConst] = useState([]);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const [selectedType, setSelectedType] = useState(1);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-
-    const [columns, setColumns] = useState([
+    const [frameWorkComponent, setFrameWorkComponent] = useState(null)
+    const [columns, setColumns] = useState([])
+    const defaultColumns = [
         { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
         { field: 'productNumber', headerName: 'Product Number', show: true, cellRenderer: 'commonRenderer' },
         { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
-    ]);
+    ] 
 
     const [filter, setFilter] = useState(`All ${routes.product.title}`);
     const [isProductType, setIsProductType] = useState(false);
 
     useEffect(() => {
-        axiosInstance().get("/field?resource=Product&view=true").then(({ data: { data } }) => {
-            const productTypes = data.find((e) => e.fieldData.fieldName === "productType")
-            if (productTypes) {
-                setIsProductType(true)
-            } else {
-                setIsProductType(false)
-            }
-        })
+        fetchGridColumns()
     }, [])
 
     useEffect(() => {
@@ -82,6 +75,37 @@ const AssignProductDialog = ({
     useEffect(() => {
         fetchProduct()
     }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
+
+    const fetchGridColumns = () => {
+        axiosInstance()
+            .get("/field?resource=Product&view=true")
+            .then(({ data: { data } }) => {
+                const productTypes = data.find((e) => e.fieldData.fieldName === "productType")
+                if (productTypes) {
+                    setIsProductType(true)
+                } else {
+                    setIsProductType(false)
+                }
+                let columns = []
+                let rendererNames = []
+                data.forEach(o => {
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
+                    if (currentColumn !== null) {
+                        columns = [...columns, currentColumn?.columnData]
+                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                            rendererNames.push(currentColumn?.rendererName)
+                        }
+                    }
+                })
+                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+                tempFrameworkComponent = {
+                    ...tempFrameworkComponent,
+                }
+                setFrameWorkComponent({ ...tempFrameworkComponent })
+                columns = [...columns, ...getStaticFields()]
+                setColumns([...defaultColumns, ...columns ])
+            })
+    }
 
     const fetchProduct = () => {
         dispatch({ type: "loading", loading: true });
@@ -108,7 +132,7 @@ const AssignProductDialog = ({
                 type: "selection",
                 selectedRecords: savedRecords
             })
-            setProductsConst(data.data)
+
             dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }) }, gridLoadingTimeout);
         })
@@ -118,7 +142,7 @@ const AssignProductDialog = ({
     };
 
     const getQueryString = () => {
-        const ignoreIds = assignedProducts && assignedProducts?.length > 0 ? assignedProducts.map(p => p._id) : []
+        const ignoreIds = assignedProducts && assignedProducts?.length > 0 ? assignedProducts.map(p => reference === "product" ? p.productId : p._id) : []
         let deepFilter = `?page=${page}&limit=${limit}&filterProducts=${selectedType}&ignoreIds=${JSON.stringify(ignoreIds)}`;
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -181,10 +205,10 @@ const AssignProductDialog = ({
         </>
     }
 
-    const frameworkComponents = {
-        actionsRenderer: ActionsRenderer,
-        commonRenderer: CommonRenderer,
-    };
+    // const frameworkComponents = {
+    //     actionsRenderer: ActionsRenderer,
+    //     commonRenderer: CommonRenderer,
+    // };
 
     const handleAssignProduct = async () => {
         setAssigning(true);
@@ -199,12 +223,6 @@ const AssignProductDialog = ({
             await axiosInstance().post(`/product/${productId}/bom`, dataObj)
                 .then(({ data }) => {
                     setAssigning(false);
-                    toastConfig.setToastConfig({
-                        message: data.message,
-                        type: "success",
-                        open: true,
-                    });
-
                     onSuccess();
                 })
                 .catch((error) => {
@@ -240,9 +258,9 @@ const AssignProductDialog = ({
         }
     };
 
-    const onCellValueChanged = (data) => {
-        console.log(data)
-        console.log([...getLocalStorageArrayData(localStorageSelectedRecords)])
+    const onCellValueChanged = (row) => {
+        if(!row || !row?.data) return 
+        const {data} = row
         const selectedFromStorage = [...getLocalStorageArrayData(localStorageSelectedRecords)]
         if (!selectedFromStorage || selectedFromStorage.length === 0) return
         const updatedRecords = selectedFromStorage.map(d => {
@@ -265,11 +283,7 @@ const AssignProductDialog = ({
             aria-labelledby="assign-roles-dialog"
         >
             <CustomDialogHeader title={`Assign ${routes.product.title}`}
-                isMinimized={!fullScreen}
-                onMinimizeMaximize={() => {
-                    setFullScreen(prevState => !prevState)
-                }}
-                showManimizeMaximize={true}
+                showManimizeMaximize={false}
                 showRequiredLabel={false}
                 onClose={handleCloseDialog}
             />
@@ -315,10 +329,10 @@ const AssignProductDialog = ({
                             </Grid>
                         </Grid>
                     </div>
-                    <CustomAgGridEditable
+                    {frameWorkComponent && Object.keys(frameWorkComponent).length > 0 ? <CustomAgGridEditable
                         columns={columns}
                         dataRows={dataRows}
-                        frameworkComponents={frameworkComponents}
+                        frameworkComponents={frameWorkComponent}
                         setGridApi={setGridApi}
                         dispatch={dispatch}
                         rowCount={rowCount}
@@ -333,7 +347,7 @@ const AssignProductDialog = ({
                         showOnlyShowFilteredRecordSwitch={true}
                         refreshGrid={fetchProduct}
                         renderedFrom={renderedFrom}
-                    />
+                    /> : <Loader text="Loading..." minHeight={"100%"} /> }
                 </>
             </CustomDialogContent>
         </Dialog>
