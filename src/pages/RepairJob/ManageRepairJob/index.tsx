@@ -68,7 +68,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       const plantsOptions = data.find((obj) => ["plant", "warehouse"].indexOf(obj?.fieldData.fieldName) > -1)?.fieldData?.option ?? [];
-      const plantOptionsEntity = plantsOptions.filter((a) => { if (a.entity.includes(selectedEntity)) { return a } });
+      const plantOptionsEntity = plantsOptions?.filter((a) => { if (a.entity.includes(selectedEntity)) { return a } });
       setOptionsPlantsEntity(plantOptionsEntity)
 
       if (repairJobId) {
