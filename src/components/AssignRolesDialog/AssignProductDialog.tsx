@@ -20,7 +20,7 @@ import styles from "src/pages/Leads/Header.module.scss";
 import { AddOutlined, RemoveOutlined } from "@material-ui/icons";
 import CustomAgGridEditable, { reducer, intialState } from "../AgGridComponents/CustomAgGridEditable";
 import { getColumnData, getFrameworkComponents, getStaticFields } from "src/constants/columns";
-import Loader from 'src/components/Loader'
+import CommonSkeleton from "../Helpers/CommonSkeleton";
 
 
 const options = [
@@ -347,7 +347,7 @@ const AssignProductDialog = ({
                         showOnlyShowFilteredRecordSwitch={true}
                         refreshGrid={fetchProduct}
                         renderedFrom={renderedFrom}
-                    /> : <Loader text="Loading..." minHeight={"100%"} /> }
+                    /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box> }
                 </>
             </CustomDialogContent>
         </Dialog>

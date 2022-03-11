@@ -8,13 +8,12 @@ import { Delete } from '@material-ui/icons';
 import { IconButton, Tooltip } from "@material-ui/core";
 import { useData } from "../../../StateProvider/Provider";
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import AssignProductDialog from '../../../components/AssignRolesDialog/AssignProductDialog';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
 import { getColumnData, getFrameworkComponents, getStaticFields } from "src/constants/columns";
-import Loader from 'src/components/Loader';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 function Parts({ id }) {
 
@@ -273,7 +272,7 @@ function Parts({ id }) {
         loading={gridLoading}
         renderedFrom={renderedFrom}
         refreshGrid={fetchBOMData}
-      /> : <Loader text="Loading..." minHeight={"100%"} my={5} /> }
+      /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box> }
       {showConfirmBox.open && <ConfirmationDialogRaw
         open={true}
         message={`Are you sure you want to delete this product(s)?`}
