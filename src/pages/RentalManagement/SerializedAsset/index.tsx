@@ -35,7 +35,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const [isAdding, setAdding] = useState(false)
   const [showConfirmBox, setShowConfirmBox] = useState(false)
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false })
-  const [selectedProducts, setSelectedProducts] = useState([])
+  const [selectedRecords, setSelectedRecords] = useState([])
+
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([])
 
   const [deleteData, setDeleteData] = useState([])
@@ -346,7 +347,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       }
 
       setRowsData(rows);
-      setSelectedProducts([])
+      setSelectedRecords([])
     }
     catch (error) {
       toastConfig.setToastConfig(error);
@@ -431,12 +432,12 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   }
 
   const handleAddSerializedAsset = (assets) => {
-    let data = [];
-    let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product");
+    var data = [];
+    var flatArray = treeToFlatArray(selectedRecords, "subRows").filter(f => f.type === "product");
     flatArray = uniqBy(flatArray, '_id')
     flatArray?.forEach((e: any) => {
       if (e.type === "product") {
-        let qty = e.realAssetQty - e.assetAssignedQty;
+        let qty = e.realAssetQty - e.realAssetAssignedQty;
         while (qty) {
           const result = assets.filter(f => f.productId === e.materialId && !f.isCounted);
           if (result.length) {
@@ -451,13 +452,14 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         }
       }
     })
+
     if (data.length) {
       setAdding(true)
       axiosInstance().post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { "products": data })
         .then(({ data }) => {
           setAddSerializedAssetDialog({ open: false })
           fetchProductInventory()
-          setSelectedProducts([])
+          setSelectedRecords([])
           setAssetAssignedProduct([])
           setAdding(false)
           toastConfig.setToastConfig({
@@ -491,7 +493,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   }
 
   useEffect(() => {
-    let flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty);
+    let flatArray = treeToFlatArray(selectedRecords, "subRows").filter(f => f.type === "product" && f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty);
     flatArray = uniqBy(flatArray, '_id')
     const products = flatArray.map(m => { return { _id: m.materialId, unit: m.unit, assetsCount: m.realAssetQty - m.realAssetAssignedQty } })
     const uniqProduct = []
@@ -528,13 +530,13 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         }
       }
     })
-    setAssetAssignedProduct(assetProduct)
-  }, [selectedProducts])
+    setAssetAssignedProduct([...assetProduct])
+  }, [selectedRecords])
 
   const disableAssignSerializedAssets = () => {
-    if (selectedProducts.length === 0)
+    if (selectedRecords.length === 0)
       return true;
-    const flatArray = treeToFlatArray(selectedProducts, "subRows").filter(f => f.type === "product" && f.realAssetQty > f.realAssetAssignedQty);
+    const flatArray = treeToFlatArray(selectedRecords, "subRows").filter(f => f.type === "product" && f.realAssetQty > f.realAssetAssignedQty);
     return flatArray.length === 0;
   }
 
@@ -603,9 +605,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               >
                 {`Create ${routes.sublease.title}`}</MenuItem>}
             <MenuItem
-              disabled={(treeToFlatArray(selectedProducts, "subRows")?.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
+              disabled={(treeToFlatArray(selectedRecords, "subRows")?.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
               onClick={() => {
-                setDeleteData(treeToFlatArray(selectedProducts, "subRows")?.filter(d => d.type === "asset").map(d => d?.inventory))
+                setDeleteData(treeToFlatArray(selectedRecords, "subRows")?.filter(d => d.type === "asset").map(d => d?.inventory))
                 setShowConfirmBox(true)
                 closeActions()
               }}
@@ -641,7 +643,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                 if (rowData.isSubleaseAsset) return "isSublease";
                 return "";
               }}
-              onSelect={setSelectedProducts}
+              onSelect={setSelectedRecords}
               childrenProperty="subRows"
               uniqueKey="_id"
               hideSelection={isOffline}
@@ -687,7 +689,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         onClose={() => setOrderDialog(prevState => ({ ...prevState, open: false, type: "" }))}
         onSuccess={() => {
           setOrderDialog(({ open: false, products: [], type: "" }))
-          setSelectedProducts([])
+          setSelectedRecords([])
           fetchProductInventory()
           toastConfig.setToastConfig({
             open: true,
@@ -711,7 +713,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         onClose={() => setOrderDialog(prevState => ({ ...prevState, open: false, type: "" }))}
         onSuccess={() => {
           setOrderDialog(({ open: false, products: [], type: "" }))
-          setSelectedProducts([])
+          setSelectedRecords([])
           fetchProductInventory()
           toastConfig.setToastConfig({
             open: true,
