@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import MaterialTable from 'material-table';
-import { Avatar, Box, Chip, Grid, Button, Menu, MenuItem } from '@material-ui/core';
+import { Box, Grid, Button, } from '@material-ui/core';
 import { Link, useParams, useLocation } from 'react-router-dom';
 import { product, isObjectEmpty, prepareDataForGrid } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -14,6 +13,8 @@ import AssignProductDialog from '../../../components/AssignRolesDialog/AssignPro
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
+import { getColumnData, getFrameworkComponents, getStaticFields } from "src/constants/columns";
+import Loader from 'src/components/Loader';
 
 function Parts({ id }) {
 
@@ -31,19 +32,28 @@ function Parts({ id }) {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const [columns, setColumns] = useState([]);
+  const [frameWorkComponent, setFrameWorkComponent] = useState(null)
   const { dataRows, rowCount, loading: gridLoading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
+  const defaultColumns = [
+    { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer' },
+    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
+] 
+
 
   useEffect(() => {
     if (id) {
       fetchBOMData();
     }
-  }, [page, limit, filters, sorting, selectedEntity]);
+  }, [id, page, limit, filters, sorting, selectedEntity]);
 
+  // useEffect(() => {
+  //   if (parts) {
+  //     getColumns();
+  //   }
+  // }, [parts])
   useEffect(() => {
-    if (parts) {
-      getColumns();
-    }
-  }, [parts])
+    fetchGridColumns()
+  }, [])
 
   const fetchBOMData = () => {
     dispatch({ type: "loading", loading: true });
@@ -53,12 +63,14 @@ function Parts({ id }) {
     axiosInstance()
       .get(`/product/${id}/bom`)
       .then(({ data: { data } }) => {
-        data = data.map((o) => {
-          return {
+        data = data.map((o:any) => {
+         let finalObject = {
+            ...o?.childProductDetail,
             ...o,
-            productName: o.childProductDetail.productName,
-            productId: o.childProductDetail._id
           };
+
+          return prepareDataForGrid(finalObject)
+
         });
         if (appendRows) {
           dispatch({
@@ -86,22 +98,49 @@ function Parts({ id }) {
           }
         }
         setParts([...data]);
-      })
-      .catch((err) => {
+         dispatch({ type: 'loading', loading: false });
+        })
+        .catch((err) => {
+        dispatch({ type: 'loading', loading: false });
       });
   };
+
+  const fetchGridColumns = () => {
+    axiosInstance()
+        .get("/field?resource=Product&view=true")
+        .then(({ data: { data } }) => {
+            let columns = []
+            let rendererNames = []
+            data.forEach(o => {
+                let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
+                if (currentColumn !== null) {
+                    columns = [...columns, currentColumn?.columnData]
+                    if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                        rendererNames.push(currentColumn?.rendererName)
+                    }
+                }
+            })
+            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+            tempFrameworkComponent = {
+                ...tempFrameworkComponent,
+            }
+            setFrameWorkComponent({ ...tempFrameworkComponent, actionsRenderer: ActionsRenderer, productNameRenderer: ProductNameRenderer, })
+            columns = [...columns, ...getStaticFields()]
+            setColumns([...defaultColumns, ...columns ])
+        })
+}
+
 
   const handleRemove = () => {
     setIsDeleting(true)
     const { data } = showConfirmBox
     if (data.length > 1) {
-      data.map((i, index) => {
-        axiosInstance().put(`${product.api}/${i.product}/bom/remove`, {
-          ids: [i._id]
+      data.forEach((p:any) => {
+        axiosInstance().put(`${product.api}/${p.product}/bom/remove`, {
+          ids: [p._id]
         })
-          .then(({ data }) => {
+          .then(() => {
             setIsDeleting(false)
-            setToastConfig({ open: true, message: "Successfully Deleted", type: "success" })
             setShowConfirmBox({ open: false, data: null });
             fetchBOMData()
           })
@@ -111,12 +150,12 @@ function Parts({ id }) {
           })
       })
     } else {
-      axiosInstance().put(`${product.api}/${data.product}/bom/remove`, {
-        ids: [data._id]
+      let d = data[0]
+      axiosInstance().put(`${product.api}/${d.product}/bom/remove`, {
+        ids: [d._id]
       })
-        .then(({ data }) => {
+        .then(() => {
           setIsDeleting(false)
-          setToastConfig({ open: true, message: "Successfully Deleted", type: "success" })
           setShowConfirmBox({ open: false, data: null });
           fetchBOMData()
         })
@@ -127,45 +166,45 @@ function Parts({ id }) {
     }
   }
 
-  const getColumns = () => {
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    dispatch({ type: 'loading', loading: true });
-    let newColumns = [];
-    let rowsData = [];
-    if (parts) {
-      rowsData = parts ? parts?.map((p) => ({
-        ...p,
-        productName: p?.productName,
-        qty: p?.qty,
-        productCategory: p?.childProductDetail?.productCategory?.optionLabel,
-        pricingMethod: p?.childProductDetail?.pricingMethod?.join(", "),
-        unit: p?.childProductDetail?.unit?.join(", "),
-        serializedProduct: p?.childProductDetail?.serializedProduct === true ? "Yes" : "No",
-        createdBy: p?.createdBy?.user?.concatedName
-      }))
-        : [];
-      newColumns = [
-        { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productNameRenderer' },
-        { field: 'qty', headerName: 'Quantity', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-        { field: 'productCategory', headerName: 'Product Category', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-        { field: 'pricingMethod', headerName: 'Pricing Method', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-        { field: 'unit', headerName: 'Unit', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-        { field: 'serializedProduct', headerName: 'Serialized Product', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-        { field: 'createdBy', headerName: 'Created By', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-      ];
-      setColumns(newColumns);
-      dispatch({ type: 'initialize', data: rowsData, count: rowsData.length });
-      dispatch({ type: 'loading', loading: false });
-    }
-  }
+  // const getColumns = () => {
+  //   if (gridApi) {
+  //     gridApi.setRowData([]);
+  //   }
+  //   dispatch({ type: 'loading', loading: true });
+  //   let newColumns = [];
+  //   let rowsData = [];
+  //   if (parts) {
+  //     rowsData = parts ? parts?.map((p) => ({
+  //       ...p,
+  //       productName: p?.productName,
+  //       qty: p?.qty,
+  //       productCategory: p?.childProductDetail?.productCategory?.optionLabel,
+  //       pricingMethod: p?.childProductDetail?.pricingMethod?.join(", "),
+  //       unit: p?.childProductDetail?.unit?.join(", "),
+  //       serializedProduct: p?.childProductDetail?.serializedProduct === true ? "Yes" : "No",
+  //       createdBy: p?.createdBy?.user?.concatedName
+  //     }))
+  //       : [];
+  //     newColumns = [
+  //       { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productNameRenderer' },
+  //       { field: 'qty', headerName: 'Quantity', show: true, disabled: false, cellRenderer: 'commonRenderer' },
+  //       { field: 'productCategory', headerName: 'Product Category', show: true, disabled: false, cellRenderer: 'commonRenderer' },
+  //       { field: 'pricingMethod', headerName: 'Pricing Method', show: true, disabled: false, cellRenderer: 'commonRenderer' },
+  //       { field: 'unit', headerName: 'Unit', show: true, disabled: false, cellRenderer: 'commonRenderer' },
+  //       { field: 'serializedProduct', headerName: 'Serialized Product', show: true, disabled: false, cellRenderer: 'commonRenderer' },
+  //       { field: 'createdBy', headerName: 'Created By', show: true, disabled: false, cellRenderer: 'commonRenderer' },
+  //     ];
+  //     setColumns(newColumns);
+  //     dispatch({ type: 'initialize', data: rowsData, count: rowsData.length });
+  //     dispatch({ type: 'loading', loading: false });
+  //   }
+  // }
 
   const ActionsRenderer = (params) => (
     <Tooltip title="Delete">
       <IconButton
         onClick={() => {
-          setShowConfirmBox({ open: true, data: params.data })
+          setShowConfirmBox({ open: true, data: [params.data] })
         }}
       >
         <Delete fontSize='small' color='error' />
@@ -174,21 +213,21 @@ function Parts({ id }) {
   )
 
   const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`/product/detail/${params.data._id}`}>
+    <Link className="link" title={params.value} to={`/product/detail/${params.data.childProduct}`}>
       {params.value}
     </Link>
   )
 
-  const frameworkComponents = {
-    actionsRenderer: ActionsRenderer,
-    productNameRenderer: ProductNameRenderer,
-    commonRenderer: CommonRenderer,
-  };
+  // const frameworkComponents = {
+  //   actionsRenderer: ActionsRenderer,
+  //   productNameRenderer: ProductNameRenderer,
+  //   commonRenderer: CommonRenderer,
+  // };
 
   return (
     <div>
       <Box p={1}>
-        <Grid container xs={12} md={12} sm={12} >
+        <Grid container>
           <Grid item xs={6} md={6} sm={6}>
             <Button
               variant='contained'
@@ -203,26 +242,27 @@ function Parts({ id }) {
           </Grid>
           <Grid item xs={6} md={6} sm={6} >
             {selectedRecords?.length > 0 &&
-              <Grid container xs={12} md={12} sm={12} justify="flex-end">
+            <Box display={'flex'} justifyContent={'flex-end'}>
                 <Button
                   variant='contained'
                   color="primary"
                   size="small"
                   onClick={() => {
-                    setShowConfirmBox({ open: true, data: selectedRecords });
+                    setShowConfirmBox({ open: true, data: selectedRecords});
                   }}
-                >
+                  >
                   Delete
                 </Button>
-              </Grid>}
+              </Box>
+              }
           </Grid>
         </Grid>
       </Box>
-      <CustomAgGrid
+     {frameWorkComponent ?  <CustomAgGrid
         columns={columns}
         dataRows={dataRows}
         isClientSideGrid={true}
-        frameworkComponents={frameworkComponents}
+        frameworkComponents={frameWorkComponent}
         setGridApi={setGridApi}
         dispatch={dispatch}
         rowCount={rowCount}
@@ -233,10 +273,10 @@ function Parts({ id }) {
         loading={gridLoading}
         renderedFrom={renderedFrom}
         refreshGrid={fetchBOMData}
-      />
+      /> : <Loader text="Loading..." minHeight={"100%"} my={5} /> }
       {showConfirmBox.open && <ConfirmationDialogRaw
         open={true}
-        message={`Are you sure you want to delete this product?`}
+        message={`Are you sure you want to delete this product(s)?`}
         okBtnLoading={isDeleting}
         onClose={() => {
           setShowConfirmBox({ open: false, data: null });

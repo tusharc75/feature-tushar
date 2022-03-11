@@ -15,12 +15,12 @@ import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomT
 import SearchBox from "../Helpers/SearchBox";
 import { gridLoadingTimeout, isObjectEmpty, product, packages, prepareDataForGrid, getLocalStorageArrayData } from "src/constants/helpers";
 import { useData } from "src/StateProvider/Provider";
-import { CommonRenderer } from "../AgGridComponents/CustomAgGridCellRenderers";
 import routes from "../Helpers/Routes";
 import styles from "src/pages/Leads/Header.module.scss";
 import { AddOutlined, RemoveOutlined } from "@material-ui/icons";
 import CustomAgGridEditable, { reducer, intialState } from "../AgGridComponents/CustomAgGridEditable";
 import { getColumnData, getFrameworkComponents, getStaticFields } from "src/constants/columns";
+import Loader from 'src/components/Loader'
 
 
 const options = [
@@ -205,10 +205,10 @@ const AssignProductDialog = ({
         </>
     }
 
-    const frameworkComponents = {
-        actionsRenderer: ActionsRenderer,
-        commonRenderer: CommonRenderer,
-    };
+    // const frameworkComponents = {
+    //     actionsRenderer: ActionsRenderer,
+    //     commonRenderer: CommonRenderer,
+    // };
 
     const handleAssignProduct = async () => {
         setAssigning(true);
@@ -329,10 +329,10 @@ const AssignProductDialog = ({
                             </Grid>
                         </Grid>
                     </div>
-                    <CustomAgGridEditable
+                    {frameWorkComponent && Object.keys(frameWorkComponent).length > 0 ? <CustomAgGridEditable
                         columns={columns}
                         dataRows={dataRows}
-                        frameworkComponents={frameworkComponents}
+                        frameworkComponents={frameWorkComponent}
                         setGridApi={setGridApi}
                         dispatch={dispatch}
                         rowCount={rowCount}
@@ -347,7 +347,7 @@ const AssignProductDialog = ({
                         showOnlyShowFilteredRecordSwitch={true}
                         refreshGrid={fetchProduct}
                         renderedFrom={renderedFrom}
-                    />
+                    /> : <Loader text="Loading..." minHeight={"100%"} /> }
                 </>
             </CustomDialogContent>
         </Dialog>
