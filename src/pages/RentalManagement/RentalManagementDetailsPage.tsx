@@ -466,6 +466,7 @@ const RentalManagementDetailsPage = () => {
                         currentStep={currentStep}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-3`}
+                        stepFullScreen={stepFullScreen}
                       />
                     )}
                     {currentStep === 4 && rentalManagementData && (
