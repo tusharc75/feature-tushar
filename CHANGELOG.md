@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.76.0](https://github.com/vebholic/oms_frontend/compare/v2.75.0...v2.76.0) (2022-03-11)
+
+
+### Features
+
+* **dashboard:** new columns in regional sale table ([5668155](https://github.com/vebholic/oms_frontend/commit/5668155d75eae390e408cf0f23789166bad900a9))
+
+
+### Bug Fixes
+
+* **app:** minor fix ([6fc35ca](https://github.com/vebholic/oms_frontend/commit/6fc35ca3ccf5887fc4840a60202e8c4beb6b13d0))
+* bug fix ([91bbb42](https://github.com/vebholic/oms_frontend/commit/91bbb428e69aee8868d2128f2a3b7ec2b66abfce))
+* bug fix ([109a0d1](https://github.com/vebholic/oms_frontend/commit/109a0d13c7d411c2fb13ca16f987b6c346013234))
+* bug fix ([8ee70b1](https://github.com/vebholic/oms_frontend/commit/8ee70b1acedf60e7b22c20cbb033870505e0526d))
+* bug fix ([8965aa9](https://github.com/vebholic/oms_frontend/commit/8965aa95ff434a417981c21446b57ad0a2f86884))
+* **dashboard:** fix ([a941e7b](https://github.com/vebholic/oms_frontend/commit/a941e7b18b92c480c23190d1fd323ff60eeb4cbf))
+* **dashboard:** fix unit ([abe1750](https://github.com/vebholic/oms_frontend/commit/abe1750b631c19d8a43eab792f57165a84a57609))
+* **package parts:** changes and fix ([68c0a03](https://github.com/vebholic/oms_frontend/commit/68c0a03714d2d170f076284ec87004b28277b3be))
+* **parts:** editable table ([caf3f35](https://github.com/vebholic/oms_frontend/commit/caf3f35db0d243afef8e026e3dd9ef7568932944))
+* **product dialog:** selected records bug fix ([c55bc27](https://github.com/vebholic/oms_frontend/commit/c55bc27bca4260b0a2c2727eef5d792f9ffbe10d))
+* rental delivery ticket multiple pdf changes ([db4cb8d](https://github.com/vebholic/oms_frontend/commit/db4cb8dd40aa8d1ed6a92c0091b714d26b4e52c1))
+* well master action and add button changes ([457a82d](https://github.com/vebholic/oms_frontend/commit/457a82de57b4769d0b9f7ea98ee6c69471995136))
+
 ## [2.75.0](https://github.com/vebholic/oms_frontend/compare/v2.74.0...v2.75.0) (2022-03-10)
 
 
