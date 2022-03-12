@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.77.0](https://github.com/vebholic/oms_frontend/compare/v2.76.0...v2.77.0) (2022-03-12)
+
+
+### Features
+
+* product tab in delivery ticket details and invoice grid changes in rental management ([ed10d8b](https://github.com/vebholic/oms_frontend/commit/ed10d8bdd221e46de5ac646ad13db8d91beada2b))
+* react table in invoice of rental job ([a7e4188](https://github.com/vebholic/oms_frontend/commit/a7e41880c2085c59ec8d035ebfe24dac706db927))
+* rentalJob views nested product show following by parent product PO-1277 ([720cc29](https://github.com/vebholic/oms_frontend/commit/720cc29d725f2bbd4d16325fa23ab599bd14c6ec))
+
+
+### Bug Fixes
+
+* **add product:** fix and changes ([f3a1fd6](https://github.com/vebholic/oms_frontend/commit/f3a1fd666c7f118de3757de5cf06be97d9e3f008))
+* **assign product dialog:** fix selcted rows qty ([f13332b](https://github.com/vebholic/oms_frontend/commit/f13332b93e04a272c1230b2bb3e5119c1791df10))
+* bug fix ([ef20089](https://github.com/vebholic/oms_frontend/commit/ef20089f9dd6823cc73dfa8cf5e6c16751f1eca7))
+* bug fix ([fb09dbb](https://github.com/vebholic/oms_frontend/commit/fb09dbb242f44f66e63bd181d7499e0f327ca9ee))
+* bug fix ([c5e5c25](https://github.com/vebholic/oms_frontend/commit/c5e5c253eac42e2cc1901693ff311c9e27a7d515))
+* bug fix ([bee7f47](https://github.com/vebholic/oms_frontend/commit/bee7f47af1e655d679533e8d7b5b5dfa7bf9f2a9))
+* **parts:** change loader ([083c096](https://github.com/vebholic/oms_frontend/commit/083c0963cc7f8d13d37a6a46d7f3b84685ef91d2))
+
 ## [2.76.0](https://github.com/vebholic/oms_frontend/compare/v2.75.0...v2.76.0) (2022-03-11)
 
 
