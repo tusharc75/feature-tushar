@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, MenuList, ListItemIcon, ListItemText } from '@material-ui/core';
+import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, MenuList, ListItemIcon, ListItemText } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -109,19 +109,16 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
               </HtmlTooltip>
             </Box>}
             {!isOffline && (
-              <HtmlTooltip title={`${row.original.type === 'product' ? "Product" : "Package"} Details`}>
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    window.open(
-                      `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
-                    );
-                  }}
-                >
-                  <InfoIcon fontSize="small" />
-                </IconButton>
-              </HtmlTooltip>
+              <Chip
+                className="ml-1"
+                label={`${row.original.type === 'product' ? "Product" : "Package"}`}
+                size="small" color="primary"
+                onClick={() => {
+                  window.open(
+                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                  );
+                }}
+              />
             )}
           </div>
         ),

@@ -2,10 +2,8 @@
 import Box from "@material-ui/core/Box/Box";
 import React, { useState, useEffect, useReducer, useContext, Fragment } from "react";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer, } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Chip, Dialog, IconButton } from "@material-ui/core";
+import { Button, Chip, Dialog, IconButton, Menu, MenuItem } from "@material-ui/core";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { CustomDialogTransition, customerContact, dateFormat, formatAmountWithCurrency, gridLoadingTimeout, INVENTORY_STATUS, purchaseOrder, rentalManagement, RENTAL_STATUS, serializedAsset, sidebarResource } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
@@ -14,14 +12,12 @@ import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
 import { isMobile, isTablet } from "react-device-detect";
 import { AiFillFilePdf } from "react-icons/ai";
 import routes from "../../../components/Helpers/Routes";
-import { BiPurchaseTagAlt, IoMdDownload, MdEmail } from "react-icons/all";
-import { Link } from "react-router-dom";
+import { IoMdDownload, MdEmail } from "react-icons/all";
 import { startCase } from "lodash";
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import AdditionalCostDialog from "../AdditionalCost/AdditionalCostDialog";
 import { fetch_rental_product_fields, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
-import { camelCase } from "lodash";
 import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
 import moment from "moment";
 import NoDataCell from "src/components/Helpers/NoDataCell";
@@ -36,9 +32,10 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [generatingPdfFile, setGeneratingFile] = useState(false);
 
-
-
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [downlodingFile, setDownlodingFile] = useState(null)
+
   const [emailAttachments, setEmailAttachments] = useState([]);
   const { isOffline } = useContext(CustomOfflineContext);
   const [showCostDialog, setShowCostDialog] = useState(false)
@@ -90,14 +87,14 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
           Cell: ({ row }) => (
             <div className="d-flex gap-2 align-items-center">
               <p className="text-truncate" title={row.original.detail}  >
-                {(row.original?.type === "asset" && !isOffline) ?
-                  <a className="link text-truncate" href={`${serializedAsset.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
-                  row.original.detail}
+                {!isOffline ?
+                  row.original?.type === "product" ?
+                    <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
+                    : row.original?.type === "package" ?
+                      <a className="link text-truncate" href={`${routes.packagesDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
+                      : <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original._id}`} target="_blank">{row.original.detail}</a>
+                  : row.original.detail}
               </p>
-              {row.original?.type === "asset" &&
-                <span className="d-flex align-items-center gap-2">
-                  <Chip label="Asset" size="small" color="primary" />
-                </span>}
             </div>),
           Footer: () => {
             return <>Total</>
@@ -254,48 +251,54 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
     return subRows;
   }
 
-  const handlePDF = (type) => {
-    setDownlodingFile(type);
-    axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/pdf`).then(({ data }) => {
-      axiosInstance().get(`user/download?fileName=${data.data.fileName}`, {
-        responseType: "blob",
-      })
-        .then(({ data }) => {
-          if (type === "Download") {
-            const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `Rental-${rentalManagementData.rentalJobName}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            setDownlodingFile(null);
-          }
-          else if (type === "Preview") {
-            const file = new Blob([data], { type: "application/pdf" });
-            const fileURL = URL.createObjectURL(file);
-            const pdfWindow = window.open();
-            pdfWindow.location.href = fileURL;
-            setDownlodingFile(null);
-          }
-          else {
-            const file = new Blob([data], { type: 'application/pdf' });
-            generateBase64forFile(file, 'pdf');
-          }
+  const handlePDF = (type, PDFType) => {
+    setIsLoading(true)
+    axiosInstance().get(PDFType === "Detail" ?
+      `${rentalManagement.api}/${rentalManagementData._id}/pdf/detail`
+      : `${rentalManagement.api}/${rentalManagementData._id}/pdf`).then(({ data }) => {
+        axiosInstance().get(`user/download?fileName=${data.data.fileName}`, {
+          responseType: "blob",
         })
-        .catch((err) => {
-          if (type === "Email") {
-            setSendEmail(true)
-          }
-          toastConfig.setToastConfig(err);
-          setDownlodingFile(null);
-        });
-    }).catch((err) => {
-      if (type === "Email") {
-        setSendEmail(true)
-      }
-      toastConfig.setToastConfig(err);
-      setDownlodingFile(null);
-    })
+          .then(({ data }) => {
+            if (type === "Download") {
+              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', `Rental-${rentalManagementData.rentalJobName}.pdf`);
+              document.body.appendChild(link);
+              link.click();
+              setIsLoading(false)
+              setDownlodingFile(null);
+            }
+            else if (type === "Preview") {
+              const file = new Blob([data], { type: "application/pdf" });
+              const fileURL = URL.createObjectURL(file);
+              const pdfWindow = window.open();
+              pdfWindow.location.href = fileURL;
+              setIsLoading(false)
+              setDownlodingFile(null);
+            }
+            else {
+              const file = new Blob([data], { type: 'application/pdf' });
+              generateBase64forFile(file, 'pdf');
+            }
+          })
+          .catch((err) => {
+            if (type === "Email") {
+              setSendEmail(true)
+            }
+            toastConfig.setToastConfig(err);
+            setIsLoading(false)
+            setDownlodingFile(null);
+          });
+      }).catch((err) => {
+        if (type === "Email") {
+          setSendEmail(true)
+        }
+        toastConfig.setToastConfig(err);
+        setIsLoading(false)
+        setDownlodingFile(null);
+      })
   }
 
   const generateBase64forFile = (blobData, type) => {
@@ -340,6 +343,15 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
       });
   }
 
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+
   return (<>
     <Box display="flex" justifyContent="space-between" m={1}>
       <Box display="flex" alignItems="center">
@@ -366,11 +378,14 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
             type="button"
             size="small"
             style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-            disabled={downlodingFile === "Preview" ? true : (false || isOffline)}
+            disabled={downlodingFile === "Preview" && isLoading ? true : (false || isOffline)}
             startIcon={isMobile ? '' : <AiFillFilePdf />}
-            onClick={() => handlePDF("Preview")}
+            onClick={(e) => {
+              setDownlodingFile("Preview");
+              handleClick(e);
+            }}
           >
-            {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile === "Preview" ? "Please wait..." : "Preview"}
+            {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile === "Preview" && isLoading ? "Please wait..." : "Preview"}
           </Button>
         )}
         <Box mx={1} />
@@ -381,27 +396,55 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
             type="button"
             size="small"
             style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
-            disabled={downlodingFile === "Download" ? true : (false || isOffline)}
+            disabled={downlodingFile === "Download" && isLoading ? true : (false || isOffline)}
             startIcon={isMobile ? '' : <IoMdDownload />}
-            onClick={() => handlePDF("Download")}
+            onClick={(e) => {
+              setDownlodingFile("Download");
+              handleClick(e)
+            }}
           >
-            {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile === "Download" ? "Please wait..." : "Download"}
+            {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile === "Download" && isLoading ? "Please wait..." : "Download"}
           </Button>
         )}
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          <MenuItem onClick={() => {
+            setAnchorEl(null)
+            handlePDF(downlodingFile, "Regular")
+          }}>Regular</MenuItem>
+          <MenuItem onClick={() => {
+            setAnchorEl(null)
+            handlePDF(downlodingFile, "Detail")
+          }}>Detail</MenuItem>
+        </Menu>
         <Box mx={1} />
         {permissions?.rentalManagement?.isRead && <Button
           variant={isMobile && !isTablet ? 'text' : 'outlined'}
           color="primary"
           size="small"
           style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
-          disabled={downlodingFile === "Email" ? true : (false || isOffline)}
+          disabled={downlodingFile === "Email" && isLoading ? true : (false || isOffline)}
           startIcon={isMobile ? '' : <MdEmail />}
           onClick={() => {
             fetchEmailsData()
-            handlePDF("Email")
+            handlePDF("Email", "Regular")
           }}
         >
-          {isMobile && !isTablet ? <MdEmail size={20} /> : downlodingFile === "Email" ? "Please wait..." : `Send Email`}
+          {isMobile && !isTablet ? <MdEmail size={20} /> : downlodingFile === "Email" && isLoading ? "Please wait..." : `Send Email`}
         </Button>}
       </Box>
     </Box>

@@ -15,7 +15,7 @@ import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
 import ManagePurchaseOrder from "../../PurchaseOrder/ManagePurchaseOrder";
 import ManageSublease from "../../Sublease/ManageSublease";
-import { uniqBy, uniq } from 'lodash';
+import { uniqBy, uniq, startCase } from 'lodash';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
@@ -76,10 +76,15 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         Cell: ({ row }) => (
           <div className="d-flex gap-2 align-items-center">
             <p className="text-truncate" title={row.original.detail}  >
-              {(row.original?.type === "asset" && !isOffline) ?
-                <a className="link text-truncate" href={`${serializedAsset.route}/detail/${row.original.inventory}`} target="_blank">{row.original.detail}</a> :
-                row.original.detail}
+              {(!isOffline) ?
+                row.original?.type === "product" ?
+                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
+                  : row.original?.type === "package" ?
+                    <a className="link text-truncate" href={`${routes.packagesDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
+                    : <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original.inventory}`} target="_blank">{row.original.detail}</a>
+                : row.original.detail}
             </p>
+            <Chip className="ml-1" label={startCase(row.original?.type)} size="small" color="primary" />
             {row.original.isPurchaseOrder &&
               <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
                 <IconButton size="small" onClick={() => {
@@ -104,7 +109,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             }
             {row.original?.type === "asset" &&
               <span className="d-flex align-items-center gap-2">
-                <Chip label="Asset" size="small" color="primary" />
                 {(row.original.status === INVENTORY_STATUS.reserved && row.original?.manualStatus !== INVENTORY_STATUS.reserved && !isOffline) &&
                   <HtmlTooltip title={`Remove`}>
                     <IconButton size="small" onClick={() => {
