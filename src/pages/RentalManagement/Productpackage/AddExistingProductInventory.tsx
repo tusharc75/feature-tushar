@@ -19,8 +19,7 @@ import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 
 
-
-
+let searchTimeout;
 const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, rentalManagementData, renderedFrom }) => {
 
     const localStorageSelectedRecords = `${renderedFrom}_selected`
@@ -54,7 +53,13 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     }, [])
 
     useEffect(() => {
-        fetchMaterial()
+        let millisec = Object.keys(search).length > 0 ? 600 : 5;
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        searchTimeout = setTimeout(() => {
+            fetchMaterial()
+        }, millisec);
     }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
 

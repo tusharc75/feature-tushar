@@ -128,7 +128,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           ele.hideSelection = ele.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered;
 
           ele.subRows = [];
-          const assets = productAssets?.filter((e) => e.product === element.materialId)
+          const assets = productAssets?.filter((e) => e._id === element._id)
           assets?.forEach((_asset: any) => {
             const asset: any = {};
             asset.detail = _asset?.inventoryDetail?.assetNumber;
@@ -162,8 +162,19 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           if (ele.subRows.length) {
             ele.hideSelection = ele.subRows?.some((e) => !e.hideSelection) ? false : true;
           }
+
           ele.qty = ele.serializedProduct ? assets.length : element.qty;
-          rows.push(ele)
+          if (rows.filter((e) => e._id === ele._id).length) {
+            rows.forEach((e) => {
+              if (e._id === ele._id) {
+                e.qty += ele.qty;
+                e.subRows = [...ele.subRows, ...e.subRows];
+              }
+            })
+          }
+          else {
+            rows.push(ele)
+          }
         })
       }
       setRowsData(rows);
@@ -193,9 +204,12 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       sticky: isMobile ? "none" : "left",
       Cell: ({ row }) => (
         row?.original?.type === "product" ?
-          <Link className="link text-truncate" title={row?.original?.detail} to={`${routes.productDetail.path}/${row?.original?._id}`}>
-            {row?.original?.detail}
-          </Link>
+          <Fragment>
+            <Link className="link text-truncate" title={row?.original?.detail} to={`${routes.productDetail.path}/${row?.original?._id}`}>
+              {row?.original?.detail}
+            </Link>
+            <Chip className="ml-2" label="Product" size="small" color="primary" />
+          </Fragment>
           : row?.original?.type === "asset" ?
             <Fragment>
               <Link className="link text-truncate" title={row?.original?.detail} to={`${routes.serializedAssetDetail.path}/${row?.original?._id}`}>

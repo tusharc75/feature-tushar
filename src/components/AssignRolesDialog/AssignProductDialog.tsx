@@ -34,6 +34,7 @@ const options = [
     }
 ];
 
+let searchTimeout;
 const AssignProductDialog = ({
     productsDialogOpen,
     productId,
@@ -59,7 +60,7 @@ const AssignProductDialog = ({
         { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
         { field: 'productNumber', headerName: 'Product Number', show: true, cellRenderer: 'commonRenderer' },
         { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
-    ] 
+    ]
 
     const [filter, setFilter] = useState(`All ${routes.product.title}`);
     const [isProductType, setIsProductType] = useState(false);
@@ -69,11 +70,17 @@ const AssignProductDialog = ({
     }, [])
 
     useEffect(() => {
-        setDisableSaveButton(selectedRecords.some(d => d.qty === 0))
+        setDisableSaveButton([...getLocalStorageArrayData(localStorageSelectedRecords)].some(d => d.qty === 0))
     }, [selectedRecords])
 
     useEffect(() => {
-        fetchProduct()
+        let millisec = Object.keys(search).length > 0 ? 600 : 5;
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        searchTimeout = setTimeout(() => {
+            fetchProduct()
+        }, millisec);
     }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
     const fetchGridColumns = () => {
@@ -103,7 +110,7 @@ const AssignProductDialog = ({
                 }
                 setFrameWorkComponent({ ...tempFrameworkComponent })
                 columns = [...columns, ...getStaticFields()]
-                setColumns([...defaultColumns, ...columns ])
+                setColumns([...defaultColumns, ...columns])
             })
     }
 
@@ -132,7 +139,6 @@ const AssignProductDialog = ({
                 type: "selection",
                 selectedRecords: savedRecords
             })
-
             dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }) }, gridLoadingTimeout);
         })
@@ -213,7 +219,7 @@ const AssignProductDialog = ({
     const handleAssignProduct = async () => {
         setAssigning(true);
         if (reference === 'product') {
-            const dataObj = selectedRecords.filter(d => d.qty > 0)
+            const dataObj = [...getLocalStorageArrayData(localStorageSelectedRecords)].filter(d => d.qty > 0)
                 .map(d => {
                     return ({
                         "childProduct": d.id,
@@ -233,7 +239,7 @@ const AssignProductDialog = ({
             axiosInstance()
                 .post(`${packages.packageApi}/add-products`, {
                     ids: [productId],
-                    products: selectedRecords.map((d: any) => ({ product: d.id, qty: Number(d.qty) }))
+                    products: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ product: d.id, qty: Number(d.qty) }))
                 })
                 .then(() => {
                     setAssigning(false);
@@ -259,8 +265,8 @@ const AssignProductDialog = ({
     };
 
     const onCellValueChanged = (row) => {
-        if(!row || !row?.data) return 
-        const {data} = row
+        if (!row || !row?.data) return
+        const { data } = row
         const selectedFromStorage = [...getLocalStorageArrayData(localStorageSelectedRecords)]
         if (!selectedFromStorage || selectedFromStorage.length === 0) return
         const updatedRecords = selectedFromStorage.map(d => {
@@ -316,14 +322,14 @@ const AssignProductDialog = ({
                                         value={search}
                                     />
                                     <Button
-                                        disabled={isAssigning || disableSaveButton || selectedRecords.length === 0}
+                                        disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
                                         onClick={handleAssignProduct}
                                         color="primary"
                                         size="small"
                                         variant="contained"
                                         endIcon={isAssigning && <CircularProgress color='inherit' size={18} />}
                                     >
-                                        Add {selectedRecords.length > 0 ? "(" + selectedRecords.length + ")" : ""}
+                                        Add {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0 ? "(" + [...getLocalStorageArrayData(localStorageSelectedRecords)].length + ")" : ""}
                                     </Button>
                                 </Box>
                             </Grid>
@@ -342,12 +348,11 @@ const AssignProductDialog = ({
                         allowAction={false}
                         loading={loading}
                         allowSelection={true}
-                        // selectedRecords={selectedRecords}
                         onCellValueChanged={onCellValueChanged}
                         showOnlyShowFilteredRecordSwitch={true}
                         refreshGrid={fetchProduct}
                         renderedFrom={renderedFrom}
-                    /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box> }
+                    /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </>
             </CustomDialogContent>
         </Dialog>

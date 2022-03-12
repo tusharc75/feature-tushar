@@ -27,6 +27,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 
+let searchTimeout;
 
 const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, addSerializedAsset, handleSerializedAssetClose, selectedProducts, refrenceType = null,
     refrenceData = null,
@@ -52,10 +53,17 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
     const [selectedPlant, setSelectedPlant] = useState(filterByPlant);
     const [subleaseAsset, setSubleaseAsset] = useState(false)
 
+    const [selectedProduct, setSelectedProduct] = useState(null)
 
     useEffect(() => {
-        fetchProductInventory()
-    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedPlant, subleaseAsset]);
+        let millisec = Object.keys(search).length > 0 ? 600 : 600;
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        searchTimeout = setTimeout(() => {
+            fetchProductInventory()
+        }, millisec);
+    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedPlant, subleaseAsset, selectedProduct]);
 
     useEffect(() => {
         fetchGridColumns()
@@ -146,8 +154,16 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
         }
         let queryString = getQueryString();
         if (selectedProducts.length > 0) {
-            queryString = `${queryString}&filterById=${JSON.stringify(selectedProducts.map(m => { return { "field": "product", "term": m?._id ?? "" } }))}&filterByIdType=or`
+            var updatedFilters = []
+            if (selectedProduct) {
+                updatedFilters.push({ field: 'product', term: selectedProduct })
+            }
+            else {
+                updatedFilters = selectedProducts.map(m => { return { "field": "product", "term": m?._id ?? "" } })
+            }
+            queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}&filterByIdType=or`
         }
+
         axiosInstance().get(`${serializedAsset.api}${queryString}`).then(({ data }) => {
             data.data = data.data
                 .map((u) => {
@@ -170,14 +186,16 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
         if (showFilteredRecordsOnly) {
             deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id))}`;
         }
+        const updatedFilters = [];
         if (!isObjectEmpty(filters)) {
-            const updatedFilters = [];
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
                     term: filters[field].filter
                 })
             });
+        }
+        if (updatedFilters.length) {
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
         if (sorting.length > 0) {
@@ -286,17 +304,33 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                 <Box pt={1} pb={1}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} md={5}>
-                            <div>
-                                {
-                                    serializedProducts.length > 0 ?
-                                        serializedProducts.map(d =>
-                                            d?.qty < 0 ? <span key={d.name} className="text-error">{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span>
-                                                : (d?.qty === 0 ? <span key={d.name} className="text-success">{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span> : <span key={d.name}>{d.name ? `  ${d.name} (${d?.qty})  |` : ""}</span>)
-                                        ) : null
+                            <Box display="flex" flexDirection="row">
+                                {serializedProducts.length > 0 ?
+                                    serializedProducts.map(d =>
+                                        <Box m={0.5} p={1} border={1}
+                                            className="cursor-pointer"
+                                            borderColor="grey.300"
+                                            onClick={() => {
+                                                if (selectedProduct === d.id) {
+                                                    setSelectedProduct(null)
+                                                }
+                                                else {
+                                                    setSelectedProduct(d.id)
+                                                }
+                                            }}
+                                            bgcolor={d.id === selectedProduct && "primary.main"}
+                                            color={d.id === selectedProduct && "white"}
+                                        >
+                                            {d?.qty < 0 ?
+                                                <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                                                : (d?.qty === 0 ? <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span> :
+                                                    <span key={d.name}>{`${d.name} (${d?.qty})`}</span>)}
+                                        </Box>
+                                    ) : null
                                 }
-                            </div>
-                            {
-                                serializedProducts.length > 0 && serializedProducts.some(s => s.qty < 0) ? <div className="text-error font-weight-bold">You have selected more assets then needed.</div> : ""
+                            </Box>
+                            {serializedProducts.length > 0 && serializedProducts.some(s => s.qty < 0) ?
+                                <div className="text-error font-weight-bold">You have selected more assets then needed.</div> : ""
                             }
                         </Grid>
                         <Grid item xs={12} md={3}>

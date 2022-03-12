@@ -18,7 +18,7 @@ import { getColumnData, getFrameworkComponents, getStaticFields } from "../../..
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 
-
+let searchTimeout;
 
 const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, isAddingProducts, renderedFrom }) => {
 
@@ -41,7 +41,13 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     }, [])
 
     useEffect(() => {
-        fetchMaterial()
+        let millisec = Object.keys(search).length > 0 ? 600 : 5;
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        searchTimeout = setTimeout(() => {
+            fetchMaterial()
+        }, millisec);
     }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
     const fetchMaterial = () => {
