@@ -95,10 +95,10 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
           additionalData: {
             volumeUnit,
             currency,
-            ['Total Booked Volume']: isNaN(hitRatioValue) ? 0 : hitRatioValue / 100,
-            ['Total Booked Value']: isNaN(hitRatioCost) ? 0 : hitRatioCost / 100,
-            ['Total Booked Cost']: isNaN(hitRatioMargin) ? 0 : hitRatioMargin / 100,
-            ['Booked Gross Margin']: isNaN(hitRatioVolume) ? 0 : hitRatioVolume / 100
+            ['Total Booked Volume']: isNaN(hitRatioValue) ? 0 : hitRatioValue * 100,
+            ['Total Booked Value']: isNaN(hitRatioCost) ? 0 : hitRatioCost * 100,
+            ['Total Booked Cost']: isNaN(hitRatioMargin) ? 0 : hitRatioMargin * 100,
+            ['Booked Gross Margin']: isNaN(hitRatioVolume) ? 0 : hitRatioVolume * 100
           },
           cardData
         };

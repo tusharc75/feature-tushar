@@ -118,7 +118,7 @@ const useStyles = makeStyles((theme) => ({
     color: "#6ca826",
     fontWeight: "bold",
   },
-  rejectedByDoa: {
+  rejectedByDoa: {                
     color: "#d60f0f",
     fontWeight: "bold",
   },
