@@ -277,7 +277,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             isSubleaseAsset: _inventory.inventoryDetail?.subleaseAsset
           })
         })
-        parent.subRows = subRows;
+        if (subRows.length > 0)
+          parent.subRows = subRows;
+
         parent.isSublease = subleaseProduct?.some(e => e.materialId === parent.materialId)
         if (parent.type === "product") {
           parent.isValid = parent?.qty === subRows?.length ? true : false;
@@ -319,13 +321,17 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             _child.isValid = _child?.qty === subRows?.length ? true : false;
             _child.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === _child.materialId)
             _child.isSublease = subleaseProduct?.some(e => e.materialId === _child.materialId)
+
+            delete _child.subRows;
           })
           if (child.filter(e => e.isValid === false).length > 0) {
             parent.isValid = false
           } else {
             parent.isValid = true
           }
-          parent.subRows = child;
+
+          if (child?.length > 0)
+            parent.subRows = child;
         }
       });
       if (rows.filter(_rows => _rows.isValid === false).length > 0) {
@@ -572,6 +578,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               childrenProperty="subRows"
               uniqueKey="_id"
               hideSelection={isOffline}
+              renderedFrom="rental_management_serialized_asset"
+              isClientSideGrid={true}
             />
           </Box>
           : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>

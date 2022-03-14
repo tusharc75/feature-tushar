@@ -431,6 +431,8 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
                         onSelect={setSelectedProducts}
                         childrenProperty="subRows"
                         uniqueKey="_id"
+                        renderedFrom="sales_order_product_package"
+                        isClientSideGrid={true}
                     />
                 </Box>
             </>

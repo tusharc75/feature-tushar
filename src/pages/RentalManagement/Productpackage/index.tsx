@@ -216,6 +216,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
         width: 50,
         sticky: 'right',
         disableFilters: true,
+        canDrag: false,
         Cell: ({ row }) =>
           !row.original.hideSelection && (
             <IconButton
@@ -586,6 +587,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={isOffline}
+                renderedFrom="rental_management_product_package"
+                isClientSideGrid={true}
               />
             </Box>
           ) : (
