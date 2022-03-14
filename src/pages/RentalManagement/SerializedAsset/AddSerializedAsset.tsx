@@ -337,27 +337,28 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                             {refrenceType === "Rental Job" &&
                                 <Grid container >
                                     <Grid item xs={6} justifyContent={"flex-end"}>
-                                        <FormControlLabel
-                                            control={
-                                                <Checkbox
-                                                    name="subleaseAsset"
-                                                    checked={subleaseAsset}
-                                                    onChange={(e) => {
-                                                        dispatch({ type: "selection", selectedRecords: [] })
-                                                        localStorage.removeItem(localStorageSelectedRecords)
-                                                        setSubleaseAsset(e.target.checked)
-                                                        if (e.target.checked) {
-                                                            setSelectedPlant(null)
-                                                        }
-                                                        else {
-                                                            setSelectedPlant(filterByPlant)
-                                                        }
-                                                    }}
-                                                    color="primary"
-                                                />
-                                            }
-                                            label="Sublease Assets"
-                                        />
+                                        {permissions?.sublease &&
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        name="subleaseAsset"
+                                                        checked={subleaseAsset}
+                                                        onChange={(e) => {
+                                                            dispatch({ type: "selection", selectedRecords: [] })
+                                                            localStorage.removeItem(localStorageSelectedRecords)
+                                                            setSubleaseAsset(e.target.checked)
+                                                            if (e.target.checked) {
+                                                                setSelectedPlant(null)
+                                                            }
+                                                            else {
+                                                                setSelectedPlant(filterByPlant)
+                                                            }
+                                                        }}
+                                                        color="primary"
+                                                    />
+                                                }
+                                                label="Sublease Assets"
+                                            />}
                                     </Grid>
                                     <Grid item xs={6} justifyContent={"flex-end"}>
                                         <Autocomplete

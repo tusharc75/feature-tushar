@@ -54,12 +54,6 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
     const [showAddSupplierAccountDialog, setShowAddSupplierAccountDialog] = useState(false);
     const [showAddSupplierContactDialog, setShowAddSupplierContactDialog] = useState(false);
 
-    // const [countryBillToDropDown, setCountryBillToDropDown] = useState([]);
-    // const [countrySellToDropDown, setCountrySellToDropDown] = useState([]);
-    // const [countryBillToMainData, setCountryBillToMainData] = useState([]);
-    // const [countrySellToMainData, setCountrySellToMainData] = useState([]);
-
-
     const [addressData, setAddressData] = useState([]);
     const [shippingAddress, setShippingAddress] = useState([]);
     const [deliveryToAddress, setDeliveryToAddress] = useState([]);
@@ -70,6 +64,7 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Sublease").then(({ data: { data } }) => {
+            data = data.filter((d) => !["rentalJob"].includes(d.fieldData.fieldName));
             let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             if (subleaseId) {
@@ -90,10 +85,10 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                         });
                         setLoading(false)
                     } else {
-                        if (data?.actualStartDate === "") {
+                        if (data?.actualStartDate && data?.actualStartDate === "") {
                             fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualStartDate"].includes(obj.fieldName));
                         }
-                        if (data?.actualEndDate === "") {
+                        if (data?.actualEndDate && data?.actualEndDate === "") {
                             fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !["actualEndDate"].includes(obj.fieldName));
                         }
                         setInitialData({
