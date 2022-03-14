@@ -349,17 +349,20 @@ const SerializedAssetDetailsPage = () => {
   }
 
   useEffect(() => {
-    let statuses = [INVENTORY_STATUS.available, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost]
     if (productInventoryData) {
-      if (productInventoryData.status === INVENTORY_STATUS.lost || productInventoryData.status === INVENTORY_STATUS.underReview) {
-        setManualStatus(statuses)
-      } else {
-        setManualStatus(statuses.filter(status => status !== "Available"))
+      if (productInventoryData.status === INVENTORY_STATUS.underReview) {
+        setManualStatus([INVENTORY_STATUS.available, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost])
       }
-    } else {
-      setManualStatus(statuses)
+      else if (productInventoryData.status === INVENTORY_STATUS.scrap) {
+        setManualStatus([INVENTORY_STATUS.lost])
+      }
+      else if (productInventoryData.status === INVENTORY_STATUS.lost) {
+        setManualStatus([])
+      }
+      else {
+        setManualStatus([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost])
+      }
     }
-
   }, [productInventoryData])
 
 
@@ -408,17 +411,31 @@ const SerializedAssetDetailsPage = () => {
                           {isMobile && !isTablet ? <GiAutoRepair size={20} /> : "Create Repair Job"}
                         </Button>
                       }
-                      <Button
-                        variant="outlined"
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        disabled={updateLoading}
-                        aria-controls="action-menu"
-                        endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
-                      >
-                        {isMobile && !isTablet ? <GrStatusInfo size={20} /> : "Change Status"}
-                      </Button>
+                      {![INVENTORY_STATUS.lost].includes(productInventoryData.status) &&
+                        <Fragment>
+                          <Button
+                            variant="outlined"
+                            color="default"
+                            size="small"
+                            onClick={openActions}
+                            disabled={updateLoading}
+                            aria-controls="action-menu"
+                            endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
+                          >
+                            {isMobile && !isTablet ? <GrStatusInfo size={20} /> : "Change Status"}
+                          </Button>
+                          {![INVENTORY_STATUS.inUse].includes(productInventoryData.status) &&
+                            <Button
+                              variant={isMobile && !isTablet ? "text" : "outlined"}
+                              color="primary"
+                              size="small"
+                              onClick={handleOpenUpdateDialog}
+                            >
+                              {isMobile && !isTablet ? <MdEdit size={22} /> : "Edit"}
+                            </Button>
+                          }
+                        </Fragment>
+                      }
                       <Menu
                         anchorEl={anchorEl}
                         keepMounted
@@ -443,17 +460,8 @@ const SerializedAssetDetailsPage = () => {
                           })
                         }
                       </Menu>
-                      <Button
-                        variant={isMobile && !isTablet ? "text" : "outlined"}
-                        color="primary"
-                        size="small"
-                        onClick={handleOpenUpdateDialog}
-                      >
-                        {isMobile && !isTablet ? <MdEdit size={22} /> : "Edit"}
-                      </Button>
                     </>
                   )}
-
                 </DetailsPageHeader>
               )}
               {/*For Desktop*/}

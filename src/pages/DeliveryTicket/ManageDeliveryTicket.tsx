@@ -32,12 +32,10 @@ import ManageAddressDialog from "../../components/Address/ManageAddressDialog";
 import { isArray } from "lodash";
 import routes from './../../components/Helpers/Routes';
 
-const ManageDeliveryTicket = (props) => {
+const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, ticketType = null, refrenceType = null, refrenceData = null, productInventory = null, products = null }) => {
 
     const { state: { user } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
-    const { deliveryTicketId = null, ticketType, refrenceType = null, refrenceData = null, productInventory = null, onClose, onSuccess,
-        warehouseId = null } = props;
 
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -200,12 +198,16 @@ const ManageDeliveryTicket = (props) => {
                 const tempInitialData = getObjKeys("", fieldsDataForCreate)
                 var isPickupFromDisable = false;
                 var isDeliveryToDisable = false;
-                if (productInventory && refrenceType && refrenceData) {
+                if ((productInventory || products) && refrenceType && refrenceData) {
 
                     tempInitialData["ticketName"] = `${refrenceData?.ticketName}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = refrenceType;
                     tempInitialData["ticketType"] = ticketType;
                     tempInitialData["productInventory"] = productInventory?.map(d => d?._id)
+                    tempInitialData["products"] = []
+                    products?.forEach((ele) => {
+                        tempInitialData["products"].push({ product: ele._id, qty: ele.qty })
+                    })
                     tempInitialData["wellName"] = refrenceData?.wellName;
                     tempInitialData["afeNumber"] = refrenceData?.afeNumber;
 

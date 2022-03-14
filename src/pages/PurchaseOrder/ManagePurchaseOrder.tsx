@@ -297,6 +297,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                 touched={touched}
                                                                 label={field.fieldLabel}
                                                                 name={field.fieldName}
+                                                                fieldData={field}
                                                                 type={field.type}
                                                                 options={field.option}
                                                                 setFieldValue={(name, value) => {
@@ -338,6 +339,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                 touched={touched}
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
+                                                                                fieldData={field}
                                                                                 type={field.type}
                                                                                 options={accountData}
 
@@ -425,6 +427,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                     touched={touched}
                                                                                     label={field.fieldLabel}
                                                                                     name={field.fieldName}
+                                                                                    fieldData={field}
                                                                                     type={field.type}
                                                                                     options={contactData.filter(d => d.parentAccount === values["supplierAccount"])}
                                                                                     setFieldValue={(name, value) => {
@@ -480,6 +483,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                 touched={touched}
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
+                                                                                fieldData={field}
                                                                                 type={field.type}
                                                                                 options={field.option}
                                                                                 setFieldValue={(name, value) => {
@@ -498,6 +502,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                     touched={touched}
                                                                                     label={field.fieldLabel}
                                                                                     name={field.fieldName}
+                                                                                    fieldData={field}
                                                                                     type={field.type}
                                                                                     options={ownerData}
                                                                                     onChange={(e, val) => {
@@ -555,6 +560,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                     touched={touched}
                                                                                     label={field.fieldLabel}
                                                                                     name={field.fieldName}
+                                                                                    fieldData={field}
                                                                                     type={field.type}
                                                                                     options={collaboratorData}
                                                                                     setFieldValue={(name, value) => {
@@ -581,6 +587,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                     errors={errors}
                                                                                     touched={touched}
                                                                                     label={field.fieldLabel}
+                                                                                    fieldData={field}
                                                                                     name={field.fieldName}
                                                                                     type={field.type}
                                                                                     options={field.option}

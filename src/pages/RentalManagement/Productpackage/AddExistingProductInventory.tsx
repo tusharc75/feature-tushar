@@ -5,7 +5,6 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from "../../../axios/axiosInstance";
 import { Box, CircularProgress, TextField } from "@material-ui/core";
 import SearchBox from '../../../components/Helpers/SearchBox'
-import { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
 import { gridLoadingTimeout, CustomDialogTransition, packages, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import Dialog from "@material-ui/core/Dialog/Dialog";
@@ -17,16 +16,15 @@ import { startCase } from "lodash";
 import { getColumnData, getFrameworkComponents, getStaticFields } from "../../../constants/columns";
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
+import { reducer, intialState, } from "../../../components/AgGridComponents/CustomAgGrid";
 
-
-
-
+let searchTimeout;
 const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, rentalManagementData, renderedFrom }) => {
+
     const localStorageSelectedRecords = `${renderedFrom}_selected`
     const toastConfig = useContext(CustomToastContext)
-    const {
-        state: { selectedEntity }
-    }: any = useData();
+
+    const { state: { user, permissions, selectedEntity } }: any = useData();
     const [packageDialog, setPackageDialog] = useState(false);
     const [productData, setProductData] = useState([]);
     const [packageProductData, setPackageProductData] = useState([]);
@@ -48,12 +46,20 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         ]
 
     useEffect(() => {
-        fetchMaterial()
-    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
-
-    useEffect(() => {
+        localStorage.removeItem(localStorageSelectedRecords)
         fetchGridColumns()
     }, [])
+
+    useEffect(() => {
+        let millisec = Object.keys(search).length > 0 ? 600 : 5;
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        searchTimeout = setTimeout(() => {
+            fetchMaterial()
+        }, millisec);
+    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+
 
     const fetchMaterial = () => {
         dispatch({ type: "loading", loading: true });
@@ -69,6 +75,10 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 finalObject["id"] = u._id;
                 finalObject["type"] = type;
                 finalObject["qty"] = 0;
+                const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id)
+                if (qtyAdded.length) {
+                    finalObject["qty"] = qtyAdded[0].qty;
+                }
                 finalObject["productCategory"] = u.productCategory?.optionLabel;
                 finalObject["priceTemplate"] = u.priceTemplate?.optionLabel
                 finalObject["unitMain"] = u.unit
@@ -77,7 +87,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                     ...finalObject,
                 };
             });
-
             dispatch({ type: "initialize", data: rows, count: count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {
@@ -96,9 +105,9 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         if (type === "package") {
             updatedFilters.push({ field: 'packageType', term: 'product' })
         }
-        if (type === "product") {
-            updatedFilters.push({ field: 'serializedProduct', term: 'yes' })
-        }
+        // if (type === "product") {
+        //     updatedFilters.push({ field: 'serializedProduct', term: 'yes' })
+        // }
         if (!isObjectEmpty(filters)) {
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
@@ -126,9 +135,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = type === "product" ?
-                        getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
-                        : getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, type === "product" ? routes.productDetail.path : routes.packagesDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -137,9 +144,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                     }
                 })
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-                tempFrameworkComponent = {
-                    ...tempFrameworkComponent,
-                }
                 setFrameWorkComponent({ ...tempFrameworkComponent })
                 columns = [...columns, ...getStaticFields()]
                 setColumns([...columns, ...defaultColumns])
@@ -162,7 +166,16 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         dispatch({ type: "search", search: e.target.value });
     };
 
-    const onCellValueChanged = (row) => {
+    const onCellValueChanged = ({ data }: any) => {
+        const selectedFromStorage = [...getLocalStorageArrayData(localStorageSelectedRecords)]
+        if (!selectedFromStorage || selectedFromStorage.length === 0) return
+        const updatedRecords = selectedFromStorage.map(d => {
+            if (data._id === d._id) {
+                d.qty = data.qty
+            }
+            return d
+        })
+        localStorage.setItem(localStorageSelectedRecords, JSON.stringify(updatedRecords))
     }
 
     const handleSubmit = () => {
@@ -179,6 +192,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             dispatch({ type: "loading", loading: false });
         }, gridLoadingTimeout);
     }
+
 
     return (<Fragment>
         <Dialog

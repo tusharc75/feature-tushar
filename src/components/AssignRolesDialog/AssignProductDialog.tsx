@@ -10,20 +10,18 @@ import {
 } from "@material-ui/core";
 import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
-import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "src/axios/axiosInstance";
+import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import SearchBox from "../Helpers/SearchBox";
-import { gridLoadingTimeout, isObjectEmpty, product, packages } from "../../constants/helpers";
-import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { useData } from "../../StateProvider/Provider";
-import CommonSkeleton from "../Helpers/CommonSkeleton";
-import { CommonRenderer } from "../AgGridComponents/CustomAgGridCellRenderers";
+import { gridLoadingTimeout, isObjectEmpty, product, packages, prepareDataForGrid, getLocalStorageArrayData } from "src/constants/helpers";
+import { useData } from "src/StateProvider/Provider";
 import routes from "../Helpers/Routes";
-import styles from "../../pages/Leads/Header.module.scss";
+import styles from "src/pages/Leads/Header.module.scss";
 import { AddOutlined, RemoveOutlined } from "@material-ui/icons";
-import CustomAgGridEditable from "../AgGridComponents/CustomAgGridEditable";
-import { isMobile, isTablet } from 'react-device-detect';
+import CustomAgGridEditable, { reducer, intialState } from "../AgGridComponents/CustomAgGridEditable";
+import { getColumnData, getFrameworkComponents, getStaticFields } from "src/constants/columns";
+import CommonSkeleton from "../Helpers/CommonSkeleton";
+
 
 const options = [
     {
@@ -36,52 +34,85 @@ const options = [
     }
 ];
 
+let searchTimeout;
 const AssignProductDialog = ({
     productsDialogOpen,
     productId,
     onSuccess,
     handleCloseDialog,
     assignedProducts,
-    reference = 'product'
+    reference = 'product',
+    renderedFrom
 }) => {
-    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-    const {
-        state: { permissions, selectedEntity },
-    }: any = useData();
+    const localStorageSelectedRecords = `${renderedFrom}_selected`
+    const { state: { permissions, selectedEntity } }: any = useData();
 
     const toastConfig = useContext(CustomToastContext);
-    const [selectedProducts, setSelectedProducts] = useState([]);
     const [isAssigning, setAssigning] = useState(false);
     const [disableSaveButton, setDisableSaveButton] = useState(false);
-    const [productsConst, setProductsConst] = useState([]);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const [selectedType, setSelectedType] = useState(1);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
-    const [columns, setColumns] = useState([
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+    const [frameWorkComponent, setFrameWorkComponent] = useState(null)
+    const [columns, setColumns] = useState([])
+    const defaultColumns = [
         { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
         { field: 'productNumber', headerName: 'Product Number', show: true, cellRenderer: 'commonRenderer' },
-        { field: 'quantity', headerName: 'Quantity', show: true, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
-    ]);
+        { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
+    ]
 
     const [filter, setFilter] = useState(`All ${routes.product.title}`);
     const [isProductType, setIsProductType] = useState(false);
 
     useEffect(() => {
-        axiosInstance().get("/field?resource=Product&view=true").then(({ data: { data } }) => {
-            const productTypes = data.find((e) => e.fieldData.fieldName === "productType")
-            if (productTypes) {
-                setIsProductType(true)
-            } else {
-                setIsProductType(false)
-            }
-        })
+        fetchGridColumns()
     }, [])
 
     useEffect(() => {
-        fetchProduct()
-    }, [page, limit, filters, sorting, search, selectedEntity, selectedType]);
+        setDisableSaveButton([...getLocalStorageArrayData(localStorageSelectedRecords)].some(d => d.qty === 0))
+    }, [selectedRecords])
+
+    useEffect(() => {
+        let millisec = Object.keys(search).length > 0 ? 600 : 5;
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        searchTimeout = setTimeout(() => {
+            fetchProduct()
+        }, millisec);
+    }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
+
+    const fetchGridColumns = () => {
+        axiosInstance()
+            .get("/field?resource=Product&view=true")
+            .then(({ data: { data } }) => {
+                const productTypes = data.find((e) => e.fieldData.fieldName === "productType")
+                if (productTypes) {
+                    setIsProductType(true)
+                } else {
+                    setIsProductType(false)
+                }
+                let columns = []
+                let rendererNames = []
+                data.forEach(o => {
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
+                    if (currentColumn !== null) {
+                        columns = [...columns, currentColumn?.columnData]
+                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                            rendererNames.push(currentColumn?.rendererName)
+                        }
+                    }
+                })
+                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+                tempFrameworkComponent = {
+                    ...tempFrameworkComponent,
+                }
+                setFrameWorkComponent({ ...tempFrameworkComponent })
+                columns = [...columns, ...getStaticFields()]
+                setColumns([...defaultColumns, ...columns])
+            })
+    }
 
     const fetchProduct = () => {
         dispatch({ type: "loading", loading: true });
@@ -90,18 +121,25 @@ const AssignProductDialog = ({
         }
         const queryString = getQueryString();
         axiosInstance().get(`${product.api}${queryString}`).then(({ data }) => {
-            if (reference === "product") {
-                data.data = data.data.filter(obj => obj._id !== productId && !assignedProducts.some(item => item?.childProduct === obj?._id))
-            } else {
-                data.data = data.data.filter(obj => assignedProducts.findIndex(d => d._id === obj._id) < 0)
-            }
-            data.data = data.data?.map((u) => ({
-                ...u,
-                id: u._id,
-                quantity: 0,
-            }));
-            setProductsConst(data.data)
-            dispatch({ type: "initialize", data: data.data, count: data.data.length });
+            let rows = data.data.map((u) => {
+                let finalObject = prepareDataForGrid(u);
+                finalObject["isChecked"] = false;
+                finalObject["id"] = u._id;
+                finalObject["qty"] = 0;
+                const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id)
+                if (qtyAdded.length) {
+                    finalObject["qty"] = qtyAdded[0].qty;
+                }
+                return {
+                    ...finalObject,
+                };
+            });
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            dispatch({
+                type: "selection",
+                selectedRecords: savedRecords
+            })
+            dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }) }, gridLoadingTimeout);
         })
             .catch((error) => {
@@ -110,9 +148,15 @@ const AssignProductDialog = ({
     };
 
     const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}&filterProducts=${selectedType}`;
+        const ignoreIds = assignedProducts && assignedProducts?.length > 0 ? assignedProducts.map(p => reference === "product" ? p.productId : p._id) : []
+        let deepFilter = `?page=${page}&limit=${limit}&filterProducts=${selectedType}&ignoreIds=${JSON.stringify(ignoreIds)}`;
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+        }
+
+        if (showFilteredRecordsOnly) {
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
         }
         const updatedFilters = []
         if (isProductType) {
@@ -150,7 +194,7 @@ const AssignProductDialog = ({
                         size="small"
                         aria-label="Clone"
                         onClick={() => {
-                            if (params.data.quantity > 0) rowNode.setDataValue("quantity", params.data.quantity - 1)
+                            if (params.data.qty > 0) rowNode.setDataValue("qty", params.data.qty - 1)
                         }}>
                         <RemoveOutlined fontSize="small" color="primary" />
                     </IconButton>
@@ -158,7 +202,7 @@ const AssignProductDialog = ({
                         size="small"
                         aria-label="Clone"
                         onClick={() => {
-                            rowNode.setDataValue("quantity", params.data.quantity + 1)
+                            rowNode.setDataValue("qty", params.data.qty + 1)
                         }}>
                         <AddOutlined fontSize="small" color="primary" />
                     </IconButton>
@@ -167,30 +211,24 @@ const AssignProductDialog = ({
         </>
     }
 
-    const frameworkComponents = {
-        actionsRenderer: ActionsRenderer,
-        commonRenderer: CommonRenderer,
-    };
+    // const frameworkComponents = {
+    //     actionsRenderer: ActionsRenderer,
+    //     commonRenderer: CommonRenderer,
+    // };
 
     const handleAssignProduct = async () => {
         setAssigning(true);
         if (reference === 'product') {
-            const dataObj = selectedRecords.filter(d => d.quantity > 0)
+            const dataObj = [...getLocalStorageArrayData(localStorageSelectedRecords)].filter(d => d.qty > 0)
                 .map(d => {
                     return ({
                         "childProduct": d.id,
-                        "qty": Number(d.quantity)
+                        "qty": Number(d.qty)
                     })
                 })
             await axiosInstance().post(`/product/${productId}/bom`, dataObj)
                 .then(({ data }) => {
                     setAssigning(false);
-                    toastConfig.setToastConfig({
-                        message: data.message,
-                        type: "success",
-                        open: true,
-                    });
-
                     onSuccess();
                 })
                 .catch((error) => {
@@ -201,7 +239,7 @@ const AssignProductDialog = ({
             axiosInstance()
                 .post(`${packages.packageApi}/add-products`, {
                     ids: [productId],
-                    products: selectedRecords.map((d: any) => ({ product: d.id, qty: Number(d.quantity) }))
+                    products: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ product: d.id, qty: Number(d.qty) }))
                 })
                 .then(() => {
                     setAssigning(false);
@@ -227,12 +265,19 @@ const AssignProductDialog = ({
     };
 
     const onCellValueChanged = (row) => {
-        setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
+        if (!row || !row?.data) return
+        const { data } = row
+        const selectedFromStorage = [...getLocalStorageArrayData(localStorageSelectedRecords)]
+        if (!selectedFromStorage || selectedFromStorage.length === 0) return
+        const updatedRecords = selectedFromStorage.map(d => {
+            if (data._id === d._id) {
+                d.qty = data.qty
+            }
+            return d
+        })
+        localStorage.setItem(localStorageSelectedRecords, JSON.stringify(updatedRecords))
+        setDisableSaveButton([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some(d => d.qty === 0))
     }
-
-    useEffect(() => {
-        setDisableSaveButton(selectedRecords.some(d => d.quantity === 0))
-    }, [selectedRecords])
 
     return (
         <Dialog
@@ -244,11 +289,7 @@ const AssignProductDialog = ({
             aria-labelledby="assign-roles-dialog"
         >
             <CustomDialogHeader title={`Assign ${routes.product.title}`}
-                isMinimized={!fullScreen}
-                onMinimizeMaximize={() => {
-                    setFullScreen(prevState => !prevState)
-                }}
-                showManimizeMaximize={true}
+                showManimizeMaximize={false}
                 showRequiredLabel={false}
                 onClose={handleCloseDialog}
             />
@@ -271,7 +312,7 @@ const AssignProductDialog = ({
                                     </ToggleButtonGroup>
                                 } */}
                             </Grid>
-                            <Grid xs={6} container className={styles.filter_side} >
+                            <Grid item xs={6} className={styles.filter_side} >
                                 <Box className={styles.filter_side_header} component="div"  >
                                     <SearchBox
                                         onSearch={handleSearch}
@@ -281,37 +322,37 @@ const AssignProductDialog = ({
                                         value={search}
                                     />
                                     <Button
-                                        disabled={isAssigning || disableSaveButton || selectedRecords.length === 0}
+                                        disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
                                         onClick={handleAssignProduct}
                                         color="primary"
                                         size="small"
                                         variant="contained"
+                                        endIcon={isAssigning && <CircularProgress color='inherit' size={18} />}
                                     >
-                                        Add
+                                        Add {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0 ? "(" + [...getLocalStorageArrayData(localStorageSelectedRecords)].length + ")" : ""}
                                     </Button>
                                 </Box>
                             </Grid>
                         </Grid>
                     </div>
-                    {columns ?
-                        <CustomAgGridEditable
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameworkComponents}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            allowAction={false}
-                            loading={loading}
-                            renderedFrom="productDetailsPage"
-                            refreshGrid={fetchProduct}
-                            onCellValueChanged={onCellValueChanged}
-                            selectedRecords={selectedRecords}
-                        />
-                        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+                    {frameWorkComponent && Object.keys(frameWorkComponent).length > 0 ? <CustomAgGridEditable
+                        columns={columns}
+                        dataRows={dataRows}
+                        frameworkComponents={frameWorkComponent}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount}
+                        limit={limit}
+                        pageSizes={pageSizes}
+                        page={page}
+                        allowAction={false}
+                        loading={loading}
+                        allowSelection={true}
+                        onCellValueChanged={onCellValueChanged}
+                        showOnlyShowFilteredRecordSwitch={true}
+                        refreshGrid={fetchProduct}
+                        renderedFrom={renderedFrom}
+                    /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
                 </>
             </CustomDialogContent>
         </Dialog>

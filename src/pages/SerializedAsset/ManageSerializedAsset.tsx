@@ -49,20 +49,18 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        data = data.filter((d) => !["currentOwnerType", "currentOwner"].includes(d.fieldData.fieldName));
+        data = data.filter((d) => !["currentOwnerType", "currentOwner", "purchaseOrder"].includes(d.fieldData.fieldName));
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-        setAllFields(productInventoryId ? fieldsDataForUpdate : fieldsDataForCreate)
+        var fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
         const categoryOptions = data.find((obj) => obj?.fieldData.fieldName === 'productCategory')?.fieldData.option;
         const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'warehouse')?.fieldData.option;
         const productOptions = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData.option;
-
+        
         setProductCategoryOptions(categoryOptions);
         setPlantsCategoryOptions(plantsOptions);
         setProductDescriptionOptions(productOptions)
-
+        setAllFields(productInventoryId ? fieldsDataForUpdate : fieldsDataForCreate)
         if (productInventoryId) {
           axiosInstance()
             .get(`${serializedAsset.api}/` + productInventoryId)

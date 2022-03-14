@@ -161,7 +161,15 @@ const RentalManagementViews = (props) => {
       if (allPackages.length) xPosition += 300;
       var pakcageIdx = 0;
       var productIdx = 0;
+      const productColSystem = {};
+      const productWithMaterialId = {};
+
+      var lastIndex = 0;
       product?.material?.map((item: any, index) => {
+        if (item.type !== 'package') {
+          productColSystem[item._id] = productColSystem[item.parentId] ? productColSystem[item.parentId] + 300 : xPosition;
+          productWithMaterialId[item.materialId] = item._id;
+        }
         flow.push({
           id: `${item._id}`,
           sourcePosition: 'right',
@@ -178,17 +186,23 @@ const RentalManagementViews = (props) => {
               </div>
             )
           },
-          position: { x: item.type === 'package' ? xPosition - 300 : xPosition, y: item.type === 'package' ? pakcageIdx * 80 : productIdx * 80 },
+          position: {
+            x: item.type === 'package' ? xPosition - 300 : productColSystem[item.parentId] ? productColSystem[item.parentId] + 300 : xPosition,
+            y: item.type === 'package' ? pakcageIdx * 80 : productIdx * 80
+          },
           style: item.type === 'package' ? customNodeStyles.package : customNodeStyles.product
         });
+        const pos = item.type === 'package' ? xPosition - 300 : productColSystem[item.parentId] ? productColSystem[item.parentId] + 300 : xPosition;
+        if (lastIndex < pos) lastIndex = pos;
         item.type === 'package' ? (pakcageIdx += 1) : (productIdx += 1);
         flowEdge.push({
-          id: `edge-product-${item._id}`,
-          source: `${item.parentId && allPackages.includes(item.parentId) ? item.parentId : rentalId}`,
+          id: `edge-product-${item._id}-${index}`,
+          source: `${item.parentId && allPackagesAndProductIds.includes(item.parentId) ? item.parentId : rentalId}`,
           arrowHeadType: 'arrow',
           target: `${item._id}`
         });
       });
+      xPosition = lastIndex;
 
       var purchaseAndSubLeaseIdx = 0;
       if (
@@ -380,7 +394,7 @@ const RentalManagementViews = (props) => {
           style: item.status === 'Delivered' ? customDeliveredNodeStyle.loadingTicket : customNodeStyles.loadingTicket
         });
 
-        item.productInventory?.map((product: any, productIndex) => {
+        item?.productInventory?.map((product: any, productIndex) => {
           flow.push({
             id: `${product.optionValue}`,
             sourcePosition: 'right',
@@ -414,6 +428,15 @@ const RentalManagementViews = (props) => {
             arrowHeadType: 'arrow',
             target: `${product.optionValue}`
           });
+        });
+        item?.products?.map((m: any) => {
+          if (productWithMaterialId[m.product])
+            flowEdge.push({
+              id: `edge-loading-${item._id}-${m.product}`,
+              source: `${productWithMaterialId[m.product]}`,
+              arrowHeadType: 'arrow',
+              target: `${item._id}`
+            });
         });
       });
 

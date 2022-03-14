@@ -1,20 +1,19 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, MenuList, ListItemIcon, ListItemText } from '@material-ui/core';
+import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, MenuList, ListItemIcon, ListItemText } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
 import AddExistingProductInventory from './AddExistingProductInventory';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import moment from 'moment';
-import { rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency, CHILD_RESOURCE } from '../../../constants/helpers';
+import { rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import RentalJobQtyDialog from './RentalJobQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -23,7 +22,6 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
-import { FiPackage } from 'react-icons/fi';
 import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
@@ -96,34 +94,31 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 {row.original.detail}
               </p>
             )}
-            {row.original?.type === 'package' && (
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
-                <HtmlTooltip title="Add Product">
-                  <IconButton
-                    onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })}
-                    size="small"
-                    color="primary"
-                  >
-                    <Add color="disabled" fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
-              </Box>
-            )}
-            {!isOffline && (
-              <HtmlTooltip title="Details">
+            {<Box ml={1} className="d-flex align-items-center">
+              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+              </span>
+              <HtmlTooltip title="Add Products">
                 <IconButton
+                  onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })}
                   size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    window.open(
-                      `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
-                    );
-                  }}
+                  color="primary"
                 >
-                  <InfoIcon fontSize="small" />
+                  <Add color="disabled" fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
+            </Box>}
+            {!isOffline && (
+              <Chip
+                className="ml-1"
+                label={`${row.original.type === 'product' ? "Product" : "Package"}`}
+                size="small" color="primary"
+                onClick={() => {
+                  window.open(
+                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                  );
+                }}
+              />
             )}
           </div>
         ),
@@ -224,11 +219,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
               aria-label="Details"
               onClick={() => {
                 const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                if (row.original?.type === 'package' && row.original?.subRows?.length) {
-                  row.original?.subRows.forEach((element) => {
-                    obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-                  });
-                }
+                getNestedSubRows(obj, row.original)
                 setDeleteData(obj);
               }}
             >
@@ -264,38 +255,55 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       inventory = data.inventory;
     }
     const rows = data.material.filter((e) => e.parentId === null);
+
     rows.forEach((parent, i) => {
       parent.srno = (i + 1);
       parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
-      if (parent.type === 'package') {
-        const subRows: any = data.material.filter((e) => e.parentId === parent._id);
-        subRows.forEach((_subRow, j) => {
-          _subRow.srno = ((i + 1) + '.' + (j + 1));
-          _subRow.detail = _subRow.productDetail?.productName;
-          _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
-          _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
-          _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
-          _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
-        });
-        if (subRows.length === 0) {
-          parent.isValid = false;
-        }
-        parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
-        parent.subRows = subRows;
-      }
+      parent.hideSelection = parent.assetQty > 0 ? true : false;
+      parent.subRows = generateNestedData(data.material, inventory, parent);
     });
+
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
     } else {
       setNextStep(true);
     }
+
     setRowsData(rows);
     setSelectedProducts([]);
   };
+
+  const generateNestedData = (material, inventory, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.srno = parent.srno + '.' + (j + 1);
+      _subRow.detail = _subRow.productDetail?.productName;
+      _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
+      _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
+      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
+      _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
+      _subRow.subRows = generateNestedData(material, inventory, _subRow);
+    });
+    if (subRows.length === 0 && parent.type === "package") {
+      parent.isValid = false;
+    }
+    if (parent.type === "package") {
+      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
+    }
+    return subRows;
+  }
+
+  const getNestedSubRows = (obj, original) => {
+    if (original?.subRows?.length) {
+      original?.subRows.forEach((element) => {
+        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
+        getNestedSubRows(obj, element);
+      });
+    }
+  }
 
   const handleAdd = async (rows) => {
     setAddingProducts(true);
@@ -441,20 +449,15 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
   };
 
   const handleDeleteMultiple = () => {
-    const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection).map((rec: any) => {
-      const obj: any = {};
-      obj.id = rec._id;
-      obj.type = rec?.type;
-      obj.materialId = rec?.materialId;
-      return obj;
-    });
+    const obj: any = [];
+    const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection);
     dataToDelete?.forEach((ele) => {
-      const _package = material?.filter((e) => e.parentId === ele.id);
-      _package?.forEach((element) => {
-        dataToDelete.push({ id: element._id, type: element.type, materialId: element.materialId });
-      });
+      obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
     })
-    setDeleteData(dataToDelete);
+    dataToDelete?.forEach((ele) => {
+      getNestedSubRows(obj, ele)
+    })
+    setDeleteData(obj);
   }
 
   return (
@@ -489,7 +492,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 {isMobile && !isTablet ? 'Package' : `Add ${routes.packages.title}`}
               </Button>
             </Box>
-
             {isMobile ? (
               <Box display="flex">
                 <Button
@@ -506,7 +508,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 >
                   Actions
                 </Button>
-
                 <Menu
                   id="basic-menu"
                   anchorEl={anchorEl}
