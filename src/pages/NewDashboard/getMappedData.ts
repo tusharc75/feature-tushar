@@ -73,7 +73,7 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
 
       const grossMarginPercent = totalBookedValue && totalBookedCost ? Math.floor(((totalBookedValue - totalBookedCost) / totalBookedCost) * 100) : 0;
       const offeredMarginPercent =
-        totalOfferedValue && totalOfferedCost ? Math.floor(((totalOfferedValue - totalOfferedCost) / totalBookedCost) * 100) : 0;
+        totalOfferedValue && totalOfferedCost ? Math.floor(((totalOfferedValue - totalOfferedCost) / totalOfferedCost) * 100) : 0;
       const grossMargin = totalBookedValue && totalBookedCost ? totalBookedValue - totalBookedCost : 0;
       const offeredMargin = totalOfferedValue && totalOfferedCost ? totalOfferedValue - totalOfferedCost : 0;
       const hitRatioValue = totalBookedValue && totalOfferedValue ? totalBookedValue / totalOfferedValue : 0;

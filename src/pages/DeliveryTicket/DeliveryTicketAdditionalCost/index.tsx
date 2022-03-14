@@ -14,24 +14,23 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import { startCase } from "lodash";
-import { getColumnData, getFrameworkComponents, getStaticFields } from "../../../constants/columns";
+import { genrateColoum, getColumnData, getFrameworkComponents, getStaticFields } from "../../../constants/columns";
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 import { findOne, objectStore } from "src/constants/indexdbhelper";
 import { CustomOfflineContext } from "src/StateProvider/OfflineContext/OfflineContext";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
+import { fetch_rental_cost_fields } from "src/components/RentalManagment/helper";
+import { CommonRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
 
-
-
-
-const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
+const DeliveryTicketAdditionalCost = ({ renderedFrom, additionalCost }) => {
 
     const toastConfig = useContext(CustomToastContext)
 
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
     const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const {
@@ -39,37 +38,17 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
     }: any = useData();
     const { isOffline } = useContext(CustomOfflineContext);
 
-    const defaultColumns = [
-        { field: "qty", headerName: "Qty", show: true, order: 1, disabled: true, cellRenderer: "commonRenderer" },
-    ]
     useEffect(() => {
         fetchGridColumns()
     }, [])
 
-    useEffect(() => {
-        fetchProduct()
-    }, [page, limit, filters, sorting, search]);
-
-
-
-    const fetchProduct = async () => {
+    const fetchAdditionalCost = async () => {
         try {
             dispatch({ type: "loading", loading: true });
             if (gridApi) {
                 gridApi.setRowData([]);
             }
-            let data;
-            if (isOffline) {
-                const deliveryTicket = await findOne(objectStore.deliveryTicket, deliveryTicketId)
-                const response = await findOne(objectStore.rentalManagement, deliveryTicket?.rentalJob?.optionValue)
-                data = response?.product
-                const inventory = deliveryTicket?.product?.map((e) => e.optionValue);
-                data = response?.product?.filter(d => inventory?.includes(d.inventory)).map(obj => obj.inventoryDetail)
-            }
-            else {
-                const response = await axiosInstance().get(`${deliveryTicket.api}/${deliveryTicketId}/products`)
-                data = response?.data?.data
-            }
+            let data = additionalCost;
             let rows = data.map((u) => {
                 let res = {
                     ...prepareDataForGrid(u, user)
@@ -86,29 +65,19 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
     };
 
 
-    const fetchGridColumns = () => {
-        axiosInstance()
-            .get("/field?resource=Product&view=true")
-            .then(({ data: { data } }) => {
-                let columns = []
-                let rendererNames = []
-                data.forEach(o => {
-                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
-                    if (currentColumn !== null) {
-                        columns = [...columns, currentColumn?.columnData]
-                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                            rendererNames.push(currentColumn?.rendererName)
-                        }
-                    }
-                })
-                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-                tempFrameworkComponent = {
-                    ...tempFrameworkComponent,
-                }
-                setFrameWorkComponent({ ...tempFrameworkComponent })
-                columns = [...columns, ...getStaticFields()]
-                setColumns([...defaultColumns, ...columns])
-            })
+    const fetchGridColumns = async () => {
+        const fields = await fetch_rental_cost_fields("", isOffline);
+        let rendererNames = [];
+        let columns = []
+        genrateColoum(fields, columns, rendererNames, false, renderedFrom);
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+            commonRenderer: CommonRenderer,
+            ...tempFrameworkComponent,
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        setColumns([...columns])
+        fetchAdditionalCost()
     }
 
     return (
@@ -154,7 +123,7 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
                         loading={loading}
                         allowSelection={false}
                         showOnlyShowFilteredRecordSwitch={true}
-                        refreshGrid={fetchProduct}
+                        refreshGrid={fetchAdditionalCost}
                         renderedFrom={renderedFrom}
                         isClientSideGrid={true}
                     />
@@ -165,4 +134,4 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
     );
 }
 
-export default DeliveryTicketProduct;
+export default DeliveryTicketAdditionalCost;
