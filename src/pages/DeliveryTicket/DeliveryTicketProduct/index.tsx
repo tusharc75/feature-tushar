@@ -112,7 +112,7 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
     }
 
     return (
-        <>
+        <Box mt={2}>
             {isMobile && !isTablet ? <CustomSwipableList
                 allowSelection={true}
                 allowSwipe={true}
@@ -159,9 +159,7 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
                         isClientSideGrid={true}
                     />
                     : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
-
-        </>
-
+        </Box>
     );
 }
 
