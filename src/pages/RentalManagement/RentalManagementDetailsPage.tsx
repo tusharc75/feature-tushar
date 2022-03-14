@@ -311,7 +311,7 @@ const RentalManagementDetailsPage = () => {
                       </Fragment>
                     )}
                   {permissions?.rentalManagement?.isUpdate &&
-                    ![RENTAL_STATUS.cancelled, RENTAL_STATUS.invoiced, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
+                    [RENTAL_STATUS.new, RENTAL_STATUS.inProgress].includes(rentalManagementData?.status) && (
                       <Button variant="outlined" color="primary" size="small" onClick={() => setShowCancelConfirmBox(true)}>
                         {'Cancel ' + routes.rentalManagement.title}
                       </Button>
@@ -466,6 +466,7 @@ const RentalManagementDetailsPage = () => {
                         currentStep={currentStep}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-3`}
+                        stepFullScreen={stepFullScreen}
                       />
                     )}
                     {currentStep === 4 && rentalManagementData && (
@@ -475,6 +476,7 @@ const RentalManagementDetailsPage = () => {
                         currentStep={currentStep}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-4`}
+                        stepFullScreen={stepFullScreen}
                       />
                     )}
                     {currentStep === 5 && rentalManagementData && (
@@ -483,8 +485,13 @@ const RentalManagementDetailsPage = () => {
                         setNextStep={setNextStep}
                         fetchRentalData={fetchRentalManagementData}
                         updateJobStatus={updateJobStatus}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
                         statusOptions={statusOptions}
                         renderedFrom={`${renderedFrom}_grid-5`}
+                        showActivity={showActivity}
+                        currencySymbol={currencySymbol}
+                        stepFullScreen={stepFullScreen}
                       />
                     )}
                   </ContentFullScreen>

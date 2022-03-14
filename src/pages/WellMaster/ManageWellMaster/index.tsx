@@ -64,7 +64,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
                         setAllFields(fieldsDataForCreate);
                         setLoading(false);
                     } else {
-                        setTitle(`Editing - [${data.wellName}]`)
+                        setTitle(`Editing - ${data.wellName}`)
                         setInitialData({
                             fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
                             values: getObjKeysWithValues(data, fieldsDataForUpdate)

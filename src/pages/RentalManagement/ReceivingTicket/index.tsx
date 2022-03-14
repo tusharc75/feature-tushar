@@ -1,28 +1,25 @@
 import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useReducer, useContext, Fragment } from "react";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { Link } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import {
   Button, Tooltip, IconButton, Menu, MenuItem,
-  Dialog, TextField, CircularProgress
+  Dialog, TextField, CircularProgress, Chip
 } from "@material-ui/core";
 import { AiFillFilePdf, AiOutlineDeliveredProcedure } from 'react-icons/ai';
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
-  gridLoadingTimeout, deliveryTicket, rentalManagement,
-  sidebarResource, serializedAsset as productInventoryHelperObject, INVENTORY_STATUS, DELIVERY_TICKET_STATUS, RENTAL_INTERNAL_ASSET_STATUS,
+  deliveryTicket, rentalManagement,
+  serializedAsset as productInventoryHelperObject, INVENTORY_STATUS, DELIVERY_TICKET_STATUS, RENTAL_INTERNAL_ASSET_STATUS,
   DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE,
-  repairJob, DELIVERY_FROM_TO_TYPE
+  repairJob, DELIVERY_FROM_TO_TYPE, treeToFlatArray, dateFormat
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
-import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -30,7 +27,6 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { makeStyles } from '@material-ui/core/styles';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
-import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -40,9 +36,9 @@ import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import InfoIcon from '@material-ui/icons/Info';
 import { ExpandMore } from '@material-ui/icons';
 import ExistingRentalJob from "./ExistingRentalJob";
-import { groupBy, uniq, map } from "lodash";
-import { camelCase } from "lodash";
-
+import { groupBy, uniq, uniqBy, map } from "lodash";
+import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
+import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -56,14 +52,12 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom }) => {
+const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom, stepFullScreen }) => {
 
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+
   const [downlodingFile, setDownlodingFile] = useState(false);
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
@@ -84,6 +78,12 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
+
+  const [rowsData, setRowsData] = useState(null);
+  const [selectedRecords, setSelectedRecords] = useState([])
+
+  const [selectedProducts, setSelectedProducts] = useState([])
+  const [selectedAssets, setSelectedAssets] = useState([])
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -108,36 +108,127 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     }
   }, []);
 
+  useEffect(() => {
+    let flatArray = treeToFlatArray(selectedRecords, "subRows");
+    flatArray = uniqBy(flatArray, '_id')
+    setSelectedAssets(flatArray?.filter((ele) => ele.type === "asset" && !ele.hideSelection))
+    setSelectedProducts(flatArray?.filter((ele) => ele.type === "product" && !ele.serializedProduct))
+  }, [selectedRecords]);
+
   const fetchRecords = async () => {
     try {
       setNextStep(false)
-      dispatch({ type: "loading", loading: true });
-      if (gridApi) {
-        gridApi.deselectAll();
-      }
-      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+      var isNextStep = false;
       var productAssets: any = [];
       var deliveryTicketList: any = [];
+      const rows = []
+
       if (isOffline) {
         productAssets = await getRentalProductAssets(rentalManagementData._id);
         productAssets = productAssets?.map((u) => ({ ...u, productName: u?.product?.optionLabel }));
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id);
       } else {
-        const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
-        productAssets = response?.data?.data;
-        productAssets = productAssets.map(d => ({ ...d.inventory, rentalAssetStatus: d.status, startDate: d.startDate, endDate: d.endDate })).map(u => ({
-          ...u,
-          productName: u?.product?.optionLabel,
-          warehouse: u?.warehouse?.optionLabel,
-          warehouseId: u?.warehouse?.optionValue,
-          currentOwner: u?.currentOwner,
-          currentLocation: u?.currentLocation?.optionValue,
-        }))
+        const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
 
         const result = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}`)
         deliveryTicketList = result?.data?.data
-      }
 
+        const products = response?.data?.data?.material.filter((e) => e.type === "product");
+        productAssets = response?.data?.data?.inventory
+
+        products?.forEach((element: any) => {
+          const ele: any = {}
+          ele.detail = element.productDetail?.productName;
+          ele._id = element.productDetail?._id;
+          ele.type = "product";
+          ele.serializedProduct = element.productDetail?.serializedProduct;
+
+          deliveryTicketList.map(obj => {
+            if (obj?.products?.some((p) => ele?._id === p?.product)) {
+              if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
+                ele.loadingTicket = obj?.ticketName;
+                ele.loadingTicketId = obj?._id;
+                ele.loadingTicketStatus = obj?.status;
+              }
+              if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving) {
+                ele.receivingTicket = obj?.ticketName;
+                ele.receivingTicketId = obj?._id;
+                ele.receivingTicketStatus = obj?.status;
+              }
+              if (obj.ticketType === DELIVERY_TICKET_TYPE.return) {
+                ele.returnTicket = obj?.ticketName;
+                ele.returnTicketId = obj?._id;
+                ele.returnTicketStatus = obj?.status;
+              }
+            }
+          });
+
+          ele.subRows = [];
+          const assets = productAssets?.filter((e) => e._id === element._id)
+          assets?.forEach((_asset: any) => {
+            const asset: any = {};
+            asset.detail = _asset?.inventoryDetail?.assetNumber;
+            asset._id = _asset?.inventoryDetail?._id;
+            asset.type = "asset";
+            asset.serialNumber = _asset?.inventoryDetail?.serialNumber;
+            asset.status = _asset?.inventoryDetail?.status;
+            asset.warehouse = _asset?.inventoryDetail?.warehouse;
+            asset.currentOwner = _asset?.inventoryDetail?.currentOwner;
+            asset.currentLocation = _asset?.inventoryDetail?.currentLocation;
+            asset.manualStatus = _asset?.inventoryDetail?.manualStatus;
+            asset.rentalAssetStatus = _asset?.status;
+            asset.startDate = _asset?.startDate;
+            asset.endDate = _asset?.endDate;
+
+            deliveryTicketList.map(obj => {
+              if (obj?.productInventory?.some((p) => asset?._id === p?.optionValue)) {
+                asset.loadingTicket = obj?.ticketName;
+                asset.loadingTicketId = obj?._id;
+                asset.loadingTicketStatus = obj?.status;
+                if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
+                  asset.loadingTicket = obj?.ticketName;
+                  asset.loadingTicketId = obj?._id;
+                  asset.loadingTicketStatus = obj?.status;
+                }
+                if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving) {
+                  asset.receivingTicket = obj?.ticketName;
+                  asset.receivingTicketId = obj?._id;
+                  asset.receivingTicketStatus = obj?.status;
+                }
+                if (obj.ticketType === DELIVERY_TICKET_TYPE.return) {
+                  asset.returnTicket = obj?.ticketName;
+                  asset.returnTicketId = obj?._id;
+                  asset.returnTicketStatus = obj?.status;
+                }
+              }
+            });
+
+            if ([RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(asset.rentalAssetStatus)) {
+              isNextStep = true
+            }
+            else {
+              isNextStep = false
+            }
+            asset.hideSelection = [INVENTORY_STATUS.indTransit, INVENTORY_STATUS.lost].includes(asset.status) || asset?.manualStatus === INVENTORY_STATUS.reserved;
+            ele.subRows.push(asset)
+          })
+          ele.qty = ele.serializedProduct ? assets.length : element.qty;
+          if (rows.filter((e) => e._id === ele._id).length) {
+            rows.forEach((e) => {
+              if (e._id === ele._id) {
+                e.qty += ele.qty;
+                e.subRows = [...ele.subRows, ...e.subRows];
+              }
+            })
+          }
+          else {
+            rows.push(ele)
+          }
+        })
+      }
+      setNextStep(isNextStep)
+      setRowsData(rows);
+      setSelectedProducts([]);
       if (deliveryTicketList.length) {
         if (deliveryTicketList.filter((e) => [DELIVERY_TICKET_TYPE.receiving, DELIVERY_TICKET_TYPE.return].includes(e.ticketType) &&
           [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status)).length) {
@@ -147,45 +238,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           setShowProcessDeliveryTicket(false)
         }
       }
-      deliveryTicketList?.map(obj => {
-        productAssets?.map((d, index) => {
-          if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
-            if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
-              productAssets[index]['loadingTicket'] = obj?.ticketName;
-              productAssets[index]['loadingTicketId'] = obj?._id;
-            }
-            if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving) {
-              productAssets[index]['receivingTicket'] = obj?.ticketName;
-              productAssets[index]['receivingTicketId'] = obj?._id;
-              productAssets[index]['receivingTicketStatus'] = obj?.status;
-            }
-            if (obj.ticketType === DELIVERY_TICKET_TYPE.return) {
-              productAssets[index]['returnTicket'] = obj?.ticketName;
-              productAssets[index]['returnTicketId'] = obj?._id;
-              productAssets[index]['returnTicketStatus'] = obj?.status;
-            }
-          }
-        });
-      });
-
-      productAssets.forEach((d) => {
-        d["isChecked"] = false;
-        d["hideSelection"] = [INVENTORY_STATUS.indTransit, INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
-      })
-      if (productAssets.filter((e) =>
-        [INVENTORY_STATUS.underReview, INVENTORY_STATUS.available, INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(e.status) ||
-        [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(e.rentalAssetStatus)).length
-        === productAssets.length) {
-        setNextStep(true)
-      }
-
-      setUniqueReceivingTicket([...new Set(productAssets.filter(d => d.receivingTicketId !== undefined).map(d => d.receivingTicketId))]);
-      dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
+      setUniqueReceivingTicket(deliveryTicketList.filter(d => [DELIVERY_TICKET_TYPE.receiving, DELIVERY_TICKET_TYPE.return].includes(d.ticketType)).map(d => d._id));
     } catch (error) {
-      dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
     }
   };
@@ -200,90 +254,103 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     });
   }
 
-  const InventoryRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
-  const WarehouseRenderer = (params) => (
-    params?.value ? (
-      <Link className="link text-truncate" title={params?.value} to={`${routes.warehouseDetail.path}/${params?.data?.warehouse?.optionValue}`}>
-        {params?.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    )
-  );
-
-  const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data?.product?.optionValue}`}>
-      {params.value}
-    </Link>
-  );
-
-  const DeliveryTicketRenderer = (params) =>
-    params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
-        {params.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
-  const ReceivingTicketRenderer = (params) =>
-    params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`}>
-        {params.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
-  const ReturnTicketRenderer = (params) =>
-    params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.returnTicketId}`}>
-        {params.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
-  const frameworkComponents = {
-    receivingTicketRenderer: ReceivingTicketRenderer,
-    deliveryTicketRenderer: DeliveryTicketRenderer,
-    returnTicketRenderer: ReturnTicketRenderer,
-    inventoryRenderer: InventoryRenderer,
-    productNameRenderer: ProductNameRenderer,
-    warehouseRenderer: WarehouseRenderer,
-    commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer
-  };
-
-  const columns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "inventoryRenderer" },
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "productName", headerName: "Product Type", show: true, cellRenderer: "productNameRenderer" },
-    { field: "warehouse", headerName: "Plant", show: false, cellRenderer: "warehouseRenderer" },
-    { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "deliveryTicketRenderer" },
-    { field: "receivingTicket", headerName: "Receiving Ticket", show: true, cellRenderer: "receivingTicketRenderer" },
-    { field: "returnTicket", headerName: "Return Ticket", show: true, cellRenderer: "returnTicketRenderer" },
-    { field: "status", headerName: "Asset Status", show: true, cellRenderer: "commonRenderer" },
-    { field: "startDate", headerName: "Actual Start Date", show: true, cellRenderer: "dateRenderer" },
-    { field: "endDate", headerName: "Actual End Date", show: true, cellRenderer: "dateRenderer" },
-    { field: "rentalAssetStatus", headerName: "Rental Asset Status", show: true, cellRenderer: "commonRenderer" },
+  const columns: any = [
+    {
+      accessor: 'detail',
+      Header: 'Detail',
+      sticky: isMobile ? "none" : "left",
+      width: 300,
+      Cell: ({ row }) => (
+        row?.original?.type === "product" ?
+          <Fragment>
+            <Link className="link text-truncate" title={row?.original?.detail} to={`${routes.productDetail.path}/${row?.original?._id}`}>
+              {row?.original?.detail}
+            </Link>
+            <Chip className="ml-2" label="Product" size="small" color="primary" />
+          </Fragment>
+          : row?.original?.type === "asset" ?
+            <Fragment>
+              <Link className="link text-truncate" title={row?.original?.detail} to={`${routes.serializedAssetDetail.path}/${row?.original?._id}`}>
+                {row?.original?.detail}
+              </Link>
+              <Chip className="ml-2" label="Asset" size="small" color="primary" />
+            </Fragment>
+            : <p className="text-truncate">{row?.original?.detail}</p>),
+    },
+    {
+      accessor: 'qty',
+      Header: 'Asset Qty',
+      width: 80,
+      Cell: ({ row }) => (<p>{row?.original?.qty}</p>),
+    },
+    {
+      accessor: 'serialNumber',
+      Header: 'Serial Number',
+      width: 100,
+      Cell: ({ row }) => (<p className="text-truncate">{row?.original?.serialNumber ? <p>{row?.original?.serialNumber}</p> : <NoDataCell />}</p>),
+    },
+    {
+      accessor: 'loadingTicket',
+      Header: 'Loading Ticket',
+      Cell: ({ row }) => (
+        row?.original?.loadingTicket ?
+          <Link className="link text-truncate" title={row?.original?.loadingTicket} to={`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`}>
+            {row?.original?.loadingTicket}
+          </Link>
+          : <NoDataCell />
+      )
+    },
+    {
+      accessor: 'receivingTicket',
+      Header: 'Loading Ticket',
+      Cell: ({ row }) => (
+        row?.original?.receivingTicket ?
+          <Link className="link text-truncate" title={row?.original?.receivingTicket} to={`${routes.deliveryTicketDetail.path}/${row?.original?.receivingTicketId}`}>
+            {row?.original?.receivingTicket}
+          </Link>
+          : <NoDataCell />
+      )
+    },
+    {
+      accessor: 'returnTicket',
+      Header: 'Return Ticket',
+      Cell: ({ row }) => (
+        row?.original?.returnTicket ?
+          <Link className="link text-truncate" title={row?.original?.returnTicket} to={`${routes.deliveryTicketDetail.path}/${row?.original?.returnTicketId}`}>
+            {row?.original?.returnTicket}
+          </Link>
+          : <NoDataCell />
+      )
+    },
+    {
+      accessor: 'status',
+      Header: 'Asset Status',
+      width: 100,
+      Cell: ({ row }) => (
+        <p className="text-truncate">{row?.original?.status ? <p>{row?.original?.status}</p> : <NoDataCell />}</p>),
+    },
+    {
+      accessor: 'startDate',
+      Header: 'Actual Start Date',
+      width: 100,
+      Cell: ({ row }) => (
+        <p className="text-truncate">{row?.original?.startDate ? <p>{moment(row?.original?.startDate?.slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />}</p>),
+    },
+    {
+      accessor: 'endDate',
+      Header: 'Actual End Date',
+      width: 100,
+      Cell: ({ row }) => (
+        <p className="text-truncate">{row?.original?.endDate ? <p>{moment(row?.original?.endDate?.slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />}</p>),
+    },
+    {
+      accessor: 'rentalAssetStatus',
+      Header: 'Rental Asset Status',
+      width: 100,
+      Cell: ({ row }) => (
+        <p className="text-truncate">{row?.original?.rentalAssetStatus ? <p>{row?.original?.rentalAssetStatus}</p> : <NoDataCell />}</p>),
+    }
   ];
-
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
 
   const handleTicketDialog = (ticketType, deliveryToType) => {
     const data = {}
@@ -291,11 +358,11 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     data["refrenceId"] = rentalManagementData._id;
     data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
     data["pickupFrom"] = rentalManagementData?.customerAccount?.optionValue;
-    data["pickupFromAddress"] = selectedRecords[0]?.currentLocation;
+    data["pickupFromAddress"] = selectedAssets[0]?.currentLocation;
     data["deliveryToType"] = deliveryToType;
     if (deliveryToType === DELIVERY_FROM_TO_TYPE.supplier) {
-      if (selectedRecords.length) {
-        data["deliveryTo"] = selectedRecords[0].owner;
+      if (selectedAssets.length) {
+        data["deliveryTo"] = selectedAssets[0].owner;
         data["deliveryToAddress"] = ""
       }
     }
@@ -307,7 +374,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     data["endDate"] = rentalManagementData?.estimateStartDate;
     data["isPickupFromDisable"] = true;
 
-    data["wellName"] = rentalManagementData?.wellName;
+    data["wellName"] = rentalManagementData?.wellName?.optionValue;
     data["afeNumber"] = rentalManagementData?.afeNumber;
     if (rentalManagementData?.processor?.optionValue) {
       data["processor"] = rentalManagementData?.processor?.optionValue;
@@ -318,7 +385,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
-      .post(`${repairJob.api}/${repairJobId}/assets`, { "ids": selectedRecords?.map(s => s._id) })
+      .post(`${repairJob.api}/${repairJobId}/assets`, { "ids": selectedAssets?.map(s => s._id) })
       .then(({ data }) => {
       })
       .catch((error) => {
@@ -327,9 +394,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   }
 
   const checkUniqWarehouse = () => {
-    if (selectedRecords.length === 0) {
+    if (selectedAssets.length === 0) {
       return false;
-    } else if (uniq(map(selectedRecords, "warehouseId")).length === 1) {
+    } else if (uniq(map(selectedAssets, "warehouse")).length === 1) {
       return true;
     } else {
       return false;
@@ -342,30 +409,28 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         {!isMobile && <Button
           onClick={() => {
             setDownlodingFile(true);
-            uniqueReceivingTicket.forEach(currentId => {
-              axiosInstance().get(`/delivery-ticket/${currentId}/pdf`)
-                .then(({ data }) => {
-                  axiosInstance()
-                    .get(`user/download?fileName=${data.data.fileName}`, {
-                      responseType: "blob",
-                    })
-                    .then(({ data }) => {
-                      const file = new Blob([data], { type: "application/pdf" });
-                      const fileURL = URL.createObjectURL(file);
-                      const pdfWindow = window.open();
-                      pdfWindow.location.href = fileURL;
-                      toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-                      setDownlodingFile(false);
-                    })
-                    .catch((err) => {
-                      toastConfig.setToastConfig(err);
-                      setDownlodingFile(false);
-                    });
-                }).catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setDownlodingFile(false);
-                })
-            })
+            axiosInstance().post(`/delivery-ticket/pdf`, { "ids": uniqueReceivingTicket })
+              .then(({ data }) => {
+                axiosInstance()
+                  .get(`user/download?fileName=${data.data.fileName}`, {
+                    responseType: "blob",
+                  })
+                  .then(({ data }) => {
+                    const file = new Blob([data], { type: "application/pdf" });
+                    const fileURL = URL.createObjectURL(file);
+                    const pdfWindow = window.open();
+                    pdfWindow.location.href = fileURL;
+                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                    setDownlodingFile(false);
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                  });
+              }).catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+              })
           }}
           variant={isMobile && !isTablet ? 'text' : 'outlined'}
           color="primary"
@@ -381,7 +446,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         <Box mx={1} />
         <Button variant={isMobile && !isTablet ? 'text' : 'outlined'} color="primary" aria-controls="simple-menu"
           aria-haspopup="true"
-          disabled={selectedRecords.length === 0 || isOffline}
+          disabled={selectedAssets.length === 0 || isOffline}
           size="small"
           onClick={handleClick}
           style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
@@ -404,11 +469,11 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             horizontal: 'right'
           }}
         >
-          {(selectedRecords?.filter(f =>
+          {(selectedAssets?.filter(f =>
             ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
               (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
             && [INVENTORY_STATUS.underReview].includes(f.status)
-          )?.length === selectedRecords?.length) &&
+          )?.length === selectedAssets?.length) &&
             <Fragment>
               <MenuItem onClick={() => {
                 setAnchorEl(null)
@@ -432,7 +497,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           size="small"
           onClick={openActions}
           aria-controls="action-menu"
-          disabled={(selectedRecords.length === 0)}
+          disabled={(selectedAssets.length === 0)}
         >
           Actions <ExpandMore />
         </Button>
@@ -449,22 +514,22 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           onClose={closeActions}
         >
           <MenuItem
-            disabled={(selectedRecords.length === 0) ||
-              (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
+            disabled={(selectedAssets.length === 0) ||
+              (selectedAssets.some(f => f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
                 || !f.hasOwnProperty("loadingTicketId")
                 || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
             onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant) }}>
             Create Receiving Ticket</MenuItem>
 
-          {(selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("receivingTicketId") &&
-            f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedRecords?.length) ?
+          {(selectedAssets.length && selectedAssets?.filter(f => f.hasOwnProperty("receivingTicketId") &&
+            f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedAssets?.length) ?
             <MenuItem onClick={() => { setShowRemoveAssetFromReceivingTicketDialog(true) }}>Remove Receiving Ticket</MenuItem>
             : null}
 
           <MenuItem
             onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant) }}
-            disabled={(selectedRecords.length === 0)
-              || (selectedRecords.some(f =>
+            disabled={(selectedAssets.length === 0)
+              || (selectedAssets.some(f =>
                 !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
                 || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
           >
@@ -473,8 +538,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
           <MenuItem
             onClick={() => handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier)}
-            disabled={(selectedRecords.length === 0)
-              || (selectedRecords.some(f =>
+            disabled={(selectedAssets.length === 0)
+              || (selectedAssets.some(f =>
                 !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
                 || !f.subleaseAsset || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
           >Create Supplier Delivery Ticket</MenuItem>
@@ -484,19 +549,19 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               setIsExistingRentalJob(true)
               closeActions()
             }}
-            disabled={(selectedRecords.length === 0)
-              || (selectedRecords.some(f =>
+            disabled={(selectedAssets.length === 0)
+              || (selectedAssets.some(f =>
                 !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
                 || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
           >
             {`Transfer to another ${routes.rentalManagement.title}`}</MenuItem>
 
-          {(selectedRecords.length && selectedRecords?.filter(f =>
+          {(selectedAssets.length && selectedAssets?.filter(f =>
             ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
               (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) || f.status === INVENTORY_STATUS.scrap)
             && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.available].includes(f.status)
             && !f.subleaseAsset && checkUniqWarehouse()
-          )?.length === selectedRecords?.length) ?
+          )?.length === selectedAssets?.length) ?
 
             <MenuItem
               onClick={() => setShowRepairJobDialog(true)}
@@ -538,89 +603,29 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       </Box>
     </Box>
     <Grid item xs={12} md={12} sm={12} className="mt-3">
-      {columns ? (
-        isMobile ? (
-          <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={true}
-            primaryField={columns?.find((d) => d.field)}
-            onClick={(data) => {
-              history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={false}
-            extraParamsToCheckDelete={true}
-            onDelete={false}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[]}
-            chips={[
-              {
-                label: 'Status : ',
-                field: 'status'
-              },
-              {
-                label: 'Receiving Ticket : ',
-                field: 'receivingTicket',
-                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.receivingTicketId}`)
-              },
-              {
-                label: 'Loading Ticket : ',
-                field: 'loadingTicket',
-                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`)
-              },
-              {
-                label: 'Return Ticket : ',
-                field: 'returnTicket',
-                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.returnTicketId}`)
-              }
-            ]}
-            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-            onCreate={false}
-            showClone={false}
-            onClone={() => { }}
-            renderedFrom={renderedFrom}
-          />
-        ) : (
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={false}
-            loading={loading}
-            isClientSideGrid={true}
-            renderedFrom={renderedFrom}
-            rowClassRules={{
-              'red-data-row': function (params) {
-                return ([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some((s) => s === params.data.status) || params?.data?.returnTicketId
-                );
-              }
-            }}
-            refreshGrid={fetchRecords}
-          />
-        )
-      ) : (
-        <Box p={2} height={500} bgcolor="white">
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+      {(columns && rowsData) ?
+        <CustomReactTable
+          height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 365px)"}
+          columns={columns}
+          data={rowsData}
+          onSelect={setSelectedRecords}
+          childrenProperty="subRows"
+          uniqueKey="_id"
+          setCellColor={(rowData) => {
+            if ([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(rowData?.status)) return "error";
+            return "";
+          }}
+        />
+        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+      }
     </Grid>
     {showTicketDialog.open && (
       <ManageDeliveryTicket
         ticketType={showTicketDialog.ticketType}
         refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
         refrenceData={showTicketDialog.data}
-        productInventory={selectedRecords}
+        productInventory={selectedAssets}
+        products={selectedProducts}
         onClose={() => setShowTicketDialog({ open: false, ticketType: "", data: {} })}
         onSuccess={() => {
           setShowTicketDialog({ open: false, ticketType: "", data: {} });
@@ -633,7 +638,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       <ExistingRentalJob
         refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
         refrenceData={rentalManagementData}
-        productInventory={selectedRecords}
+        productInventory={selectedAssets}
         onClose={() => setIsExistingRentalJob(false)}
         onSuccess={() => {
           setIsExistingRentalJob(false)
@@ -650,7 +655,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         }}
         onOk={() => {
           setOkBtnLoading(true);
-          const groupByCalls = groupBy(selectedRecords, 'receivingTicketId');
+          const groupByCalls = groupBy(selectedAssets, 'receivingTicketId');
           let apiCalls = [];
           Object.keys(groupByCalls).forEach((key) => {
             apiCalls.push(
@@ -721,7 +726,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
               axiosInstance().put(`${productInventoryHelperObject.api}/update-status`, {
                 comment: statusToUpdate.message,
-                assets: selectedRecords.map(m => m?._id ?? m?.id),
+                assets: selectedAssets.map(m => m?._id ?? m?.id),
                 status: statusToUpdate.status,
                 reference: {
                   _id: rentalManagementData._id,
@@ -764,8 +769,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       <ManageRepairJob
         refrenceType="Rental Job"
         refrenceData={{
-          _id: rentalManagementData._id, warehouse: selectedRecords[0].warehouseId,
-          wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber
+          _id: rentalManagementData._id, warehouse: selectedAssets[0].warehouse,
+          wellName: rentalManagementData?.wellName?.optionValue, afeNumber: rentalManagementData?.afeNumber
         }}
         onClose={() => setShowRepairJobDialog(false)}
         onSuccess={(obj) => {

@@ -18,7 +18,7 @@ import { getColumnData, getFrameworkComponents, getStaticFields } from "../../..
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 
-
+let searchTimeout;
 
 const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, isAddingProducts, renderedFrom }) => {
 
@@ -36,12 +36,19 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const defaultColumns = [{ field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true }]
 
     useEffect(() => {
-        fetchMaterial()
-    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
-
-    useEffect(() => {
+        localStorage.removeItem(localStorageSelectedRecords)
         fetchGridColumns()
     }, [])
+
+    useEffect(() => {
+        let millisec = Object.keys(search).length > 0 ? 600 : 5;
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        searchTimeout = setTimeout(() => {
+            fetchMaterial()
+        }, millisec);
+    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
     const fetchMaterial = () => {
         dispatch({ type: "loading", loading: true });
@@ -56,6 +63,10 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 finalObject["id"] = u._id;
                 finalObject["type"] = type;
                 finalObject["qty"] = 0;
+                const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id)
+                if (qtyAdded.length) {
+                    finalObject["qty"] = qtyAdded[0].qty;
+                }
                 finalObject["productCategory"] = u.productCategory?.optionLabel;
                 finalObject["priceTemplate"] = u.priceTemplate?.optionLabel
                 finalObject["unitMain"] = u.unit
