@@ -105,7 +105,7 @@ const useStyles = makeStyles((theme) => ({
 
   },
   rejected: {
-    background: "var(--skin)",
+    background: "#f3e78e",
     borderBottom: "0px solid var(--productRed)",
     color: "var(--error) !important",
     borderLeft: "6px solid var(--error)",
