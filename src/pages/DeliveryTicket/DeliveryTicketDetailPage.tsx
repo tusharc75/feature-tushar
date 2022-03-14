@@ -648,7 +648,7 @@ export default function DeliveryTicketDetail(props) {
                       }}
                       label={
                         <div className="d-flex align-items-center tab-font">
-                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Product
+                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Additional Products
                         </div>
                       }
                       {...a11yProps(0)}
@@ -662,7 +662,7 @@ export default function DeliveryTicketDetail(props) {
                         }}
                         label={
                           <div className="d-flex align-items-center tab-font">
-                            <BiFoodMenu className="mr-1" fontSize="inherit" /> Additional Cost
+                            <BiFoodMenu className="mr-1" fontSize="inherit" /> Services and Consumables
                           </div>
                         }
                         {...a11yProps(0)}
@@ -689,9 +689,6 @@ export default function DeliveryTicketDetail(props) {
                   <TabPanel value={tabValue} index={1}>
                     <Grid container spacing={1} className="p-2">
                       <Grid item xs={12} className="mt-2 d-flex gap-2">
-                        <Typography variant="subtitle1" className="font-weight-bold text-primary">
-                          Serialized Assets
-                        </Typography>
                         {
                           deliveryTicketData?.status === "New" && <IconButton
                             onClick={() => {
@@ -784,31 +781,12 @@ export default function DeliveryTicketDetail(props) {
                     </Grid>
                   </TabPanel>
                   <TabPanel value={tabValue} index={2}>
-                    <Grid container spacing={1} className="p-2">
-                      <Grid item xs={12} className="mt-2 d-flex gap-2">
-                        <Typography variant="subtitle1" className="font-weight-bold text-primary">
-                          Products
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12}>
-                        <DeliveryTicketProduct renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-2`} deliveryTicketId={id}
-                        />
-                      </Grid>
-                    </Grid>
+                    <DeliveryTicketProduct renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-2`} deliveryTicketId={id} />
                   </TabPanel>
-                  {deliveryTicketData?.additionalCost.length > 0 && <TabPanel value={tabValue} index={3}>
-                    <Grid container spacing={1} className="p-2">
-                      <Grid item xs={12} className="mt-2 d-flex gap-2">
-                        <Typography variant="subtitle1" className="font-weight-bold text-primary">
-                          Additional Cost
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12}>
-                        <DeliveryTicketAdditionalCost renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-3`} additionalCost={deliveryTicketData?.additionalCost}
-                        />
-                      </Grid>
-                    </Grid>
-                  </TabPanel>}
+                  {deliveryTicketData?.additionalCost.length > 0 &&
+                    <TabPanel value={tabValue} index={3}>
+                      <DeliveryTicketAdditionalCost renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-3`} additionalCost={deliveryTicketData?.additionalCost} />
+                    </TabPanel>}
                 </>
               )}
             </Paper>

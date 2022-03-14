@@ -304,30 +304,33 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                 <Box pt={1} pb={1}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} md={5}>
-                            <Box display="flex" flexDirection="row">
-                                {serializedProducts.length > 0 ?
-                                    serializedProducts.map(d =>
-                                        <Box m={0.5} p={1} border={1}
-                                            className="cursor-pointer"
-                                            borderColor="grey.300"
-                                            onClick={() => {
-                                                if (selectedProduct === d.id) {
-                                                    setSelectedProduct(null)
-                                                }
-                                                else {
-                                                    setSelectedProduct(d.id)
-                                                }
-                                            }}
-                                            bgcolor={d.id === selectedProduct && "primary.main"}
-                                            color={d.id === selectedProduct && "white"}
-                                        >
-                                            {d?.qty < 0 ?
-                                                <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                                                : (d?.qty === 0 ? <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span> :
-                                                    <span key={d.name}>{`${d.name} (${d?.qty})`}</span>)}
-                                        </Box>
-                                    ) : null
-                                }
+                            <Box display="flex">
+                                <Box style={{ "display": "inline" }} >
+                                    {serializedProducts.length > 0 ?
+                                        serializedProducts.map(d =>
+                                            <Box m={0.5} p={1} border={1}
+                                                className="cursor-pointer"
+                                                borderColor="grey.300"
+                                                onClick={() => {
+                                                    if (selectedProduct === d.id) {
+                                                        setSelectedProduct(null)
+                                                    }
+                                                    else {
+                                                        setSelectedProduct(d.id)
+                                                    }
+                                                }}
+                                                style={{ "display": "inline-block" }}
+                                                bgcolor={d.id === selectedProduct && "primary.main"}
+                                                color={d.id === selectedProduct && "white"}
+                                            >
+                                                {d?.qty < 0 ?
+                                                    <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                                                    : (d?.qty === 0 ? <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span> :
+                                                        <span key={d.name}>{`${d.name} (${d?.qty})`}</span>)}
+                                            </Box>
+                                        ) : null
+                                    }
+                                </Box>
                             </Box>
                             {serializedProducts.length > 0 && serializedProducts.some(s => s.qty < 0) ?
                                 <div className="text-error font-weight-bold">You have selected more assets then needed.</div> : ""

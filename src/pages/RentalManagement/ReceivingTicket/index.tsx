@@ -162,6 +162,10 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             obj.productId = ele?.productDetail?._id
             obj.warehouse = rentalManagementData?.warehouse?.optionLabel
             obj.warehouseId = rentalManagementData?.warehouse?.optionValue
+            obj.status = ele?.status
+            obj.rentalAssetStatus = ele?.status
+            obj.startDate = ele?.actualStartDate
+            obj.endDate = ele?.actualEndDate
             productAssets.push(obj)
           }
         })
@@ -198,22 +202,16 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
               productAssets[index]['loadingTicket'] = obj?.ticketName;
               productAssets[index]['loadingTicketId'] = obj?._id;
-              productAssets[index]['status'] = RENTAL_INTERNAL_ASSET_STATUS.inUse;
-              productAssets[index]['rentalAssetStatus'] = RENTAL_INTERNAL_ASSET_STATUS.inUse;
             }
             if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving) {
               productAssets[index]['receivingTicket'] = obj?.ticketName;
               productAssets[index]['receivingTicketId'] = obj?._id;
               productAssets[index]['receivingTicketStatus'] = obj?.status;
-              productAssets[index]['status'] = RENTAL_INTERNAL_ASSET_STATUS.complete;
-              productAssets[index]['rentalAssetStatus'] = RENTAL_INTERNAL_ASSET_STATUS.complete;
             }
             if (obj.ticketType === DELIVERY_TICKET_TYPE.return) {
               productAssets[index]['returnTicket'] = obj?.ticketName;
               productAssets[index]['returnTicketId'] = obj?._id;
               productAssets[index]['returnTicketStatus'] = obj?.status;
-              productAssets[index]['status'] = RENTAL_INTERNAL_ASSET_STATUS.return;
-              productAssets[index]['rentalAssetStatus'] = RENTAL_INTERNAL_ASSET_STATUS.return;
             }
           }
         });
