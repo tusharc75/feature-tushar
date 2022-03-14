@@ -280,7 +280,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = _subRow.productDetail?.productName;
-      _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
+      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
