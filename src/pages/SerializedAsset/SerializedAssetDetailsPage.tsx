@@ -424,14 +424,16 @@ const SerializedAssetDetailsPage = () => {
                           >
                             {isMobile && !isTablet ? <GrStatusInfo size={20} /> : "Change Status"}
                           </Button>
-                          <Button
-                            variant={isMobile && !isTablet ? "text" : "outlined"}
-                            color="primary"
-                            size="small"
-                            onClick={handleOpenUpdateDialog}
-                          >
-                            {isMobile && !isTablet ? <MdEdit size={22} /> : "Edit"}
-                          </Button>
+                          {![INVENTORY_STATUS.inUse].includes(productInventoryData.status) &&
+                            <Button
+                              variant={isMobile && !isTablet ? "text" : "outlined"}
+                              color="primary"
+                              size="small"
+                              onClick={handleOpenUpdateDialog}
+                            >
+                              {isMobile && !isTablet ? <MdEdit size={22} /> : "Edit"}
+                            </Button>
+                          }
                         </Fragment>
                       }
                       <Menu

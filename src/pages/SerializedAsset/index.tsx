@@ -469,19 +469,20 @@ const ProductInventory = () => {
                                                 />
                                         )}
                                     />
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                name="subleaseAsset"
-                                                checked={subleaseAsset}
-                                                onChange={(e) => {
-                                                    setSubleaseAsset(e.target.checked)
-                                                }}
-                                                color="primary"
-                                            />
-                                        }
-                                        label="Sublease Assets"
-                                    />
+                                    {permissions?.sublease &&
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    name="subleaseAsset"
+                                                    checked={subleaseAsset}
+                                                    onChange={(e) => {
+                                                        setSubleaseAsset(e.target.checked)
+                                                    }}
+                                                    color="primary"
+                                                />
+                                            }
+                                            label="Sublease Assets"
+                                        />}
                                 </Fragment>
                             )
                         }
