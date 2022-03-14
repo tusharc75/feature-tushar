@@ -59,11 +59,11 @@ const DashbaordNew = () => {
             customerAccount: data['Customer Account'].filter((c: any) =>
               Array.isArray(c?.entity) ? c?.entity?.findIndex((entity: any) => entity === selectedEntity) !== -1 : c?.entity === selectedEntity
             ),
+            salesRep: data['User'].filter((u: any) => u?.entities?.findIndex((d: any) => d.entity === selectedEntity) !== -1),
+            marketSegment: data['Market Segment'].filter((d) => !d.parentMarketSegment),
+            subMarketSegment: data['Market Segment'].filter((d) => d.parentMarketSegment),
             countryBillTo: countriesData,
             countrySellTo: countriesData,
-            subMarketSegment: data['Market Segment'].filter((d) => d.parentMarketSegment),
-            marketSegment: data['Market Segment'].filter((d) => !d.parentMarketSegment),
-            salesRep: data['User'].filter((u: any) => u?.entities?.findIndex((d: any) => d.entity === selectedEntity) !== -1)
           }));
         });
       } catch (error) {

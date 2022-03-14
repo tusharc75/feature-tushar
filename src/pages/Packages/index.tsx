@@ -218,7 +218,7 @@ const PackageList = () => {
                     entity="packages"
                 />
             </HideWhenOffline>
-            <HideWhenOffline>
+            {/* <HideWhenOffline>
                 <HtmlTooltip title="View product list">
                     <IconButton
                         color='primary'
@@ -231,7 +231,7 @@ const PackageList = () => {
                         <FaListAlt fontSize="small" />
                     </IconButton>
                 </HtmlTooltip>
-            </HideWhenOffline>
+            </HideWhenOffline> */}
         </>
     );
 
