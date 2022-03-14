@@ -392,30 +392,28 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         {!isMobile && <Button
           onClick={() => {
             setDownlodingFile(true);
-            uniqueReceivingTicket.forEach(currentId => {
-              axiosInstance().get(`/delivery-ticket/${currentId}/pdf`)
-                .then(({ data }) => {
-                  axiosInstance()
-                    .get(`user/download?fileName=${data.data.fileName}`, {
-                      responseType: "blob",
-                    })
-                    .then(({ data }) => {
-                      const file = new Blob([data], { type: "application/pdf" });
-                      const fileURL = URL.createObjectURL(file);
-                      const pdfWindow = window.open();
-                      pdfWindow.location.href = fileURL;
-                      toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-                      setDownlodingFile(false);
-                    })
-                    .catch((err) => {
-                      toastConfig.setToastConfig(err);
-                      setDownlodingFile(false);
-                    });
-                }).catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setDownlodingFile(false);
-                })
-            })
+            axiosInstance().post(`/delivery-ticket/pdf`, { "ids": uniqueReceivingTicket })
+              .then(({ data }) => {
+                axiosInstance()
+                  .get(`user/download?fileName=${data.data.fileName}`, {
+                    responseType: "blob",
+                  })
+                  .then(({ data }) => {
+                    const file = new Blob([data], { type: "application/pdf" });
+                    const fileURL = URL.createObjectURL(file);
+                    const pdfWindow = window.open();
+                    pdfWindow.location.href = fileURL;
+                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                    setDownlodingFile(false);
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                  });
+              }).catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+              })
           }}
           variant={isMobile && !isTablet ? 'text' : 'outlined'}
           color="primary"
@@ -424,7 +422,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           disabled={downlodingFile || isOffline || uniqueReceivingTicket.length === 0}
           startIcon={isMobile ? '' : <AiFillFilePdf />}
           style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-
         >
           {downlodingFile ? "Please wait..." : "Preview"}
         </Button>}

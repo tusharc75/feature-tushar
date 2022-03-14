@@ -328,7 +328,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
                 toastConfig.setToastConfig(err);
                 setDownlodingFile(false);
               })
-
           }}
           variant={isMobile && !isTablet ? 'text' : 'outlined'}
           color="primary"
