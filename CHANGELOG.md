@@ -2,6 +2,58 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.77.2](https://github.com/vebholic/oms_frontend/compare/v2.77.1...v2.77.2) (2022-03-14)
+
+### [2.77.1](https://github.com/vebholic/oms_frontend/compare/v2.77.0...v2.77.1) (2022-03-13)
+
+
+### Bug Fixes
+
+* bug fix ([399e65e](https://github.com/vebholic/oms_frontend/commit/399e65ec9ffc9d5997a17d00379b63de270443ab))
+
+## [2.77.0](https://github.com/vebholic/oms_frontend/compare/v2.76.0...v2.77.0) (2022-03-12)
+
+
+### Features
+
+* product tab in delivery ticket details and invoice grid changes in rental management ([ed10d8b](https://github.com/vebholic/oms_frontend/commit/ed10d8bdd221e46de5ac646ad13db8d91beada2b))
+* react table in invoice of rental job ([a7e4188](https://github.com/vebholic/oms_frontend/commit/a7e41880c2085c59ec8d035ebfe24dac706db927))
+* rentalJob views nested product show following by parent product PO-1277 ([720cc29](https://github.com/vebholic/oms_frontend/commit/720cc29d725f2bbd4d16325fa23ab599bd14c6ec))
+
+
+### Bug Fixes
+
+* **add product:** fix and changes ([f3a1fd6](https://github.com/vebholic/oms_frontend/commit/f3a1fd666c7f118de3757de5cf06be97d9e3f008))
+* **assign product dialog:** fix selcted rows qty ([f13332b](https://github.com/vebholic/oms_frontend/commit/f13332b93e04a272c1230b2bb3e5119c1791df10))
+* bug fix ([ef20089](https://github.com/vebholic/oms_frontend/commit/ef20089f9dd6823cc73dfa8cf5e6c16751f1eca7))
+* bug fix ([fb09dbb](https://github.com/vebholic/oms_frontend/commit/fb09dbb242f44f66e63bd181d7499e0f327ca9ee))
+* bug fix ([c5e5c25](https://github.com/vebholic/oms_frontend/commit/c5e5c253eac42e2cc1901693ff311c9e27a7d515))
+* bug fix ([bee7f47](https://github.com/vebholic/oms_frontend/commit/bee7f47af1e655d679533e8d7b5b5dfa7bf9f2a9))
+* **parts:** change loader ([083c096](https://github.com/vebholic/oms_frontend/commit/083c0963cc7f8d13d37a6a46d7f3b84685ef91d2))
+
+## [2.76.0](https://github.com/vebholic/oms_frontend/compare/v2.75.0...v2.76.0) (2022-03-11)
+
+
+### Features
+
+* **dashboard:** new columns in regional sale table ([5668155](https://github.com/vebholic/oms_frontend/commit/5668155d75eae390e408cf0f23789166bad900a9))
+
+
+### Bug Fixes
+
+* **app:** minor fix ([6fc35ca](https://github.com/vebholic/oms_frontend/commit/6fc35ca3ccf5887fc4840a60202e8c4beb6b13d0))
+* bug fix ([91bbb42](https://github.com/vebholic/oms_frontend/commit/91bbb428e69aee8868d2128f2a3b7ec2b66abfce))
+* bug fix ([109a0d1](https://github.com/vebholic/oms_frontend/commit/109a0d13c7d411c2fb13ca16f987b6c346013234))
+* bug fix ([8ee70b1](https://github.com/vebholic/oms_frontend/commit/8ee70b1acedf60e7b22c20cbb033870505e0526d))
+* bug fix ([8965aa9](https://github.com/vebholic/oms_frontend/commit/8965aa95ff434a417981c21446b57ad0a2f86884))
+* **dashboard:** fix ([a941e7b](https://github.com/vebholic/oms_frontend/commit/a941e7b18b92c480c23190d1fd323ff60eeb4cbf))
+* **dashboard:** fix unit ([abe1750](https://github.com/vebholic/oms_frontend/commit/abe1750b631c19d8a43eab792f57165a84a57609))
+* **package parts:** changes and fix ([68c0a03](https://github.com/vebholic/oms_frontend/commit/68c0a03714d2d170f076284ec87004b28277b3be))
+* **parts:** editable table ([caf3f35](https://github.com/vebholic/oms_frontend/commit/caf3f35db0d243afef8e026e3dd9ef7568932944))
+* **product dialog:** selected records bug fix ([c55bc27](https://github.com/vebholic/oms_frontend/commit/c55bc27bca4260b0a2c2727eef5d792f9ffbe10d))
+* rental delivery ticket multiple pdf changes ([db4cb8d](https://github.com/vebholic/oms_frontend/commit/db4cb8dd40aa8d1ed6a92c0091b714d26b4e52c1))
+* well master action and add button changes ([457a82d](https://github.com/vebholic/oms_frontend/commit/457a82de57b4769d0b9f7ea98ee6c69471995136))
+
 ## [2.75.0](https://github.com/vebholic/oms_frontend/compare/v2.74.0...v2.75.0) (2022-03-10)
 
 

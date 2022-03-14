@@ -32,14 +32,30 @@ import { FaSuitcase } from "react-icons/fa";
 import MobileSortDialog from "src/components/MobileSortDialog";
 import MobileFilterDialog from "src/components/MobileFilterDialog"
 import { camelCase } from "lodash";
+import queryString from 'query-string';
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
+import HideWhenOffline from "src/components/HideWhenOffline";
 
 
 const PurchaseOrder = () => {
+
+    const PurchaseOrderType = [
+        {
+            key: `All ${routes.purchaseOrder.title}`,
+            value: 1,
+        },
+        {
+            key: `My ${routes.purchaseOrder.title}`,
+            value: 2,
+        },
+    ];
     let renderedFrom = camelCase(routes.purchaseOrder?.title)
 
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
-
+    const { type }: any = queryString.parse(history.location.search);
+    const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+    const [filter, setFilter] = useState(`All ${routes.purchaseOrder.title}`);
     const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
@@ -69,7 +85,7 @@ const PurchaseOrder = () => {
 
     useEffect(() => {
         fetchPurchaseOrder()
-    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, fromSalesOrder]);
+    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, fromSalesOrder, selectedType]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -179,7 +195,7 @@ const PurchaseOrder = () => {
     };
 
     const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}`;
+        let deepFilter = `?page=${page}&limit=${limit}&filterPurchaseOrders=${selectedType}`;
         let filterById = [];
 
         if (fromRental) {
@@ -249,6 +265,19 @@ const PurchaseOrder = () => {
         });
     }
 
+
+    const handlePurchaseOrderTypeSel = (filterValues) => {
+        setSelectedType(filterValues);
+        history.push(`?type=${filterValues}`)
+    }
+
+    const handleFilter = (event, newFilter) => {
+        if (newFilter != null) {
+            setFilter(newFilter);
+            handlePurchaseOrderTypeSel(PurchaseOrderType.find((d) => d.key === newFilter).value);
+
+        }
+    };
 
 
     const ActionsRenderer = params => (
@@ -363,7 +392,7 @@ const PurchaseOrder = () => {
                             <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
                             <span className="listingHeader">{routes.purchaseOrder?.title} </span>
                         </div>
-                        {isMobile && (
+                        {isMobile ? (
                             <>
                                 <Grid style={{ display: 'inline-flex' }}>
                                     <Button
@@ -415,7 +444,22 @@ const PurchaseOrder = () => {
                                     />
                                 </Grid>
                             </>
-                        )}
+                        ) :
+                            <HideWhenOffline>
+                                <div className={`align-items-center gap-1 layout-for-mobile `}>
+                                    {PurchaseOrderType && (
+                                        <ToggleButtonGroup size="small" className="ml-2" value={PurchaseOrderType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                                            {PurchaseOrderType.map((k, index) => {
+                                                return (
+                                                    <ToggleButton value={k.key} key={index}>
+                                                        {k.key}
+                                                    </ToggleButton>
+                                                );
+                                            })}
+                                        </ToggleButtonGroup>
+                                    )}
+                                </div>
+                            </HideWhenOffline>}
 
 
 

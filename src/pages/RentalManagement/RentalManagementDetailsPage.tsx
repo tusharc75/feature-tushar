@@ -466,6 +466,7 @@ const RentalManagementDetailsPage = () => {
                         currentStep={currentStep}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-3`}
+                        stepFullScreen={stepFullScreen}
                       />
                     )}
                     {currentStep === 4 && rentalManagementData && (
@@ -475,6 +476,7 @@ const RentalManagementDetailsPage = () => {
                         currentStep={currentStep}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-4`}
+                        stepFullScreen={stepFullScreen}
                       />
                     )}
                     {currentStep === 5 && rentalManagementData && (
@@ -483,8 +485,13 @@ const RentalManagementDetailsPage = () => {
                         setNextStep={setNextStep}
                         fetchRentalData={fetchRentalManagementData}
                         updateJobStatus={updateJobStatus}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
                         statusOptions={statusOptions}
                         renderedFrom={`${renderedFrom}_grid-5`}
+                        showActivity={showActivity}
+                        currencySymbol={currencySymbol}
+                        stepFullScreen={stepFullScreen}
                       />
                     )}
                   </ContentFullScreen>
