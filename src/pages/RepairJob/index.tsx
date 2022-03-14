@@ -422,7 +422,7 @@ const RepairJob = () => {
                   permissions={permissions.repairJob}
                   module="repairJob"
                   api={repairJob.api}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => { fetchRepairJobs() }}
                   isExportAllOrSomeFeature={true}
                   total={rowCount}
                   recordsToExport={selectedRecords.length}
@@ -510,57 +510,12 @@ const RepairJob = () => {
                 rowCount={rowCount}
                 page={page}
                 loading={loading}
-                additionalDetails={[
-                  {
-                    icon: <FaSuitcase size={18} />,
-                    field: "repairJobName"
-                  },
-                ]}
                 chips={[
                   {
                     icon: <SiStatuspage />,
                     label: "Status: ",
                     field: "status",
-                  },
-                  {
-                    icon: <GrStatusInfo />,
-                    label: "Repair Status: ",
-                    field: "typeOfRepair",
-                  },
-                  {
-                    icon: <BsFillPersonFill />,
-                    label: "Repair Person: ",
-                    field: "repairPerson"
-                  },
-
-                  {
-                    icon: <FaWarehouse />,
-                    label: "Plant: ",
-                    field: "plant"
-                  },
-
-                  {
-                    icon: <GiAutoRepair />,
-                    label: "Repair Plant: ",
-                    field: "repairPlant"
-                  },
-
-                  {
-                    icon: <GiCargoShip />,
-                    label: "Plant Ship To: ",
-                    field: "plantShipTo"
-                  },
-                  {
-                    icon: <RiSpaceShipFill />,
-                    label: "Supplier: ",
-                    field: "supplier"
-                  },
-                  {
-                    icon: <FaShippingFast />,
-                    label: "Supplier Ship To: ",
-                    field: "supplierShipTo"
-                  },
-
+                  }
                 ]}
                 onCreate={false}
                 showClone={false}
