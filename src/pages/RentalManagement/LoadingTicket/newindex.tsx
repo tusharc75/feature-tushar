@@ -1,19 +1,15 @@
 import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useReducer, useContext, Fragment } from "react";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { Link } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Tooltip, Menu, MenuItem, Dialog, TextField, CircularProgress } from "@material-ui/core";
+import { Button, Tooltip, Menu, MenuItem, Dialog, Chip, TextField, CircularProgress } from "@material-ui/core";
 import { AiFillFilePdf, AiOutlineLoading3Quarters } from 'react-icons/ai';
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "../../../components/Helpers/NoDataCell";
 import {
   deliveryTicket,
-  gridLoadingTimeout,
   rentalManagement,
   sidebarResource,
   INVENTORY_STATUS,
@@ -21,13 +17,12 @@ import {
   DELIVERY_TICKET_TYPE,
   DELIVERY_TICKET_REFRENCE_TYPE,
   serializedAsset,
-  DELIVERY_FROM_TO_TYPE
+  DELIVERY_FROM_TO_TYPE,
+  treeToFlatArray
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { useHistory } from 'react-router-dom';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
@@ -38,8 +33,9 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { makeStyles } from '@material-ui/core/styles';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
-import { groupBy, uniq, map } from "lodash";
-
+import { groupBy, uniq, uniqBy, map } from "lodash";
+import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
+import NoDataCell from "../../../components/Helpers/NoDataCell";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -53,15 +49,11 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom }) => {
+const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom, stepFullScreen }) => {
 
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
   const classes = useStyles();
 
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [downlodingFile, setDownlodingFile] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
 
@@ -76,21 +68,29 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
 
+  const [rowsData, setRowsData] = useState(null);
+  const [selectedRecords, setSelectedRecords] = useState([])
+
+  const [selectedProducts, setSelectedProducts] = useState([])
+  const [selectedAssets, setSelectedAssets] = useState([])
+
   useEffect(() => {
     fetchRecords();
   }, []);
 
+  useEffect(() => {
+    let flatArray = treeToFlatArray(selectedRecords, "subRows");
+    flatArray = uniqBy(flatArray, '_id')
+    setSelectedAssets(flatArray?.filter((ele) => ele.type === "asset" && !ele.hideSelection))
+    setSelectedProducts(flatArray?.filter((ele) => ele.type === "product" && !ele.serializedProduct))
+  }, [selectedRecords]);
+
   const fetchRecords = async () => {
     setNextStep(false);
     try {
-      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
-      if (gridApi) {
-        gridApi.deselectAll();
-      }
       var productAssets: any = [];
       var deliveryTicketList: any = [];
-      var products: any = [];
-      dispatch({ type: 'loading', loading: true });
+      const rows = []
       if (isOffline) {
         productAssets = await getRentalProductAssets(rentalManagementData._id)
         productAssets = productAssets?.map(u => ({
@@ -102,47 +102,86 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id)
       }
       else {
-        const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`)
-        productAssets = response?.data?.data
-        productAssets = productAssets.map(d => d.inventory).map(u => ({
-          ...u,
-          type: "Asset",
-          qty: 1,
-          productName: u?.product?.optionLabel,
-          productId: u?.product?.optionValue,
-          warehouse: u?.warehouse?.optionLabel,
-          warehouseId: u?.warehouse?.optionValue,
-          currentOwner: u?.currentOwner,
-          currentLocation: u?.currentLocation?.optionValue,
-        }))
+        const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
+
         const result = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
         deliveryTicketList = result?.data?.data
 
-        const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
-        products = productResponse?.data?.data?.material
-        products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
+        const products = response?.data?.data?.material.filter((e) => e.type === "product");
+        productAssets = response?.data?.data?.inventory
 
-        products?.forEach((ele) => {
-          if (productAssets.filter((e) => e._id === ele.materialId).length) {
-            productAssets.forEach(element => {
-              if (element._id === ele.materialId) {
-                element.qty += ele.qty
+
+        products?.forEach((element: any) => {
+          const ele: any = {}
+          ele.detail = element.productDetail?.productName;
+          ele._id = element.productDetail?._id;
+          ele.type = "product";
+          ele.serializedProduct = element.productDetail?.serializedProduct;
+
+          deliveryTicketList.map(obj => {
+            if (obj?.products?.some((p) => ele?._id === p?.product)) {
+              ele.loadingTicket = obj?.ticketName;
+              ele.loadingTicketId = obj?._id;
+              ele.loadingTicketStatus = obj?.status;
+            }
+          });
+          ele.hideSelection = ele.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered;
+
+          ele.subRows = [];
+          const assets = productAssets?.filter((e) => e._id === element._id)
+          assets?.forEach((_asset: any) => {
+            const asset: any = {};
+            asset.detail = _asset?.inventoryDetail?.assetNumber;
+            asset._id = _asset?.inventoryDetail?._id;
+            asset.type = "asset";
+            asset.serialNumber = _asset?.inventoryDetail?.serialNumber;
+            asset.status = _asset?.inventoryDetail?.status;
+            asset.warehouse = _asset?.inventoryDetail?.warehouse;
+            asset.currentOwner = _asset?.inventoryDetail?.currentOwner;
+            asset.currentLocation = _asset?.inventoryDetail?.currentLocation;
+            asset.manualStatus = _asset?.inventoryDetail?.manualStatus;
+            deliveryTicketList.map(obj => {
+              if (obj?.productInventory?.some((p) => asset?._id === p?.optionValue)) {
+                asset.loadingTicket = obj?.ticketName;
+                asset.loadingTicketId = obj?._id;
+                asset.loadingTicketStatus = obj?.status;
               }
             });
+            asset.hideSelection =
+              [
+                INVENTORY_STATUS.inUse,
+                INVENTORY_STATUS.indTransit,
+                INVENTORY_STATUS.repair,
+                INVENTORY_STATUS.scrap,
+                INVENTORY_STATUS.lost,
+                INVENTORY_STATUS.underReview
+              ].includes(asset.status) || asset.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered || asset?.manualStatus === INVENTORY_STATUS.reserved;
+
+            ele.subRows.push(asset)
+          })
+          if (ele.subRows.length) {
+            ele.hideSelection = ele.subRows?.some((e) => !e.hideSelection) ? false : true;
+          }
+
+          ele.qty = ele.serializedProduct ? assets.length : element.qty;
+          if (rows.filter((e) => e._id === ele._id).length) {
+            rows.forEach((e) => {
+              if (e._id === ele._id) {
+                e.qty += ele.qty;
+                e.subRows = [...ele.subRows, ...e.subRows];
+              }
+            })
           }
           else {
-            const obj: any = {}
-            obj._id = ele.materialId
-            obj.type = "Product"
-            obj.qty = ele.qty
-            obj.assetNumber = ele?.productDetail?.productName
-            obj.productName = ele?.productDetail?.productName
-            obj.productId = ele?.productDetail?._id
-            obj.warehouse = rentalManagementData?.warehouse?.optionLabel
-            obj.warehouseId = rentalManagementData?.warehouse?.optionValue
-            productAssets.push(obj)
+            rows.push(ele)
           }
         })
+      }
+      setRowsData(rows);
+      setSelectedProducts([]);
+
+      if (deliveryTicketList.filter((e) => e.status === DELIVERY_TICKET_STATUS.delivered).length > 0) {
+        setNextStep(true);
       }
       if (deliveryTicketList.length) {
         if ((deliveryTicketList.filter((e) => [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status))).length > 0) {
@@ -152,125 +191,78 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           setShowProcessDeliveryTicket(false)
         }
       }
-      deliveryTicketList.map(obj => {
-        if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
-          productAssets.map((d, index) => {
-            if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
-              productAssets[index]['loadingTicket'] = obj?.ticketName;
-              productAssets[index]['loadingTicketId'] = obj?._id;
-              productAssets[index]['loadingTicketStatus'] = obj?.status;
-            }
-            if (obj?.products?.some((p) => d?._id === p?.product)) {
-              productAssets[index]['loadingTicket'] = obj?.ticketName;
-              productAssets[index]['loadingTicketId'] = obj?._id;
-              productAssets[index]['loadingTicketStatus'] = obj?.status;
-            }
-          });
-        }
-      });
-      productAssets.forEach((d) => {
-        d['isChecked'] = false;
-        d['hideSelection'] =
-          [
-            INVENTORY_STATUS.inUse,
-            INVENTORY_STATUS.indTransit,
-            INVENTORY_STATUS.repair,
-            INVENTORY_STATUS.scrap,
-            INVENTORY_STATUS.lost,
-            INVENTORY_STATUS.underReview
-          ].includes(d.status) || d.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered || d?.manualStatus === INVENTORY_STATUS.reserved;
-      });
-      if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
-        setNextStep(true);
-      }
-
-      setUniqueLoadingTicket([...new Set(productAssets.filter(d => d.loadingTicketId !== undefined).map(d => d.loadingTicketId))]);
-      dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
+      setUniqueLoadingTicket(deliveryTicketList?.map(d => d._id));
     } catch (error) {
-      dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
     }
   };
 
-  const TicketRenderer = (params) =>
-    params?.value ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
-        {params.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
-  const WarehouseRenderer = (params) => (
-    params?.value ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`}>
-        {params.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    )
-  );
-
-  const InventoryRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${params.data.type === "Asset" ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
-  const ProductNameRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.productId}`}>
-      {params.value}
-    </Link>
-  );
-
-  const frameworkComponents = {
-    ticketRenderer: TicketRenderer,
-    productNameRenderer: ProductNameRenderer,
-    inventoryRenderer: InventoryRenderer,
-    warehouseRenderer: WarehouseRenderer,
-    commonRenderer: CommonRenderer
-  };
-
-  const columns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "inventoryRenderer" },
-    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
-    { field: "productName", headerName: "Product Type", show: true, cellRenderer: "productNameRenderer" },
-    { field: "warehouse", headerName: "Plant", show: false, cellRenderer: "warehouseRenderer" },
-    { field: "loadingTicket", headerName: "Loading Ticket", show: true, cellRenderer: "ticketRenderer" },
-    { field: "status", headerName: "Asset Status", show: true, cellRenderer: "commonRenderer" },
+  const columns: any = [
+    {
+      accessor: 'detail',
+      Header: 'Detail',
+      sticky: isMobile ? "none" : "left",
+      Cell: ({ row }) => (
+        row?.original?.type === "product" ?
+          <Fragment>
+            <Link className="link text-truncate" title={row?.original?.detail} to={`${routes.productDetail.path}/${row?.original?._id}`}>
+              {row?.original?.detail}
+            </Link>
+            <Chip className="ml-2" label="Product" size="small" color="primary" />
+          </Fragment>
+          : row?.original?.type === "asset" ?
+            <Fragment>
+              <Link className="link text-truncate" title={row?.original?.detail} to={`${routes.serializedAssetDetail.path}/${row?.original?._id}`}>
+                {row?.original?.detail}
+              </Link>
+              <Chip className="ml-2" label="Asset" size="small" color="primary" />
+            </Fragment>
+            : <p className="text-truncate">{row?.original?.detail}</p>),
+    },
+    {
+      accessor: 'qty',
+      Header: 'Asset Qty',
+      Cell: ({ row }) => (<p>{row?.original?.qty}</p>),
+    },
+    {
+      accessor: 'serialNumber',
+      Header: 'Serial Number',
+      Cell: ({ row }) => (<p className="text-truncate">{row?.original?.serialNumber ? <p>{row?.original?.serialNumber}</p> : <NoDataCell />}</p>),
+    },
+    {
+      accessor: 'loadingTicket',
+      Header: 'Loading Ticket',
+      Cell: ({ row }) => (
+        row?.original?.loadingTicket ?
+          <Link className="link text-truncate" title={row?.original?.loadingTicket} to={`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`}>
+            {row?.original?.loadingTicket}
+          </Link>
+          : <NoDataCell />
+      )
+    },
+    {
+      accessor: 'status',
+      Header: 'Asset Status',
+      Cell: ({ row }) => (
+        <p className="text-truncate">{row?.original?.status ? <p>{row?.original?.status}</p> : <NoDataCell />}</p>),
+    }
   ];
 
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-
   const handleDeliveryTicketDialog = () => {
-    if (selectedRecords.length) {
+    if (selectedAssets.length) {
       const data = {}
       data["ticketName"] = rentalManagementData.rentalJobName;
       data["refrenceId"] = rentalManagementData._id;
 
-      if (selectedRecords[0].warehouse) {
+      if (selectedAssets[0].warehouse) {
         data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
-        data["pickupFrom"] = selectedRecords[0].warehouseId;
-        data["pickupFromAddress"] = selectedRecords[0].currentLocation;
+        data["pickupFrom"] = selectedAssets[0].warehouse;
+        data["pickupFromAddress"] = selectedAssets[0].currentLocation;
       }
       else {
         data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
-        data["pickupFrom"] = selectedRecords[0].currentOwner;
-        data["pickupFromAddress"] = selectedRecords[0].currentLocation;
+        data["pickupFrom"] = selectedAssets[0].currentOwner;
+        data["pickupFromAddress"] = selectedAssets[0].currentLocation;
       }
       data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.customer;
       data["deliveryTo"] = rentalManagementData?.customerAccount?.optionValue;
@@ -299,15 +291,14 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   };
 
   const checkUniqWarehouse = () => {
-    if (selectedRecords.length === 0) {
+    if (selectedAssets.length === 0) {
       return true;
-    } else if (uniq(map(selectedRecords, "warehouseId")).length === 1) {
+    } else if (uniq(map(selectedAssets, "warehouse")).length === 1) {
       return false;
     } else {
       return true;
     }
   };
-
 
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
@@ -315,30 +306,28 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         {!isMobile && <Button
           onClick={() => {
             setDownlodingFile(true);
-            uniqueLoadingTicket.forEach(currentId => {
-              axiosInstance().get(`/delivery-ticket/${currentId}/pdf`)
-                .then(({ data }) => {
-                  axiosInstance()
-                    .get(`user/download?fileName=${data.data.fileName}`, {
-                      responseType: "blob",
-                    })
-                    .then(({ data }) => {
-                      const file = new Blob([data], { type: "application/pdf" });
-                      const fileURL = URL.createObjectURL(file);
-                      const pdfWindow = window.open();
-                      pdfWindow.location.href = fileURL;
-                      toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
-                      setDownlodingFile(false);
-                    })
-                    .catch((err) => {
-                      toastConfig.setToastConfig(err);
-                      setDownlodingFile(false);
-                    });
-                }).catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setDownlodingFile(false);
-                })
-            })
+            axiosInstance().post(`/delivery-ticket/pdf`, { "ids": uniqueLoadingTicket })
+              .then(({ data }) => {
+                axiosInstance()
+                  .get(`user/download?fileName=${data.data.fileName}`, {
+                    responseType: "blob",
+                  })
+                  .then(({ data }) => {
+                    const file = new Blob([data], { type: "application/pdf" });
+                    const fileURL = URL.createObjectURL(file);
+                    const pdfWindow = window.open();
+                    pdfWindow.location.href = fileURL;
+                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                    setDownlodingFile(false);
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                  });
+              }).catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+              })
 
           }}
           variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -356,7 +345,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           color="primary"
           aria-controls="simple-menu"
           aria-haspopup="true"
-          disabled={selectedRecords.length === 0 || selectedRecords?.some(f => f.type === "Product") || isOffline}
+          disabled={selectedAssets.length === 0 || isOffline}
           size="small"
           onClick={handleClick}
           style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
@@ -389,7 +378,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           }}>Lost</MenuItem>
         </Menu>
         <Box mx={1} />
-        <Tooltip title={(checkUniqWarehouse() && selectedRecords.length > 1) ? "Selected assets are located in several locations."
+        <Tooltip title={(checkUniqWarehouse() && selectedAssets.length > 1) ? "Selected assets are located in several locations."
           : "Create Loading Ticket"}>
           <span>
             <Button
@@ -397,16 +386,15 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
               variant={isMobile && !isTablet ? "text" : "outlined"}
               color="primary"
               size="small"
-              disabled={(selectedRecords.length === 0)
-                || (selectedRecords.some(f => f.hasOwnProperty("loadingTicketId")) || checkUniqWarehouse())}
+              disabled={(selectedAssets.length === 0) || (selectedAssets.some(f => f.hasOwnProperty("loadingTicketId")) || checkUniqWarehouse())}
             >
               {'Create Loading Ticket'}
             </Button>
           </span>
         </Tooltip>
         <Box mx={1} />
-        {(selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("loadingTicketId") &&
-          f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedRecords?.length) ?
+        {(selectedAssets.length && selectedAssets?.filter(f => f.hasOwnProperty("loadingTicketId") &&
+          f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedAssets?.length) ?
           <Fragment>
             <Tooltip
               title="Remove Assets From Loading Ticket(s)">
@@ -418,7 +406,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
                 color="primary"
                 size="small"
                 style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
-                disabled={(selectedRecords.length === 0) || currentStep === 4 || (selectedRecords.some(f => !f.hasOwnProperty("loadingTicketId")))}
+                disabled={(selectedAssets.length === 0) || currentStep === 4 || (selectedAssets.some(f => !f.hasOwnProperty("loadingTicketId")))}
               >
                 {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : "Remove Loading Ticket"}
               </Button>
@@ -446,67 +434,19 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       </Box>
     </Box>
     <Grid item xs={12} md={12} sm={12} className="mt-3">
-      {columns ?
-        isMobile && !isTablet ?
-          <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={true}
-            primaryField={columns?.find(d => d.field)}
-            onClick={(data) => {
-              history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={false}
-            extraParamsToCheckDelete={true}
-            onDelete={false}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[
-            ]}
-            chips={[
-              {
-                label: "Status : ",
-                field: "status",
-              },
-              {
-                label: "Loading Ticket : ",
-                field: "loadingTicket",
-                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`)
-              }
-            ]}
-            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-            onCreate={false}
-            showClone={false}
-            onClone={() => { }}
-            renderedFrom={renderedFrom}
-          /> :
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={false}
-            loading={loading}
-            isClientSideGrid={true}
-            allowSelection={true}
-            rowClassRules={{
-              "red-data-row":
-                function (params) {
-                  return [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some(s => s === params.data.status);
-                },
-            }}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchRecords}
-          />
+      {(columns && rowsData) ?
+        <CustomReactTable
+          height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 365px)"}
+          columns={columns}
+          data={rowsData}
+          setCellColor={(rowData) => {
+            if ([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(rowData?.status)) return "error";
+            return "";
+          }}
+          onSelect={setSelectedRecords}
+          childrenProperty="subRows"
+          uniqueKey="_id"
+        />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
       }
     </Grid>
@@ -517,8 +457,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
           refrenceData={showTicketDialog.data}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
-          productInventory={selectedRecords?.filter((e => e.type === "Asset"))}
-          products={selectedRecords?.filter((e => e.type === "Product"))}
+          productInventory={selectedAssets}
+          products={selectedProducts}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchRecords();
@@ -537,16 +477,13 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           }}
           onOk={() => {
             setOkBtnLoading(true);
-
-            const groupByCalls = groupBy(selectedRecords, 'loadingTicketId');
+            const groupByCalls = groupBy(selectedAssets, 'loadingTicketId');
             let apiCalls = [];
-
             Object.keys(groupByCalls).forEach((key) => {
               apiCalls.push(
                 axiosInstance().put(`${deliveryTicket.api}/${key}/assets`, { ids: groupByCalls[key].map((m) => m._id) })
               );
             });
-
             Promise.all(apiCalls)
               .then(() => {
                 toastConfig.setToastConfig({
@@ -615,7 +552,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
                 setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
                 axiosInstance().put(`${serializedAsset.api}/update-status`, {
                   comment: statusToUpdate.message,
-                  assets: selectedRecords.map(m => m?._id ?? m?.id),
+                  assets: selectedAssets.map(m => m?._id ?? m?.id),
                   status: statusToUpdate.status,
                   reference: {
                     _id: rentalManagementData._id,
