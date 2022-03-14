@@ -5,7 +5,6 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from "../../../axios/axiosInstance";
 import { Box, CircularProgress, TextField } from "@material-ui/core";
 import SearchBox from '../../../components/Helpers/SearchBox'
-import { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
 import { gridLoadingTimeout, CustomDialogTransition, packages, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import Dialog from "@material-ui/core/Dialog/Dialog";
@@ -17,16 +16,15 @@ import { startCase } from "lodash";
 import { getColumnData, getFrameworkComponents, getStaticFields } from "../../../constants/columns";
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
-
+import { reducer, intialState, } from "../../../components/AgGridComponents/CustomAgGrid";
 
 let searchTimeout;
 const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, rentalManagementData, renderedFrom }) => {
 
     const localStorageSelectedRecords = `${renderedFrom}_selected`
     const toastConfig = useContext(CustomToastContext)
-    const {
-        state: { selectedEntity }
-    }: any = useData();
+
+    const { state: { user, permissions, selectedEntity } }: any = useData();
     const [packageDialog, setPackageDialog] = useState(false);
     const [productData, setProductData] = useState([]);
     const [packageProductData, setPackageProductData] = useState([]);
@@ -61,7 +59,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             fetchMaterial()
         }, millisec);
     }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
-
 
 
     const fetchMaterial = () => {
@@ -138,9 +135,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = type === "product" ?
-                        getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
-                        : getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, type === "product" ? routes.productDetail.path : routes.packagesDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -149,9 +144,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                     }
                 })
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-                tempFrameworkComponent = {
-                    ...tempFrameworkComponent,
-                }
                 setFrameWorkComponent({ ...tempFrameworkComponent })
                 columns = [...columns, ...getStaticFields()]
                 setColumns([...columns, ...defaultColumns])
@@ -200,6 +192,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             dispatch({ type: "loading", loading: false });
         }, gridLoadingTimeout);
     }
+
 
     return (<Fragment>
         <Dialog
