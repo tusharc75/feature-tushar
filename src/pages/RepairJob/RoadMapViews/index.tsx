@@ -267,17 +267,17 @@ const RepairJobViews = (props) => {
                         <div
                           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', paddingLeft: '5px', paddingRight: '5px' }}
                         >
-                          {customNodeStyles[key].name}
                           <div
                             style={{
                               height: '12px',
                               width: '12px',
-                              marginLeft: '3px',
+                              marginRight: '3px',
                               borderRadius: '100%',
                               background: `${customNodeStyles[key].background}`,
                               borderColor: `1px solid ${customNodeStyles[key].borderColor}`
                             }}
                           ></div>
+                          {customNodeStyles[key].name}
                         </div>
                       );
                     })}

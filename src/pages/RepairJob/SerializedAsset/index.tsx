@@ -156,7 +156,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         data["ticketName"] = repairJobData.repairJobName;
         data["refrenceId"] = repairJobData._id;
         data["pickupFromType"] = pickupFromType;
-        
+
         var pickupFrom = "";
         if (selectedRecords[0].currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
             pickupFrom = selectedRecords[0].warehouseId;
@@ -208,16 +208,21 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         }
     };
 
+    const checkUniqWarehouse = () => {
+        if (selectedRecords.length === 0) {
+            return true;
+        } else if (uniq(map(selectedRecords, "warehouseId")).length === 1) {
+            return false;
+        } else {
+            return true;
+        }
+    };
+
     const checkUniqSupplier = () => {
         if (selectedRecords.length === 0) {
             return true;
         } else if (uniq(map(selectedRecords, "currentOwnerId")).length === 1) {
-            if (uniq(map(selectedRecords, "currentOwnerType"))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
-                return false;
-            }
-            else {
-                return true;
-            }
+            return false;
         } else {
             return true;
         }
@@ -335,20 +340,38 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                             onClose={closeActions}
                         >
                             <MenuItem
-                                disabled={(selectedRecords.length === 0 || checkUniqWarehouseAndOwner() || selectedRecords.some(s => s.repaired === true))}
-                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant) }}>
+                                disabled={(selectedRecords.length === 0 || checkUniqSupplier() || checkUniqWarehouse() || selectedRecords.some(s => s.repaired === true))}
+                                onClick={() => {
+                                    if (uniq(map(selectedRecords, "currentOwnerType")).length === 1) {
+                                        if (uniq(map(selectedRecords, "currentOwnerType"))[0] === INVENTORY_OWNER_TYPE.brand) {
+                                            handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant)
+                                        }
+                                        else if (uniq(map(selectedRecords, "currentOwnerType"))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
+                                            handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant)
+                                        }
+                                    }
+                                }}>
                                 Send to Plant
                             </MenuItem>
                             <MenuItem
-                                disabled={(selectedRecords.length === 0 || checkUniqWarehouseAndOwner() || selectedRecords.some(s => s.repaired === true))}
-                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.loading, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier) }}>
+                                disabled={(selectedRecords.length === 0 || checkUniqSupplier() || checkUniqWarehouse() || selectedRecords.some(s => s.repaired === true))}
+                                onClick={() => {
+                                    if (uniq(map(selectedRecords, "currentOwnerType")).length === 1) {
+                                        if (uniq(map(selectedRecords, "currentOwnerType"))[0] === INVENTORY_OWNER_TYPE.brand) {
+                                            handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier)
+                                        }
+                                        else if (uniq(map(selectedRecords, "currentOwnerType"))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
+                                            handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.supplier)
+                                        }
+                                    }
+                                }}>
                                 Send to Supplier
                             </MenuItem>
-                            <MenuItem
+                            {/* <MenuItem
                                 disabled={(selectedRecords.length === 0 || checkUniqSupplier() || selectedRecords.some(s => s.repaired === true))}
                                 onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant) }}>
                                 Receiving from Supplier
-                            </MenuItem>
+                            </MenuItem> */}
                         </Menu>
                     </Fragment>
                 }
@@ -404,10 +427,12 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                     loading={loading}
                     renderedFrom={renderedFrom}
                     rowClassRules={{
-                        "red-data-row":
-                            function (params) {
-                                return ["Scrap", "Lost"].some(s => s === params.data.status);
-                            },
+                        "scrap-data-row": function (params) {
+                            return [INVENTORY_STATUS.scrap].some(s => s === params.data.status);
+                        },
+                        "red-data-row": function (params) {
+                            return [INVENTORY_STATUS.lost].some(s => s === params.data.status);
+                        },
                     }}
                     isClientSideGrid={true}
                     refreshGrid={fetchRecords}

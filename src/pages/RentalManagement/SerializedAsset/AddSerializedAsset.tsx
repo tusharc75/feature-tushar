@@ -222,7 +222,12 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
             if (queryString) {
                 deepFilter = `${deepFilter}&${queryString}`;
             } else {
-                deepFilter = `${deepFilter}&availableAssets=true`;
+                if (refrenceType === "Repair Job") {
+                    deepFilter = `${deepFilter}&repairable=true`;
+                }
+                else {
+                    deepFilter = `${deepFilter}&availableAssets=true`;
+                }
             }
         }
         if (subleaseAsset) {
@@ -231,6 +236,8 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
         else {
             deepFilter = `${deepFilter}&subleaseAsset=0`;
         }
+
+
         return deepFilter;
     };
 
