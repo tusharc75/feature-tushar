@@ -88,7 +88,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         <ActivityLoader />
       ) : notes.length ? (
         <Fragment>
-          {notes.map((_note, index) => (
+          {notes.slice(0, 5).map((_note, index) => (
             <Box key={_note._id} className="activity">
               <Box>
                 <Grid container>

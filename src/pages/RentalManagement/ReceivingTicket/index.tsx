@@ -66,6 +66,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [downlodingFile, setDownlodingFile] = useState(false);
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
+
+  const [showConformationConsume, setShowConformationConsume] = useState(false);
+
   const [okBtnLoading, setOkBtnLoading] = useState(false);
 
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
@@ -219,11 +222,13 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
       productAssets.forEach((d) => {
         d["isChecked"] = false;
-        d["hideSelection"] = [INVENTORY_STATUS.indTransit, INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
+        d["hideSelection"] = [INVENTORY_STATUS.indTransit, INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved
+          || d?.status === RENTAL_INTERNAL_ASSET_STATUS.consumed;
       })
+
       if (productAssets.filter((e) =>
         [INVENTORY_STATUS.underReview, INVENTORY_STATUS.available, INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(e.status) ||
-        [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(e.rentalAssetStatus)).length
+        [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(e.rentalAssetStatus)).length
         === productAssets.length) {
         setNextStep(true)
       }
@@ -428,7 +433,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         <Box mx={1} />
         <Button variant={isMobile && !isTablet ? 'text' : 'outlined'} color="primary" aria-controls="simple-menu"
           aria-haspopup="true"
-          disabled={selectedRecords?.length === 0 || selectedRecords?.some(f => f.type === "Product") || isOffline}
+          disabled={selectedRecords?.length === 0 || isOffline}
           size="small"
           onClick={handleClick}
           style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
@@ -451,26 +456,35 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             horizontal: 'right'
           }}
         >
-          {(selectedRecords?.filter(f =>
-            ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-              (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
-            && [INVENTORY_STATUS.underReview].includes(f.status)
-          )?.length === selectedRecords?.length) &&
+          {(selectedRecords?.filter((f) => f.type === "Asset").length === selectedRecords.length) &&
             <Fragment>
+              {(selectedRecords?.filter(f =>
+                ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
+                && [INVENTORY_STATUS.underReview].includes(f.status)
+              )?.length === selectedRecords?.length) &&
+                <Fragment>
+                  <MenuItem onClick={() => {
+                    setAnchorEl(null)
+                    setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: "" })
+                  }}>{INVENTORY_STATUS.available}</MenuItem>
+                </Fragment>}
               <MenuItem onClick={() => {
                 setAnchorEl(null)
-                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: "" })
-              }}>{INVENTORY_STATUS.available}</MenuItem>
+                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
+              }}>{INVENTORY_STATUS.scrap}</MenuItem>
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
+              }}>{INVENTORY_STATUS.lost}</MenuItem>
             </Fragment>
           }
-          <MenuItem onClick={() => {
-            setAnchorEl(null)
-            setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
-          }}>{INVENTORY_STATUS.scrap}</MenuItem>
-          <MenuItem onClick={() => {
-            setAnchorEl(null)
-            setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
-          }}>{INVENTORY_STATUS.lost}</MenuItem>
+          {(selectedRecords?.filter((f) => f.type === "Product").length === selectedRecords.length) &&
+            <MenuItem onClick={() => {
+              setAnchorEl(null)
+              setShowConformationConsume(true)
+            }}>{RENTAL_INTERNAL_ASSET_STATUS.consumed}</MenuItem>
+          }
         </Menu>
         <Box mx={1} />
         <Button
@@ -723,6 +737,28 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             });
         }}
         okBtnLoading={okBtnLoading}
+      />
+    )}
+    {showConformationConsume && (
+      <ConfirmationDialog
+        open={showConformationConsume}
+        message={`Are you sure you want to consume selected records?`}
+        onClose={() => {
+          setShowConformationConsume(false);
+        }}
+        okBtnLoading={okBtnLoading}
+        onOk={() => {
+          setOkBtnLoading(true);
+          axiosInstance().post(`${rentalManagement.api}/consume-product/${rentalManagementData._id}`, { "products": selectedRecords?.map(s => s._id) })
+            .then(({ data }) => {
+              setOkBtnLoading(false);
+              setShowConformationConsume(false);
+              fetchRecords();
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+            })
+        }}
       />
     )}
     {statusToUpdate.open && (
