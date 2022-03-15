@@ -95,10 +95,10 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
           additionalData: {
             volumeUnit,
             currency,
-            ['Total Booked Volume']: isNaN(hitRatioValue) ? 0 : hitRatioValue * 100,
-            ['Total Booked Value']: isNaN(hitRatioCost) ? 0 : hitRatioCost * 100,
-            ['Total Booked Cost']: isNaN(hitRatioMargin) ? 0 : hitRatioMargin * 100,
-            ['Booked Gross Margin']: isNaN(hitRatioVolume) ? 0 : hitRatioVolume * 100
+            ['Total Booked Volume']: isNaN(hitRatioVolume) ? 0 : hitRatioVolume * 100,
+            ['Total Booked Value']: isNaN(hitRatioValue) ? 0 : hitRatioValue * 100,
+            ['Total Booked Cost']: isNaN(hitRatioCost) ? 0 : hitRatioCost * 100,
+            ['Booked Gross Margin']: isNaN(hitRatioMargin) ? 0 : hitRatioMargin * 100
           },
           cardData
         };
@@ -389,18 +389,16 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
         bookedData.push(d?.totalBookedVolume || 0);
         offeredData.push(d?.totalOfferedVolume || 0);
         budget.push(d?.volumeBudget || 0);
-
       } else {
-
         if (currencyTo && currencyTo !== currencyFrom) {
           const salesData: any = await Promise.all([
             getExchangeRates(moment().format('YYYY-MM-DD'), d?.totalBookedMargin || 0, currencyFrom, currencyTo),
             getExchangeRates(moment().format('YYYY-MM-DD'), d?.totalOfferedMargin || 0, currencyFrom, currencyTo),
-            getExchangeRates(moment().format('YYYY-MM-DD'), d?.marginBudget || 0, currencyFrom, currencyTo),
+            getExchangeRates(moment().format('YYYY-MM-DD'), d?.marginBudget || 0, currencyFrom, currencyTo)
           ]);
           bookedData.push(salesData[0]?.rates[currencyTo] || 0);
           offeredData.push(salesData[1]?.rates[currencyTo] || 0);
-          budget.push(salesData[2]?.rates[currencyTo] || 0)
+          budget.push(salesData[2]?.rates[currencyTo] || 0);
         } else {
           bookedData.push(d?.totalBookedMargin || 0);
           offeredData.push(d?.totalOfferedMargin || 0);

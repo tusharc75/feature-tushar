@@ -158,17 +158,31 @@ const RentalManagementViews = (props) => {
       xPosition += 300;
       const allPackages = product?.material?.filter((item) => item.type === 'package').map((item) => item._id);
       const allPackagesAndProductIds = product?.material?.map((item) => item._id);
+      // var materialIds = [];
+      // const allNonSerializedProductIds = product?.material
+      //   ?.filter((i) => !i?.productDetail?.serializedProduct && !materialIds.includes(i?.materialId))
+      //   .map((item) => {
+      //     materialIds.push(item?.materialId);
+      //     return item._id;
+      //   });
+      const allMaterialWithId = {};
+      product?.material
+        ?.filter((i) => !i?.productDetail?.serializedProduct)
+        ?.map((item) => {
+          allMaterialWithId[item?._id] = item?.materialId;
+        });
+
+      // console.log(allNonSerializedProductIds);
+
       if (allPackages.length) xPosition += 300;
       var pakcageIdx = 0;
       var productIdx = 0;
       const productColSystem = {};
-      const productWithMaterialId = {};
 
       var lastIndex = 0;
       product?.material?.map((item: any, index) => {
         if (item.type !== 'package') {
           productColSystem[item._id] = productColSystem[item.parentId] ? productColSystem[item.parentId] + 300 : xPosition;
-          productWithMaterialId[item.materialId] = item._id;
         }
         flow.push({
           id: `${item._id}`,
@@ -319,7 +333,8 @@ const RentalManagementViews = (props) => {
 
       xPosition += 300;
       var productsWithStatus = {};
-      product?.inventory?.map((item: any, index) => {
+      var beforeLoadingAssetIdx = 0;
+      product?.inventory?.map((item: any) => {
         productsWithStatus[item.inventory] = item?.inventoryDetail?.status;
         flow.push({
           id: `${item.inventoryDetail.assetNumber}`,
@@ -335,12 +350,13 @@ const RentalManagementViews = (props) => {
               </HtmlTooltip>
             )
           },
-          position: { x: xPosition, y: index * 80 },
+          position: { x: xPosition, y: beforeLoadingAssetIdx * 80 },
           style:
             item?.inventoryDetail?.status === INVENTORY_STATUS.scrap || item?.inventoryDetail?.status === INVENTORY_STATUS.lost
               ? customNodeStyles.lostOrScrapAssets
               : customNodeStyles.productAssets
         });
+        beforeLoadingAssetIdx += 1;
 
         flowEdge.push({
           id: `edge-assets-${item.inventoryDetail.assetNumber}`,
@@ -355,6 +371,54 @@ const RentalManagementViews = (props) => {
           target: `${item.inventoryDetail.assetNumber}`
         });
       });
+
+      const assetsInLoading = {};
+      loadingTicket?.map((item) => {
+        item?.products?.map((i) => {
+          assetsInLoading[i?.product] = item._id;
+        });
+      });
+      var loadingProductData = [];
+      product?.material
+        ?.filter((i) => !i?.productDetail?.serializedProduct && assetsInLoading[i?.materialId] && i.type !== 'package')
+        ?.map((item) => {
+          if (loadingProductData.includes(`${item.materialId}`)) {
+            flow.push({
+              id: `${item.productDetail?.productName}`,
+              sourcePosition: 'right',
+              targetPosition: 'left',
+              type: 'default',
+              data: {
+                ref_type: item.type,
+                ref_id: item.materialId,
+                label: (
+                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {item.productDetail?.productName || item.packageDetail?.packageName}
+                    <br />
+                    {_.startCase(_.camelCase(item.type))}
+                  </div>
+                )
+              },
+              position: { x: xPosition, y: beforeLoadingAssetIdx * 80 },
+              style: customNodeStyles.product
+            });
+            beforeLoadingAssetIdx += 1;
+          } else {
+            loadingProductData.push(`${item.materialId}`);
+          }
+          flowEdge.push({
+            id: `edge-assets-product-parent-${item.productDetail?.productName}-${assetsInLoading[item?.materialId]}-${_.random(0, 1000)}`,
+            source: item?.parentId && allPackagesAndProductIds.includes(item?.parentId) ? `${item?.parentId}` : rentalId,
+            arrowHeadType: 'arrow',
+            target: `${item.productDetail?.productName}`
+          });
+          flowEdge.push({
+            id: `edge-assets-product-${item.productDetail?.productName}-${assetsInLoading[item?.materialId]}-${_.random(0, 1000)}`,
+            source: `${item.productDetail?.productName}`,
+            arrowHeadType: 'arrow',
+            target: `${assetsInLoading[item?.materialId]}`
+          });
+        });
 
       var loadingAssets = 0;
       if (loadingTicket?.length) xPosition += 300;
@@ -429,16 +493,57 @@ const RentalManagementViews = (props) => {
             target: `${product.optionValue}`
           });
         });
-        item?.products?.map((m: any) => {
-          if (productWithMaterialId[m.product])
-            flowEdge.push({
-              id: `edge-loading-${item._id}-${m.product}`,
-              source: `${productWithMaterialId[m.product]}`,
-              arrowHeadType: 'arrow',
-              target: `${item._id}`
-            });
+      });
+
+      const assetsInReceiving = {};
+      receivingTicket?.map((item) => {
+        item?.products?.map((i) => {
+          assetsInReceiving[i?.product] = item._id;
         });
       });
+
+      const loadingAssetsXPosition = xPosition + 300;
+      var receivingProductData = [];
+      product?.material
+        ?.filter((i) => !i?.productDetail?.serializedProduct && assetsInReceiving[i?.materialId] && i.type !== 'package')
+        .map((item) => {
+          if (receivingProductData.includes(`${item.materialId}`)) {
+            flow.push({
+              id: `${item.materialId}`,
+              sourcePosition: 'right',
+              targetPosition: 'left',
+              type: 'default',
+              data: {
+                ref_type: item.type,
+                ref_id: item.materialId,
+                label: (
+                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {item.productDetail?.productName || item.packageDetail?.packageName}
+                    <br />
+                    {_.startCase(_.camelCase(item.type))}
+                  </div>
+                )
+              },
+              position: { x: loadingAssetsXPosition, y: loadingAssets * 80 },
+              style: customNodeStyles.product
+            });
+            loadingAssets += 1;
+          } else {
+            receivingProductData.push(`${item.materialId}`);
+          }
+          flowEdge.push({
+            id: `edge-assets-product-parent-${item?.materialId}-${assetsInLoading[item?.materialId]}-${_.random(0, 1000)}`,
+            source: assetsInLoading[item?.materialId],
+            arrowHeadType: 'arrow',
+            target: `${item.materialId}`
+          });
+          flowEdge.push({
+            id: `edge-assets-product-${item?.materialId}-${assetsInReceiving[item?.materialId]}-${_.random(0, 1000)}`,
+            source: `${item.materialId}`,
+            arrowHeadType: 'arrow',
+            target: `${assetsInReceiving[item?.materialId]}`
+          });
+        });
 
       xPosition += 600;
       var receivingAndReturnIdx = 0;
@@ -487,6 +592,55 @@ const RentalManagementViews = (props) => {
           });
         });
       });
+
+      const assetsInReturn = {};
+      returnTicket?.map((item) => {
+        item?.products?.map((i) => {
+          assetsInReturn[i?.product] = item._id;
+        });
+      });
+      var returnProductData = [];
+      product?.material
+        ?.filter((i) => !i?.productDetail?.serializedProduct && assetsInReturn[i?.materialId] && i.type !== 'package')
+        .map((item) => {
+          if (returnProductData.includes(`${item.materialId}`)) {
+            flow.push({
+              id: `${item.materialId}`,
+              sourcePosition: 'right',
+              targetPosition: 'left',
+              type: 'default',
+              data: {
+                ref_type: item.type,
+                ref_id: item.materialId,
+                label: (
+                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {item.productDetail?.productName || item.packageDetail?.packageName}
+                    <br />
+                    {_.startCase(_.camelCase(item.type))}
+                  </div>
+                )
+              },
+              position: { x: loadingAssetsXPosition, y: loadingAssets * 80 },
+              style: customNodeStyles.product
+            });
+            loadingAssets += 1;
+          } else {
+            returnProductData.push(`${item.materialId}`);
+          }
+          flowEdge.push({
+            id: `edge-assets-product-parent-${item?.materialId}-${assetsInLoading[item?.materialId]}-${_.random(0, 1000)}`,
+            source: `${assetsInLoading[item?.materialId]}`,
+            arrowHeadType: 'arrow',
+            target: `${item.materialId}`
+          });
+          flowEdge.push({
+            id: `edge-assets-product-${item?.materialId}-${assetsInReturn[item?.materialId]}-${_.random(0, 1000)}`,
+            source: `${item.materialId}`,
+            arrowHeadType: 'arrow',
+            target: `${assetsInReturn[item?.materialId]}`
+          });
+        });
+
       returnTicket?.map((item: any) => {
         flow.push({
           id: `${item._id}`,
@@ -641,17 +795,17 @@ const RentalManagementViews = (props) => {
                               paddingRight: '5px'
                             }}
                           >
-                            {customNodeStyles[key].name}
                             <div
                               style={{
                                 height: '12px',
                                 width: '12px',
-                                marginLeft: '3px',
+                                marginRight: '3px',
                                 borderRadius: '100%',
                                 background: `${customNodeStyles[key].background}`,
                                 borderColor: `1px solid ${customNodeStyles[key].borderColor}`
                               }}
                             ></div>
+                            {customNodeStyles[key].name}
                           </div>
                         );
                       })}

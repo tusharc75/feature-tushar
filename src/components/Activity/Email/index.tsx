@@ -98,7 +98,7 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         <ActivityLoader />
       ) : emails.length ?
         <Fragment>
-          {emails.map((_email, index) => (
+          {emails.slice(0, 5).map((_email, index) => (
             <Box key={_email._id} className="activity">
               <Box>
                 <Grid container>

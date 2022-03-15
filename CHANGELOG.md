@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.78.0](https://github.com/vebholic/oms_frontend/compare/v2.77.2...v2.78.0) (2022-03-15)
+
+
+### Features
+
+* delivery ticket product and additional cost tab ([fcd70ab](https://github.com/vebholic/oms_frontend/commit/fcd70abbeffb2b78a833ef3ed0d62c9b36660417))
+* non-serialised asset need to be linked in "views" PO-1293 ([e30ebcf](https://github.com/vebholic/oms_frontend/commit/e30ebcf4b78c83a6122c318d6ca1b46025287e85))
+
+
+### Bug Fixes
+
+* bug fix ([9a42e85](https://github.com/vebholic/oms_frontend/commit/9a42e85d06960d4235e3d683707b1d197b522def))
+* bug fix ([d2e6ee6](https://github.com/vebholic/oms_frontend/commit/d2e6ee611c3ff40288911f35d3a39c274ed29520))
+* bug fix ([52c4f63](https://github.com/vebholic/oms_frontend/commit/52c4f63bab019c125b88b54014e50ba1090bc234))
+* bug fix ([d90ccb7](https://github.com/vebholic/oms_frontend/commit/d90ccb7a4ce91972bf96c0c69cbfd625f9c9d8cc))
+* bug fix ([088c1f6](https://github.com/vebholic/oms_frontend/commit/088c1f63cd061841eda3fb6a2ad973ddcbf62c9b))
+* bug fix ([d56288b](https://github.com/vebholic/oms_frontend/commit/d56288b205783b317b18924d050e0eeee629ffc1))
+* **chat:** fix small screen size ([a4a4829](https://github.com/vebholic/oms_frontend/commit/a4a482939cb222fec65420a6dc7c01cdbffb46f7))
+* **dashboard:** filter indexing ([e6547b9](https://github.com/vebholic/oms_frontend/commit/e6547b9fbc48c21592246043397625e4519df28e))
+* **dashboard:** fix ([24c7dff](https://github.com/vebholic/oms_frontend/commit/24c7dff41e06c02d36bdeb99353b9c7252c1d71d))
+* **dashboard:** hit ratio fix ([f16b790](https://github.com/vebholic/oms_frontend/commit/f16b7901fbc32d4b8ffc34d1deaaa0775d12fa97))
+* **dashboard:** minor fix ([b7d0846](https://github.com/vebholic/oms_frontend/commit/b7d084654c87c4893c280c06b47fcb5df0101b8f))
+* **quote steps:** reject step bg color to light yellow ([8217bdd](https://github.com/vebholic/oms_frontend/commit/8217bdd2651fbd162f71dc570430b9424432b5cb))
+
 ### [2.77.2](https://github.com/vebholic/oms_frontend/compare/v2.77.1...v2.77.2) (2022-03-14)
 
 ### [2.77.1](https://github.com/vebholic/oms_frontend/compare/v2.77.0...v2.77.1) (2022-03-13)

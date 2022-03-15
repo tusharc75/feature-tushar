@@ -1,29 +1,17 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
-import { Box, CircularProgress, TextField } from "@material-ui/core";
-import SearchBox from '../../../components/Helpers/SearchBox'
+import { Box} from "@material-ui/core";
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
 import { gridLoadingTimeout, CustomDialogTransition, packages, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData, deliveryTicket } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import Dialog from "@material-ui/core/Dialog/Dialog";
-import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
-import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
-import { startCase } from "lodash";
-import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
+import { getColumnData, getFrameworkComponents, getStaticFields } from "../../../constants/columns";
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
-import { findOne, objectStore } from "src/constants/indexdbhelper";
-import { CustomOfflineContext } from "src/StateProvider/OfflineContext/OfflineContext";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 
-
-const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
+const ParentProduct = ({ renderedFrom, productId }) => {
 
     const toastConfig = useContext(CustomToastContext)
 
@@ -35,12 +23,7 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
     const {
         state: { user, permissions }
     }: any = useData();
-    const { isOffline } = useContext(CustomOfflineContext);
-    const { getColumnData } = useColumns();
 
-    const defaultColumns = [
-        { field: "qty", headerName: "Qty", show: true, order: 1, disabled: true, cellRenderer: "commonRenderer" },
-    ]
     useEffect(() => {
         fetchGridColumns()
     }, [])
@@ -58,17 +41,8 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
                 gridApi.setRowData([]);
             }
             let data;
-            if (isOffline) {
-                const deliveryTicket = await findOne(objectStore.deliveryTicket, deliveryTicketId)
-                const response = await findOne(objectStore.rentalManagement, deliveryTicket?.rentalJob?.optionValue)
-                data = response?.product
-                const inventory = deliveryTicket?.product?.map((e) => e.optionValue);
-                data = response?.product?.filter(d => inventory?.includes(d.inventory)).map(obj => obj.inventoryDetail)
-            }
-            else {
-                const response = await axiosInstance().get(`${deliveryTicket.api}/${deliveryTicketId}/products`)
-                data = response?.data?.data
-            }
+            const response = await axiosInstance().get(`/product/${productId}/bom/parent`)
+            data = response?.data?.data
             let rows = data.map((u) => {
                 let res = {
                     ...prepareDataForGrid(u, user)
@@ -106,7 +80,7 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
                 }
                 setFrameWorkComponent({ ...tempFrameworkComponent })
                 columns = [...columns, ...getStaticFields()]
-                setColumns([...defaultColumns, ...columns])
+                setColumns([...columns])
             })
     }
 
@@ -162,4 +136,4 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
     );
 }
 
-export default DeliveryTicketProduct;
+export default ParentProduct;

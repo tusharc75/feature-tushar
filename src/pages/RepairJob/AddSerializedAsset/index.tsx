@@ -316,10 +316,12 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             rowClassRules={{
-              "red-data-row":
-                function (params) {
-                  return [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some(s => s === params.data.status);
-                },
+              "scrap-data-row": function (params) {
+                return [INVENTORY_STATUS.scrap].some(s => s === params.data.status);
+              },
+              "red-data-row": function (params) {
+                return [INVENTORY_STATUS.lost].some(s => s === params.data.status);
+              },
             }}
             refreshGrid={fetchRecords}
           />
@@ -328,6 +330,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
     </Grid>
     {addSerializedAssetDialog &&
       <AddSerializedAsset
+        refrenceType="Repair Job"
         addSerializedAsset={(newRecordsToAdd) => {
           setIsAdding(true);
           axiosInstance().post(`${repairJob.api}/${repairJobData._id}/assets`, { "ids": newRecordsToAdd.map(m => m._id ?? m.id) })
