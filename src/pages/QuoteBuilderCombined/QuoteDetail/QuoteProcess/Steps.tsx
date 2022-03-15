@@ -180,7 +180,7 @@ const Steps = (props) => {
   let activeStep = currentStep;
   const toastConfig = useContext(CustomToastContext);
   const [selectedOption, setSelectedOption] = useState(null);
-  const options = ["Booked", "Not Booked", "Other"];
+  const options = ["Booked", "Not Booked", "Others"];
   const [showManualCustomerActionDialog, setShowManualCustomerActionDialog] =
     useState(false);
   const [comment, setComment] = useState("");
@@ -223,7 +223,7 @@ const Steps = (props) => {
       } else if (
         versionStatus.includes("Rejected by Customer") ||
         versionStatus.includes("Not Booked by Customer") ||
-        versionStatus.includes("Other by Customer")
+        versionStatus.includes("Others by Customer")
       ) {
         if (steps.length === 6) {
           if (props.icon > 4) {
@@ -244,7 +244,7 @@ const Steps = (props) => {
       if (
         versionStatus.includes("Rejected") ||
         versionStatus.includes("Not Booked") ||
-        versionStatus.includes("Other")
+        versionStatus.includes("Others")
       ) {
         status = 4;
         active = false;
@@ -307,7 +307,7 @@ const Steps = (props) => {
         manual: true,
         comment: tempComment
       };
-      if (selectedOption === "Other" || selectedOption === "Not Booked") {
+      if (selectedOption === "Others" || selectedOption === "Not Booked") {
         dataObj.comment.push(comment);
       }
 
@@ -317,7 +317,7 @@ const Steps = (props) => {
 
       dataObj.comment = msg
 
-      if ((selectedOption === "Other" || selectedOption === "Not Booked") && comment === "") {
+      if ((selectedOption === "Others" || selectedOption === "Not Booked") && comment === "") {
         setCommentError("Please write your comment!")
       } else {
         setSubmitting(true)
@@ -722,7 +722,7 @@ const Steps = (props) => {
                             [classes.rejected]: (versionStatus.includes("Rejected by DOA") && i > 2) ||
                               ((versionStatus.includes("Rejected by Customer") ||
                                 versionStatus.includes("Not Booked by Customer") ||
-                                versionStatus.includes("Other by Customer")) && ((steps.length === 5 && i > 2) || (steps.length === 6 && i > 3)))
+                                versionStatus.includes("Others by Customer")) && ((steps.length === 5 && i > 2) || (steps.length === 6 && i > 3)))
 
                           })}
                         >
@@ -829,7 +829,7 @@ const Steps = (props) => {
                   </ListItem>
                 ))}
               </List>
-              {(selectedOption === "Other" || selectedOption === "Not Booked") && (
+              {(selectedOption === "Others" || selectedOption === "Not Booked") && (
                 <Box my={2}>
                   <TextField
                     fullWidth
