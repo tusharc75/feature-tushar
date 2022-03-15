@@ -26,7 +26,7 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
     state: { permissions },
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  
+
   useEffect(() => {
     fetchTask();
   }, []);
@@ -86,7 +86,7 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         <ActivityLoader />
       ) : task.length ? (
         <Fragment>
-          {task.map((_task, index) => (
+          {task.slice(0, 5).map((_task, index) => (
             <Box className="activity" key={_task._id}>
               <Box>
                 <Grid container>
@@ -163,7 +163,7 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
         onClose={() => {
-          handleClose() 
+          handleClose()
           setFullScreen(false);
         }}
         fullWidth

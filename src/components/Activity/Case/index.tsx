@@ -86,7 +86,7 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         <ActivityLoader />
       ) : cases.length ? (
         <Fragment>
-          {cases.map((_case, index) => (
+          {cases.slice(0, 5).map((_case, index) => (
             <Box key={_case._id} className="activity">
               <Box>
                 <Grid container>

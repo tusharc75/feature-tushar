@@ -104,7 +104,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           <>
             {attachments.length ? (
               <Fragment>
-                {attachments.map((_attachment, index) => (
+                {attachments.slice(0, 5).map((_attachment, index) => (
                   <Box key={_attachment._id} className="activity">
                     <Box>
                       <Grid container>
