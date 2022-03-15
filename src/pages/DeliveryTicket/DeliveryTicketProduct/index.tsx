@@ -14,15 +14,13 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import { startCase } from "lodash";
-import { getColumnData, getFrameworkComponents, getStaticFields } from "../../../constants/columns";
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 import { findOne, objectStore } from "src/constants/indexdbhelper";
 import { CustomOfflineContext } from "src/StateProvider/OfflineContext/OfflineContext";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
-
-
 
 
 const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
@@ -38,6 +36,7 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
         state: { user, permissions }
     }: any = useData();
     const { isOffline } = useContext(CustomOfflineContext);
+    const { getColumnData } = useColumns();
 
     const defaultColumns = [
         { field: "qty", headerName: "Qty", show: true, order: 1, disabled: true, cellRenderer: "commonRenderer" },
