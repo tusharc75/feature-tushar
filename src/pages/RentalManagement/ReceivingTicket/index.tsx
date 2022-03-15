@@ -479,7 +479,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               }}>{INVENTORY_STATUS.lost}</MenuItem>
             </Fragment>
           }
-          {(selectedRecords?.filter((f) => f.type === "Product").length === selectedRecords.length) &&
+          {(selectedRecords?.filter((f) => f.type === "Product" && f.hasOwnProperty("loadingTicketId")).length === selectedRecords.length) &&
             <MenuItem onClick={() => {
               setAnchorEl(null)
               setShowConformationConsume(true)
@@ -662,10 +662,12 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             isClientSideGrid={true}
             renderedFrom={renderedFrom}
             rowClassRules={{
-              'red-data-row': function (params) {
-                return ([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].some((s) => s === params.data.status) || params?.data?.returnTicketId
-                );
-              }
+              "scrap-data-row": function (params) {
+                return [INVENTORY_STATUS.scrap].some(s => s === params.data.status);
+              },
+              "red-data-row": function (params) {
+                return [INVENTORY_STATUS.lost].some(s => s === params.data.status);
+              },
             }}
             refreshGrid={fetchRecords}
           />
