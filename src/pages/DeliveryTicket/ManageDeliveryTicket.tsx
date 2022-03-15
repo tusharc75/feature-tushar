@@ -152,6 +152,9 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
             if (pickupFromType === DELIVERY_FROM_TO_TYPE.plant && deliveryToType === DELIVERY_FROM_TO_TYPE.plant && element.fieldName === "deliveryTo") {
                 element.option = element.option?.filter((e) => e.optionValue !== pickupFrom);
             }
+            if (pickupFromType === DELIVERY_FROM_TO_TYPE.supplier && deliveryToType === DELIVERY_FROM_TO_TYPE.supplier && element.fieldName === "deliveryTo") {
+                element.option = element.option?.filter((e) => e.optionValue !== pickupFrom);
+            }
 
             if (ticketType === DELIVERY_TICKET_TYPE.return && element.fieldName === "returnReason") {
                 element.required = true;
