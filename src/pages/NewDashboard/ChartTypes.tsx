@@ -16,7 +16,6 @@ import { GlobalFiltersType } from './GlobalFilter';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import EyeTooltip from './EyeTooltip';
 import { startCase } from 'lodash';
 
 export type ChartDataType = {
@@ -48,7 +47,8 @@ const StatusOptions1 = [
 const StatusOptions2 = [
   { optionLabel: 'Open', optionValue: 'open' },
   { optionLabel: 'Won', optionValue: 'won' },
-  { optionLabel: 'Lost', optionValue: 'lost' }
+  { optionLabel: 'Lost', optionValue: 'lost' },
+  { optionLabel: 'Offered', optionValue: 'offered' }
 ];
 
 const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
@@ -175,7 +175,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                   <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
                     <Box>
                       <Typography className={styles.price}>{chartData?.cardData[key] ? chartData?.cardData[key] : 0}</Typography>
-                      <Typography variant="h6" className={styles.title}>
+                      <Typography variant="h6" className={chartData?.additionalData ? styles.title : styles.title_sub}>
                         {key}
                       </Typography>
                       {chartData?.additionalData && (
