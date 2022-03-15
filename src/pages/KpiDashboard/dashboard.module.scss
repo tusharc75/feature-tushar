@@ -21,8 +21,13 @@
 }
 
 .title {
-  font-size: 12px !important;
+  font-size: 14px !important;
   color: #06906e;
+}
+
+.title_sub {
+  font-size: 14px !important;
+  color: var(--skin);
 }
 
 .hit_ratio {
