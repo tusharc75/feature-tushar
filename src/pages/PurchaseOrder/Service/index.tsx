@@ -1,28 +1,24 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs, ButtonGroup, Container, InputAdornment, TextField, Menu, MenuItem } from "@material-ui/core";
-import { Autocomplete, Skeleton } from "@material-ui/lab";
-import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "src/axios/axiosInstance";
-import routes from "src/components/Helpers/Routes";
 import { useData } from "src/StateProvider/Provider";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder, CHILD_RESOURCE } from "src/constants/helpers";
+import { purchaseOrder } from "src/constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
-import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
+import { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
+import { CommonRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "src/components/Helpers/GridDeleteIcon";
 import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
 import ServiceDialog from "./ServiceDialog";
-import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
-import { CURReplaceByCurrencySingle } from "src/constants/formulaUtility";
 import { prepareDataForGrid } from "src/constants/helpers";
-import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "src/constants/columns"
+import { getFrameworkComponents, genrateColoum } from "src/constants/columns"
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
+import { fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
 
 const Product = ({ purchaseOrderData, renderedFrom }) => {
 
@@ -46,20 +42,22 @@ const Product = ({ purchaseOrderData, renderedFrom }) => {
     }, [purchaseOrderData]);
 
     useEffect(() => {
-        axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderService}`).then(({ data: { data } }) => {
-            const fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
-            let rendererNames = [];
-            genrateColoum(fields, columns, rendererNames, false, renderedFrom);
-            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-            tempFrameworkComponent = {
-                commonRenderer: CommonRenderer,
-                actionsRenderer: ActionsRenderer,
-                ...tempFrameworkComponent,
-            }
-            setFrameWorkComponent({ ...tempFrameworkComponent })
-            setColumns([...columns])
-        })
+        fetchFields()
     }, []);
+
+    const fetchFields = async () => {
+        const fields = await fetch_po_service_fields(purchaseOrderData?.currency);
+        let rendererNames = [];
+        genrateColoum(fields, columns, rendererNames, false, renderedFrom);
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+            commonRenderer: CommonRenderer,
+            actionsRenderer: ActionsRenderer,
+            ...tempFrameworkComponent,
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        setColumns([...columns])
+    }
 
     const fetchPurchaseOrderService = () => {
         dispatch({ type: "loading", loading: true });

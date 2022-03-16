@@ -88,7 +88,11 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                     : <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original.inventory}`} target="_blank">{row.original.detail}</a>
                 : row.original.detail}
             </p>
-            <Chip className="ml-1" label={startCase(row.original?.type)} size="small" color="primary" />
+            <Chip
+              className="ml-1"
+              label={`${row.original.type === 'product' ? !row.original.serializedProduct ? "Non-Serialized Product" : startCase(row.original?.type) : startCase(row.original?.type)}`}
+              size="small"
+              color="primary" />
             {row.original.isPurchaseOrder &&
               <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
                 <IconButton size="small" onClick={() => {
