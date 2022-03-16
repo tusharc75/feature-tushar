@@ -19,7 +19,7 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import { startCase } from "lodash";
-import { getColumnData, getFrameworkComponents, getStaticFields } from "../../../constants/columns";
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 
@@ -39,6 +39,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const [columns, setColumns] = useState([]);
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [materialList, setMaterialList] = useState([]);
+    const { getColumnData } = useColumns();
 
     const defaultColumns = type === "product" ?
         [
