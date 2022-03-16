@@ -5,7 +5,7 @@ import { Box} from "@material-ui/core";
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
 import { gridLoadingTimeout, CustomDialogTransition, packages, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData, deliveryTicket } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import { getColumnData, getFrameworkComponents, getStaticFields } from "../../../constants/columns";
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
@@ -14,7 +14,7 @@ import CustomSwipableList from "src/components/SwipableListComponents/CustomSwip
 const ParentProduct = ({ renderedFrom, productId }) => {
 
     const toastConfig = useContext(CustomToastContext)
-
+    const { getColumnData } = useColumns();
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting } = state;

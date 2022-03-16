@@ -19,7 +19,7 @@ import routes from "../Helpers/Routes";
 import styles from "src/pages/Leads/Header.module.scss";
 import { AddOutlined, RemoveOutlined } from "@material-ui/icons";
 import CustomAgGridEditable, { reducer, intialState } from "../AgGridComponents/CustomAgGridEditable";
-import { getColumnData, getFrameworkComponents, getStaticFields } from "src/constants/columns";
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CommonSkeleton from "../Helpers/CommonSkeleton";
 
 
@@ -64,6 +64,7 @@ const AssignProductDialog = ({
 
     const [filter, setFilter] = useState(`All ${routes.product.title}`);
     const [isProductType, setIsProductType] = useState(false);
+    const { getColumnData } = useColumns();
 
     useEffect(() => {
         fetchGridColumns()

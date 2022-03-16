@@ -12,7 +12,7 @@ import AssignProductDialog from '../../../components/AssignRolesDialog/AssignPro
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
-import { getColumnData, getFrameworkComponents, getStaticFields } from "src/constants/columns";
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 function Parts({ id }) {
@@ -27,6 +27,7 @@ function Parts({ id }) {
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null })
   const [isDeleting, setIsDeleting] = useState(false);
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
+  const { getColumnData } = useColumns();
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
