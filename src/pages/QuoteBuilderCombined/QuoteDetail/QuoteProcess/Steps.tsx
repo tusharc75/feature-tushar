@@ -223,7 +223,7 @@ const Steps = (props) => {
       } else if (
         versionStatus.includes("Rejected by Customer") ||
         versionStatus.includes("Not Booked by Customer") ||
-        versionStatus.includes("Others by Customer")
+        versionStatus.includes("Others")
       ) {
         if (steps.length === 6) {
           if (props.icon > 4) {
@@ -722,7 +722,7 @@ const Steps = (props) => {
                             [classes.rejected]: (versionStatus.includes("Rejected by DOA") && i > 2) ||
                               ((versionStatus.includes("Rejected by Customer") ||
                                 versionStatus.includes("Not Booked by Customer") ||
-                                versionStatus.includes("Others by Customer")) && ((steps.length === 5 && i > 2) || (steps.length === 6 && i > 3)))
+                                versionStatus.includes("Others")) && ((steps.length === 5 && i > 2) || (steps.length === 6 && i > 3)))
 
                           })}
                         >

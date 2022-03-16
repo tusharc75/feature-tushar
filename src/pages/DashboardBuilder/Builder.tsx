@@ -1,10 +1,10 @@
 import React from 'react';
 import { TextField, Box, Paper, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbox, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-
 import { Autocomplete } from '@material-ui/lab';
-import { CHART_TYPES, FILTERS_OPTIONS, GRAPH_TYPES, FormData } from './builderHelpers';
-import Filters from '../KpiDashboard/Filters';
+import {camelCase} from 'lodash'
+
+import { CHART_TYPES, FILTERS_OPTIONS, GRAPH_TYPES, IFormDataType } from './builderHelpers';
 
 const useClasses = makeStyles((theme) => ({
   container: {
@@ -30,7 +30,7 @@ const Builder = (props: any) => {
     hasExport: false,
     filters: []
   };
-  const [formValues, setFormValues] = React.useState<FormData>(defaultFormConfigs);
+  const [formValues, setFormValues] = React.useState<IFormDataType>(defaultFormConfigs);
   const [errors, setErrors] = React.useState(null);
 
   const classes = useClasses();
@@ -43,8 +43,8 @@ const Builder = (props: any) => {
     const hasErrors = findErrors();
 
     if (hasErrors) return;
-
-    setFormData((prevState: any) => [...prevState, formValues]);
+    const formedData = {uniqueId: camelCase(formValues.chartTitle) , ...formValues}
+    setFormData((prevState: any) => [...prevState, formedData]);
     setFormValues(defaultFormConfigs);
   };
 
@@ -59,7 +59,7 @@ const Builder = (props: any) => {
       errorObject.chartTitle = 'Required Field';
     }
 
-    if (formValues.graphType === 'Chart' && formValues.chartType) {
+    if (formValues.graphType === 'Chart' && !formValues.chartType) {
       errorObject.chartType = 'Required Field';
     }
 
@@ -187,7 +187,7 @@ const Builder = (props: any) => {
       </div>
 
       <Box>
-        <Button fullWidth color="primary" onClick={addFormConfigs} variant="contained">
+        <Button disableRipple fullWidth color="primary" onClick={addFormConfigs} variant="contained">
           Apply Changes
         </Button>
       </Box>
