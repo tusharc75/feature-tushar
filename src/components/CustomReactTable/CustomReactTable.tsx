@@ -269,6 +269,17 @@ export default function CustomReactTable({
                 toggleRowExpanded(d.id, true)
             }
         })
+
+        try {
+            const storedColumns = localStorage.getItem(renderedFrom)
+            if (storedColumns) {
+                setColumnOrder(JSON.parse(storedColumns).map(m => m.id));
+                setHiddenColumns(JSON.parse(storedColumns).filter(f => f.isVisible === false).map(m => m.id))
+            }
+        } catch (ex) {
+            console.error(`Error while getting stored data from local storage - ${renderedFrom}`)
+        }
+
     }, [])
 
     // useEffect(() => {
@@ -311,7 +322,7 @@ export default function CustomReactTable({
     // Render the UI for your table
     return (
         <>
-            {/* <CustomReactTableHeaderOptions
+            <CustomReactTableHeaderOptions
                 columns={allColumns}
                 // setSelectedReportView={setSelectedReportView}
                 // selectedReportView={selectedReportView}
@@ -327,7 +338,7 @@ export default function CustomReactTable({
                 setHiddenColumns={setHiddenColumns}
                 getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
                 setColumnOrder={setColumnOrder}
-            /> */}
+            />
 
             <div style={{
                 display: "block",
