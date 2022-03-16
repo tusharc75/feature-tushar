@@ -56,7 +56,7 @@ export default function ImportExportLinks({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => { },
+  onExportToExcelSuccess = () => {},
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
@@ -128,6 +128,12 @@ export default function ImportExportLinks({
    * EXPORT TABLES INTO EXCEL
    */
   const exportToExcel = () => {
+    toastConfig.setToastConfig({
+      hideDuration: null,
+      open: true,
+      type: 'info',
+      message: `Your file will be downloaded/uploaded in a matter of seconds`
+    });
     let exportApi = `${api}/template?export=true`;
 
     if (additionalParams) {
@@ -217,12 +223,14 @@ export default function ImportExportLinks({
         <label onClick={exportToExcel} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
           Export to Excel {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : '(Selected)') : null}
         </label>
-        {isDownloadExcel && <>
-          <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} />
-          <label onClick={downloadTemplate} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
-            Download Template
-          </label>
-        </>}
+        {isDownloadExcel && (
+          <>
+            <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} />
+            <label onClick={downloadTemplate} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
+              Download Template
+            </label>
+          </>
+        )}
         {/* <Divider
           orientation="vertical"
           flexItem
@@ -250,14 +258,16 @@ export default function ImportExportLinks({
         >
           Export to Excel ({recordsToExport === 0 ? 'All' : 'Selected'})
         </MenuItem>
-        {isDownloadExcel && <MenuItem
-          onClick={() => {
-            downloadTemplate();
-            handleClose();
-          }}
-        >
-          Download Template
-        </MenuItem>}
+        {isDownloadExcel && (
+          <MenuItem
+            onClick={() => {
+              downloadTemplate();
+              handleClose();
+            }}
+          >
+            Download Template
+          </MenuItem>
+        )}
         {/* <MenuItem>Email a Link</MenuItem> */}
       </Menu>
       {isMobile && (

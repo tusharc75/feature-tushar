@@ -46,9 +46,13 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], type: "" });
 
   const [anchorActionEl, setAnchorActionEl] = useState(null);
+  const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
+
+  const [purchaseOrderCount, setPurchaseOrderCount] = useState(0);
+  const [subleaseCount, setSubleaseCount] = useState(0);
+  const [transferAssetCount, setTransferAssetCount] = useState(0);
 
   const { state: { user, permissions, selectedEntity } }: any = useData();
-
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
@@ -240,12 +244,17 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         const result = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`)
         const transactionData = result?.data?.data
 
-        transferAssets = transactionData?.transferAsset;
         if (permissions?.purchaseOrder?.isRead) {
           purchaseOrderProduct = transactionData?.purchaseOrder
+          setPurchaseOrderCount(purchaseOrderProduct?.length)
         }
         if (permissions?.sublease?.isRead) {
           subleaseProduct = transactionData?.sublease
+          setSubleaseCount(subleaseProduct?.length)
+        }
+        if (permissions?.transferAsset?.isRead) {
+          transferAssets = transactionData?.transferAsset
+          setTransferAssetCount(transferAssets?.length)
         }
       }
 
@@ -460,6 +469,15 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     setAnchorActionEl(null);
   };
 
+  const openLinkActions = (event) => {
+    setAnchorLinkActionEl(event.currentTarget);
+  };
+
+  const closeLinkActions = () => {
+    setAnchorLinkActionEl(null);
+  };
+
+
   return (<Fragment>
     <Box display="flex" justifyContent="flex-end" pt={1} pb={2} >
       <Box display="flex" alignItems="center" justifyContent={isMobile ? "space-between" : "flex-end"} paddingX={1} gridColumnGap={8} flex={1}>
@@ -525,6 +543,54 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               }}
             >
               {`Remove ${routes.serializedAsset.title}`}</MenuItem>
+          </Menu>
+
+          {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0) &&
+            <IconButton onClick={openLinkActions} size="small" color="primary"  >
+              <ExpandMore fontSize="inherit" />
+            </IconButton>
+          }
+          <Menu
+            anchorEl={anchorLinkActionEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="action-menu"
+            open={Boolean(anchorLinkActionEl)}
+            onClose={closeLinkActions}
+          >
+            {purchaseOrderCount > 0 &&
+              <MenuItem
+                onClick={() => {
+                  history.push(routes.purchaseOrder.path, {
+                    rental: rentalManagementData,
+                  })
+                }}
+              >
+                {`Created ${routes.purchaseOrder.title}`}
+              </MenuItem>}
+            {subleaseCount > 0 &&
+              <MenuItem
+                onClick={() => {
+                  history.push(routes.sublease.path, {
+                    rental: rentalManagementData,
+                  })
+                }}
+              >
+                {`Created ${routes.sublease.title}`}
+              </MenuItem>}
+            {transferAssetCount > 0 &&
+              <MenuItem
+                onClick={() => {
+                  history.push(routes.transferAsset.path, {
+                    rental: rentalManagementData,
+                  })
+                }}>
+                {`Created ${routes.transferAsset.title}`}
+              </MenuItem>}
           </Menu>
         </Box>
       </Box>

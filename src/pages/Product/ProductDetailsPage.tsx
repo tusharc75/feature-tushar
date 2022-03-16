@@ -29,6 +29,7 @@ import queryString from 'query-string';
 import ProductConfiguration from './ProductConfiguration';
 import { camelCase } from 'lodash';
 import Parts from './Parts';
+import ParentProduct from './ParentProduct';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -313,31 +314,7 @@ const ProductDetailsPage = () => {
     dispatch({ type: 'loading', loading: true });
     let newColumns = [];
     let rowsData = [];
-    if (activeTable === 'parent') {
-      rowsData = parent
-        ? parent.map((product) => ({
-          ...product,
-          serializedProduct: product?.serializedProduct ? 'Yes' : 'No',
-          productType: product?.productType,
-          createdBy: product?.createdBy?.user?.concatedName,
-          createdByDate: product?.createdBy?.date,
-          updatedBy: product?.updatedBy?.user?.concatedName,
-          updatedByDate: product?.updatedBy?.date
-        }))
-        : [];
-      newColumns = [
-        { field: 'productName', headerName: 'Product Description', show: true, disabled: false, cellRenderer: 'productNameRenderer' },
-        { field: 'productNumber', headerName: 'Product Number', show: true, cellRenderer: 'commonRenderer' },
-        { field: 'longDescription', headerName: 'Long Description', show: true, cellRenderer: 'commonRenderer' },
-        { field: 'productCategory', headerName: 'Product Category', show: true, disabled: false, cellRenderer: 'productCategoryRenderer' },
-        { field: 'mrp', headerName: 'MRP', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-        { field: 'productType', headerName: 'Product Type', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-        { field: 'serializedProduct', headerName: 'Serialized Product', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-        { field: 'ratingsCount', headerName: 'Ratings Count', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-        { field: 'createdBy', headerName: 'Created By', show: true, disabled: false, cellRenderer: 'createdByRenderer' },
-        { field: 'updatedBy', headerName: 'Updated By', show: true, disabled: false, cellRenderer: 'updatedByRenderer' }
-      ];
-    } else {
+    if (activeTable === 'packages') {
       rowsData = packages
         ? packages.map((p) => ({
           ...p,
@@ -472,23 +449,9 @@ const ProductDetailsPage = () => {
                 />
               }
               {tabValue === 2 &&
-                <CustomAgGrid
-                  allowSelection={false}
-                  allowAction={false}
-                  columns={columns}
-                  dataRows={dataRows}
-                  frameworkComponents={frameworkComponents}
-                  setGridApi={setGridApi}
-                  dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  page={page}
-                  actionWidth={150}
-                  loading={gridLoading}
-                  isClientSideGrid={true}
+                <ParentProduct
                   renderedFrom={`${renderedFrom}_grid-2`}
-                  refreshGrid={getColumns}
+                  productId={id}
                 />
               }
               {tabValue === 3 &&

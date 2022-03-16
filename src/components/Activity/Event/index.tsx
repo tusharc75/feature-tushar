@@ -81,7 +81,7 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         <ActivityLoader />
       ) : events.length ? (
         <Fragment>
-          {events.map((_event, index) => (
+          {events.slice(0, 5).map((_event, index) => (
             <Box className="activity" key={_event._id}>
               <Box>
                 <Grid container>

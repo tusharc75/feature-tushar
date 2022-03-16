@@ -1580,6 +1580,7 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   inUse: 'In-Use',
   complete: 'Complete',
   return: 'Return',
+  consumed: 'Consumed',
 } as const;
 
 export const REPAIR_JOB_STATUS = {
