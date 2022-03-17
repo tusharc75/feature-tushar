@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.79.1](https://github.com/vebholic/oms_frontend/compare/v2.79.0...v2.79.1) (2022-03-17)
+
+
+### Bug Fixes
+
+* bug fix ([9da9bae](https://github.com/vebholic/oms_frontend/commit/9da9bae2b4e7faea7e3bc8141974234d829f9322))
+* **dashboard:** dashboard bulder ui start ([fac2582](https://github.com/vebholic/oms_frontend/commit/fac258249bcfe3d88eae1bc5dc77edbdf5ab5d25))
+* mobile ui bug fix in delivery tickets ([d7e7656](https://github.com/vebholic/oms_frontend/commit/d7e7656a4fa3af675ec5ddfb4fadefe3cc0fe24e))
+* product grid linkable issue ([b3496a1](https://github.com/vebholic/oms_frontend/commit/b3496a1ed9705c52e0d4176ef97910b9ace2aad1))
+* **quote:** minor change ([c6d7354](https://github.com/vebholic/oms_frontend/commit/c6d7354fc6728b2c5d50b4c1f8deb2fa1d906f46))
+
+## [2.79.0](https://github.com/vebholic/oms_frontend/compare/v2.78.0...v2.79.0) (2022-03-16)
+
+
+### Features
+
+* add a Conveying message during downloading excel if it is taking time PO-1274 ([4dba502](https://github.com/vebholic/oms_frontend/commit/4dba50273d2d3c55409ba9dbbdbf4e542f64c688))
+* parent tab changes in product details page ([ef9ec3b](https://github.com/vebholic/oms_frontend/commit/ef9ec3bf7699581ee4dd1fd1ba48c780e053c0f4))
+* rentalJob non-serialized product show with assets PO-1300 ([8a3850b](https://github.com/vebholic/oms_frontend/commit/8a3850b907688d5d406d4077b3e982d30a5e65ee))
+
+
+### Bug Fixes
+
+* bug fix ([1dd1933](https://github.com/vebholic/oms_frontend/commit/1dd19330a0ec8fd9cfa0b8c3b9c6c523042d0df7))
+* bug fix ([de9256d](https://github.com/vebholic/oms_frontend/commit/de9256ddc53e14a27d6ed5e7bc356da282179ed2))
+* bug fix ([ded6cbf](https://github.com/vebholic/oms_frontend/commit/ded6cbf647900ff45ffc1d32ca5dcd25579199df))
+* **dashboard:** minor changes ([10dc8f5](https://github.com/vebholic/oms_frontend/commit/10dc8f55e84b8dfd2b8902be8330afd46bec8739))
+* limit activity to 5 elements ([1512819](https://github.com/vebholic/oms_frontend/commit/15128192c3b2590fc70ec63a45e02e50f25f4e64))
+* **quotes:** minor change ([63aeb48](https://github.com/vebholic/oms_frontend/commit/63aeb4829719d93ffba52852e5540962817b8ce6))
+* rentalJob colorName style change ([b2229a5](https://github.com/vebholic/oms_frontend/commit/b2229a50ee20d91f8a7ea3ca10add1c5feb94744))
+* rentalJob non-serialized product show with assets PO-1300 ([5044713](https://github.com/vebholic/oms_frontend/commit/5044713ef7cf5570598a1b256c40defd0990aa1d))
+* repairJob colorName style change ([b0bcb86](https://github.com/vebholic/oms_frontend/commit/b0bcb8621be0570f8b47ff2f83fc93026c890611))
+
 ## [2.78.0](https://github.com/vebholic/oms_frontend/compare/v2.77.2...v2.78.0) (2022-03-15)
 
 

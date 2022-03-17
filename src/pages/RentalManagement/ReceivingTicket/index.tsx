@@ -41,7 +41,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import { ExpandMore } from '@material-ui/icons';
 import ExistingRentalJob from "./ExistingRentalJob";
 import { groupBy, uniq, map, filter } from "lodash";
-import { camelCase } from "lodash";
+import { objectStore, findOne } from '../../../constants/indexdbhelper';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -124,8 +124,23 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       var products: any = [];
       if (isOffline) {
         productAssets = await getRentalProductAssets(rentalManagementData._id);
-        productAssets = productAssets?.map((u) => ({ ...u, productName: u?.product?.optionLabel }));
+        productAssets = productAssets?.map(u => ({
+          ...u,
+          type: "Asset",
+          qty: 1,
+          productName: u?.product?.optionLabel,
+          warehouse: u?.warehouse?.optionLabel,
+          warehouseId: u?.warehouse?.optionValue,
+          currentOwner: u?.currentOwner,
+          currentLocation: u?.currentLocation?.optionValue,
+          rentalAssetStatus: u?.status
+        }))
+
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id);
+
+        const productResponse = await findOne(objectStore.rentalManagement, rentalManagementData._id);
+        products = productResponse.material;
+
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
@@ -145,34 +160,35 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
         products = productResponse?.data?.data?.material
-        products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
 
-        products?.forEach((ele) => {
-          if (productAssets.filter((e) => e._id === ele.materialId).length) {
-            productAssets.forEach(element => {
-              if (element._id === ele.materialId) {
-                element.qty += ele.qty
-              }
-            });
-          }
-          else {
-            const obj: any = {}
-            obj._id = ele.materialId
-            obj.type = "Product"
-            obj.qty = ele.qty
-            obj.assetNumber = ele?.productDetail?.productName
-            obj.productName = ele?.productDetail?.productName
-            obj.productId = ele?.productDetail?._id
-            obj.warehouse = rentalManagementData?.warehouse?.optionLabel
-            obj.warehouseId = rentalManagementData?.warehouse?.optionValue
-            obj.status = ele?.status
-            obj.rentalAssetStatus = ele?.status
-            obj.startDate = ele?.actualStartDate
-            obj.endDate = ele?.actualEndDate
-            productAssets.push(obj)
-          }
-        })
       }
+      products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
+
+      products?.forEach((ele) => {
+        if (productAssets.filter((e) => e._id === ele.materialId).length) {
+          productAssets.forEach(element => {
+            if (element._id === ele.materialId) {
+              element.qty += ele.qty
+            }
+          });
+        }
+        else {
+          const obj: any = {}
+          obj._id = ele.materialId
+          obj.type = "Product"
+          obj.qty = ele.qty
+          obj.assetNumber = ele?.productDetail?.productName
+          obj.productName = ele?.productDetail?.productName
+          obj.productId = ele?.productDetail?._id
+          obj.warehouse = rentalManagementData?.warehouse?.optionLabel
+          obj.warehouseId = rentalManagementData?.warehouse?.optionValue
+          obj.status = ele?.status
+          obj.rentalAssetStatus = ele?.status
+          obj.startDate = ele?.actualStartDate
+          obj.endDate = ele?.actualEndDate
+          productAssets.push(obj)
+        }
+      })
 
       if (deliveryTicketList.length) {
         if (deliveryTicketList.filter((e) => [DELIVERY_TICKET_TYPE.receiving, DELIVERY_TICKET_TYPE.return].includes(e.ticketType) &&
@@ -534,7 +550,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
           <MenuItem
             onClick={() => handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier)}
-            disabled={(selectedRecords.length === 0)
+            disabled={(selectedRecords.length === 0) || isOffline
               || (selectedRecords.some(f =>
                 !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
                 || !f.subleaseAsset || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
@@ -545,7 +561,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               setIsExistingRentalJob(true)
               closeActions()
             }}
-            disabled={(selectedRecords.length === 0)
+            disabled={(selectedRecords.length === 0) || isOffline
               || (selectedRecords.some(f =>
                 !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
                 || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
@@ -557,7 +573,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) || f.status === INVENTORY_STATUS.scrap)
             && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.available].includes(f.status)
             && !f.subleaseAsset && checkUniqWarehouse()
-          )?.length === selectedRecords?.length) ?
+          )?.length === selectedRecords?.length && !isOffline) ?
 
             <MenuItem
               onClick={() => setShowRepairJobDialog(true)}

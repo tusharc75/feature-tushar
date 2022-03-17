@@ -59,12 +59,12 @@ const TypewiseTickets = ({ refrenceType, refrenceId, renderedFrom }) => {
                 columns = [...columns, ...getStaticFields()]
                 columns = columns.filter((e) => !["warehouse", "customerAccount", "supplierAccount"].includes(e.field))
                 columns.forEach((e) => {
-                  if (e.field === "pickupFrom") {
-                    e.cellRenderer = "pickupFromRenderer";
-                  }
-                  if (e.field === "deliveryTo") {
-                    e.cellRenderer = "deliveryToRenderer";
-                  }
+                    if (e.field === "pickupFrom") {
+                        e.cellRenderer = "pickupFromRenderer";
+                    }
+                    if (e.field === "deliveryTo") {
+                        e.cellRenderer = "deliveryToRenderer";
+                    }
                 })
                 setColumns([...columns])
                 fetchRecords()
@@ -80,10 +80,9 @@ const TypewiseTickets = ({ refrenceType, refrenceId, renderedFrom }) => {
         const response = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${refrenceType}&refrenceId=${refrenceId}`)
         data = response?.data?.data
         let rows = data.map((u) => {
-            let res = {
-                ...prepareDataForGrid(u, user)
-            };
-            return res;
+            let finalObject = prepareDataForGrid(u, user);
+            finalObject["isChecked"] = false;
+            return finalObject;
         });
         dispatch({ type: "initialize", data: rows, count: rows.length });
         setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
