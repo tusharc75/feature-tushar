@@ -480,6 +480,7 @@ const RentalManagement = () => {
               // showCloneRentalManagementDialog={() => {
               //   handleShowCloneRentalManagementDialog()
               // }}
+              gridApi={gridApi}
               fetchRentalManagement={fetchRentalManagement}
             >
               {accountDetails.accountId && (
