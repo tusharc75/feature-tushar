@@ -116,6 +116,11 @@ function RentalManagementHeader(props) {
       .then(({ data: { data } }) => {
         insertUpdate(objectStore.resource, 'serializedAsset', data);
       });
+    axiosInstance()
+      .get(`/field?resource=Product&view=true`)
+      .then(({ data: { data } }) => {
+        insertUpdate(objectStore.resource, 'Product', data);
+      });
   };
 
 
@@ -290,7 +295,7 @@ function RentalManagementHeader(props) {
                       } */}
                       {
                         <MenuItem
-                          disabled={!selectedRecords.length || selectedRecords.find((d) => d.canDelete === false)}
+                          disabled={!selectedRecords.length}
                           onClick={() => handleAddOffline()}
                         >
                           Add Offline

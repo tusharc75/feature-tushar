@@ -39,6 +39,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 import { groupBy, uniq, map } from "lodash";
+import { objectStore, findOne } from '../../../constants/indexdbhelper';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -91,15 +92,26 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       var deliveryTicketList: any = [];
       var products: any = [];
       dispatch({ type: 'loading', loading: true });
+
       if (isOffline) {
+
         productAssets = await getRentalProductAssets(rentalManagementData._id)
         productAssets = productAssets?.map(u => ({
           ...u,
+          type: "Asset",
+          qty: 1,
           productName: u?.product?.optionLabel,
           warehouse: u?.warehouse?.optionLabel,
-          warehouseId: u?.warehouse?.optionValue
+          warehouseId: u?.warehouse?.optionValue,
+          currentOwner: u?.currentOwner,
+          currentLocation: u?.currentLocation?.optionValue,
         }))
+
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id)
+
+        const productResponse = await findOne(objectStore.rentalManagement, rentalManagementData._id);
+        products = productResponse.material;
+
       }
       else {
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`)
@@ -115,35 +127,37 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           currentOwner: u?.currentOwner,
           currentLocation: u?.currentLocation?.optionValue,
         }))
+
         const result = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
         deliveryTicketList = result?.data?.data
 
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
         products = productResponse?.data?.data?.material
-        products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
-
-        products?.forEach((ele) => {
-          if (productAssets.filter((e) => e._id === ele.materialId).length) {
-            productAssets.forEach(element => {
-              if (element._id === ele.materialId) {
-                element.qty += ele.qty
-              }
-            });
-          }
-          else {
-            const obj: any = {}
-            obj._id = ele.materialId
-            obj.type = "Product"
-            obj.qty = ele.qty
-            obj.assetNumber = ele?.productDetail?.productName
-            obj.productName = ele?.productDetail?.productName
-            obj.productId = ele?.productDetail?._id
-            obj.warehouse = rentalManagementData?.warehouse?.optionLabel
-            obj.warehouseId = rentalManagementData?.warehouse?.optionValue
-            productAssets.push(obj)
-          }
-        })
       }
+    
+      products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
+      products?.forEach((ele) => {
+        if (productAssets.filter((e) => e._id === ele.materialId).length) {
+          productAssets.forEach(element => {
+            if (element._id === ele.materialId) {
+              element.qty += ele.qty
+            }
+          });
+        }
+        else {
+          const obj: any = {}
+          obj._id = ele.materialId
+          obj.type = "Product"
+          obj.qty = ele.qty
+          obj.assetNumber = ele?.productDetail?.productName
+          obj.productName = ele?.productDetail?.productName
+          obj.productId = ele?.productDetail?._id
+          obj.warehouse = rentalManagementData?.warehouse?.optionLabel
+          obj.warehouseId = rentalManagementData?.warehouse?.optionValue
+          productAssets.push(obj)
+        }
+      })
+
       if (deliveryTicketList.length) {
         if ((deliveryTicketList.filter((e) => [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status))).length > 0) {
           setShowProcessDeliveryTicket(true)
