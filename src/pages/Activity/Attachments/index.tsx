@@ -258,7 +258,6 @@ export default function Attachment() {
     </>
   );
   const downloadFile = (data1) => {
-    console.log("data1",data1)
     const file = data1.file
     const fileUrl = file.map(f => f.url)
     setIsDownloading(true);
