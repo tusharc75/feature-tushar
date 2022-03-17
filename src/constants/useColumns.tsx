@@ -280,6 +280,16 @@ export default function useColumns() {
                     rendererName: 'checkboxRenderer'
                 }
             }
+            else if (field?.type === "colorPicker") {
+                return {
+                    columnData: {
+                        ...commonFieldData,
+                        cellRenderer: "commonRenderer",
+                        filter: false,
+                    },
+                    rendererName: 'commonRenderer'
+                }
+            }
             else {
                 return {
                     columnData: {
