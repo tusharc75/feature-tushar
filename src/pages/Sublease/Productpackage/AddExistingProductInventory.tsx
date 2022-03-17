@@ -14,7 +14,7 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import { startCase } from "lodash";
-import { getColumnData, getFrameworkComponents, getStaticFields } from "../../../constants/columns";
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 
@@ -27,6 +27,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const { state: { selectedEntity } }: any = useData();
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
+    const { getColumnData } = useColumns();
 
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
 

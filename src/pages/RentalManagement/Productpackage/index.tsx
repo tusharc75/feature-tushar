@@ -98,21 +98,24 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
               <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
               </span>
-              <HtmlTooltip title="Add Products">
-                <IconButton
-                  onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })}
-                  size="small"
-                  color="primary"
-                >
-                  <Add color="disabled" fontSize="small" />
-                </IconButton>
-              </HtmlTooltip>
+              {!isOffline &&
+                <HtmlTooltip title="Add Products">
+                  <IconButton
+                    onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })}
+                    size="small"
+                    color="primary"
+                  >
+                    <Add color="disabled" fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>}
             </Box>}
             {!isOffline && (
               <Chip
                 className="ml-1"
-                label={`${row.original.type === 'product' ? "Product" : "Package"}`}
-                size="small" color="primary"
+                label={`${row.original.type === 'product' ?
+                  !row.original.serializedProduct ? "Non-Serialized Product" : "Product" : "Package"}`}
+                size="small"
+                color="primary"
                 onClick={() => {
                   window.open(
                     `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
@@ -258,6 +261,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     rows.forEach((parent, i) => {
       parent.srno = (i + 1);
       parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
+      parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
@@ -279,7 +283,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow.productDetail?.productName;
+      _subRow.detail = _subRow?.productDetail?.productName;
+      _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
@@ -363,6 +368,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     rows.forEach((element) => {
       delete element.srno
       delete element.detail;
+      delete element.serializedProduct;
       delete element.qtyDisplay;
       delete element.isValid;
       delete element.hideSelection;
@@ -458,6 +464,9 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     })
     setDeleteData(obj);
   }
+
+
+  console.log(rowsData)
 
   return (
     <Fragment>

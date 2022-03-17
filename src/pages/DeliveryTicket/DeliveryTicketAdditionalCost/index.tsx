@@ -64,9 +64,8 @@ const DeliveryTicketAdditionalCost = ({ renderedFrom, additionalCost }) => {
         }
     };
 
-
     const fetchGridColumns = async () => {
-        const fields = await fetch_rental_cost_fields("", isOffline);
+        const fields = await fetch_rental_cost_fields("USD", isOffline);
         let rendererNames = [];
         let columns = []
         genrateColoum(fields, columns, rendererNames, false, renderedFrom);

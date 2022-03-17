@@ -6,20 +6,15 @@ import CustomAgGrid, { intialState, reducer } from "src/components/AgGridCompone
 import { Button, Chip, Dialog, IconButton, makeStyles, useMediaQuery } from "@material-ui/core";
 import axiosInstance from "src/axios/axiosInstance";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "src/components/Helpers/NoDataCell";
 import {
     CustomDialogTransition, dateFormat, defaultActivityShow, gridLoadingTimeout, serializedAsset,
     purchaseOrder, PURCHASE_ORDER_STATUS, CHILD_RESOURCE, prepareDataForGrid
 } from "src/constants/helpers";
 import { useData } from "src/StateProvider/Provider";
-import moment from "moment";
-import { startCase } from "lodash";
 import CreateSeriaizedAsset from "./CreateSerializedAsset";
-import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import routes from "src/components/Helpers/Routes";
-import { CURReplaceByCurrencySingle } from "src/constants/formulaUtility";
 import { Link } from "react-router-dom";
 import { CreateEmail } from "src/components/Activity/Email/CreateEmail";
 import { AiFillFilePdf } from "react-icons/ai";
@@ -29,6 +24,7 @@ import { genrateColoum, getFrameworkComponents } from "src/constants/columns";
 import { useHistory } from "react-router-dom";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
 import { IoMdDownload } from "react-icons/io";
+import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 
 const useStyles = makeStyles(() => ({
     equal: {
@@ -112,21 +108,19 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
         fetchEmailsData()
     }, []);
 
-    const fetchColumns = () => {
+    const fetchColumns = async () => {
         setLoadingColumns(true)
-        axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
-            let fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
-            let rendererNames = [];
-            genrateColoum(fields, columns, rendererNames, false, renderedFrom);
-            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-            tempFrameworkComponent = {
-                nameRenderer: NameRenderer,
-                ...tempFrameworkComponent,
-            }
-            setFrameWorkComponent({ ...tempFrameworkComponent })
-            setColumns([...columns])
-            setLoadingColumns(false)
-        })
+        let fields = await fetch_po_product_fields(purchaseOrderData?.currency);
+        let rendererNames = [];
+        genrateColoum(fields, columns, rendererNames, false, renderedFrom);
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+            nameRenderer: NameRenderer,
+            ...tempFrameworkComponent,
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        setColumns([...columns])
+        setLoadingColumns(false)
     }
 
     const fetchProduct = () => {

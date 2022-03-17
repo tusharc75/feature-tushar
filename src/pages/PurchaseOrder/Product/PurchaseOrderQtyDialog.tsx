@@ -5,35 +5,23 @@ import {
   TextField,
   Grid,
   Box,
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  InputAdornment,
-  FormHelperText
 } from '@material-ui/core';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DateUtils from '@date-io/date-fns';
 import moment from 'moment';
-import { arrayToDropwdownOption, dateFormatForInputControl } from '../../../constants/helpers';
+import { arrayToDropwdownOption } from '../../../constants/helpers';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { startCase } from 'lodash';
-import axiosInstance from "../../../axios/axiosInstance";
-import { groupBy } from 'lodash';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from "../../../constants/helpers";
+import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, isFieldNotTouched } from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
 import { Formik, Form } from "formik";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomButton from '../../../components/Helpers/CustomButton'
 import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
+import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
+import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 
 interface PurchaseOrderQtyDialogProps {
   onClose: VoidFunction | any;
@@ -53,61 +41,61 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
   const [allFields, setAllFields] = useState([]);
 
   useEffect(() => {
-    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
-      let poFields = CURReplaceByCurrencySingle(data, currency);
-      setAllFields(JSON.parse(JSON.stringify(poFields)))
-      if (bulkEdit) {
-        let unitArray: any = []
-        productData?.forEach(element => {
-          if (element?.productDetail?.unit) {
-            unitArray.push([...element?.productDetail?.unit])
-          }
-        });
-        let unit: any = unitArray?.shift()?.filter(function (v) {
-          return unitArray.every(function (a) {
-            return a.indexOf(v) !== -1;
-          });
-        });
-        const unitOptions: any = arrayToDropwdownOption(unit)
-        poFields.forEach((element) => {
-          if (element.fieldName === "unit") {
-            element.option = unitOptions;
-          }
-          element.required = false;
-          element.isFormula = false;
-          element.isMulitFormula = false;
-        })
-        poFields = poFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
-        setInitialData({
-          fields: poFields,
-          values: { ...getObjKeys("", poFields), expectedDelivery: "" },
-        });
-      }
-      else {
-
-        poFields.filter((_f) => {
-          if (["unit"].includes(_f.fieldName.toLowerCase())) {
-            if (productData?.productDetail?.unit) {
-              _f.option = arrayToDropwdownOption(productData?.productDetail?.unit)
-            }
-          }
-        })
-
-        let tempObjKeysWithValues = getObjKeysWithValues(productData, poFields)
-        if (!tempObjKeysWithValues["taxSchedule"] && purchaseOrderData["taxSchedule"]) {
-          tempObjKeysWithValues["taxSchedule"] = purchaseOrderData["taxSchedule"]
-        }
-        if (!tempObjKeysWithValues["expectedDelivery"] && purchaseOrderData["deliveryDate"]) {
-          tempObjKeysWithValues["expectedDelivery"] = purchaseOrderData["deliveryDate"]
-        }
-        setInitialData({
-          fields: poFields,
-          values: tempObjKeysWithValues,
-        });
-      }
-      EvaluteproductFields(poFields);
-    })
+    fetchField()
   }, []);
+
+  const fetchField = async () => {
+    var poFields = await fetch_po_product_fields(purchaseOrderData?.currency);
+    setAllFields(JSON.parse(JSON.stringify(poFields)))
+    if (bulkEdit) {
+      let unitArray: any = []
+      productData?.forEach(element => {
+        if (element?.productDetail?.unit) {
+          unitArray.push([...element?.productDetail?.unit])
+        }
+      });
+      let unit: any = unitArray?.shift()?.filter(function (v) {
+        return unitArray.every(function (a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+      const unitOptions: any = arrayToDropwdownOption(unit)
+      poFields.forEach((element) => {
+        if (element.fieldName === "unit") {
+          element.option = unitOptions;
+        }
+        element.required = false;
+        element.isFormula = false;
+        element.isMulitFormula = false;
+      })
+      poFields = poFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
+      setInitialData({
+        fields: poFields,
+        values: { ...getObjKeys("", poFields), expectedDelivery: "" },
+      });
+    }
+    else {
+      poFields.filter((_f) => {
+        if (["unit"].includes(_f.fieldName.toLowerCase())) {
+          if (productData?.productDetail?.unit) {
+            _f.option = arrayToDropwdownOption(productData?.productDetail?.unit)
+          }
+        }
+      })
+      let tempObjKeysWithValues = getObjKeysWithValues(productData, poFields)
+      if (!tempObjKeysWithValues["taxSchedule"] && purchaseOrderData["taxSchedule"]) {
+        tempObjKeysWithValues["taxSchedule"] = purchaseOrderData["taxSchedule"]
+      }
+      if (!tempObjKeysWithValues["expectedDelivery"] && purchaseOrderData["deliveryDate"]) {
+        tempObjKeysWithValues["expectedDelivery"] = purchaseOrderData["deliveryDate"]
+      }
+      setInitialData({
+        fields: poFields,
+        values: tempObjKeysWithValues,
+      });
+    }
+    EvaluteproductFields(poFields);
+  }
 
   const EvaluteproductFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));

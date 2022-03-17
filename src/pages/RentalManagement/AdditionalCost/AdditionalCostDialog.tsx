@@ -7,7 +7,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, CHILD_RESOURCE } from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
 import { Formik, Form } from "formik";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomButton from '../../../components/Helpers/CustomButton'

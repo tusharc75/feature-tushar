@@ -47,6 +47,19 @@ export const getRentalDeliveryTicket = async (id) => {
     }
 };
 
+export const updateRentalProcessStatus = async (id, processStatus) => {
+    try {
+        const rentalManagement = await findOne(objectStore.rentalManagement, id);
+        rentalManagement.processStatus = processStatus;
+        await insertUpdate(objectStore.rentalManagement, id, rentalManagement);
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
+}
+
+
 export const updateRentalAssetStatus = async (id, status, asset) => {
     try {
         const rentalManagement = await findOne(objectStore.rentalManagement, id);

@@ -3,11 +3,11 @@ import Box from "@material-ui/core/Box/Box";
 import React, { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer, } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer,  } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Dialog, IconButton } from "@material-ui/core";
+import { Button, Dialog } from "@material-ui/core";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import { CustomDialogTransition, customerContact, gridLoadingTimeout, purchaseOrder, rentalManagement, CHILD_RESOURCE, PURCHASE_ORDER_STATUS } from "src/constants/helpers";
+import { CustomDialogTransition, gridLoadingTimeout, purchaseOrder, PURCHASE_ORDER_STATUS } from "src/constants/helpers";
 import { useData } from "src/StateProvider/Provider";
 import axiosInstance from "src/axios/axiosInstance";
 import { CreateEmail } from "src/components/Activity/Email/CreateEmail";
@@ -15,12 +15,12 @@ import { isMobile, isTablet } from "react-device-detect";
 import { AiFillFilePdf } from "react-icons/ai";
 import routes from "src/components/Helpers/Routes";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
-import { BiPurchaseTagAlt, IoMdDownload, MdEmail } from "react-icons/all";
-import { CURReplaceByCurrencySingle } from "src/constants/formulaUtility";
-import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "src/constants/columns"
+import { IoMdDownload, MdEmail } from "react-icons/all";
+import { getFrameworkComponents, genrateColoum } from "src/constants/columns"
 import { prepareDataForGrid } from "src/constants/helpers";
 import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
 import { Link } from "react-router-dom";
+import { fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
 
 
 const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrentStep, currentStep, handleAttachments, statusOptions, renderedFrom }) => {
@@ -57,23 +57,24 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
     );
 
     useEffect(() => {
-        axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
-            let fields = CURReplaceByCurrencySingle(data, purchaseOrderData.currency)
-            axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderService}`).then(({ data: { data } }) => {
-                fields = [...fields, ...CURReplaceByCurrencySingle(data, purchaseOrderData.currency)]
-                let rendererNames = [];
-                genrateColoum(fields, columns, rendererNames, false, renderedFrom);
-                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-                tempFrameworkComponent = {
-                    commonRenderer: CommonRenderer,
-                    nameRenderer: NameRenderer,
-                    ...tempFrameworkComponent,
-                }
-                setFrameWorkComponent({ ...tempFrameworkComponent })
-                setColumns([...columns])
-            })
-        })
+        fetchFields()
     }, []);
+
+    const fetchFields = async () => {
+        let fields_product = await fetch_po_product_fields(purchaseOrderData?.currency);
+        let fields_service = await fetch_po_service_fields(purchaseOrderData?.currency);
+        const fields = [...fields_product, ...fields_service]
+        let rendererNames = [];
+        genrateColoum(fields, columns, rendererNames, false, renderedFrom);
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+            commonRenderer: CommonRenderer,
+            nameRenderer: NameRenderer,
+            ...tempFrameworkComponent,
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        setColumns([...columns])
+    }
 
     useEffect(() => {
         fetchEmailsData()
@@ -195,7 +196,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
     return (<>
         <Box display="flex" justifyContent="space-between" m={1}>
             <Box display="flex" alignItems="center">
-                {permissions?.purchaseOrder?.isRead && !isMobile &&  (
+                {permissions?.purchaseOrder?.isRead && !isMobile && (
                     <Button
                         variant={isMobile && !isTablet ? "text" : "outlined"}
                         color="primary"
@@ -251,7 +252,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                             handleUpdateData({ "status": "Issued" })
                         }}
                     >
-                        Issue PO
+                        Issue
                     </Button>
                 </Box>
             }
