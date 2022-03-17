@@ -257,7 +257,9 @@ export default function Attachment() {
     }
     </>
   );
-  const downloadFile = (file) => {
+  const downloadFile = (data1) => {
+    console.log("data1",data1)
+    const file = data1.file
     const fileUrl = file.map(f => f.url)
     setIsDownloading(true);
     axiosInstance()
@@ -284,7 +286,7 @@ export default function Attachment() {
         const url = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', "download.zip");
+        link.setAttribute('download',data1.name?`${data1.name}.zip` :"download.zip");
         document.body.appendChild(link);
         link.click();
         setTimeout(() => setIsDownloading(false), 2000);
@@ -302,7 +304,7 @@ export default function Attachment() {
           aria-label="Download"
           color="primary"
           disabled={isDownloading}
-          onClick={() => downloadFile(params.data.file)}
+          onClick={() => downloadFile(params.data)}
         >
           <GoArrowDown size={26} />
         </IconButton>
