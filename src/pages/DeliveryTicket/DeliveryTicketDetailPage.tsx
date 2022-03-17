@@ -261,7 +261,7 @@ export default function DeliveryTicketDetail(props) {
     try {
       let data;
       if (isOffline) {
-        data = await findOne(objectStore.resource, "productInventory")
+        data = await findOne(objectStore.resource, "serializedAsset")
       }
       else {
         const response = await axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
@@ -653,7 +653,7 @@ export default function DeliveryTicketDetail(props) {
                       }
                       {...a11yProps(0)}
                     />
-                    {deliveryTicketData?.additionalCost.length > 0 &&
+                    {deliveryTicketData?.additionalCost?.length > 0 &&
                       <Tab
                         className={'tabLayout'}
                         style={{
@@ -720,7 +720,6 @@ export default function DeliveryTicketDetail(props) {
                           </IconButton>
                         }
                         <Box mx={1} />
-
                       </Grid>
                       <Grid item xs={12}>
                         {isMobile && !isTablet ? <CustomSwipableList
@@ -781,11 +780,15 @@ export default function DeliveryTicketDetail(props) {
                     </Grid>
                   </TabPanel>
                   <TabPanel value={tabValue} index={2}>
-                    <DeliveryTicketProduct renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-2`} deliveryTicketId={id} />
+                    <DeliveryTicketProduct
+                      renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-2`}
+                      deliveryTicketId={id} />
                   </TabPanel>
-                  {deliveryTicketData?.additionalCost.length > 0 &&
+                  {deliveryTicketData?.additionalCost?.length > 0 &&
                     <TabPanel value={tabValue} index={3}>
-                      <DeliveryTicketAdditionalCost renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-3`} additionalCost={deliveryTicketData?.additionalCost} />
+                      <DeliveryTicketAdditionalCost
+                        renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-3`}
+                        additionalCost={deliveryTicketData?.additionalCost} />
                     </TabPanel>}
                 </>
               )}

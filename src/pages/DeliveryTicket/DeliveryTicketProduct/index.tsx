@@ -49,8 +49,6 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
         fetchProduct()
     }, [page, limit, filters, sorting, search]);
 
-
-
     const fetchProduct = async () => {
         try {
             dispatch({ type: "loading", loading: true });
@@ -84,30 +82,33 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
         }
     };
 
-
-    const fetchGridColumns = () => {
-        axiosInstance()
-            .get("/field?resource=Product&view=true")
-            .then(({ data: { data } }) => {
-                let columns = []
-                let rendererNames = []
-                data.forEach(o => {
-                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
-                    if (currentColumn !== null) {
-                        columns = [...columns, currentColumn?.columnData]
-                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                            rendererNames.push(currentColumn?.rendererName)
-                        }
-                    }
-                })
-                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-                tempFrameworkComponent = {
-                    ...tempFrameworkComponent,
+    const fetchGridColumns = async () => {
+        var fields = []
+        if (isOffline) {
+            fields = await findOne(objectStore.resource, "Product")
+        }
+        else {
+            const response = await axiosInstance().get("/field?resource=Product&view=true")
+            fields = response?.data?.data
+        }
+        let columns = []
+        let rendererNames = []
+        fields.forEach(o => {
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
+            if (currentColumn !== null) {
+                columns = [...columns, currentColumn?.columnData]
+                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                    rendererNames.push(currentColumn?.rendererName)
                 }
-                setFrameWorkComponent({ ...tempFrameworkComponent })
-                columns = [...columns, ...getStaticFields()]
-                setColumns([...defaultColumns, ...columns])
-            })
+            }
+        })
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+            ...tempFrameworkComponent,
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...defaultColumns, ...columns])
     }
 
     return (

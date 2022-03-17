@@ -495,7 +495,7 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                                                 <Box marginY={2}>
                                                     <Grid spacing={3} container>
                                                         {form.sectionFields.map((field, index2) => (
-                                                            ["repairJob", "transferAsset", "rentalJob", "salesOrder", "type", "productInventory", "pickupFromType", "deliveryToType"].includes(field.fieldName) ? null :
+                                                            ["sublease", "repairJob", "transferAsset", "rentalJob", "salesOrder", "type", "productInventory", "pickupFromType", "deliveryToType"].includes(field.fieldName) ? null :
                                                                 (["returnReason"].includes(field.fieldName) && values["ticketType"] !== DELIVERY_TICKET_TYPE.return) ? null :
                                                                     <Grid key={index2} item xs={12} sm={6} md={6}>
                                                                         {field.fieldName === "pickUpDate" ? (
