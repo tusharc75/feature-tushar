@@ -315,11 +315,10 @@ export default function DeliveryTicketDetail(props) {
         data = response?.data?.data
       }
       let rows = data.map((u) => {
-        let res = {
-          ...prepareDataForGrid(u, user)
-        };
-        return res;
-      });
+        let finalObject = prepareDataForGrid(u, user);
+        finalObject["isChecked"] = false;
+        return finalObject;
+    });
       dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
     }
