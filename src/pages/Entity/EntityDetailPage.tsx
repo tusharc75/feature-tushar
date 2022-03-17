@@ -85,9 +85,9 @@ const EntityDetailsPage = () => {
       } = await axiosInstance().get(`/entity/${id}`);
 
       handleMainPoints(data);
-      setHeadingLbl(data.entityName);
+      setHeadingLbl(data?.entityName);
       setEntityData(data);
-      setCustomizedRoutes([routes.entity, { title: data.entityName }]);
+      setCustomizedRoutes([routes.entity, { title: data?.entityName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -111,7 +111,7 @@ const EntityDetailsPage = () => {
 
   const handleMainPoints = (data) => {
     let tempMp = {
-      name: `${data.entityName}`,
+      name: `${data?.entityName}`,
       taxJurisdiction: data.taxJurisdiction || "",
     };
     setMainPoints(tempMp);
@@ -541,7 +541,7 @@ const EntityDetailsPage = () => {
                       <Box className="btn-view gap-1" p={1} display="flex" justifyContent="center" alignItems="center"
                         onClick={() => history.push(`/user`, {
                           id: entityData._id,
-                          name: entityData.entityName,
+                          name: entityData?.entityName,
                           type: "entity",
                           text: "Entity"
                         })}>
@@ -583,7 +583,7 @@ const EntityDetailsPage = () => {
           <ResourceTransferDialog
             open={true}
             resource="Entity"
-            fromResource={{ ...entityData, name: entityData.entityName }}
+            fromResource={{ ...entityData, name: entityData?.entityName }}
             allResourceData={JSON.parse(localStorage.getItem("mappedEntities")).map(o => ({ ...o, name: o?.entityName }))}
             onClose={() => setShowDeleteEntityDialog(false)}
             handleDelete={handleDeleteEntity}
