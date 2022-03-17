@@ -38,7 +38,8 @@ function RentalManagementHeader(props) {
     dispatch,
     showTransferEntityDialog,
     selectedType,
-    fetchRentalManagement
+    fetchRentalManagement,
+    gridApi
     // showCloneRentalManagementDialog
   } = props;
 
@@ -121,10 +122,8 @@ function RentalManagementHeader(props) {
       .then(({ data: { data } }) => {
         insertUpdate(objectStore.resource, 'Product', data);
       });
+    if (gridApi) gridApi.deselectAll()
   };
-
-
-
 
   const handleRemoveoffline = async () => {
     await clearAll(objectStore.rentalManagement);

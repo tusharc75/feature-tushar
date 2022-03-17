@@ -59,9 +59,14 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
             if (isOffline) {
                 const deliveryTicket = await findOne(objectStore.deliveryTicket, deliveryTicketId)
                 const response = await findOne(objectStore.rentalManagement, deliveryTicket?.rentalJob?.optionValue)
-                data = response?.product
-                const inventory = deliveryTicket?.product?.map((e) => e.optionValue);
-                data = response?.product?.filter(d => inventory?.includes(d.inventory)).map(obj => obj.inventoryDetail)
+                const product = deliveryTicket?.products?.map((e) => e.product);
+                data = response?.material?.filter(d => product?.includes(d.materialId)).map(obj => obj.productDetail)
+                data?.forEach((ele) => {
+                    const res = deliveryTicket?.products?.filter((e) => e.product === ele._id);
+                    if (res.length) {
+                        ele.qty = res[0].qty
+                    }
+                })
             }
             else {
                 const response = await axiosInstance().get(`${deliveryTicket.api}/${deliveryTicketId}/products`)
