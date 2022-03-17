@@ -101,7 +101,7 @@ const ServiceDialog: FC<ServiceDialogProps> = ({ onClose, currency, handleAddSer
         }) => (
           <Fragment>
             <CustomDialogHeader
-              title={serviceData ? `Edit ${serviceData?.description || "Service"}` : `Ad hoc Charges`}
+              title={serviceData ? `Edit ${serviceData?.description || "Services and Consumables"}` : `Services and Consumables`}
               onClose={() => {
                 onClose()
               }}

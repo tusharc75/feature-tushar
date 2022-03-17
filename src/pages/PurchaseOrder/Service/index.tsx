@@ -59,6 +59,17 @@ const Product = ({ purchaseOrderData, renderedFrom }) => {
         setColumns([...columns])
     }
 
+    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+    if (columnState) {
+        columns.forEach((item) => {
+            columnState.forEach((d) => {
+                if (d.colId === item.field) {
+                    item.show = !d.hide;
+                }
+            });
+        });
+    }
+
     const fetchPurchaseOrderService = () => {
         dispatch({ type: "loading", loading: true });
         if (gridApi) {
@@ -162,7 +173,7 @@ const Product = ({ purchaseOrderData, renderedFrom }) => {
                             setSelectedServiceData(null)
                         }}
                     >
-                        Ad hoc Charges
+                       Add Services and Consumables
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
