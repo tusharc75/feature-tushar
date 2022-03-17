@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.79.1](https://github.com/vebholic/oms_frontend/compare/v2.79.0...v2.79.1) (2022-03-17)
+
+
+### Bug Fixes
+
+* bug fix ([9da9bae](https://github.com/vebholic/oms_frontend/commit/9da9bae2b4e7faea7e3bc8141974234d829f9322))
+* **dashboard:** dashboard bulder ui start ([fac2582](https://github.com/vebholic/oms_frontend/commit/fac258249bcfe3d88eae1bc5dc77edbdf5ab5d25))
+* mobile ui bug fix in delivery tickets ([d7e7656](https://github.com/vebholic/oms_frontend/commit/d7e7656a4fa3af675ec5ddfb4fadefe3cc0fe24e))
+* product grid linkable issue ([b3496a1](https://github.com/vebholic/oms_frontend/commit/b3496a1ed9705c52e0d4176ef97910b9ace2aad1))
+* **quote:** minor change ([c6d7354](https://github.com/vebholic/oms_frontend/commit/c6d7354fc6728b2c5d50b4c1f8deb2fa1d906f46))
+
 ## [2.79.0](https://github.com/vebholic/oms_frontend/compare/v2.78.0...v2.79.0) (2022-03-16)
 
 
