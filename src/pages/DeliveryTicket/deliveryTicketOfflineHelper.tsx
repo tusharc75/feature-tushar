@@ -1,7 +1,7 @@
 
 import { objectStore, insertUpdate, findOne, findAll } from '../../constants/indexdbhelper';
-import { updateRentalAssetStatus } from '../RentalManagement/rentalOfflineHelper';
-import { getObjKeysWithValues, INVENTORY_STATUS, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE } from "../../constants/helpers";
+import { updateRentalAssetStatus, updateRentalProductStatus } from '../RentalManagement/rentalOfflineHelper';
+import { getObjKeysWithValues, INVENTORY_STATUS, RENTAL_INTERNAL_ASSET_STATUS, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE } from "../../constants/helpers";
 
 export const createDeliveryTicketOffline = async (data, values) => {
     try {
@@ -20,16 +20,30 @@ export const createDeliveryTicketOffline = async (data, values) => {
         await insertUpdate(objectStore.offlineDataSync, _id, { type: "deliveryTicket", data: { ...values, _id, offlineStatusLog } });
 
         var assetStatus = INVENTORY_STATUS.readyToShip;
+        var productStatus = INVENTORY_STATUS.readyToShip;
         if (data?.status === DELIVERY_TICKET_STATUS.new) {
             assetStatus = INVENTORY_STATUS.readyToShip
+            productStatus = INVENTORY_STATUS.readyToShip
         }
         else if (data?.status === DELIVERY_TICKET_STATUS.delivered && data?.ticketType === DELIVERY_TICKET_TYPE.loading) {
             assetStatus = INVENTORY_STATUS.inUse
+            productStatus = RENTAL_INTERNAL_ASSET_STATUS.inUse
         }
         else if (data?.status === DELIVERY_TICKET_STATUS.delivered && [DELIVERY_TICKET_TYPE.receiving, DELIVERY_TICKET_TYPE.return].includes(data?.ticketType)) {
             assetStatus = INVENTORY_STATUS.underReview
+            if (DELIVERY_TICKET_TYPE.receiving === data?.ticketType) {
+                productStatus = RENTAL_INTERNAL_ASSET_STATUS.complete
+            }
+            else {
+                productStatus = RENTAL_INTERNAL_ASSET_STATUS.return
+            }
         }
-        await updateRentalAssetStatus(data?.rentalJob?.optionValue, assetStatus, data?.productInventory?.map((e) => e.optionValue))
+        if (data?.productInventory && data?.productInventory?.length) {
+            await updateRentalAssetStatus(data?.rentalJob?.optionValue, assetStatus, data?.productInventory?.map((e) => e.optionValue))
+        }
+        if (data?.products && data?.products?.length) {
+            await updateRentalProductStatus(data?.rentalJob?.optionValue, productStatus, data?.products?.map((e) => e.product))
+        }
         return true;
     }
     catch (e) {
