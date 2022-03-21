@@ -50,9 +50,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
 
     const [showCreateAssetDialog, setShowCreateAssetDialog] = useState(false)
     const [loadingColumns, setLoadingColumns] = useState(false)
-    const isSmallScreen = useMediaQuery('(max-width:1300px)');
-    const isTabletScreen = useMediaQuery('(max-width:960px)');
-    const [showActivity, setActivityShow] = useState(defaultActivityShow);
+
     const [sendEmail, setSendEmail] = useState(false);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
@@ -289,76 +287,61 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
         </Box>
         {columns && !loadingColumns ?
             <>
-                <Box
-                    p="6px"
-                    zIndex={5}
-                    width={
-                        isTabletScreen
-                            ? "calc(100vw - 20px)"
-                            : isSmallScreen
-                                ? "calc(100vw - 78px)"
-                                : showActivity ? "100%" : "calc(100vw - 100px)"
-                    }
-                    height={"calc(100vh - 330px)"}
-                >
-                    {columns && frameWorkComponent ?
-                        isMobile && !isTablet ? <CustomSwipableList
-                            allowSelection={true}
-                            allowSwipe={true}
-                            permissions={permissions}
-                            primaryField={columns?.find(d => d.field === "productDescription")}
-                            onClick={(data) => {
-                                history.push(`${routes.purchaseOrderDetail.path}/${data.productId}`)
-                            }}
-                            dataRows={dataRows}
-                            selectedRecords={selectedRecords}
-                            dispatch={dispatch}
-                            onEdit={() => {
-                            }}
-                            extraParamsToCheckDelete={true}
-                            onDelete={() => {
-                            }}
-                            rowCount={rowCount}
-                            page={page}
-                            loading={loading}
-                            chips={
-                                [{
-                                    label: `Quantity: `,
-                                    field: "qty",
-                                    forceShow: true
-                                }]
-                            }
-                            onCreate={null}
-                            showClone={false}
-                            fullHeight={true}
-                            renderedFrom={renderedFrom}
-                            onClone={() => { }}
+                {columns && frameWorkComponent ?
+                    isMobile && !isTablet ? <CustomSwipableList
+                        allowSelection={true}
+                        allowSwipe={true}
+                        permissions={permissions}
+                        primaryField={columns?.find(d => d.field === "productDescription")}
+                        onClick={(data) => {
+                            history.push(`${routes.purchaseOrderDetail.path}/${data.productId}`)
+                        }}
+                        dataRows={dataRows}
+                        selectedRecords={selectedRecords}
+                        dispatch={dispatch}
+                        onEdit={() => {
+                        }}
+                        extraParamsToCheckDelete={true}
+                        onDelete={() => {
+                        }}
+                        rowCount={rowCount}
+                        page={page}
+                        loading={loading}
+                        chips={
+                            [{
+                                label: `Quantity: `,
+                                field: "qty",
+                                forceShow: true
+                            }]
+                        }
+                        onCreate={null}
+                        showClone={false}
+                        fullHeight={true}
+                        renderedFrom={renderedFrom}
+                        onClone={() => { }}
 
-                        /> : <CustomAgGridEditable
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameWorkComponent}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            allowAction={false}
-                            loading={loading}
-                            allowSelection={true}
-                            isClientSideGrid={true}
-                            renderedFrom={renderedFrom}
-                            onCellValueChanged={(row) => {
-                            }}
-                            currency={purchaseOrderData?.currency?.toLowerCase()}
-                            isFooter={true}
-                        />
-                        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-                    }
-
-                </Box>
-
+                    /> : <CustomAgGridEditable
+                        columns={columns}
+                        dataRows={dataRows}
+                        frameworkComponents={frameWorkComponent}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount}
+                        limit={limit}
+                        pageSizes={pageSizes}
+                        page={page}
+                        allowAction={false}
+                        loading={loading}
+                        allowSelection={true}
+                        isClientSideGrid={true}
+                        renderedFrom={renderedFrom}
+                        onCellValueChanged={(row) => {
+                        }}
+                        currency={purchaseOrderData?.currency?.toLowerCase()}
+                        isFooter={true}
+                    />
+                    : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+                }
             </>
             : <Box
                 p={2}

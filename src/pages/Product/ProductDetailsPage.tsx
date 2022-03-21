@@ -172,7 +172,7 @@ const ProductDetailsPage = () => {
             handleMainPoints(data.productData);
             setHeadingLabel(
               data.productData?.productNumber
-                ? `${data.productData?.productNumber} - ${data.productData?.productName}`
+                ? `${data.productData?.productName} - ${data.productData?.productNumber}`
                 : data.productData?.productName
             );
             setCustomizedRoutes([routes.product, { title: `${data.productData.productName}` }]);
