@@ -185,9 +185,9 @@ const ProductsTable = (props: Props) => {
           dataRows={dataRows}
           selectedRecords={[]}
           dispatch={dispatch}
-          onEdit={(data) => {}}
+          onEdit={(data) => { }}
           extraParamsToCheckDelete={true}
-          onDelete={(data) => {}}
+          onDelete={(data) => { }}
           rowCount={rowCount}
           page={page}
           loading={loading}
@@ -203,7 +203,7 @@ const ProductsTable = (props: Props) => {
             setShowProductAssignDialog(true);
           }}
           showClone={true}
-          onClone={(data) => {}}
+          onClone={(data) => { }}
           renderedFrom={renderedFrom}
         />
       ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -235,7 +235,7 @@ const ProductsTable = (props: Props) => {
           productsDialogOpen={true}
           productId={packageId}
           handleCloseDialog={() => setShowProductAssignDialog(false)}
-          assignedProducts={dataRows}
+          assignedProducts={[...dataRows?.map((e) => e._id)]}
           renderedFrom={`${renderedFrom}_sub-1`}
           onSuccess={() => {
             getProducts();

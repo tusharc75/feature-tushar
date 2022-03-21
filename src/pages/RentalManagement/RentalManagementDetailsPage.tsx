@@ -121,10 +121,13 @@ const RentalManagementDetailsPage = () => {
   }
 
   useEffect(() => {
-    if (isSmallScreen) {
+    if (isSmallScreen && tabValue === 0) {
       setActivityShow(true)
     }
-  }, [isSmallScreen])
+    else {
+      setActivityShow(false)
+    }
+  }, [isSmallScreen, tabValue])
 
   useEffect(() => {
     if (id) {
@@ -517,7 +520,7 @@ const RentalManagementDetailsPage = () => {
                   {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
                 </span>
               )}
-              <div style={{ display: showActivity || (isSmallScreen && tabValue === 0) ? 'block' : 'none' }}>
+              <div style={{ display: showActivity ? 'block' : 'none' }}>
                 <Grid container>
                   <Grid item xs={12}>
                     {rentalManagementData && (

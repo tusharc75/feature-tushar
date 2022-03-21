@@ -21,7 +21,6 @@ import ManagePackageDialog from './ManagePackageDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import HideWhenOffline from '../../components/HideWhenOffline';
-import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
 import ProductListDialog from './ProductListDialog';
@@ -32,6 +31,7 @@ import { GoDeviceMobile } from "react-icons/go";
 import { AiFillCrown, IoIosPricetags, RiPriceTagLine } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
 let packagesTimeout;
 
@@ -82,6 +82,7 @@ const PackageList = () => {
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
+    const [selectedPackageProducts, setSelectedPackageProducts] = useState([]);
 
     useEffect(() => {
         fetchGridColumns();
@@ -430,6 +431,22 @@ const PackageList = () => {
         }
     };
 
+    const openAssingToProduct = async () => {
+        if (selectedRecords.length > 0) {
+            await axiosInstance()
+                .post(`${packageApi}/get/products`, {
+                    ids: selectedRecords.map(d => d._id)
+                })
+                .then(({ data }) => {
+                    setSelectedPackageProducts(data?.data)
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
+            setShowProductAssignDialog(true)
+
+        }
+    }
     return (
         <>
             <Fragment>
@@ -481,7 +498,7 @@ const PackageList = () => {
                             icon={<BiPackage className="headerLogo" />}
                             heading={routes.packages.title}
                             showTransferEntityDialog={handleTransferEntityDialog}
-                            openAssingToProduct={() => setShowProductAssignDialog(true)}
+                            openAssingToProduct={openAssingToProduct}
                         // showClonepackagesDialog={() => {
                         //   handleShowClonepackagesDialog()
                         // }}
@@ -611,14 +628,16 @@ const PackageList = () => {
                 </CustomContainer>
             </Fragment>
             {showProductAssignDialog && (
-                <AssignQuantityDialog
-                    ids={selectedRecords.map((s) => s.id)}
-                    onClose={() => setShowProductAssignDialog(false)}
-                    onSuccess={() => setShowProductAssignDialog(false)}
-                    resource={product.api}
-                    title="Assign Products"
-                    label='Select Product'
-                    resourceData={[]}
+                <AssignProductDialog
+                    reference="package"
+                    productsDialogOpen={true}
+                    productId={[...selectedRecords.map(d => d._id)]}
+                    handleCloseDialog={() => setShowProductAssignDialog(false)}
+                    assignedProducts={selectedPackageProducts}
+                    renderedFrom={`${renderedFrom}_sub-1`}
+                    onSuccess={() => {
+                        setShowProductAssignDialog(false);
+                    }}
                 />
             )}
             {showManagePackageDialog.open && (
