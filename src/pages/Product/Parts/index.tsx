@@ -59,8 +59,8 @@ function Parts({ id }) {
       .then(({ data: { data } }) => {
         data = data.map((o: any) => {
           let finalObject = {
-            ...o?.childProductDetail,
             ...o,
+            ...o?.childProductDetail,
           };
           return prepareDataForGrid(finalObject)
         });
@@ -116,7 +116,10 @@ function Parts({ id }) {
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
         }
-        setFrameWorkComponent({ ...tempFrameworkComponent, actionsRenderer: ActionsRenderer, productNameRenderer: ProductNameRenderer, })
+        setFrameWorkComponent({
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer
+        })
         columns = [...columns, ...getStaticFields()]
         setColumns([...defaultColumns, ...columns])
       })
@@ -128,7 +131,7 @@ function Parts({ id }) {
     if (data.length > 1) {
       data.forEach((p: any) => {
         axiosInstance().put(`${product.api}/${p.product}/bom/remove`, {
-          ids: [p._id]
+          ids: [p.id]
         })
           .then(() => {
             setIsDeleting(false)
@@ -143,7 +146,7 @@ function Parts({ id }) {
     } else {
       let d = data[0]
       axiosInstance().put(`${product.api}/${d.product}/bom/remove`, {
-        ids: [d._id]
+        ids: [d.id]
       })
         .then(() => {
           setIsDeleting(false)
@@ -167,12 +170,6 @@ function Parts({ id }) {
         <Delete fontSize='small' color='error' />
       </IconButton>
     </Tooltip>
-  )
-
-  const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`/product/detail/${params.data.childProduct}`}>
-      {params.value}
-    </Link>
   )
 
   return (
