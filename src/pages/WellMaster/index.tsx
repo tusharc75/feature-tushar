@@ -13,7 +13,7 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { wellMaster, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
+import { wellMaster, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from '../../constants/helpers';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -33,6 +33,8 @@ import { camelCase } from "lodash";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
 import ExpandMore from "@material-ui/icons/ExpandMore";
+
+let searchTimeout;
 
 const WellMaster = () => {
 
@@ -64,7 +66,13 @@ const WellMaster = () => {
     }, [])
 
     useEffect(() => {
-        fetchData()
+        let millisec = Object.keys(search).length > 0 ? 600 : 600;
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        searchTimeout = setTimeout(() => {
+            fetchData()
+        }, millisec);
     }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
     const fetchGridColumns = () => {
@@ -166,7 +174,7 @@ const WellMaster = () => {
         }
 
         if (showFilteredRecordsOnly) {
-            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
             deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
         }
 
@@ -301,8 +309,8 @@ const WellMaster = () => {
                     }}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
-                    recordsToExport={selectedRecords.length}
-                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.length}
+                    ids={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.length ? [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((obj) => obj._id) : []}
                     onExportToExcelSuccess={() => {
                         if (gridApi) gridApi.deselectAll()
                         else fetchData()
