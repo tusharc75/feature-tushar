@@ -1,7 +1,7 @@
 
 import { objectStore, insertUpdate, findOne, findAll } from '../../constants/indexdbhelper';
 import { updateRentalAssetStatus } from '../RentalManagement/rentalOfflineHelper';
-import { getObjKeysWithValues, INVENTORY_STATUS, DELIVERY_TICKET_STATUS } from "../../constants/helpers";
+import { getObjKeysWithValues, INVENTORY_STATUS, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE } from "../../constants/helpers";
 
 export const createDeliveryTicketOffline = async (data, values) => {
     try {
@@ -18,8 +18,18 @@ export const createDeliveryTicketOffline = async (data, values) => {
             date: new Date()
         }]
         await insertUpdate(objectStore.offlineDataSync, _id, { type: "deliveryTicket", data: { ...values, _id, offlineStatusLog } });
-        await updateRentalAssetStatus(data?.rentalJob?.optionValue,
-            INVENTORY_STATUS.readyToShip, data?.productInventory?.map((e) => e.optionValue))
+
+        var assetStatus = INVENTORY_STATUS.readyToShip;
+        if (data?.status === DELIVERY_TICKET_STATUS.new) {
+            assetStatus = INVENTORY_STATUS.readyToShip
+        }
+        else if (data?.status === DELIVERY_TICKET_STATUS.delivered && data?.ticketType === DELIVERY_TICKET_TYPE.loading) {
+            assetStatus = INVENTORY_STATUS.inUse
+        }
+        else if (data?.status === DELIVERY_TICKET_STATUS.delivered && [DELIVERY_TICKET_TYPE.receiving, DELIVERY_TICKET_TYPE.return].includes(data?.ticketType)) {
+            assetStatus = INVENTORY_STATUS.underReview
+        }
+        await updateRentalAssetStatus(data?.rentalJob?.optionValue, assetStatus, data?.productInventory?.map((e) => e.optionValue))
         return true;
     }
     catch (e) {
@@ -49,7 +59,7 @@ export const updateSignatureOffline = async (id, signatures) => {
                 deliveryTicket.signatures = signatures
                 await updateofflineDataSync(id, { status: DELIVERY_TICKET_STATUS.delivered, signatures: signatures })
                 await updateRentalAssetStatus(deliveryTicket?.rentalJob?.optionValue,
-                    deliveryTicket.ticketType === "Loading" ? INVENTORY_STATUS.inUse : INVENTORY_STATUS.underReview,
+                    deliveryTicket.ticketType === DELIVERY_TICKET_TYPE.loading ? INVENTORY_STATUS.inUse : INVENTORY_STATUS.underReview,
                     deliveryTicket?.productInventory?.map((e) => e.optionValue))
             }
         }

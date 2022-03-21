@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.79.5](https://github.com/vebholic/oms_frontend/compare/v2.79.4...v2.79.5) (2022-03-21)
+
+### [2.79.4](https://github.com/vebholic/oms_frontend/compare/v2.79.3...v2.79.4) (2022-03-20)
+
+### [2.79.3](https://github.com/vebholic/oms_frontend/compare/v2.79.2...v2.79.3) (2022-03-19)
+
+### [2.79.2](https://github.com/vebholic/oms_frontend/compare/v2.79.1...v2.79.2) (2022-03-18)
+
+
+### Bug Fixes
+
+* bug fix ([f76ca9d](https://github.com/vebholic/oms_frontend/commit/f76ca9dad860d46c9cac0f2e6313db2aa31b7c3a))
+* bug fix ([6e701c3](https://github.com/vebholic/oms_frontend/commit/6e701c3729f9d3d6e0241ad62388b2867605b46a))
+* bug fix ([b9fd472](https://github.com/vebholic/oms_frontend/commit/b9fd472d8ed81905e2ed3eb190e1a2f16cbed55a))
+* bug fix ([590201b](https://github.com/vebholic/oms_frontend/commit/590201b5c46768a3df84f1996a6f539f2b5a9904))
+* bug fix offline ([bd6228a](https://github.com/vebholic/oms_frontend/commit/bd6228ae0a3b7e4a275c8fb44ac2ebc3d1459c20))
+* entity details page issue ([fb7d643](https://github.com/vebholic/oms_frontend/commit/fb7d64319a6c9d3b1fa80d789800e9f322a0a8ed))
+* package show filter and clone issue ([7d72324](https://github.com/vebholic/oms_frontend/commit/7d723240f171d744de7a95f46018334dba29d99f))
+
 ### [2.79.1](https://github.com/vebholic/oms_frontend/compare/v2.79.0...v2.79.1) (2022-03-17)
 
 

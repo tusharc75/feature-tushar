@@ -130,6 +130,17 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
         });
     };
 
+    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+    if (columnState) {
+        columns.forEach((item) => {
+            columnState.forEach((d) => {
+                if (d.colId === item.field) {
+                    item.show = !d.hide;
+                }
+            });
+        });
+    }
+
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
         <span className="link" onClick={() => {
             setShowProductDialog(true)
@@ -189,7 +200,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     };
 
     const handleAddProduct = (rows) => {
-        console.log(rows)
         setAddingProducts(true)
         let tempProductArray = rows.map(d => ({
             "productId": d._id,

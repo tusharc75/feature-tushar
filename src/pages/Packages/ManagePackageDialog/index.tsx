@@ -32,6 +32,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
     const [formsData, setFormsData] = useState([]);
     const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
     const [ownerData, setOwnerData] = useState([]);
+    const [packageName, setPackageName] = useState("");
     const [collaboratorData, setCollaboratorData] = useState([]);
     const {
         state: { user },
@@ -100,7 +101,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
 
                     if (isClone) {
                         const { _id, brand, createdBy, entity, packageName, history, updatedBy, ...rest } = data
-
+                        setPackageName(packageName)
                         setPackageData({
                             fields: fieldsDataForCreate,
                             initialValues: getObjKeysWithValues(rest, fieldsDataForCreate),
@@ -281,7 +282,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                     title={
                         !packageId
                             ? "Create Package"
-                            : `${isClone ? "Clone" : "Editing"}`
+                            : `${isClone ? `Clone - ${packageName}` : "Editing"}`
                     }
                     onClose={(e, reason) => {
                         if (isFieldNotTouched(packageData, formValues)) onClose()

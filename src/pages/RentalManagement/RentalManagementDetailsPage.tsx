@@ -22,10 +22,8 @@ import {
 } from '../../constants/helpers';
 import Steps from './Steps';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
-import { MdEdit, MdDelete } from 'react-icons/md';
 import ManageRentalManagementDialog from './ManageRental/ManageRentalManagementDialog';
 import Activity from '../../components/Activity';
-import styles from './Retal.module.scss';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import ContentFullScreen from '../../components/ContentFullScreen';
@@ -49,6 +47,7 @@ import ReceivingTicket from './ReceivingTicket';
 import Invoice from './Invoice';
 import RentalManagementViews from './RoadMapViews/RentalManagementViews';
 import { camelCase } from 'lodash';
+import { updateRentalProcessStatus } from './rentalOfflineHelper';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -135,7 +134,7 @@ const RentalManagementDetailsPage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (!isOffline && currentStep !== null && currentStep >= 0 && currentStep <= 5) {
+    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
       updateProcessStatus(rentalManagementSteps[currentStep]);
     }
   }, [currentStep]);
@@ -242,12 +241,17 @@ const RentalManagementDetailsPage = () => {
     }
   };
 
-  const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => {
-      });
+  const updateProcessStatus = async (processStatus) => {
+    if (isOffline) {
+      await updateRentalProcessStatus(id, processStatus)
+    }
+    else {
+      axiosInstance()
+        .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
+        .then(({ data }) => { })
+        .catch((error) => {
+        });
+    }
   };
 
   const updateJobStatus = (status) => {
@@ -397,19 +401,20 @@ const RentalManagementDetailsPage = () => {
                   }
                   {...a11yProps(1)}
                 />
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 3 ? 'white' : '',
-                    color: tabValue === 3 ? 'blue' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-                    </div>
-                  }
-                  {...a11yProps(2)}
-                />
+                {!isOffline &&
+                  <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 3 ? 'white' : '',
+                      color: tabValue === 3 ? 'blue' : '#163340'
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+                      </div>
+                    }
+                    {...a11yProps(2)}
+                  />}
                 <div className={'uio'}> </div>
               </Tabs>
               <TabPanel value={tabValue} index={0}>

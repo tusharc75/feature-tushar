@@ -98,15 +98,16 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
               <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
               </span>
-              <HtmlTooltip title="Add Products">
-                <IconButton
-                  onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })}
-                  size="small"
-                  color="primary"
-                >
-                  <Add color="disabled" fontSize="small" />
-                </IconButton>
-              </HtmlTooltip>
+              {!isOffline &&
+                <HtmlTooltip title="Add Products">
+                  <IconButton
+                    onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })}
+                    size="small"
+                    color="primary"
+                  >
+                    <Add color="disabled" fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>}
             </Box>}
             {!isOffline && (
               <Chip

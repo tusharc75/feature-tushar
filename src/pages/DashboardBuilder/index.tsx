@@ -1,56 +1,115 @@
 import React from 'react';
-import { Grid, Box, Divider, Button } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import { Grid, Box, Button } from '@material-ui/core';
+import { useHistory, Link } from 'react-router-dom';
 import { MdDashboardCustomize } from 'react-icons/md';
 
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import Builder from './Builder';
-import { IFormDataType } from './builderHelpers';
-import View from './View';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomContainer from 'src/components/CustomContainer';
+import { gridLoadingTimeout } from 'src/constants/helpers';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
+import { useData } from 'src/StateProvider/Provider';
+import { baseURL } from './builderHelpers';
 
-const useClasses = makeStyles(() => ({
-  root: {
-    height: 'calc(80vh + 20px)'
-  }
-}));
+const Dashboards = () => {
+  const history = useHistory();
+  const {
+    state: { user }
+  } = useData();
+  const { setToastConfig } = React.useContext(CustomToastContext);
+  const [gridApi, setGridApi] = React.useState(null);
+  const [state, dispatch] = React.useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  let columns = [
+    {
+      field: 'name',
+      headerName: 'Dashboard Name',
+      show: true,
+      disabled: true,
+      cellRenderer: 'nameRenderer'
+    }
+  ];
 
-const DashboardBuilder = () => {
-  const classes = useClasses();
-  const [formData, setFormData] = React.useState<IFormDataType[]>([]);
+  const NameRenderer = (params) => (
+    <Link className="link" to={`dashboard-builder/${params.data._id}`} title={params.value}>
+      {params.value}
+    </Link>
+  );
+
+  const frameworkComponents = {
+    nameRenderer: NameRenderer
+  };
+
+  React.useEffect(() => {
+    handleFetch();
+  }, []);
+
+  const handleFetch = () => {
+    dispatch({ type: 'loading', loading: true });
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+    axiosInstance()
+      .get(baseURL)
+      .then(({ data: { data } }) => {
+        dispatch({ type: 'initialize', data, count: data.length });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((err) => {
+        setToastConfig(err);
+        dispatch({ type: 'loading', loading: false });
+      });
+  };
 
   return (
-    <div>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: 'Dashboard Builder', path: '' }]} />
-        </Grid>
-      </Grid>
-      <div className="main-container">
-        <Box className="header-panel" display="flex" py={'6px'} justifyContent="space-between">
-          <Box display={'flex'} alignItems="center" >
+    <React.Fragment>
+      <div className="headerbox">
+        <CustomBreadCrumbs routes={[{ title: 'Dashboard List' }]} />
+      </div>
+      <CustomContainer>
+        <Box className="header-panel" display="flex" justifyContent="space-between" alignItems={'center'}>
+          <Box display={'flex'} alignItems="center">
             <MdDashboardCustomize size={22} className="headerLogo" />
             <Box ml={1}>
-              <span className="listingHeader">Dashboard Builder</span>
+              <span className="listingHeader">Dashboards List</span>
             </Box>
           </Box>
           <Box py={'6px'}>
-            <Button color='primary' variant='contained' size='small' disableRipple>Save</Button>
+            <Button color="primary" variant="contained" size="small" disableRipple onClick={() => history.push(`dashboard-builder/new`)}>
+              Create
+            </Button>
+            <Box component="span" ml={1} />
+            <DeleteButton text="Delete" onClick={() => {}} />
           </Box>
         </Box>
-        <Divider />
-        <Box bgcolor="#f5f5f5" p={1}>
-          <Grid container spacing={2} className={classes.root}>
-            <Grid item xs={12} sm={4}>
-              <Builder formData={formData} setFormData={setFormData} />
-            </Grid>
-            <Grid item xs={12} sm={8}>
-              <View formData={formData} setFormData={setFormData} />
-            </Grid>
-          </Grid>
-        </Box>
-      </div>
-    </div>
+
+        <CustomAgGrid
+          columns={columns}
+          dataRows={dataRows}
+          frameworkComponents={frameworkComponents}
+          setGridApi={setGridApi}
+          dispatch={dispatch}
+          rowCount={rowCount}
+          limit={limit}
+          pageSizes={pageSizes}
+          page={page}
+          actionWidth={150}
+          allowSelection={false}
+          allowAction={false}
+          isClientSideGrid={true}
+          loading={loading}
+          renderedFrom={'dashboard-builder'}
+          refreshGrid={handleFetch}
+        />
+      </CustomContainer>
+    </React.Fragment>
   );
 };
 
-export default DashboardBuilder;
+export default Dashboards;
