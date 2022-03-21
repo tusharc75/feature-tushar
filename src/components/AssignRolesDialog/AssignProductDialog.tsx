@@ -67,6 +67,7 @@ const AssignProductDialog = ({
     const { getColumnData } = useColumns();
 
     useEffect(() => {
+        localStorage.removeItem(localStorageSelectedRecords)
         fetchGridColumns()
     }, [])
 
@@ -149,7 +150,7 @@ const AssignProductDialog = ({
     };
 
     const getQueryString = () => {
-        const ignoreIds = assignedProducts && assignedProducts?.length > 0 ? assignedProducts.map(p => reference === "product" ? p.productId : p._id) : []
+        const ignoreIds = assignedProducts && assignedProducts?.length > 0 ? assignedProducts : []
         let deepFilter = `?page=${page}&limit=${limit}&filterProducts=${selectedType}&ignoreIds=${JSON.stringify(ignoreIds)}`;
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;

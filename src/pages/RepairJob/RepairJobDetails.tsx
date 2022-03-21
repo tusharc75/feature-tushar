@@ -167,7 +167,7 @@ const RepairJobDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairJob.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
       });
   };
@@ -175,7 +175,7 @@ const RepairJobDetails = () => {
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => {})
+      .then(({ data: { data } }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -191,6 +191,16 @@ const RepairJobDetails = () => {
         toastConfig.setToastConfig(error);
       });
   };
+
+  useEffect(() => {
+    if (isSmallScreen && tabValue === 0) {
+      setActivityShow(true)
+    }
+    else {
+      setActivityShow(false)
+    }
+  }, [isSmallScreen, tabValue])
+
 
   return (
     <>
@@ -364,7 +374,7 @@ const RepairJobDetails = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                           emails={[]}
                         />
                       </div>
