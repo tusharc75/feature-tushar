@@ -82,6 +82,7 @@ const PackageList = () => {
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
+    const [selectedPackageProducts, setSelectedPackageProducts] = useState([]);
 
     useEffect(() => {
         fetchGridColumns();
@@ -430,6 +431,22 @@ const PackageList = () => {
         }
     };
 
+    const openAssingToProduct = async () => {
+        if (selectedRecords.length > 0) {
+            await axiosInstance()
+                .post(`${packageApi}/get/products`, {
+                    ids: selectedRecords.map(d => d._id)
+                })
+                .then(({ data }) => {
+                    setSelectedPackageProducts(data?.data)
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
+            setShowProductAssignDialog(true)
+
+        }
+    }
     return (
         <>
             <Fragment>
@@ -481,7 +498,7 @@ const PackageList = () => {
                             icon={<BiPackage className="headerLogo" />}
                             heading={routes.packages.title}
                             showTransferEntityDialog={handleTransferEntityDialog}
-                            openAssingToProduct={() => setShowProductAssignDialog(true)}
+                            openAssingToProduct={openAssingToProduct}
                         // showClonepackagesDialog={() => {
                         //   handleShowClonepackagesDialog()
                         // }}
@@ -616,7 +633,7 @@ const PackageList = () => {
                     productsDialogOpen={true}
                     productId={[...selectedRecords.map(d => d._id)]}
                     handleCloseDialog={() => setShowProductAssignDialog(false)}
-                    assignedProducts={[]}
+                    assignedProducts={selectedPackageProducts}
                     renderedFrom={`${renderedFrom}_sub-1`}
                     onSuccess={() => {
                         setShowProductAssignDialog(false);
