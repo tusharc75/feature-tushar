@@ -196,12 +196,12 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
 
       regionSalesData.push({
         region: d.region,
-        totalBookedValue,
+        ['totalOfferedVolume MT']: totalOfferedVolume,
         totalOfferedValue,
-        ['totalBooked GM']: totalBookedMargin,
         ['totalOffered GM']: totalOfferedMargin,
         ['totalBookedVolume MT']: totalBookedVolume,
-        ['totalOfferedVolume MT']: totalOfferedVolume
+        totalBookedValue,
+        ['totalBooked GM']: totalBookedMargin,
       });
     }
 
