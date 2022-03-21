@@ -1,0 +1,184 @@
+import React from 'react';
+import { Grid, Box, Divider, Button, TextField } from '@material-ui/core';
+import { useParams, useHistory } from 'react-router-dom';
+import { makeStyles } from '@material-ui/styles';
+import { MdDashboardCustomize } from 'react-icons/md';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import Builder from './Builder';
+import { IFormDataType, baseURL } from './builderHelpers';
+import DashboardView from './DashboardView';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+
+const useClasses = makeStyles(() => ({
+  root: {
+    height: 'calc(80vh + 20px)'
+  }
+}));
+
+const DashboardBuilder = () => {
+  const classes = useClasses();
+  const history = useHistory();
+  const { id } = useParams();
+  const isNew = id && id === 'new';
+  const { setToastConfig } = React.useContext(CustomToastContext);
+  const [formData, setFormData] = React.useState<IFormDataType[]>([]);
+  const [selectedData, setSelectedData] = React.useState<IFormDataType>();
+  const [name, setName] = React.useState<string>('');
+  const [isSubmitting, setSubmitting] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (!isNew) {
+      (() => {
+        axiosInstance()
+          .get(`${baseURL}/${id}`)
+          .then(({ data: { data } }) => {
+            setFormData(data?.charts || []);
+            setName(data?.name || '');
+          })
+          .catch((err) => {
+            setToastConfig(err);
+          });
+      })();
+    }
+  }, [id]);
+
+  const handleEdit = (data: IFormDataType) => {
+    setSelectedData(data);
+  };
+
+  const handleRemove = (id: string) => {
+    setFormData((prevState) => prevState.filter((d) => d.uniqueId !== id));
+    setSelectedData(null);
+  };
+
+  const handleUpdate = (values: IFormDataType) => {
+    setFormData((prevState) =>
+      prevState.map((d) => {
+        if (d.uniqueId === selectedData?.uniqueId) {
+          return values;
+        } else {
+          return d;
+        }
+      })
+    );
+    setSelectedData(null);
+  };
+
+  const createDashboard = () => {
+    setSubmitting(true);
+    axiosInstance()
+      .post(baseURL, {
+        name: name.trim(),
+        charts: formData
+      })
+      .then(() => {
+        setToastConfig({
+          open: true,
+          message: 'Successfully created dashboard',
+          type: 'success'
+        });
+        setSubmitting(false);
+        history.goBack();
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        setToastConfig(error);
+      });
+  };
+
+  const updateDashboard = () => {
+    setSubmitting(true);
+    axiosInstance()
+      .put(`${baseURL}/${id}`, {
+        name: name.trim(),
+        charts: formData
+      })
+      .then(() => {
+        setToastConfig({
+          open: true,
+          message: 'Successfully updated dashboard',
+          type: 'success'
+        });
+        setSubmitting(false);
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        setToastConfig(error);
+      });
+  };
+
+  const handleClickSave = () => {
+    if (!isNew) {
+      updateDashboard();
+    } else {
+      createDashboard();
+    }
+  };
+
+  return (
+    <div>
+      <Grid container className="headerbox">
+        <Grid item md={4} sm={11} xs={10}>
+          <CustomBreadCrumbs
+            routes={[
+              { title: 'Dashboard Builder', path: '/dashboard-builder' },
+              { title: !isNew ? name : 'New', path: '' }
+            ]}
+          />
+        </Grid>
+      </Grid>
+      <div className="main-container">
+        <Box p={1.2} display="flex" justifyContent="space-between" alignItems={'center'}>
+          <Box>
+            <TextField
+              style={{ height: 40, width: 300 }}
+              variant="outlined"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              size="small"
+              label="Dashboard Name"
+            />
+          </Box>
+          <Box py={'6px'}>
+            <Button
+              color="primary"
+              variant="contained"
+              size="small"
+              disableRipple
+              disabled={formData.length === 0 || isSubmitting}
+              onClick={handleClickSave}
+            >
+              Save
+            </Button>
+          </Box>
+        </Box>
+        <Divider />
+        <Box bgcolor="#f5f5f5" p={1}>
+          <Grid container spacing={2} className={classes.root}>
+            <Grid item xs={12} sm={4}>
+              <Builder setFormData={setFormData} selectedData={selectedData} handleUpdate={handleUpdate} />
+            </Grid>
+            <Grid item xs={12} sm={8}>
+              <DndProvider backend={HTML5Backend}>
+                <DashboardView
+                  selectedData={selectedData}
+                  formData={formData}
+                  setFormData={setFormData}
+                  handleEdit={handleEdit}
+                  handleRemove={handleRemove}
+                />
+              </DndProvider>
+            </Grid>
+          </Grid>
+        </Box>
+      </div>
+    </div>
+  );
+};
+
+export default DashboardBuilder;

@@ -2,11 +2,11 @@ import React from 'react';
 import { TextField, Box, Paper, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbox, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { Autocomplete } from '@material-ui/lab';
-import {camelCase} from 'lodash'
+import { camelCase } from 'lodash';
 
-import { CHART_TYPES, FILTERS_OPTIONS, GRAPH_TYPES, IFormDataType } from './builderHelpers';
+import { CHART_TYPES, FILTERS_OPTIONS, GRAPH_TYPES, IFormDataType, defaultFormConfigs } from './builderHelpers';
 
-const useClasses = makeStyles((theme) => ({
+const useClasses = makeStyles(() => ({
   container: {
     display: 'flex',
     flexDirection: 'column',
@@ -18,22 +18,27 @@ const useClasses = makeStyles((theme) => ({
   }
 }));
 
-const Builder = (props: any) => {
-  const { formData, setFormData } = props;
-  const defaultFormConfigs = {
-    column: 6,
-    graphType: '',
-    chartType: '',
-    chartTitle: '',
-    hasFilters: false,
-    hasTableView: false,
-    hasExport: false,
-    filters: []
-  };
+interface Props {
+  setFormData: React.Dispatch<React.SetStateAction<IFormDataType[]>>;
+  selectedData: IFormDataType;
+  handleUpdate: (data: IFormDataType) => void;
+}
+
+const Builder = (props: Props) => {
+  const { setFormData, selectedData, handleUpdate } = props;
+
   const [formValues, setFormValues] = React.useState<IFormDataType>(defaultFormConfigs);
   const [errors, setErrors] = React.useState(null);
 
   const classes = useClasses();
+
+  React.useEffect(() => {
+    if (selectedData) {
+      setFormValues(selectedData);
+    } else {
+      setFormValues(defaultFormConfigs);
+    }
+  }, [selectedData]);
 
   const handleChange = (name: string, val: string | boolean | any[] | number) => {
     setFormValues((prevState) => ({ ...prevState, [name]: val }));
@@ -41,11 +46,15 @@ const Builder = (props: any) => {
 
   const addFormConfigs = () => {
     const hasErrors = findErrors();
-
     if (hasErrors) return;
-    const formedData = {uniqueId: camelCase(formValues.chartTitle) , ...formValues}
-    setFormData((prevState: any) => [...prevState, formedData]);
-    setFormValues(defaultFormConfigs);
+
+    if (selectedData) {
+      handleUpdate(formValues );
+    } else {
+      const formedData = { uniqueId: camelCase(formValues.chartTitle), ...formValues };
+      setFormData((prevState: any) => [...prevState, formedData]);
+      setFormValues(defaultFormConfigs);
+    }
   };
 
   const findErrors = () => {
@@ -76,9 +85,11 @@ const Builder = (props: any) => {
   return (
     <Box component={Paper} p={1.5} className={classes.container}>
       <div>
-        <Box>
+        <Box mt={2}>
           <FormControl component="fieldset">
-            <FormLabel component="legend">Column</FormLabel>
+            <FormLabel required component="legend">
+              Column Size
+            </FormLabel>
             <RadioGroup
               aria-label="column"
               name="column"
@@ -103,8 +114,9 @@ const Builder = (props: any) => {
             renderInput={(params) => (
               <TextField
                 {...params}
+                required
                 label="Graph Type"
-                variant="standard"
+                variant="outlined"
                 helperText={errors && !Boolean(formValues.graphType) && errors?.graphType}
                 error={errors && !Boolean(formValues.graphType) && Boolean(errors?.graphType)}
               />
@@ -123,8 +135,9 @@ const Builder = (props: any) => {
               renderInput={(params) => (
                 <TextField
                   {...params}
+                  required
                   label="Chart Type"
-                  variant="standard"
+                  variant="outlined"
                   helperText={errors && !Boolean(formValues.chartType) && errors?.chartType}
                   error={errors && !Boolean(formValues.chartType) && Boolean(errors?.chartType)}
                 />
@@ -135,11 +148,13 @@ const Builder = (props: any) => {
 
         <Box mt={2}>
           <TextField
+            required
             value={formValues.chartTitle}
             onChange={(e) => handleChange('chartTitle', e.target.value)}
             size="small"
             fullWidth
-            label="Chart Title"
+            variant="outlined"
+            label={`Title`}
             helperText={errors && !Boolean(formValues.chartTitle) && errors?.chartTitle}
             error={errors && !Boolean(formValues.chartTitle) && Boolean(errors?.chartTitle)}
           />
@@ -148,15 +163,33 @@ const Builder = (props: any) => {
         <Box mt={2}>
           <FormGroup row>
             <FormControlLabel
-              control={<Checkbox checked={formValues.hasFilters} onChange={(e) => handleChange('hasFilters', e.target.checked)} />}
+              control={
+                <Checkbox
+                  disabled={formValues.graphType === 'Map'}
+                  checked={formValues.hasFilters}
+                  onChange={(e) => handleChange('hasFilters', e.target.checked)}
+                />
+              }
               label="Filters"
             />
             <FormControlLabel
-              control={<Checkbox checked={formValues.hasTableView} onChange={(e) => handleChange('hasTableView', e.target.checked)} />}
+              control={
+                <Checkbox
+                  disabled={formValues.graphType === 'Table' || formValues.graphType === 'Map'}
+                  checked={formValues.hasTableView}
+                  onChange={(e) => handleChange('hasTableView', e.target.checked)}
+                />
+              }
               label="Table View"
             />
             <FormControlLabel
-              control={<Checkbox checked={formValues.hasExport} onChange={(e) => handleChange('hasExport', e.target.checked)} />}
+              control={
+                <Checkbox
+                  disabled={formValues.graphType === 'Map'}
+                  checked={formValues.hasExport}
+                  onChange={(e) => handleChange('hasExport', e.target.checked)}
+                />
+              }
               label="Exports"
             />
           </FormGroup>
@@ -175,8 +208,9 @@ const Builder = (props: any) => {
               renderInput={(params) => (
                 <TextField
                   {...params}
+                  required
                   label="Filters"
-                  variant="standard"
+                  variant="outlined"
                   helperText={errors && formValues.hasFilters && formValues.filters.length === 0 && errors?.filters}
                   error={errors && Boolean(errors?.filters) && formValues.hasFilters && formValues.filters.length === 0}
                 />

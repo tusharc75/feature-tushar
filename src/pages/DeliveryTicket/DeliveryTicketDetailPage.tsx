@@ -1,11 +1,11 @@
 import { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react'
 import { useHistory, useParams } from "react-router-dom";
-import { Paper, Box, Grid, Button, Typography, IconButton, Tooltip, Tabs, Tab } from "@material-ui/core";
+import { Paper, Box, Grid, Button, Typography, IconButton, Tooltip, Tabs, Tab, useMediaQuery } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import queryString from 'query-string';
-import { yyyyMMDD, deliveryTicket, getObjKeysWithValues, defaultActivityShow, dateTimeFormat } from "../../constants/helpers";
+import { yyyyMMDD, deliveryTicket, getObjKeysWithValues, defaultActivityShow, dateTimeFormat, ACTIVITY_RESOURCE } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import routes from "../../components/Helpers/Routes";
@@ -37,6 +37,7 @@ import { updateSignatureOffline } from './deliveryTicketOfflineHelper';
 import { camelCase } from 'lodash';
 import DeliveryTicketProduct from './DeliveryTicketProduct';
 import DeliveryTicketAdditionalCost from './DeliveryTicketAdditionalCost';
+import HideWhenOffline from 'src/components/HideWhenOffline';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -100,6 +101,7 @@ export default function DeliveryTicketDetail(props) {
   const [downlodingFile, setDownlodingFile] = useState(false)
   const [locationKeys, setLocationKeys] = useState([])
   const { isOffline } = useContext(CustomOfflineContext);
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
 
   useEffect(() => {
     return history.listen(location => {
@@ -318,7 +320,7 @@ export default function DeliveryTicketDetail(props) {
         let finalObject = prepareDataForGrid(u, user);
         finalObject["isChecked"] = false;
         return finalObject;
-    });
+      });
       dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
     }
@@ -478,6 +480,19 @@ export default function DeliveryTicketDetail(props) {
       });
     }
   }
+
+
+
+  useEffect(() => {
+    if (isSmallScreen && tabValue === 0) {
+      setActivityShow(true)
+    }
+    else {
+      setActivityShow(false)
+    }
+  }, [isSmallScreen, tabValue])
+
+
 
   return (
     <>
@@ -795,46 +810,41 @@ export default function DeliveryTicketDetail(props) {
           </div>
 
           <div className="position-relative">
-            {showActivity ?
+            <HideWhenOffline>
               <Paper>
-                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropright className="icon" />
-                </span>}
-                {!deliveryTicketData ? (
-                  <Box>
-                    <Skeleton variant="text" width="100px" height="25px" />
-                    <Box marginY={1} />
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <Skeleton key={i} width="100%" height="50px" />
-                    ))}
-                  </Box>
-                ) : (
-                  <div>
-                    <Activity
-                      resourceId={deliveryTicketData?._id}
-                      resource={deliveryTicket.resource}
-                      // restrictedAddActivities={["Attachment", "Case"]}
-                      relatedTo={[
-                        {
-                          type: "deliveryTicket",
-                          referenceId: deliveryTicketData?._id,
-                          access: true,
-                        },
-                      ]}
-                      handleActivityRefresh={() => { }}
-                      //   emails={contactsEmailsData}
-                      emails={null}
-                    />
-                  </div>
+                {!isSmallScreen && (
+                  <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                    {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+                  </span>
                 )}
-              </Paper> :
-              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-                <IoIosArrowDropleft className="icon" />
-              </span>}
+                <div style={{ display: showActivity ? 'block' : 'none' }}>
+                  <Grid container>
+                    <Grid item xs={12}>
+                      {deliveryTicketData && (
+                        <div>
+                          <Activity
+                            resourceId={deliveryTicketData?._id}
+                            resource={ACTIVITY_RESOURCE.deliveryTicket}
+                            relatedTo={[
+                              {
+
+                                access: true,
+                                referenceId: deliveryTicketData?._id,
+                                type: ACTIVITY_RESOURCE.deliveryTicket,
+                              }
+                            ]}
+                            handleActivityRefresh={() => { }}
+                            emails={[]}
+                          />
+                        </div>
+                      )}
+                    </Grid>
+                  </Grid>
+                </div>
+              </Paper>
+            </HideWhenOffline>
           </div>
         </div>
-
-
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
