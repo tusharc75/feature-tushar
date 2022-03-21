@@ -2,35 +2,22 @@ import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment } from 'react
 import {
   Button,
   Dialog,
-  TextField,
   Grid,
   Box,
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  InputAdornment,
-  FormHelperText
 } from '@material-ui/core';
-import { dateFormatForInputControl } from '../../../constants/helpers';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { startCase } from 'lodash';
-import axiosInstance from "../../../axios/axiosInstance";
-import { groupBy } from 'lodash';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, isFieldNotTouched, CHILD_RESOURCE } from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
 import { Formik, Form } from "formik";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomButton from '../../../components/Helpers/CustomButton'
 import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
+import { fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
 
 interface ServiceDialogProps {
   onClose: VoidFunction | any;
@@ -48,23 +35,25 @@ const ServiceDialog: FC<ServiceDialogProps> = ({ onClose, currency, handleAddSer
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderService}`).then(({ data: { data } }) => {
-      const poFields = CURReplaceByCurrencySingle(data, currency);
-      if (serviceData) {
-        setInitialData({
-          fields: poFields,
-          values: getObjKeysWithValues(serviceData, poFields),
-        });
-      }
-      else {
-        setInitialData({
-          fields: poFields,
-          values: getObjKeys("", poFields),
-        });
-      }
-      EvaluteproductFields(poFields);
-    })
+    fetchFields()
   }, []);
+
+  const fetchFields = async () => {
+    let poFields = await fetch_po_service_fields(currency);
+    if (serviceData) {
+      setInitialData({
+        fields: poFields,
+        values: getObjKeysWithValues(serviceData, poFields),
+      });
+    }
+    else {
+      setInitialData({
+        fields: poFields,
+        values: getObjKeys("", poFields),
+      });
+    }
+    EvaluteproductFields(poFields);
+  }
 
   const EvaluteproductFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
@@ -112,7 +101,7 @@ const ServiceDialog: FC<ServiceDialogProps> = ({ onClose, currency, handleAddSer
         }) => (
           <Fragment>
             <CustomDialogHeader
-              title={serviceData ? `Edit ${serviceData?.description || "Service"}` : `Ad hoc Charges`}
+              title={serviceData ? `Edit ${serviceData?.description || "Services and Consumables"}` : `Services and Consumables`}
               onClose={() => {
                 onClose()
               }}

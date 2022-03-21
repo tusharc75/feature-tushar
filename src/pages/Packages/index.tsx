@@ -40,7 +40,7 @@ const PackageList = () => {
     const toastConfig = useContext(CustomToastContext);
     const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
 
-   
+
     const history = useHistory();
     const {
         state: { user, permissions, selectedEntity }
@@ -78,10 +78,10 @@ const PackageList = () => {
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
-    const localStorageSelectedRecords = "productTemplatePage_selected";
+    const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
     useEffect(() => {
         fetchGridColumns();
@@ -156,7 +156,7 @@ const PackageList = () => {
         if (renderCount > 0) {
             fetchPackages();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, isOffline]);
+    }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, isOffline, showFilteredRecordsOnly]);
 
     const handleSingleDeletePackage = async () => {
         dispatch({ type: 'loading', loading: true });
@@ -287,7 +287,10 @@ const PackageList = () => {
                 ])}`;
             }
         }
-
+        if (showFilteredRecordsOnly) {
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+        }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -567,6 +570,7 @@ const PackageList = () => {
                                 allowSelection={!isOffline}
                                 isClientSideGrid={isOffline}
                                 refreshGrid={fetchPackages}
+                                showOnlyShowFilteredRecordSwitch={true}
                             />
                     ) : null}
 

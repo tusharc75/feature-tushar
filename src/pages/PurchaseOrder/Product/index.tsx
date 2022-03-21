@@ -10,25 +10,23 @@ import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomT
 import { purchaseOrder } from "src/constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
 import AddExistingProductInventory from "../../Sublease/Productpackage/AddExistingProductInventory";
 import GridDeleteIcon from "src/components/Helpers/GridDeleteIcon";
 import CreateProduct from "src/components/Product/CreateProduct";
 import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
 import PurchaseOrderQtyDialog from "./PurchaseOrderQtyDialog";
-import { FaCartArrowDown, FaCartPlus, FaLaptopHouse } from "react-icons/fa";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
-import { CURReplaceByCurrencySingle } from "src/constants/formulaUtility";
-import { prepareDataForGrid, CHILD_RESOURCE } from "src/constants/helpers";
-import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "src/constants/columns"
+import { prepareDataForGrid } from "src/constants/helpers";
+import { getFrameworkComponents, genrateColoum } from "src/constants/columns"
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
 import CustomRenderCell from "src/components/Helpers/CustomRenderCell";
 import InfoIcon from "@material-ui/icons/Info";
-import { MdAdd } from "react-icons/md";
 import { RiEditCircleLine } from "react-icons/ri";
+import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 
 const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom }) => {
 
@@ -61,32 +59,28 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
         fetchFields()
     }, []);
 
-
     useEffect(() => {
         fetchPurchaseOrderProduct();
     }, [columns]);
 
-
     const fetchFields = async () => {
-        axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`).then(({ data: { data } }) => {
-            const fields = CURReplaceByCurrencySingle(data, purchaseOrderData?.currency)
-            fields.forEach(element => {
-                if (element.fieldName === "price" && element.required) {
-                    setIsRateRequired(true);
-                }
-            });
-            let rendererNames = [];
-            genrateColoum(fields, columns, rendererNames, false, renderedFrom);
-            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-            tempFrameworkComponent = {
-                nameRenderer: NameRenderer,
-                commonRenderer: CommonRenderer,
-                actionsRenderer: ActionsRenderer,
-                ...tempFrameworkComponent,
+        const fields = await fetch_po_product_fields(purchaseOrderData?.currency);
+        fields.forEach(element => {
+            if (element.fieldName === "price" && element.required) {
+                setIsRateRequired(true);
             }
-            setFrameWorkComponent({ ...tempFrameworkComponent })
-            setColumns([...columns])
-        })
+        });
+        let rendererNames = [];
+        genrateColoum(fields, columns, rendererNames, false, renderedFrom);
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+            nameRenderer: NameRenderer,
+            commonRenderer: CommonRenderer,
+            actionsRenderer: ActionsRenderer,
+            ...tempFrameworkComponent,
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        setColumns([...columns])
     }
 
     const fetchPurchaseOrderProduct = () => {
@@ -104,7 +98,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 let res: any = {
                     ...finalObject,
                 };
-                res.productName = `${index + 1}- ${item.productDetail?.productName}`
+                res.productName = item.productDetail?.productName
                 res.productNumber = item.productDetail?.productNumber
                 res.productDetail = item.productDetail
                 if (item?.qty === 0) {
@@ -135,6 +129,17 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
             dispatch({ type: "loading", loading: false });
         });
     };
+
+    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+    if (columnState) {
+        columns.forEach((item) => {
+            columnState.forEach((d) => {
+                if (d.colId === item.field) {
+                    item.show = !d.hide;
+                }
+            });
+        });
+    }
 
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
         <span className="link" onClick={() => {
@@ -195,7 +200,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     };
 
     const handleAddProduct = (rows) => {
-        console.log(rows)
         setAddingProducts(true)
         let tempProductArray = rows.map(d => ({
             "productId": d._id,

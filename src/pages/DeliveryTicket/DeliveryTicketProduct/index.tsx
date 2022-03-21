@@ -49,8 +49,6 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
         fetchProduct()
     }, [page, limit, filters, sorting, search]);
 
-
-
     const fetchProduct = async () => {
         try {
             dispatch({ type: "loading", loading: true });
@@ -61,9 +59,14 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
             if (isOffline) {
                 const deliveryTicket = await findOne(objectStore.deliveryTicket, deliveryTicketId)
                 const response = await findOne(objectStore.rentalManagement, deliveryTicket?.rentalJob?.optionValue)
-                data = response?.product
-                const inventory = deliveryTicket?.product?.map((e) => e.optionValue);
-                data = response?.product?.filter(d => inventory?.includes(d.inventory)).map(obj => obj.inventoryDetail)
+                const product = deliveryTicket?.products?.map((e) => e.product);
+                data = response?.material?.filter(d => product?.includes(d.materialId)).map(obj => obj.productDetail)
+                data?.forEach((ele) => {
+                    const res = deliveryTicket?.products?.filter((e) => e.product === ele._id);
+                    if (res.length) {
+                        ele.qty = res[0].qty
+                    }
+                })
             }
             else {
                 const response = await axiosInstance().get(`${deliveryTicket.api}/${deliveryTicketId}/products`)
@@ -84,30 +87,33 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
         }
     };
 
-
-    const fetchGridColumns = () => {
-        axiosInstance()
-            .get("/field?resource=Product&view=true")
-            .then(({ data: { data } }) => {
-                let columns = []
-                let rendererNames = []
-                data.forEach(o => {
-                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
-                    if (currentColumn !== null) {
-                        columns = [...columns, currentColumn?.columnData]
-                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                            rendererNames.push(currentColumn?.rendererName)
-                        }
-                    }
-                })
-                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-                tempFrameworkComponent = {
-                    ...tempFrameworkComponent,
+    const fetchGridColumns = async () => {
+        var fields = []
+        if (isOffline) {
+            fields = await findOne(objectStore.resource, "Product")
+        }
+        else {
+            const response = await axiosInstance().get("/field?resource=Product&view=true")
+            fields = response?.data?.data
+        }
+        let columns = []
+        let rendererNames = []
+        fields.forEach(o => {
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
+            if (currentColumn !== null) {
+                columns = [...columns, currentColumn?.columnData]
+                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                    rendererNames.push(currentColumn?.rendererName)
                 }
-                setFrameWorkComponent({ ...tempFrameworkComponent })
-                columns = [...columns, ...getStaticFields()]
-                setColumns([...defaultColumns, ...columns])
-            })
+            }
+        })
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+            ...tempFrameworkComponent,
+        }
+        setFrameWorkComponent({ ...tempFrameworkComponent })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...defaultColumns, ...columns])
     }
 
     return (
