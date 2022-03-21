@@ -124,11 +124,11 @@ const BOMTable = () => {
         if (appendRows) {
           dispatch({
             type: "initialize", data: [...dataRows, ...data],
-            count: data.count, selectedRecords: [...dataRows, ...data].filter(f => f.isChecked === true)
+            count: data.length, selectedRecords: [...dataRows, ...data].filter(f => f.isChecked === true)
           });
         } else {
           dispatch({
-            type: "initialize", data: data, count: data.count,
+            type: "initialize", data: data, count: data.length,
             selectedRecords: data.filter(f => f.isChecked === true)
           });
         }
