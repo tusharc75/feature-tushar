@@ -140,7 +140,7 @@ export default function ImportExportLinks({
       exportApi = `${exportApi}&${additionalParams}`;
     }
 
-    if (recordsToExport > 0 && recordsToExport < total) {
+    if (recordsToExport > 0 && recordsToExport <= total) {
       if (exportSelectedRecords) {
         exportSelectedRecords();
         return;
