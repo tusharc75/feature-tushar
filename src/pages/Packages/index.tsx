@@ -21,7 +21,6 @@ import ManagePackageDialog from './ManagePackageDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import HideWhenOffline from '../../components/HideWhenOffline';
-import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
 import ProductListDialog from './ProductListDialog';
@@ -32,6 +31,7 @@ import { GoDeviceMobile } from "react-icons/go";
 import { AiFillCrown, IoIosPricetags, RiPriceTagLine } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
 let packagesTimeout;
 
@@ -611,14 +611,16 @@ const PackageList = () => {
                 </CustomContainer>
             </Fragment>
             {showProductAssignDialog && (
-                <AssignQuantityDialog
-                    ids={selectedRecords.map((s) => s.id)}
-                    onClose={() => setShowProductAssignDialog(false)}
-                    onSuccess={() => setShowProductAssignDialog(false)}
-                    resource={product.api}
-                    title="Assign Products"
-                    label='Select Product'
-                    resourceData={[]}
+                <AssignProductDialog
+                    reference="package"
+                    productsDialogOpen={true}
+                    productId={[...selectedRecords.map(d => d._id)]}
+                    handleCloseDialog={() => setShowProductAssignDialog(false)}
+                    assignedProducts={[]}
+                    renderedFrom={`${renderedFrom}_sub-1`}
+                    onSuccess={() => {
+                        setShowProductAssignDialog(false);
+                    }}
                 />
             )}
             {showManagePackageDialog.open && (
