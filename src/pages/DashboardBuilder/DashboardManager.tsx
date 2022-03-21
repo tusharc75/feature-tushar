@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Box, Divider, Button, TextField } from '@material-ui/core';
+import { Grid, Box, Divider, Button, TextField, CircularProgress, Typography } from '@material-ui/core';
 import { useParams, useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
 import { MdDashboardCustomize } from 'react-icons/md';
@@ -27,19 +27,23 @@ const DashboardBuilder = () => {
   const { setToastConfig } = React.useContext(CustomToastContext);
   const [formData, setFormData] = React.useState<IFormDataType[]>([]);
   const [selectedData, setSelectedData] = React.useState<IFormDataType>();
-  const [name, setName] = React.useState<string>('');
   const [isSubmitting, setSubmitting] = React.useState<boolean>(false);
+  const [isLoading, setLoading] = React.useState<boolean>(false);
+  const [name, setName] = React.useState<string>('');
 
   React.useEffect(() => {
     if (!isNew) {
       (() => {
+        setLoading(true);
         axiosInstance()
           .get(`${baseURL}/${id}`)
           .then(({ data: { data } }) => {
             setFormData(data?.charts || []);
             setName(data?.name || '');
+            setLoading(false);
           })
           .catch((err) => {
+            setLoading(false);
             setToastConfig(err);
           });
       })();
@@ -135,6 +139,7 @@ const DashboardBuilder = () => {
         <Box p={1.2} display="flex" justifyContent="space-between" alignItems={'center'}>
           <Box>
             <TextField
+              disabled={isLoading}
               style={{ height: 40, width: 300 }}
               variant="outlined"
               required
@@ -164,6 +169,15 @@ const DashboardBuilder = () => {
               <Builder setFormData={setFormData} selectedData={selectedData} handleUpdate={handleUpdate} />
             </Grid>
             <Grid item xs={12} sm={8}>
+              <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
+                {isLoading && <CircularProgress size={22} color="primary" />}
+                <Box textAlign="center">
+                  <MdDashboardCustomize size={120} className="headerLogo" />
+                  <Typography variant="body1" align="center">
+                    Start creating layout
+                  </Typography>
+                </Box>
+              </Box>
               <DndProvider backend={HTML5Backend}>
                 <DashboardView
                   selectedData={selectedData}
