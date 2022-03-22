@@ -169,15 +169,20 @@ const DashboardBuilder = () => {
               <Builder setFormData={setFormData} selectedData={selectedData} handleUpdate={handleUpdate} />
             </Grid>
             <Grid item xs={12} sm={8}>
-              <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
-                {isLoading && <CircularProgress size={22} color="primary" />}
-                <Box textAlign="center">
-                  <MdDashboardCustomize size={120} className="headerLogo" />
-                  <Typography variant="body1" align="center">
-                    Start creating layout
-                  </Typography>
+              {formData.length === 0 && (
+                <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
+                  {isLoading ? (
+                    <CircularProgress size={22} color="primary" />
+                  ) : (
+                    <Box textAlign="center">
+                      <MdDashboardCustomize size={120} className="headerLogo" />
+                      <Typography variant="body1" align="center">
+                        Start creating layout
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
-              </Box>
+              )}
               <DndProvider backend={HTML5Backend}>
                 <DashboardView
                   selectedData={selectedData}
