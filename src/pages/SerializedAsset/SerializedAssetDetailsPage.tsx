@@ -653,7 +653,7 @@ const SerializedAssetDetailsPage = () => {
                 alignItems="center"
               >
                 <Typography variant="subtitle2">
-                  Product - Parts
+                  Child Product
                 </Typography>
               </Box>
               {(

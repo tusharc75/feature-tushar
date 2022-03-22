@@ -30,6 +30,10 @@ const DashboardBuilder = () => {
   const [isSubmitting, setSubmitting] = React.useState<boolean>(false);
   const [isLoading, setLoading] = React.useState<boolean>(false);
   const [name, setName] = React.useState<string>('');
+  const [compareData, setCompareData] = React.useState({
+    oldData: '',
+    newData: ''
+  });
 
   React.useEffect(() => {
     if (!isNew) {
@@ -41,6 +45,10 @@ const DashboardBuilder = () => {
             setFormData(data?.charts || []);
             setName(data?.name || '');
             setLoading(false);
+            setCompareData({
+              oldData: JSON.stringify({ name: data?.name, charts: data?.charts }),
+              newData: JSON.stringify({ name: data?.name, charts: data?.charts })
+            });
           })
           .catch((err) => {
             setLoading(false);
@@ -49,6 +57,13 @@ const DashboardBuilder = () => {
       })();
     }
   }, [id]);
+
+  React.useEffect(() => {
+    setCompareData((prevState) => ({
+      ...prevState,
+      newData: JSON.stringify({ name, charts: formData })
+    }));
+  }, [name, formData]);
 
   const handleEdit = (data: IFormDataType) => {
     setSelectedData(data);
@@ -125,16 +140,14 @@ const DashboardBuilder = () => {
 
   return (
     <div>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs
-            routes={[
-              { title: 'Dashboard Builder', path: '/dashboard-builder' },
-              { title: !isNew ? name : 'New', path: '' }
-            ]}
-          />
-        </Grid>
-      </Grid>
+      <div className="headerbox">
+        <CustomBreadCrumbs
+          routes={[
+            { title: 'Dashboard Builder', path: '/dashboard-builder' },
+            { title: !isNew ? name : 'New', path: '' }
+          ]}
+        />
+      </div>
       <div className="main-container">
         <Box p={1.2} display="flex" justifyContent="space-between" alignItems={'center'}>
           <Box>
@@ -155,8 +168,9 @@ const DashboardBuilder = () => {
               variant="contained"
               size="small"
               disableRipple
-              disabled={formData.length === 0 || isSubmitting}
+              disabled={formData.length === 0 || isSubmitting || (!isNew && compareData.oldData === compareData.newData)}
               onClick={handleClickSave}
+              startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
             >
               Save
             </Button>
@@ -169,15 +183,20 @@ const DashboardBuilder = () => {
               <Builder setFormData={setFormData} selectedData={selectedData} handleUpdate={handleUpdate} />
             </Grid>
             <Grid item xs={12} sm={8}>
-              <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
-                {isLoading && <CircularProgress size={22} color="primary" />}
-                <Box textAlign="center">
-                  <MdDashboardCustomize size={120} className="headerLogo" />
-                  <Typography variant="body1" align="center">
-                    Start creating layout
-                  </Typography>
+              {formData.length === 0 && (
+                <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
+                  {isLoading ? (
+                    <CircularProgress size={22} color="primary" />
+                  ) : (
+                    <Box textAlign="center">
+                      <MdDashboardCustomize size={120} className="headerLogo" />
+                      <Typography variant="body1" align="center">
+                        Start creating layout
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
-              </Box>
+              )}
               <DndProvider backend={HTML5Backend}>
                 <DashboardView
                   selectedData={selectedData}

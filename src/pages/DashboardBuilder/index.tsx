@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Box, Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { useHistory, Link } from 'react-router-dom';
 import { MdDashboardCustomize } from 'react-icons/md';
 
@@ -13,6 +13,8 @@ import DeleteButton from 'src/components/Helpers/DeleteButton';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import { useData } from 'src/StateProvider/Provider';
 import { baseURL } from './builderHelpers';
+import HideWhenOffline from 'src/components/HideWhenOffline';
+import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 
 const Dashboards = () => {
   const history = useHistory();
@@ -20,6 +22,7 @@ const Dashboards = () => {
     state: { user }
   } = useData();
   const { setToastConfig } = React.useContext(CustomToastContext);
+  const [showDeleteDialog, setShowDeleteDialog] = React.useState({ open: false, data: [], isLoading: false });
   const [gridApi, setGridApi] = React.useState(null);
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
@@ -39,15 +42,50 @@ const Dashboards = () => {
     </Link>
   );
 
+  const removeDashboard = () => {
+    setShowDeleteDialog({
+      ...showDeleteDialog,
+      isLoading: true
+    });
+    axiosInstance()
+      .put(`${baseURL}/remove`, {
+        ids: showDeleteDialog.data
+      })
+      .then(() => {
+        fetchDashboards();
+        closeDeleteDialog();
+      })
+      .catch((err) => {
+        setToastConfig(err);
+        closeDeleteDialog();
+      });
+  };
+
+  const ActionRenderer = (params) => {
+    const { data } = params;
+    return (
+      <HideWhenOffline>
+        <GridDeleteIcon
+          hasDeletePermission={true}
+          ownerId={data?.createdBy?.user}
+          userId={user?.user?._id}
+          onDelete={() => setShowDeleteDialog({ ...showDeleteDialog, open: true, data: [data?._id] })}
+          entity=""
+        />
+      </HideWhenOffline>
+    );
+  };
+
   const frameworkComponents = {
-    nameRenderer: NameRenderer
+    nameRenderer: NameRenderer,
+    actionsRenderer: ActionRenderer
   };
 
   React.useEffect(() => {
-    handleFetch();
+    fetchDashboards();
   }, []);
 
-  const handleFetch = () => {
+  const fetchDashboards = () => {
     dispatch({ type: 'loading', loading: true });
 
     if (gridApi) {
@@ -65,6 +103,14 @@ const Dashboards = () => {
         setToastConfig(err);
         dispatch({ type: 'loading', loading: false });
       });
+  };
+
+  const closeDeleteDialog = () => {
+    setShowDeleteDialog({
+      open: false,
+      data: [],
+      isLoading: false
+    });
   };
 
   return (
@@ -85,7 +131,17 @@ const Dashboards = () => {
               Create
             </Button>
             <Box component="span" ml={1} />
-            <DeleteButton text="Delete" onClick={() => {}} />
+            <DeleteButton
+              disabled={selectedRecords.length === 0}
+              text="Delete"
+              onClick={() => {
+                setShowDeleteDialog({
+                  ...showDeleteDialog,
+                  open: true,
+                  data: selectedRecords.map((d: any) => d._id)
+                });
+              }}
+            />
           </Box>
         </Box>
 
@@ -100,14 +156,24 @@ const Dashboards = () => {
           pageSizes={pageSizes}
           page={page}
           actionWidth={150}
-          allowSelection={false}
-          allowAction={false}
+          allowSelection={true}
+          allowAction={true}
           isClientSideGrid={true}
           loading={loading}
           renderedFrom={'dashboard-builder'}
-          refreshGrid={handleFetch}
+          refreshGrid={fetchDashboards}
         />
       </CustomContainer>
+
+      {showDeleteDialog.open && (
+        <ConfirmationDialog
+          open={true}
+          okBtnLoading={showDeleteDialog.isLoading}
+          message={'Are you sure you want delete?'}
+          onClose={closeDeleteDialog}
+          onOk={removeDashboard}
+        />
+      )}
     </React.Fragment>
   );
 };
