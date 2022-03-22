@@ -101,7 +101,7 @@ const BOMTable = () => {
         setCustomizedRoutes([
           { title: 'Product Master', path: routes.product.path },
           { title: productData?.productName, path: `${routes.productDetail.path}/${id}` },
-          { title: 'Parts' }
+          { title: 'Child Product' }
         ]);
       });
   };
@@ -236,7 +236,7 @@ const BOMTable = () => {
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
               <div className="d-flex align-items-center">
                 <AiOutlineApartment className="headerLogo" />
-                <span className="listingHeader">Parts</span>
+                <span className="listingHeader">Child Product</span>
               </div>
             </Grid>
             <Grid className={styles.filter_side} item md={6} sm={12} xs={12}>

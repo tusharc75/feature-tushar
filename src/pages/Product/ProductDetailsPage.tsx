@@ -412,7 +412,7 @@ const ProductDetailsPage = () => {
                 <Tab label="Details" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
                 <Tab label="Packages" value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
                 <Tab label="Parent Product" value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
-                {permissions?.serializedAsset && <Tab label="Parts" value={3} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
+                {permissions?.serializedAsset && <Tab label="Child Product" value={3} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
                 {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <Tab value={4} label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />}
               </Tabs>
               {tabValue === 0 &&
