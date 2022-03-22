@@ -439,10 +439,10 @@ const Product = () => {
       )}
 
       {productPermissions.isRead && permissions?.serializedAsset ? (
-        <Tooltip title="Parts">
+        <Tooltip title="Child Product">
           <IconButton
             size="small"
-            aria-label="View Parts"
+            aria-label="View Child Product"
             onClick={() => {
               history.push(`${routes.productDetail.path}/${params.data._id}/bom`, { productName: params.data.productName });
             }}
