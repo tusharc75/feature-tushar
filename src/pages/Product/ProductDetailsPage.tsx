@@ -21,7 +21,6 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import ManageSerializedAsset from '../SerializedAsset/ManageSerializedAsset';
 import { extractFieldsForDisplay } from '../../constants/formulaUtility';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
-import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
@@ -30,6 +29,7 @@ import ProductConfiguration from './ProductConfiguration';
 import { camelCase } from 'lodash';
 import Parts from './Parts';
 import ParentProduct from './ParentProduct';
+import NonSerializedAssetProductInventory from './inventory';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -291,7 +291,7 @@ const ProductDetailsPage = () => {
         });
     } else {
       axiosInstance()
-        .get(`product/${id}/inventory`)
+        .get(`/product-inventory/product/${id}`)
         .then(async ({ data: { data } }) => {
           setProductWarehouseData(data);
           setInventoriesData(data);
@@ -470,7 +470,7 @@ const ProductDetailsPage = () => {
               <Paper style={{ overflow: 'hidden' }}>
                 <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
                   <Typography variant="subtitle2">Plants ({inventoriesData?.length || 0})</Typography>
-                  {permissions?.serializedAsset?.isCreate && (
+                  {permissions?.serializedAsset?.isCreate && !loadingWarehouse && (
                     <IconButton
                       title="Manage Plant(s)"
                       color="primary"
@@ -605,15 +605,15 @@ const ProductDetailsPage = () => {
                       ) : (
                         <Box width="100%">
                           <Box mx={2} mt={1} display="flex" justifyContent="space-between">
-                            <Typography variant="h6">Plants</Typography>
+                            <Typography variant="h6">{routes.warehouse.title}</Typography>
                             <Typography variant="h6">Qty.</Typography>
                           </Box>
-                          {inventoriesData?.map(({ qty, wareHouse }) => (
-                            <List disablePadding key={wareHouse?._id}>
+                          {inventoriesData?.filter(d => d.inventory).map(({ inventory, warehouse }) => (
+                            <List disablePadding key={warehouse?._id}>
                               <ListItem dense>
-                                <ListItemText primary={wareHouse?.warehouseName} />
+                                <ListItemText primary={warehouse?.name} />
                                 <ListItemSecondaryAction>
-                                  <Typography variant="h6">{qty}</Typography>
+                                  <Typography variant="h6">{inventory}</Typography>
                                 </ListItemSecondaryAction>
                               </ListItem>
                             </List>
@@ -668,20 +668,16 @@ const ProductDetailsPage = () => {
             }}
           />
         ) : (
-          <AssignQuantityDialog
-            ids={id}
-            onClose={() => setOpenProductInventoryDialog(false)}
+          <NonSerializedAssetProductInventory
+            productId={id}
+            productInventoryData={inventoriesData}
             onSuccess={() => {
               setOpenProductInventoryDialog(false);
               if (permissions?.serializedAsset) {
                 getWarehouses();
               }
             }}
-            resource={warehouse.warehouseApi}
-            title="Assign Plants"
-            label="Select Plants"
-            text="Assign Plants"
-            resourceData={inventoriesData}
+            onClose={() => setOpenProductInventoryDialog(false)}
           />
         )
       ) : null}
