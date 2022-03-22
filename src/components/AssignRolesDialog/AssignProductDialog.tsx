@@ -56,9 +56,8 @@ const AssignProductDialog = ({
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
     const [columns, setColumns] = useState([])
+    
     const defaultColumns = [
-        { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
-        { field: 'productNumber', headerName: 'Product Number', show: true, cellRenderer: 'commonRenderer' },
         { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
     ]
 
@@ -187,36 +186,6 @@ const AssignProductDialog = ({
         return deepFilter;
     };
 
-    const ActionsRenderer = params => {
-        const rowNode = params.node.gridApi.getRowNode(params.data.id)
-        return <>
-            {
-                <ButtonGroup size="small" aria-label="small outlined button group">
-                    <IconButton
-                        size="small"
-                        aria-label="Clone"
-                        onClick={() => {
-                            if (params.data.qty > 0) rowNode.setDataValue("qty", params.data.qty - 1)
-                        }}>
-                        <RemoveOutlined fontSize="small" color="primary" />
-                    </IconButton>
-                    <IconButton
-                        size="small"
-                        aria-label="Clone"
-                        onClick={() => {
-                            rowNode.setDataValue("qty", params.data.qty + 1)
-                        }}>
-                        <AddOutlined fontSize="small" color="primary" />
-                    </IconButton>
-                </ButtonGroup>
-            }
-        </>
-    }
-
-    // const frameworkComponents = {
-    //     actionsRenderer: ActionsRenderer,
-    //     commonRenderer: CommonRenderer,
-    // };
 
     const handleAssignProduct = async () => {
         setAssigning(true);
