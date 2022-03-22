@@ -213,8 +213,8 @@ const Builder = (props: Props) => {
               options={FILTERS_OPTIONS}
               value={formValues.filters}
               onChange={(_, val) => handleChange('filters', val)}
-              getOptionLabel={(option) => option}
-              getOptionSelected={(option, value) => option === value}
+              getOptionLabel={(option) => option.title}
+              getOptionSelected={(option, value) => option.key === value.key}
               renderInput={(params) => (
                 <TextField
                   {...params}
