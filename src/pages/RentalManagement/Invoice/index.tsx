@@ -99,6 +99,15 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
           Footer: () => {
             return <>Total</>
           }
+        },
+        {
+          accessor: 'status',
+          Header: 'Status',
+          width: 200,
+          Cell: ({ row }) => (
+            <p className="text-truncate"  >
+              {row.original.status ? row.original.status : <NoDataCell />}
+            </p>),
         }]
       fields.forEach(element => {
         if (element.type === "date") {
@@ -236,6 +245,9 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
         _id: _inventory.inventoryDetail?._id,
         srno: `${parent.srno}.${(k + 1)}`,
         detail: _inventory.inventoryDetail?.assetNumber,
+        status: _inventory.status,
+        actualStartDate: _inventory.startDate,
+        actualEndDate: _inventory.endDate,
         type: "Asset",
         qty: 1,
       })

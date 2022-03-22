@@ -56,7 +56,7 @@ export default function ImportExportLinks({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => {},
+  onExportToExcelSuccess = () => { },
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
@@ -140,7 +140,7 @@ export default function ImportExportLinks({
       exportApi = `${exportApi}&${additionalParams}`;
     }
 
-    if (recordsToExport > 0 && recordsToExport < total) {
+    if (recordsToExport > 0 && recordsToExport <= total) {
       if (exportSelectedRecords) {
         exportSelectedRecords();
         return;
@@ -221,7 +221,7 @@ export default function ImportExportLinks({
           </>
         )}
         <label onClick={exportToExcel} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
-          Export to Excel {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : '(Selected)') : null}
+          Export to Excel {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
         </label>
         {isDownloadExcel && (
           <>
@@ -256,7 +256,7 @@ export default function ImportExportLinks({
             handleClose();
           }}
         >
-          Export to Excel ({recordsToExport === 0 ? 'All' : 'Selected'})
+          Export to Excel ({recordsToExport === 0 ? 'All' : `(${recordsToExport})`})
         </MenuItem>
         {isDownloadExcel && (
           <MenuItem
@@ -280,7 +280,7 @@ export default function ImportExportLinks({
     <div id="importExportLinks" className={`${classes.root}`}>
       <div className={classes.linksContainer}>
         <label onClick={exportToExcel} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
-          Export to Excel {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : '(Selected)') : null}
+          Export to Excel {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
         </label>
       </div>
       <Menu id="import-export-links" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
@@ -290,7 +290,7 @@ export default function ImportExportLinks({
             handleClose();
           }}
         >
-          Export to Excel ({recordsToExport === 0 ? 'All' : 'Selected'})
+          Export to Excel ({recordsToExport === 0  ? 'All' : `(${recordsToExport})`})
         </MenuItem>
       </Menu>
       {isMobile && (

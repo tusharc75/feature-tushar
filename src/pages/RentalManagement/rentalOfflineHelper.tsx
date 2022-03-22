@@ -75,3 +75,21 @@ export const updateRentalAssetStatus = async (id, status, asset) => {
         return false;
     }
 }
+
+
+export const updateRentalProductStatus = async (id, status, product) => {
+    try {
+        const rentalManagement = await findOne(objectStore.rentalManagement, id);
+        rentalManagement?.material?.forEach(element => {
+            if (product.includes(element?.materialId)) {
+                element.status = status;
+            }
+        });
+        await insertUpdate(objectStore.rentalManagement, id, rentalManagement);
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
+}
+

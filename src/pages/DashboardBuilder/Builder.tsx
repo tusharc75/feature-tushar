@@ -49,7 +49,7 @@ const Builder = (props: Props) => {
     if (hasErrors) return;
 
     if (selectedData) {
-      handleUpdate(formValues );
+      handleUpdate(formValues);
     } else {
       const formedData = { uniqueId: camelCase(formValues.chartTitle), ...formValues };
       setFormData((prevState: any) => [...prevState, formedData]);
@@ -95,14 +95,24 @@ const Builder = (props: Props) => {
               name="column"
               value={formValues.column}
               className={classes.column}
-              onChange={(e) => handleChange('column', Number(e.target.value))}
+              onChange={(e) => {
+                let value: any = e.target.value;
+                value = value.includes('custom') ? value : Number(value);
+                handleChange('column', value);
+              }}
             >
               <FormControlLabel value={3} control={<Radio />} label="Col 3" />
               <FormControlLabel value={6} control={<Radio />} label="Col 6" />
               <FormControlLabel value={12} control={<Radio />} label="Col 12" />
+              {/* <FormControlLabel value={'custom'} control={<Radio />} label="Custom" /> */}
             </RadioGroup>
           </FormControl>
         </Box>
+        {/* {isNaN(formValues.column) && (
+          <Box mt={2}>
+            <TextField required size="small" fullWidth variant="outlined" label={`Custom Column`} />
+          </Box>
+        )} */}
         <Box mt={2}>
           <Autocomplete
             size="small"
@@ -203,8 +213,8 @@ const Builder = (props: Props) => {
               options={FILTERS_OPTIONS}
               value={formValues.filters}
               onChange={(_, val) => handleChange('filters', val)}
-              getOptionLabel={(option) => option}
-              getOptionSelected={(option, value) => option === value}
+              getOptionLabel={(option) => option.title}
+              getOptionSelected={(option, value) => option.key === value.key}
               renderInput={(params) => (
                 <TextField
                   {...params}

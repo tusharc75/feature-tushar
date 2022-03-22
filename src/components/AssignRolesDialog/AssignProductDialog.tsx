@@ -67,6 +67,7 @@ const AssignProductDialog = ({
     const { getColumnData } = useColumns();
 
     useEffect(() => {
+        localStorage.removeItem(localStorageSelectedRecords)
         fetchGridColumns()
     }, [])
 
@@ -149,7 +150,7 @@ const AssignProductDialog = ({
     };
 
     const getQueryString = () => {
-        const ignoreIds = assignedProducts && assignedProducts?.length > 0 ? assignedProducts.map(p => reference === "product" ? p.productId : p._id) : []
+        const ignoreIds = assignedProducts && assignedProducts?.length > 0 ? assignedProducts : []
         let deepFilter = `?page=${page}&limit=${limit}&filterProducts=${selectedType}&ignoreIds=${JSON.stringify(ignoreIds)}`;
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -239,7 +240,7 @@ const AssignProductDialog = ({
         } else {
             axiosInstance()
                 .post(`${packages.packageApi}/add-products`, {
-                    ids: [productId],
+                    ids: Array.isArray(productId) && productId.length ? productId : [productId],
                     products: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ product: d.id, qty: Number(d.qty) }))
                 })
                 .then(() => {

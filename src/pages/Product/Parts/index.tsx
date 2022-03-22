@@ -34,11 +34,10 @@ function Parts({ id }) {
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState(null)
   const { dataRows, rowCount, loading: gridLoading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
-  const defaultColumns = [
-    { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer' },
-    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
-] 
 
+  const defaultColumns = [
+    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
+  ]
 
   useEffect(() => {
     if (id) {
@@ -46,11 +45,6 @@ function Parts({ id }) {
     }
   }, [id, page, limit, filters, sorting, selectedEntity]);
 
-  // useEffect(() => {
-  //   if (parts) {
-  //     getColumns();
-  //   }
-  // }, [parts])
   useEffect(() => {
     fetchGridColumns()
   }, [])
@@ -63,23 +57,21 @@ function Parts({ id }) {
     axiosInstance()
       .get(`/product/${id}/bom`)
       .then(({ data: { data } }) => {
-        data = data.map((o:any) => {
-         let finalObject = {
-            ...o?.childProductDetail,
+        data = data.map((o: any) => {
+          let finalObject = {
             ...o,
+            ...o?.childProductDetail,
           };
-
           return prepareDataForGrid(finalObject)
-
         });
         if (appendRows) {
           dispatch({
             type: "initialize", data: [...dataRows, ...data],
-            count: data.count, selectedRecords: [...dataRows, ...data].filter(f => f.isChecked === true)
+            count: data.length, selectedRecords: [...dataRows, ...data].filter(f => f.isChecked === true)
           });
         } else {
           dispatch({
-            type: "initialize", data: data, count: data.count,
+            type: "initialize", data: data, count: data.length,
             selectedRecords: data.filter(f => f.isChecked === true)
           });
         }
@@ -98,46 +90,48 @@ function Parts({ id }) {
           }
         }
         setParts([...data]);
-         dispatch({ type: 'loading', loading: false });
-        })
-        .catch((err) => {
+        dispatch({ type: 'loading', loading: false });
+      })
+      .catch((err) => {
         dispatch({ type: 'loading', loading: false });
       });
   };
 
   const fetchGridColumns = () => {
     axiosInstance()
-        .get("/field?resource=Product&view=true")
-        .then(({ data: { data } }) => {
-            let columns = []
-            let rendererNames = []
-            data.forEach(o => {
-                let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
-                if (currentColumn !== null) {
-                    columns = [...columns, currentColumn?.columnData]
-                    if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                        rendererNames.push(currentColumn?.rendererName)
-                    }
-                }
-            })
-            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-            tempFrameworkComponent = {
-                ...tempFrameworkComponent,
+      .get("/field?resource=Product&view=true")
+      .then(({ data: { data } }) => {
+        let columns = []
+        let rendererNames = []
+        data.forEach(o => {
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData]
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
             }
-            setFrameWorkComponent({ ...tempFrameworkComponent, actionsRenderer: ActionsRenderer, productNameRenderer: ProductNameRenderer, })
-            columns = [...columns, ...getStaticFields()]
-            setColumns([...defaultColumns, ...columns ])
+          }
         })
-}
-
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+        }
+        setFrameWorkComponent({
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer
+        })
+        columns = [...columns, ...getStaticFields()]
+        setColumns([...defaultColumns, ...columns])
+      })
+  }
 
   const handleRemove = () => {
     setIsDeleting(true)
     const { data } = showConfirmBox
     if (data.length > 1) {
-      data.forEach((p:any) => {
+      data.forEach((p: any) => {
         axiosInstance().put(`${product.api}/${p.product}/bom/remove`, {
-          ids: [p._id]
+          ids: [p.id]
         })
           .then(() => {
             setIsDeleting(false)
@@ -152,7 +146,7 @@ function Parts({ id }) {
     } else {
       let d = data[0]
       axiosInstance().put(`${product.api}/${d.product}/bom/remove`, {
-        ids: [d._id]
+        ids: [d.id]
       })
         .then(() => {
           setIsDeleting(false)
@@ -166,40 +160,6 @@ function Parts({ id }) {
     }
   }
 
-  // const getColumns = () => {
-  //   if (gridApi) {
-  //     gridApi.setRowData([]);
-  //   }
-  //   dispatch({ type: 'loading', loading: true });
-  //   let newColumns = [];
-  //   let rowsData = [];
-  //   if (parts) {
-  //     rowsData = parts ? parts?.map((p) => ({
-  //       ...p,
-  //       productName: p?.productName,
-  //       qty: p?.qty,
-  //       productCategory: p?.childProductDetail?.productCategory?.optionLabel,
-  //       pricingMethod: p?.childProductDetail?.pricingMethod?.join(", "),
-  //       unit: p?.childProductDetail?.unit?.join(", "),
-  //       serializedProduct: p?.childProductDetail?.serializedProduct === true ? "Yes" : "No",
-  //       createdBy: p?.createdBy?.user?.concatedName
-  //     }))
-  //       : [];
-  //     newColumns = [
-  //       { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productNameRenderer' },
-  //       { field: 'qty', headerName: 'Quantity', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-  //       { field: 'productCategory', headerName: 'Product Category', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-  //       { field: 'pricingMethod', headerName: 'Pricing Method', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-  //       { field: 'unit', headerName: 'Unit', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-  //       { field: 'serializedProduct', headerName: 'Serialized Product', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-  //       { field: 'createdBy', headerName: 'Created By', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-  //     ];
-  //     setColumns(newColumns);
-  //     dispatch({ type: 'initialize', data: rowsData, count: rowsData.length });
-  //     dispatch({ type: 'loading', loading: false });
-  //   }
-  // }
-
   const ActionsRenderer = (params) => (
     <Tooltip title="Delete">
       <IconButton
@@ -211,18 +171,6 @@ function Parts({ id }) {
       </IconButton>
     </Tooltip>
   )
-
-  const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`/product/detail/${params.data.childProduct}`}>
-      {params.value}
-    </Link>
-  )
-
-  // const frameworkComponents = {
-  //   actionsRenderer: ActionsRenderer,
-  //   productNameRenderer: ProductNameRenderer,
-  //   commonRenderer: CommonRenderer,
-  // };
 
   return (
     <div>
@@ -241,24 +189,23 @@ function Parts({ id }) {
             </Button>
           </Grid>
           <Grid item xs={6} md={6} sm={6} >
-            {selectedRecords?.length > 0 &&
             <Box display={'flex'} justifyContent={'flex-end'}>
-                <Button
-                  variant='contained'
-                  color="primary"
-                  size="small"
-                  onClick={() => {
-                    setShowConfirmBox({ open: true, data: selectedRecords});
-                  }}
-                  >
-                  Delete
-                </Button>
-              </Box>
-              }
+              <Button
+                variant='contained'
+                color="primary"
+                size="small"
+                disabled={selectedRecords?.length === 0}
+                onClick={() => {
+                  setShowConfirmBox({ open: true, data: selectedRecords });
+                }}
+              >
+                Delete
+              </Button>
+            </Box>
           </Grid>
         </Grid>
       </Box>
-     {frameWorkComponent ?  <CustomAgGrid
+      {frameWorkComponent ? <CustomAgGrid
         columns={columns}
         dataRows={dataRows}
         isClientSideGrid={true}
@@ -273,7 +220,7 @@ function Parts({ id }) {
         loading={gridLoading}
         renderedFrom={renderedFrom}
         refreshGrid={fetchBOMData}
-      /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box> }
+      /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
       {showConfirmBox.open && <ConfirmationDialogRaw
         open={true}
         message={`Are you sure you want to delete this product(s)?`}
@@ -288,7 +235,7 @@ function Parts({ id }) {
           productsDialogOpen={openAssignProductDialog}
           productId={id}
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
-          assignedProducts={parts}
+          assignedProducts={[...parts?.map(p => p.childProduct), id]}
           renderedFrom={`${renderedFrom}_grid-sub-1`}
           onSuccess={() => {
             if (permissions?.serializedAsset) {
