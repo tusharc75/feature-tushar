@@ -73,7 +73,7 @@ const getTitle = data => {
 export const LinkRenderer = params => params.value ? <>
     <Link className="link text-truncate" to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` :
         `${params?.pathName}/${params?.data[params?.property]}`} title={params?.value}>{params?.value}</Link>
-
+    {console.log(params)}
     {
         params["more"] && params.data[params["more"]]?.length > 0 && (
             <Tooltip title={getTitle(params.data[params["more"]])} >
