@@ -206,6 +206,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
             <Fragment>
               {currentStep === 1 && (
                 <Fragment>
+<<<<<<< HEAD
                   <Tooltip title="Transfer to Plant">
                     <Button
                       variant={'contained'}
@@ -236,6 +237,78 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                     </Button>
                   </Tooltip>
                   <Box mx={1} />
+=======
+                    {currentStep === 1 &&
+                        <Fragment>
+                            <Tooltip title="Transfer to Plant">
+                                <Button
+                                    variant={"contained"}
+                                    color="primary"
+                                    size="small"
+                                    onClick={() => {
+                                        const data = {}
+                                        data["ticketName"] = subleaseData.subleaseName;
+                                        data["refrenceId"] = subleaseData._id;
+                                        data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.supplier;
+                                        data["pickupFrom"] = subleaseData?.supplierAccount?.optionValue;
+                                        data["pickupFromAddress"] = subleaseData?.shippingAddress?.optionValue;
+                                        data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                                        data["isPickupFromDisable"] = true;
+                                        setShowTicketDialog({ open: true, data: data });
+                                    }}
+                                    disabled={(selectedRecords.length === 0 || (selectedRecords.some(f => f.hasOwnProperty("warehouse")
+                                        || f.currentOwnerType !== INVENTORY_OWNER_TYPE.supplierAccount || [INVENTORY_STATUS.reserved].includes(f.status))))}
+                                >
+                                    Receiving to Plant
+                                </Button>
+                            </Tooltip>
+                            <Box mx={1} />
+                        </Fragment>
+                    }
+                    {(selectedRecords.length > 0 && selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+                        checkUniqWarehouse() && currentStep === 1) ?
+                        <Fragment>
+                            <Tooltip title="Send to Supplier">
+                                <Button
+                                    variant={"contained"}
+                                    color="primary"
+                                    size="small"
+                                    onClick={() => {
+                                        const data = {}
+                                        data["ticketName"] = subleaseData.subleaseName;
+                                        data["refrenceId"] = subleaseData._id;
+                                        data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
+                                        data["pickupFrom"] = selectedRecords[0]?.warehouseId;
+                                        data["pickupFromAddress"] = selectedRecords[0]?.currentLocationId;
+                                        data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.supplier;
+                                        data["deliveryTo"] = subleaseData?.supplierAccount?.optionValue;
+                                        data["deliveryToAddress"] = subleaseData?.shippingAddress?.optionValue;
+                                        data["isPickupFromDisable"] = true;
+                                        data["isDeliveryToDisable"] = true;
+                                        setShowTicketDialog({ open: true, data: data });
+                                    }}
+                                >
+                                    Send to Supplier
+                                </Button>
+                            </Tooltip>
+                            <Box mx={1} />
+                        </Fragment>
+                        : null
+                    }
+                    {currentStep === 2 &&
+                        <Fragment>
+                            <Button
+                                variant={"contained"}
+                                color="primary"
+                                size="small"
+                                disabled={!isCompleteEnable || isCompleteing}
+                                onClick={() => { completeSublease() }}
+                            >
+                                End Sublease
+                            </Button>
+                            <Box mx={1} />
+                        </Fragment>}
+>>>>>>> 1d0570d4bf8a9a145ebb29809527711f3082157d
                 </Fragment>
               )}
               {selectedRecords.length > 0 &&
