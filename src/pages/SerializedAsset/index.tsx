@@ -33,9 +33,11 @@ import { Autocomplete } from "@material-ui/lab";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import { camelCase } from "lodash";
+import { Link } from 'react-router-dom'
+import WarningIcon from '@material-ui/icons/Warning';
 
+const SerializedAsset = () => {
 
-const ProductInventory = () => {
     const renderedFrom = camelCase(routes?.serializedAsset.title)
     const toastConfig = useContext(CustomToastContext)
     const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -124,9 +126,15 @@ const ProductInventory = () => {
                         }
                     }
                 })
+                columns?.forEach((e) => {
+                    if (e.field === "assetNumber") {
+                        e.cellRenderer = "assetNumberRenderer"
+                    }
+                })
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
                 tempFrameworkComponent = {
                     ...tempFrameworkComponent,
+                    assetNumberRenderer: AssetNumberRenderer,
                     actionsRenderer: ActionsRenderer
                 }
                 setFrameWorkComponent({ ...tempFrameworkComponent })
@@ -243,6 +251,20 @@ const ProductInventory = () => {
             toastConfig.setToastConfig(error)
         });
     }
+
+    const AssetNumberRenderer = (params) => (
+        <Fragment>
+            {params.data?.recertDate && ((new Date(params.data?.recertDate))?.getTime() <= (new Date())?.getTime()) &&
+                <Box mr={1} pt={1}>
+                    <HtmlTooltip title="Asset needs to be recert">
+                        <WarningIcon fontSize="small" color="error" />
+                    </HtmlTooltip>
+                </Box>}
+            <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data?._id}`}>
+                {params.value}
+            </Link>
+        </Fragment>
+    );
 
     const ActionsRenderer = params => (
         <>
@@ -590,7 +612,7 @@ const ProductInventory = () => {
                     showClone={true}
                     onClone={(data) => { setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id }); }}
                     renderedFrom={renderedFrom} /> :
-                    Object.keys(frameWorkComponent).length > 0 ?
+                    Object.keys(frameWorkComponent).length > 0 && columns ?
                         <CustomAgGrid
                             columns={columns}
                             dataRows={dataRows}
@@ -634,4 +656,4 @@ const ProductInventory = () => {
     );
 }
 
-export default ProductInventory;
+export default SerializedAsset;
