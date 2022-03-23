@@ -54,11 +54,18 @@ export const termsAndConditionDocumentUploadMaxSize = {
   text: '2 MB'
 };
 
-export const repairJobProcessSteps = ["Serialized Assets", "Repair Process"];
+export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 export const purchaseOrderSteps = ['Add Product', 'Services and Consumables', 'Issue', 'Receiving Asset'];
-export const rentalManagementSteps = ['Add Products', 'Services and Consumables', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Packing Slip'];
-export const subleaseSteps = ["Add Products", "Start Sublease", "End Sublease"]
+export const rentalManagementSteps = [
+  'Add Products',
+  'Services and Consumables',
+  'Serialized Asset',
+  'Loading Ticket',
+  'Receiving Ticket',
+  'Packing Slip'
+];
+export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -73,18 +80,17 @@ export const opportunityTemplateFileName = 'Opportunities-Template.xlsx';
 export const opportunityImportErrorFileName = 'Opportunities-Errors.xlsx';
 
 export const quoteStepColors = {
-  "accepted by customer": { backgroundColor: "#008000", color: "#fff" },
-  "not booked by customer": { backgroundColor: "#ba181b", color: "#fff" },
+  'accepted by customer': { backgroundColor: '#008000', color: '#fff' },
+  'not booked by customer': { backgroundColor: '#ba181b', color: '#fff' },
 
-  "re-open": { backgroundColor: "#ff7d00", color: "#fff" },
-  "invalid by customer": { backgroundColor: "#eb5e28", color: "#fff" },
+  're-open': { backgroundColor: '#ff7d00', color: '#fff' },
+  'invalid by customer': { backgroundColor: '#eb5e28', color: '#fff' },
 
-  "not booked": { backgroundColor: "#2b2d42", color: "#fff" },
-  "building quote": { backgroundColor: "#023e7d", color: "#fff" },
+  'not booked': { backgroundColor: '#2b2d42', color: '#fff' },
+  'building quote': { backgroundColor: '#023e7d', color: '#fff' },
 
-  "__default__": { backgroundColor: "#023e7d", color: "#fff" }
-}
-
+  __default__: { backgroundColor: '#023e7d', color: '#fff' }
+};
 
 export const roleTypes = [
   {
@@ -133,7 +139,7 @@ export const sidebarResource = {
   field: 'Field',
   productCategory: 'Product Category',
   productInventory: 'Product Inventory',
-  serializedAsset: "Serialized Asset",
+  serializedAsset: 'Serialized Asset',
   priceTemplate: 'Price Template',
   product: 'Product',
   productTemplate: 'Product Template',
@@ -193,7 +199,7 @@ export const resourceNames = {
   field: 'Field',
   productCategory: 'Product Category',
   productInventory: 'Product Inventory',
-  serializedAsset: "Serialized Asset",
+  serializedAsset: 'Serialized Asset',
   priceTemplate: 'Price Template',
   product: 'Product',
   productTemplate: 'Product Template',
@@ -240,13 +246,13 @@ export const resourceNames = {
 };
 
 export const primaryFields = {
-  serializedAsset: "assetNumber",
-  rentalManagement: "rentalJobName",
-  transferAsset: "transferAssetNumber",
-  repairJob: "repairJobName",
-  purchaseOrder: "purchaseOrderNumber",
-  deliveryTicket: "ticketName"
-}
+  serializedAsset: 'assetNumber',
+  rentalManagement: 'rentalJobName',
+  transferAsset: 'transferAssetNumber',
+  repairJob: 'repairJobName',
+  purchaseOrder: 'purchaseOrderNumber',
+  deliveryTicket: 'ticketName'
+};
 
 export const RESOURCE_LABEL = {
   account: 'Supplier Accounts',
@@ -301,8 +307,8 @@ export const RESOURCE_LABEL = {
   address: 'Addresses',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventories',
-  zone: "Zone",
-  wellMaster: "Well Master"
+  zone: 'Zone',
+  wellMaster: 'Well Master'
 };
 
 export const CHILD_RESOURCE = {
@@ -313,16 +319,16 @@ export const CHILD_RESOURCE = {
   repairJobAsset: 'Repair Job Asset',
   salesOrderProduct: 'Sales Order Product',
   salesOrderCost: 'Sales Order Cost',
-  subleaseProduct: 'Sublease Product',
+  subleaseProduct: 'Sublease Product'
 };
 
 export const sidebarResourceObjectFromValues = () => {
   let obj: any = {};
   Object.keys(sidebarResource).forEach((key) => {
-    obj[sidebarResource[key]] = key
-  })
-  return obj
-}
+    obj[sidebarResource[key]] = key;
+  });
+  return obj;
+};
 
 export const lead = {
   leadResource: 'lead', //  Key of sidebar object
@@ -359,7 +365,7 @@ export const quoteBuilder = {
 export const rentalManagement = {
   api: '/rental-management',
   rentalManagementResource: 'rentalManagement',
-  resource: "rental-management"
+  resource: 'rental-management'
 };
 
 export const deliveryTicket = {
@@ -375,7 +381,7 @@ export const repairJob = {
 export const salesOrder = {
   salesOrderResource: 'salesOrder',
   salesOrderApi: '/sales-order',
-  resource: "sales-order"
+  resource: 'sales-order'
 };
 
 export const packages = {
@@ -454,7 +460,7 @@ export const product = {
 
 export const eProduct = {
   api: '/e-product',
-  route: '/e-product',
+  route: '/e-product'
 };
 
 export const serializedAsset = {
@@ -522,13 +528,11 @@ export const transferInventory = {
   resource: 'transferInventory'
 };
 
-
 export const pricingCondition = {
   resource: 'pricingCondition',
   api: '/pricing-condition',
   route: 'pricing-condition'
 };
-
 
 export const profileMenuItems = {
   profile: 1,
@@ -539,13 +543,11 @@ export const profileMenuItems = {
 };
 
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
-
   //let selectedEntity = localStorage.getItem("selectedEntity")
   //let isCreate = (val === "") ? true : false
 
   const obj = {};
   for (const key of arr) {
-
     let value = key.isDefaultValue ? key.defaultValue : val;
 
     //let isEntityField = key?.fieldName === "entity"
@@ -565,7 +567,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
         defaultOptions = key.option;
       }
       const options = defaultOptions?.map((data: any) => data.optionValue);
-      obj[key.fieldName] = value ? typeof value === 'string' ? [value] : value : options;
+      obj[key.fieldName] = value ? (typeof value === 'string' ? [value] : value) : options;
     } else if (key.type === 'freeStyleMultiSelect') {
       const defaultOptions = key.option?.filter((item: any) => item.default === true);
       const options = defaultOptions?.map((data: any) => data.optionValue);
@@ -575,7 +577,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'year') {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === 'colorPicker') {
-      obj[key.fieldName] = value ? value : "#aaaaaa";
+      obj[key.fieldName] = value ? value : '#aaaaaa';
     } else if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = value ? value : false;
     } else if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
@@ -609,23 +611,26 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data.optionValue : '');
   for (const key of arr) {
-    let defaultValue
+    let defaultValue;
 
     if (key?.isDefaultValue && key?.defaultValue) {
-      defaultValue = key.defaultValue
+      defaultValue = key.defaultValue;
     }
     if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue ? defaultValue : false;
     } else if (key.type === 'multiSelect') {
-      const values = dataObj[key.fieldName] && dataObj[key.fieldName].length
-        ? typeof dataObj[key.fieldName] === 'string'
-          ? [dataObj[key.fieldName]]
-          : dataObj[key.fieldName].map((val: any) => filterValues(val))
-        : defaultValue || [];
+      const values =
+        dataObj[key.fieldName] && dataObj[key.fieldName].length
+          ? typeof dataObj[key.fieldName] === 'string'
+            ? [dataObj[key.fieldName]]
+            : dataObj[key.fieldName].map((val: any) => filterValues(val))
+          : defaultValue || [];
       obj[key.fieldName] = values;
     } else if (key.type === 'dropDown') {
-      const value = (dataObj[key.fieldName] && Array.isArray(dataObj[key.fieldName]) && dataObj[key.fieldName]?.length) ? dataObj[key.fieldName][0] :
-        filterValues(dataObj[key.fieldName]);
+      const value =
+        dataObj[key.fieldName] && Array.isArray(dataObj[key.fieldName]) && dataObj[key.fieldName]?.length
+          ? dataObj[key.fieldName][0]
+          : filterValues(dataObj[key.fieldName]);
       obj[key.fieldName] = value ? value : defaultValue || '';
     } else if (key.type === 'converter' || key.type === 'currencyAmount' || key.isConverter === true) {
       if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
@@ -683,21 +688,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -705,9 +710,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'multiSelect') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal') {
-      schema[input.fieldName] = input.required
-        ? number().required(`${input.fieldLabel} is required`).nullable()
-        : number().nullable();
+      schema[input.fieldName] = input.required ? number().required(`${input.fieldLabel} is required`).nullable() : number().nullable();
     } else if (input.type === 'email') {
       schema[input.fieldName] =
         input.required && validEmail
@@ -716,23 +719,27 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'switch' || input.type === 'checkBox') {
       schema[input.fieldName] = input.required ? boolean().required(`${input.fieldLabel} is required`) : boolean();
     } else if (input.type !== 'currencyAmount' && (input.type === 'converter' || input.isConverter === true)) {
-      input.displayUnits && input.displayUnits.forEach((_unit) => {
-        schema[input.fieldName + '_' + _unit.toLowerCase()] = input.required ? number().required(`${input.fieldLabel} is required`).nullable() : number().nullable();
-      });
-    } else if (input.type === 'currencyAmount') {
-      input.displayCurrency && input.displayCurrency.forEach((_currency) => {
-        if (input.isConverter && input.displayUnits.length) {
-          input.displayUnits.forEach((_unit) => {
-            schema[input.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] = input.required
-              ? number().required(`${input.fieldLabel} is required`).nullable()
-              : number().nullable();
-          });
-        } else {
-          schema[input.fieldName + '_' + _currency.toLowerCase()] = input.required
+      input.displayUnits &&
+        input.displayUnits.forEach((_unit) => {
+          schema[input.fieldName + '_' + _unit.toLowerCase()] = input.required
             ? number().required(`${input.fieldLabel} is required`).nullable()
             : number().nullable();
-        }
-      });
+        });
+    } else if (input.type === 'currencyAmount') {
+      input.displayCurrency &&
+        input.displayCurrency.forEach((_currency) => {
+          if (input.isConverter && input.displayUnits.length) {
+            input.displayUnits.forEach((_unit) => {
+              schema[input.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] = input.required
+                ? number().required(`${input.fieldLabel} is required`).nullable()
+                : number().nullable();
+            });
+          } else {
+            schema[input.fieldName + '_' + _currency.toLowerCase()] = input.required
+              ? number().required(`${input.fieldLabel} is required`).nullable()
+              : number().nullable();
+          }
+        });
     } else if (input.type === 'date') {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
     } else if (input.type === 'freeStyleMultiSelect') {
@@ -748,8 +755,6 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
   return object().shape(schema);
 };
-
-
 
 export const UnCamelCase = (str) => {
   return str
@@ -803,11 +808,11 @@ export const initializeDropdownById = (field, fieldName, id) => {
 
   return field;
 };
-export const dateFormat = localStorage.getItem("dateFormat") ?? "MM/DD/YYYY";
-export const dateTimeFormat = localStorage.getItem("dateTimeFormat") ?? "MM/DD/YYYY hh:mm A";
-export const cardDateFormat = localStorage.getItem("cardDateFormat") ?? "MMM DD, YYYY";
+export const dateFormat = localStorage.getItem('dateFormat') ?? 'MM/DD/YYYY';
+export const dateTimeFormat = localStorage.getItem('dateTimeFormat') ?? 'MM/DD/YYYY hh:mm A';
+export const cardDateFormat = localStorage.getItem('cardDateFormat') ?? 'MMM DD, YYYY';
 
-export const dateFormatForInputControl = localStorage.getItem("dateFormatForInputControl") ?? "MM/dd/yyyy";
+export const dateFormatForInputControl = localStorage.getItem('dateFormatForInputControl') ?? 'MM/dd/yyyy';
 // export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
 // export const cardDateFormat = "MMM,dd yyyy"
 
@@ -902,21 +907,21 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
             title: d.resourceLabel || d.name
           };
         } else {
-          console.info(`Custom Error (helper.tsx > getPermissions()) => ${JSON.stringify(d)} resource not found`)
+          console.info(`Custom Error (helper.tsx > getPermissions()) => ${JSON.stringify(d)} resource not found`);
         }
       });
     }
 
-    sidebarFieldsKeys.forEach(d => {
+    sidebarFieldsKeys.forEach((d) => {
       if (!permissions.hasOwnProperty(d)) {
         permissions[d] = {
           isCreate: false,
           isRead: false,
           isUpdate: false,
           isDelete: false
-        }
+        };
       }
-    })
+    });
 
     localStorage.setItem('routes', JSON.stringify(routesAndTitle));
     return permissions;
@@ -1104,7 +1109,7 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
 };
 
 /**
- * 
+ *
  * @param date From when to convert amount
  * @param amount An amount to be converted
  * @param currencyFrom Currency to convert from
@@ -1113,11 +1118,11 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
  */
 
 export const getExchangeRates = (date: string, amount: number, currencyFrom: string, currencyTo: string) => {
-  if (!currencyFrom || !currencyTo) return
+  if (!currencyFrom || !currencyTo) return;
 
-  if (currencyFrom === currencyTo) return
+  if (currencyFrom === currencyTo) return;
 
-  if (amount <= 0) return
+  if (amount <= 0) return;
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -1129,7 +1134,7 @@ export const getExchangeRates = (date: string, amount: number, currencyFrom: str
     } catch (error) {
       reject(error);
     }
-  })
+  });
 };
 
 export const b64toBlob = (dataURI: string) => {
@@ -1141,50 +1146,37 @@ export const b64toBlob = (dataURI: string) => {
     ia[i] = byteString.charCodeAt(i);
   }
   return new Blob([ab], { type: 'image/jpeg' });
-}
+};
 
 export const determineLightOrDark = (color: any) => {
   let r: number, g: number, b: number, hsp: number;
   // Check the format of the color, HEX or RGB?
   if (color.match(/^rgb/)) {
-
     // If HEX --> store the red, green, blue values in separate variables
     color = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/);
 
     r = color[1];
     g = color[2];
     b = color[3];
-  }
-  else {
-
+  } else {
     // If RGB then Convert it to HEX
-    color = +("0x" + color.slice(1).replace(
-      color.length < 5 && /./g, '$&$&'
-    )
-    );
+    color = +('0x' + color.slice(1).replace(color.length < 5 && /./g, '$&$&'));
 
     r = color >> 16;
-    g = color >> 8 & 255;
+    g = (color >> 8) & 255;
     b = color & 255;
   }
 
   // HSP (Highly Sensitive Poo) equation
-  hsp = Math.sqrt(
-    0.299 * (r * r) +
-    0.587 * (g * g) +
-    0.114 * (b * b)
-  );
+  hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b));
 
   // Using the HSP value, determine whether the color is light or dark
   if (hsp > 127.5) {
-
     return 'light';
-  }
-  else {
-
+  } else {
     return 'dark';
   }
-}
+};
 
 //  Currencies Short Form Symbols
 // const SI_SYMBOL = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"];
@@ -1420,62 +1412,56 @@ export const prepareDataForGrid = (data, user = {}) => {
   let restProperties = {};
 
   Object.keys(data).forEach((key) => {
-    if (typeof data[key] === "object") {
-
+    if (typeof data[key] === 'object') {
       if (Array.isArray(data[key])) {
-        if (data[key].length > 0 && data[key][0] && data[key][0].hasOwnProperty("optionLabel")) {
+        if (data[key].length > 0 && data[key][0] && data[key][0].hasOwnProperty('optionLabel')) {
           const [first, ...rest] = data[key];
 
-          restProperties[key] = first["optionLabel"];
-          restProperties[`${key}Id`] = first["optionValue"];
-          restProperties[`rest${key}`] = rest
+          restProperties[key] = first['optionLabel'];
+          restProperties[`${key}Id`] = first['optionValue'];
+          restProperties[`rest${key}`] = rest;
+        } else if (typeof data[key][0] !== 'object') {
+          restProperties[key] = data[key].join(' , ');
+        } else {
+          restProperties[key] = data[key];
         }
-        else if (typeof data[key][0] !== "object") {
-          restProperties[key] = data[key].join(" , ")
-        }
-        else {
-          restProperties[key] = data[key]
-        }
-      }
-      else {
+      } else {
         objectValues[key] = data[key];
       }
     } else {
       restProperties[key] = data[key];
     }
-  })
+  });
 
   let finalObject = { ...restProperties };
 
-  Object.keys(objectValues).forEach(d => {
-    if (objectValues[d] && objectValues[d].hasOwnProperty("optionLabel")) {
-      finalObject[d] = objectValues[d]["optionLabel"];
-      finalObject[`${d}Id`] = objectValues[d]["optionValue"];
+  Object.keys(objectValues).forEach((d) => {
+    if (objectValues[d] && objectValues[d].hasOwnProperty('optionLabel')) {
+      finalObject[d] = objectValues[d]['optionLabel'];
+      finalObject[`${d}Id`] = objectValues[d]['optionValue'];
     }
   });
 
   if (data?.collaborator) {
-    finalObject["isAllowedToUpdate"] = [...(data?.collaborator ?? []), data?.owner ?? {}].some(
-      (obj) => obj.optionValue === user["user"]?._id
-    )
+    finalObject['isAllowedToUpdate'] = [...(data?.collaborator ?? []), data?.owner ?? {}].some((obj) => obj.optionValue === user['user']?._id);
   }
 
   if (data?.createdBy) {
-    finalObject["createdBy"] = data.createdBy?.user?.concatedName
-    finalObject["createdByDate"] = data.createdBy?.date
-    finalObject["createdById"] = data.createdBy?.user?._id
-    if (!finalObject["isAllowedToUpdate"]) {
-      finalObject["isAllowedToUpdate"] = data.createdBy?.user?._id === user["user"]?._id
+    finalObject['createdBy'] = data.createdBy?.user?.concatedName;
+    finalObject['createdByDate'] = data.createdBy?.date;
+    finalObject['createdById'] = data.createdBy?.user?._id;
+    if (!finalObject['isAllowedToUpdate']) {
+      finalObject['isAllowedToUpdate'] = data.createdBy?.user?._id === user['user']?._id;
     }
   }
   if (data?.updatedBy) {
-    finalObject["updatedBy"] = data?.updatedBy?.user?.concatedName
-    finalObject["updatedByDate"] = data?.updatedBy?.date
+    finalObject['updatedBy'] = data?.updatedBy?.user?.concatedName;
+    finalObject['updatedByDate'] = data?.updatedBy?.date;
   }
-  finalObject["id"] = data?._id
+  finalObject['id'] = data?._id;
 
   return finalObject;
-}
+};
 
 export const getLocalStorageArrayData = (key) => {
   try {
@@ -1483,37 +1469,36 @@ export const getLocalStorageArrayData = (key) => {
       return JSON.parse(localStorage.getItem(key));
     }
     return [];
-
   } catch (ex) {
-    return []
+    return [];
   }
-}
+};
 
 export const translateDataToTree = (data, parentProperty, childProperty, childrenPropertyToStore) => {
-  let parents = data.filter(value => value[parentProperty] == 'undefined' || value[parentProperty] == null)
-  let childrens = data.filter(value => value[parentProperty] !== 'undefined' && value[parentProperty] != null)
+  let parents = data.filter((value) => value[parentProperty] == 'undefined' || value[parentProperty] == null);
+  let childrens = data.filter((value) => value[parentProperty] !== 'undefined' && value[parentProperty] != null);
 
   let translator = (parents, childrens) => {
     parents.forEach((parent) => {
       childrens.forEach((current, index) => {
         if (current.parent === parent[childProperty]) {
-          let temp = JSON.parse(JSON.stringify(childrens))
-          temp.splice(index, 1)
-          translator([current], temp)
+          let temp = JSON.parse(JSON.stringify(childrens));
+          temp.splice(index, 1);
+          translator([current], temp);
 
           if (typeof parent[childrenPropertyToStore] !== 'undefined') {
-            parent[childrenPropertyToStore].push(current)
+            parent[childrenPropertyToStore].push(current);
           } else {
-            parent[childrenPropertyToStore] = [current]
+            parent[childrenPropertyToStore] = [current];
           }
         }
-      })
-    })
-  }
-  translator(parents, childrens)
+      });
+    });
+  };
+  translator(parents, childrens);
 
-  return parents
-}
+  return parents;
+};
 
 export function treeToFlatArray(array, childrenProperty) {
   var result = [];
@@ -1528,16 +1513,16 @@ export function treeToFlatArray(array, childrenProperty) {
 }
 
 export const arrayToDropwdownOption = (array) => {
-  const option: any = []
+  const option: any = [];
   array?.forEach((element, index) => {
     option.push({
-      "optionLabel": element,
-      "optionValue": element,
-      "order": index
-    })
+      optionLabel: element,
+      optionValue: element,
+      order: index
+    });
   });
   return option;
-}
+};
 
 export const INVENTORY_STATUS = {
   new: 'New',
@@ -1553,14 +1538,14 @@ export const INVENTORY_STATUS = {
   lost: 'Lost',
   customer: 'With Customer',
   supplier: 'With Supplier',
-  returned: 'Returned',
+  returned: 'Returned'
 };
 
 export const DELIVERY_TICKET_STATUS = {
   new: 'New',
   indTransit: 'In-Transit',
   delivered: 'Delivered',
-  cancelled: 'Cancelled',
+  cancelled: 'Cancelled'
 };
 
 export const RENTAL_STATUS = {
@@ -1573,7 +1558,7 @@ export const RENTAL_STATUS = {
   jobEnded: 'Job Ended',
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
-  closed: 'Closed',
+  closed: 'Closed'
 };
 
 export const RENTAL_INTERNAL_ASSET_STATUS = {
@@ -1581,7 +1566,7 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   inUse: 'In-Use',
   complete: 'Complete',
   return: 'Return',
-  consumed: 'Consumed',
+  consumed: 'Consumed'
 } as const;
 
 export const REPAIR_JOB_STATUS = {
@@ -1591,15 +1576,15 @@ export const REPAIR_JOB_STATUS = {
 };
 
 export const DELIVERY_TICKET_MAPPED_STATUS = {
-  "Sign-off - Dispatch": DELIVERY_TICKET_STATUS.indTransit,
-  "Sign-off - Delivery": DELIVERY_TICKET_STATUS.delivered
-}
+  'Sign-off - Dispatch': DELIVERY_TICKET_STATUS.indTransit,
+  'Sign-off - Delivery': DELIVERY_TICKET_STATUS.delivered
+};
 
 export const DELIVERY_TICKET_TYPE = {
   loading: 'Loading',
   receiving: 'Receiving',
   return: 'Return',
-  delivery: 'Delivery',
+  delivery: 'Delivery'
 };
 
 export const DELIVERY_TICKET_REFRENCE_TYPE = {
@@ -1607,20 +1592,20 @@ export const DELIVERY_TICKET_REFRENCE_TYPE = {
   transferAsset: 'Transfer Asset',
   repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
-  sublease: 'Sublease',
+  sublease: 'Sublease'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
   plant: 'Plant',
   customer: 'Customer',
-  supplier: 'Supplier',
+  supplier: 'Supplier'
 };
 
 export const SUBLEASE_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   issued: 'Issued',
-  completed: 'Completed',
+  completed: 'Completed'
 };
 
 export const PURCHASE_ORDER_STATUS = {
@@ -1630,19 +1615,16 @@ export const PURCHASE_ORDER_STATUS = {
   received: 'Received',
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
-  closed: 'Closed',
+  closed: 'Closed'
 } as const;
 
 export const INVENTORY_OWNER_TYPE = {
   brand: 'Brand',
   supplierAccount: 'Supplier Account',
-  customerAccount: 'Customer Account',
+  customerAccount: 'Customer Account'
 } as const;
 
-export const asyncForEach = async (
-  array: any[],
-  callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>
-) => {
+export const asyncForEach = async (array: any[], callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>) => {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
   }
@@ -1664,18 +1646,18 @@ export const ACTIVITY_RESOURCE = {
   deliveryTicket: 'deliveryTicket',
   sublease: 'sublease',
   salesOrder: 'salesOrder',
-  serializedAsset: 'serializedAsset',
+  serializedAsset: 'serializedAsset'
 };
 
 export const REPORT_LIST = [
-  { title: sidebarResource.rentalManagement, key: "rentalManagement" },
-  { title: sidebarResource.salesOrder, key: "salesOrder" },
-  { title: sidebarResource.serializedAsset, key: "serializedAsset" },
-  { title: sidebarResource.lead, key: "lead" },
-  { title: sidebarResource.opportunity, key: "opportunity" },
-  { title: sidebarResource.quoteBuilder, key: "quoteBuilder" },
-  { title: sidebarResource.projectSales, key: "projectSales" }
-]
+  { title: sidebarResource.rentalManagement, key: 'rentalManagement' },
+  { title: sidebarResource.salesOrder, key: 'salesOrder' },
+  { title: sidebarResource.serializedAsset, key: 'serializedAsset' },
+  { title: sidebarResource.lead, key: 'lead' },
+  { title: sidebarResource.opportunity, key: 'opportunity' },
+  { title: sidebarResource.quoteBuilder, key: 'quoteBuilder' },
+  { title: sidebarResource.projectSales, key: 'projectSales' }
+];
 
 export const getApi = (resource: string) => {
   switch (kebabCase(resource)) {
@@ -1695,7 +1677,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'customer-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ""} ${data?.firstName ? data?.firstName : ""} ${data?.middleName ? data?.middleName : ""} ${data?.lastName ? data?.lastName : ""}`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'supplier-account':
@@ -1705,7 +1689,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'supplier-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ""} ${data?.firstName ? data?.firstName : ""} ${data?.middleName ? data?.middleName : ""} ${data?.lastName ? data?.lastName : ""}`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'lead':
@@ -1767,8 +1753,87 @@ export const getData = (resource: string, data: any) => {
       return {
         name: `${data.assetNumber}`,
         id: data._id
-      }
+      };
     default:
       break;
+  }
+};
+
+export const viewsColors = {
+  rentalJob: {
+    background: '#c3d5e6',
+    borderColor: '#6c89a6'
+  },
+  cancelledRentalJob: {
+    background: '#00FF00',
+    borderColor: '#999999'
+  },
+  closedRentalJob: {
+    background: '#4BB543',
+    borderColor: '#999999'
+  },
+  repairJob: {
+    background: '#c3d5e6',
+    borderColor: '#6c89a6'
+  },
+  closedRepairJob: {
+    background: '#4BB543',
+    borderColor: '#999999'
+  },
+  package: {
+    background: '#acdce6',
+    borderColor: '#81afb8'
+  },
+  product: {
+    background: '#97c9bf',
+    borderColor: '#70948d'
+  },
+  assets: {
+    background: '#ffd65b',
+    borderColor: '#f5c431'
+  },
+  lostAssets: {
+    background: '#ff9980',
+    borderColor: '#db765c'
+  },
+  scrapAssets: {
+    background: '#ff9980',
+    borderColor: '#db765c'
+  },
+  purchaseOrder: {
+    background: '#FFA500',
+    borderColor: '#6c89a6'
+  },
+  sublease: {
+    background: '#FFE4C0',
+    borderColor: '#FFE4C0'
+  },
+  transferAsset: {
+    background: '#ecc19c',
+    borderColor: '#d98298'
+  },
+  loadingTicket: {
+    background: '#e6c6e6',
+    borderColor: '#b38fb3'
+  },
+  deliveredLoadingTicket: {
+    background: '#e6c6e6',
+    borderColor: '#b38fb3'
+  },
+  receivingTicket: {
+    background: '#cfdb7f',
+    borderColor: '#aeb86e'
+  },
+  deliveredReceivingTicket: {
+    background: '#cfdb7f',
+    borderColor: '#aeb86e'
+  },
+  returnTicket: {
+    background: '#ff9980',
+    borderColor: '#db765c'
+  },
+  deliveredReturnTicket: {
+    background: '#ff9980',
+    borderColor: '#db765c'
   }
 };

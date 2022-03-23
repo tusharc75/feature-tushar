@@ -2,12 +2,7 @@ import _ from 'lodash';
 import React, { useContext, useState, useEffect } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
-import {
-  DELIVERY_TICKET_TYPE,
-  INVENTORY_STATUS,
-  rentalManagement,
-  RENTAL_STATUS,
-} from '../../../constants/helpers';
+import { DELIVERY_TICKET_TYPE, INVENTORY_STATUS, rentalManagement, RENTAL_STATUS, viewsColors } from '../../../constants/helpers';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
@@ -19,88 +14,76 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 const customNodeStyles = {
   rentalJob: {
     name: 'Rental Job',
-    background: '#c3d5e6',
-    borderColor: '#6c89a6'
+    ...viewsColors.rentalJob
   },
   package: {
     name: 'Package',
-    background: '#acdce6',
-    borderColor: '#81afb8'
+    ...viewsColors.package
   },
   product: {
     name: 'Product',
-    background: '#97c9bf',
-    borderColor: '#70948d'
+    ...viewsColors.product
   },
   purchaseOrder: {
     name: 'Purchase Order',
-    background: '#FFA500',
-    borderColor: '#6c89a6'
+    ...viewsColors.purchaseOrder
   },
   sublease: {
     name: 'Sublease',
-    background: '#FFE4C0',
-    borderColor: '#FFE4C0'
+    ...viewsColors.sublease
   },
   transferAsset: {
     name: 'Transfer Asset',
-    background: '#ecc19c',
-    borderColor: '#d98298'
+    ...viewsColors.transferAsset
   },
   productAssets: {
     name: 'Assets',
-    background: '#ffd65b',
-    borderColor: '#f5c431'
+    ...viewsColors.assets
   },
-  lostOrScrapAssets: {
-    name: 'Lost/Scrap Assets',
-    background: '#ff9980',
-    borderColor: '#db765c'
+  lostAssets: {
+    name: 'Lost Assets',
+    ...viewsColors.lostAssets
+  },
+  scrapAssets: {
+    name: 'Scrap Assets',
+    ...viewsColors.scrapAssets
   },
   loadingTicket: {
     name: 'Loading Ticket',
-    background: '#e6c6e6',
-    borderColor: '#b38fb3'
+    ...viewsColors.loadingTicket
   },
   receivingTicket: {
     name: 'Receiving Ticket',
-    background: '#cfdb7f',
-    borderColor: '#aeb86e'
+    ...viewsColors.receivingTicket
   },
   returnTicket: {
     name: 'Return Ticket',
-    background: '#ff9980',
-    borderColor: '#db765c'
+    ...viewsColors.returnTicket
   }
 };
 const customDeliveredNodeStyle = {
   loadingTicket: {
     name: 'Loading Ticket',
-    background: '#e6c6e6',
-    borderColor: '#b38fb3',
+    ...viewsColors.deliveredLoadingTicket,
     borderLeft: '10px solid #008000'
   },
   receivingTicket: {
     name: 'Receiving Ticket',
-    background: '#cfdb7f',
-    borderColor: '#aeb86e',
+    ...viewsColors.deliveredReceivingTicket,
     borderLeft: '10px solid #008000'
   },
   returnTicket: {
     name: 'Return Ticket',
-    background: '#ff9980',
-    borderColor: '#db765c',
+    ...viewsColors.deliveredReturnTicket,
     borderLeft: '10px solid #FF0000'
   },
   cancelledRentalJob: {
     name: 'Return Ticket',
-    background: '#00FF00',
-    borderColor: '#999999'
+    ...viewsColors.cancelledRentalJob
   },
   closedRentalJob: {
     name: 'Return Ticket',
-    background: '#4BB543',
-    borderColor: '#999999'
+    ...viewsColors.closedRentalJob
   }
 };
 
@@ -166,7 +149,6 @@ const RentalManagementViews = (props) => {
         ?.map((item) => {
           allMaterialWithId[item?._id] = item?.materialId;
         });
-
 
       if (allPackages.length) xPosition += 300;
       var pakcageIdx = 0;
@@ -347,7 +329,9 @@ const RentalManagementViews = (props) => {
           position: { x: xPosition, y: beforeLoadingAssetIdx * 80 },
           style:
             item?.inventoryDetail?.status === INVENTORY_STATUS.scrap || item?.inventoryDetail?.status === INVENTORY_STATUS.lost
-              ? customNodeStyles.lostOrScrapAssets
+              ? item?.inventoryDetail?.status === INVENTORY_STATUS.scrap
+                ? customNodeStyles.scrapAssets
+                : customNodeStyles.lostAssets
               : customNodeStyles.productAssets
         });
         beforeLoadingAssetIdx += 1;
@@ -357,10 +341,10 @@ const RentalManagementViews = (props) => {
           source: purchaseArr.includes(item.inventoryDetail.purchaseOrder)
             ? `${item.inventoryDetail.purchaseOrder}`
             : subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset
-              ? `${item.inventoryDetail.supplierAccount}`
-              : allAssets[item.inventoryDetail.assetNumber] !== undefined
-                ? allAssets[item.inventoryDetail.assetNumber]
-                : `${item._id}`,
+            ? `${item.inventoryDetail.supplierAccount}`
+            : allAssets[item.inventoryDetail.assetNumber] !== undefined
+            ? allAssets[item.inventoryDetail.assetNumber]
+            : `${item._id}`,
           arrowHeadType: 'arrow',
           target: `${item.inventoryDetail.assetNumber}`
         });
@@ -469,7 +453,9 @@ const RentalManagementViews = (props) => {
             position: { x: xPosition + 300, y: loadingAssets * 80 },
             style:
               productsWithStatus[product.optionValue] === INVENTORY_STATUS.lost || productsWithStatus[product.optionValue] === INVENTORY_STATUS.scrap
-                ? customNodeStyles.lostOrScrapAssets
+                ? productsWithStatus[product.optionValue] === INVENTORY_STATUS.lost
+                  ? customNodeStyles.lostAssets
+                  : customNodeStyles.scrapAssets
                 : customNodeStyles.productAssets
           });
           loadingAssets += 1;
