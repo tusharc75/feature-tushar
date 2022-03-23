@@ -30,12 +30,14 @@ import { isEqual } from 'lodash';
 import moment from "moment";
 import ManageAddressDialog from "src/components/Address/ManageAddressDialog";
 
-const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess, currency = null,
+const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess,
     refrenceType = null, refrenceId = null, refrenceData = null }) => {
 
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
-    const { state: { user, selectedEntity, permissions } }: any = useData();
+    const {
+        state: { user, permissions, selectedEntity },
+    }: any = useData();
     const ref = useRef(null);
 
     const [loading, setLoading] = useState(false);
@@ -60,7 +62,6 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
 
     const [showAddressDialog, setShowAddressDialog] = useState(false);
     const [addressType, setAddressType] = useState('');
-
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Sublease").then(({ data: { data } }) => {
@@ -104,13 +105,16 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                 fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !["actualStartDate", "actualEndDate"].includes(obj.fieldName));
                 let createValues: any = getObjKeys("", fieldsDataForCreate)
                 createValues["subleaseName"] = `SL_${generateUniqueIdOnly()}`
-                if (currency) {
-                    createValues["currency"] = currency
+                if (fieldsDataForCreate?.some((e) => e.fieldName === "currency")) {
+                    createValues["currency"] = user.user?.brandCurrency;
                 }
                 if (refrenceType === "rentalJob") {
                     createValues["rentalJob"] = refrenceId
                     createValues["estimateStartDate"] = refrenceData.estimateStartDate
                     createValues["estimateEndDate"] = refrenceData.estimateEndDate
+                    if (fieldsDataForCreate?.some((e) => e.fieldName === "warehouse")) {
+                        createValues["warehouse"] = refrenceData?.warehouse?.optionValue
+                    }
                 }
                 createValues["actualStartDate"] = ""
                 createValues["actualEndDate"] = ""

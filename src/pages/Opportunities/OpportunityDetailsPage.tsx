@@ -230,7 +230,6 @@ function OpportunityDetailsPage() {
     axiosInstance()
       .get(`${opportunityApi}/related/${id}`)
       .then(({ data: { data } }) => {
-        console.log(data,'related')
         setProjectSales(
           data[sidebarResource.projectSales] &&
             data[sidebarResource.projectSales][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]

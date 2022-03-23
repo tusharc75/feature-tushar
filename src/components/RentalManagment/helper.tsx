@@ -16,7 +16,7 @@ export const fetch_rental_product_fields = async (currency, isOffline) => {
         const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`);
         data = response?.data?.data;
     }
-    data = CURReplaceByCurrencySingle(data, currency);
+    data = CURReplaceByCurrencySingle(data, currency ? currency : "USD");
     var isRateRequired = false
     data.forEach(element => {
         if (element.fieldName === "price" && element.required) {
@@ -37,7 +37,7 @@ export const fetch_rental_cost_fields = async (currency, isOffline) => {
         const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`);
         data = response?.data?.data;
     }
-    data = CURReplaceByCurrencySingle(data, currency);
+    data = CURReplaceByCurrencySingle(data, currency ? currency : "USD");
     var isRateRequired = false
     data.forEach(element => {
         if (element.fieldName === "price" && element.required) {
