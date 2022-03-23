@@ -447,8 +447,12 @@ const RentalManagement = () => {
                     }}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
-                    recordsToExport={selectedRecords.length}
-                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+                    ids={
+                      getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                        ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                        : []
+                    }
                     onExportToExcelSuccess={() => {
                       if (gridApi) gridApi.deselectAll()
                       else fetchRentalManagement()

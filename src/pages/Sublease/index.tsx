@@ -15,7 +15,7 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { sublease, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL } from '../../constants/helpers';
+import { sublease, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL, getLocalStorageArrayData } from '../../constants/helpers';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -34,6 +34,7 @@ import MobileFilterDialog from "../../components/MobileFilterDialog"
 import queryString from 'query-string';
 import HideWhenOffline from "src/components/HideWhenOffline";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
+import { camelCase } from "lodash";
 
 const Sublease = () => {
 
@@ -47,6 +48,7 @@ const Sublease = () => {
             value: 2,
         },
     ];
+    let renderedFrom = camelCase(routes.sublease?.title)
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const { type }: any = queryString.parse(history.location.search);
@@ -65,6 +67,7 @@ const Sublease = () => {
 
     const [isOpenDialog, setisOpenDialog] = useState(false)
     const [fromRental, setFromRental] = useState(history.location?.state?.rental);
+    const localStorageSelectedRecords = `${renderedFrom}_selected`
 
     const {
         state: { user, permissions, selectedEntity },
@@ -307,8 +310,12 @@ const Sublease = () => {
                     }}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
-                    recordsToExport={selectedRecords.length}
-                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+                    ids={
+                        getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                            ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                            : []
+                    }
                     onExportToExcelSuccess={() => {
                         if (gridApi) gridApi.deselectAll()
                         else fetchData()
@@ -454,13 +461,13 @@ const Sublease = () => {
                             permissions={permissions.sublease}
                             primaryField={columns?.find(d => d.primaryField)}
                             onClick={(data) => {
-                                history.push(`${routes.purchaseOrderDetail.path}/${data._id}`)
+                                history.push(`${routes.subleaseDetail.path}/${data._id}`)
                             }}
                             dataRows={dataRows}
                             selectedRecords={selectedRecords}
                             dispatch={dispatch}
                             onEdit={(data) => {
-                                history.push(`${routes.purchaseOrderDetail.path}/${data._id}?openEdit=true`)
+                                history.push(`${routes.subleaseDetail.path}/${data._id}?openEdit=true`)
                             }}
                             extraParamsToCheckDelete={true}
                             onDelete={(data) => {
@@ -485,7 +492,7 @@ const Sublease = () => {
                             onCreate={false}
                             showClone={true}
                             onClone={(data) => { setShowManageDialog({ open: true, isClone: true, idToClone: data._id }); }}
-                            renderedFrom={routes.sublease?.title}
+                            renderedFrom={renderedFrom}
                         /> :
                         <CustomAgGrid
                             columns={columns}
@@ -499,7 +506,7 @@ const Sublease = () => {
                             page={page}
                             actionWidth={150}
                             loading={loading}
-                            renderedFrom={routes.sublease?.title}
+                            renderedFrom={renderedFrom}
                             refreshGrid={fetchData}
                             showOnlyShowFilteredRecordSwitch={true}
                         /> : null
@@ -515,7 +522,6 @@ const Sublease = () => {
                     setShowManageDialog({ open: false, isClone: false, idToClone: null });
                     fetchData()
                 }}
-                currency={user?.entity?.find(d => d._id === selectedEntity)?.currency}
             />
         }
         {

@@ -65,8 +65,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
     const [addressData, setAddressData] = useState([])
     const [billingAddress, setBillingAddress] = useState([]);
     const [shippingAddress, setShippingAddress] = useState([]);
-    // const [countryBillToMainData, setCountryBillToMainData] = useState([]);
-    // const [countrySellToMainData, setCountrySellToMainData] = useState([]);
     const [cloneHeading, setCloneHeading] = useState('');
 
     const [showAddWarehouseDialog, setShowAddWarehouseDialog] = useState(false);
@@ -145,21 +143,13 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             (d) => d.fieldName === "customerContact"
         );
         const billingAddressDropdownData = rentalData.fields.find(
-            (d) => d.fieldName === "billingAddress"
+            (d) => d.fieldName === "billingAddress" || d.fieldName === "shippingAddress"
         );
         if (billingAddressDropdownData) {
             setAddressData(billingAddressDropdownData.option)
-            // setCountryBillToMainData(billingAddressDropdownData.option)
             setBillingAddress(billingAddressDropdownData.option)
             setShippingAddress(billingAddressDropdownData.option)
         }
-        // const countrySellToDropdownData = rentalData.fields.find(
-        //     (d) => d.fieldName === "shippingAddress"
-        // );
-        // if (billingAddressDropdownData) {
-        //     // setCountrySellToMainData(countrySellToDropdownData.option)
-        //     setShippingAddress(countrySellToDropdownData.option)
-        // }
         if (customerContactDropdownData) {
             setCustomerContactMainDataSource(customerContactDropdownData.option);
             if (rentalManagementId) {
@@ -270,10 +260,18 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             }
             else {
                 fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !["actualStartDate", "actualEndDate"].includes(obj.fieldName));
-                let initialData = {
-                    ...getObjKeys("", fieldsDataForCreate),
-                    estimateEndDate: "", actualStartDate: "", actualEndDate: "", currency: user.user?.brandCurrency || "", rentalJobName: `RJ_${generateUniqueIdOnly()}`
-                };
+                let initialData = getObjKeys("", fieldsDataForCreate);
+                if (fieldsDataForCreate?.some((e) => e.fieldName === "currency")) {
+                    initialData["currency"] = user.user?.brandCurrency;
+                }
+                if (fieldsDataForCreate?.some((e) => e.fieldName === "estimateEndDate")) {
+                    initialData["estimateEndDate"] = "";
+                }
+                initialData["actualStartDate"] = "";
+                initialData["actualEndDate"] = "";
+                if (fieldsDataForCreate?.some((e) => e.fieldName === "rentalJobName")) {
+                    initialData["rentalJobName"] = `RJ_${generateUniqueIdOnly()}`
+                }
                 setRentalData({
                     fields: fieldsDataForCreate,
                     initialValues: initialData,
@@ -381,30 +379,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             }
         }
     };
-
-    // const onCountrySellToDropDownOpen = (selectedAccount) => {
-    //     let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.shippingAddress
-    //     if (filterAddress) {
-    //         setShippingAddress(
-    //             countrySellToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue))
-    //         );
-    //     }
-    //     else {
-    //         setShippingAddress([])
-    //     }
-    // };
-
-    // const onCountryBillToDropDownOpen = (selectedAccount) => {
-    //     let filterAddress = accountData.find(d => d.optionValue === selectedAccount)?.billingAddress
-    //     if (filterAddress) {
-    //         setBillingAddress(
-    //             countryBillToMainData.filter((d) => filterAddress?.some(u => u === d.optionValue))
-    //         );
-    //     }
-    //     else {
-    //         setBillingAddress([])
-    //     }
-    // };
 
     const handleValuesChange = (data) => {
         setFormValues((prevState) => ({
@@ -584,12 +558,17 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                                     ? value.optionValue
                                                                                                     : ""
                                                                                             );
-                                                                                            setFieldValue("customerContact", "");
-                                                                                            setFieldValue("billingAddress", "");
-                                                                                            setFieldValue("shippingAddress", "");
+                                                                                            if (rentalData?.fields?.some((e) => e.fieldName === "customerContact")) {
+                                                                                                setFieldValue("customerContact", "");
+                                                                                            }
+                                                                                            if (rentalData?.fields?.some((e) => e.fieldName === "billingAddress")) {
+                                                                                                setFieldValue("billingAddress", "");
+                                                                                            }
+                                                                                            if (rentalData?.fields?.some((e) => e.fieldName === "shippingAddress")) {
+                                                                                                setFieldValue("shippingAddress", "");
+                                                                                            }
                                                                                             handleValuesChange({
-                                                                                                [field.fieldName]: value && value.optionValue ? value.optionValue : "",
-                                                                                                "customerContact": "",
+                                                                                                [field.fieldName]: value && value.optionValue ? value.optionValue : ""
                                                                                             })
                                                                                         }}
                                                                                     />
@@ -879,29 +858,6 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                             />
                                                                         )
                                                                             : field.fieldName === "billingAddress" ? (
-                                                                                // <FormTypes
-                                                                                //     {...field}
-                                                                                //     disabled={Boolean(rentalManagementId) && field.disableOnEdit && !isClone}
-                                                                                //     values={values}
-                                                                                //     errors={errors}
-                                                                                //     touched={touched}
-                                                                                //     label={field.fieldLabel}
-                                                                                //     name={field.fieldName}
-                                                                                //     type={field.type}
-                                                                                //     options={billingAddress}
-                                                                                //     setFieldValue={(name, value) => {
-                                                                                //         setFieldValue(name, value)
-                                                                                //     }}
-                                                                                //     required={field.required}
-                                                                                //     fullWidth
-                                                                                //     isTooltip={field?.isTooltip || false}
-                                                                                //     tooltipMessage={field?.tooltipMessage}
-                                                                                //     size="small"
-                                                                                //     onOpen={() =>
-                                                                                //         onCountryBillToDropDownOpen(values["customerAccount"])
-                                                                                //     }
-                                                                                // />
-
                                                                                 <Box display="flex">
                                                                                     <Box flexGrow={1}>
                                                                                         <FormTypes
@@ -947,69 +903,46 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                 :
                                                                                 field.fieldName === "shippingAddress" ? (
                                                                                     <Box display="flex">
-                                                                                    <Box flexGrow={1}>
-                                                                                        <FormTypes
-                                                                                            {...field}
-                                                                                            disabled={Boolean(rentalManagementId) && field.disableOnEdit && !isClone}
-                                                                                            fieldData={field}
-                                                                                            values={values}
-                                                                                            errors={errors}
-                                                                                            touched={touched}
-                                                                                            label={field.fieldLabel}
-                                                                                            name={field.fieldName}
-                                                                                            type={field.type}
-                                                                                            options={shippingAddress}
-                                                                                            setFieldValue={(name, value) => {
-                                                                                                setFieldValue(name, value)
-                                                                                            }}
-                                                                                            required={field.required}
-                                                                                            fullWidth
-                                                                                            isTooltip={field?.isTooltip || false}
-                                                                                            tooltipMessage={field?.tooltipMessage}
-                                                                                            size="small"
-                                                                                            onOpen={() =>
-                                                                                                onShippingAddressOpen(values["customerAccount"], values["shippingAddress"])
-                                                                                            }
-                                                                                        />
-                                                                                    </Box>
-                                                                                    <Box>
-                                                                                        <Tooltip title={`Add ${field.fieldLabel}`} className="mt-1">
-                                                                                            <IconButton
-                                                                                                onClick={() => {
-                                                                                                    setShowAddressDialog(true);
-                                                                                                    setAddressType('shippingAddress');
+                                                                                        <Box flexGrow={1}>
+                                                                                            <FormTypes
+                                                                                                {...field}
+                                                                                                disabled={Boolean(rentalManagementId) && field.disableOnEdit && !isClone}
+                                                                                                fieldData={field}
+                                                                                                values={values}
+                                                                                                errors={errors}
+                                                                                                touched={touched}
+                                                                                                label={field.fieldLabel}
+                                                                                                name={field.fieldName}
+                                                                                                type={field.type}
+                                                                                                options={shippingAddress}
+                                                                                                setFieldValue={(name, value) => {
+                                                                                                    setFieldValue(name, value)
                                                                                                 }}
-                                                                                                disabled={field.disableOnEdit}
+                                                                                                required={field.required}
+                                                                                                fullWidth
+                                                                                                isTooltip={field?.isTooltip || false}
+                                                                                                tooltipMessage={field?.tooltipMessage}
                                                                                                 size="small"
-                                                                                            >
-                                                                                                <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                                                            </IconButton>
-                                                                                        </Tooltip>
+                                                                                                onOpen={() =>
+                                                                                                    onShippingAddressOpen(values["customerAccount"], values["shippingAddress"])
+                                                                                                }
+                                                                                            />
+                                                                                        </Box>
+                                                                                        <Box>
+                                                                                            <Tooltip title={`Add ${field.fieldLabel}`} className="mt-1">
+                                                                                                <IconButton
+                                                                                                    onClick={() => {
+                                                                                                        setShowAddressDialog(true);
+                                                                                                        setAddressType('shippingAddress');
+                                                                                                    }}
+                                                                                                    disabled={field.disableOnEdit}
+                                                                                                    size="small"
+                                                                                                >
+                                                                                                    <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
+                                                                                                </IconButton>
+                                                                                            </Tooltip>
+                                                                                        </Box>
                                                                                     </Box>
-                                                                                </Box>
-
-                                                                                    // <FormTypes
-                                                                                    //     {...field}
-                                                                                    //     disabled={Boolean(rentalManagementId) && field.disableOnEdit && !isClone}
-                                                                                    //     values={values}
-                                                                                    //     errors={errors}
-                                                                                    //     touched={touched}
-                                                                                    //     label={field.fieldLabel}
-                                                                                    //     name={field.fieldName}
-                                                                                    //     type={field.type}
-                                                                                    //     options={shippingAddress}
-                                                                                    //     setFieldValue={(name, value) => {
-                                                                                    //         setFieldValue(name, value)
-                                                                                    //     }}
-                                                                                    //     required={field.required}
-                                                                                    //     fullWidth
-                                                                                    //     isTooltip={field?.isTooltip || false}
-                                                                                    //     tooltipMessage={field?.tooltipMessage}
-                                                                                    //     size="small"
-                                                                                    //     onOpen={() =>
-                                                                                    //         onShippingAddressOpen(values["customerAccount"], values["shippingAddress"])
-                                                                                    //     }
-                                                                                    // />
                                                                                 )
                                                                                     : (field.fieldName === "plant" || field.fieldName === "warehouse") ? (
                                                                                         <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
@@ -1194,11 +1127,18 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                         onGetAddedAccount={({ data }) => {
                                             setNewAddedAccountId(data._id);
                                             updateAccountDropdown(data);
-
-                                            setFieldValue("customerAccount", data._id);
-                                            setFieldValue("customerContact", "");
-                                            setFieldValue("billingAddress", "");
-                                            setFieldValue("shippingAddress", "");
+                                            if (rentalData?.fields?.some((e) => e.fieldName === "customerAccount")) {
+                                                setFieldValue("customerAccount", data._id);
+                                            }
+                                            if (rentalData?.fields?.some((e) => e.fieldName === "customerContact")) {
+                                                setFieldValue("customerContact", "");
+                                            }
+                                            if (rentalData?.fields?.some((e) => e.fieldName === "billingAddress")) {
+                                                setFieldValue("billingAddress", "");
+                                            }
+                                            if (rentalData?.fields?.some((e) => e.fieldName === "shippingAddress")) {
+                                                setFieldValue("shippingAddress", "");
+                                            }
                                         }}
                                         isRedirectToDetailPage={false}
                                     />
