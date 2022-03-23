@@ -538,7 +538,7 @@ const Product = () => {
       }
     />
   );
-  console.log(getLocalStorageArrayData(localStorageSelectedRecords));
+  
   return (
     <Fragment>
       <Grid container className="headerbox">

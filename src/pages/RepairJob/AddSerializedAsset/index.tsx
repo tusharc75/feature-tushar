@@ -316,11 +316,8 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             rowClassRules={{
-              "scrap-data-row": function (params) {
-                return [INVENTORY_STATUS.scrap].some(s => s === params.data.status);
-              },
               "red-data-row": function (params) {
-                return [INVENTORY_STATUS.lost].some(s => s === params.data.status);
+                return [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].some(s => s === params.data.status);
               },
             }}
             refreshGrid={fetchRecords}

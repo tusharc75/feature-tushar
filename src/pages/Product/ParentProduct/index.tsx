@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
-import { Box} from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
 import { gridLoadingTimeout, CustomDialogTransition, packages, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData, deliveryTicket } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
@@ -30,9 +30,7 @@ const ParentProduct = ({ renderedFrom, productId }) => {
 
     useEffect(() => {
         fetchProduct()
-    }, [page, limit, filters, sorting, search]);
-
-
+    }, [page, limit, filters, sorting, search, productId]);
 
     const fetchProduct = async () => {
         try {
@@ -57,7 +55,6 @@ const ParentProduct = ({ renderedFrom, productId }) => {
             dispatch({ type: "loading", loading: false });
         }
     };
-
 
     const fetchGridColumns = () => {
         axiosInstance()

@@ -118,7 +118,6 @@ const Report = () => {
    * @returns none if no data selected
    */
   const fetchResourceData = () => {
-    console.log(resourceCamelCase);
     if (cancelTokenSource) {
       cancelTokenSource.cancel();
     }
