@@ -11,18 +11,17 @@ import { AiOutlineApartment } from 'react-icons/ai';
 import { MdAdd } from 'react-icons/md';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import SearchBox from '../../components/Helpers/SearchBox';
 import { Delete } from '@material-ui/icons';
 import { IconButton, Tooltip } from '@material-ui/core';
 import { useData } from '../../StateProvider/Provider';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGridEditable';
-import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CustomAgGridEditable from '../../components/AgGridComponents/CustomAgGridEditable';
 import AssignProductDialog from '../../components/AssignRolesDialog/AssignProductDialog';
 import ConfirmationDialogRaw from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 
 const BOMTable = () => {
   const { id } = useParams();
@@ -72,7 +71,7 @@ const BOMTable = () => {
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
         }
-        setFrameWorkComponent({ ...tempFrameworkComponent, actionsRenderer: ActionsRenderer, productNameRenderer: ProductNameRenderer, })
+        setFrameWorkComponent({ ...tempFrameworkComponent, actionsRenderer: ActionsRenderer })
         columns = [...columns, ...getStaticFields()]
         setColumns([...defaultColumns, ...columns])
       })
@@ -101,7 +100,7 @@ const BOMTable = () => {
         setCustomizedRoutes([
           { title: 'Product Master', path: routes.product.path },
           { title: productData?.productName, path: `${routes.productDetail.path}/${id}` },
-          { title: 'Parts' }
+          { title: 'Child Product' }
         ]);
       });
   };
@@ -203,12 +202,6 @@ const BOMTable = () => {
     </Tooltip>
   )
 
-  const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`/product/detail/${params.data.childProduct}`}>
-      {params.value}
-    </Link>
-  )
-
   const handleValueUpdate = (row) => {
     if (!row || !row?.data) return;
     const bomId = row.data._id;
@@ -236,7 +229,7 @@ const BOMTable = () => {
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
               <div className="d-flex align-items-center">
                 <AiOutlineApartment className="headerLogo" />
-                <span className="listingHeader">Parts</span>
+                <span className="listingHeader">Child Product</span>
               </div>
             </Grid>
             <Grid className={styles.filter_side} item md={6} sm={12} xs={12}>
@@ -286,7 +279,7 @@ const BOMTable = () => {
           </Grid>
         </div>
         <Box component="div">
-          {frameWorkComponent ? <CustomAgGrid
+          {frameWorkComponent ? <CustomAgGridEditable
             columns={columns}
             dataRows={dataRows}
             isClientSideGrid={true}

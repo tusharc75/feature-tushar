@@ -334,6 +334,7 @@ export default function CustomAgGridEditable({
         field={column.field}
         headerName={column.headerName}
         filter={column.filter ?? "agTextColumnFilter"}
+        cellRendererParams={column.cellRendererParams ?? null}
         sortable={column.sortable ?? true}
         cellRenderer={column.cellRenderer ?? null}
         minWidth={column.width ?? 250}

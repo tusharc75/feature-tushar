@@ -382,7 +382,10 @@ const RentalManagementViews = (props) => {
       product?.material
         ?.filter((i) => !i?.productDetail?.serializedProduct && assetsInLoading[i?.materialId] && i.type !== 'package')
         ?.map((item) => {
-          if (loadingProductData.includes(`${item.materialId}`)) {
+          if (!loadingProductData.includes(`${item.materialId}`)) {
+            loadingProductData.push(`${item.materialId}`);
+
+            console.log(item.productDetail?.productName);
             flow.push({
               id: `${item.productDetail?.productName}`,
               sourcePosition: 'right',
@@ -403,8 +406,6 @@ const RentalManagementViews = (props) => {
               style: customNodeStyles.product
             });
             beforeLoadingAssetIdx += 1;
-          } else {
-            loadingProductData.push(`${item.materialId}`);
           }
           flowEdge.push({
             id: `edge-assets-product-parent-${item.productDetail?.productName}-${assetsInLoading[item?.materialId]}-${_.random(0, 1000)}`,
@@ -507,7 +508,9 @@ const RentalManagementViews = (props) => {
       product?.material
         ?.filter((i) => !i?.productDetail?.serializedProduct && assetsInReceiving[i?.materialId] && i.type !== 'package')
         .map((item) => {
-          if (receivingProductData.includes(`${item.materialId}`)) {
+          if (!receivingProductData.includes(`${item.materialId}`)) {
+            receivingProductData.push(`${item.materialId}`);
+
             flow.push({
               id: `${item.materialId}`,
               sourcePosition: 'right',
@@ -528,8 +531,6 @@ const RentalManagementViews = (props) => {
               style: customNodeStyles.product
             });
             loadingAssets += 1;
-          } else {
-            receivingProductData.push(`${item.materialId}`);
           }
           flowEdge.push({
             id: `edge-assets-product-parent-${item?.materialId}-${assetsInLoading[item?.materialId]}-${_.random(0, 1000)}`,
@@ -603,7 +604,8 @@ const RentalManagementViews = (props) => {
       product?.material
         ?.filter((i) => !i?.productDetail?.serializedProduct && assetsInReturn[i?.materialId] && i.type !== 'package')
         .map((item) => {
-          if (returnProductData.includes(`${item.materialId}`)) {
+          if (!returnProductData.includes(`${item.materialId}`)) {
+            returnProductData.push(`${item.materialId}`);
             flow.push({
               id: `${item.materialId}`,
               sourcePosition: 'right',
@@ -624,8 +626,6 @@ const RentalManagementViews = (props) => {
               style: customNodeStyles.product
             });
             loadingAssets += 1;
-          } else {
-            returnProductData.push(`${item.materialId}`);
           }
           flowEdge.push({
             id: `edge-assets-product-parent-${item?.materialId}-${assetsInLoading[item?.materialId]}-${_.random(0, 1000)}`,

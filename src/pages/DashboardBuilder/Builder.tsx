@@ -214,7 +214,7 @@ const Builder = (props: Props) => {
               value={formValues.filters}
               onChange={(_, val) => handleChange('filters', val)}
               getOptionLabel={(option) => option.title}
-              getOptionSelected={(option, value) => option.key === value.key}
+              getOptionSelected={(option, value) => option.title === value.title}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -232,7 +232,7 @@ const Builder = (props: Props) => {
 
       <Box>
         <Button disableRipple fullWidth color="primary" onClick={addFormConfigs} variant="contained">
-          Apply Changes
+          {Boolean(selectedData) ? 'Apply Changes' : 'Add Chart'}
         </Button>
       </Box>
     </Box>
