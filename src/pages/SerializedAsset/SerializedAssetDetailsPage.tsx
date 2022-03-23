@@ -32,6 +32,7 @@ import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
 import { MdEdit } from "react-icons/md";
 import { camelCase, startCase } from "lodash";
 import moment from 'moment';
+import Activity from "../../components/Activity";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -82,7 +83,7 @@ const SerializedAssetDetailsPage = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
+  const [contactsEmailsData, setContactsEmailsData] = useState([]);
   const [tabValue, setTabValue] = useState(0);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
@@ -347,6 +348,27 @@ const SerializedAssetDetailsPage = () => {
       });
     }
   }
+  const getContactEmails = (contacts) => {
+    return contacts.reduce((emails, contact) => {
+      if (contact?.email) emails.push(contact.email);
+      return emails;
+    }, []);
+  };
+
+  const handleContactsEmails = (productInventoryData) => {
+    let data = [];
+    if (productInventoryData && productInventoryData?.staticData) {
+      const { customerContact, supplierContact } = productInventoryData?.staticData;
+      if (customerContact && customerContact.length) {
+        data = getContactEmails(customerContact);
+      }
+      if (supplierContact && supplierContact.length) {
+        data = [...data, ...getContactEmails(supplierContact)];
+      }
+      if (data.length > 0) setContactsEmailsData(data);
+    }
+  };
+
 
   useEffect(() => {
     if (productInventoryData) {
@@ -702,7 +724,25 @@ const SerializedAssetDetailsPage = () => {
                 </Box>
               )}
             </Paper>
+            <Paper style={{ overflow: 'hidden',}}>
+            <Activity 
+            resourceId={id}
+            resource={serializedAsset?.resource}
+            relatedTo={[
+              {
+                type:serializedAsset?.resource,
+                referenceId:id,
+                access:true
+              }
+            ]}
+            handleActivityRefresh={() => { }}
+            emails={contactsEmailsData}
+            />
+          
+          </Paper>
+  
           </Grid>
+    
         </Grid>
       </Fragment>
       {showConfirmBox && (
