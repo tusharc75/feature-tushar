@@ -396,6 +396,8 @@ const SerializedAssetDetailsPage = () => {
   };
 
 
+  console.log(productInventoryData)
+  
   return (
     <>
       <Fragment>
@@ -429,7 +431,7 @@ const SerializedAssetDetailsPage = () => {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
-                  {permissions?.serializedAsset?.isUpdate && (
+                  {permissions?.serializedAsset?.isUpdate && productInventoryData.active && (
                     <>
                       {![INVENTORY_STATUS.lost, INVENTORY_STATUS.inUse, INVENTORY_STATUS.reserved, INVENTORY_STATUS.repair].includes(productInventoryData.status) &&
                         <Button

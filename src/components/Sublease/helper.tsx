@@ -11,7 +11,7 @@ export const fetch_sublease_product_fields = async (currency) => {
     var data;
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.subleaseProduct}`);
     data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, currency);
+    data = CURReplaceByCurrencySingle(data, currency ? currency : "USD");
     var isRateRequired = false
     data.forEach(element => {
         if (element.fieldName === "price" && element.required) {

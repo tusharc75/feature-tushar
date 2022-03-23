@@ -3,14 +3,10 @@ import React, { useContext, useState, useEffect } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
 import {
-  CustomDialogTransition,
-  deliveryTicket,
-  DELIVERY_TICKET_REFRENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   INVENTORY_STATUS,
   rentalManagement,
   RENTAL_STATUS,
-  sublease
 } from '../../../constants/helpers';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from '../../../components/Helpers/Routes';
@@ -18,7 +14,6 @@ import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { MdZoomOutMap } from 'react-icons/md';
-import { Dialog } from '@material-ui/core';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 
 const customNodeStyles = {
@@ -44,8 +39,8 @@ const customNodeStyles = {
   },
   sublease: {
     name: 'Sublease',
-    background: '#ffb3c6',
-    borderColor: '#d98298'
+    background: '#FFE4C0',
+    borderColor: '#FFE4C0'
   },
   transferAsset: {
     name: 'Transfer Asset',
@@ -172,7 +167,6 @@ const RentalManagementViews = (props) => {
           allMaterialWithId[item?._id] = item?.materialId;
         });
 
-      // console.log(allNonSerializedProductIds);
 
       if (allPackages.length) xPosition += 300;
       var pakcageIdx = 0;
@@ -363,10 +357,10 @@ const RentalManagementViews = (props) => {
           source: purchaseArr.includes(item.inventoryDetail.purchaseOrder)
             ? `${item.inventoryDetail.purchaseOrder}`
             : subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset
-            ? `${item.inventoryDetail.supplierAccount}`
-            : allAssets[item.inventoryDetail.assetNumber] !== undefined
-            ? allAssets[item.inventoryDetail.assetNumber]
-            : `${item._id}`,
+              ? `${item.inventoryDetail.supplierAccount}`
+              : allAssets[item.inventoryDetail.assetNumber] !== undefined
+                ? allAssets[item.inventoryDetail.assetNumber]
+                : `${item._id}`,
           arrowHeadType: 'arrow',
           target: `${item.inventoryDetail.assetNumber}`
         });
@@ -384,8 +378,6 @@ const RentalManagementViews = (props) => {
         ?.map((item) => {
           if (!loadingProductData.includes(`${item.materialId}`)) {
             loadingProductData.push(`${item.materialId}`);
-
-            console.log(item.productDetail?.productName);
             flow.push({
               id: `${item.productDetail?.productName}`,
               sourcePosition: 'right',

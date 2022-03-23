@@ -522,7 +522,6 @@ const Sublease = () => {
                     setShowManageDialog({ open: false, isClone: false, idToClone: null });
                     fetchData()
                 }}
-                currency={user?.entity?.find(d => d._id === selectedEntity)?.currency}
             />
         }
         {

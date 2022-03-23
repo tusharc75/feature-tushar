@@ -1553,6 +1553,7 @@ export const INVENTORY_STATUS = {
   lost: 'Lost',
   customer: 'With Customer',
   supplier: 'With Supplier',
+  returned: 'Returned',
 };
 
 export const DELIVERY_TICKET_STATUS = {
