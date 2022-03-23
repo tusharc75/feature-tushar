@@ -10,7 +10,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { isObjectEmpty, gridLoadingTimeout, deliveryTicket, DELIVERY_FROM_TO_TYPE } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, deliveryTicket, DELIVERY_FROM_TO_TYPE, getLocalStorageArrayData } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
@@ -72,6 +72,7 @@ const DeliveryTicket = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const { isOffline } = useContext(CustomOfflineContext);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`
 
   useEffect(() => {
     fetchGridColumns();
@@ -328,8 +329,12 @@ const DeliveryTicket = () => {
                     isExportAllOrSomeFeature={true}
                     onlyExport={true}
                     total={rowCount}
-                    recordsToExport={selectedRecords.length}
-                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+                    ids={
+                      getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                        ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                        : []
+                    }
                     onExportToExcelSuccess={() => {
                       if (gridApi) {
                         gridApi.deselectAll();
@@ -354,20 +359,20 @@ const DeliveryTicket = () => {
                   <span className="listingHeader">{routes.deliveryTicket.title} </span>
                 </Grid>
                 <HideWhenOffline>
-                        <div className={`align-items-center gap-1 layout-for-mobile `}>
-                          {DeliveryTicketType && (
-                            <ToggleButtonGroup size="small" className="ml-2" value={DeliveryTicketType[selectedType - 1].key} exclusive onChange={handleFilter}>
-                              {DeliveryTicketType.map((k, index) => {
-                                return (
-                                  <ToggleButton value={k.key} key={index}>
-                                    {k.key}
-                                  </ToggleButton>
-                                );
-                              })}
-                            </ToggleButtonGroup>
-                          )}
-                        </div>
-                      </HideWhenOffline>
+                  <div className={`align-items-center gap-1 layout-for-mobile `}>
+                    {DeliveryTicketType && (
+                      <ToggleButtonGroup size="small" className="ml-2" value={DeliveryTicketType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                        {DeliveryTicketType.map((k, index) => {
+                          return (
+                            <ToggleButton value={k.key} key={index}>
+                              {k.key}
+                            </ToggleButton>
+                          );
+                        })}
+                      </ToggleButtonGroup>
+                    )}
+                  </div>
+                </HideWhenOffline>
 
 
               </Grid>

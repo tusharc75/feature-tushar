@@ -1553,6 +1553,7 @@ export const INVENTORY_STATUS = {
   lost: 'Lost',
   customer: 'With Customer',
   supplier: 'With Supplier',
+  returned: 'Returned',
 };
 
 export const DELIVERY_TICKET_STATUS = {
@@ -1663,6 +1664,7 @@ export const ACTIVITY_RESOURCE = {
   deliveryTicket: 'deliveryTicket',
   sublease: 'sublease',
   salesOrder: 'salesOrder',
+  serializedAsset: 'serializedAsset',
 };
 
 export const REPORT_LIST = [
@@ -1761,6 +1763,11 @@ export const getData = (resource: string, data: any) => {
         name: `${data.salesOrderNo}`,
         id: data._id
       };
+    case 'serializedAsset':
+      return {
+        name: `${data.assetNumber}`,
+        id: data._id
+      }
     default:
       break;
   }

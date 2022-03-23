@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
-import { Grid, Box, Button, Paper, Typography, Tab, Tabs } from "@material-ui/core";
+import { Grid, Box, Button, Paper, Typography, Tab, Tabs, useMediaQuery } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
@@ -17,6 +17,7 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
 import ReasonDialog from "./ReasonDialog"
+import { ACTIVITY_RESOURCE, defaultActivityShow } from "../../constants/helpers";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateTimeRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import ManageRepairJob from '../RepairJob/ManageRepairJob'
@@ -32,7 +33,9 @@ import { GiAutoRepair, GrStatusInfo } from "react-icons/all";
 import { MdEdit } from "react-icons/md";
 import { camelCase, startCase } from "lodash";
 import moment from 'moment';
-
+import Activity from "../../components/Activity";
+import HideWhenOffline from "../../components/HideWhenOffline"
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
@@ -59,6 +62,8 @@ const SerializedAssetDetailsPage = () => {
   const {
     state: { permissions }
   }: any = useData();
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loadingProductInventory, setLoadingProductInventory] = useState(false);
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
@@ -82,7 +87,7 @@ const SerializedAssetDetailsPage = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
+  const [contactsEmailsData, setContactsEmailsData] = useState([]);
   const [tabValue, setTabValue] = useState(0);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
@@ -347,6 +352,27 @@ const SerializedAssetDetailsPage = () => {
       });
     }
   }
+  const getContactEmails = (contacts) => {
+    return contacts.reduce((emails, contact) => {
+      if (contact?.email) emails.push(contact.email);
+      return emails;
+    }, []);
+  };
+
+  const handleContactsEmails = (productInventoryData) => {
+    let data = [];
+    if (productInventoryData && productInventoryData?.staticData) {
+      const { customerContact, supplierContact } = productInventoryData?.staticData;
+      if (customerContact && customerContact.length) {
+        data = getContactEmails(customerContact);
+      }
+      if (supplierContact && supplierContact.length) {
+        data = [...data, ...getContactEmails(supplierContact)];
+      }
+      if (data.length > 0) setContactsEmailsData(data);
+    }
+  };
+
 
   useEffect(() => {
     if (productInventoryData) {
@@ -365,7 +391,13 @@ const SerializedAssetDetailsPage = () => {
     }
   }, [productInventoryData])
 
+  const handleActivityHideShow = () => {
+    setActivityShow(!showActivity);
+  };
 
+
+  console.log(productInventoryData)
+  
   return (
     <>
       <Fragment>
@@ -399,7 +431,7 @@ const SerializedAssetDetailsPage = () => {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
-                  {permissions?.serializedAsset?.isUpdate && (
+                  {permissions?.serializedAsset?.isUpdate && productInventoryData.active && (
                     <>
                       {![INVENTORY_STATUS.lost, INVENTORY_STATUS.inUse, INVENTORY_STATUS.reserved, INVENTORY_STATUS.repair].includes(productInventoryData.status) &&
                         <Button
@@ -702,9 +734,61 @@ const SerializedAssetDetailsPage = () => {
                 </Box>
               )}
             </Paper>
+            {/* <Paper style={{ overflow: 'hidden',}}>
+            <Activity 
+            resourceId={id}
+            resource={ ACTIVITY_RESOURCE?.serializedAsset}
+            relatedTo={[
+              {
+                type:ACTIVITY_RESOURCE?.serializedAsset,
+                referenceId:id,
+                access:true
+              }
+            ]}
+            handleActivityRefresh={() => { }}
+            emails={contactsEmailsData}
+            />
+          
+          </Paper> */}
+<div className="position-relative">
+            <HideWhenOffline>
+              <Paper>
+                {!isSmallScreen && (
+                  <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                    {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+                  </span>
+                )}
+                <div style={{ display: showActivity || (isSmallScreen && tabValue === 0) ? 'block' : 'none' }}>
+                  <Grid container>
+                    <Grid item xs={12}>
+                      {productInventoryData && (
+                        <div>
+                          <Activity
+                            resourceId={id}
+                            resource={ACTIVITY_RESOURCE?.serializedAsset}
+                            relatedTo={[
+                              {
+                                type: ACTIVITY_RESOURCE?.serializedAsset,
+                                referenceId: id,
+                                access: true
+                              }
+                            ]}
+                            handleActivityRefresh={() => { }}
+                            emails={contactsEmailsData}
+                          />
+                        </div>
+                      )}
+                    </Grid>
+                  </Grid>
+                </div>
+              </Paper>
+            </HideWhenOffline>
+          </div>
           </Grid>
+          
         </Grid>
       </Fragment>
+
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}

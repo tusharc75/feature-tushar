@@ -60,7 +60,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 element.unit = element.unit?.join(",")
                 element.pricingMethod = element.pricingMethod?.join(",")
             })
-            console.log(data)
             dispatch({ type: "initialize", data: data, count: data.length });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {
