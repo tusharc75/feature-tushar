@@ -17,6 +17,9 @@ import useColumns, { getStaticFields, getFrameworkComponents } from "../../../co
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 import { reducer, intialState, } from "../../../components/AgGridComponents/CustomAgGrid";
+//import { getColumnData } from "../../../constants/columns"
+
+
 
 let searchTimeout;
 const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, rentalManagementData, renderedFrom }) => {
@@ -85,7 +88,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 finalObject["unitMain"] = u.unit
                 finalObject["pricingMethodMain"] = u.pricingMethod
                 return {
-                    ...finalObject,
+                    ...finalObject
                 };
             });
             dispatch({ type: "initialize", data: rows, count: count });
@@ -150,7 +153,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 setColumns([...columns, ...defaultColumns])
             })
     }
-
+    
     const fetchPackageProduct = (packageId) => {
         if (type === "package") {
             axiosInstance().get(`${packages.packageApi}/get-products/${packageId}`).then(({ data: { data } }) => {
@@ -194,7 +197,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         }, gridLoadingTimeout);
     }
 
-
+  
     return (<Fragment>
         <Dialog
             fullScreen={true}

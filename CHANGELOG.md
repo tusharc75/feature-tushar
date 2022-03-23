@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.80.1](https://github.com/vebholic/oms_frontend/compare/v2.80.0...v2.80.1) (2022-03-23)
+
+
+### Bug Fixes
+
+* bug fix ([d76fdb4](https://github.com/vebholic/oms_frontend/commit/d76fdb4dddcdb8dfb8239a34c98359772fa03e97))
+* bug fix ([a8d3588](https://github.com/vebholic/oms_frontend/commit/a8d3588647d20918318993a5839c5bde446aef5e))
+* bug fix ([4a5449e](https://github.com/vebholic/oms_frontend/commit/4a5449e401b0d666bfaa6879a0690661cc303560))
+* bug fx ([8e77754](https://github.com/vebholic/oms_frontend/commit/8e77754a03fa1814190a9dbf8f21fc436808ee8e))
+* **dashboard builder:** changes and fix ([76f8811](https://github.com/vebholic/oms_frontend/commit/76f88119beea81948e647b6bc1b5254dc862eebf))
+* **dashboard builder:** minor fix ([ffe5655](https://github.com/vebholic/oms_frontend/commit/ffe56552b81e1d216e6bab2ede2f0b00aa31ee6a))
+* product details page plant changes ([774108c](https://github.com/vebholic/oms_frontend/commit/774108c8fc9552778555935949ee300a93d13c0f))
+* rentalJob non-serialized asset not showing with loading and receiving ticket PO-1348 ([e767942](https://github.com/vebholic/oms_frontend/commit/e767942a27dbf84d0576e1f996a5e21cd39a7050))
+
 ## [2.80.0](https://github.com/vebholic/oms_frontend/compare/v2.79.5...v2.80.0) (2022-03-22)
 
 

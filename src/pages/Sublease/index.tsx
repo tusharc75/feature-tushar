@@ -461,13 +461,13 @@ const Sublease = () => {
                             permissions={permissions.sublease}
                             primaryField={columns?.find(d => d.primaryField)}
                             onClick={(data) => {
-                                history.push(`${routes.purchaseOrderDetail.path}/${data._id}`)
+                                history.push(`${routes.subleaseDetail.path}/${data._id}`)
                             }}
                             dataRows={dataRows}
                             selectedRecords={selectedRecords}
                             dispatch={dispatch}
                             onEdit={(data) => {
-                                history.push(`${routes.purchaseOrderDetail.path}/${data._id}?openEdit=true`)
+                                history.push(`${routes.subleaseDetail.path}/${data._id}?openEdit=true`)
                             }}
                             extraParamsToCheckDelete={true}
                             onDelete={(data) => {
