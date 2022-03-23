@@ -172,7 +172,6 @@ const RentalManagementViews = (props) => {
           allMaterialWithId[item?._id] = item?.materialId;
         });
 
-      // console.log(allNonSerializedProductIds);
 
       if (allPackages.length) xPosition += 300;
       var pakcageIdx = 0;
@@ -384,8 +383,6 @@ const RentalManagementViews = (props) => {
         ?.map((item) => {
           if (!loadingProductData.includes(`${item.materialId}`)) {
             loadingProductData.push(`${item.materialId}`);
-
-            console.log(item.productDetail?.productName);
             flow.push({
               id: `${item.productDetail?.productName}`,
               sourcePosition: 'right',

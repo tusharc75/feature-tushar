@@ -195,7 +195,6 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                                     color="primary"
                                     size="small"
                                     onClick={() => {
-                                        console.log(selectedRecords)
                                         const data = {}
                                         data["ticketName"] = subleaseData.subleaseName;
                                         data["refrenceId"] = subleaseData._id;

@@ -134,7 +134,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
         products = productResponse?.data?.data?.material
       }
-    
+
       products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
       products?.forEach((ele) => {
         if (productAssets.filter((e) => e._id === ele.materialId).length) {
@@ -510,13 +510,9 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             isClientSideGrid={true}
             allowSelection={true}
             rowClassRules={{
-              "scrap-data-row":
-                function (params) {
-                  return [INVENTORY_STATUS.scrap].some(s => s === params.data.status);
-                },
               "red-data-row":
                 function (params) {
-                  return [INVENTORY_STATUS.lost].some(s => s === params.data.status);
+                  return [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].some(s => s === params.data.status);
                 },
             }}
             renderedFrom={renderedFrom}

@@ -60,7 +60,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
   }, [columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
       {
@@ -466,7 +466,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
   }
 
 
-  console.log(rowsData)
 
   return (
     <Fragment>
