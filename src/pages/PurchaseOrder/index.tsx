@@ -15,7 +15,7 @@ import SearchBox from 'src/components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "src/components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "src/components/AgGridComponents/CustomAgGrid";
-import { purchaseOrder, isObjectEmpty, gridLoadingTimeout } from 'src/constants/helpers';
+import { purchaseOrder, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from 'src/constants/helpers';
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { useData } from "src/StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -374,8 +374,12 @@ const PurchaseOrder = () => {
                     }}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
-                    recordsToExport={selectedRecords.length}
-                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+                    ids={
+                      getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                        ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                        : []
+                    }
                     onExportToExcelSuccess={() => {
                         if (gridApi) gridApi.deselectAll()
                         else fetchPurchaseOrder()

@@ -16,11 +16,11 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { FaUserCheck, FaUserAltSlash,FaSuitcase,IoCreateSharp,MdEmail} from "react-icons/all";
+import { FaUserCheck, FaUserAltSlash, FaSuitcase, IoCreateSharp, MdEmail } from "react-icons/all";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import { userType, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid } from './../../constants/helpers'
+import { userType, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, getLocalStorageArrayData } from './../../constants/helpers'
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
 import { camelCase, uniqBy } from "lodash";
@@ -79,6 +79,8 @@ const User: FC = () => {
   const [allUsers, setAllUsers] = useState([])
   const [entityAccess, setEntityAccess] = useState([])
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([])
+  const localStorageSelectedRecords = `${renderedFrom}_selected`
+
   const columns = [
     {
       field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
@@ -338,13 +340,13 @@ const User: FC = () => {
     await axiosInstance().get(`/user/${user.user?._id}`).then(({ data: { data } }) => {
       data.entities.map((item) => {
         item.role.forEach((role) => {
-          if(roleIds.includes(role?._id)){
+          if (roleIds.includes(role?._id)) {
 
-          }else{
+          } else {
             roleIds.push(role?._id)
           }
         })
-        
+
       })
       setRoleAccessOfLoggedInUser(roleIds)
     }).catch((error) => {
@@ -454,30 +456,30 @@ const User: FC = () => {
     setBrandAssigningLoading(true)
     const records = selectedRecords.map((record) => record._id)
     axiosInstance()
-    .put(`/user/make-user-admin`, {'users': records})
-    .then(({data}) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: "success",
-        message: data.message,
+      .put(`/user/make-user-admin`, { 'users': records })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
+        setShowBrandAssignConfirmation(false)
+        setBrandAssigningLoading(false)
+        fetchUsers()
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setShowBrandAssignConfirmation(false)
+        setBrandAssigningLoading(false)
       });
-      setShowBrandAssignConfirmation(false)
-      setBrandAssigningLoading(false)
-      fetchUsers()
-    })
-    .catch((error) => {
-      toastConfig.setToastConfig(error);
-      setShowBrandAssignConfirmation(false)
-      setBrandAssigningLoading(false)
-    });
   }
 
   const unAssignBrandAdmin = async () => {
     setBrandUnAssigningLoading(true)
     const records = selectedRecords.map((record) => record._id)
     axiosInstance()
-      .put('/user/unassign-user-admin',{'users': records})
-      .then(({data}) => {
+      .put('/user/unassign-user-admin', { 'users': records })
+      .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: "success",
@@ -491,7 +493,7 @@ const User: FC = () => {
         toastConfig.setToastConfig(error);
         setShowBrandUnAssignConfirmation(false)
         setBrandUnAssigningLoading(false)
-    });
+      });
   }
 
   const handleDeleteUser = async () => {
@@ -589,18 +591,18 @@ const User: FC = () => {
 
   return (
     <>
-      {                         
+      {
         isOpen?.open && (
           <ManageUserDialog
             open={isOpen?.open}
             isClone={isOpen?.isClone}
-            close={handleClose} 
+            close={handleClose}
             onSuccess={(obj) => { setUserList([]); fetchUsers() }}
-            userId={isOpen?.idToClone} 
-            dataToUpdate={null} 
-            isNew={isOpen?.isClone ? false : true} 
-            isUserSetupPermission = {isUserSetupPermission}
-            />
+            userId={isOpen?.idToClone}
+            dataToUpdate={null}
+            isNew={isOpen?.isClone ? false : true}
+            isUserSetupPermission={isUserSetupPermission}
+          />
           // <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
         )
       }
@@ -617,11 +619,11 @@ const User: FC = () => {
             fetchUsers={() => fetchUsers()}
             userList={userList}
             selectedRecords={selectedRecords}
-            isRoleSetUpPermission = {isRoleSetUpPermission}
-            isApprovalProcess = {isLoggedInUserBrandAdmin}
+            isRoleSetUpPermission={isRoleSetUpPermission}
+            isApprovalProcess={isLoggedInUserBrandAdmin}
             roleAccessIds={roleAccessOfLoggedInUser}
             entityAccessIds={entityAccess}
-            />
+          />
         )
       }
       {globalRolesDialogOpen && (
@@ -683,8 +685,8 @@ const User: FC = () => {
               handleRegionalRolesCloseDialog();
               fetchUsers();
             }}
-            entityAccessIds = {entityAccess}
-            roleAccessIds = {roleAccessOfLoggedInUser}
+            entityAccessIds={entityAccess}
+            roleAccessIds={roleAccessOfLoggedInUser}
           />
         </Dialog>
       )}
@@ -709,8 +711,12 @@ const User: FC = () => {
               }}
               isExportAllOrSomeFeature={true}
               total={rowCount}
-              recordsToExport={selectedRecords.length}
-              ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+              recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+              ids={
+                getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                  ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                  : []
+              }
               onExportToExcelSuccess={() => {
                 if (gridApi) gridApi.deselectAll()
                 else fetchUsers()
@@ -785,48 +791,48 @@ const User: FC = () => {
             loading={loading}
             additionalDetails={[
               {
-                icon:<FaSuitcase size={18} />,
-                field:"regionalWideRole"
+                icon: <FaSuitcase size={18} />,
+                field: "regionalWideRole"
               }
             ]}
             chips={[
               {
-                icon:<MdEmail />,
-                label:"Email: ",
-                field:"email"
+                icon: <MdEmail />,
+                label: "Email: ",
+                field: "email"
               },
               {
-                label:"Status",
-                field:"status"
+                label: "Status",
+                field: "status"
               },
-              { 
-                icon:<IoCreateSharp />,
-                label:"Created By: ",
-                field:"createdBy"
+              {
+                icon: <IoCreateSharp />,
+                label: "Created By: ",
+                field: "createdBy"
               }
             ]}
             owerCollaboratorInitialsOrImages=""
             onCreate={false}
             showClone={false}
             onClone={() => { }}
-            renderedFrom={renderedFrom} /> 
-            
-            : 
+            renderedFrom={renderedFrom} />
+
+            :
             <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={110}
-            loading={loading}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchUsers}
-          />}
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameworkComponents}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={110}
+              loading={loading}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchUsers}
+            />}
 
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (
@@ -868,17 +874,17 @@ const User: FC = () => {
           />
         }
         {
-          showBrandUnAssignConfirmation && 
-            <ConfirmationDialog
-              open={showBrandUnAssignConfirmation}
-              onClose={() => {
-                setShowBrandUnAssignConfirmation(false)
-                fetchUsers()
-              }}
-              message={`Are you sure want to unassign the user from Brand Admin role`}
-              okBtnLoading={brandUnAssigningLoading}
-              onOk={unAssignBrandAdmin}
-            />
+          showBrandUnAssignConfirmation &&
+          <ConfirmationDialog
+            open={showBrandUnAssignConfirmation}
+            onClose={() => {
+              setShowBrandUnAssignConfirmation(false)
+              fetchUsers()
+            }}
+            message={`Are you sure want to unassign the user from Brand Admin role`}
+            okBtnLoading={brandUnAssigningLoading}
+            onOk={unAssignBrandAdmin}
+          />
         }
         {
           showDeleteDialog ?

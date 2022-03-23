@@ -14,7 +14,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import { transferAsset, isObjectEmpty, gridLoadingTimeout } from 'src/constants/helpers';
+import { transferAsset, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -66,6 +66,7 @@ const TransferAsset = () => {
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.transferAsset.title}`);
   const [fromRental, setFromRental] = useState(history.location?.state?.rental);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`
 
   const {
     state: { user, permissions, selectedEntity }
@@ -245,8 +246,8 @@ const TransferAsset = () => {
             <DeleteIcon color="error" />
           </IconButton>
         </Tooltip>
-      ):
-      <Tooltip title="Don't have the permissions to Delete">
+      ) :
+        <Tooltip title="Don't have the permissions to Delete">
           <IconButton
             size="small"
             aria-label="Delete"
@@ -323,8 +324,12 @@ const TransferAsset = () => {
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+            ids={
+              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                : []
+            }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchTransferAsset();
@@ -387,20 +392,20 @@ const TransferAsset = () => {
                 </div>
                 :
                 <HideWhenOffline>
-                        <div className={`align-items-center gap-1 layout-for-mobile `}>
-                          {TransferAssetType && (
-                            <ToggleButtonGroup size="small" className="ml-2" value={TransferAssetType[selectedType - 1].key} exclusive onChange={handleFilter}>
-                              {TransferAssetType.map((k, index) => {
-                                return (
-                                  <ToggleButton value={k.key} key={index}>
-                                    {k.key}
-                                  </ToggleButton>
-                                );
-                              })}
-                            </ToggleButtonGroup>
-                          )}
-                        </div>
-                      </HideWhenOffline>}
+                  <div className={`align-items-center gap-1 layout-for-mobile `}>
+                    {TransferAssetType && (
+                      <ToggleButtonGroup size="small" className="ml-2" value={TransferAssetType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                        {TransferAssetType.map((k, index) => {
+                          return (
+                            <ToggleButton value={k.key} key={index}>
+                              {k.key}
+                            </ToggleButton>
+                          );
+                        })}
+                      </ToggleButtonGroup>
+                    )}
+                  </div>
+                </HideWhenOffline>}
               {fromRental && (
                 <Chip
                   className="ml-3"
