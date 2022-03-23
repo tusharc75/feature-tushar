@@ -140,7 +140,7 @@ export default function ImportExportLinks({
       exportApi = `${exportApi}&${additionalParams}`;
     }
 
-    if (recordsToExport > 0 && recordsToExport <= total) {
+    if (recordsToExport > 0) {
       if (exportSelectedRecords) {
         exportSelectedRecords();
         return;
@@ -290,7 +290,7 @@ export default function ImportExportLinks({
             handleClose();
           }}
         >
-          Export to Excel ({recordsToExport === 0  ? 'All' : `(${recordsToExport})`})
+          Export to Excel ({recordsToExport === 0 ? 'All' : `(${recordsToExport})`})
         </MenuItem>
       </Menu>
       {isMobile && (

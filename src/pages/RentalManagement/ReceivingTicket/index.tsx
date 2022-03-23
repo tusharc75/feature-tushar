@@ -678,11 +678,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             isClientSideGrid={true}
             renderedFrom={renderedFrom}
             rowClassRules={{
-              "scrap-data-row": function (params) {
-                return [INVENTORY_STATUS.scrap].some(s => s === params.data.status);
-              },
               "red-data-row": function (params) {
-                return [INVENTORY_STATUS.lost].some(s => s === params.data.status);
+                return [INVENTORY_STATUS.lost,INVENTORY_STATUS.scrap].some(s => s === params.data.status);
               },
             }}
             refreshGrid={fetchRecords}
