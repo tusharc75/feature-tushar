@@ -5,7 +5,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
 import queryString from 'query-string';
 import ManageRepairJobDialog from './ManageRepairJob';
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairJob, prepareDataForGrid } from '../../constants/helpers';
+import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairJob, prepareDataForGrid, getLocalStorageArrayData } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -73,6 +73,7 @@ const RepairJob = () => {
   const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
   const [columns, setColumns] = useState([]);
   const pageTitle = camelCase(`${routes.repairJob.title}`)
+  const localStorageSelectedRecords = `${renderedFrom}_selected`
 
   const { getColumnData } = useColumns();
 
@@ -425,8 +426,12 @@ const RepairJob = () => {
                   afterImportCompleted={() => { fetchRepairJobs() }}
                   isExportAllOrSomeFeature={true}
                   total={rowCount}
-                  recordsToExport={selectedRecords.length}
-                  ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+                  ids={
+                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                      : []
+                  }
                   onExportToExcelSuccess={() => {
                     if (gridApi) gridApi.deselectAll()
                     else fetchRepairJobs()
