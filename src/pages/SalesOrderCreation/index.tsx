@@ -11,7 +11,8 @@ import {
   gridLoadingTimeout,
   salesOrder,
   sidebarResource,
-  prepareDataForGrid
+  prepareDataForGrid,
+  getLocalStorageArrayData
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -30,7 +31,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog/ManageSalesOrderDialog';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import {camelCase} from 'lodash'
+import { camelCase } from 'lodash'
 
 let salesOrderTimeout;
 const SalesOrderType = [
@@ -77,6 +78,7 @@ const SalesOrder = () => {
   const { getColumnData } = useColumns();
   const [frameworkComponent, setFrameworkComponent] = useState({});
   const [columns, setColumns] = useState(null);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`
 
   useEffect(() => {
     fetchGridColumns();
@@ -406,8 +408,12 @@ const SalesOrder = () => {
                   afterImportCompleted={() => { }}
                   isExportAllOrSomeFeature={true}
                   total={rowCount}
-                  recordsToExport={selectedRecords.length}
-                  ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+                  ids={
+                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                      : []
+                  }
                   onExportToExcelSuccess={() => {
                     if (gridApi) gridApi.deselectAll();
                     else fetchSalesOrder();
