@@ -55,6 +55,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       }
     }
   }, [transferAssetData, currentStep])
+
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
@@ -99,7 +100,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
   useEffect(() => {
     if (currentStep === 0) {
-
       if (transferAssetData) {
         fetchAssetsData(true);
       }
@@ -124,7 +124,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     try {
       let data = await fetchAssets(forceRefresh)
       let ticketData: any = await fetchLoadingTickets();
