@@ -202,9 +202,8 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     const handleAddProduct = (rows) => {
         setAddingProducts(true)
         let tempProductArray = rows.map(d => ({
-            "productId": d._id,
+            "productId": d._id ?? d.productId,
             "qty": d.qty ? parseInt(d.qty) : 1,
-            "expectedDelivery": bulkAssetCreationData?.deliveryDate
         }))
         axiosInstance().post(`${bulkAssetCreation.api}/product/${bulkAssetCreationData._id}/add`, { "orderDetails": tempProductArray })
             .then(() => {

@@ -175,6 +175,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, }) => {
                         actionWidth={150}
                         loading={loading}
                         allowSelection={false}
+                        allowAction={false}
                         renderedFrom={renderedFrom}
                         refreshGrid={fetchProductInventory}
                     /> : null

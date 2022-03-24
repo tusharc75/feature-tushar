@@ -521,7 +521,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                                                                         : <FormTypes
                                                                             isNew={Boolean(bulkAssetCreationId)}
                                                                             {...field}
-                                                                            disabled={(Boolean(bulkAssetCreationId) && field.disableOnEdit && !isClone) || field.fieldName === "baNumber" || field.fieldName === "status" || (field.fieldName === "currency")}
+                                                                            disabled={(Boolean(bulkAssetCreationId) && field.disableOnEdit && !isClone) || field.fieldName === "baNumber" || field.fieldName === "status" }
                                                                             values={values}
                                                                             errors={errors}
                                                                             touched={touched}
