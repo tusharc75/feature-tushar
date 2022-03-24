@@ -59,6 +59,7 @@ export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serializ
 export const purchaseOrderSteps = ['Add Product', 'Services and Consumables', 'Issue', 'Receiving Asset'];
 export const rentalManagementSteps = ['Add Products', 'Services and Consumables', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Packing Slip'];
 export const subleaseSteps = ["Add Products", "Start Sublease", "End Sublease"]
+export const bulkAssetCreationSteps = ['Add Product', 'Asset List'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -178,7 +179,8 @@ export const sidebarResource = {
   transferInventory: 'Transfer Inventory',
   zone: 'Zone',
   projectSales: 'Project Sales',
-  wellMaster: 'Well Master'
+  wellMaster: 'Well Master',
+  bulkAssetCreation: 'Bulk Asset Creation'
 };
 
 export const resourceNames = {
@@ -236,7 +238,8 @@ export const resourceNames = {
   transferAsset: 'Transfer Asset',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
-  wellMaster: 'Well Master'
+  wellMaster: 'Well Master',
+  bulkAssetCreation: 'Bulk Asset Creation'
 };
 
 export const primaryFields = {
@@ -302,7 +305,8 @@ export const RESOURCE_LABEL = {
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventories',
   zone: "Zone",
-  wellMaster: "Well Master"
+  wellMaster: "Well Master",
+  bulkAssetCreation: "Bulk Asset Creation"
 };
 
 export const CHILD_RESOURCE = {
@@ -529,6 +533,12 @@ export const pricingCondition = {
   route: 'pricing-condition'
 };
 
+export const bulkAssetCreation = {
+  api: '/bulk-asset-creation',
+  route: '/bulk-asset-creation',
+  permission: 'bulkAssetCreation',
+  resource: 'bulkAssetCreation'
+};
 
 export const profileMenuItems = {
   profile: 1,
@@ -1663,6 +1673,7 @@ export const ACTIVITY_RESOURCE = {
   deliveryTicket: 'deliveryTicket',
   sublease: 'sublease',
   salesOrder: 'salesOrder',
+  bulkAssetCreation: 'bulkAssetCreation'
 };
 
 export const REPORT_LIST = [
