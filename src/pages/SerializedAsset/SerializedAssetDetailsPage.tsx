@@ -397,221 +397,107 @@ const SerializedAssetDetailsPage = () => {
 
 
   console.log(productInventoryData)
-  
+
   return (
     <>
       <Fragment>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Paper>
-              {!productInventoryData ? (
-                <div>
-                  <Skeleton variant="text" width="150px" height="40px" />
-                  <Box display="flex">
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
-                    <Box marginX={1} />
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
-                  </Box>
-                </div>
-              ) : (
+        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
+          <Grid container spacing={1}>
+            <Grid item xs={12} sm={12} md={8} lg={8}>
+              <Paper>
+                {!productInventoryData ? (
+                  <div>
+                    <Skeleton variant="text" width="150px" height="40px" />
+                    <Box display="flex">
+                      <Skeleton
+                        style={{ borderRadius: 6 }}
+                        width="120px"
+                        height="80px"
+                      />
+                      <Box marginX={1} />
+                      <Skeleton
+                        style={{ borderRadius: 6 }}
+                        width="120px"
+                        height="80px"
+                      />
+                    </Box>
+                  </div>
+                ) : (
 
-                <DetailsPageHeader
-                  heading={headingLbl}
-                  mainPoints={mainPoints}
-                  showHeading={true}
-                >
-                  {permissions?.serializedAsset?.isUpdate && productInventoryData.active && (
-                    <>
-                      {![INVENTORY_STATUS.lost, INVENTORY_STATUS.inUse, INVENTORY_STATUS.reserved, INVENTORY_STATUS.repair].includes(productInventoryData.status) &&
-                        <Button
-                          variant="outlined"
-                          color="default"
-                          size="small"
-                          onClick={() => setShowRepairJobDialog(true)}
-                        >
-                          {isMobile && !isTablet ? <GiAutoRepair size={20} /> : "Create Repair Job"}
-                        </Button>
-                      }
-                      {![INVENTORY_STATUS.lost].includes(productInventoryData.status) &&
-                        <Fragment>
+                  <DetailsPageHeader
+                    heading={headingLbl}
+                    mainPoints={mainPoints}
+                    showHeading={true}
+                  >
+                    {permissions?.serializedAsset?.isUpdate && productInventoryData.active && (
+                      <>
+                        {![INVENTORY_STATUS.lost, INVENTORY_STATUS.inUse, INVENTORY_STATUS.reserved, INVENTORY_STATUS.repair].includes(productInventoryData.status) &&
                           <Button
                             variant="outlined"
                             color="default"
                             size="small"
-                            onClick={openActions}
-                            disabled={updateLoading}
-                            aria-controls="action-menu"
-                            endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
+                            onClick={() => setShowRepairJobDialog(true)}
                           >
-                            {isMobile && !isTablet ? <GrStatusInfo size={20} /> : "Change Status"}
+                            {isMobile && !isTablet ? <GiAutoRepair size={20} /> : "Create Repair Job"}
                           </Button>
-                          {![INVENTORY_STATUS.inUse].includes(productInventoryData.status) &&
-                            <Button
-                              variant={isMobile && !isTablet ? "text" : "outlined"}
-                              color="primary"
-                              size="small"
-                              onClick={handleOpenUpdateDialog}
-                            >
-                              {isMobile && !isTablet ? <MdEdit size={22} /> : "Edit"}
-                            </Button>
-                          }
-                        </Fragment>
-                      }
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}>
-                        {
-                          statusOptions.map(o => {
-                            return <MenuItem
-                              key={o?.optionValue}
-                              disabled={!manualStatus.includes(o?.optionLabel)}
-                              onClick={() => {
-                                closeActions()
-                                handleStatusChange(o)
-                              }}
-                              value={o}>{o?.optionLabel}</MenuItem>
-                          })
                         }
-                      </Menu>
-                    </>
-                  )}
-                </DetailsPageHeader>
-              )}
-              {/*For Desktop*/}
-              <Box display={isMobile ? "none" : ""}>
-                {loadingProductInventory || !productInventoryFields.length ? (
-                  <Grid container spacing={2} style={{ padding: "8px" }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <>
-                    <DetailsPage data={productInventoryData}
-                      fields={productInventoryData?.status &&
-                        (productInventoryData?.status === "Scrap" || productInventoryData?.status === "Lost") ?
-                        [...productInventoryFields, customField] :
-                        productInventoryFields} />
-                  </>
+                        {![INVENTORY_STATUS.lost].includes(productInventoryData.status) &&
+                          <Fragment>
+                            <Button
+                              variant="outlined"
+                              color="default"
+                              size="small"
+                              onClick={openActions}
+                              disabled={updateLoading}
+                              aria-controls="action-menu"
+                              endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
+                            >
+                              {isMobile && !isTablet ? <GrStatusInfo size={20} /> : "Change Status"}
+                            </Button>
+                            {![INVENTORY_STATUS.inUse].includes(productInventoryData.status) &&
+                              <Button
+                                variant={isMobile && !isTablet ? "text" : "outlined"}
+                                color="primary"
+                                size="small"
+                                onClick={handleOpenUpdateDialog}
+                              >
+                                {isMobile && !isTablet ? <MdEdit size={22} /> : "Edit"}
+                              </Button>
+                            }
+                          </Fragment>
+                        }
+                        <Menu
+                          anchorEl={anchorEl}
+                          keepMounted
+                          getContentAnchorEl={null}
+                          anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left'
+                          }}
+                          id="action-menu"
+                          open={Boolean(anchorEl)}
+                          onClose={closeActions}>
+                          {
+                            statusOptions.map(o => {
+                              return <MenuItem
+                                key={o?.optionValue}
+                                disabled={!manualStatus.includes(o?.optionLabel)}
+                                onClick={() => {
+                                  closeActions()
+                                  handleStatusChange(o)
+                                }}
+                                value={o}>{o?.optionLabel}</MenuItem>
+                            })
+                          }
+                        </Menu>
+                      </>
+                    )}
+                  </DetailsPageHeader>
                 )}
-              </Box>
-              <Grid container spacing={2} style={isMobile ? { display: "none" } : { display: "" }}>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
-                  <div className="detail-box">
-                    <div className="detail-box-content">
-                      <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-                      <h3 className="form-label-style" title="Asset History">
-                        Asset History
-                      </h3>
-                    </div>
-
-                    <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
-                      {columns ?
-                        <CustomAgGrid
-                          columns={columns}
-                          dataRows={dataRows}
-                          frameworkComponents={frameworkComponents}
-                          setGridApi={setGridApi}
-                          dispatch={dispatch}
-                          rowCount={rowCount}
-                          limit={limit}
-                          pageSizes={pageSizes}
-                          page={page}
-                          allowAction={false}
-                          allowSelection={false}
-                          isClientSideGrid={true}
-                          loading={loading}
-                          renderedFrom="rentalManagementDetailsPageInventory"
-                          refreshGrid={fetchProductInventoryHistory}
-                        />
-                        : <Box
-                          p={2}
-                          height={500}
-                          bgcolor="white">
-                          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                        </Box>
-                      }
-                    </Grid>
-                  </div>
-                </Grid>
-              </Grid>
-              <Tabs
-                className="quote-tab"
-                value={tabValue}
-                style={isMobile ? { display: "" } : { display: "none" }}
-                onChange={handleMainTabChange}
-                textColor="primary"
-                TabIndicatorProps={{
-                  style: {
-                    display: 'none'
-                  }
-                }}
-              >
-                {/* <Tab
-                        className={"tabLayout"}
-                      style={{
-                        background: tabValue === 0 ? "white" : "",
-                        color: tabValue === 0 ? "blue" : "#163340",
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font ">
-                          <InfoIcon className="mr-1" fontSize="inherit" /> All
-                          Version Status
-                        </div>
-                      }
-                      {...a11yProps(0)}
-                    /> */}
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 1 ? 'white' : '',
-                    color: tabValue === 1 ? '#163340' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                    </div>
-                  }
-                  {...a11yProps(0)}
-                />
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 2 ? 'white' : '',
-                    color: tabValue === 2 ? 'blue' : '#163340',
-                    display: "flex !important"
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                    </div>
-                  }
-                  {...a11yProps(1)}
-                />
-                <div className={'uio'}> </div>
-              </Tabs>
-
-
-              <TabPanel value={tabValue} index={0}>
-
-                <Box display={isMobile ? "flex" : "none"}>
+                <Box display={isMobile ? "none" : ""}>
                   {loadingProductInventory || !productInventoryFields.length ? (
                     <Grid container spacing={2} style={{ padding: "8px" }}>
                       <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -620,15 +506,13 @@ const SerializedAssetDetailsPage = () => {
                     <>
                       <DetailsPage data={productInventoryData}
                         fields={productInventoryData?.status &&
-                          productInventoryData?.status === "Scrap" ?
+                          (productInventoryData?.status === "Scrap" || productInventoryData?.status === "Lost") ?
                           [...productInventoryFields, customField] :
                           productInventoryFields} />
                     </>
                   )}
                 </Box>
-              </TabPanel>
-              <TabPanel value={tabValue} index={1}>
-                <Grid container spacing={2}>
+                <Grid container spacing={2} style={isMobile ? { display: "none" } : { display: "" }}>
                   <Grid item xs={12} sm={12} md={12} lg={12}>
                     <div className="detail-box">
                       <div className="detail-box-content">
@@ -637,12 +521,9 @@ const SerializedAssetDetailsPage = () => {
                           Asset History
                         </h3>
                       </div>
-                      {isMobile && <div>
-                        <CustomTimeline dataRows={productInventoryHistoryData} />
-                      </div>}
 
                       <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
-                        {!isMobile && columns ?
+                        {columns ?
                           <CustomAgGrid
                             columns={columns}
                             dataRows={dataRows}
@@ -657,7 +538,7 @@ const SerializedAssetDetailsPage = () => {
                             allowSelection={false}
                             isClientSideGrid={true}
                             loading={loading}
-                            renderedFrom={`${renderedFrom}_grid-1`}
+                            renderedFrom="rentalManagementDetailsPageInventory"
                             refreshGrid={fetchProductInventoryHistory}
                           />
                           : <Box
@@ -668,89 +549,177 @@ const SerializedAssetDetailsPage = () => {
                           </Box>
                         }
                       </Grid>
-
                     </div>
                   </Grid>
                 </Grid>
-              </TabPanel>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper style={{ overflow: 'hidden' }}>
-              <Box
-                padding={1}
-                bgcolor="grey.200"
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Typography variant="subtitle2">
-                  Child Product
-                </Typography>
-              </Box>
-              {(
-                <Box>
-                  {loading || loadingBOMData ? (
-                    [1].map((i) => (
-                      <BoxWithBorder
-                        key={i}
-                        style={{
-                          margin: "8px",
-                        }}
-                      >
-                        <Box padding={1}>
-                          <Skeleton
-                            variant="text"
-                            width="100px"
-                            height="20px"
-                          />
-                          <Box marginTop={1} />
-                          <Skeleton variant="text" width="100%" height="15px" />
-                        </Box>
-                      </BoxWithBorder>
-                    ))
-                  ) : BOMData.length ? (
-                    <>
-                      <ProductHierarchy
-                        data={BOMData}
-                        permissions={permissions?.product}
-                        unassignProduct={() => { }}
-                      />
-                      <Box px={1} my={1} >
-                        <Button
-                          fullWidth
-                          variant="outlined"
-                          color='primary'
-                          onClick={() => history.push(`${routes.productDetail.path}/${productId}/bom`, { productName: productInventoryData?.product?.optionLabel })}>
-                          View All
-                        </Button>
-                      </Box>
-                    </>
-                  ) : (
-                    <Box textAlign="center" padding={2} minHeight={150}>
-                      <Typography>No parts available for this product</Typography>
-                    </Box>
-                  )}
+                <Tabs
+                  className="quote-tab"
+                  value={tabValue}
+                  style={isMobile ? { display: "" } : { display: "none" }}
+                  onChange={handleMainTabChange}
+                  textColor="primary"
+                  TabIndicatorProps={{
+                    style: {
+                      display: 'none'
+                    }
+                  }}
+                >
+                  <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 1 ? 'white' : '',
+                      color: tabValue === 1 ? '#163340' : '#163340'
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                      </div>
+                    }
+                    {...a11yProps(0)}
+                  />
+                  <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 2 ? 'white' : '',
+                      color: tabValue === 2 ? 'blue' : '#163340',
+                      display: "flex !important"
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                      </div>
+                    }
+                    {...a11yProps(1)}
+                  />
+                  <div className={'uio'}> </div>
+                </Tabs>
+                <TabPanel value={tabValue} index={0}>
+                  <Box display={isMobile ? "flex" : "none"}>
+                    {loadingProductInventory || !productInventoryFields.length ? (
+                      <Grid container spacing={2} style={{ padding: "8px" }}>
+                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                      </Grid>
+                    ) : (
+                      <>
+                        <DetailsPage data={productInventoryData}
+                          fields={productInventoryData?.status &&
+                            productInventoryData?.status === "Scrap" ?
+                            [...productInventoryFields, customField] :
+                            productInventoryFields} />
+                      </>
+                    )}
+                  </Box>
+                </TabPanel>
+                <TabPanel value={tabValue} index={1}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={12} md={12} lg={12}>
+                      <div className="detail-box">
+                        <div className="detail-box-content">
+                          <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                          <h3 className="form-label-style" title="Asset History">
+                            Asset History
+                          </h3>
+                        </div>
+                        {isMobile && <div>
+                          <CustomTimeline dataRows={productInventoryHistoryData} />
+                        </div>}
+
+                        <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
+                          {!isMobile && columns ?
+                            <CustomAgGrid
+                              columns={columns}
+                              dataRows={dataRows}
+                              frameworkComponents={frameworkComponents}
+                              setGridApi={setGridApi}
+                              dispatch={dispatch}
+                              rowCount={rowCount}
+                              limit={limit}
+                              pageSizes={pageSizes}
+                              page={page}
+                              allowAction={false}
+                              allowSelection={false}
+                              isClientSideGrid={true}
+                              loading={loading}
+                              renderedFrom={`${renderedFrom}_grid-1`}
+                              refreshGrid={fetchProductInventoryHistory}
+                            />
+                            : <Box
+                              p={2}
+                              height={500}
+                              bgcolor="white">
+                              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                            </Box>
+                          }
+                        </Grid>
+
+                      </div>
+                    </Grid>
+                  </Grid>
+                </TabPanel>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={12} md={4} lg={4}>
+              <Paper style={{ overflow: 'hidden' }}>
+                <Box
+                  padding={1}
+                  bgcolor="grey.200"
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Typography variant="subtitle2">
+                    Child Product
+                  </Typography>
                 </Box>
-              )}
-            </Paper>
-            {/* <Paper style={{ overflow: 'hidden',}}>
-            <Activity 
-            resourceId={id}
-            resource={ ACTIVITY_RESOURCE?.serializedAsset}
-            relatedTo={[
-              {
-                type:ACTIVITY_RESOURCE?.serializedAsset,
-                referenceId:id,
-                access:true
-              }
-            ]}
-            handleActivityRefresh={() => { }}
-            emails={contactsEmailsData}
-            />
-          
-          </Paper> */}
-<div className="position-relative">
+                {(
+                  <Box>
+                    {loading || loadingBOMData ? (
+                      [1].map((i) => (
+                        <BoxWithBorder
+                          key={i}
+                          style={{
+                            margin: "8px",
+                          }}
+                        >
+                          <Box padding={1}>
+                            <Skeleton
+                              variant="text"
+                              width="100px"
+                              height="20px"
+                            />
+                            <Box marginTop={1} />
+                            <Skeleton variant="text" width="100%" height="15px" />
+                          </Box>
+                        </BoxWithBorder>
+                      ))
+                    ) : BOMData.length ? (
+                      <>
+                        <ProductHierarchy
+                          data={BOMData}
+                          permissions={permissions?.product}
+                          unassignProduct={() => { }}
+                        />
+                        <Box px={1} my={1} >
+                          <Button
+                            fullWidth
+                            variant="outlined"
+                            color='primary'
+                            onClick={() => history.push(`${routes.productDetail.path}/${productId}/bom`, { productName: productInventoryData?.product?.optionLabel })}>
+                            View All
+                          </Button>
+                        </Box>
+                      </>
+                    ) : (
+                      <Box textAlign="center" padding={2} minHeight={150}>
+                        <Typography>No parts available for this product</Typography>
+                      </Box>
+                    )}
+                  </Box>
+                )}
+              </Paper>
+            </Grid>
+          </Grid>
+          <div className="position-relative">
             <HideWhenOffline>
               <Paper>
                 {!isSmallScreen && (
@@ -784,11 +753,8 @@ const SerializedAssetDetailsPage = () => {
               </Paper>
             </HideWhenOffline>
           </div>
-          </Grid>
-          
-        </Grid>
+        </div>
       </Fragment>
-
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
