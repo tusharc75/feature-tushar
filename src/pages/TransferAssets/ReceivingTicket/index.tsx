@@ -136,9 +136,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     try {
       let assetData = await fetchAssets(forceRefresh);
       let ticketData: any = await fetchLoadingTickets();
-      const loadingTicket = ticketData.filter((ticket: any) => ticket.ticketType === "Loading")
-      const receivingTicket = ticketData.filter((ticket: any) => ticket.ticketType === "Receiving")
-
+      const loadingTicket = ticketData.filter((ticket: any) => ticket.ticketType === DELIVERY_TICKET_TYPE.loading)
+      const receivingTicket = ticketData.filter((ticket: any) => ticket.ticketType === DELIVERY_TICKET_TYPE.receiving)
       for (let i = 0; i < receivingTicket.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
           if (receivingTicket[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
@@ -148,7 +147,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           }
         }
       }
-
       for (let i = 0; i < loadingTicket.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
           if (
@@ -160,12 +158,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           }
         }
       }
-
-      assetData = assetData?.map((d: any, index) => ({
-        ...d,
-        assetNumber: `${index + 1}. ${d.assetNumber}`
-      }));
-
       dispatch({ type: 'initialize', data: assetData, count: assetData.length });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -192,9 +184,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         (asset: any) => !asset?.hasOwnProperty('receivingTicket') && asset?.loadingTicketStatus === 'Delivered'
       );
       const loadingTicketsNotDelivered = selectedRecords.filter((asset: any) => asset?.loadingTicketStatus !== 'Delivered');
-      const selectedInventoryDelivered = selectedRecords.filter(
-        (asset: any) => asset?.receivingTicketStatus === 'Delivered' || asset?.receivingTicketStatus === 'In-Transit'
-      );
       setLoadingTicketsNotDelivered(loadingTicketsNotDelivered);
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
@@ -300,7 +289,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
                 const data: any = {}
                 data["refrenceId"] = transferAssetData._id
                 data["ticketName"] = transferAssetData.transferAssetNumber
-               
+
                 if (transferAssetData?.transferType === "Internal") {
                   data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
                   data["pickupFrom"] = transferAssetData?.transfertoPlant?.optionValue;
@@ -316,7 +305,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
                   data["pickupFrom"] = transferAssetData?.transfertoSupplier?.optionValue;
                   data["pickupFromAddress"] = transferAssetData?.supplierShipTo?.optionValue;
                 }
-                
+
                 data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
                 data["deliveryTo"] = transferAssetData?.transferFromPlant?.optionValue;
                 data["deliveryToAddress"] = transferAssetData?.transferFromPlant?.address;
