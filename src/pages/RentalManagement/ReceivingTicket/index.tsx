@@ -42,6 +42,7 @@ import { ExpandMore } from '@material-ui/icons';
 import ExistingRentalJob from "./ExistingRentalJob";
 import { groupBy, uniq, map, filter } from "lodash";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
+import AddSerializedAsset from "../SerializedAsset/AddSerializedAsset";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -87,6 +88,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
+
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] })
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -407,6 +410,37 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     }
   };
 
+  const handleReplaceAssets = (rows) => {
+
+    const data: any = {}
+    data.refrenceType = "rentalJob";
+    data.referenceId = rentalManagementData._id;
+
+    const assets: any = []
+    selectedRecords?.forEach((element: any) => {
+      const result = rows.filter(f => f.productId === element?.product?.optionValue && !f.isCounted);
+      if (result.length) {
+        assets.push({ _id: element._id, status: element.status, deliveryTicketId: element.loadingTicketId, newId: result[0]._id })
+        result[0].isCounted = true;
+      }
+    })
+    data.assets = assets;
+
+    axiosInstance().post(`${deliveryTicket.api}/replace-assets`, data)
+      .then(({ data }) => {
+        setAddSerializedAssetDialog({ open: false, products: [] })
+        fetchRecords()
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Assets Replaced Successfully`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+  }
+
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
       <Box display="flex" alignItems="center">
@@ -579,6 +613,31 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               onClick={() => setShowRepairJobDialog(true)}
             >Create Repair Job</MenuItem>
             : null}
+
+          <MenuItem
+            onClick={() => {
+              const products = []
+              selectedRecords?.forEach((element) => {
+                const foundProduct = products.filter((e) => e._id === element?.product?.optionValue)
+                if (foundProduct.length) {
+                  foundProduct[0].qty += 1
+                }
+                else {
+                  products.push({
+                    _id: element?.product?.optionValue,
+                    productName: element?.product?.optionLabel,
+                    qty: 1
+                  })
+                }
+              })
+              setAddSerializedAssetDialog({ open: true, products: products });
+              closeActions()
+            }}
+            disabled={(selectedRecords.length === 0) || isOffline || (selectedRecords.some((f: any) => f.type !== "Asset" ||
+              !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
+            ))}
+          >
+            Replace Assets</MenuItem>
         </Menu>
         <Box mx={1} />
         {(showProcessDeliveryTicket && !isOffline) &&
@@ -679,7 +738,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             renderedFrom={renderedFrom}
             rowClassRules={{
               "red-data-row": function (params) {
-                return [INVENTORY_STATUS.lost,INVENTORY_STATUS.scrap].some(s => s === params.data.status);
+                return [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].some(s => s === params.data.status);
               },
             }}
             refreshGrid={fetchRecords}
@@ -872,6 +931,21 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           setShowRepairJobDialog(false);
           fetchRecords()
         }}
+      />
+    }
+    {addSerializedAssetDialog.open &&
+      <AddSerializedAsset
+        addSerializedAsset={handleReplaceAssets}
+        handleSerializedAssetClose={() => {
+          setAddSerializedAssetDialog({ open: false, products: [] });
+        }}
+        refrenceType={"ReplaceAsset"}
+        refrenceData={{
+          _id: rentalManagementData?._id, warehouse: rentalManagementData?.warehouse?.optionValue
+        }}
+        isAdding={false}
+        selectedProducts={addSerializedAssetDialog.products}
+        filterByPlant={rentalManagementData?.warehouse?.optionValue}
       />
     }
   </>
