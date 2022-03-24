@@ -19,7 +19,6 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 
 const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -65,8 +64,9 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
     // const {zipCodePostalCode, stateProvince, ...restValues} = values
     setLoading(true);
     if (addressData) {
-      values._id = addressData._id
-      axiosInstance().put(`${address.addressApi}`, values)
+      values._id = addressData._id;
+      axiosInstance()
+        .put(`${address.addressApi}`, values)
         .then(({ data: { data } }) => {
           setLoading(false);
           onSuccess(data);
@@ -74,8 +74,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
-    }
-    else {
+    } else {
       axiosInstance()
         .post(`${address.addressApi}`, values)
         .then(({ data: { data } }) => {
@@ -101,46 +100,51 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
       const element = document.createElement('div');
       let placesService = new window.google.maps.places.PlacesService(element);
       placesService.getDetails({ placeId }, (results) => {
-        type addressType = {
-          long_name: string;
-          short_name: string;
-          types: any[];
-        };
-        const addressess = results.address_components;
-        let fullAddress: any = {};
-        addressess.forEach((address: addressType) => {
-          const type = address.types[0];
-          if (type === 'locality') {
-            fullAddress.city = address.long_name;
-          }
-          // if (type === 'administrative_area_level_1') {
-          //   if(initialData.values.hasOwnProperty("state")) {
-          //     fullAddress['state'] = address.long_name;
-          //   } else {
-          //     fullAddress['state/Province'] = address.long_name;
-          //   }
-          // }
-          if (type === 'administrative_area_level_2') {
-            fullAddress.county = address.long_name;
-          }
-          if (type === 'country') {
-            fullAddress.country = address.long_name;
-          }
-          // if (type === 'postal_code') {
-          //   if(initialData.values.hasOwnProperty("zipCode")) {
-          //     fullAddress['zipCode'] = address.long_name;
-          //   } else {
-          //     fullAddress['zipCode/PostalCode'] = address.long_name;
-          //   }
-          // }
-        });
-        fullAddress.latitude = results.geometry.location.lat().toLocaleString();
-        fullAddress.longitude = results.geometry.location.lng().toLocaleString();
-        fullAddress.streetAddress = results.formatted_address;
-        fullAddress.fullAddress = val.description;
-        setAddressDetail(fullAddress);
+        setFullAddressFields(results, val);
       });
     }
+  };
+
+  const setFullAddressFields = (results: any, val?: any) => {
+    type addressType = {
+      long_name: string;
+      short_name: string;
+      types: string[];
+    };
+    const addressess = results.address_components;
+
+    let fullAddress: any = { ...initialData.values };
+    addressess.forEach((address: addressType) => {
+      const type = address.types;
+      if (type.includes('locality')) {
+        fullAddress.city = address.long_name;
+      }
+      // if (type.includes('administrative_area_level_1')) {
+      //   if(initialData.values.hasOwnProperty("state")) {
+      //     fullAddress['state'] = address.long_name;
+      //   } else {
+      //     fullAddress['state/Province'] = address.long_name;
+      //   }
+      // }
+      if (type.includes('administrative_area_level_2')) {
+        fullAddress.county = address.long_name;
+      }
+      if (type.includes('country')) {
+        fullAddress.country = address.long_name;
+      }
+      // if (type === 'postal_code') {
+      //   if(initialData.values.hasOwnProperty("zipCode")) {
+      //     fullAddress['zipCode'] = address.long_name;
+      //   } else {
+      //     fullAddress['zipCode/PostalCode'] = address.long_name;
+      //   }
+      // }
+    });
+    fullAddress.latitude = results.geometry.location.lat().toLocaleString();
+    fullAddress.longitude = results.geometry.location.lng().toLocaleString();
+    fullAddress.streetAddress = results.formatted_address;
+    fullAddress.fullAddress = val?.description ?? results.formatted_address;
+    setAddressDetail(fullAddress);
   };
 
   useEffect(() => {
@@ -156,12 +160,16 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
   }, [addressDetail]);
 
   const onCordChange = (position: google.maps.MapMouseEvent) => {
-    if (!formikRef.current) return;
-    setAddressDetail((prevState) => ({
-      ...prevState,
-      longitude: position.latLng.lng().toLocaleString(),
-      latitude: position.latLng.lat().toLocaleString()
-    }));
+    if (!formikRef.current || !window.google) return;
+
+    const geocoder = new window.google.maps.Geocoder();
+
+    geocoder.geocode({ location: position.latLng }, (result, status) => {
+      if (status === google.maps.GeocoderStatus.OK) {
+        console.log(result);
+        setFullAddressFields(result[1]);
+      }
+    });
   };
 
   return (
@@ -250,12 +258,12 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
                                       onChange={
                                         field.fieldName === 'fullAddress'
                                           ? (_, val) => {
-                                            if (typeof val !== 'object') return;
-                                            getFullAddress(val);
-                                            if (!val?.place_id) {
-                                              setAddressDetail(null);
+                                              if (typeof val !== 'object') return;
+                                              getFullAddress(val);
+                                              if (!val?.place_id) {
+                                                setAddressDetail(null);
+                                              }
                                             }
-                                          }
                                           : null
                                       }
                                     />
