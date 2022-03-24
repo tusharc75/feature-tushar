@@ -66,6 +66,7 @@ export const rentalManagementSteps = [
   'Packing Slip'
 ];
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
+export const bulkAssetCreationSteps = ['Add Product', 'Asset List'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -184,7 +185,8 @@ export const sidebarResource = {
   transferInventory: 'Transfer Inventory',
   zone: 'Zone',
   projectSales: 'Project Sales',
-  wellMaster: 'Well Master'
+  wellMaster: 'Well Master',
+  bulkAssetCreation: 'Bulk Asset Creation'
 };
 
 export const resourceNames = {
@@ -242,7 +244,8 @@ export const resourceNames = {
   transferAsset: 'Transfer Asset',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
-  wellMaster: 'Well Master'
+  wellMaster: 'Well Master',
+  bulkAssetCreation: 'Bulk Asset Creation'
 };
 
 export const primaryFields = {
@@ -307,8 +310,9 @@ export const RESOURCE_LABEL = {
   address: 'Addresses',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventories',
-  zone: 'Zone',
-  wellMaster: 'Well Master'
+  zone: "Zone",
+  wellMaster: "Well Master",
+  bulkAssetCreation: "Bulk Asset Creation"
 };
 
 export const CHILD_RESOURCE = {
@@ -532,6 +536,13 @@ export const pricingCondition = {
   resource: 'pricingCondition',
   api: '/pricing-condition',
   route: 'pricing-condition'
+};
+
+export const bulkAssetCreation = {
+  api: '/bulk-asset-creation',
+  route: '/bulk-asset-creation',
+  permission: 'bulkAssetCreation',
+  resource: 'bulkAssetCreation'
 };
 
 export const profileMenuItems = {
@@ -1646,6 +1657,7 @@ export const ACTIVITY_RESOURCE = {
   deliveryTicket: 'deliveryTicket',
   sublease: 'sublease',
   salesOrder: 'salesOrder',
+  bulkAssetCreation: 'bulkAssetCreation',
   serializedAsset: 'serializedAsset'
 };
 
