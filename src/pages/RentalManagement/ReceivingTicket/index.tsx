@@ -155,6 +155,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           type: "Asset",
           qty: 1,
           productName: u?.product?.optionLabel,
+          productId: u?.product?.optionValue,
           warehouse: u?.warehouse?.optionLabel,
           warehouseId: u?.warehouse?.optionValue,
           currentOwner: u?.currentOwner,
@@ -171,28 +172,30 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
 
       products?.forEach((ele) => {
-        if (productAssets.filter((e) => e._id === ele.materialId).length) {
-          productAssets.forEach(element => {
-            if (element._id === ele.materialId) {
-              element.qty += ele.qty
-            }
-          });
-        }
-        else {
-          const obj: any = {}
-          obj._id = ele.materialId
-          obj.type = "Product"
-          obj.qty = ele.qty
-          obj.assetNumber = ele?.productDetail?.productName
-          obj.productName = ele?.productDetail?.productName
-          obj.productId = ele?.productDetail?._id
-          obj.warehouse = rentalManagementData?.warehouse?.optionLabel
-          obj.warehouseId = rentalManagementData?.warehouse?.optionValue
-          obj.status = ele?.status
-          obj.rentalAssetStatus = ele?.status
-          obj.startDate = ele?.actualStartDate
-          obj.endDate = ele?.actualEndDate
-          productAssets.push(obj)
+        if (productAssets.filter((e) => e.productId === ele.materialId).length === 0) {
+          if (productAssets.filter((e) => e._id === ele.materialId).length) {
+            productAssets.forEach(element => {
+              if (element._id === ele.materialId) {
+                element.qty += ele.qty
+              }
+            });
+          }
+          else {
+            const obj: any = {}
+            obj._id = ele.materialId
+            obj.type = "Product"
+            obj.qty = ele.qty
+            obj.assetNumber = ele?.productDetail?.productName
+            obj.productName = ele?.productDetail?.productName
+            obj.productId = ele?.productDetail?._id
+            obj.warehouse = rentalManagementData?.warehouse?.optionLabel
+            obj.warehouseId = rentalManagementData?.warehouse?.optionValue
+            obj.status = ele?.status
+            obj.rentalAssetStatus = ele?.status
+            obj.startDate = ele?.actualStartDate
+            obj.endDate = ele?.actualEndDate
+            productAssets.push(obj)
+          }
         }
       })
 

@@ -21,7 +21,7 @@ import { makeStyles, createStyles, withStyles } from '@material-ui/styles';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-
+import { CircularProgress } from "@material-ui/core";
 interface DialogProps {
   closeDialog: () => void;
   products: any[];
@@ -182,7 +182,13 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
       <CustomDialogContent>
         <Box display="flex" flexDirection="column" component={'form'} onSubmit={handleSubmit}>
           <Box alignSelf={'flex-end'} mb={2}>
-            <Button type="submit" variant="contained" size="small" color="primary" disabled={isSubmitting || Boolean(hasError)}>
+            <Button
+              type="submit"
+              variant="contained"
+              size="small"
+              color="primary"
+              endIcon={isSubmitting && <CircularProgress size={20} />}
+              disabled={isSubmitting || Boolean(hasError)}>
               Add
             </Button>
           </Box>
