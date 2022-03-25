@@ -66,7 +66,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'transfer-inventory',
         'zone',
         'well-master',
-        'dashboard-builder'
+        'dashboard-builder',
+        'bulk-asset-creation'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);

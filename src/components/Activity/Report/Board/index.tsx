@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Grid, Typography, TextField } from '@material-ui/core';
+import { Box, Grid, Typography,Tooltip, Dialog, TextField, IconButton } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import { DndProvider } from 'react-dnd';
@@ -7,13 +7,16 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import { isEqual, kebabCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
-
+import { camelCase } from 'lodash';
 import statusList from '../../Helpers/statusList';
 import { GetBoard } from '../../../../axios/activity';
 import { useData } from '../../../../StateProvider/Provider';
-
+import { Add } from '@material-ui/icons';
 import { BoardList } from './BoardList';
+import { CustomDialogTransition } from '../../../../constants/helpers';
 import axiosInstance from '../../../../axios/axiosInstance';
+import { CreateTask } from '../../Task/CreateTask';
+import { CreateCase } from '../../Case/CreateCase';
 import { getApi, getData } from '../../../../constants/helpers';
 import { get_activity_resource } from '../../../Activity/Helpers/utils';
 
@@ -22,14 +25,15 @@ const useStyles = makeStyles((theme) => ({
     background: '#f0f0f0',
     borderRadius: '4px',
     minHeight: 'calc(100vh - 33.5vh)',
-    height: '100%'
+    height: '100%',
+
   },
   activityMainBlock: {
     height: 'calc(100vh - 32vh)',
-    overflow: 'auto'
+    overflow: 'auto',
   },
-  ".MuiGrid-spacing-xs-1": {
-    width: "calc(100vw + 14px)"
+  '.MuiGrid-spacing-xs-1': {
+    width: 'calc(100vw + 14px)'
   }
 }));
 
@@ -38,16 +42,22 @@ const Board = ({ type, filter }) => {
   const [activities, setActivities] = useState([]);
   const classes = useStyles();
   const {
-    state: { user, permissions }
+    state: {
+      user: { user },
+      permissions
+    }
   }: any = useData();
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
-
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [click, setClick] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   useEffect(() => {
-    setResourceOptions(get_activity_resource(permissions))
+    setResourceOptions(get_activity_resource(permissions));
   }, []);
 
   useEffect(() => {
@@ -63,6 +73,11 @@ const Board = ({ type, filter }) => {
       .catch((err) => {
         setLoading(false);
       });
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    fetchBoard();
   };
 
   // Data for Autocomplete
@@ -115,7 +130,7 @@ const Board = ({ type, filter }) => {
   const updateStatus = (id: string, updatedData: any) => {
     axiosInstance()
       .put(`${type}/${id}`, { status: updatedData.status })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         fetchBoard();
       });
@@ -123,7 +138,7 @@ const Board = ({ type, filter }) => {
 
   return (
     <>
-      <Box display="flex" pb={1}>
+      <Box display="flex" style={{paddingBottom:"18px"}} pb={1}>
         <Autocomplete
           options={resourceOptions}
           getOptionLabel={(option) => option.optionLabel}
@@ -160,36 +175,110 @@ const Board = ({ type, filter }) => {
       </Box>
       <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
         <Grid container spacing={2} className={classes.activityMainBlock}>
-          {statusList.map((data, index) => (
-            <Grid item md={3} xs={12} sm={4} key={index}>
-              <div className={classes.block}>
-                {!loading && (
-                  <Box p={1}>
-                    <Typography variant="subtitle2">
-                      {data.status.toUpperCase()}
-                      {' (' +
-                        activities.filter(function (o) {
-                          return o.status === data.status;
-                        }).length +
-                        ')'}
-                    </Typography>
-                  </Box>
-                )}
-                <BoardList
-                  loading={loading}
-                  selectedResource={selectedResourceData}
-                  resource={resource?.optionValue}
-                  status={data.status}
-                  activity={activities.filter(function (o) {
-                    return o.status === data.status;
-                  })}
-                  fetchBoard={fetchBoard}
-                  type={type}
-                  handleChangeStatus={handleChangeStatus}
-                />
-              </div>
-            </Grid>
-          ))}
+          {statusList.map((data, index) => {
+            return (
+              <Grid item md={3} xs={12} sm={4} style={{paddingTop:"0px"}} key={index}>
+                <div className={classes.block}>
+                  {!loading && (
+                    <Box p={1} className="fixedBoardHeader">
+                      <Typography variant="subtitle2" style={{ width: '50%' }}>
+                        {data.status.toUpperCase()}
+                        {' (' +
+                          activities.filter(function (o) {
+                            return o.status === data.status;
+                          }).length +
+                          ')'}
+                      </Typography>
+                      {permissions && permissions[type?.toLowerCase()]?.isCreate ? (
+                        <Tooltip
+                        title={`Create ${type}`}
+                        >
+                        <IconButton
+                          size="small"
+                          style={{ float: 'right', marginTop: '-25px' }}
+                          onClick={() => {
+                            setSelectedStatus(data.status);
+                            setOpenDialog(true);
+                            setFullScreen(false);
+                          }}
+                        >
+                          <Add fontSize="small" />
+                        </IconButton>
+                        </Tooltip>
+                      ) : null}
+                    </Box>
+                  )}
+                  <BoardList
+                    loading={loading}
+                    selectedResource={selectedResourceData}
+                    resource={resource?.optionValue}
+                    status={data.status}
+                    activity={activities.filter(function (o) {
+                      return o.status === data.status;
+                    })}
+                    fetchBoard={fetchBoard}
+                    type={type}
+                    handleChangeStatus={handleChangeStatus}
+                  />
+                </div>
+              </Grid>
+            );
+          })}
+          <Dialog
+            open={openDialog}
+            onClose={() => {
+              handleCloseDialog();
+              setFullScreen(false);
+            }}
+            fullWidth
+            maxWidth="md"
+            fullScreen={fullScreen || isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+          >
+            {type === 'task' ? (
+              <CreateTask
+                status={selectedStatus}
+                taskId={null}
+                relatedTo={[
+                  {
+                    type: resource?.optionValue && selectedResourceData ? camelCase(resource?.optionValue) : 'user',
+                    referenceId: resource?.optionValue && selectedResourceData ? selectedResourceData.id : user._id,
+                    access: true
+                  }
+                ]}
+                handleClose={() => {
+                  handleCloseDialog();
+                  setFullScreen(false);
+                }}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+              />
+            ) : type === 'case' ? (
+              <CreateCase
+                status={selectedStatus}
+                caseId={null}
+                relatedTo={[
+                  {
+                    type: resource?.optionValue && selectedResourceData ? camelCase(resource?.optionValue) : 'user',
+                    referenceId: resource?.optionValue && selectedResourceData ? selectedResourceData.id : user._id,
+                    access: true
+                  }
+                ]}
+                handleClose={() => {
+                  handleCloseDialog();
+                  setFullScreen(false);
+                }}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+              />
+            ) : null}
+          </Dialog>
         </Grid>
       </DndProvider>
     </>

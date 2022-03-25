@@ -659,6 +659,13 @@ body::-webkit-scrollbar-thumb {
   margin-top: 5px !important;
 }
 
+.fixedBoardHeader {
+position:sticky;
+z-index: 4;
+top:0px;
+background: #eeeeee;
+}
+
 .fixedRightPanel {
   position: fixed;
   // height: calc(100vh - 107px);
