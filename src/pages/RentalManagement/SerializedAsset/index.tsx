@@ -703,7 +703,10 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     }
     {addNonSerializedAssetDialog && (
       <AddNonSerializeAssets
-        closeDialog={() => setAddNonSerializedAssetDialog(false)}
+        closeDialog={() => {
+          fetchProductInventory()
+          setAddNonSerializedAssetDialog(false)
+        }}
         products={selectedRecords.filter(d => d.type === "product" && !d.serializedProduct)}
         warehouse={rentalManagementData?.warehouse ?? null}
         rentalId={rentalManagementData?._id}
