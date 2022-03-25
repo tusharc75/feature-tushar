@@ -36,7 +36,6 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
     const theme = useTheme()
-    const isSmallScreen = useMediaQuery(theme.breakpoints.down('xs'))
     const toastConfig = useContext(CustomToastContext)
     const [serializedProducts, setSerializedProducts] = useState([]);
     const [gridApi, setGridApi] = useState(null);
@@ -306,7 +305,7 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
             aria-labelledby="customized-dialog-title"
             open={true}
         >
-            <CustomDialogHeader title={`Add ${routes.serializedAsset.title}`} onClose={handleSerializedAssetClose} ></CustomDialogHeader>
+            <CustomDialogHeader title={`${refrenceType === "ReplaceAsset" ? "Replace" : "Add"} ${routes.serializedAsset.title}`} onClose={handleSerializedAssetClose} ></CustomDialogHeader>
             <CustomDialogContent>
                 <Box pt={1} pb={1}>
                     <Grid container spacing={2}>
@@ -441,7 +440,8 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                                     </Box>
                                 }
                                 <Box pl={1}>
-                                    <HtmlTooltip title={(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) ? "Direct transfer to customer location" : "Add to Job"}>
+                                    <HtmlTooltip title={(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) ? "Direct transfer to customer location" :
+                                        refrenceType === "Rental Job" ? "Add to Job" : refrenceType === "ReplaceAsset" ? "Replace" : 'Add'}>
                                         <Button
                                             color="primary"
                                             size="small"
@@ -452,7 +452,10 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                                             className={isMobile && !isTablet ? 'mobile_button' : ""}
                                             endIcon={isAdding && <CircularProgress size={20} />}
                                         >
-                                            {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add to Job'}
+                                            {isMobile && !isTablet ? <MdAdd size={23} /> :
+                                                refrenceType === "Rental Job" ? 'Add to Job' :
+                                                    refrenceType === "ReplaceAsset" ? "Replace" : 'Add'
+                                            }
                                             {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")" : ""}
                                         </Button>
                                     </HtmlTooltip>
