@@ -36,7 +36,6 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
     const theme = useTheme()
-    const isSmallScreen = useMediaQuery(theme.breakpoints.down('xs'))
     const toastConfig = useContext(CustomToastContext)
     const [serializedProducts, setSerializedProducts] = useState([]);
     const [gridApi, setGridApi] = useState(null);

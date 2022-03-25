@@ -140,6 +140,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
             if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
               createValues["afeNumber"] = refrenceData?.afeNumber
             }
+            if (fieldsDataForCreate.some((e) => e.fieldName === "processor")) {
+              createValues["processor"] = refrenceData?.processor
+            }
           }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
