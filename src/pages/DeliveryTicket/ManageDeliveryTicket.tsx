@@ -10,7 +10,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import {
     getOwnerDropdownDataSource,
     getCollaboratorDropdownDataSource,
-    CustomDialogTransition, setFieldsInAscendingOrder, generateUniqueIdOnly
+    CustomDialogTransition, setFieldsInAscendingOrder, generateUniqueIdOnly, DELIVERY_TICKET_STATUS
 } from "./../../constants/helpers";
 import {
     getObjKeysWithValues, getObjKeys, yupSchema, deliveryTicket, sidebarResource, DELIVERY_TICKET_TYPE,
@@ -213,11 +213,12 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                     })
                     tempInitialData["wellName"] = refrenceData?.wellName;
                     tempInitialData["afeNumber"] = refrenceData?.afeNumber;
-
                     if (refrenceData?.processor) {
                         tempInitialData["deliveryPerson"] = refrenceData?.processor;
                     }
-
+                    if (refrenceData.status) {
+                        tempInitialData["status"] = refrenceData.status;
+                    }
                     isPickupFromDisable = refrenceData?.isPickupFromDisable ? true : false;
                     isDeliveryToDisable = refrenceData?.isDeliveryToDisable ? true : false;
 

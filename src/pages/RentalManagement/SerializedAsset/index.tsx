@@ -703,7 +703,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             message: `${sidebarResource.sublease} has been created successfully`,
           });
         }}
-        currency={rentalManagementData.currency}
         refrenceType="rentalJob"
         refrenceId={rentalManagementData._id}
         refrenceData={{ ...rentalManagementData, material: [...showOrderDialog.products] }}
