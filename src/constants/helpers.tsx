@@ -1829,6 +1829,10 @@ export const viewsColors = {
     background: '#ecc19c',
     borderColor: '#d98298'
   },
+  bulkAsset: {
+    background: '#FFA500',
+    borderColor: '#6c89a6'
+  },
   loadingTicket: {
     background: '#e6c6e6',
     borderColor: '#b38fb3'
