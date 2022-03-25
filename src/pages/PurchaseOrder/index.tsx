@@ -386,7 +386,6 @@ const PurchaseOrder = () => {
                     }}
                 />
             </Grid>
-
         </Grid>
         <div className="main-container">
             <div className="header-panel">

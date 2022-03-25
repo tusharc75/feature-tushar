@@ -14,6 +14,7 @@ import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
 import ManagePurchaseOrder from "../../PurchaseOrder/ManagePurchaseOrder";
+import ManageBulkAssetCreation from "../../BulkAssetCreation/ManageBulkAssetCreation";
 import ManageSublease from "../../Sublease/ManageSublease";
 import { uniqBy, uniq, startCase } from 'lodash';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
@@ -53,6 +54,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const [purchaseOrderCount, setPurchaseOrderCount] = useState(0);
   const [subleaseCount, setSubleaseCount] = useState(0);
   const [transferAssetCount, setTransferAssetCount] = useState(0);
+  const [bulkAssetCreationCount, setbulkAssetCreationCount] = useState(0);
 
   const { state: { user, permissions, selectedEntity } }: any = useData();
   const { isOffline } = useContext(CustomOfflineContext);
@@ -99,6 +101,17 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
                 <IconButton size="small" onClick={() => {
                   history.push(routes.purchaseOrder.path, {
+                    rental: rentalManagementData,
+                  })
+                }}>
+                  <InfoIcon fontSize="small" color={"primary"} />
+                </IconButton>
+              </HtmlTooltip>
+            }
+            {row.original.isBulkAssetCreation &&
+              <HtmlTooltip title={`${routes.bulkAssetCreation.title}`}>
+                <IconButton size="small" onClick={() => {
+                  history.push(routes.bulkAssetCreation.path, {
                     rental: rentalManagementData,
                   })
                 }}>
@@ -237,6 +250,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       var data: any = []
       var transferAssets: any = []
       var purchaseOrderProduct: any = []
+      var bulkAssetCreationProduct: any = []
       var subleaseProduct: any = []
 
       if (isOffline) {
@@ -253,6 +267,10 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         if (permissions?.purchaseOrder?.isRead) {
           purchaseOrderProduct = transactionData?.purchaseOrder
           setPurchaseOrderCount(purchaseOrderProduct?.length)
+        }
+        if (permissions?.bulkAssetCreation?.isRead) {
+          bulkAssetCreationProduct = transactionData?.bulkAssetCreation
+          setbulkAssetCreationCount(bulkAssetCreationProduct?.length)
         }
         if (permissions?.sublease?.isRead) {
           subleaseProduct = transactionData?.sublease
@@ -277,7 +295,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         parent.isValid = parent.serializedProduct ? parent.assetAssignedQty === parent.assetQty ? true : false : true;
         parent.isSublease = subleaseProduct?.some(e => e.materialId === parent.materialId)
         parent.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === parent.materialId)
-        parent.subRows = generateNestedData(data.material, data.inventory, parent, transferAssets, subleaseProduct, purchaseOrderProduct);
+        parent.isBulkAssetCreation = bulkAssetCreationProduct?.some(e => e.productId === parent.materialId)
+        parent.subRows = generateNestedData(data.material, data.inventory, parent, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct);
       });
 
       if (rows.filter(_rows => _rows.isValid === false).length > 0) {
@@ -294,7 +313,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     }
   };
 
-  const generateNestedData = (material, inventory, parent, transferAssets, subleaseProduct, purchaseOrderProduct) => {
+  const generateNestedData = (material, inventory, parent, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct) => {
     const subRows: any = [];
     const inventory_result = inventory?.filter((e) => e._id === parent._id);
     inventory_result?.forEach((_inventory, k) => {
@@ -335,7 +354,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       _subRow.isValid = _subRow.serializedProduct ? _subRow.assetAssignedQty === _subRow.assetQty ? true : false : true;
       _subRow.isSublease = subleaseProduct?.some(e => e.materialId === _subRow.materialId)
       _subRow.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === _subRow.materialId)
-      _subRow.subRows = generateNestedData(material, inventory, _subRow, transferAssets, subleaseProduct, purchaseOrderProduct);
+      _subRow.isBulkAssetCreation = bulkAssetCreationProduct?.some(e => e.productId === _subRow.materialId)
+      _subRow.subRows = generateNestedData(material, inventory, _subRow, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct);
       subRows.push(_subRow)
       assetQtySUM += _subRow.assetQty
       assetAssignedQtySUM += _subRow.assetAssignedQty
@@ -521,6 +541,16 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             open={Boolean(anchorActionEl)}
             onClose={closeActions}
           >
+            {permissions?.bulkAssetCreation?.isCreate &&
+              <MenuItem
+                disabled={showOrderDialog.products.length === 0}
+                onClick={() => {
+                  setOrderDialog(prevState => ({ ...prevState, open: true, type: "bulkAssetCreation" }))
+                  closeActions()
+                }}
+              >
+                {`Create ${routes.bulkAssetCreation.title}`}</MenuItem>
+            }
             {permissions?.purchaseOrder?.isCreate &&
               <MenuItem
                 disabled={showOrderDialog.products.length === 0}
@@ -558,8 +588,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             >
               {`Remove ${routes.serializedAsset.title}`}</MenuItem>
           </Menu>
-
-          {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0) &&
+          {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) &&
             <IconButton onClick={openLinkActions} size="small" color="primary"  >
               <ExpandMore fontSize="inherit" />
             </IconButton>
@@ -585,6 +614,16 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                 }}
               >
                 {`Created ${routes.purchaseOrder.title}`}
+              </MenuItem>}
+            {bulkAssetCreationCount > 0 &&
+              <MenuItem
+                onClick={() => {
+                  history.push(routes.bulkAssetCreation.path, {
+                    rental: rentalManagementData,
+                  })
+                }}
+              >
+                {`Created ${routes.bulkAssetCreation.title}`}
               </MenuItem>}
             {subleaseCount > 0 &&
               <MenuItem
@@ -631,7 +670,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               setCellColor={(rowData) => {
                 if (rowData.isTransferAsset) return "isTransferAsset";
                 if (!rowData.isValid) return "error";
-                if (rowData.isPurchaseOrderAsset) return "isPurchaseOrder";
+                if (rowData.isPurchaseOrder) return "isPurchaseOrder";
+                if (rowData.isBulkAssetCreation) return "isPurchaseOrder";
                 if (rowData.isSubleaseAsset) return "isSublease";
                 return "";
               }}
@@ -684,6 +724,30 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         onOk={handleRemoveInventory}
       />
     )
+    }
+    {(showOrderDialog.open && showOrderDialog.type === "bulkAssetCreation") &&
+      <ManageBulkAssetCreation
+        isClone={false}
+        bulkAssetCreationId={null}
+        onClose={() => setOrderDialog(prevState => ({ ...prevState, open: false, type: "" }))}
+        onSuccess={() => {
+          setOrderDialog(({ open: false, products: [], type: "" }))
+          setSelectedRecords([])
+          fetchProductInventory()
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: `${sidebarResource.bulkAssetCreation} has been created successfully`,
+          });
+        }}
+        refrenceData={{
+          products: [...showOrderDialog.products],
+          wellName: rentalManagementData?.wellName?.optionValue,
+          afeNumber: rentalManagementData?.afeNumber,
+          warehouse: rentalManagementData?.warehouse?.optionValue
+        }}
+        refrenceId={rentalManagementData._id}
+      />
     }
     {(showOrderDialog.open && showOrderDialog.type === "purchaseOrder") &&
       <ManagePurchaseOrder
