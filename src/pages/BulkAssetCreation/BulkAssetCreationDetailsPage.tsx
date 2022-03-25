@@ -25,7 +25,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { bulkAssetCreation, getObjKeysWithValues, supplierAccount, customerAccount, bulkAssetCreationSteps, PURCHASE_ORDER_STATUS, ACTIVITY_RESOURCE } from '../../constants/helpers';
+import { bulkAssetCreation, getObjKeysWithValues, supplierAccount, customerAccount, bulkAssetCreationSteps, ACTIVITY_RESOURCE } from '../../constants/helpers';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -162,18 +162,6 @@ const BulkAssetCreationDetailsPage = () => {
             });
     };
 
-    const openActions = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const closeActions = () => {
-        setAnchorEl(null);
-    };
-
-    const handleStatusChange = (o) => {
-        handleUpdateData({ status: o.optionValue });
-    };
-
     const handleUpdateData = (obj) => {
         if (obj.status && bulkAssetCreationData?.status !== obj.status && bulkAssetCreationFields.length > 0) {
             const fieldsDataForUpdate = bulkAssetCreationFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -278,8 +266,7 @@ const BulkAssetCreationDetailsPage = () => {
                             ) : (
                                 <DetailsPageHeader heading={bulkAssetCreationData?.baNumber} mainPoints={null} showHeading={true}>
                                     {permissions?.bulkAssetCreation?.isUpdate &&
-                                        ![PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(bulkAssetCreationData?.status)
-                                        && (
+                                        (
                                             <Button
                                                 variant={isMobile && !isTablet ? 'text' : 'contained'}
                                                 color="primary"
@@ -290,48 +277,6 @@ const BulkAssetCreationDetailsPage = () => {
                                             >
                                                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                                             </Button>
-                                        )}
-                                    {permissions?.bulkAssetCreation?.isUpdate && [PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced].includes(bulkAssetCreationData?.status)
-                                        && (
-                                            <>
-                                                <Button
-                                                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                                                    color="default"
-                                                    size="small"
-                                                    onClick={openActions}
-                                                    aria-controls="action-menu"
-                                                    endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                                                >
-                                                    {isMobile && !isTablet ? <GrStatusGood size={18} style={{ color: 'var(--warning-darken)' }} /> : 'Change Status'}
-                                                </Button>
-                                                <Menu
-                                                    anchorEl={anchorEl}
-                                                    keepMounted
-                                                    getContentAnchorEl={null}
-                                                    anchorOrigin={{
-                                                        vertical: 'bottom',
-                                                        horizontal: 'left'
-                                                    }}
-                                                    id="action-menu"
-                                                    open={Boolean(anchorEl)}
-                                                    onClose={closeActions}
-                                                >
-                                                    {statusOptions.map((o, index) => {
-                                                        return (
-                                                            <MenuItem
-                                                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === bulkAssetCreationData?.status)}
-                                                                onClick={() => {
-                                                                    closeActions();
-                                                                    handleStatusChange(o);
-                                                                }}
-                                                                value={o}
-                                                            >
-                                                                {o?.optionLabel}
-                                                            </MenuItem>
-                                                        );
-                                                    })}
-                                                </Menu>
-                                            </>
                                         )}
                                 </DetailsPageHeader>
                             )}
@@ -409,6 +354,7 @@ const BulkAssetCreationDetailsPage = () => {
                                                             setNextStep={setNextStep}
                                                             setBulkAssetCreationProduct={setBulkAssetCreationProduct}
                                                             renderedFrom={`${renderedFrom}_grid-1`}
+                                                            handleUpdateData={handleUpdateData}
                                                         />
                                                     )}
                                                     {currentStep === 1 && (

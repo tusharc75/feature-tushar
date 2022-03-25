@@ -17,6 +17,8 @@ import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEd
 import { useHistory } from "react-router-dom";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import useColumns, { getFrameworkComponents, getStaticFields } from "src/constants/useColumns";
+import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
+import { Grid } from "@material-ui/core";
 
 const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, }) => {
     const toastConfig = useContext(CustomToastContext);
@@ -33,7 +35,6 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, }) => {
 
     useEffect(() => {
         fetchColumns()
-        fetchProductInventory()
     }, []);
 
     const fetchColumns = () => {
@@ -42,7 +43,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, }) => {
             .then(({ data: { data } }) => {
                 let columns = []
                 let rendererNames = []
-                data.forEach(o => {
+                data.filter(d => d?.fieldData?.fieldName !== "bornOnDate").forEach(o => {
                     let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
@@ -58,6 +59,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, }) => {
                 setFrameWorkComponent({ ...tempFrameworkComponent })
                 columns = [...columns, ...getStaticFields()]
                 setColumns([...columns])
+                fetchProductInventory()
             })
     }
 
@@ -126,60 +128,101 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, }) => {
         return `${deepFilter}&filterType=and&filterByIdType=and`;
     };
 
-
+    const handleValueUpdate = async (row) => {
+        if (!row || !row?.data) return;
+        const assetId = row.data._id;
+        console.log(row);
+        const data = [
+            {
+                _id: assetId,
+                [row.column.colId]: row.newValue
+            }
+        ];
+        try {
+            await axiosInstance()
+                .post(`${routes.serializedAsset.path}/update-assets`, data)
+                .then(() => {
+                    fetchColumns();
+                });
+        } catch (err) {
+            toastConfig.setToastConfig(err);
+        }
+    };
 
     return (<>
-        {columns ?
-            isMobile && !isTablet ? <CustomSwipableList
-                allowSelection={false}
-                allowSwipe={true}
-                permissions={permissions?.serializedAsset}
-                primaryField={columns?.find(d => d.field === "assetNumber")}
-                onClick={(d) => {
-                    history.push(`${routes.serializedAssetDetail.path}/${d._id}`)
-                }}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                onEdit={(d) => {
-                    history.push(`${routes.serializedAssetDetail.path}/${d._id}`)
-                }}
-                extraParamsToCheckDelete={false}
-                onDelete={() => { }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                additionalDetails={[]}
-                chips={[
-                    {
-                        label: "Serial Number : ",
-                        field: "serialNumber",
-                    },
-                ]}
-                owerCollaboratorInitialsOrImages=""
-                onCreate={false}
-                showClone={true}
-                onClone={() => { }}
-                renderedFrom={renderedFrom} /> :
-                Object.keys(frameWorkComponent).length > 0 ?
-                    <CustomAgGrid
-                        columns={columns}
-                        dataRows={dataRows}
-                        frameworkComponents={frameWorkComponent}
-                        setGridApi={setGridApi}
-                        dispatch={dispatch}
-                        rowCount={rowCount}
-                        limit={limit}
-                        pageSizes={pageSizes}
-                        page={page}
-                        actionWidth={150}
-                        loading={loading}
-                        allowSelection={false}
-                        allowAction={false}
-                        renderedFrom={renderedFrom}
-                        refreshGrid={fetchProductInventory}
-                    /> : null
-            : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+        <Box display="flex" justifyContent="flex-end" pt={1} alignItems="center" className="bg-white">
+            <Box ml={2}>
+                <ImportExportLinks
+                    permissions={permissions?.packages}
+                    module="packages-products"
+                    api={`${serializedAsset.api}/custom-template`}
+                    afterImportCompleted={() => {
+                        fetchProductInventory();
+                    }}
+                    isExportAllOrSomeFeature={true}
+                    total={rowCount}
+                    recordsToExport={selectedRecords.length ? selectedRecords.length : dataRows.length}
+                    ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
+                    isDownloadExcel={false}
+                    isBackgroundWhite={true}
+                />
+            </Box>
+            <Box mx={1} />
+        </Box>
+        <Grid item xs={12} md={12} sm={12} className="mt-3">
+            {columns ?
+                isMobile && !isTablet ? <CustomSwipableList
+                    allowSelection={false}
+                    allowSwipe={true}
+                    permissions={permissions?.serializedAsset}
+                    primaryField={columns?.find(d => d.field === "assetNumber")}
+                    onClick={(d) => {
+                        history.push(`${routes.serializedAssetDetail.path}/${d._id}`)
+                    }}
+                    dataRows={dataRows}
+                    selectedRecords={selectedRecords}
+                    dispatch={dispatch}
+                    onEdit={(d) => {
+                        history.push(`${routes.serializedAssetDetail.path}/${d._id}`)
+                    }}
+                    extraParamsToCheckDelete={false}
+                    onDelete={() => { }}
+                    rowCount={rowCount}
+                    page={page}
+                    loading={loading}
+                    additionalDetails={[]}
+                    chips={[
+                        {
+                            label: "Serial Number : ",
+                            field: "serialNumber",
+                        },
+                    ]}
+                    owerCollaboratorInitialsOrImages=""
+                    onCreate={false}
+                    showClone={true}
+                    onClone={() => { }}
+                    renderedFrom={renderedFrom} /> :
+                    Object.keys(frameWorkComponent).length > 0 ?
+                        <CustomAgGridEditable
+                            columns={columns}
+                            dataRows={dataRows}
+                            frameworkComponents={frameWorkComponent}
+                            setGridApi={setGridApi}
+                            dispatch={dispatch}
+                            rowCount={rowCount}
+                            limit={limit}
+                            pageSizes={pageSizes}
+                            page={page}
+                            actionWidth={150}
+                            loading={loading}
+                            allowSelection={false}
+                            allowAction={false}
+                            renderedFrom={renderedFrom}
+                            refreshGrid={fetchProductInventory}
+                            onCellValueChanged={handleValueUpdate}
+                        /> : null
+                : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+        </Grid>
     </>
     );
 }
