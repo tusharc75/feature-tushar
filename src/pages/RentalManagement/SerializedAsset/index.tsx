@@ -26,6 +26,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { useData } from "../../../StateProvider/Provider";
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { ExpandMore } from '@material-ui/icons';
+import AddNonSerializeAssets from "./AddNonSerializeAssets";
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol, stepFullScreen }) => {
 
@@ -36,6 +37,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const [isAdding, setAdding] = useState(false)
   const [showConfirmBox, setShowConfirmBox] = useState(false)
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false })
+  const [addNonSerializedAssetDialog, setAddNonSerializedAssetDialog] = useState(false)
   const [selectedRecords, setSelectedRecords] = useState([])
 
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([])
@@ -289,7 +291,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         parent.assetAssignedQty = data.inventory.filter((e) => e._id === parent._id).length;
         parent.realAssetQty = parent.assetQty;
         parent.realAssetAssignedQty = parent.assetAssignedQty;
-        parent.hideSelection = parent.type === "product" && !parent.productDetail?.serializedProduct ? true : false;
+        // parent.hideSelection = parent.type === "product" && !parent.productDetail?.serializedProduct ? true : false;
         parent.isValid = parent.serializedProduct ? parent.assetAssignedQty === parent.assetQty ? true : false : true;
         parent.isSublease = subleaseProduct?.some(e => e.materialId === parent.materialId)
         parent.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === parent.materialId)
@@ -343,7 +345,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     childProduct.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = _subRow.productDetail?.productName;
-      _subRow.hideSelection = _subRow.type === "product" && !_subRow.productDetail?.serializedProduct ? true : false;
+      // _subRow.hideSelection = _subRow.type === "product" && !_subRow.productDetail?.serializedProduct ? true : false;
       _subRow.serializedProduct = _subRow.type === "product" && !_subRow.productDetail?.serializedProduct ? false : true;
       _subRow.assetQty = _subRow.serializedProduct ? _subRow.qty * parent.assetQty : 0;
       _subRow.assetAssignedQty = inventory.filter((e) => e._id === _subRow._id).length;
@@ -569,6 +571,14 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               >
                 {`Create ${routes.sublease.title}`}</MenuItem>}
             <MenuItem
+              disabled={selectedRecords.filter(d => d.type !== "product").length > 0 || selectedRecords.filter(d => !d.serializedProduct).length === 0}
+              onClick={() => {
+                setAddNonSerializedAssetDialog(true)
+                closeActions()
+              }}
+            >
+              {`Create Non ${routes.serializedAsset.title}`}</MenuItem>
+            <MenuItem
               disabled={(treeToFlatArray(selectedRecords, "subRows")?.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
               onClick={() => {
                 setDeleteData(treeToFlatArray(selectedRecords, "subRows")?.filter(d => d.type === "asset").map(d => d?.inventory))
@@ -691,6 +701,14 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         filterByPlant={rentalManagementData?.warehouse?.optionValue}
       />
     }
+    {addNonSerializedAssetDialog && (
+      <AddNonSerializeAssets
+        closeDialog={() => setAddNonSerializedAssetDialog(false)}
+        products={selectedRecords.filter(d => d.type === "product" && !d.serializedProduct)}
+        warehouse={rentalManagementData?.warehouse ?? null}
+        rentalId={rentalManagementData?._id}
+      />
+    )}
     {showConfirmBox && (
       <ConfirmationDialog
         open={showConfirmBox}
