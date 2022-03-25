@@ -352,6 +352,14 @@ const routes = {
     title: (storedRoutes && storedRoutes.wellMaster && storedRoutes.wellMaster.title) ? storedRoutes.wellMaster?.title : RESOURCE_LABEL.wellMaster,
     path: "/well-master/detail",
   },
+  bulkAssetCreation: {
+    title: (storedRoutes && storedRoutes.bulkAssetCreation && storedRoutes.bulkAssetCreation.title) ? storedRoutes.bulkAssetCreation?.title : RESOURCE_LABEL.bulkAssetCreation,
+    path: "/bulk-asset-creation",
+  },
+  bulkAssetCreationDetail: {
+    title: (storedRoutes && storedRoutes.bulkAssetCreation && storedRoutes.bulkAssetCreation.title) ? storedRoutes.bulkAssetCreation?.title : RESOURCE_LABEL.bulkAssetCreation,
+    path: "/bulk-asset-creation/detail",
+  },
 };
 
 export default routes;

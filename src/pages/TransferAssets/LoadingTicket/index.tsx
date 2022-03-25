@@ -7,7 +7,6 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { deliveryTicket, sidebarResource, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_FROM_TO_TYPE } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { groupBy } from 'lodash';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import { CommonRenderer, DateRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -15,6 +14,7 @@ import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridCompone
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
+import { uniq, map, groupBy } from 'lodash';
 
 interface LoadingGridProps {
   fetchAssets: any;
@@ -55,6 +55,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
+
   const history = useHistory();
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
@@ -117,12 +119,10 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     try {
       let assetData = await fetchAssets(forceRefresh);
       let ticketData: any = await fetchLoadingTickets();
-      ticketData = ticketData.filter((ticket: any) => ticket.ticketType === "Loading")
-
+      ticketData = ticketData.filter((ticket: any) => ticket.ticketType === DELIVERY_TICKET_TYPE.loading)
       for (let i = 0; i < ticketData.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
           if (ticketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
@@ -132,14 +132,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           }
         }
       }
-
-      assetData = assetData?.map((d: any, index) => ({
-        ...d,
-        assetNumber: `${index + 1}. ${d.assetNumber}`
-      }));
-
       setExistingAssets(assetData);
-
       dispatch({ type: 'initialize', data: assetData, count: assetData.length });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -164,20 +157,16 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   useEffect(() => {
     if (selectedRecords.length > 0) {
       const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty('loadingTicket'));
-      const selectedInventoryDelivered = selectedRecords.filter((asset: any) => asset['loadingTicketStatus'] === 'Delivered');
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
-
     if (dataRows.length) {
       const inventoryDelivered = dataRows.filter((asset: any) => asset['loadingTicketStatus'] === 'Delivered');
       const inventoryLost = dataRows.filter((asset: any) => asset?.status === 'Lost');
-
       if (inventoryDelivered.length > 0) {
         setNextStep(true);
       } else {
         setNextStep(false);
       }
-
       if (transferAssetData?.transferType === 'Internal') {
         if (inventoryDelivered.length === dataRows.filter(d => d.status !== "Lost").length || inventoryLost.length === dataRows.length) {
           setTransferIsEnded(true);
@@ -216,6 +205,27 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         setShowConfirmBox(false);
       });
   };
+
+  const handelReceiveAssets = () => {
+    let data = {}
+    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
+    if (loadingTicketIds.length) {
+      data["_ids"] = loadingTicketIds?.map((e) => e);
+      data["status"] = DELIVERY_TICKET_STATUS.delivered
+      data["signatures"] = []
+      axiosInstance().post(`${deliveryTicket.api}/updatebulk`, data).then(({ data: { data } }) => {
+        fetchAssetsData(true)
+        setShowConfirmBoxReceive(false)
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Assets Received Successfully`
+        });
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    }
+  }
 
   return (
     <Fragment>
@@ -257,49 +267,63 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         </Box>
         {!isTransferEnded && <Box >
           {permissions?.transferAsset.isUpdate && (
-            <Button
-              variant="contained"
-              size="small"
-              color="primary"
-              disabled={
-                selectedRecords.length === 0 ||
-                selectedRecords.filter((asset) => asset?.hasOwnProperty('loadingTicket')).length > 0 ||
-                selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0
-              }
-              onClick={() => {
-                const data: any = {}
-                data["refrenceId"] = transferAssetData._id
-                data["ticketName"] = transferAssetData.transferAssetNumber
-                data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
-                data["pickupFrom"] = transferAssetData?.transferFromPlant?.optionValue;
-                data["pickupFromAddress"] = transferAssetData?.transferFromPlant?.address;
-                if (transferAssetData?.transferType === "Internal") {
-                  data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
-                  data["deliveryTo"] = transferAssetData?.transfertoPlant?.optionValue;
-                  data["deliveryToAddress"] = transferAssetData?.plantShipTo?.optionValue;
+            <Fragment>
+              <Button
+                variant="contained"
+                size="small"
+                color="primary"
+                disabled={
+                  selectedRecords.length === 0 ||
+                  selectedRecords.filter((asset) => asset?.hasOwnProperty('loadingTicket')).length > 0 ||
+                  selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0
                 }
-                else if (transferAssetData?.transferType === "External Customer") {
-                  data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.customer;
-                  data["deliveryTo"] = transferAssetData?.transfertoCustomer?.optionValue;
-                  data["deliveryToAddress"] = transferAssetData?.customerShipTo?.optionValue;
-                }
-                else if (transferAssetData?.transferType === "External Supplier") {
-                  data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.supplier;
-                  data["deliveryTo"] = transferAssetData?.transfertoSupplier?.optionValue;
-                  data["deliveryToAddress"] = transferAssetData?.supplierShipTo?.optionValue;
-                }
-                data["wellName"] = transferAssetData?.wellName?.optionValue;
-                data["afeNumber"] = transferAssetData?.afeNumber;
-                if (transferAssetData?.processor?.optionValue) {
-                  data["processor"] = transferAssetData?.processor?.optionValue;
-                }
-                data["isPickupFromDisable"] = true;
-                data["isDeliveryToDisable"] = true;
-                setShowTicketDialog({ open: true, data: data })
-              }}
-            >
-              Create Loading Ticket
-            </Button>
+                onClick={() => {
+                  const data: any = {}
+                  data["refrenceId"] = transferAssetData._id
+                  data["ticketName"] = transferAssetData.transferAssetNumber
+                  data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.plant;
+                  data["pickupFrom"] = transferAssetData?.transferFromPlant?.optionValue;
+                  data["pickupFromAddress"] = transferAssetData?.transferFromPlant?.address;
+                  if (transferAssetData?.transferType === "Internal") {
+                    data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.plant;
+                    data["deliveryTo"] = transferAssetData?.transfertoPlant?.optionValue;
+                    data["deliveryToAddress"] = transferAssetData?.plantShipTo?.optionValue;
+                    data["status"] = DELIVERY_TICKET_STATUS.indTransit;
+                  }
+                  else if (transferAssetData?.transferType === "External Customer") {
+                    data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.customer;
+                    data["deliveryTo"] = transferAssetData?.transfertoCustomer?.optionValue;
+                    data["deliveryToAddress"] = transferAssetData?.customerShipTo?.optionValue;
+                  }
+                  else if (transferAssetData?.transferType === "External Supplier") {
+                    data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.supplier;
+                    data["deliveryTo"] = transferAssetData?.transfertoSupplier?.optionValue;
+                    data["deliveryToAddress"] = transferAssetData?.supplierShipTo?.optionValue;
+                  }
+                  data["wellName"] = transferAssetData?.wellName?.optionValue;
+                  data["afeNumber"] = transferAssetData?.afeNumber;
+                  if (transferAssetData?.processor?.optionValue) {
+                    data["processor"] = transferAssetData?.processor?.optionValue;
+                  }
+                  data["isPickupFromDisable"] = true;
+                  data["isDeliveryToDisable"] = true;
+                  setShowTicketDialog({ open: true, data: data })
+                }}
+              >
+                Create Loading Ticket
+              </Button>
+              <Box component="span" mx={1} />
+              <Button
+                variant="contained"
+                size="small"
+                color="primary"
+                disabled={selectedRecords.length === 0 ||
+                  selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length}
+                onClick={() => { setShowConfirmBoxReceive(true) }}
+              >
+                Receive Assets
+              </Button>
+            </Fragment>
           )}
           <Box component="span" mx={1} />
           {permissions?.transferAsset.isUpdate && (selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("loadingTicket") &&
@@ -397,6 +421,17 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             setShowConfirmBox(false);
           }}
           onOk={handleRemoveTicket}
+        />
+      )}
+      {showConfirmBoxReceive && (
+        <ConfirmationDialog
+          okBtnLoading={isRemovingTicket}
+          open={showConfirmBoxReceive}
+          message={`Are you sure you want to receive assets?`}
+          onClose={() => {
+            setShowConfirmBoxReceive(false);
+          }}
+          onOk={handelReceiveAssets}
         />
       )}
     </Fragment>

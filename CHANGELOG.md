@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.82.0](https://github.com/vebholic/oms_frontend/compare/v2.81.0...v2.82.0) (2022-03-25)
+
+
+### Features
+
+* **addres dialog:** changes and fix ([33d514f](https://github.com/vebholic/oms_frontend/commit/33d514f5b2eba618379ae5d4ae5a108baabe301e))
+* bulk asset creation resources ([f61a7ea](https://github.com/vebholic/oms_frontend/commit/f61a7ea6dd1a5c1f363dd2e5b20fc8261d444227))
+* sublease serializedAsset inline edit feature on singleLine field PO-1366 ([b9f37f9](https://github.com/vebholic/oms_frontend/commit/b9f37f95e97b937f331fe4950ad134e052faa7d2))
+
+
+### Bug Fixes
+
+* bug fix ([6e39af5](https://github.com/vebholic/oms_frontend/commit/6e39af55438d1fb30348dd0d685bf13f5cdcba06))
+* bug fix ([50283ea](https://github.com/vebholic/oms_frontend/commit/50283eac64b3a7976fce822755732a44bcba3084))
+* bug fix ([cc95ff2](https://github.com/vebholic/oms_frontend/commit/cc95ff214949ca3a4c4fbf2da4ededae43be35af))
+* bug fix ([b870e41](https://github.com/vebholic/oms_frontend/commit/b870e41c0d800b20aca9afc63c3a3003b45b9ae9))
+* bulk asset creation fixes ([8c7b94f](https://github.com/vebholic/oms_frontend/commit/8c7b94f6059ebb2d07bf55b15986189fbd9d6329))
+
 ## [2.81.0](https://github.com/vebholic/oms_frontend/compare/v2.80.1...v2.81.0) (2022-03-24)
 
 
