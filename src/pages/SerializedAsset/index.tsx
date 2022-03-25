@@ -276,24 +276,25 @@ const SerializedAsset = () => {
       });
   };
 
-  const handleStatusUpdate = (records) => {
-    console.log(records);
+  const handleStatusUpdate = (status) => {
     const ids = selectedRecords.map((d) => d._id);
-
     axiosInstance()
       .put(`${serializedAsset.api}/update-status`, {
         assets: ids,
-        status: INVENTORY_STATUS.available,
+        status: status,
         comment: '',
         reference: { _id: '', type: 'Inventory' }
       })
       .then(() => {
+        if (gridApi) {
+          gridApi.deselectAll()
+        }
         fetchProductInventory();
         setAnchorEl(null);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: 'Status Updated to Available'
+          message: `Status changed to ${status}`
         });
       })
       .catch((error) => {
@@ -607,18 +608,35 @@ const SerializedAsset = () => {
                       </MenuItem>
                     )}
                     {permissions?.serializedAsset?.isUpdate && (
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          handleStatusUpdate(selectedRecords);
-                          // setShowDeleteConfirmBox(true)
-                        }}
-                        disabled={
-                          selectedRecords?.filter((o) => o.status === INVENTORY_STATUS.underReview).length === selectedRecords.length ? false : true
-                        }
-                      >
-                        Status Change to Available
-                      </MenuItem>
+                      <>
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            handleStatusUpdate(INVENTORY_STATUS.available);
+                          }}
+                          disabled={selectedRecords?.filter((o) => o.status === INVENTORY_STATUS.underReview).length === selectedRecords.length ? false : true}
+                        >
+                          {`Status Change - ${INVENTORY_STATUS.available}`}
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            handleStatusUpdate(INVENTORY_STATUS.needRepair);
+                          }}
+                          disabled={selectedRecords?.filter((o) => o.status === INVENTORY_STATUS.underReview).length === selectedRecords.length ? false : true}
+                        >
+                          {`Status Change - ${INVENTORY_STATUS.needRepair}`}
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            handleStatusUpdate(INVENTORY_STATUS.needRepair);
+                          }}
+                          disabled={selectedRecords?.filter((o) => o.status === INVENTORY_STATUS.underReview).length === selectedRecords.length ? false : true}
+                        >
+                          {`Status Change - ${INVENTORY_STATUS.needRepair}`}
+                        </MenuItem>
+                      </>
                     )}
                   </Menu>
                 </Grid>
@@ -703,9 +721,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.serializedAsset.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes.serializedAsset.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDelete}
         />
