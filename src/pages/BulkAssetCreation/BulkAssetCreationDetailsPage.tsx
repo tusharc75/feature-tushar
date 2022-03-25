@@ -1,0 +1,394 @@
+import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import {
+    Grid,
+    Box,
+    Button,
+    Paper,
+    useMediaQuery,
+    Tab,
+    Tabs,
+
+} from '@material-ui/core';
+import { Autocomplete, Skeleton } from '@material-ui/lab';
+import { useParams, useHistory } from 'react-router-dom';
+import axiosInstance from '../../axios/axiosInstance';
+import routes from '../../components/Helpers/Routes';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import DetailsPageHeader from '../../components/DetailsPageHeader';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import { useData } from '../../StateProvider/Provider';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { bulkAssetCreation, getObjKeysWithValues, supplierAccount, customerAccount, bulkAssetCreationSteps, ACTIVITY_RESOURCE } from '../../constants/helpers';
+import ManageBulkAssetCreation from './ManageBulkAssetCreation';
+import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from 'react-icons/fa';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import TabPanel from '../../components/TabPanel';
+import queryString from 'query-string';
+import { isMobile, isTablet } from 'react-device-detect';
+import Product from './Product';
+import HideWhenOffline from '../../components/HideWhenOffline';
+import Activity from '../../components/Activity';
+import { defaultActivityShow } from '../../constants/helpers';
+import accountClass from '../Account/account.module.scss';
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import Steps from '../RentalManagement/Steps';
+import { camelCase } from 'lodash';
+import SerializedAsset from './SerializedAsset';
+
+const BulkAssetCreationDetailsPage = () => {
+
+    const renderedFrom = camelCase(routes?.bulkAssetCreation.title)
+    const toastConfig = useContext(CustomToastContext);
+    const { id } = useParams();
+    const history = useHistory();
+    const parsed = queryString.parse(history.location.search);
+    const { openEdit } = parsed;
+    const { state: { user, permissions } }: any = useData();
+
+    const [loadingBulkAssetCreation, setLoadingBulkAssetCreation] = useState(false);
+    const [bulkAssetCreationData, setBulkAssetCreationData] = useState(null);
+    const [showConfirmBox, setShowConfirmBox] = useState(false);
+    const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+    const [bulkAssetCreationFields, setBulkAssetCreationFields] = useState([]);
+    const [statusOptions, setStatusOptions] = useState([]);
+    const [bulkAssetCreationProduct, setBulkAssetCreationProduct] = useState([]);
+    const [allowedToEdit, setAllowedToEdit] = useState(false);
+    const [currentStep, setCurrentStep] = useState(null);
+
+    const isSmallScreen = useMediaQuery('(max-width:1300px)');
+
+    const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
+    const [showActivity, setActivityShow] = useState(defaultActivityShow);
+    const [nextStep, setNextStep] = useState(true);
+
+    function a11yProps(index: any) {
+        return {
+            id: `main-tab-${index}`,
+            'aria-controls': `main-tabpanel-${index}`
+        };
+    }
+
+    const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+        setTabValue(newValue);
+        history.replace(`?tab=${newValue}`);
+    };
+
+    useEffect(() => {
+        if (currentStep !== null && currentStep >= 0 && currentStep <= 1) {
+            updateProcessStatus(bulkAssetCreationSteps[currentStep]);
+        }
+    }, [currentStep]);
+
+    const updateProcessStatus = async (processStatus) => {
+        axiosInstance()
+            .put(`${bulkAssetCreation.api}/${id}/process-status`, { processStatus: processStatus })
+            .then(({ data }) => { })
+            .catch((error) => {
+            });
+    };
+
+    useEffect(() => {
+        if (parsed) {
+            history.replace(`?tab=${tabValue}`);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (id) {
+            fetchFields();
+            fetchData();
+        }
+    }, [id]);
+
+    const fetchData = async () => {
+        setLoadingBulkAssetCreation(true);
+        try {
+            const { data: { data } } = await axiosInstance().get(`${bulkAssetCreation.api}/${id}`);
+            const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+            setAllowedToEdit(isAllowedToEdit);
+            setCurrentStep(bulkAssetCreationSteps.indexOf(data?.processStatus) !== -1 ? bulkAssetCreationSteps.indexOf(data?.processStatus) : 0);
+            setBulkAssetCreationData(data);
+            if (isAllowedToEdit && openEdit === 'true') {
+                setOpenUpdateDialog(true);
+                const params = new URLSearchParams();
+                params.delete('openEdit');
+                history.push({ search: params.toString() });
+            }
+            setLoadingBulkAssetCreation(false);
+        } catch (error) {
+            toastConfig.setToastConfig(error);
+        }
+    };
+
+    const fetchFields = () => {
+        axiosInstance()
+            .get('/field?resource=Bulk Asset Creation')
+            .then(({ data }) => {
+                setBulkAssetCreationFields(data.data);
+                if (data.data && data.data.length) {
+                    data.data.some((o) => {
+                        if (o?.fieldData?.fieldName === 'status') {
+                            setStatusOptions([...o.fieldData.option]);
+                            return true;
+                        }
+                    });
+                }
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    };
+
+    const handleOpenUpdateDialog = () => {
+        setOpenUpdateDialog(true);
+    };
+
+    const handleDelete = () => {
+        axiosInstance()
+            .put(`${bulkAssetCreation.api}/remove`, { ids: [] })
+            .then(() => {
+                setShowConfirmBox(false);
+                history.goBack();
+            })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+                setShowConfirmBox(false);
+            });
+    };
+
+    const handleUpdateData = (obj) => {
+        if (obj.status && bulkAssetCreationData?.status !== obj.status && bulkAssetCreationFields.length > 0) {
+            const fieldsDataForUpdate = bulkAssetCreationFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+            let values = getObjKeysWithValues(bulkAssetCreationData, fieldsDataForUpdate);
+            values['status'] = obj.status;
+            values['_id'] = id;
+            axiosInstance()
+                .put(`${bulkAssetCreation.api}`, values)
+                .then(({ data: { data } }) => {
+                    fetchFields();
+                    fetchData();
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: 'success',
+                        message: `Status changed to ${obj.status}`
+                    });
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
+        }
+    };
+
+    const handleActivityHideShow = () => {
+        setActivityShow(!showActivity);
+    };
+
+    useEffect(() => {
+        if (isSmallScreen && tabValue === 0) {
+            setActivityShow(true)
+        }
+        else {
+            setActivityShow(false)
+        }
+    }, [isSmallScreen, tabValue])
+
+
+    return (
+        <>
+            <Grid container className="headerbox">
+                <CustomBreadCrumbs routes={[routes.bulkAssetCreation, { title: `${bulkAssetCreationData?.baNumber}` }]}
+                />
+            </Grid>
+            <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
+                <div>
+                    <div>
+                        <Paper>
+                            {!bulkAssetCreationData ? (
+                                <div>
+                                    <Skeleton variant="text" width="150px" height="40px" />
+                                    <Box display="flex">
+                                        <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                                        <Box marginX={1} />
+                                        <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
+                                    </Box>
+                                </div>
+                            ) : (
+                                <DetailsPageHeader heading={bulkAssetCreationData?.baNumber} mainPoints={null} showHeading={true}>
+                                    {permissions?.bulkAssetCreation?.isUpdate &&
+                                        (
+                                            <Button
+                                                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                                                color="primary"
+                                                size="small"
+                                                onClick={handleOpenUpdateDialog}
+                                                className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                                                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                                            >
+                                                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                                            </Button>
+                                        )}
+                                </DetailsPageHeader>
+                            )}
+                            <Fragment>
+                                <Tabs
+                                    className="quote-tab"
+                                    value={tabValue}
+                                    onChange={handleMainTabChange}
+                                    textColor="primary"
+                                    TabIndicatorProps={{
+                                        style: {
+                                            display: 'none'
+                                        }
+                                    }}
+                                >
+                                    <Tab
+                                        className={'tabLayout'}
+                                        style={{
+                                            background: tabValue === 1 ? 'white' : '',
+                                            color: tabValue === 1 ? '#163340' : '#163340'
+                                        }}
+                                        label={
+                                            <div className="d-flex align-items-center tab-font">
+                                                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                                            </div>
+                                        }
+                                        {...a11yProps(0)}
+                                    />
+                                    <Tab
+                                        className={'tabLayout'}
+                                        style={{
+                                            background: tabValue === 2 ? 'white' : '',
+                                            color: tabValue === 2 ? 'blue' : '#163340'
+                                        }}
+                                        label={
+                                            <div className="d-flex align-items-center tab-font">
+                                                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                                            </div>
+                                        }
+                                        {...a11yProps(1)}
+                                    />
+                                    <div className={'uio'}> </div>
+                                </Tabs>
+                                <TabPanel value={tabValue} index={0}>
+                                    <Box>
+                                        {loadingBulkAssetCreation || !bulkAssetCreationFields.length ? (
+                                            <Grid container spacing={2} style={{ padding: '8px' }}>
+                                                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                                            </Grid>
+                                        ) : (
+                                            <DetailsPage data={bulkAssetCreationData} fields={bulkAssetCreationFields} />
+                                        )}
+                                    </Box>
+                                </TabPanel>
+                                <TabPanel value={tabValue} index={1}>
+                                    <Grid item xs={12} sm={12} md={12} lg={12}>
+                                        {!bulkAssetCreationData || !bulkAssetCreationFields.length ? (
+                                            <Grid container spacing={2} style={{ padding: '8px' }}>
+                                                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                                            </Grid>
+                                        ) : (
+                                            <Grid item xs={12} sm={12} md={12} lg={12}>
+                                                <Paper>
+                                                    <Steps
+                                                        isNextStep={false}
+                                                        nextStep={nextStep}
+                                                        steps={bulkAssetCreationSteps}
+                                                        currentStep={currentStep}
+                                                        setCurrentStep={setCurrentStep}
+                                                        isStepEnded={false}
+                                                    />
+                                                    {currentStep === 0 && (
+                                                        <Product
+                                                            bulkAssetCreationData={bulkAssetCreationData}
+                                                            setNextStep={setNextStep}
+                                                            setBulkAssetCreationProduct={setBulkAssetCreationProduct}
+                                                            renderedFrom={`${renderedFrom}_grid-1`}
+                                                            handleUpdateData={handleUpdateData}
+                                                            fetchData={fetchData}
+                                                        />
+                                                    )}
+                                                    {currentStep === 1 && (
+                                                        <SerializedAsset
+                                                            bulkAssetCreationData={bulkAssetCreationData}
+                                                            renderedFrom={`${renderedFrom}_grid-2`}
+                                                        />
+                                                    )}
+
+                                                </Paper>
+                                            </Grid>
+                                        )}
+                                    </Grid>
+                                </TabPanel>
+                            </Fragment>
+                        </Paper>
+                    </div>
+                    <Box my={1} />
+                </div>
+                <div className="position-relative">
+                    <HideWhenOffline>
+                        <Paper>
+                            {!isSmallScreen && (
+                                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                                    {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+                                </span>
+                            )}
+                            <div style={{ display: showActivity ? 'block' : 'none' }}>
+                                <Grid container>
+                                    <Grid item xs={12}>
+                                        {bulkAssetCreationData && (
+                                            <div>
+                                                <Activity
+                                                    resourceId={bulkAssetCreationData._id}
+                                                    resource={ACTIVITY_RESOURCE.bulkAssetCreation}
+                                                    restrictedAddActivities={
+                                                        permissions && permissions[`${ACTIVITY_RESOURCE.bulkAssetCreation}`] && permissions[`${ACTIVITY_RESOURCE.bulkAssetCreation}`].isUpdate
+                                                            ? []
+                                                            : ['Attachment', 'Case']
+                                                    }
+                                                    relatedTo={[
+                                                        {
+                                                            type: ACTIVITY_RESOURCE.bulkAssetCreation,
+                                                            referenceId: bulkAssetCreationData._id,
+                                                            access: true
+                                                        }
+                                                    ]}
+                                                    handleActivityRefresh={() => { }}
+                                                    emails={[]}
+                                                />
+                                            </div>
+                                        )}
+                                    </Grid>
+                                </Grid>
+                            </div>
+                        </Paper>
+                    </HideWhenOffline>
+                </div>
+            </div>
+            {showConfirmBox && (
+                <ConfirmationDialog
+                    open={showConfirmBox}
+                    message={`Are you sure you want to delete this ${routes.bulkAssetCreation?.title} ?`}
+                    onClose={() => {
+                        setShowConfirmBox(false);
+                    }}
+                    onOk={handleDelete}
+                />
+            )}
+            {openUpdateDialog && (
+                <ManageBulkAssetCreation
+                    isClone={false}
+                    bulkAssetCreationId={id}
+                    onClose={() => setOpenUpdateDialog(false)}
+                    onSuccess={() => {
+                        setOpenUpdateDialog(false);
+                        fetchData();
+                    }}
+                />
+            )}
+        </>
+    );
+};
+
+export default BulkAssetCreationDetailsPage;

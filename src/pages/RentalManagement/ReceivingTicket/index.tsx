@@ -22,7 +22,6 @@ import {
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
-import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -42,6 +41,8 @@ import { ExpandMore } from '@material-ui/icons';
 import ExistingRentalJob from "./ExistingRentalJob";
 import { groupBy, uniq, map, filter } from "lodash";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
+import AddSerializedAsset from "../SerializedAsset/AddSerializedAsset";
+import ReplaceAssetReason from "../../../components/RentalManagment/ReplaceAssetReason";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -87,6 +88,11 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
+
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] })
+  const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} })
+  const [replaceLoading, setReplaceLoading] = useState(false)
+
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -149,6 +155,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           type: "Asset",
           qty: 1,
           productName: u?.product?.optionLabel,
+          productId: u?.product?.optionValue,
           warehouse: u?.warehouse?.optionLabel,
           warehouseId: u?.warehouse?.optionValue,
           currentOwner: u?.currentOwner,
@@ -165,28 +172,30 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
 
       products?.forEach((ele) => {
-        if (productAssets.filter((e) => e._id === ele.materialId).length) {
-          productAssets.forEach(element => {
-            if (element._id === ele.materialId) {
-              element.qty += ele.qty
-            }
-          });
-        }
-        else {
-          const obj: any = {}
-          obj._id = ele.materialId
-          obj.type = "Product"
-          obj.qty = ele.qty
-          obj.assetNumber = ele?.productDetail?.productName
-          obj.productName = ele?.productDetail?.productName
-          obj.productId = ele?.productDetail?._id
-          obj.warehouse = rentalManagementData?.warehouse?.optionLabel
-          obj.warehouseId = rentalManagementData?.warehouse?.optionValue
-          obj.status = ele?.status
-          obj.rentalAssetStatus = ele?.status
-          obj.startDate = ele?.actualStartDate
-          obj.endDate = ele?.actualEndDate
-          productAssets.push(obj)
+        if (productAssets.filter((e) => e.productId === ele.materialId).length === 0) {
+          if (productAssets.filter((e) => e._id === ele.materialId).length) {
+            productAssets.forEach(element => {
+              if (element._id === ele.materialId) {
+                element.qty += ele.qty
+              }
+            });
+          }
+          else {
+            const obj: any = {}
+            obj._id = ele.materialId
+            obj.type = "Product"
+            obj.qty = ele.qty
+            obj.assetNumber = ele?.productDetail?.productName
+            obj.productName = ele?.productDetail?.productName
+            obj.productId = ele?.productDetail?._id
+            obj.warehouse = rentalManagementData?.warehouse?.optionLabel
+            obj.warehouseId = rentalManagementData?.warehouse?.optionValue
+            obj.status = ele?.status
+            obj.rentalAssetStatus = ele?.status
+            obj.startDate = ele?.actualStartDate
+            obj.endDate = ele?.actualEndDate
+            productAssets.push(obj)
+          }
         }
       })
 
@@ -407,6 +416,41 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     }
   };
 
+  const handleOpenReplaceAssetReason = (rows) => {
+    const data: any = {}
+    data.refrenceType = "rentalJob";
+    data.referenceId = rentalManagementData._id;
+    const assets: any = []
+    selectedRecords?.forEach((element: any) => {
+      const result = rows.filter(f => f.productId === element?.product?.optionValue && !f.isCounted);
+      if (result.length) {
+        assets.push({ _id: element._id, status: element.status, deliveryTicketId: element.loadingTicketId, newId: result[0]._id })
+        result[0].isCounted = true;
+      }
+    })
+    data.assets = assets;
+    setShowReplaceReason({ open: true, data: data })
+  }
+
+  const handleReplaceAsset = (reason) => {
+    setReplaceLoading(true)
+    axiosInstance().post(`${deliveryTicket.api}/replace-assets`, { ...showReplaceReason.data, reason: reason })
+      .then(({ data }) => {
+        setShowReplaceReason({ open: false, data: [] })
+        setAddSerializedAssetDialog({ open: false, products: [] })
+        setReplaceLoading(false)
+        fetchRecords()
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Assets Replaced Successfully`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+  }
+
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
       <Box display="flex" alignItems="center">
@@ -493,6 +537,14 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
                 setAnchorEl(null)
                 setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
               }}>{INVENTORY_STATUS.lost}</MenuItem>
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.needRepair, message: "" })
+              }}>{INVENTORY_STATUS.needRepair}</MenuItem>
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.needRecert, message: "" })
+              }}>{INVENTORY_STATUS.needRecert}</MenuItem>
             </Fragment>
           }
           {(selectedRecords?.filter((f) => f.type === "Product" && f.hasOwnProperty("loadingTicketId")).length === selectedRecords.length) &&
@@ -579,6 +631,31 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               onClick={() => setShowRepairJobDialog(true)}
             >Create Repair Job</MenuItem>
             : null}
+
+          <MenuItem
+            onClick={() => {
+              const products = []
+              selectedRecords?.forEach((element) => {
+                const foundProduct = products.filter((e) => e._id === element?.product?.optionValue)
+                if (foundProduct.length) {
+                  foundProduct[0].qty += 1
+                }
+                else {
+                  products.push({
+                    _id: element?.product?.optionValue,
+                    productName: element?.product?.optionLabel,
+                    qty: 1
+                  })
+                }
+              })
+              setAddSerializedAssetDialog({ open: true, products: products });
+              closeActions()
+            }}
+            disabled={(selectedRecords.length === 0) || isOffline || (selectedRecords.some((f: any) => f.type !== "Asset" ||
+              !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
+            ))}
+          >
+            Replace Assets</MenuItem>
         </Menu>
         <Box mx={1} />
         {(showProcessDeliveryTicket && !isOffline) &&
@@ -679,7 +756,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             renderedFrom={renderedFrom}
             rowClassRules={{
               "red-data-row": function (params) {
-                return [INVENTORY_STATUS.lost,INVENTORY_STATUS.scrap].some(s => s === params.data.status);
+                return [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].some(s => s === params.data.status);
               },
             }}
             refreshGrid={fetchRecords}
@@ -789,10 +866,10 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           showRequiredLabel={false}
           onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
         />
-
         <CustomDialogContent>
           <Box className="my-2">
-            {[INVENTORY_STATUS.available, INVENTORY_STATUS.repair].includes(statusToUpdate.status) ? <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
+            {[INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(statusToUpdate.status) ?
+              <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
               : <TextField
                 id="outlined-multiline-static"
                 label={`Please enter the reason for ${statusToUpdate.status}`}
@@ -804,8 +881,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
                 onChange={(e) => {
                   setStatusToUpdate(prevState => ({ ...prevState, message: e.target.value }))
                 }}
-              />
-            }
+              />}
           </Box>
         </CustomDialogContent>
         <CustomDialogFooter>
@@ -872,6 +948,28 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           setShowRepairJobDialog(false);
           fetchRecords()
         }}
+      />
+    }
+    {addSerializedAssetDialog.open &&
+      <AddSerializedAsset
+        addSerializedAsset={handleOpenReplaceAssetReason}
+        handleSerializedAssetClose={() => {
+          setAddSerializedAssetDialog({ open: false, products: [] });
+        }}
+        refrenceType={"ReplaceAsset"}
+        refrenceData={{
+          _id: rentalManagementData?._id, warehouse: rentalManagementData?.warehouse?.optionValue
+        }}
+        isAdding={replaceLoading}
+        selectedProducts={addSerializedAssetDialog.products}
+        filterByPlant={rentalManagementData?.warehouse?.optionValue}
+      />
+    }
+    {showReplaceReason.open &&
+      <ReplaceAssetReason
+        handleClose={() => setShowReplaceReason({ open: false, data: {} })}
+        loading={replaceLoading}
+        handleSucess={(data) => { handleReplaceAsset(data?.reason) }}
       />
     }
   </>

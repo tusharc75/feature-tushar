@@ -120,6 +120,8 @@ import WellMaster from './pages/WellMaster';
 import DashboardBuilder from './pages/DashboardBuilder/DashboardManager';
 import DashboardsList from './pages/DashboardBuilder';
 import WellMasterDetailsPage from './pages/WellMaster/WellMasterDetailsPage';
+import BulkAssetCreation from './pages/BulkAssetCreation';
+import BulkAssetCreationDetailsPage from './pages/BulkAssetCreation/BulkAssetCreationDetailsPage';
 
 var notificationInterval: any = null;
 
@@ -656,6 +658,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.wellMasterDetail.path}/:id`}>
               <WellMasterDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.bulkAssetCreation.path}`}>
+              <BulkAssetCreation />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.bulkAssetCreationDetail.path}/:id`}>
+              <BulkAssetCreationDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={"/dashboard-builder/:id"}>
               <DashboardBuilder />

@@ -2,6 +2,7 @@ import Box from '@material-ui/core/Box/Box';
 import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
+import CustomAgGridEditable from '../../../components/AgGridComponents/CustomAgGridEditable';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -20,6 +21,7 @@ import {
   SUBLEASE_STATUS,
   INVENTORY_OWNER_TYPE
 } from '../../../constants/helpers';
+// import route from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import { Button, Tooltip } from '@material-ui/core';
 import { AiFillFilePdf } from 'react-icons/ai';
@@ -46,6 +48,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
   const [isCompleteEnable, setIsCompleteEnable] = useState(false);
 
   const [downlodingFile, setDownlodingFile] = useState(false);
+  const { setToastConfig } = useContext(CustomToastContext);
 
   useEffect(() => {
     fetchGridColumns();
@@ -58,8 +61,11 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
+          let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
           if (currentColumn !== null) {
+            if (o.fieldData.type === 'singleLine') {
+              currentColumn.columnData.editable = true;
+            }
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
               rendererNames.push(currentColumn?.rendererName);
@@ -130,6 +136,26 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
       return true;
     } else {
       return false;
+    }
+  };
+
+  const handleValueUpdate = async (row) => {
+    if (!row || !row?.data) return;
+    const assetId = row.data._id;
+    const data = [
+      {
+        _id: assetId,
+        [row.column.colId]: row.newValue
+      }
+    ];
+    try {
+      await axiosInstance()
+        .post(`${routes.serializedAsset.path}/update-assets`, data)
+        .then(() => {
+          fetchGridColumns();
+        });
+    } catch (err) {
+      setToastConfig(err);
     }
   };
 
@@ -324,7 +350,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               renderedFrom={renderedFrom}
             />
           ) : (
-            <CustomAgGrid
+            <CustomAgGridEditable
               columns={columns}
               dataRows={dataRows}
               frameworkComponents={frameWorkComponent}
@@ -340,6 +366,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               allowSelection={true}
               renderedFrom={renderedFrom}
               refreshGrid={fetchRecords}
+              onCellValueChanged={handleValueUpdate}
             />
           )
         ) : (

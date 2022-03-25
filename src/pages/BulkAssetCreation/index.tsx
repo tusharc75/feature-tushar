@@ -15,7 +15,7 @@ import SearchBox from 'src/components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "src/components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "src/components/AgGridComponents/CustomAgGrid";
-import { purchaseOrder, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from 'src/constants/helpers';
+import { bulkAssetCreation, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from 'src/constants/helpers';
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { useData } from "src/StateProvider/Provider";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -23,7 +23,7 @@ import HtmlTooltip from "src/components/CustomTooltipTitle";
 import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
 import useColumns, { getStaticFields, getFrameworkComponents } from "src/constants/useColumns"
 import { prepareDataForGrid } from "src/constants/helpers"
-import ManagePurchaseOrder from "./ManagePurchaseOrder";
+import ManageBulkAssetCreation from "./ManageBulkAssetCreation";
 import { AiFillCrown, MdAdd, MdSort, MdFilterList } from "react-icons/all";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
@@ -32,31 +32,25 @@ import { FaSuitcase } from "react-icons/fa";
 import MobileSortDialog from "src/components/MobileSortDialog";
 import MobileFilterDialog from "src/components/MobileFilterDialog"
 import { camelCase } from "lodash";
-import queryString from 'query-string';
-import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import HideWhenOffline from "src/components/HideWhenOffline";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
+import queryString from 'query-string';
 
-
-const PurchaseOrder = () => {
-
-    const PurchaseOrderType = [
+const BulkAssetCreation = () => {
+    const BulkAssetCreationType = [
         {
-            key: `All ${routes.purchaseOrder.title}`,
+            key: `All ${routes.bulkAssetCreation.title}`,
             value: 1,
         },
         {
-            key: `My ${routes.purchaseOrder.title}`,
+            key: `My ${routes.bulkAssetCreation.title}`,
             value: 2,
         },
     ];
-    let renderedFrom = camelCase(routes.purchaseOrder?.title)
-
+    let renderedFrom = camelCase(routes.bulkAssetCreation?.title)
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
-    const { type }: any = queryString.parse(history.location.search);
-    const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
-    const [filter, setFilter] = useState(`All ${routes.purchaseOrder.title}`);
-    const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
+    const [showManageBulkAssetCreationDialog, setShowManageBulkAssetCreationDialog] = useState({ open: false, isClone: false, idToClone: null });
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [anchorEl, setAnchorEl] = useState(null);
@@ -66,13 +60,12 @@ const PurchaseOrder = () => {
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
-    const [isAllChecked, setIsAllChecked] = useState(false);
-    const [clonedData, setClonedData] = useState([])
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
     const [isOpenDialog, setisOpenDialog] = useState(false)
+    const { type }: any = queryString.parse(history.location.search);
+    const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
 
     const [fromRental, setFromRental] = useState(history.location?.state?.rental);
-    const [fromSalesOrder, setFromSalesOrder] = useState(history.location?.state?.salesOrder);
 
     const {
         state: { user, permissions, selectedEntity },
@@ -84,17 +77,17 @@ const PurchaseOrder = () => {
     }, [])
 
     useEffect(() => {
-        fetchPurchaseOrder()
-    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, fromSalesOrder, selectedType]);
+        fetchBulkAssetCreation()
+    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, selectedType]);
 
     const fetchGridColumns = () => {
         axiosInstance()
-            .get("/field?resource=Purchase Order")
+            .get("/field?resource=Bulk Asset Creation")
             .then(({ data: { data } }) => {
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.purchaseOrderDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.bulkAssetCreationDetail.path)
 
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
@@ -115,7 +108,7 @@ const PurchaseOrder = () => {
             })
     }
 
-    const fetchPurchaseOrder = () => {
+    const fetchBulkAssetCreation = () => {
         dispatch({ type: "loading", loading: true });
 
         if (gridApi) {
@@ -124,7 +117,7 @@ const PurchaseOrder = () => {
 
         const queryString = getQueryString();
         let dataToProcess, count;
-        axiosInstance().get(`${purchaseOrder.api}${queryString}`).then(({ data }) => {
+        axiosInstance().get(`${bulkAssetCreation.api}${queryString}`).then(({ data }) => {
             dataToProcess = data?.data;
             count = data?.count;
 
@@ -154,8 +147,6 @@ const PurchaseOrder = () => {
                 };
                 return res;
             });
-            setIsAllChecked(false);
-            setClonedData(data)
             if (appendRows) {
                 dispatch({
                     type: "initialize", data: [...dataRows, ...rows],
@@ -195,20 +186,17 @@ const PurchaseOrder = () => {
     };
 
     const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}&filterPurchaseOrders=${selectedType}`;
+        let deepFilter = `?page=${page}&limit=${limit}&filterBulkAssetCreation=${selectedType}`;
         let filterById = [];
+
+        if (filterById.length > 0) {
+            deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
+        }
 
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
         }
 
-        if (fromSalesOrder) {
-            filterById.push({ field: "salesOrder", term: fromSalesOrder?._id });
-        }
-
-        if (filterById.length > 0) {
-            deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
-        }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -255,8 +243,8 @@ const PurchaseOrder = () => {
         else {
             ids = selectedRecords.map(d => d._id);
         }
-        axiosInstance().put(`${purchaseOrder.api}/remove`, { "ids": ids }).then(() => {
-            fetchPurchaseOrder();
+        axiosInstance().put(`${bulkAssetCreation.api}/remove`, { "ids": ids }).then(() => {
+            fetchBulkAssetCreation();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
             setAnchorEl(null)
@@ -265,47 +253,22 @@ const PurchaseOrder = () => {
         });
     }
 
-
-    const handlePurchaseOrderTypeSel = (filterValues) => {
-        setSelectedType(filterValues);
-        history.push(`?type=${filterValues}`)
-    }
-
-    const handleFilter = (event, newFilter) => {
-        if (newFilter != null) {
-            setFilter(newFilter);
-            handlePurchaseOrderTypeSel(PurchaseOrderType.find((d) => d.key === newFilter).value);
-
-        }
-    };
-
-
     const ActionsRenderer = params => (
         <>
             {
-                permissions?.purchaseOrder?.isCreate &&
+                permissions?.bulkAssetCreation?.isCreate &&
                 <HtmlTooltip title="Clone">
                     <IconButton
                         size="small"
                         aria-label="Clone"
                         onClick={() => {
-                            setShowManagePurchaseOrderDialog({ open: true, isClone: true, idToClone: params.data._id });
+                            setShowManageBulkAssetCreationDialog({ open: true, isClone: true, idToClone: params.data._id });
                         }}
                     >
                         <FileCopyIcon color="primary" />
                     </IconButton>
                 </HtmlTooltip>
             }
-            {/* {permissions?.purchaseOrder?.isDelete &&
-                <HtmlTooltip title="Delete">
-                    <IconButton size="small" aria-label="Delete" onClick={() => {
-                        setDeleteRecord(params.data);
-                        setShowDeleteConfirmBox(true)
-                    }} >
-                        <DeleteIcon color="error" />
-                    </IconButton>
-                </HtmlTooltip >
-            } */}
         </>
     )
 
@@ -351,38 +314,42 @@ const PurchaseOrder = () => {
         setisOpenDialog(false);
     };
 
+    const handleBulkAssetCreationType = (filterValues) => {
+        setSelectedType(filterValues);
+        history.push(`?type=${filterValues}`)
+    }
 
+    const handleFilter = (event, newFilter) => {
+        if (newFilter != null) {
+            handleBulkAssetCreationType(BulkAssetCreationType.find((d) => d.key === newFilter).value);
 
-
-
-
-
-
+        }
+    };
 
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[routes.purchaseOrder]} />
+                <CustomBreadCrumbs routes={[routes.bulkAssetCreation]} />
             </Grid>
             <Grid item md={8} sm={1} xs={2}>
                 <ImportExportLinks
-                    permissions={permissions?.purchaseOrder}
-                    module="purchase order"
-                    api={purchaseOrder.api}
+                    permissions={permissions?.bulkAssetCreation}
+                    module="bulk assets creation "
+                    api={bulkAssetCreation.api}
                     afterImportCompleted={() => {
-                        fetchPurchaseOrder();
+                        fetchBulkAssetCreation();
                     }}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
                     recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
                     ids={
-                      getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                        ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                        : []
+                        getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                            ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                            : []
                     }
                     onExportToExcelSuccess={() => {
                         if (gridApi) gridApi.deselectAll()
-                        else fetchPurchaseOrder()
+                        else fetchBulkAssetCreation()
                     }}
                 />
             </Grid>
@@ -393,7 +360,7 @@ const PurchaseOrder = () => {
                     <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
                         <div className="d-flex align-items-center">
                             <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
-                            <span className="listingHeader">{routes.purchaseOrder?.title} </span>
+                            <span className="listingHeader">{routes.bulkAssetCreation?.title} </span>
                         </div>
                         {isMobile ? (
                             <>
@@ -450,9 +417,9 @@ const PurchaseOrder = () => {
                         ) :
                             <HideWhenOffline>
                                 <div className={`align-items-center gap-1 layout-for-mobile `}>
-                                    {PurchaseOrderType && (
-                                        <ToggleButtonGroup size="small" className="ml-2" value={PurchaseOrderType[selectedType - 1].key} exclusive onChange={handleFilter}>
-                                            {PurchaseOrderType.map((k, index) => {
+                                    {BulkAssetCreationType && (
+                                        <ToggleButtonGroup size="small" className="ml-2" value={BulkAssetCreationType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                                            {BulkAssetCreationType.map((k, index) => {
                                                 return (
                                                     <ToggleButton value={k.key} key={index}>
                                                         {k.key}
@@ -463,9 +430,6 @@ const PurchaseOrder = () => {
                                     )}
                                 </div>
                             </HideWhenOffline>}
-
-
-
                         {fromRental && (
                             <Chip
                                 className="ml-3"
@@ -473,16 +437,6 @@ const PurchaseOrder = () => {
                                 label={`Rental Job : ${fromRental?.rentalJobName}`}
                                 onDelete={() => {
                                     setFromRental(null);
-                                }}
-                            />
-                        )}
-                        {fromSalesOrder && (
-                            <Chip
-                                className="ml-3"
-                                color="primary"
-                                label={`Sales Order : ${fromSalesOrder?.salesOrderNo}`}
-                                onDelete={() => {
-                                    setFromSalesOrder(null);
                                 }}
                             />
                         )}
@@ -498,33 +452,14 @@ const PurchaseOrder = () => {
                                     value={search}
                                     style={isMobile ? { flex: 1 } : {}}
                                 />
-
                             </Grid>
-
                             <Grid style={{ display: "flex", gap: "5px" }}>
-                                {permissions?.purchaseOrder?.isCreate &&
+                                {permissions?.bulkAssetCreation?.isCreate &&
                                     <Button onClick={() => {
-                                        setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null })
+                                        setShowManageBulkAssetCreationDialog({ open: true, isClone: false, idToClone: null })
                                     }} variant={isMobile && !isTablet ? "text" : "contained"} size="small" color="primary" className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
                                         startIcon={isMobile && !isTablet ? null : <AddOutlined />}> {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}</Button>
                                 }
-
-                                {/* <HtmlTooltip title="Please select some purchase orders">
-                                    <span>
-                                        <Button
-                                            variant={isMobile ? "text" : "contained"}
-                                            color="default"
-                                            size="small"
-                                            onClick={openActions}
-                                            disabled={selectedRecords.length ? false : true}
-                                            aria-controls="action-menu"
-                                            className={isMobile ? "mobile_button" : styles.add_submit_btn}
-                                        >
-                                            {isMobile ? "" : "Actions"} <ExpandMore />
-
-                                        </Button>
-                                    </span>
-                                </HtmlTooltip> */}
                                 <Menu
                                     anchorEl={anchorEl}
                                     keepMounted
@@ -537,7 +472,7 @@ const PurchaseOrder = () => {
                                     open={Boolean(anchorEl)}
                                     onClose={closeActions}
                                 >
-                                    {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
+                                    {permissions?.bulkAssetCreation?.isDelete && <MenuItem onClick={() => {
                                         closeActions()
                                         setShowDeleteConfirmBox(true)
                                     }}>Delete</MenuItem>}
@@ -553,16 +488,16 @@ const PurchaseOrder = () => {
                         <CustomSwipableList
                             allowSelection={true}
                             allowSwipe={true}
-                            permissions={permissions.purchaseOrder}
+                            permissions={permissions.bulkAssetCreation}
                             primaryField={columns?.find(d => d.primaryField)}
                             onClick={(data) => {
-                                history.push(`${routes.purchaseOrderDetail.path}/${data._id}`)
+                                history.push(`${routes.bulkAssetCreationDetail.path}/${data._id}`)
                             }}
                             dataRows={dataRows}
                             selectedRecords={selectedRecords}
                             dispatch={dispatch}
                             onEdit={(data) => {
-                                history.push(`${routes.purchaseOrderDetail.path}/${data._id}?openEdit=true`)
+                                history.push(`${routes.bulkAssetCreationDetail.path}/${data._id}?openEdit=true`)
                             }}
                             extraParamsToCheckDelete={true}
                             onDelete={(data) => {
@@ -580,38 +515,13 @@ const PurchaseOrder = () => {
                             ]}
                             chips={[
                                 {
-                                    label: "Delivery Date: ",
-                                    field: "deliveryDate",
-                                    fieldType: "date",
-                                    setBackground: (data) => { return data.status === "" && new Date() > new Date(data.deliveryDate) ? { backgroundColor: "#efcccc" } : null }
-                                },
-                                {
                                     label: "Status: ",
                                     field: "status",
                                 },
-                                {
-                                    label: "Tax Schedule: ",
-                                    field: "taxSchedule",
-                                },
-                                {
-                                    label: "Country Bill To: ",
-                                    field: "countryBillTo",
-                                },
-                                {
-                                    label: "Country Sell To: ",
-                                    field: "countrysellTo",
-                                },
-                                {
-                                    label: "SupplierContact:  ",
-                                    field: "supplierContact",
-                                },
-
-
-
                             ]}
                             onCreate={false}
                             showClone={true}
-                            onClone={(data) => { setShowManagePurchaseOrderDialog({ open: true, isClone: true, idToClone: data._id }); }}
+                            onClone={(data) => { setShowManageBulkAssetCreationDialog({ open: true, isClone: true, idToClone: data._id }); }}
                             renderedFrom={renderedFrom}
                         /> :
                         <CustomAgGrid
@@ -627,28 +537,27 @@ const PurchaseOrder = () => {
                             actionWidth={150}
                             loading={loading}
                             renderedFrom={renderedFrom}
-                            refreshGrid={fetchPurchaseOrder}
+                            refreshGrid={fetchBulkAssetCreation}
                         /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
         {
-            showManagePurchaseOrderDialog.open &&
-            <ManagePurchaseOrder
-                isClone={showManagePurchaseOrderDialog.isClone}
-                purchaseOrderId={showManagePurchaseOrderDialog.idToClone}
-                onClose={() => setShowManagePurchaseOrderDialog({ open: false, isClone: false, idToClone: null })}
+            showManageBulkAssetCreationDialog.open &&
+            <ManageBulkAssetCreation
+                isClone={showManageBulkAssetCreationDialog.isClone}
+                bulkAssetCreationId={showManageBulkAssetCreationDialog.idToClone}
+                onClose={() => setShowManageBulkAssetCreationDialog({ open: false, isClone: false, idToClone: null })}
                 onSuccess={() => {
-                    setShowManagePurchaseOrderDialog({ open: false, isClone: false, idToClone: null });
-                    fetchPurchaseOrder()
+                    setShowManageBulkAssetCreationDialog({ open: false, isClone: false, idToClone: null });
+                    fetchBulkAssetCreation()
                 }}
-                currency={user?.entity?.find(d => d._id === selectedEntity)?.currency}
             />
         }
         {
             showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the ${routes?.purchaseOrder.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
+                message={`Are you sure you want to delete the ${routes?.bulkAssetCreation.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />
@@ -657,4 +566,4 @@ const PurchaseOrder = () => {
     );
 }
 
-export default PurchaseOrder;
+export default BulkAssetCreation;
