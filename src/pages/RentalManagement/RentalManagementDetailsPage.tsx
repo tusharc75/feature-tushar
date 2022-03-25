@@ -317,12 +317,12 @@ const RentalManagementDetailsPage = () => {
                         </Button>
                       </Fragment>
                     )}
-                  {permissions?.rentalManagement?.isUpdate &&
+                  {/* {permissions?.rentalManagement?.isUpdate &&
                     [RENTAL_STATUS.new, RENTAL_STATUS.inProgress].includes(rentalManagementData?.status) && (
                       <Button variant="outlined" color="primary" size="small" onClick={() => setShowCancelConfirmBox(true)}>
                         {'Cancel ' + routes.rentalManagement.title}
                       </Button>
-                    )}
+                    )} */}
                   {permissions?.rentalManagement?.isUpdate &&
                     [RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) && (
                       <Fragment>

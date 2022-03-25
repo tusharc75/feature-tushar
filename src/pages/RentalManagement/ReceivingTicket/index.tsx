@@ -22,7 +22,6 @@ import {
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
-import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -43,6 +42,7 @@ import ExistingRentalJob from "./ExistingRentalJob";
 import { groupBy, uniq, map, filter } from "lodash";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import AddSerializedAsset from "../SerializedAsset/AddSerializedAsset";
+import ReplaceAssetReason from "../../../components/RentalManagment/ReplaceAssetReason";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -90,6 +90,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
 
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] })
+  const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} })
+  const [replaceLoading, setReplaceLoading] = useState(false)
+
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -410,12 +413,10 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     }
   };
 
-  const handleReplaceAssets = (rows) => {
-
+  const handleOpenReplaceAssetReason = (rows) => {
     const data: any = {}
     data.refrenceType = "rentalJob";
     data.referenceId = rentalManagementData._id;
-
     const assets: any = []
     selectedRecords?.forEach((element: any) => {
       const result = rows.filter(f => f.productId === element?.product?.optionValue && !f.isCounted);
@@ -425,10 +426,16 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       }
     })
     data.assets = assets;
+    setShowReplaceReason({ open: true, data: data })
+  }
 
-    axiosInstance().post(`${deliveryTicket.api}/replace-assets`, data)
+  const handleReplaceAsset = (reason) => {
+    setReplaceLoading(true)
+    axiosInstance().post(`${deliveryTicket.api}/replace-assets`, { ...showReplaceReason.data, reason: reason })
       .then(({ data }) => {
+        setShowReplaceReason({ open: false, data: [] })
         setAddSerializedAssetDialog({ open: false, products: [] })
+        setReplaceLoading(false)
         fetchRecords()
         toastConfig.setToastConfig({
           open: true,
@@ -527,6 +534,14 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
                 setAnchorEl(null)
                 setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
               }}>{INVENTORY_STATUS.lost}</MenuItem>
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.needRepair, message: "" })
+              }}>{INVENTORY_STATUS.needRepair}</MenuItem>
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.needRecert, message: "" })
+              }}>{INVENTORY_STATUS.needRecert}</MenuItem>
             </Fragment>
           }
           {(selectedRecords?.filter((f) => f.type === "Product" && f.hasOwnProperty("loadingTicketId")).length === selectedRecords.length) &&
@@ -848,10 +863,10 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           showRequiredLabel={false}
           onClose={() => setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: false, open: false }))}
         />
-
         <CustomDialogContent>
           <Box className="my-2">
-            {[INVENTORY_STATUS.available, INVENTORY_STATUS.repair].includes(statusToUpdate.status) ? <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
+            {[INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(statusToUpdate.status) ?
+              <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
               : <TextField
                 id="outlined-multiline-static"
                 label={`Please enter the reason for ${statusToUpdate.status}`}
@@ -863,8 +878,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
                 onChange={(e) => {
                   setStatusToUpdate(prevState => ({ ...prevState, message: e.target.value }))
                 }}
-              />
-            }
+              />}
           </Box>
         </CustomDialogContent>
         <CustomDialogFooter>
@@ -935,7 +949,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     }
     {addSerializedAssetDialog.open &&
       <AddSerializedAsset
-        addSerializedAsset={handleReplaceAssets}
+        addSerializedAsset={handleOpenReplaceAssetReason}
         handleSerializedAssetClose={() => {
           setAddSerializedAssetDialog({ open: false, products: [] });
         }}
@@ -943,9 +957,16 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         refrenceData={{
           _id: rentalManagementData?._id, warehouse: rentalManagementData?.warehouse?.optionValue
         }}
-        isAdding={false}
+        isAdding={replaceLoading}
         selectedProducts={addSerializedAssetDialog.products}
         filterByPlant={rentalManagementData?.warehouse?.optionValue}
+      />
+    }
+    {showReplaceReason.open &&
+      <ReplaceAssetReason
+        handleClose={() => setShowReplaceReason({ open: false, data: {} })}
+        loading={replaceLoading}
+        handleSucess={(data) => { handleReplaceAsset(data?.reason) }}
       />
     }
   </>

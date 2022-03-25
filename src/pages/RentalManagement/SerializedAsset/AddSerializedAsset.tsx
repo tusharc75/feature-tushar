@@ -441,7 +441,8 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                                     </Box>
                                 }
                                 <Box pl={1}>
-                                    <HtmlTooltip title={(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) ? "Direct transfer to customer location" : "Add to Job"}>
+                                    <HtmlTooltip title={(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) ? "Direct transfer to customer location" :
+                                        refrenceType === "Rental Job" ? "Add to Job" : refrenceType === "ReplaceAsset" ? "Replace" : 'Add'}>
                                         <Button
                                             color="primary"
                                             size="small"
