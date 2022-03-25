@@ -377,16 +377,16 @@ const SerializedAssetDetailsPage = () => {
   useEffect(() => {
     if (productInventoryData) {
       if (productInventoryData.status === INVENTORY_STATUS.underReview) {
-        setManualStatus([INVENTORY_STATUS.available, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost])
+        setManualStatus([INVENTORY_STATUS.available, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert])
       }
       else if (productInventoryData.status === INVENTORY_STATUS.scrap) {
-        setManualStatus([INVENTORY_STATUS.lost])
+        setManualStatus([INVENTORY_STATUS.lost, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert])
       }
       else if (productInventoryData.status === INVENTORY_STATUS.lost) {
-        setManualStatus([])
+        setManualStatus([INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert])
       }
       else {
-        setManualStatus([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost])
+        setManualStatus([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert])
       }
     }
   }, [productInventoryData])
@@ -394,9 +394,6 @@ const SerializedAssetDetailsPage = () => {
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity);
   };
-
-
-  console.log(productInventoryData)
 
   return (
     <>
@@ -444,30 +441,26 @@ const SerializedAssetDetailsPage = () => {
                             {isMobile && !isTablet ? <GiAutoRepair size={20} /> : "Create Repair Job"}
                           </Button>
                         }
-                        {![INVENTORY_STATUS.lost].includes(productInventoryData.status) &&
-                          <Fragment>
-                            <Button
-                              variant="outlined"
-                              color="default"
-                              size="small"
-                              onClick={openActions}
-                              disabled={updateLoading}
-                              aria-controls="action-menu"
-                              endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
-                            >
-                              {isMobile && !isTablet ? <GrStatusInfo size={20} /> : "Change Status"}
-                            </Button>
-                            {![INVENTORY_STATUS.inUse].includes(productInventoryData.status) &&
-                              <Button
-                                variant={isMobile && !isTablet ? "text" : "outlined"}
-                                color="primary"
-                                size="small"
-                                onClick={handleOpenUpdateDialog}
-                              >
-                                {isMobile && !isTablet ? <MdEdit size={22} /> : "Edit"}
-                              </Button>
-                            }
-                          </Fragment>
+                        <Button
+                          variant="outlined"
+                          color="default"
+                          size="small"
+                          onClick={openActions}
+                          disabled={updateLoading}
+                          aria-controls="action-menu"
+                          endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
+                        >
+                          {isMobile && !isTablet ? <GrStatusInfo size={20} /> : "Change Status"}
+                        </Button>
+                        {![INVENTORY_STATUS.inUse].includes(productInventoryData.status) &&
+                          <Button
+                            variant={isMobile && !isTablet ? "text" : "outlined"}
+                            color="primary"
+                            size="small"
+                            onClick={handleOpenUpdateDialog}
+                          >
+                            {isMobile && !isTablet ? <MdEdit size={22} /> : "Edit"}
+                          </Button>
                         }
                         <Menu
                           anchorEl={anchorEl}
@@ -484,7 +477,7 @@ const SerializedAssetDetailsPage = () => {
                             statusOptions.map(o => {
                               return <MenuItem
                                 key={o?.optionValue}
-                                disabled={!manualStatus.includes(o?.optionLabel)}
+                                disabled={!manualStatus.includes(o?.optionLabel) || o?.optionLabel === productInventoryData?.status}
                                 onClick={() => {
                                   closeActions()
                                   handleStatusChange(o)
