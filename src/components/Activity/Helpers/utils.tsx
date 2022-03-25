@@ -29,7 +29,8 @@ export const resActivityColors = {
   deliveryTicket: "#91C483",
   sublease: "#ffb3c6",
   salesOrder: "#11468F",
-  serializedAsset:"#19282F",
+  serializedAsset: "#19282F",
+  bulkAssetCreation: "#11468F",
   my: "#990033",
   task: "#3949ab",
   event: "#e65100",
@@ -37,7 +38,6 @@ export const resActivityColors = {
   note: "#990033",
   email: "#990033",
   attachment: "#990033",
-  
 };
 
 export const SubCaseColors = {
