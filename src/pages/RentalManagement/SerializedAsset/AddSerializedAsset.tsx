@@ -235,7 +235,8 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
         else {
             deepFilter = `${deepFilter}&subleaseAsset=0`;
         }
-
+        
+        deepFilter = `${deepFilter}&isNonSerializedAsset=0`;
 
         return deepFilter;
     };

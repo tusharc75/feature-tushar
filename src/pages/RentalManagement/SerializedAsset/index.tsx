@@ -370,7 +370,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     if (row?.original?.type === "asset") {
       return "";
     }
-    if (row?.original?.assetAssignedQty === 0) {
+    if (!row?.original?.serializedProduct && row?.original?.assetAssignedQty === 0) {
       return <p>---</p>;
     }
     return <p>{row?.original?.assetAssignedQty} / {row?.original?.assetQty}</p>;
@@ -568,7 +568,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               >
                 {`Create ${routes.sublease.title}`}</MenuItem>}
             <MenuItem
-              disabled={selectedRecords.filter(d => d.type !== "product").length > 0 || selectedRecords.filter(d => !d.serializedProduct).length === 0}
+              disabled={selectedRecords.filter(d => d.type === "product" && d.serializedProduct === false).length !== selectedRecords.length}
               onClick={() => {
                 setAddNonSerializedAssetDialog(true)
                 closeActions()
