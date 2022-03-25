@@ -32,9 +32,21 @@ import { FaSuitcase } from "react-icons/fa";
 import MobileSortDialog from "src/components/MobileSortDialog";
 import MobileFilterDialog from "src/components/MobileFilterDialog"
 import { camelCase } from "lodash";
+import HideWhenOffline from "src/components/HideWhenOffline";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
+import queryString from 'query-string';
 
 const BulkAssetCreation = () => {
-
+    const BulkAssetCreationType = [
+        {
+            key: `All ${routes.bulkAssetCreation.title}`,
+            value: 1,
+        },
+        {
+            key: `My ${routes.bulkAssetCreation.title}`,
+            value: 2,
+        },
+    ];
     let renderedFrom = camelCase(routes.bulkAssetCreation?.title)
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
@@ -50,6 +62,8 @@ const BulkAssetCreation = () => {
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
     const [isOpenDialog, setisOpenDialog] = useState(false)
+    const { type }: any = queryString.parse(history.location.search);
+    const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
 
     const [fromRental, setFromRental] = useState(history.location?.state?.rental);
 
@@ -64,7 +78,7 @@ const BulkAssetCreation = () => {
 
     useEffect(() => {
         fetchBulkAssetCreation()
-    }, [page, limit, filters, sorting, search, selectedEntity, fromRental]);
+    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, selectedType]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -172,7 +186,7 @@ const BulkAssetCreation = () => {
     };
 
     const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}`;
+        let deepFilter = `?page=${page}&limit=${limit}&filterBulkAssetCreation=${selectedType}`;
         let filterById = [];
 
         if (filterById.length > 0) {
@@ -300,6 +314,18 @@ const BulkAssetCreation = () => {
         setisOpenDialog(false);
     };
 
+    const handleBulkAssetCreationType = (filterValues) => {
+        setSelectedType(filterValues);
+        history.push(`?type=${filterValues}`)
+    }
+
+    const handleFilter = (event, newFilter) => {
+        if (newFilter != null) {
+            handleBulkAssetCreationType(BulkAssetCreationType.find((d) => d.key === newFilter).value);
+
+        }
+    };
+
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
@@ -336,7 +362,7 @@ const BulkAssetCreation = () => {
                             <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
                             <span className="listingHeader">{routes.bulkAssetCreation?.title} </span>
                         </div>
-                        {isMobile && (
+                        {isMobile ? (
                             <>
                                 <Grid style={{ display: 'inline-flex' }}>
                                     <Button
@@ -388,7 +414,22 @@ const BulkAssetCreation = () => {
                                     />
                                 </Grid>
                             </>
-                        )}
+                        ) :
+                            <HideWhenOffline>
+                                <div className={`align-items-center gap-1 layout-for-mobile `}>
+                                    {BulkAssetCreationType && (
+                                        <ToggleButtonGroup size="small" className="ml-2" value={BulkAssetCreationType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                                            {BulkAssetCreationType.map((k, index) => {
+                                                return (
+                                                    <ToggleButton value={k.key} key={index}>
+                                                        {k.key}
+                                                    </ToggleButton>
+                                                );
+                                            })}
+                                        </ToggleButtonGroup>
+                                    )}
+                                </div>
+                            </HideWhenOffline>}
                         {fromRental && (
                             <Chip
                                 className="ml-3"

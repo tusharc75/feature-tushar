@@ -1756,14 +1756,19 @@ export const getData = (resource: string, data: any) => {
         name: `${data.subleaseName}`,
         id: data._id
       };
-    case 'salesOrder':
+    case 'sales-order':
       return {
         name: `${data.salesOrderNo}`,
         id: data._id
       };
-    case 'serializedAsset':
+    case 'serialized-asset':
       return {
         name: `${data.assetNumber}`,
+        id: data._id
+      };
+    case 'bulk-asset-creation':
+      return {
+        name: `${data.baNumber}`,
         id: data._id
       };
     default:
@@ -1823,6 +1828,10 @@ export const viewsColors = {
   transferAsset: {
     background: '#ecc19c',
     borderColor: '#d98298'
+  },
+  bulkAsset: {
+    background: '#FFA500',
+    borderColor: '#6c89a6'
   },
   loadingTicket: {
     background: '#e6c6e6',

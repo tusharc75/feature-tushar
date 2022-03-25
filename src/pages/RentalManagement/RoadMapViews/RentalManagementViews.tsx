@@ -24,10 +24,10 @@ const customNodeStyles = {
     name: 'Product',
     ...viewsColors.product
   },
-  purchaseOrder: {
-    name: 'Purchase Order',
-    ...viewsColors.purchaseOrder
-  },
+  // purchaseOrder: {
+  //   name: 'Purchase Order',
+  //   ...viewsColors.purchaseOrder
+  // },
   sublease: {
     name: 'Sublease',
     ...viewsColors.sublease
@@ -35,6 +35,10 @@ const customNodeStyles = {
   transferAsset: {
     name: 'Transfer Asset',
     ...viewsColors.transferAsset
+  },
+  bulkAsset: {
+    name: 'Bulk Asset Creation',
+    ...viewsColors.bulkAsset
   },
   productAssets: {
     name: 'Assets',
@@ -107,6 +111,7 @@ const RentalManagementViews = (props) => {
       const product = viewsData?.data?.data?.product;
       const ticketData = viewsData?.data?.data?.ticketData;
       const purchaseOrder = viewsData?.data?.data?.purchaseOrder;
+      const bulkAsset = viewsData?.data?.data?.bulkAsset;
       const subLease = viewsData?.data?.data?.sublease;
       const transferAsset = viewsData?.data?.data?.transferAsset;
       const allAssets = viewsData?.data?.data?.transferAssetData;
@@ -199,37 +204,70 @@ const RentalManagementViews = (props) => {
         purchaseOrder?.length ||
         subLease?.length ||
         transferAsset?.length ||
+        bulkAsset?.length ||
         (subLease?.length && purchaseOrder?.length) ||
         (transferAsset?.length && purchaseOrder?.length) ||
         (transferAsset?.length && purchaseOrder?.length && subLease?.length)
       )
         xPosition += 300;
       const purchaseArr = purchaseOrder?.map((item) => item._id);
-      const subLeaseArr = subLease?.map((item) => item.supplierAccount.optionValue);
       const purchaseOrderInAssets = product?.inventory
         ?.filter((item) => item.inventoryDetail.purchaseOrder)
         .map((item) => item.inventoryDetail.purchaseOrder);
-      purchaseOrder?.map((item: any, index) => {
-        if (purchaseOrderInAssets.includes(item._id)) {
+      // purchaseOrder?.map((item: any, index) => {
+      //   if (purchaseOrderInAssets.includes(item._id)) {
+      //     flow.push({
+      //       id: `${item._id}`,
+      //       sourcePosition: 'right',
+      //       targetPosition: 'left',
+      //       type: 'default',
+      //       data: {
+      //         ref_type: 'purchaseOrder',
+      //         ref_id: item._id,
+      //         label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.purchaseOrderNumber}</div>
+      //       },
+      //       position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
+      //       style: customNodeStyles.purchaseOrder
+      //     });
+      //     purchaseAndSubLeaseIdx += 1;
+      //   }
+      //   product?.inventory?.map((data) => {
+      //     if (purchaseArr.includes(data.inventoryDetail.purchaseOrder) && data.inventoryDetail.purchaseOrder === item._id) {
+      //       flowEdge.push({
+      //         id: `edge-purchseOrder-${item._id}-${_.random(0, 1000)}`,
+      //         source: `${data._id}`,
+      //         arrowHeadType: 'arrow',
+      //         target: `${item._id}`
+      //       });
+      //     }
+      //   });
+      // });
+
+      const bulkAssetArr = bulkAsset?.map((item) => item._id);
+      const bulkAssetInAssets = product?.inventory
+        ?.filter((item) => item.inventoryDetail.bulkAssetCreation)
+        .map((item) => item.inventoryDetail.bulkAssetCreation);
+      bulkAsset?.map((item: any, index) => {
+        if (bulkAssetInAssets.includes(item._id)) {
           flow.push({
             id: `${item._id}`,
             sourcePosition: 'right',
             targetPosition: 'left',
             type: 'default',
             data: {
-              ref_type: 'purchaseOrder',
+              ref_type: 'bulkAsset',
               ref_id: item._id,
-              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.purchaseOrderNumber}</div>
+              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.baNumber}</div>
             },
             position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
-            style: customNodeStyles.purchaseOrder
+            style: customNodeStyles.bulkAsset
           });
           purchaseAndSubLeaseIdx += 1;
         }
         product?.inventory?.map((data) => {
-          if (purchaseArr.includes(data.inventoryDetail.purchaseOrder) && data.inventoryDetail.purchaseOrder === item._id) {
+          if (bulkAssetArr.includes(data.inventoryDetail.bulkAssetCreation) && data.inventoryDetail.bulkAssetCreation === item._id) {
             flowEdge.push({
-              id: `edge-purchseOrder-${item._id}-${_.random(0, 1000)}`,
+              id: `edge-bulkAsset-${item._id}-${_.random(0, 1000)}`,
               source: `${data._id}`,
               arrowHeadType: 'arrow',
               target: `${item._id}`
@@ -241,6 +279,8 @@ const RentalManagementViews = (props) => {
       const subleaseInAssets = product?.inventory
         ?.filter((item) => item.inventoryDetail.supplierAccount)
         .map((item) => item.inventoryDetail.supplierAccount);
+      const subLeaseArr = subLease?.map((item) => item.supplierAccount.optionValue);
+
       subLease?.map((item: any, index) => {
         if (subleaseInAssets.includes(item.supplierAccount.optionValue)) {
           flow.push({
@@ -342,6 +382,8 @@ const RentalManagementViews = (props) => {
             ? `${item.inventoryDetail.purchaseOrder}`
             : subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset
             ? `${item.inventoryDetail.supplierAccount}`
+            : bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation)
+            ? `${item.inventoryDetail.bulkAssetCreation}`
             : allAssets[item.inventoryDetail.assetNumber] !== undefined
             ? allAssets[item.inventoryDetail.assetNumber]
             : `${item._id}`,
@@ -741,6 +783,9 @@ const RentalManagementViews = (props) => {
         break;
       case 'transferAsset':
         history.push(`${routes.transferAssetDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'bulkAsset':
+        history.push(`${routes.bulkAssetCreationDetail.path}/${element.data.ref_id}`);
         break;
     }
   };
