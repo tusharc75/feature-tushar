@@ -94,7 +94,8 @@ export default function NewCreateQuotePdfTemplate() {
         RESOURCE_LABEL.purchaseOrder,
         RESOURCE_LABEL.deliveryTicket,
         RESOURCE_LABEL.transferAsset,
-        RESOURCE_LABEL.sublease].filter(d => d)
+        RESOURCE_LABEL.sublease,
+        RESOURCE_LABEL.bulkAssetCreation].filter(d => d)
 
     const [variables, setVariables] = useState([])
     const [formValues, setFormValues] = useState(null)
