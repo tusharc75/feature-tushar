@@ -58,6 +58,7 @@ const SerializedAsset = () => {
   const [plantOptions, setPlantOptions] = useState([]);
   const [selectedPlant, setSelectedPlant] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
+  const [isNonSerializedAsset, setNonSerializedAsset] = useState(false);
 
   const {
     state: { permissions }
@@ -94,7 +95,8 @@ const SerializedAsset = () => {
     fromPurchaseOrder,
     productCategory,
     productFilter,
-    subleaseAsset
+    subleaseAsset,
+    isNonSerializedAsset
   ]);
 
   useEffect(() => {
@@ -252,6 +254,11 @@ const SerializedAsset = () => {
       deepFilter = `${deepFilter}&subleaseAsset=1`;
     } else {
       deepFilter = `${deepFilter}&subleaseAsset=0`;
+    }
+    if (isNonSerializedAsset) {
+      deepFilter = `${deepFilter}&isNonSerializedAsset=1`;
+    } else {
+      deepFilter = `${deepFilter}&isNonSerializedAsset=0`;
     }
     return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
@@ -538,6 +545,21 @@ const SerializedAsset = () => {
                       label="Sublease Assets"
                     />
                   )}
+                 
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="isNonSerializedAsset"
+                          checked={isNonSerializedAsset}
+                          onChange={(e) => {
+                            setNonSerializedAsset(e.target.checked);
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Non Serialized Assets"
+                    />
+                  
                 </Fragment>
               )}
             </Grid>
