@@ -3,7 +3,7 @@ import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flo
 import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, INVENTORY_STATUS, REPAIR_JOB_STATUS } from 'src/constants/helpers';
+import { deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, INVENTORY_STATUS, REPAIR_JOB_STATUS, viewsColors } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -12,36 +12,34 @@ import { MdZoomOutMap } from 'react-icons/md';
 const customNodeStyles = {
   repairJob: {
     name: 'Repair Job',
-    background: '#c3d5e6',
-    borderColor: '#6c89a6'
+    ...viewsColors.repairJob
   },
   asset: {
     name: 'Assets',
-    background: '#ffd65b',
-    borderColor: '#f5c431',
+    ...viewsColors.assets,
     cursor: 'pointer'
   },
-  lostOrScrapAssets: {
-    name: 'Lost/Scrap Assets',
-    background: '#ff9980',
-    borderColor: '#db765c'
+  lostAssets: {
+    name: 'Lost Assets',
+    ...viewsColors.lostAssets
+  },
+  scrapAssets: {
+    name: 'Scrap Assets',
+    ...viewsColors.scrapAssets
   },
   loadingTicket: {
     name: 'Loading Ticket',
-    background: '#e6c6e6',
-    borderColor: '#b38fb3'
+    ...viewsColors.loadingTicket
   },
   closedRepairJob: {
     name: 'Completed Repair Job',
-    background: '#4BB543',
-    borderColor: '#999999'
+    ...viewsColors.closedRepairJob
   }
 };
 const customDeliveredNodeStyle = {
   loadingTicket: {
     name: 'Loading Ticket',
-    background: '#e6c6e6',
-    borderColor: '#b38fb3',
+    ...viewsColors.deliveredLoadingTicket,
     borderLeft: '10px solid #008000'
   }
 };
@@ -104,7 +102,9 @@ const RepairJobViews = (props) => {
           position: { x: xPosition, y: index * 80 },
           style:
             item?.status === INVENTORY_STATUS.scrap || item?.status === INVENTORY_STATUS.lost
-              ? customNodeStyles.lostOrScrapAssets
+              ? item?.status === INVENTORY_STATUS.scrap
+                ? customNodeStyles.scrapAssets
+                : customNodeStyles.lostAssets
               : customNodeStyles.asset
         });
 
