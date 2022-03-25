@@ -1756,14 +1756,19 @@ export const getData = (resource: string, data: any) => {
         name: `${data.subleaseName}`,
         id: data._id
       };
-    case 'salesOrder':
+    case 'sales-order':
       return {
         name: `${data.salesOrderNo}`,
         id: data._id
       };
-    case 'serializedAsset':
+    case 'serialized-asset':
       return {
         name: `${data.assetNumber}`,
+        id: data._id
+      };
+    case 'bulk-asset-creation':
+      return {
+        name: `${data.baNumber}`,
         id: data._id
       };
     default:

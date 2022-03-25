@@ -291,7 +291,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         parent.assetAssignedQty = data.inventory.filter((e) => e._id === parent._id).length;
         parent.realAssetQty = parent.assetQty;
         parent.realAssetAssignedQty = parent.assetAssignedQty;
-        // parent.hideSelection = parent.type === "product" && !parent.productDetail?.serializedProduct ? true : false;
         parent.isValid = parent.serializedProduct ? parent.assetAssignedQty === parent.assetQty ? true : false : true;
         parent.isSublease = subleaseProduct?.some(e => e.materialId === parent.materialId)
         parent.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === parent.materialId)
@@ -345,7 +344,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     childProduct.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = _subRow.productDetail?.productName;
-      // _subRow.hideSelection = _subRow.type === "product" && !_subRow.productDetail?.serializedProduct ? true : false;
       _subRow.serializedProduct = _subRow.type === "product" && !_subRow.productDetail?.serializedProduct ? false : true;
       _subRow.assetQty = _subRow.serializedProduct ? _subRow.qty * parent.assetQty : 0;
       _subRow.assetAssignedQty = inventory.filter((e) => e._id === _subRow._id).length;
@@ -372,7 +370,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     if (row?.original?.type === "asset") {
       return "";
     }
-    if (!row?.original?.serializedProduct) {
+    if (row?.original?.assetAssignedQty === 0) {
       return <p>---</p>;
     }
     return <p>{row?.original?.assetAssignedQty} / {row?.original?.assetQty}</p>;
@@ -502,7 +500,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   const closeLinkActions = () => {
     setAnchorLinkActionEl(null);
   };
-
 
   return (<Fragment>
     <Box display="flex" justifyContent="flex-end" pt={1} pb={2} >
@@ -704,8 +701,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     {addNonSerializedAssetDialog && (
       <AddNonSerializeAssets
         closeDialog={() => {
-          fetchProductInventory()
           setAddNonSerializedAssetDialog(false)
+          setSelectedRecords([])
+          fetchProductInventory()
         }}
         products={selectedRecords.filter(d => d.type === "product" && !d.serializedProduct)}
         warehouse={rentalManagementData?.warehouse ?? null}
