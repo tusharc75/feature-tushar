@@ -568,7 +568,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               >
                 {`Create ${routes.sublease.title}`}</MenuItem>}
             <MenuItem
-              disabled={selectedRecords.filter(d => d.type === "product" && d.serializedProduct === false).length !== selectedRecords.length}
+              disabled={selectedRecords.length === 0 || selectedRecords.filter(d => d.type === "product" && d.serializedProduct === false).length !== selectedRecords.length}
               onClick={() => {
                 setAddNonSerializedAssetDialog(true)
                 closeActions()
