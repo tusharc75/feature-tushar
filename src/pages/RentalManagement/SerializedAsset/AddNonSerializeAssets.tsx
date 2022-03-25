@@ -185,7 +185,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
     };
 
     axiosInstance()
-      .put(`${routes.rentalManagement.path}/${rentalId}/inventory/create-assets-non-serialized-product`, dataToSubmit)
+      .post(`${routes.rentalManagement.path}/${rentalId}/inventory/create-assets-non-serialized-product`, dataToSubmit)
       .then(() => {
         setSubmitting(false);
         closeDialog();
