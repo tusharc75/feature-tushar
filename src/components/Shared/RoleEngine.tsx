@@ -8,12 +8,12 @@ import {
   TableHead,
   TableBody,
   TableCell,
-  TableRow, 
+  TableRow,
   FormControlLabel,
   Collapse,
   IconButton
 } from "@material-ui/core";
-import {KeyboardArrowDown, KeyboardArrowUp} from '@material-ui/icons';
+import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
 
 interface RoleProps {
   field: any[];
@@ -25,7 +25,7 @@ interface RoleProps {
 }
 
 
-const RoleEngine = (props:RoleProps) => {
+const RoleEngine = (props: RoleProps) => {
   const { field, resource, setField, setResource, isDisable, style } = props;
 
   const [isReadChecked, setIsReadChecked] = useState(false);
@@ -96,7 +96,7 @@ const RoleEngine = (props:RoleProps) => {
     const newResource = [...resource];
     const newField = [...field];
     newResource.forEach((_resource) => {
-      if(isChecked === true) {
+      if (isChecked === true) {
         _resource[propertyToUpdate] = !_resource[`${propertyToUpdate}Disabled`] && isChecked;
       } else {
         _resource[propertyToUpdate] = isChecked;
@@ -104,7 +104,7 @@ const RoleEngine = (props:RoleProps) => {
 
       if (propertyToUpdate !== "isDelete") {
         newField.filter(d => d.fieldData.resource === _resource.name).forEach((_field) => {
-          if(isChecked === true){
+          if (isChecked === true) {
             _field[propertyToUpdate] = !_resource[`${propertyToUpdate}Disabled`] && !_field[`${propertyToUpdate}Disabled`] && isChecked;
           } else {
             _field[propertyToUpdate] = isChecked;
@@ -124,9 +124,14 @@ const RoleEngine = (props:RoleProps) => {
       const newField = [...field];
       newResource.forEach((_resource) => {
         if (_resource.resourceId === id) {
-          const isCreateUpdateSelected = newField
-            .filter((_field) => _field.fieldData.resource === _resource.name)
-            .some((_field) => _field["isCreate"] || _field["isUpdate"]);
+          let isCreateUpdateSelected;
+          const isSubResourcePresent = newField
+            .filter((_field) => _field.fieldData.resource === _resource.name);
+          if (isSubResourcePresent.length === 0) {
+            isCreateUpdateSelected = _resource["isCreate"] || _resource["isUpdate"];
+          } else {
+            isCreateUpdateSelected = isSubResourcePresent.some((_field) => _field["isCreate"] || _field["isUpdate"]);
+          }
 
           if (access === "isRead" && isCreateUpdateSelected) {
           } else {
@@ -338,7 +343,7 @@ const RoleEngine = (props:RoleProps) => {
 
             return (
               <React.Fragment key={outerIndex}>
-                <Row 
+                <Row
                   _resource={_resource}
                   isDisable={isDisable}
                   handleChange={handleChange}
@@ -356,122 +361,122 @@ const RoleEngine = (props:RoleProps) => {
 
 const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
   const [open, setOpen] = useState(false)
-  const isReadAllChecked = fieldCheckbox.length > 0 === fieldCheckbox.filter(f => f.isRead).length > 0 
-  && fieldCheckbox.filter(f => f.isRead).length > 0 && fieldCheckbox.filter(f => f.isRead).length !== fieldCheckbox.length
+  const isReadAllChecked = fieldCheckbox.length > 0 === fieldCheckbox.filter(f => f.isRead).length > 0
+    && fieldCheckbox.filter(f => f.isRead).length > 0 && fieldCheckbox.filter(f => f.isRead).length !== fieldCheckbox.length
 
-  const isCreateAllChecked = fieldCheckbox.length > 0 === fieldCheckbox.filter(f => f.isCreate).length > 0 
-  && fieldCheckbox.filter(f => f.isCreate).length > 0 && fieldCheckbox.filter(f => f.isCreate).length !== fieldCheckbox.length
+  const isCreateAllChecked = fieldCheckbox.length > 0 === fieldCheckbox.filter(f => f.isCreate).length > 0
+    && fieldCheckbox.filter(f => f.isCreate).length > 0 && fieldCheckbox.filter(f => f.isCreate).length !== fieldCheckbox.length
 
-  const isUpdateAllChecked = fieldCheckbox.length > 0 === fieldCheckbox.filter(f => f.isUpdate).length > 0 
-  && fieldCheckbox.filter(f => f.isUpdate).length > 0 && fieldCheckbox.filter(f => f.isUpdate).length !== fieldCheckbox.length
+  const isUpdateAllChecked = fieldCheckbox.length > 0 === fieldCheckbox.filter(f => f.isUpdate).length > 0
+    && fieldCheckbox.filter(f => f.isUpdate).length > 0 && fieldCheckbox.filter(f => f.isUpdate).length !== fieldCheckbox.length
 
   return (
     <React.Fragment>
-    <TableRow>
-      <TableCell style={{ minWidth: 300 }}>
-        <Box display='flex' justifyContent={'flex-start'} alignItems={'center'}>
-          <Typography className="tableMainHeader">{_resource.name}</Typography>
-        {fieldCheckbox.length > 0 &&  <Box ml={1}>
-            <IconButton 
-              size="small"
-              aria-label="expand row"
-              onClick={() => setOpen(!open)}
+      <TableRow>
+        <TableCell style={{ minWidth: 300 }}>
+          <Box display='flex' justifyContent={'flex-start'} alignItems={'center'}>
+            <Typography className="tableMainHeader">{_resource.name}</Typography>
+            {fieldCheckbox.length > 0 && <Box ml={1}>
+              <IconButton
+                size="small"
+                aria-label="expand row"
+                onClick={() => setOpen(!open)}
               >
-              {open ? <KeyboardArrowUp/> : <KeyboardArrowDown/>}
-            </IconButton>
-          </Box>}
-        </Box>
-      </TableCell>
-      <TableCell align="center">
-        <Checkbox
-          indeterminate={isReadAllChecked}
-          disabled={isDisable || _resource.isReadDisabled}
-          checked={_resource.isRead}
-          onChange={handleChange(
-            "resource",
-            _resource.resourceId,
-            "isRead"
-          )}
-        />
-      </TableCell>
-      <TableCell align="center">
-        <Checkbox
-          indeterminate={isCreateAllChecked}
-          disabled={isDisable || _resource.isCreateDisabled}
-          checked={_resource.isCreate}
-          onChange={handleChange(
-            "resource",
-            _resource.resourceId,
-            "isCreate"
-          )}
-        />
-      </TableCell>
-      <TableCell align="center">
-        <Checkbox
-          indeterminate={isUpdateAllChecked}
-          disabled={isDisable || _resource.isUpdateDisabled}
-          checked={_resource.isUpdate}
-          onChange={handleChange(
-            "resource",
-            _resource.resourceId,
-            "isUpdate"
-          )}
-        />
-      </TableCell>
-      <TableCell align="center">
-        <Checkbox
-          disabled={isDisable || _resource.isDeleteDisabled}
-          checked={_resource.isDelete}
-          onChange={handleChange(
-            "resource",
-            _resource.resourceId,
-            "isDelete"
-          )}
-        />
-      </TableCell>
-    </TableRow>
-    {open && fieldCheckbox.map((_field, innerIndex) => (
-    <TableRow key={innerIndex}>
-      <TableCell>
-        <Typography variant="body1">
-          &emsp;{" "}
-          {_field.fieldData.fieldLabel +
-            (_field.fieldData.required ? " *" : "")}
-        </Typography>
-      </TableCell>
-      <TableCell align="center">
-        <Checkbox
-          disabled={isDisable || _resource.isReadDisabled || _field.isReadDisabled}
-          checked={_field.isRead}
-          onChange={handleChange("field", _field.fieldData._id, "isRead")}
-        />
-      </TableCell>
-      <TableCell align="center">
-        <Checkbox
-          disabled={isDisable || _resource.isCreateDisabled || _field.isCreateDisabled}
-          checked={_field.isCreate}
-          onChange={handleChange(
-            "field",
-            _field.fieldData._id,
-            "isCreate"
-          )}
-        />
-      </TableCell>
-      <TableCell align="center">
-        <Checkbox
-          disabled={isDisable || _resource.isUpdateDisabled || _field.isUpdateDisabled}
-          checked={_field.isUpdate}
-          onChange={handleChange(
-            "field",
-            _field.fieldData._id,
-            "isUpdate"
-          )}
-        />
-      </TableCell>
-      <TableCell />
-    </TableRow>
-  ))}
-  </React.Fragment>
+                {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+              </IconButton>
+            </Box>}
+          </Box>
+        </TableCell>
+        <TableCell align="center">
+          <Checkbox
+            indeterminate={isReadAllChecked}
+            disabled={isDisable || _resource.isReadDisabled}
+            checked={_resource.isRead}
+            onChange={handleChange(
+              "resource",
+              _resource.resourceId,
+              "isRead"
+            )}
+          />
+        </TableCell>
+        <TableCell align="center">
+          <Checkbox
+            indeterminate={isCreateAllChecked}
+            disabled={isDisable || _resource.isCreateDisabled}
+            checked={_resource.isCreate}
+            onChange={handleChange(
+              "resource",
+              _resource.resourceId,
+              "isCreate"
+            )}
+          />
+        </TableCell>
+        <TableCell align="center">
+          <Checkbox
+            indeterminate={isUpdateAllChecked}
+            disabled={isDisable || _resource.isUpdateDisabled}
+            checked={_resource.isUpdate}
+            onChange={handleChange(
+              "resource",
+              _resource.resourceId,
+              "isUpdate"
+            )}
+          />
+        </TableCell>
+        <TableCell align="center">
+          <Checkbox
+            disabled={isDisable || _resource.isDeleteDisabled}
+            checked={_resource.isDelete}
+            onChange={handleChange(
+              "resource",
+              _resource.resourceId,
+              "isDelete"
+            )}
+          />
+        </TableCell>
+      </TableRow>
+      {open && fieldCheckbox.map((_field, innerIndex) => (
+        <TableRow key={innerIndex}>
+          <TableCell>
+            <Typography variant="body1">
+              &emsp;{" "}
+              {_field.fieldData.fieldLabel +
+                (_field.fieldData.required ? " *" : "")}
+            </Typography>
+          </TableCell>
+          <TableCell align="center">
+            <Checkbox
+              disabled={isDisable || _resource.isReadDisabled || _field.isReadDisabled}
+              checked={_field.isRead}
+              onChange={handleChange("field", _field.fieldData._id, "isRead")}
+            />
+          </TableCell>
+          <TableCell align="center">
+            <Checkbox
+              disabled={isDisable || _resource.isCreateDisabled || _field.isCreateDisabled}
+              checked={_field.isCreate}
+              onChange={handleChange(
+                "field",
+                _field.fieldData._id,
+                "isCreate"
+              )}
+            />
+          </TableCell>
+          <TableCell align="center">
+            <Checkbox
+              disabled={isDisable || _resource.isUpdateDisabled || _field.isUpdateDisabled}
+              checked={_field.isUpdate}
+              onChange={handleChange(
+                "field",
+                _field.fieldData._id,
+                "isUpdate"
+              )}
+            />
+          </TableCell>
+          <TableCell />
+        </TableRow>
+      ))}
+    </React.Fragment>
   )
 }
 
