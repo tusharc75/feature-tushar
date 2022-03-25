@@ -24,18 +24,16 @@ import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
 import CustomRenderCell from "src/components/Helpers/CustomRenderCell";
 import InfoIcon from "@material-ui/icons/Info";
-import { RiEditCircleLine } from "react-icons/ri";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import BulkAssetCreationQtyDialog from "./BulkAssetCreationQtyDialog";
 
-const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProduct, renderedFrom, handleUpdateData }) => {
+const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProduct, renderedFrom, fetchData, handleUpdateData }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
 
     const [columns, setColumns] = useState([{ field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" }])
-
 
     const [addProductDialog, setAddProductDialog] = useState(false);
     const [isAddingProducts, setAddingProducts] = useState(false);
@@ -51,7 +49,6 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     const [anchorEl, setAnchorEl] = useState(null);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteBulkAssetCreationProduct, setDeleteBulkAssetCreationProduct] = useState([]);
-
     const [isRateRequired, setIsRateRequired] = useState(false);
 
     useEffect(() => {
@@ -95,7 +92,6 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
                 finalObject["allowedToEdit"] = true
                 finalObject["hideSelection"] = !Boolean(item.createdQty === 0 || item.createdQty === undefined)
-
                 let res: any = {
                     ...finalObject,
                 };
@@ -193,22 +189,13 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
         </>
     );
 
-
-    const openActions = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const closeActions = () => {
-        setAnchorEl(null);
-    };
-
     const handleAddProduct = (rows) => {
         setAddingProducts(true)
         let tempProductArray = rows.map(d => ({
             "productId": d._id ?? d.productId,
             "qty": d.qty ? parseInt(d.qty) : 1,
         }))
-        axiosInstance().post(`${bulkAssetCreation.api}/product/${bulkAssetCreationData._id}/add`, { "orderDetails": tempProductArray })
+        axiosInstance().post(`${bulkAssetCreation.api}/product/${bulkAssetCreationData._id}/add`, { "products": tempProductArray })
             .then(() => {
                 setAddProductDialog(false)
                 fetchBulkAssetCreationProduct()
@@ -248,7 +235,6 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     }
 
     const createAsset = () => {
-
         let tempProducts = selectedRecords.map(d => {
             return {
                 "bulkAssetCreationId": bulkAssetCreationData?._id,
@@ -260,7 +246,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
         axiosInstance().post(`${bulkAssetCreation.api}/create-assets`, { bulkAssetCreation: tempProducts })
             .then(({ data }) => {
                 fetchBulkAssetCreationProduct()
-                handleUpdateData({ status: "Issued" })
+                fetchData()
                 toastConfig.setToastConfig({
                     open: true,
                     type: "success",
@@ -279,7 +265,6 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                         variant={"contained"}
                         color="primary"
                         size="small"
-                        // style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
                         onClick={() => {
                             setAddProductDialog(true);
                         }}
@@ -288,97 +273,44 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
-
-                    <Box display={isMobile ? "none" : "flex"} justifyContent="flex-end">
+                    <Box display={"flex"} justifyContent="flex-end">
                         <Button
                             variant={isMobile && !isTablet ? "text" : "contained"}
                             color="primary"
                             size="small"
-                            style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
                             disabled={selectedRecords.length === 0}
                             onClick={() => {
                                 setIsBulkEdit(true)
                                 setShowProductDialog(true)
                             }}
-
                         >
-                            {isMobile && !isTablet ? <RiEditCircleLine size={20} /> : `Bulk Edit`}
+                            Bulk Edit
                         </Button>
                         <Box mx={1} />
-                        {permissions?.bulkAssetCreation?.isUpdate && !isMobile && <Button
+                        {permissions?.bulkAssetCreation?.isDelete && <Button
                             variant={isMobile && !isTablet ? "text" : "contained"}
                             color="primary"
                             size="small"
-                            style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
                             disabled={selectedRecords.length === 0}
                             onClick={() => {
-                                closeActions()
-                                createAsset()
-                            }}>
-                            Create Asset
-                        </Button>}
-                        <Box mx={1} />
-                        {permissions?.bulkAssetCreation?.isDelete && !isMobile && <Button
-                            variant={isMobile && !isTablet ? "text" : "contained"}
-                            color="primary"
-                            size="small"
-                            style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-                            disabled={selectedRecords.length === 0}
-                            onClick={() => {
-                                closeActions()
                                 setShowDeleteConfirmBox(true)
                                 setDeleteBulkAssetCreationProduct(selectedRecords.map(d => d._id))
                             }}>
                             Delete
                         </Button>}
-                    </Box>
-
-                    {isMobile && <>
-                        <HtmlTooltip title="Please select some product">
-                            <Button
-                                variant={"outlined"}
-                                color="default"
-                                size="small"
-                                onClick={openActions}
-                                disabled={selectedRecords.length ? false : true}
-                                aria-controls="action-menu"
-                            >
-                                {"Actions"}
-                                <ExpandMore fontSize="small" />
-                            </Button>
-                        </HtmlTooltip>
-                        <Menu
-                            anchorEl={anchorEl}
-                            keepMounted
-                            getContentAnchorEl={null}
-                            anchorOrigin={{
-                                vertical: "bottom",
-                                horizontal: "left",
-                            }}
-                            id="action-menu"
-                            open={Boolean(anchorEl)}
-                            onClose={closeActions}
-                        >
-
-                            <MenuItem disabled={selectedRecords.length === 0}
-                                onClick={() => {
-                                    setIsBulkEdit(true)
-                                    setShowProductDialog(true)
-                                }}>
-                                Bulk Edit
-                            </MenuItem>
-                            {permissions?.bulkAssetCreation?.isDelete && <MenuItem onClick={() => {
-                                closeActions()
-                                setShowDeleteConfirmBox(true)
-                                setDeleteBulkAssetCreationProduct(selectedRecords.map(d => d._id))
-                            }}>Delete</MenuItem>}
-                            {permissions?.bulkAssetCreation?.isUpdate && <MenuItem onClick={() => {
-                                closeActions()
+                        <Box mx={1} />
+                        {permissions?.bulkAssetCreation?.isUpdate && <Button
+                            variant={isMobile && !isTablet ? "text" : "contained"}
+                            color="primary"
+                            size="small"
+                            disabled={selectedRecords.length === 0}
+                            onClick={() => {
                                 createAsset()
-                            }}>Create Asset</MenuItem>}
-                        </Menu>
-                    </>
-                    }
+                            }}>
+                            Create Asset
+                        </Button>}
+                        <Box mx={1} />
+                    </Box>
                 </div>
             </Box>
             {columns && frameWorkComponent ? isMobile && !isTablet ?
@@ -418,7 +350,6 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                     fullHeight={true}
                     renderedFrom={renderedFrom}
                     onClone={() => { }}
-
                 /> :
                 <CustomAgGridEditable
                     columns={columns}

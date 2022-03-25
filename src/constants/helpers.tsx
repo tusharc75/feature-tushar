@@ -66,7 +66,7 @@ export const rentalManagementSteps = [
   'Packing Slip'
 ];
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
-export const bulkAssetCreationSteps = ['Add Product', 'Asset List'];
+export const bulkAssetCreationSteps = ['Add Product', 'Serialized Asset'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';

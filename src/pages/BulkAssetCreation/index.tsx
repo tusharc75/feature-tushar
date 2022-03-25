@@ -51,6 +51,8 @@ const BulkAssetCreation = () => {
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
     const [isOpenDialog, setisOpenDialog] = useState(false)
 
+    const [fromRental, setFromRental] = useState(history.location?.state?.rental);
+
     const {
         state: { user, permissions, selectedEntity },
     }: any = useData();
@@ -62,7 +64,7 @@ const BulkAssetCreation = () => {
 
     useEffect(() => {
         fetchBulkAssetCreation()
-    }, [page, limit, filters, sorting, search, selectedEntity]);
+    }, [page, limit, filters, sorting, search, selectedEntity, fromRental]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -176,6 +178,11 @@ const BulkAssetCreation = () => {
         if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
         }
+
+        if (fromRental) {
+            filterById.push({ field: "rentalJob", term: fromRental?._id });
+        }
+
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -320,7 +327,6 @@ const BulkAssetCreation = () => {
                     }}
                 />
             </Grid>
-
         </Grid>
         <div className="main-container">
             <div className="header-panel">
@@ -383,7 +389,16 @@ const BulkAssetCreation = () => {
                                 </Grid>
                             </>
                         )}
-
+                        {fromRental && (
+                            <Chip
+                                className="ml-3"
+                                color="primary"
+                                label={`Rental Job : ${fromRental?.rentalJobName}`}
+                                onDelete={() => {
+                                    setFromRental(null);
+                                }}
+                            />
+                        )}
                     </Grid>
                     <Grid xs={12} sm={12} md={6} container className={styles.filter_side} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
@@ -396,9 +411,7 @@ const BulkAssetCreation = () => {
                                     value={search}
                                     style={isMobile ? { flex: 1 } : {}}
                                 />
-
                             </Grid>
-
                             <Grid style={{ display: "flex", gap: "5px" }}>
                                 {permissions?.bulkAssetCreation?.isCreate &&
                                     <Button onClick={() => {
@@ -461,34 +474,9 @@ const BulkAssetCreation = () => {
                             ]}
                             chips={[
                                 {
-                                    label: "Delivery Date: ",
-                                    field: "deliveryDate",
-                                    fieldType: "date",
-                                    setBackground: (data) => { return data.status === "" && new Date() > new Date(data.deliveryDate) ? { backgroundColor: "#efcccc" } : null }
-                                },
-                                {
                                     label: "Status: ",
                                     field: "status",
                                 },
-                                {
-                                    label: "Tax Schedule: ",
-                                    field: "taxSchedule",
-                                },
-                                {
-                                    label: "Country Bill To: ",
-                                    field: "countryBillTo",
-                                },
-                                {
-                                    label: "Country Sell To: ",
-                                    field: "countrysellTo",
-                                },
-                                {
-                                    label: "SupplierContact:  ",
-                                    field: "supplierContact",
-                                },
-
-
-
                             ]}
                             onCreate={false}
                             showClone={true}

@@ -25,12 +25,11 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../Account/ManageAccount";
 import ManageContactDialog from "../Contact/ManageContact";
 
-const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, onClose, onSuccess }) => {
+const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, onClose, onSuccess, refrenceId = null, refrenceData = null }) => {
+
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
-    const {
-        state: { user, selectedEntity, permissions },
-    }: any = useData();
+    const { state: { user, selectedEntity, permissions } }: any = useData();
 
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -38,7 +37,6 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
     const [formsData, setFormsData] = useState([]);
     const [bulkAssetCreationData, setBulkAssetCreationData] = useState(null);
     const [cloneHeading, setCloneHeading] = useState('head')
-
 
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [accountData, setAccountData] = useState([]);
@@ -81,12 +79,24 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
             else {
                 let createValues: any = getObjKeys("", fieldsDataForCreate)
                 createValues.baNumber = `BA_${generateUniqueIdOnly()}`
+                if (fieldsDataForCreate.some((e) => e.fieldName === "currency")) {
+                    createValues["currency"] = user.user?.brandCurrency;
+                }
+                if (refrenceData) {
+                    createValues["rentalJob"] = refrenceId
+                    createValues["warehouse"] = refrenceData?.warehouse
+                    if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
+                        createValues["wellName"] = refrenceData?.wellName
+                    }
+                    if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
+                        createValues["afeNumber"] = refrenceData?.afeNumber
+                    }
+                }
                 setInitialData({
                     fields: fieldsDataForCreate,
                     values: createValues
                 });
             }
-
             const supplierAccountOptions = fieldsDataForCreate.find(
                 (d) => d.fieldName === "supplierAccount"
             );
@@ -149,18 +159,23 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
             });
         }
         else {
+            if (refrenceData && refrenceData?.products) {
+                values.products = refrenceData?.products
+            }
             axiosInstance().post(`${bulkAssetCreation.api}`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                // onSuccess(data)
-                history.push(`${bulkAssetCreation.api}/detail/${data._id}`);
+                if (refrenceData && refrenceData?.products) {
+                    onSuccess();
+                }
+                else {
+                    history.push(`${bulkAssetCreation.api}/detail/${data._id}`);
+                }
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);
             });
-
         }
     };
-
 
     const isFieldNotTouched = (initialData, values) => {
         return Object.values(
@@ -521,7 +536,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                                                                         : <FormTypes
                                                                             isNew={Boolean(bulkAssetCreationId)}
                                                                             {...field}
-                                                                            disabled={(Boolean(bulkAssetCreationId) && field.disableOnEdit && !isClone) || field.fieldName === "baNumber" || field.fieldName === "status" }
+                                                                            disabled={(Boolean(bulkAssetCreationId) && field.disableOnEdit && !isClone) || field.fieldName === "baNumber" || field.fieldName === "status"}
                                                                             values={values}
                                                                             errors={errors}
                                                                             touched={touched}
