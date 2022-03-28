@@ -17,7 +17,6 @@ import { rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrenc
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import RentalJobQtyDialog from './RentalJobQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import InfoIcon from '@material-ui/icons/Info';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -26,7 +25,7 @@ import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 
-const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen }) => {
+const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen, allowedToEdit }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
@@ -81,7 +80,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {isOffline ? (
+            {isOffline || !allowedToEdit ? (
               <p> {row.original.detail}</p>
             ) : (
               <p
@@ -99,6 +98,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
               </span>
               {!isOffline &&
+                allowedToEdit &&
                 <HtmlTooltip title="Add Products">
                   <IconButton
                     onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })}
@@ -215,7 +215,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
         sticky: 'right',
         disableFilters: true,
         Cell: ({ row }) =>
-          !row.original.hideSelection && (
+          !row.original.hideSelection && allowedToEdit && (
             <IconButton
               size="small"
               aria-label="Details"
@@ -465,120 +465,120 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     setDeleteData(obj);
   }
 
-
-
   return (
     <Fragment>
       <Grid container spacing={2}>
-        <Grid item xs={12} md={12} sm={12}>
-          <Box display="flex" justifyContent="space-between" m={1}>
-            <Box display="flex">
-              <Button
-                variant={isMobile ? 'contained' : 'contained'}
-                color="primary"
-                size="small"
-                disabled={isOffline}
-                style={!isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-                onClick={() => {
-                  setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
-                }}
-              >
-                {isMobile && !isTablet ? 'Product' : `Add ${routes.product.title}`}
-              </Button>
-              <Box mx={isMobile ? 0.5 : 1} />
-              <Button
-                variant={isMobile ? 'contained' : 'contained'}
-                color="primary"
-                size="small"
-                style={!isMobile && !isTablet ? { color: 'var(--colorOpportunity)' } : {}}
-                disabled={isOffline}
-                onClick={() => {
-                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                }}
-              >
-                {isMobile && !isTablet ? 'Package' : `Add ${routes.packages.title}`}
-              </Button>
-            </Box>
-            {isMobile ? (
+        {allowedToEdit &&
+          <Grid item xs={12} md={12} sm={12}>
+            <Box display="flex" justifyContent="space-between" m={1}>
               <Box display="flex">
                 <Button
-                  variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+                  variant={isMobile ? 'contained' : 'contained'}
                   color="primary"
                   size="small"
-                  style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                  id="demo-positioned-button"
-                  aria-controls={open ? 'demo-positioned-menu' : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? 'true' : undefined}
-                  onClick={handleClick}
-                  endIcon={<BiChevronDown />}
-                >
-                  Actions
-                </Button>
-                <Menu
-                  id="basic-menu"
-                  anchorEl={anchorEl}
-                  open={open}
-                  onClose={handleClose}
-                  MenuListProps={{
-                    'aria-labelledby': 'basic-button'
+                  disabled={isOffline}
+                  style={!isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
+                  onClick={() => {
+                    setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
                   }}
-                  className={isMobile ? "add-product-action-menu-mobile" : "add-product-action-menu"}
                 >
-                  <HtmlTooltip
-                    title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}
-                  >
-                    <MenuItem onClick={() => setIsProductEdit({ open: true, isBulkedit: true })} disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}>
-                      <ListItemIcon>
-                        <MdEdit size={16} />
-                      </ListItemIcon>
-                      <ListItemText>Bulk edit</ListItemText>
-                    </MenuItem>
-                  </HtmlTooltip>
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                    <MenuItem disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-                      onClick={() => { handleDeleteMultiple() }}>
-                      <ListItemIcon>
-                        <MdDelete size={16} />
-                      </ListItemIcon>
-                      <ListItemText>Delete</ListItemText>
-                    </MenuItem>
-                  </HtmlTooltip>
-                </Menu>
+                  {isMobile && !isTablet ? 'Product' : `Add ${routes.product.title}`}
+                </Button>
+                <Box mx={isMobile ? 0.5 : 1} />
+                <Button
+                  variant={isMobile ? 'contained' : 'contained'}
+                  color="primary"
+                  size="small"
+                  style={!isMobile && !isTablet ? { color: 'var(--colorOpportunity)' } : {}}
+                  disabled={isOffline}
+                  onClick={() => {
+                    setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+                  }}
+                >
+                  {isMobile && !isTablet ? 'Package' : `Add ${routes.packages.title}`}
+                </Button>
               </Box>
-            ) : (
-              <Box display="flex">
-                <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-                  <span>
+              {isMobile ? (
+                <Box display="flex">
+                  <Button
+                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+                    color="primary"
+                    size="small"
+                    style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                    id="demo-positioned-button"
+                    aria-controls={open ? 'demo-positioned-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                    onClick={handleClick}
+                    endIcon={<BiChevronDown />}
+                  >
+                    Actions
+                  </Button>
+                  <Menu
+                    id="basic-menu"
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                    MenuListProps={{
+                      'aria-labelledby': 'basic-button'
+                    }}
+                    className={isMobile ? "add-product-action-menu-mobile" : "add-product-action-menu"}
+                  >
+                    <HtmlTooltip
+                      title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}
+                    >
+                      <MenuItem onClick={() => setIsProductEdit({ open: true, isBulkedit: true })} disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}>
+                        <ListItemIcon>
+                          <MdEdit size={16} />
+                        </ListItemIcon>
+                        <ListItemText>Bulk edit</ListItemText>
+                      </MenuItem>
+                    </HtmlTooltip>
+                    <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+                      <MenuItem disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+                        onClick={() => { handleDeleteMultiple() }}>
+                        <ListItemIcon>
+                          <MdDelete size={16} />
+                        </ListItemIcon>
+                        <ListItemText>Delete</ListItemText>
+                      </MenuItem>
+                    </HtmlTooltip>
+                  </Menu>
+                </Box>
+              ) : (
+                <Box display="flex">
+                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
+                    <span>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        color="primary"
+                        size="small"
+                        style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                        disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+                        onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
+                      >
+                        {isMobile && !isTablet ? <RiEditCircleLine size={20} /> : 'Bulk Edit'}
+                      </Button>
+                    </span>
+                  </HtmlTooltip>
+                  <Box mx={1} />
+                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
                       size="small"
-                      style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                      disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                      onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
+                      disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+                      onClick={() => { handleDeleteMultiple() }}
+                      endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
                     >
-                      {isMobile && !isTablet ? <RiEditCircleLine size={20} /> : 'Bulk Edit'}
+                      {isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
                     </Button>
-                  </span>
-                </HtmlTooltip>
-                <Box mx={1} />
-                <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
-                    size="small"
-                    disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-                    onClick={() => { handleDeleteMultiple() }}
-                    endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
-                  >
-                    {isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
-                  </Button>
-                </HtmlTooltip>
-              </Box>
-            )}
-          </Box>
-        </Grid>
+                  </HtmlTooltip>
+                </Box>
+              )}
+            </Box>
+          </Grid>
+        }
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
             <Box
@@ -594,7 +594,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 onSelect={setSelectedProducts}
                 childrenProperty="subRows"
                 uniqueKey="_id"
-                hideSelection={isOffline}
+                hideSelection={isOffline || !allowedToEdit}
               />
             </Box>
           ) : (

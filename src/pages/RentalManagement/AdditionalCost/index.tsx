@@ -26,7 +26,7 @@ import NoDataCell from "../../../components/Helpers/NoDataCell";
 import { fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
 
 
-const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom }) => {
+const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allowedToEdit }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -88,8 +88,8 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom }) => 
                 let res: any = {
                     ...prepareDataForGrid(item),
                 };
-                res["canDelete"] = permissions?.rentalManagement?.isDelete;
-                res["allowedToEdit"] = permissions?.rentalManagement?.isUpdate;
+                res["canDelete"] = permissions?.rentalManagement?.isDelete && allowedToEdit;
+                res["allowedToEdit"] = permissions?.rentalManagement?.isUpdate && allowedToEdit;
                 res["isChecked"] = false;
                 return res;
             });
@@ -131,12 +131,13 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom }) => 
 
     const CostTypeRenderer = (params) =>
         params?.value ? (
-            <a className="link" title={params.value} onClick={() => {
-                setShowCostDialog(true)
-                setSelectedCostData(params.data)
-            }} >
-                {params.value}
-            </a>
+            allowedToEdit ?
+                <a className="link" title={params.value} onClick={() => {
+                    setShowCostDialog(true)
+                    setSelectedCostData(params.data)
+                }} >
+                    {params.value}
+                </a> : params.value
         ) : (
             <NoDataCell />
         );
@@ -176,44 +177,48 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom }) => 
 
     return (
         <Fragment>
-            <Box display="flex" justifyContent="space-between" m={1}>
-                <Box display="flex">
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        disabled={isOffline}
-                        onClick={() => {
-                            setShowCostDialog(true);
-                            setSelectedCostData(null)
-                        }}
-                    >
-                        Add Services and Consumables
-                    </Button>
+            {allowedToEdit &&
+                <Box display="flex" justifyContent="space-between" m={1}>
+                    <Box display="flex">
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            disabled={isOffline}
+                            onClick={() => {
+                                setShowCostDialog(true);
+                                setSelectedCostData(null)
+                            }}
+                        >
+                            Add Services and Consumables
+                        </Button>
+                    </Box>
+                    <Box display="flex-end">
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            disabled={isOffline || selectedRecords.length === 0}
+                            onClick={() => {
+                                setDeleteData(selectedRecords?.map(({ _id }: any) => _id))
+                            }}
+                        >
+                            Delete
+                        </Button>
+                    </Box>
                 </Box>
-                <Box display="flex-end">
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        disabled={isOffline || selectedRecords.length === 0}
-                        onClick={() => {
-                            setDeleteData(selectedRecords?.map(({ _id }: any) => _id))
-                        }}
-                    >
-                        Delete
-                    </Button>
-                </Box>
-            </Box>
+            }
             {columns && frameWorkComponent ? isMobile && !isTablet ?
                 <CustomSwipableList
-                    allowSelection={true}
+                    allowSelection={allowedToEdit}
                     allowSwipe={true}
                     permissions={permissions.rentalManagement}
                     primaryField={columns?.find(d => d.field)}
                     onClick={(data) => {
-                        setShowCostDialog(true)
-                        setSelectedCostData(data)
+                        if (allowedToEdit) {
+                            setShowCostDialog(true)
+                            setSelectedCostData(data)
+                        }
                     }}
                     dataRows={dataRows}
                     selectedRecords={selectedRecords}
@@ -253,9 +258,9 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom }) => 
                     limit={limit}
                     pageSizes={pageSizes}
                     page={page}
-                    allowAction={true}
+                    allowAction={allowedToEdit}
                     actionWidth={150}
-                    allowSelection={true}
+                    allowSelection={allowedToEdit}
                     isClientSideGrid={true}
                     loading={loading}
                     onCellValueChanged={(row) => {
