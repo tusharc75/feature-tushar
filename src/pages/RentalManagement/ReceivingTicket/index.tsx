@@ -639,7 +639,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               {(selectedRecords.length && selectedRecords?.filter(f =>
                 ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                   (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) || f.status === INVENTORY_STATUS.scrap)
-                && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.available].includes(f.status)
+                && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.available, INVENTORY_STATUS.needRecert, INVENTORY_STATUS.needRepair].includes(f.status)
                 && !f.subleaseAsset && checkUniqWarehouse()
               )?.length === selectedRecords?.length && !isOffline) ?
 
@@ -959,12 +959,13 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         refrenceType="Rental Job"
         refrenceData={{
           _id: rentalManagementData._id, warehouse: selectedRecords[0].warehouseId,
-          wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber
+          wellName: rentalManagementData?.wellName?.optionValue, afeNumber: rentalManagementData?.afeNumber
         }}
         onClose={() => setShowRepairJobDialog(false)}
         onSuccess={(obj) => {
           handleAddAssetToRepairJob(obj?._id)
           setShowRepairJobDialog(false);
+          fetchRepairJob()
           fetchRecords()
         }}
       />
