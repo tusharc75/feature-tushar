@@ -124,7 +124,7 @@ export const intialState = {
 };
 
 export default function CustomAgGrid({
-  columns:cols,
+  columns: cols,
   dataRows,
   frameworkComponents,
   dispatch,
@@ -166,7 +166,7 @@ export default function CustomAgGrid({
 
   useEffect(() => {
     setColumns(cols)
-  },[cols])
+  }, [cols])
 
   //  If you want to do something once grid binding done
   const onGridReady = (params) => {
@@ -314,6 +314,7 @@ export default function CustomAgGrid({
       column.isAction ? getActionColumn() : <AgGridColumn
         key={index}
         field={column.field ?? null}
+        cellStyle={column.cellStyle}
         headerName={column.headerName}
         filter={column.filter ?? 'agTextColumnFilter'}
         sortable={column.sortable ?? true}
@@ -337,6 +338,7 @@ export default function CustomAgGrid({
         lockPosition={column?.lockPosition ? true : false}
         key={index}
         field={column.field}
+        cellStyle={column.cellStyle}
         headerName={column.headerName}
         filter={column.filter ?? 'agTextColumnFilter'}
         sortable={column.sortable ?? true}
