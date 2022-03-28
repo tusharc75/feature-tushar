@@ -56,7 +56,7 @@ export const SearchFilter = ({
       e.label = routes[e.type] ? routes[e.type].title : e.type
     })
     setValue(filter.filter(d => permissionsSearch?.some(f => f.type === d.type)));
-  }, [filter]);
+  }, [filter, permissionsSearch]);
 
   useEffect(() => {
     if (inputValue === "") {

@@ -41,7 +41,7 @@ const Note = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [isNew, setIsNew] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [filter, setFilter] = useState([]);
+  const [filter, setFilter] = useState(null);
   const [okButtonLoading, setOkButtonLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState({ id: null, name: null });
@@ -61,7 +61,6 @@ const Note = () => {
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
-  // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('notesPage'));
 
   const [resourceOptions, setResourceOptions] = useState([]);
@@ -98,6 +97,9 @@ const Note = () => {
           toastConfig.setToastConfig(err);
         });
     }
+    else {
+      setFilter([])
+    }
   }, [referenceId]);
 
   useEffect(() => {
@@ -123,7 +125,9 @@ const Note = () => {
   }, [resource]);
 
   useEffect(() => {
-    fetchNotes();
+    if (filter) {
+      fetchNotes();
+    }
   }, [filter]);
 
   const openActions = (event) => {
@@ -204,7 +208,6 @@ const Note = () => {
   };
 
   const fetchNotes = async () => {
-    // setLoading(true)
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
@@ -237,7 +240,6 @@ const Note = () => {
             selectedRecords: rows.filter(f => f.isChecked === true)
           });
         }
-
         if (gridApi) {
           try {
             let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
@@ -323,114 +325,116 @@ const Note = () => {
         </Grid>
       </Grid>
       <CustomContainer>
-        <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={6} md={6} sm={12} className="d-flex align-items-center gap-1">
-              <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title}</span>
-              <Autocomplete
-                options={resourceOptions}
-                getOptionLabel={(option) => option.optionLabel}
-                style={{ width: "250px" }}
-                value={resource}
-                onChange={(event, newValue) => {
-                  setResource(newValue);
-                  setFilter([])
-                }}
-                size="small"
-                renderInput={(params) =>
-                  isMobile && !isTablet ? (
-                    <TextField {...params} label="Select Resource" variant="standard" className={isMobile ? 'serchBox' : ''} />
-                  ) : (
-                    <TextField {...params} label="Select Resource" variant="outlined" />
-                  )
-                }
-              />
-              {resource && resourceData && (
+        {filter &&
+          <div className="header-panel">
+            <Grid container className={styles.filter_side_container}>
+              <Grid item xs={6} md={6} sm={12} className="d-flex align-items-center gap-1">
+                <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title}</span>
                 <Autocomplete
-                  disabled={loadingResources}
-                  options={resourceData}
-                  getOptionLabel={(option: any) => option.name}
-                  getOptionSelected={(option: any, value: any) => option.name === value.name}
+                  options={resourceOptions}
+                  getOptionLabel={(option) => option.optionLabel}
                   style={{ width: "250px" }}
-                  value={selectedResourceData}
+                  value={resource}
                   onChange={(event, newValue) => {
-                    setSelectedResourceData(newValue);
-                    if (newValue?.id) {
-                      setFilter((prevState) => ([...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]))
-                    }
-                    else {
-                      setFilter([])
-                    }
+                    setResource(newValue);
+                    setFilter([])
                   }}
                   size="small"
-                  renderInput={(params) => <TextField {...params} label={`${resource.optionLabel}`} variant="outlined" />}
-                />
-              )}
-            </Grid>
-            <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
-              <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                <Grid style={{ width: "100%", display: "flex" }}>
-                  <SearchFilter
-                    handleChangeFilter={handleChangeFilter}
-                    filter={filter}
-                    chip={{ size: 'small' }}
-                    activityName="note" />
-                </Grid>
-                <Grid style={{ display: "flex", gap: "5px" }}>
-                  {<Button
-                    variant={isMobile && !isTablet ? "text" : "contained"}
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      setIsNew(true);
-                      setShowCreateDialog(true);
-                    }}
-                    className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
-                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                  >
-                    {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
-                  </Button>
+                  renderInput={(params) =>
+                    isMobile && !isTablet ? (
+                      <TextField {...params} label="Select Resource" variant="standard" className={isMobile ? 'serchBox' : ''} />
+                    ) : (
+                      <TextField {...params} label="Select Resource" variant="outlined" />
+                    )
                   }
-                  <div className="d-flex gap-2">
-                    {/* </Box> */}
-                    <Button
-                      variant={isMobile && !isTablet ? "text" : "outlined"}
-                      color="default"
+                />
+                {resource && resourceData && (
+                  <Autocomplete
+                    disabled={loadingResources}
+                    options={resourceData}
+                    getOptionLabel={(option: any) => option.name}
+                    getOptionSelected={(option: any, value: any) => option.name === value.name}
+                    style={{ width: "250px" }}
+                    value={selectedResourceData}
+                    onChange={(event, newValue) => {
+                      setSelectedResourceData(newValue);
+                      if (newValue?.id) {
+                        setFilter((prevState) => ([...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]))
+                      }
+                      else {
+                        setFilter([])
+                      }
+                    }}
+                    size="small"
+                    renderInput={(params) => <TextField {...params} label={`${resource.optionLabel}`} variant="outlined" />}
+                  />
+                )}
+              </Grid>
+              <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
+                <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
+                  <Grid style={{ width: "100%", display: "flex" }}>
+                    <SearchFilter
+                      handleChangeFilter={handleChangeFilter}
+                      filter={filter}
+                      chip={{ size: 'small' }}
+                      activityName="note" />
+                  </Grid>
+                  <Grid style={{ display: "flex", gap: "5px" }}>
+                    {<Button
+                      variant={isMobile && !isTablet ? "text" : "contained"}
+                      color="primary"
                       size="small"
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                      disabled={selectedRecords.length > 0 ? false : true}
-                      className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
-                    >
-                      {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
+                      onClick={() => {
+                        setIsNew(true);
+                        setShowCreateDialog(true);
                       }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
+                      className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                     >
-                      <MenuItem
-                        onClick={() => {
-                          showConfirmBox(selectedRecords);
-                          closeActions();
-                        }}
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
+                    </Button>
+                    }
+                    <div className="d-flex gap-2">
+                      {/* </Box> */}
+                      <Button
+                        variant={isMobile && !isTablet ? "text" : "outlined"}
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                        disabled={selectedRecords.length > 0 ? false : true}
+                        className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
                       >
-                        Delete
-                      </MenuItem>
-                    </Menu>
-                  </div>
-                </Grid>
-              </Box>
+                        {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        <MenuItem
+                          onClick={() => {
+                            showConfirmBox(selectedRecords);
+                            closeActions();
+                          }}
+                        >
+                          Delete
+                        </MenuItem>
+                      </Menu>
+                    </div>
+                  </Grid>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </div>
+          </div>
+        }
         {isMobile && !isTablet ?
           <CustomSwipableList
             allowSelection={true}
