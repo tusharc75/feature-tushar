@@ -15,7 +15,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { serializedAsset, isObjectEmpty, gridLoadingTimeout, product, warehouse as warehouseHelper, INVENTORY_STATUS } from '../../constants/helpers';
+import { serializedAsset, isObjectEmpty, gridLoadingTimeout, product, warehouse as warehouseHelper, INVENTORY_STATUS, COLOUR_MASTER } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import ManageSerializedAsset from './ManageSerializedAsset';
@@ -147,6 +147,12 @@ const SerializedAsset = () => {
         columns?.forEach((e) => {
           if (e.field === 'assetNumber') {
             e.cellRenderer = 'assetNumberRenderer';
+            e.cellStyle = params => {
+              if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
+                return { backgroundColor: COLOUR_MASTER.lostAssets.background };
+              }
+              return null;
+            }
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
