@@ -128,7 +128,7 @@ export default function Attachment() {
   const { referenceType, referenceId } = parsed;
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const [filter, setFilter] = useState([]);
+  const [filter, setFilter] = useState(null);
   const [open, setOpen] = useState(false);
   const [attachmentData, setAttachmentData] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -144,7 +144,6 @@ export default function Attachment() {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const columnState = JSON.parse(localStorage.getItem('attachmentPage'));
-  const localStorageSelectedRecords = "attachmentPage_selected";
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
@@ -171,6 +170,7 @@ export default function Attachment() {
       sortable: false
     }
   ]);
+
   if (columnState) {
     columns.forEach((item) => {
       columnState.forEach((d) => {
@@ -191,12 +191,19 @@ export default function Attachment() {
         .then(({ data }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => { });
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+    else {
+      setFilter([])
     }
   }, [referenceId]);
 
   useEffect(() => {
-    fetchAttachments();
+    if (filter) {
+      fetchAttachments();
+    }
   }, [page, limit, filter, filters, sorting]);
 
   useEffect(() => {
@@ -285,7 +292,7 @@ export default function Attachment() {
         const url = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download',data1.name?`${data1.name}.zip` :"download.zip");
+        link.setAttribute('download', data1.name ? `${data1.name}.zip` : "download.zip");
         document.body.appendChild(link);
         link.click();
         setTimeout(() => setIsDownloading(false), 2000);
@@ -365,7 +372,6 @@ export default function Attachment() {
   const fetchAttachments = async () => {
     const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
@@ -423,8 +429,6 @@ export default function Attachment() {
   };
 
   const handleDeleteEmails = async () => {
-    // .put('/email',
-    //             { emails: deleteRecord?.id ? [deleteRecord.id] : selectedRecords.map(d => d._id) })
     setDeleteLoading(true);
     if (deleteRecord?.id || selectedRecords.length > 0)
       axiosInstance()
@@ -462,111 +466,113 @@ export default function Attachment() {
         <CustomBreadCrumbs routes={[{ title: routes.attachment.title }]} />
       </Grid>
       <CustomContainer>
-        <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
-              <AiOutlinePaperClip className="headerLogo" /> <span className="listingHeader">{routes.attachment.title} </span>
-              <Autocomplete
-                options={resourceOptions}
-                getOptionLabel={(option) => option.optionLabel}
-                style={{ width: "250px" }}
-                value={resource}
-                onChange={(event, newValue) => {
-                  setResource(newValue);
-                  setFilter([])
-                }}
-                size="small"
-                renderInput={(params) =>
-                  isMobile && !isTablet ? (
-                    <TextField {...params} label="Select Resource" variant="standard" className={isMobile ? 'serchBox' : ''} />
-                  ) : (
-                    <TextField {...params} label="Select Resource" variant="outlined" />
-                  )
-                }
-              />
-              {resource && resourceData && (
+        {filter &&
+          <div className="header-panel">
+            <Grid container className={styles.filter_side_container}>
+              <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
+                <AiOutlinePaperClip className="headerLogo" /> <span className="listingHeader">{routes.attachment.title} </span>
                 <Autocomplete
-                  disabled={loadingResources}
-                  options={resourceData}
-                  getOptionLabel={(option: any) => option.name}
-                  getOptionSelected={(option: any, value: any) => option.name === value.name}
+                  options={resourceOptions}
+                  getOptionLabel={(option) => option.optionLabel}
                   style={{ width: "250px" }}
-                  value={selectedResourceData}
+                  value={resource}
                   onChange={(event, newValue) => {
-                    setSelectedResourceData(newValue);
-                    if (newValue?.id) {
-                      setFilter((prevState) => ([...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]))
-                    }
-                    else {
-                      setFilter([])
-                    }
+                    setResource(newValue);
+                    setFilter([])
                   }}
                   size="small"
-                  renderInput={(params) => <TextField {...params} label={`Select ${resource.optionLabel}`} variant="outlined" />}
-                />
-              )}
-            </Grid>
-            <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
-              <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                <Grid style={{ width: "90%", display: "flex" }}>
-                  <SearchFilter
-                    handleChangeFilter={handleChangeFilter}
-                    filter={filter}
-                    chip={{ size: 'small' }}
-                    activityName="attachment"
-                  />
-                </Grid>
-                <Grid style={{ display: "flex", gap: "5px" }}>
-                  {<Button
-                    variant={isMobile && !isTablet ? "text" : "contained"}
-                    color="primary"
-                    size="small"
-                    onClick={() => setOpen(true)}
-                    className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
-                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                  >
-                    {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
-                  </Button>
+                  renderInput={(params) =>
+                    isMobile && !isTablet ? (
+                      <TextField {...params} label="Select Resource" variant="standard" className={isMobile ? 'serchBox' : ''} />
+                    ) : (
+                      <TextField {...params} label="Select Resource" variant="outlined" />
+                    )
                   }
-                  <Button
-                    variant={isMobile && !isTablet ? "text" : "outlined"}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    disabled={selectedRecords.length > 0 ? false : true}
-                    className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
-                  >
-                    {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+                />
+                {resource && resourceData && (
+                  <Autocomplete
+                    disabled={loadingResources}
+                    options={resourceData}
+                    getOptionLabel={(option: any) => option.name}
+                    getOptionSelected={(option: any, value: any) => option.name === value.name}
+                    style={{ width: "250px" }}
+                    value={selectedResourceData}
+                    onChange={(event, newValue) => {
+                      setSelectedResourceData(newValue);
+                      if (newValue?.id) {
+                        setFilter((prevState) => ([...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]))
+                      }
+                      else {
+                        setFilter([])
+                      }
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                      disabled={!selectedRecords.some((records) => records.canEdit)}
-                      onClick={() => {
-                        showConfirmBox(null);
-                        closeActions();
-                      }}
+                    size="small"
+                    renderInput={(params) => <TextField {...params} label={`Select ${resource.optionLabel}`} variant="outlined" />}
+                  />
+                )}
+              </Grid>
+              <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
+                <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
+                  <Grid style={{ width: "90%", display: "flex" }}>
+                    <SearchFilter
+                      handleChangeFilter={handleChangeFilter}
+                      filter={filter}
+                      chip={{ size: 'small' }}
+                      activityName="attachment"
+                    />
+                  </Grid>
+                  <Grid style={{ display: "flex", gap: "5px" }}>
+                    {<Button
+                      variant={isMobile && !isTablet ? "text" : "contained"}
+                      color="primary"
+                      size="small"
+                      onClick={() => setOpen(true)}
+                      className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                     >
-                      Delete
-                    </MenuItem>
-                  </Menu>
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
+                    </Button>
+                    }
+                    <Button
+                      variant={isMobile && !isTablet ? "text" : "outlined"}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      aria-controls="action-menu"
+                      disabled={selectedRecords.length > 0 ? false : true}
+                      className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                    >
+                      {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        disabled={!selectedRecords.some((records) => records.canEdit)}
+                        onClick={() => {
+                          showConfirmBox(null);
+                          closeActions();
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    </Menu>
 
-                </Grid>
-              </Box>
+                  </Grid>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </div>
+          </div>
+        }
         {
           isMobile && !isTablet ? <CustomSwipableList
             allowSelection={true}

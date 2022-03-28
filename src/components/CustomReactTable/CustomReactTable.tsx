@@ -1,19 +1,20 @@
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import MaUTable from '@material-ui/core/Table'
 import { TableBody, TableCell, TableHead, TableFooter, TableRow, TextField } from '@material-ui/core'
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
 import { columnFilter } from './ReactTableHelpers'
-import { treeToFlatArray } from '../../constants/helpers'
+import { generateUniqueId, treeToFlatArray } from '../../constants/helpers'
 import { uniqBy, isString } from 'lodash';
 import {
     useTable, useExpanded, useRowSelect, useFlexLayout,
-    useSortBy, useResizeColumns, useFilters, usePagination
+    useSortBy, useResizeColumns, useFilters, useColumnOrder, usePagination
 } from 'react-table'
 import { useSticky } from "react-table-sticky";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import FilterListIcon from '@material-ui/icons/FilterList';
+import CustomReactTableHeaderOptions from './CustomReactTableHeaderOptions';
 
 const IndeterminateCheckbox = React.forwardRef(
     ({ indeterminate, ...rest }: any, ref) => {
@@ -74,7 +75,9 @@ export default function CustomReactTable({
     childrenProperty,
     uniqueKey,
     height = "100%",
-    hideSelection = false
+    hideSelection = false,
+    renderedFrom,
+    isClientSideGrid = true
     // rowCount,
     // customPageSize = 20,
 }) {
@@ -94,22 +97,25 @@ export default function CustomReactTable({
             {
                 // Build our expander column
                 id: 'expander', // Make sure it has an ID
-                Header: ({ getToggleAllRowsExpandedProps, isAllRowsExpanded, rows }) => (
-                    <span {...getToggleAllRowsExpandedProps({
-                        style: {
-                            paddingLeft: "0.3rem",
-                            color: "black"
-                        }
-                    })}>
+                Header: ({ isAllRowsExpanded }) => (
+                    <span style={{
+                        paddingLeft: "0.3rem",
+                        color: "black"
+                    }}>
                         {
-                            rows.some(d => d.canExpand) && (isAllRowsExpanded ? <FaAngleDown /> : <FaAngleRight />)
+                            isAllRowsExpanded ? <FaAngleDown className="cursor-pointer" onClick={() => {
+                                toggleAllRowsExpanded(false);
+                            }} /> : <FaAngleRight className="cursor-pointer" onClick={() => {
+                                toggleAllRowsExpanded(true);
+                            }} />
                         }
                     </span>
                 ),
                 sticky: "left",
                 width: 70,
                 minWidth: 70,
-                maxWidth: 250,
+                maxWidth: 70,
+                canDrag: false,
                 Cell: ({ row }) =>
                     // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
                     // to build the toggle for expanding a row
@@ -126,7 +132,7 @@ export default function CustomReactTable({
                         >
                             {row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
                         </span>
-                    ) : <div></div>,
+                    ) : null,
             },
 
             //  Use below selection if pagination is there
@@ -155,7 +161,8 @@ export default function CustomReactTable({
                 sticky: "left",
                 width: 100,
                 minWidth: 100,
-                maxWidth: 250,
+                maxWidth: 100,
+                canDrag: false,
                 // The header can use the table's getToggleAllRowsSelectedProps method
                 // to render a checkbox
                 Header: ({ getToggleAllRowsSelectedProps }) => (
@@ -191,6 +198,10 @@ export default function CustomReactTable({
         headerGroups,
         footerGroups,
         prepareRow,
+
+        allColumns,
+        setHiddenColumns,
+        getToggleHideAllColumnsProps,
         // page,
         // canPreviousPage,
         // canNextPage,
@@ -204,12 +215,14 @@ export default function CustomReactTable({
 
         toggleRowExpanded,
         toggleAllRowsExpanded,
-        // state: {
-        //     pageIndex,
-        //     pageSize,
-        //     // selectedRowIds
-        //     expanded
-        // },
+
+        setColumnOrder,
+        state: {
+            // pageIndex,
+            // pageSize,
+            selectedRowIds
+            // expanded
+        },
     } = useTable(
         {
             columns: newColumns,
@@ -219,7 +232,7 @@ export default function CustomReactTable({
             filterTypes,
             initialState: {
                 // pageIndex: 0,
-                autoResetExpanded: true,
+                autoResetExpanded: false,
                 hiddenColumns: hideSelection ? ["selection", "action"] : []
             },
             getSubRows: (row: any) => row.subRows,
@@ -238,6 +251,7 @@ export default function CustomReactTable({
             }
         },
         useFlexLayout,
+        useColumnOrder,
         useResizeColumns,
         useFilters,
         useSortBy,
@@ -255,6 +269,17 @@ export default function CustomReactTable({
                 toggleRowExpanded(d.id, true)
             }
         })
+
+        try {
+            const storedColumns = localStorage.getItem(renderedFrom)
+            if (storedColumns) {
+                setColumnOrder(JSON.parse(storedColumns).map(m => m.id));
+                setHiddenColumns(JSON.parse(storedColumns).filter(f => f.isVisible === false).map(m => m.id))
+            }
+        } catch (ex) {
+            console.error(`Error while getting stored data from local storage - ${renderedFrom}`)
+        }
+
     }, [])
 
     // useEffect(() => {
@@ -264,27 +289,57 @@ export default function CustomReactTable({
 
     useEffect(() => {
 
-        const flatData = treeToFlatArray(selectedFlatRows, childrenProperty);
+        let flatSelectedData = [];
 
-        const flatSelectedData = [];
-        flatData.filter(f => f.isSelected).forEach(({ original }) => {
-            // const { subRows, ...d } = original;
-            flatSelectedData.push(original)
-        });
+        Object.keys(selectedRowIds).forEach((key) => {
 
-        if (flatSelectedData.every(s => s.hasOwnProperty(uniqueKey))) {
-            onSelect([...uniqBy(flatSelectedData, uniqueKey)]);
-        } else if (flatSelectedData.every(s => s.hasOwnProperty("_id"))) {
-            onSelect([...uniqBy(flatSelectedData, "_id")]);
-        } else {
-            onSelect([...uniqBy(flatSelectedData, "id")]);
-        }
+            const splittedArray = key.split(".");
 
-    }, [selectedFlatRows.length]);
+            if (splittedArray.length === 0) {
+                const { subRows, ...rest } = data[key];
+                flatSelectedData.push({ ...rest })
+            } else {
+                let dataToStore = null;
+
+                splittedArray.forEach((f, index) => {
+
+                    if (index === 0) {
+                        dataToStore = { ...data[f] };
+                    } else {
+                        dataToStore = { ...dataToStore["subRows"][f] };
+                    }
+                })
+
+                const { subRows, ...rest } = dataToStore;
+                flatSelectedData.push({ ...rest })
+            }
+        })
+
+        onSelect([...flatSelectedData]);
+
+    }, [selectedRowIds]);
 
     // Render the UI for your table
     return (
         <>
+            <CustomReactTableHeaderOptions
+                columns={allColumns}
+                // setSelectedReportView={setSelectedReportView}
+                // selectedReportView={selectedReportView}
+                // columns={columns}
+                // setColumns={setColumns}
+                // columnApi={columnApi}
+                // refreshGrid={refreshGrid}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={isClientSideGrid}
+                // dispatch={dispatch}
+                showOnlyShowFilteredRecordSwitch={false}
+                selectedRecords={selectedFlatRows.length ?? 0}
+                setHiddenColumns={setHiddenColumns}
+                getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
+                setColumnOrder={setColumnOrder}
+            />
+
             <div style={{
                 display: "block",
                 overflow: "auto",
@@ -296,9 +351,9 @@ export default function CustomReactTable({
             }} className="border custom-react-table">
                 <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
                     <TableHead style={{ overflowY: "auto", overflowX: "hidden" }} className="header">
-                        {headerGroups.map(headerGroup => (
+                        {headerGroups.map((headerGroup, index) => (
                             <>
-                                <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
+                                <TableRow {...headerGroup.getHeaderGroupProps()} key={index} className="tr">
                                     {headerGroup.headers.map(column => (
                                         <TableCell {...column.getHeaderProps()} className="th text-truncate">
                                             <div className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
@@ -340,7 +395,7 @@ export default function CustomReactTable({
                             rows.map((row, index) => {
                                 prepareRow(row)
                                 return (
-                                    <TableRow {...row.getRowProps()} key={row.original._id ?? index} className="tr">
+                                    <TableRow {...row.getRowProps()} className="tr">
                                         {row.cells.map(cell => {
                                             return (
                                                 <TableCell {...cell.getCellProps()} className={`td ${setCellColor ? setCellColor(row.original) : ""}`}>

@@ -87,13 +87,13 @@ const SerializedAssetDetailsPage = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-  const [contactsEmailsData, setContactsEmailsData] = useState([]);
   const [tabValue, setTabValue] = useState(0);
+
+  const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
-
 
   function a11yProps(index: any) {
     return {
@@ -127,12 +127,15 @@ const SerializedAssetDetailsPage = () => {
                     <Link className="link" title={params.value} to={`${routes.subleaseDetail.path}/${params.data.referenceId}`}>
                       {params.value}
                     </Link>
-                    : params.value
+                    : params.data?.type === "Bulk Asset Creation" ?
+                      <Link className="link" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`}>
+                        {params.value}
+                      </Link>
+                      : params.value
       ) : (
         <NoDataCell />
       )
     }
-
     </>
   );
 
@@ -141,6 +144,7 @@ const SerializedAssetDetailsPage = () => {
     commonRenderer: CommonRenderer,
     dateTimeRenderer: DateTimeRenderer,
   };
+
   const columns = [
     { field: "reference", headerName: "Reference", show: true, cellRenderer: "nameRenderer" },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
@@ -156,7 +160,6 @@ const SerializedAssetDetailsPage = () => {
     if (id) {
       fetchAllData()
     }
-
   }, [id]);
 
   useEffect(() => {
@@ -164,7 +167,7 @@ const SerializedAssetDetailsPage = () => {
   }, [productId])
 
   const fetchAllData = () => {
-    getProductInventoryFields();
+    fetchFields();
     fetchProductInventoryData();
     fetchProductInventoryHistory();
     fetchProductInventoryStates()
@@ -219,7 +222,6 @@ const SerializedAssetDetailsPage = () => {
     setLoadingProductInventory(true);
     try {
       const { data: { data } } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
-
       setHeadingLbl(`${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}`);
       setCustomizedRoutes([routes.serializedAsset, { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ""}` }]);
       setProductId(data?.product?.optionValue)
@@ -250,13 +252,14 @@ const SerializedAssetDetailsPage = () => {
     }
   };
 
-  const getProductInventoryFields = () => {
+  const fetchFields = () => {
     axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data }) => {
         if (data.data && data.data.length) {
           data.data.some(o => {
             if (o?.fieldData?.fieldName === "status") {
               setStatusOptions([...o.fieldData.option])
+              setAllowUpdateStatus(o?.isUpdate)
               return true
             }
           })
@@ -359,21 +362,6 @@ const SerializedAssetDetailsPage = () => {
     }, []);
   };
 
-  const handleContactsEmails = (productInventoryData) => {
-    let data = [];
-    if (productInventoryData && productInventoryData?.staticData) {
-      const { customerContact, supplierContact } = productInventoryData?.staticData;
-      if (customerContact && customerContact.length) {
-        data = getContactEmails(customerContact);
-      }
-      if (supplierContact && supplierContact.length) {
-        data = [...data, ...getContactEmails(supplierContact)];
-      }
-      if (data.length > 0) setContactsEmailsData(data);
-    }
-  };
-
-
   useEffect(() => {
     if (productInventoryData) {
       if (productInventoryData.status === INVENTORY_STATUS.underReview) {
@@ -423,7 +411,6 @@ const SerializedAssetDetailsPage = () => {
                     </Box>
                   </div>
                 ) : (
-
                   <DetailsPageHeader
                     heading={headingLbl}
                     mainPoints={mainPoints}
@@ -431,7 +418,7 @@ const SerializedAssetDetailsPage = () => {
                   >
                     {permissions?.serializedAsset?.isUpdate && productInventoryData.active && (
                       <>
-                        {![INVENTORY_STATUS.lost, INVENTORY_STATUS.inUse, INVENTORY_STATUS.reserved, INVENTORY_STATUS.repair].includes(productInventoryData.status) &&
+                        {permissions?.repairJob?.isCreate && ![INVENTORY_STATUS.lost, INVENTORY_STATUS.inUse, INVENTORY_STATUS.reserved, INVENTORY_STATUS.repair].includes(productInventoryData.status) &&
                           <Button
                             variant="outlined"
                             color="default"
@@ -441,17 +428,19 @@ const SerializedAssetDetailsPage = () => {
                             {isMobile && !isTablet ? <GiAutoRepair size={20} /> : "Create Repair Job"}
                           </Button>
                         }
-                        <Button
-                          variant="outlined"
-                          color="default"
-                          size="small"
-                          onClick={openActions}
-                          disabled={updateLoading}
-                          aria-controls="action-menu"
-                          endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
-                        >
-                          {isMobile && !isTablet ? <GrStatusInfo size={20} /> : "Change Status"}
-                        </Button>
+                        {allowUpdateStatus &&
+                          <Button
+                            variant="outlined"
+                            color="default"
+                            size="small"
+                            onClick={openActions}
+                            disabled={updateLoading}
+                            aria-controls="action-menu"
+                            endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
+                          >
+                            {isMobile && !isTablet ? <GrStatusInfo size={20} /> : "Change Status"}
+                          </Button>
+                        }
                         {![INVENTORY_STATUS.inUse].includes(productInventoryData.status) &&
                           <Button
                             variant={isMobile && !isTablet ? "text" : "outlined"}
@@ -616,7 +605,6 @@ const SerializedAssetDetailsPage = () => {
                         {isMobile && <div>
                           <CustomTimeline dataRows={productInventoryHistoryData} />
                         </div>}
-
                         <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
                           {!isMobile && columns ?
                             <CustomAgGrid
@@ -644,7 +632,6 @@ const SerializedAssetDetailsPage = () => {
                             </Box>
                           }
                         </Grid>
-
                       </div>
                     </Grid>
                   </Grid>
@@ -736,7 +723,7 @@ const SerializedAssetDetailsPage = () => {
                               }
                             ]}
                             handleActivityRefresh={() => { }}
-                            emails={contactsEmailsData}
+                            emails={[]}
                           />
                         </div>
                       )}

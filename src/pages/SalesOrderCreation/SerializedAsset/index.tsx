@@ -435,6 +435,8 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
+              renderedFrom="sales_order"
+              isClientSideGrid={true}
             />
           </Box>
           : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
