@@ -311,16 +311,16 @@ const SerializedAsset = () => {
 
   const AssetNumberRenderer = (params) => (
     <Fragment>
-      {params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime() && (
-        <Box mr={1} pt={1}>
-          <HtmlTooltip title="Asset needs to be recert">
-            <WarningIcon fontSize="small" color="error" />
-          </HtmlTooltip>
-        </Box>
-      )}
       <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data?._id}`}>
         {params.value}
       </Link>
+      {params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime() && (
+        <Box ml={1} pt={1}>
+          <HtmlTooltip title="Asset needs to be recert">
+            <WarningIcon style={{ fontSize: "14px" }} fontSize="small" color="error" />
+          </HtmlTooltip>
+        </Box>
+      )}
     </Fragment>
   );
 
@@ -545,21 +545,21 @@ const SerializedAsset = () => {
                       label="Sublease Assets"
                     />
                   )}
-                 
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          name="isNonSerializedAsset"
-                          checked={isNonSerializedAsset}
-                          onChange={(e) => {
-                            setNonSerializedAsset(e.target.checked);
-                          }}
-                          color="primary"
-                        />
-                      }
-                      label="Non Serialized Assets"
-                    />
-                  
+
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="isNonSerializedAsset"
+                        checked={isNonSerializedAsset}
+                        onChange={(e) => {
+                          setNonSerializedAsset(e.target.checked);
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label="Non Serialized Assets"
+                  />
+
                 </Fragment>
               )}
             </Grid>

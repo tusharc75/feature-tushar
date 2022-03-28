@@ -60,7 +60,7 @@ const RepairJobDetails = () => {
   const [showRepairJobCompleteConfirmationDialog, setShowRepairJobCompleteConfirmationDialog] = useState(false);
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
-
+  const [allowedToEdit, setAllowedToEdit] = useState(false); 
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
 
@@ -127,6 +127,8 @@ const RepairJobDetails = () => {
       .then(({ data: { data } }) => {
         setRepairJobData({ ...data });
         setCurrentStep(repairJobProcessSteps.indexOf(data?.processStatus) !== -1 ? repairJobProcessSteps.indexOf(data?.processStatus) : 0);
+        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner, data.processor].some((d) => d?.optionValue === user?.user?._id);
+        setAllowedToEdit(isAllowedToEdit);
         if (permissions?.repairJob?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
@@ -319,6 +321,7 @@ const RepairJobDetails = () => {
                             updateJobStatus={updateJobStatus}
                             repairedAssetStatus={repairedAssetStatus}
                             renderedFrom={`${renderedFrom}_grid-1`}
+                            allowedToEdit={allowedToEdit}
                           />
                         )}
                         {currentStep === 1 && (
@@ -327,6 +330,7 @@ const RepairJobDetails = () => {
                             fetchRepairJobData={fetchRepairJobData}
                             repairedAssetStatus={repairedAssetStatus}
                             renderedFrom={`${renderedFrom}_grid-2`}
+                            allowedToEdit={allowedToEdit}
                           />
                         )}
                       </Grid>

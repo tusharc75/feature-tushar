@@ -451,6 +451,23 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       })
   }
 
+  const checkTransferValid = () => {
+    if (selectedRecords.length === 0) {
+      return false;
+    } else if (selectedRecords.some(f => !f.hasOwnProperty("loadingTicketId") || [INVENTORY_STATUS.lost].includes(f.status))) {
+      return false;
+    } else if (selectedRecords.filter((f) => [INVENTORY_STATUS.inUse].includes(f.status)
+      && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(f.rentalAssetStatus)).length === selectedRecords.length) {
+      return true;
+    } else if (selectedRecords.filter((f) => [INVENTORY_STATUS.available, INVENTORY_STATUS.underReview, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.consumed].includes(f.status)
+      && [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.consumed].includes(f.rentalAssetStatus)).length === selectedRecords.length) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  };
+
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
       <Box display="flex" alignItems="center">
@@ -615,17 +632,14 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
                   setIsExistingRentalJob(true)
                   closeActions()
                 }}
-                disabled={(selectedRecords.length === 0) || isOffline
-                  || (selectedRecords.some(f =>
-                    !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
-                    || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
+                disabled={isOffline || !checkTransferValid()}
               >
                 {`Transfer to another ${routes.rentalManagement.title}`}</MenuItem>
 
               {(selectedRecords.length && selectedRecords?.filter(f =>
                 ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                   (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) || f.status === INVENTORY_STATUS.scrap)
-                && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.available].includes(f.status)
+                && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.available, INVENTORY_STATUS.needRecert, INVENTORY_STATUS.needRepair].includes(f.status)
                 && !f.subleaseAsset && checkUniqWarehouse()
               )?.length === selectedRecords?.length && !isOffline) ?
 
@@ -790,8 +804,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     )}
     {isExistingRentalJob && (
       <ExistingRentalJob
-        refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
-        refrenceData={rentalManagementData}
+        referenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
+        referenceData={rentalManagementData}
         productInventory={selectedRecords}
         onClose={() => setIsExistingRentalJob(false)}
         onSuccess={() => {
@@ -945,12 +959,13 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         refrenceType="Rental Job"
         refrenceData={{
           _id: rentalManagementData._id, warehouse: selectedRecords[0].warehouseId,
-          wellName: rentalManagementData?.wellName, afeNumber: rentalManagementData?.afeNumber
+          wellName: rentalManagementData?.wellName?.optionValue, afeNumber: rentalManagementData?.afeNumber
         }}
         onClose={() => setShowRepairJobDialog(false)}
         onSuccess={(obj) => {
           handleAddAssetToRepairJob(obj?._id)
           setShowRepairJobDialog(false);
+          fetchRepairJob()
           fetchRecords()
         }}
       />

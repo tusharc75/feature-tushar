@@ -1,21 +1,11 @@
-import { useState, useEffect, Fragment } from "react";
-import PropTypes from "prop-types";
-import { TextField, Chip } from "@material-ui/core";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import { flatMap, map } from "lodash";
-import axiosInstance from "../../../axios/axiosInstance";
+import { useState, useEffect, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { TextField, Chip } from '@material-ui/core';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { flatMap, map } from 'lodash';
+import axiosInstance from '../../../axios/axiosInstance';
 
-export const UserDropdown = ({
-  email,
-  name,
-  label,
-  value,
-  multiple,
-  touched,
-  errors,
-  setFieldValue,
-  required,
-}) => {
+export const UserDropdown = ({ email, name, label, value, multiple, touched, errors, setFieldValue, required }) => {
   const [users, setUsers] = useState(null);
 
   useEffect(() => {
@@ -24,21 +14,19 @@ export const UserDropdown = ({
 
   const fetchUsers = async () => {
     await axiosInstance()
-      .get("/activity/user")
+      .get('/activity/user')
       .then(({ data: { data } }) => {
         let userData = data.map((_user) => ({
           userId: _user._id,
-          name: _user.firstName + " " + _user.lastName,
+          name: _user.firstName + ' ' + _user.lastName
         }));
 
         if (Array.isArray(value) && value.length) {
-          let filteredOptions = value.filter(
-            (val) => userData.filter((u) => val.userId === u.userId).length <= 0
-          );
+          let filteredOptions = value.filter((val) => userData.filter((u) => val.userId ?? val.optionValue === u.userId).length <= 0);
 
           filteredOptions = filteredOptions.map((user) => ({
-            userId: user.userId,
-            name: user.userId,
+            userId: user.userId ?? user.optionValue,
+            name: user.userId ?? user.optionLabel
           }));
 
           setUsers([...userData, ...filteredOptions, ...email]);
@@ -46,37 +34,35 @@ export const UserDropdown = ({
           setUsers(userData);
         }
       })
-      .catch(() => { });
+      .catch(() => {});
   };
 
   const setParticipants = (values, reason) => {
     if (values) {
       if (multiple === true) {
-        if (reason === "clear" || reason === "clear-option") {
+        if (reason === 'clear' || reason === 'clear-option') {
           setFieldValue(name, []);
         }
 
-        if (reason === "remove-option") {
+        if (reason === 'remove-option') {
           if (value.length === 1) {
             setFieldValue(name, []);
           }
         }
 
         values.forEach((val: any) => {
-          if (typeof val === "string") {
+          if (typeof val === 'string') {
             if (val && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(val)) {
               if (users.map((u) => u.name).includes(val)) {
-                setUsers([
-                  ...users,
-                ]);
+                setUsers([...users]);
                 setFieldValue(name, [...value, { userId: val }]);
               } else {
                 setUsers([
                   ...users,
                   {
                     userId: val,
-                    name: val,
-                  },
+                    name: val
+                  }
                 ]);
                 setFieldValue(name, [...value, { userId: val }]);
               }
@@ -86,14 +72,14 @@ export const UserDropdown = ({
               ...users,
               {
                 userId: val.inputValue,
-                name: val.inputValue,
-              },
+                name: val.inputValue
+              }
             ]);
             setFieldValue(name, [...value, { userId: val.inputValue }]);
           } else {
             const nValues = [];
             values.forEach((val) => {
-              if (typeof val !== "string") {
+              if (typeof val !== 'string') {
                 nValues.push({ userId: val.userId });
               }
             });
@@ -104,8 +90,8 @@ export const UserDropdown = ({
       } else {
         setFieldValue(name, values.userId);
       }
-    }else{
-      multiple ? setFieldValue(name,[]) : setFieldValue(name,'')
+    } else {
+      multiple ? setFieldValue(name, []) : setFieldValue(name, '');
     }
   };
 
@@ -116,7 +102,7 @@ export const UserDropdown = ({
         disableCloseOnSelect={multiple}
         options={users ? users : []}
         getOptionLabel={(option) => {
-          if (typeof option === "string") {
+          if (typeof option === 'string') {
             return option;
           }
 
@@ -124,7 +110,7 @@ export const UserDropdown = ({
             return option.name;
           }
 
-          return "";
+          return '';
         }}
         freeSolo
         limitTags={5}
@@ -136,26 +122,20 @@ export const UserDropdown = ({
         value={
           users && multiple === true
             ? users.filter((data) =>
-              flatMap(value, (nameObj) =>
-                map(nameObj, (userId) => {
-                  return userId;
-                })
-              ).includes(data.userId)
-            )
+                flatMap(value, (nameObj) =>
+                  map(nameObj, (userId) => {
+                    return userId;
+                  })
+                ).includes(data.userId)
+              )
             : users
-              ? users.filter((data) => data.userId === value).length > 0
-                ? users.filter((data) => data.userId === value)[0]
-                : []
+            ? users.filter((data) => data.userId === value).length > 0
+              ? users.filter((data) => data.userId === value)[0]
               : []
+            : []
         }
         renderTags={(value, getTagProps) =>
-          value.map((option, index) => (
-            <Chip
-              variant="outlined"
-              label={option && option.name}
-              {...getTagProps({ index })}
-            />
-          ))
+          value.map((option, index) => <Chip variant="outlined" label={option && option.name} {...getTagProps({ index })} />)
         }
         renderInput={(params) => (
           <TextField
@@ -182,5 +162,5 @@ UserDropdown.propTypes = {
   errors: PropTypes.any,
   setFieldValue: PropTypes.any,
   requied: PropTypes.any,
-  email: PropTypes.any,
+  email: PropTypes.any
 };
