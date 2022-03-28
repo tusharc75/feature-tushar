@@ -29,7 +29,7 @@ import ManageContactDialog from "../../Contact/ManageContact";
 import ManageWarehouse from '../../Warehouse/ManageWarehouse';
 import ManageAddressDialog from "src/components/Address/ManageAddressDialog";
 
-const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManagementData = null, onClose, onSuccess, open }) => {
+const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManagementData = null, onClose, onSuccess, open, referenceData = null }) => {
 
     const history = useHistory()
     const toastConfig = useContext(CustomToastContext);
@@ -209,10 +209,8 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                     statusOptions = e.fieldData.option;
                 }
             })
-
             var fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             var fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
             if (rentalManagementId) {
                 try {
                     let data;
@@ -272,6 +270,11 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                 if (fieldsDataForCreate?.some((e) => e.fieldName === "rentalJobName")) {
                     initialData["rentalJobName"] = `RJ_${generateUniqueIdOnly()}`
                 }
+                if (referenceData) {
+                    if (fieldsDataForCreate?.some((e) => e.fieldName === "warehouse")) {
+                        initialData["warehouse"] = referenceData?.warehouse;
+                    }
+                }
                 setRentalData({
                     fields: fieldsDataForCreate,
                     initialValues: initialData,
@@ -307,76 +310,37 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
         setLoading(true);
         if (rentalManagementId && isClone === false) {
             values._id = rentalManagementId
-            if (!isOffline) {
-                axiosInstance().put(`${rentalManagement.api}`, values).then(({ data }) => {
-                    setLoading(false);
-                    onSuccess()
-                    toastConfig.setToastConfig({
-                        open: true,
-                        type: "success",
-                        message: data.message,
-                    });
-                }).catch((error) => {
-                    setLoading(false);
-                    toastConfig.setToastConfig(error);
-                });
-            } else {
-                let storedData = {};
-                if (localStorage.getItem("offlineDataToSave")) {
-                    storedData = JSON.parse(localStorage.getItem("offlineDataToSave"));
-                }
-                const dataToSave = {
-                    api: rentalManagement.api,
-                    method: "put",
-                    values: values
-                };
-                if (!storedData["rentalManagement"]) {
-                    storedData["rentalManagement"] = [];
-                }
-                storedData["rentalManagement"].push(dataToSave)
-                localStorage.setItem("offlineDataToSave", JSON.stringify(storedData));
-                setLoading(false);
+            axiosInstance().put(`${rentalManagement.api}`, values).then(({ data }) => {
                 toastConfig.setToastConfig({
                     open: true,
-                    type: "info",
-                    message: "Updates are in offline state, it will be affected once you will be in network",
+                    type: "success",
+                    message: data.message,
                 });
-                onSuccess();
-            }
+                onSuccess()
+                setLoading(false);
+            }).catch((error) => {
+                setLoading(false);
+                toastConfig.setToastConfig(error);
+            });
         }
         else {
-            if (!isOffline) {
-                axiosInstance().post(`${rentalManagement.api}`, values).then(({ data: { data, message } }) => {
-                    history.push(`${routes.rentalManagementDetail.path}/${data}`)
-                    setLoading(false);
-                    onSuccess(data)
-                    toastConfig.setToastConfig({
-                        open: true,
-                        type: "success",
-                        message: message,
-                    });
-                }).catch((error) => {
-                    setLoading(false);
-                    toastConfig.setToastConfig(error);
+            axiosInstance().post(`${rentalManagement.api}`, values).then(({ data: { data, message } }) => {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: message,
                 });
-            }
-            else {
-                let storedData = {};
-                if (localStorage.getItem("offlineDataToSave")) {
-                    storedData = JSON.parse(localStorage.getItem("offlineDataToSave"));
+                if (referenceData) {
+                    onSuccess(data)
                 }
-                const dataToSave = {
-                    api: rentalManagement.api,
-                    method: "post",
-                    values: values
-                };
-                if (!storedData["rentalManagement"]) {
-                    storedData["rentalManagement"] = [];
+                else {
+                    history.push(`${routes.rentalManagementDetail.path}/${data?._id}`)
+                    setLoading(false);
                 }
-                storedData["rentalManagement"].push(dataToSave)
-                localStorage.setItem("offlineDataToSave", JSON.stringify(storedData));
-                onSuccess();
-            }
+            }).catch((error) => {
+                setLoading(false);
+                toastConfig.setToastConfig(error);
+            });
         }
     };
 
