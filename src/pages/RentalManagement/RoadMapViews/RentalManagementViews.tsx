@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React, { useContext, useState, useEffect } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
-import { DELIVERY_TICKET_TYPE, INVENTORY_STATUS, rentalManagement, RENTAL_STATUS, viewsColors } from '../../../constants/helpers';
+import { DELIVERY_TICKET_TYPE, INVENTORY_STATUS, rentalManagement, RENTAL_STATUS, COLOUR_MASTER } from '../../../constants/helpers';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
@@ -14,80 +14,80 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 const customNodeStyles = {
   rentalJob: {
     name: 'Rental Job',
-    ...viewsColors.rentalJob
+    ...COLOUR_MASTER.rentalJob
   },
   package: {
     name: 'Package',
-    ...viewsColors.package
+    ...COLOUR_MASTER.package
   },
   product: {
     name: 'Product',
-    ...viewsColors.product
+    ...COLOUR_MASTER.product
   },
   // purchaseOrder: {
   //   name: 'Purchase Order',
-  //   ...viewsColors.purchaseOrder
+  //   ...COLOUR_MASTER.purchaseOrder
   // },
   sublease: {
     name: 'Sublease',
-    ...viewsColors.sublease
+    ...COLOUR_MASTER.sublease
   },
   transferAsset: {
     name: 'Transfer Asset',
-    ...viewsColors.transferAsset
+    ...COLOUR_MASTER.transferAsset
   },
   bulkAsset: {
     name: 'Bulk Asset Creation',
-    ...viewsColors.bulkAsset
+    ...COLOUR_MASTER.bulkAsset
   },
   productAssets: {
     name: 'Assets',
-    ...viewsColors.assets
+    ...COLOUR_MASTER.assets
   },
   lostAssets: {
     name: 'Lost Assets',
-    ...viewsColors.lostAssets
+    ...COLOUR_MASTER.lostAssets
   },
   scrapAssets: {
     name: 'Scrap Assets',
-    ...viewsColors.scrapAssets
+    ...COLOUR_MASTER.scrapAssets
   },
   loadingTicket: {
     name: 'Loading Ticket',
-    ...viewsColors.loadingTicket
+    ...COLOUR_MASTER.loadingTicket
   },
   receivingTicket: {
     name: 'Receiving Ticket',
-    ...viewsColors.receivingTicket
+    ...COLOUR_MASTER.receivingTicket
   },
   returnTicket: {
     name: 'Return Ticket',
-    ...viewsColors.returnTicket
+    ...COLOUR_MASTER.returnTicket
   }
 };
 const customDeliveredNodeStyle = {
   loadingTicket: {
     name: 'Loading Ticket',
-    ...viewsColors.deliveredLoadingTicket,
+    ...COLOUR_MASTER.deliveredLoadingTicket,
     borderLeft: '10px solid #008000'
   },
   receivingTicket: {
     name: 'Receiving Ticket',
-    ...viewsColors.deliveredReceivingTicket,
+    ...COLOUR_MASTER.deliveredReceivingTicket,
     borderLeft: '10px solid #008000'
   },
   returnTicket: {
     name: 'Return Ticket',
-    ...viewsColors.deliveredReturnTicket,
+    ...COLOUR_MASTER.deliveredReturnTicket,
     borderLeft: '10px solid #FF0000'
   },
   cancelledRentalJob: {
     name: 'Return Ticket',
-    ...viewsColors.cancelledRentalJob
+    ...COLOUR_MASTER.cancelledRentalJob
   },
   closedRentalJob: {
     name: 'Return Ticket',
-    ...viewsColors.closedRentalJob
+    ...COLOUR_MASTER.closedRentalJob
   }
 };
 

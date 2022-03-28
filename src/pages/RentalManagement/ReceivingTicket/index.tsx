@@ -18,7 +18,7 @@ import {
   gridLoadingTimeout, deliveryTicket, rentalManagement,
   sidebarResource, serializedAsset as productInventoryHelperObject, INVENTORY_STATUS, DELIVERY_TICKET_STATUS, RENTAL_INTERNAL_ASSET_STATUS,
   DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE,
-  repairJob, DELIVERY_FROM_TO_TYPE
+  repairJob, DELIVERY_FROM_TO_TYPE, COLOUR_MASTER
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
@@ -339,7 +339,15 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   };
 
   const columns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "inventoryRenderer" },
+    {
+      field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "inventoryRenderer",
+      cellStyle: params => {
+        if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
+          return { backgroundColor: COLOUR_MASTER.lostAssets.background };
+        }
+        return null;
+      }
+    },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
@@ -773,11 +781,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             isClientSideGrid={true}
             renderedFrom={renderedFrom}
             allowSelection={allowedToEdit}
-            rowClassRules={{
-              "red-data-row": function (params) {
-                return [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].some(s => s === params.data.status);
-              },
-            }}
             refreshGrid={fetchRecords}
           />
         )

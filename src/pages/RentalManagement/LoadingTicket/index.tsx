@@ -21,7 +21,8 @@ import {
   DELIVERY_TICKET_TYPE,
   DELIVERY_TICKET_REFRENCE_TYPE,
   serializedAsset,
-  DELIVERY_FROM_TO_TYPE
+  DELIVERY_FROM_TO_TYPE,
+  COLOUR_MASTER
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { useHistory } from 'react-router-dom';
@@ -198,7 +199,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             INVENTORY_STATUS.underReview
           ].includes(d.status) || d.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered || d?.manualStatus === INVENTORY_STATUS.reserved;
       });
-      
+
       if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
         setNextStep(true);
       }
@@ -254,7 +255,15 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   };
 
   const columns = [
-    { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "inventoryRenderer" },
+    {
+      field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "inventoryRenderer",
+      cellStyle: params => {
+        if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
+          return { backgroundColor: COLOUR_MASTER.lostAssets.background };
+        }
+        return null;
+      }
+    },
     { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer" },
     { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
@@ -327,9 +336,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     }
   };
 
-
   return (<>
-
     <Box display="flex" justifyContent="flex-end" pt={1}>
       <Box display="flex" alignItems="center">
         {!isMobile && <Button
@@ -519,12 +526,12 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             loading={loading}
             isClientSideGrid={true}
             allowSelection={allowedToEdit}
-            rowClassRules={{
-              "red-data-row":
-                function (params) {
-                  return [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].some(s => s === params.data.status);
-                },
-            }}
+            // rowClassRules={{
+            //   "red-data-row":
+            //     function (params) {
+            //       return [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].some(s => s === params.data.status);
+            //     },
+            // }}
             renderedFrom={renderedFrom}
             refreshGrid={fetchRecords}
           />
