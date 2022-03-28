@@ -27,7 +27,7 @@ import CustomSwipableList from '../../../components/SwipableListComponents/Custo
 import ManageAssetDialog from './ManageAssetDialog';
 import AssetScrapRepairDialog from '../../../components/AssetScrapRepairDialog/AssetScrapRepairDialog';
 
-const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus, renderedFrom }) => {
+const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus, renderedFrom, allowedToEdit }) => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -176,7 +176,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
 
 
   return (<Fragment>
-    {repairJobData?.status !== REPAIR_JOB_STATUS.completed &&
+    {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed &&
       <Box display="flex" justifyContent="space-between" m={1}  >
         <Box display="flex">
           <Button
@@ -266,8 +266,8 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
       {columns && Object.keys(frameWorkComponent).length > 0 ?
         isMobile && !isTablet ?
           <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
+            allowSelection={allowedToEdit}
+            allowSwipe={allowedToEdit}
             permissions={permissions}
             primaryField={columns?.find(d => d.field)}
             onClick={(data) => {
@@ -309,10 +309,10 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
             limit={limit}
             pageSizes={pageSizes}
             page={page}
-            allowAction={repairJobData && repairJobData["status"] === REPAIR_JOB_STATUS.completed ? false : true}
+            allowAction={allowedToEdit && repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed ? true : false}
             actionWidth={150}
             loading={loading}
-            allowSelection={repairJobData && repairJobData["status"] === REPAIR_JOB_STATUS.completed ? false : true}
+            allowSelection={allowedToEdit && repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed ? true : false}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             rowClassRules={{

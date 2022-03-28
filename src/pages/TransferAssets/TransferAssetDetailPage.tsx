@@ -171,7 +171,7 @@ const TransferAssetDetailPage = () => {
         const steps = data?.transferType === 'Internal' ? transferSteps : transferSteps1;
         setCurrentStep(steps.indexOf(data?.processStatus) !== -1 ? steps.indexOf(data?.processStatus) : 0);
         setCustomizedRoutes([routes.transferAsset, { title: data.transferAssetNumber }]);
-        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner, data.processor].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
         if (permissions?.transferAsset?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
