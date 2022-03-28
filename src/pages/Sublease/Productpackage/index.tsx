@@ -24,7 +24,7 @@ import { FiPackage } from "react-icons/fi";
 import { RiEditCircleLine } from "react-icons/ri";
 import { fetch_sublease_product_fields } from "../../../components/Sublease/helper";
 
-const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom }) => {
+const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -78,7 +78,9 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                 sticky: isMobile ? "none" : "left",
                 Cell: ({ row }) => (
                     <div style={{ display: "flex", alignItems: 'center' }}>
-                        <p
+                        {!allowedToEdit ? (
+                            <p> {row.original.detail}</p>
+                        ) : <p
                             onClick={() => {
                                 handleOpen(row.original)
                             }}
@@ -86,8 +88,8 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                             title={row.original.detail}
                         >
                             {row.original.detail}
-                        </p>
-                        {row.original?.type === 'package' &&
+                        </p>}
+                        {row.original?.type === 'package' && allowedToEdit &&
                             <Box ml={1} className="d-flex align-items-center">
                                 <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
                                 <HtmlTooltip title="Add Product">
@@ -195,7 +197,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
             sticky: "right",
             disableFilters: true,
             Cell: ({ row }) => (
-                !row.original.hideSelection &&
+                !row.original.hideSelection && allowedToEdit &&
                 <IconButton
                     size="small"
                     aria-label="Details"
@@ -398,95 +400,96 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
 
     return (<Fragment>
         <Grid container spacing={2} >
-            <Grid item xs={12} md={12} sm={12} >
-                <Box display="flex" justifyContent="space-between" m={1}>
-                    <Box display="flex">
-                        {subleaseData.status === SUBLEASE_STATUS.new &&
-                            <Fragment>
-                                <Button
-                                    variant={isMobile && !isTablet ? "text" : "contained"}
-                                    color="primary"
-                                    size="small"
-                                    style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
-                                    onClick={() => {
-                                        setAddExistingProductDialog({ open: true, type: "product", parentId: null });
-                                    }}
-                                >
-                                    {isMobile && !isTablet ? <MdAdd size={20} /> : `Add ${routes.product.title}`}
-                                </Button>
-                                <Box mx={1} />
-                                <Button
-                                    variant={isMobile && !isTablet ? "text" : "contained"}
-                                    color="primary"
-                                    size="small"
-                                    style={isMobile && !isTablet ? { color: "var(--colorOpportunity)" } : {}}
-                                    onClick={() => {
-                                        setAddExistingProductDialog({ open: true, type: "package", parentId: null });
-                                    }}
-                                >
-                                    {isMobile && !isTablet ? <FiPackage size={18} /> : `Add ${routes.packages.title}`}
-                                </Button>
-                            </Fragment>
-                        }
-                    </Box>
-                    <Box display="flex">
-                        <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Bulk edit selected records" : "Select records to edit"}>
-                            <span>
-                                <Button
-                                    variant={isMobile && !isTablet ? "text" : "contained"}
-                                    color="primary"
-                                    size="small"
-                                    style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-                                    disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                                    onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
-                                >
-                                    {isMobile && !isTablet ? <RiEditCircleLine size={20} /> : "Bulk Edit"}
-                                </Button>
-                            </span>
-                        </HtmlTooltip>
-                        <Box mx={1} />
-                        <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
-                            <Button
-                                variant={isMobile && !isTablet ? "text" : "contained"}
-                                color="primary"
-                                size="small"
-                                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-                                onClick={() => {
-                                    const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection).map((rec: any) => {
-                                        const obj: any = {};
-                                        obj.id = rec._id;
-                                        obj.type = rec?.type;
-                                        obj.materialId = rec?.materialId;
-                                        return obj
-                                    })
-                                    setDeleteData(dataToDelete)
-                                }}
-                                endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
-                            >
-                                {isMobile && !isTablet ? <MdDelete size={20} /> : "Delete"}
-                            </Button>
-                        </HtmlTooltip>
-                        <Box mx={1} />
-                        {(material.length && !isIssued && !rowsData?.some(f => !f.isValid)) ?
-                            <Fragment>
-                                <HtmlTooltip title={"Start Sublease"}>
+            {allowedToEdit &&
+                <Grid item xs={12} md={12} sm={12} >
+                    <Box display="flex" justifyContent="space-between" m={1}>
+                        <Box display="flex">
+                            {subleaseData.status === SUBLEASE_STATUS.new &&
+                                <Fragment>
                                     <Button
                                         variant={isMobile && !isTablet ? "text" : "contained"}
                                         color="primary"
                                         size="small"
-                                        onClick={() => { issueSublease() }}
-                                        disabled={isIssueing}
-                                        endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
+                                        style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
+                                        onClick={() => {
+                                            setAddExistingProductDialog({ open: true, type: "product", parentId: null });
+                                        }}
                                     >
-                                        {isMobile && !isTablet ? <MdDelete size={20} /> : "Start Sublease"}
+                                        {isMobile && !isTablet ? <MdAdd size={20} /> : `Add ${routes.product.title}`}
                                     </Button>
-                                </HtmlTooltip>
-                                <Box mx={1} />
-                            </Fragment>
-                            : null}
+                                    <Box mx={1} />
+                                    <Button
+                                        variant={isMobile && !isTablet ? "text" : "contained"}
+                                        color="primary"
+                                        size="small"
+                                        style={isMobile && !isTablet ? { color: "var(--colorOpportunity)" } : {}}
+                                        onClick={() => {
+                                            setAddExistingProductDialog({ open: true, type: "package", parentId: null });
+                                        }}
+                                    >
+                                        {isMobile && !isTablet ? <FiPackage size={18} /> : `Add ${routes.packages.title}`}
+                                    </Button>
+                                </Fragment>
+                            }
+                        </Box>
+                        <Box display="flex">
+                            <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Bulk edit selected records" : "Select records to edit"}>
+                                <span>
+                                    <Button
+                                        variant={isMobile && !isTablet ? "text" : "contained"}
+                                        color="primary"
+                                        size="small"
+                                        style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
+                                        disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+                                        onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
+                                    >
+                                        {isMobile && !isTablet ? <RiEditCircleLine size={20} /> : "Bulk Edit"}
+                                    </Button>
+                                </span>
+                            </HtmlTooltip>
+                            <Box mx={1} />
+                            <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Delete selected records" : "Select records to delete"}>
+                                <Button
+                                    variant={isMobile && !isTablet ? "text" : "contained"}
+                                    color="primary"
+                                    size="small"
+                                    disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+                                    onClick={() => {
+                                        const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection).map((rec: any) => {
+                                            const obj: any = {};
+                                            obj.id = rec._id;
+                                            obj.type = rec?.type;
+                                            obj.materialId = rec?.materialId;
+                                            return obj
+                                        })
+                                        setDeleteData(dataToDelete)
+                                    }}
+                                    endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
+                                >
+                                    {isMobile && !isTablet ? <MdDelete size={20} /> : "Delete"}
+                                </Button>
+                            </HtmlTooltip>
+                            <Box mx={1} />
+                            {(material.length && !isIssued && !rowsData?.some(f => !f.isValid)) ?
+                                <Fragment>
+                                    <HtmlTooltip title={"Start Sublease"}>
+                                        <Button
+                                            variant={isMobile && !isTablet ? "text" : "contained"}
+                                            color="primary"
+                                            size="small"
+                                            onClick={() => { issueSublease() }}
+                                            disabled={isIssueing}
+                                            endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
+                                        >
+                                            {isMobile && !isTablet ? <MdDelete size={20} /> : "Start Sublease"}
+                                        </Button>
+                                    </HtmlTooltip>
+                                    <Box mx={1} />
+                                </Fragment>
+                                : null}
+                        </Box>
                     </Box>
-                </Box>
-            </Grid>
+                </Grid>}
             <Grid item xs={12} md={12} sm={12} >
                 {columns && rowsData ?
                     <Box
@@ -502,6 +505,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                             onSelect={setSelectedProducts}
                             childrenProperty="subRows"
                             uniqueKey="_id"
+                            hideSelection={!allowedToEdit}
                         />
                     </Box>
                     : <Box p={2} height={500} bgcolor="white">
