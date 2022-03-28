@@ -16,7 +16,7 @@ import useColumns, { getFrameworkComponents, getStaticFields } from "src/constan
 import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
 import { Grid } from "@material-ui/core";
 
-const SerializedAsset = ({ bulkAssetCreationData, renderedFrom }) => {
+const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -70,9 +70,10 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom }) => {
         axiosInstance().get(`${serializedAsset.api}${queryString}`).then(({ data }) => {
             let rows = data.data?.map((u, user) => {
                 let finalObject = prepareDataForGrid(u);
-                finalObject["canDelete"] = permissions?.serializedAsset?.isDelete
+                finalObject["canDelete"] = permissions?.serializedAsset?.isDelete && allowedToEdit
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-                finalObject["allowedToEdit"] = permissions?.serializedAsset.isUpdate
+                finalObject["allowedToEdit"] = permissions?.serializedAsset.isUpdate && allowedToEdit
+                finalObject["hideSelection"] = !allowedToEdit
                 return {
                     ...finalObject,
                 };
@@ -147,7 +148,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom }) => {
 
     return (<>
         <Box display="flex" justifyContent="flex-end" pt={1} alignItems="center" className="bg-white">
-            <Box ml={2}>
+            {allowedToEdit && <Box ml={2}>
                 <ImportExportLinks
                     permissions={permissions?.packages}
                     module="packages-products"
@@ -162,13 +163,13 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom }) => {
                     isDownloadExcel={false}
                     isBackgroundWhite={true}
                 />
-            </Box>
+            </Box>}
             <Box mx={1} />
         </Box>
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns ?
                 isMobile && !isTablet ? <CustomSwipableList
-                    allowSelection={false}
+                    allowSelection={allowedToEdit}
                     allowSwipe={true}
                     permissions={permissions?.serializedAsset}
                     primaryField={columns?.find(d => d.field === "assetNumber")}
@@ -192,6 +193,10 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom }) => {
                             label: "Serial Number : ",
                             field: "serialNumber",
                         },
+                        {
+                            label: 'Status : ',
+                            field: 'status'
+                        }
                     ]}
                     owerCollaboratorInitialsOrImages=""
                     onCreate={false}
@@ -211,7 +216,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom }) => {
                             page={page}
                             actionWidth={150}
                             loading={loading}
-                            allowSelection={true}
+                            allowSelection={allowedToEdit}
                             allowAction={false}
                             renderedFrom={renderedFrom}
                             refreshGrid={fetchProductInventory}

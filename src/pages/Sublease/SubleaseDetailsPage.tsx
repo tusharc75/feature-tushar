@@ -156,7 +156,7 @@ const SubleaseDetailsPage = () => {
                                 mainPoints={null}
                                 showHeading={true}
                             >
-                                {(permissions?.sublease?.isUpdate && subleaseData?.status !== SUBLEASE_STATUS.completed) && (
+                                {(permissions?.sublease?.isUpdate && subleaseData?.status !== SUBLEASE_STATUS.completed) && allowedToEdit && (
                                     <>
                                         <Button
                                             variant={isMobile && !isTablet ? "text" : "contained"}
@@ -257,6 +257,7 @@ const SubleaseDetailsPage = () => {
                                                             fetchData={fetchData}
                                                             isIssued={isIssued}
                                                             renderedFrom={`${renderedFrom}_grid-1`}
+                                                            allowedToEdit={allowedToEdit}
                                                         />
                                                     )}
                                                     {(currentStep === 1 || currentStep === 2) && subleaseData && (
@@ -266,6 +267,7 @@ const SubleaseDetailsPage = () => {
                                                             setNextStep={setNextStep}
                                                             currentStep={currentStep}
                                                             renderedFrom={`${renderedFrom}_grid-2`}
+                                                            allowedToEdit={allowedToEdit}
                                                         />
                                                     )}
                                                 </Paper>
