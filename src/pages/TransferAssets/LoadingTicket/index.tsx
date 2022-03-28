@@ -36,6 +36,7 @@ interface LoadingGridProps {
   fileDownloading?: boolean;
   isTransferEnded: boolean;
   renderedFrom?: string;
+  allowedToEdit: boolean;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
@@ -52,7 +53,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     handleViewPdf,
     fileDownloading,
     isTransferEnded,
-    renderedFrom
+    renderedFrom,
+    allowedToEdit
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -317,7 +319,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           )}
           <Box component="span" mx={1} />
         </Box>
-        {!isTransferEnded && <Box >
+        {allowedToEdit || !isTransferEnded && <Box >
           {permissions?.transferAsset.isUpdate && (
             <Fragment>
               <Button
