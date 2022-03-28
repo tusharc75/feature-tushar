@@ -28,7 +28,7 @@ import { GiAutoRepair } from 'react-icons/gi';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { groupBy, uniq, map } from "lodash";
 
-const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom }) => {
+const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions, selectedEntity } }: any = useData();
@@ -267,7 +267,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                     {downlodingFile ? "Please wait..." : "Preview"}
                 </Button>}
                 <Box mx={1} />
-                {repairJobData?.status !== REPAIR_JOB_STATUS.completed &&
+                {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed &&
                     <Fragment>
                         <Button variant="outlined" color="primary" aria-controls="simple-menu"
                             aria-haspopup="true"
@@ -380,8 +380,8 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns ?
                 isMobile && !isTablet ? <CustomSwipableList
-                    allowSelection={true}
-                    allowSwipe={true}
+                    allowSelection={allowedToEdit}
+                    allowSwipe={allowedToEdit &&  repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed ? true : false}
                     permissions={true}
                     primaryField={columns?.find(d => d.field)}
                     onClick={(data) => {
@@ -422,8 +422,8 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                     limit={limit}
                     pageSizes={pageSizes}
                     page={page}
-                    allowSelection={repairJobData && repairJobData["status"] === REPAIR_JOB_STATUS.completed ? false : true}
-                    allowAction={true}
+                    allowSelection={allowedToEdit &&  repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed ? true : false}
+                    allowAction={allowedToEdit}
                     loading={loading}
                     renderedFrom={renderedFrom}
                     rowClassRules={{

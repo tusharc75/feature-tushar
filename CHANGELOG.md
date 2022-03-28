@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.83.2](https://github.com/vebholic/oms_frontend/compare/v2.83.1...v2.83.2) (2022-03-28)
+
+### [2.83.1](https://github.com/vebholic/oms_frontend/compare/v2.83.0...v2.83.1) (2022-03-27)
+
+## [2.83.0](https://github.com/vebholic/oms_frontend/compare/v2.82.0...v2.83.0) (2022-03-26)
+
+
+### Features
+
+* bulk asset creation show on views ([cb94529](https://github.com/vebholic/oms_frontend/commit/cb9452980e3774ca8f6f8cb412caeb9bd234becd))
+* filter in bulk asset creation ([939bf15](https://github.com/vebholic/oms_frontend/commit/939bf15c9b60ec2c213523a39027813ee9abc8cc))
+* multiple serializedAsset under-review status update to available with an action button PO-1367 ([a445f88](https://github.com/vebholic/oms_frontend/commit/a445f88ef1a403a3b10f3656e727b187d0757a17))
+* **non serialized dialog:** add asset number for non serilized product ([18f6f81](https://github.com/vebholic/oms_frontend/commit/18f6f81cee23143ba258164be6ca24274b9e6d3a))
+* **serializedasset:** checkbox for non serialized asset ([801b464](https://github.com/vebholic/oms_frontend/commit/801b464f1282b3bb14e5720d0372bb87a00dcd6f))
+* **task/fix-header/add:** task/fix-header/add ([a409525](https://github.com/vebholic/oms_frontend/commit/a409525860fb592a5721c13b0ca6546337c9917e))
+
+
+### Bug Fixes
+
+* **adress:** fetch address for lat lng ([402be9b](https://github.com/vebholic/oms_frontend/commit/402be9b19a915a2bb7d2dd63d37b0d5aaf8e33ad))
+* bu fix ([850b617](https://github.com/vebholic/oms_frontend/commit/850b6176af5f2e82067f3a293d30e3a43804cc28))
+* bug fix ([1382d20](https://github.com/vebholic/oms_frontend/commit/1382d202fa0c6d03075a5936cd73510cc00452f5))
+* bug fix ([bbc60fb](https://github.com/vebholic/oms_frontend/commit/bbc60fb211d046dee19bb700d627341995e8a67c))
+* bug fix ([6adde91](https://github.com/vebholic/oms_frontend/commit/6adde91636e24b817c87594fd9d39579c7e46d1f))
+* bug fix ([0db6de2](https://github.com/vebholic/oms_frontend/commit/0db6de2ae1e8d734f013c8a31dc2bf1ef5536149))
+* bug fix ([a44ee65](https://github.com/vebholic/oms_frontend/commit/a44ee65bef387ec4b1df0667c6c9f51087b37cca))
+* bug fix ([3db660c](https://github.com/vebholic/oms_frontend/commit/3db660cdeebb56949218a432eac7786157283f04))
+* bug fix ([09bc6ac](https://github.com/vebholic/oms_frontend/commit/09bc6ac2633147a6950c20d6bb13abe705b30733))
+* bug fix ([1adddcc](https://github.com/vebholic/oms_frontend/commit/1adddcc17b41dea7d47693fb6eb95dec2d0a5724))
+* bulk asset creation changes ([92a5ac1](https://github.com/vebholic/oms_frontend/commit/92a5ac1a64f0e845044115caa25c4198a404969f))
+
 ## [2.82.0](https://github.com/vebholic/oms_frontend/compare/v2.81.0...v2.82.0) (2022-03-25)
 
 

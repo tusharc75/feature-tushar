@@ -32,11 +32,12 @@ import { BsBriefcase } from "react-icons/bs";
 import { VscCalendar } from "react-icons/vsc";
 import routes from "../../../components/Helpers/Routes";
 import styles from "../../Leads/Header.module.scss";
+import { GetReferenceName } from "../../../axios/activity";
 
 const BigCalendar = () => {
   const {
     state: {
-      user: {user},
+      user: { user },
     },
   } = useData();
   const history = useHistory();
@@ -47,7 +48,7 @@ const BigCalendar = () => {
   );
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [createType, setCreateType] = useState(null);
-  const [filter, setFilter] = useState([]);
+  const [filter, setFilter] = useState(null);
   const [activityData, setActivityData] = useState(null);
   const [activities, setActivities] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -61,24 +62,23 @@ const BigCalendar = () => {
   };
 
   useEffect(() => {
-    if (referenceType && referenceId) {
-      axiosInstance()
-        .get(
-          `/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`
-        )
-        .then(({ data: { data } }) => {
+    if (referenceType) {
+      GetReferenceName(referenceType, referenceId)
+        .then(({ data }) => {
           setFilter([
             { _id: referenceId, type: referenceType, name: data.name },
           ]);
         })
         .catch((err) => { });
     }
-  }, []);
+    else {
+      setFilter([])
+    }
+  }, [type, referenceId]);
 
   const joinTime = (date: any, time: any) => {
     const d = new Date(date).toISOString().split("T")[0];
     const t = new Date(time).toISOString().split("T")[1];
-
     return new Date(`${d}T${t}`);
   };
 
@@ -86,7 +86,6 @@ const BigCalendar = () => {
     GetBoard("", JSON.stringify(filter))
       .then(({ data }) => {
         const allActivities = [...data.event, ...data.task, ...data.case];
-
         const newData = allActivities.map((d) => ({
           ...d,
           title: d.name,
@@ -98,7 +97,6 @@ const BigCalendar = () => {
             ? joinTime(d.endDate, d.endTime)
             : new Date(d.dueDate),
         }));
-
         setActivities(newData);
       })
       .catch(() => { });
@@ -143,96 +141,98 @@ const BigCalendar = () => {
         </Grid>
       </Grid>
       <CustomContainer>
-        <div className="bgLight">
-          <Grid container className="greyBox">
-            <Grid item xs={12} sm={5}>
-              <Box display="flex" alignItems="center">
-                <Button
-                  aria-controls="simple-menu"
-                  aria-haspopup="true"
-                  onClick={handleClick}
-                  size="small"
-                  color="primary"
-                  variant="contained"
-                >
-                  Create Activity
-                </Button>
-                <Box component="span" mx={1} />
-                {["Event", "Task", "Case"].map((item) => (
-                  <>
-                    <Box display="flex">
-                      {item} <Box component="span" ml={1} />
-                      <Box
-                        width={16}
-                        height={16}
-                        bgcolor={
-                          item === "Event"
-                            ? "#E65100"
-                            : item === "Task"
-                              ? "#3949AB"
-                              : "#BF360C"
-                        }
-                        borderRadius={50}
-                      />
-                    </Box>
-                    <Box component="span" ml={1} />
-                  </>
-                ))}
-              </Box>
-              <Popper
-                id="simple-menu"
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                role={undefined}
-                transition
-                disablePortal
-                style={{ zIndex: 10 }}
-              >
-                {({ TransitionProps, placement }) => (
-                  <Grow
-                    {...TransitionProps}
-                    style={{
-                      transformOrigin:
-                        placement === "bottom" ? "center top" : "center bottom",
-                    }}
+        {filter &&
+          <div className="bgLight">
+            <Grid container className="greyBox">
+              <Grid item xs={12} sm={5}>
+                <Box display="flex" alignItems="center">
+                  <Button
+                    aria-controls="simple-menu"
+                    aria-haspopup="true"
+                    onClick={handleClick}
+                    size="small"
+                    color="primary"
+                    variant="contained"
                   >
-                    <Paper>
-                      <ClickAwayListener onClickAway={handleClose}>
-                        <MenuList autoFocusItem={Boolean(anchorEl)}>
-                          {activityOptions.map((item, i) => (
-                            <MenuItem
-                              key={i}
-                              onClick={() => {
-                                setCreateType(lowerCase(item.title));
-                                handleClose();
-                              }}
-                            >
-                              {item.icon}
-                              <span className="ml-2"></span>
-                              {item.title}
-                            </MenuItem>
-                          ))}
-                        </MenuList>
-                      </ClickAwayListener>
-                    </Paper>
-                  </Grow>
-                )}
-              </Popper>
+                    Create Activity
+                  </Button>
+                  <Box component="span" mx={1} />
+                  {["Event", "Task", "Case"].map((item) => (
+                    <>
+                      <Box display="flex">
+                        {item} <Box component="span" ml={1} />
+                        <Box
+                          width={16}
+                          height={16}
+                          bgcolor={
+                            item === "Event"
+                              ? "#E65100"
+                              : item === "Task"
+                                ? "#3949AB"
+                                : "#BF360C"
+                          }
+                          borderRadius={50}
+                        />
+                      </Box>
+                      <Box component="span" ml={1} />
+                    </>
+                  ))}
+                </Box>
+                <Popper
+                  id="simple-menu"
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  role={undefined}
+                  transition
+                  disablePortal
+                  style={{ zIndex: 10 }}
+                >
+                  {({ TransitionProps, placement }) => (
+                    <Grow
+                      {...TransitionProps}
+                      style={{
+                        transformOrigin:
+                          placement === "bottom" ? "center top" : "center bottom",
+                      }}
+                    >
+                      <Paper>
+                        <ClickAwayListener onClickAway={handleClose}>
+                          <MenuList autoFocusItem={Boolean(anchorEl)}>
+                            {activityOptions.map((item, i) => (
+                              <MenuItem
+                                key={i}
+                                onClick={() => {
+                                  setCreateType(lowerCase(item.title));
+                                  handleClose();
+                                }}
+                              >
+                                {item.icon}
+                                <span className="ml-2"></span>
+                                {item.title}
+                              </MenuItem>
+                            ))}
+                          </MenuList>
+                        </ClickAwayListener>
+                      </Paper>
+                    </Grow>
+                  )}
+                </Popper>
+              </Grid>
+              <Grid item xs={12} sm={7} className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
+                <SearchFilter
+                  handleChangeFilter={handleChangeFilter}
+                  filter={filter}
+                  chip={{ size: "small" }}
+                  activityName="calendar"
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={7} className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-              <SearchFilter
-                handleChangeFilter={handleChangeFilter}
-                filter={filter}
-                chip={{ size: "small" }}
-                activityName="calendar"
-              />
-            </Grid>
-          </Grid>
-          <MyCalendar
-            activities={activities}
-            setActivityData={setActivityData}
-          />
-        </div>
+            <MyCalendar
+              activities={activities}
+              setActivityData={setActivityData}
+            />
+          </div>
+        }
         {activityData && (
           <ActivityModelHandler
             fetchBoard={fetchBoard}
@@ -241,7 +241,6 @@ const BigCalendar = () => {
             activityId={activityData.id}
           />
         )}
-
         {createType && (
           <Dialog
             fullScreen={fullScreen || (isMobile || isTablet)}

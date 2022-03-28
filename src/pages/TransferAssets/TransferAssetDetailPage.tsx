@@ -66,6 +66,7 @@ const TransferAssetDetailPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [isTransferEnded, setTransferIsEnded] = useState(false);
+  const [allowedToEdit, setAllowedToEdit] = useState(false); 
   const [locationKeys, setLocationKeys] = useState([]);
 
   useEffect(() => {
@@ -170,7 +171,8 @@ const TransferAssetDetailPage = () => {
         const steps = data?.transferType === 'Internal' ? transferSteps : transferSteps1;
         setCurrentStep(steps.indexOf(data?.processStatus) !== -1 ? steps.indexOf(data?.processStatus) : 0);
         setCustomizedRoutes([routes.transferAsset, { title: data.transferAssetNumber }]);
-
+        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner, data.processor].some((d) => d?.optionValue === user?.user?._id);
+        setAllowedToEdit(isAllowedToEdit);
         if (permissions?.transferAsset?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
@@ -448,6 +450,7 @@ const TransferAssetDetailPage = () => {
                       handleViewPdf={handleViewPdf}
                       fileDownloading={fileDownloading}
                       renderedFrom={`${renderedFrom}_grid-1`}
+                      allowedToEdit={allowedToEdit}
                     />
                   )}
                   {currentStep === 1 && (
@@ -467,6 +470,7 @@ const TransferAssetDetailPage = () => {
                       fileDownloading={fileDownloading}
                       isTransferEnded={isTransferEnded}
                       renderedFrom={`${renderedFrom}_grid-2`}
+                      allowedToEdit={allowedToEdit}
                     />
                   )}
                   {currentStep === 2 && (
@@ -485,6 +489,7 @@ const TransferAssetDetailPage = () => {
                       fileDownloading={fileDownloading}
                       isTransferEnded={isTransferEnded}
                       renderedFrom={`${renderedFrom}_grid-3`}
+                      allowedToEdit={allowedToEdit}
                     />
                   )}
                 </Box>

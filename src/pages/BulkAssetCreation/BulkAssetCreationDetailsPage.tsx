@@ -106,7 +106,7 @@ const BulkAssetCreationDetailsPage = () => {
         setLoadingBulkAssetCreation(true);
         try {
             const { data: { data } } = await axiosInstance().get(`${bulkAssetCreation.api}/${id}`);
-            const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+            const isAllowedToEdit = [...(data?.collaborator ?? []), data?.owner, data?.processor].some((d) => d?.optionValue === user?.user?._id);
             setAllowedToEdit(isAllowedToEdit);
             setCurrentStep(bulkAssetCreationSteps.indexOf(data?.processStatus) !== -1 ? bulkAssetCreationSteps.indexOf(data?.processStatus) : 0);
             setBulkAssetCreationData(data);
@@ -216,7 +216,7 @@ const BulkAssetCreationDetailsPage = () => {
                                 </div>
                             ) : (
                                 <DetailsPageHeader heading={bulkAssetCreationData?.baNumber} mainPoints={null} showHeading={true}>
-                                    {permissions?.bulkAssetCreation?.isUpdate &&
+                                    {permissions?.bulkAssetCreation?.isUpdate && allowedToEdit &&
                                         (
                                             <Button
                                                 variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -307,12 +307,14 @@ const BulkAssetCreationDetailsPage = () => {
                                                             renderedFrom={`${renderedFrom}_grid-1`}
                                                             handleUpdateData={handleUpdateData}
                                                             fetchData={fetchData}
+                                                            allowedToEdit={allowedToEdit}
                                                         />
                                                     )}
                                                     {currentStep === 1 && (
                                                         <SerializedAsset
                                                             bulkAssetCreationData={bulkAssetCreationData}
                                                             renderedFrom={`${renderedFrom}_grid-2`}
+                                                            allowedToEdit={allowedToEdit}
                                                         />
                                                     )}
 

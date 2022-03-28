@@ -27,7 +27,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import BulkAssetCreationQtyDialog from "./BulkAssetCreationQtyDialog";
 
-const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProduct, renderedFrom, fetchData, handleUpdateData }) => {
+const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProduct, renderedFrom, fetchData, handleUpdateData, allowedToEdit }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -90,7 +90,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
             let rows = data?.map((item, index) => {
                 let finalObject = prepareDataForGrid(item);
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
-                finalObject["allowedToEdit"] = true
+                finalObject["allowedToEdit"] = allowedToEdit
                 finalObject["hideSelection"] = !Boolean(item.createdQty === 0 || item.createdQty === undefined)
                 let res: any = {
                     ...finalObject,
@@ -141,12 +141,14 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
 
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
         <span className="link" onClick={() => {
-            setShowProductDialog(true)
-            setSelectedProductData(params.data)
+            if (allowedToEdit) {
+                setShowProductDialog(true)
+                setSelectedProductData(params.data)
+            }
         }}>
             <CustomRenderCell value={params.value} />
         </span>
-        {params.data.productId && <HtmlTooltip title="Details">
+        {params.data.productId && allowedToEdit && <HtmlTooltip title="Details">
             <IconButton
                 size="small"
                 aria-label="Details"
@@ -161,7 +163,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
 
     const ActionsRenderer = (params) => (
         <>
-            {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && <HtmlTooltip title="Edit">
+            {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && allowedToEdit && <HtmlTooltip title="Edit">
                 <IconButton
                     size="small"
                     aria-label="Clone"
@@ -174,7 +176,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                 </IconButton>
             </HtmlTooltip>
             }
-            {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && <GridDeleteIcon
+            {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && allowedToEdit && <GridDeleteIcon
                 hasDeletePermission={permissions?.bulkAssetCreation?.isUpdate}
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
@@ -259,7 +261,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
 
     return (
         <Fragment>
-            <Box display="flex" justifyContent="space-between" m={1}>
+            {allowedToEdit && <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex" alignItems="center">
                     <Button
                         variant={"contained"}
@@ -307,33 +309,39 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                             onClick={() => {
                                 createAsset()
                             }}>
-                            Create Asset
+                            {`Create ${routes.serializedAsset.title}`}
                         </Button>}
                         <Box mx={1} />
                     </Box>
                 </div>
-            </Box>
+            </Box>}
             {columns && frameWorkComponent ? isMobile && !isTablet ?
                 <CustomSwipableList
-                    allowSelection={true}
+                    allowSelection={allowedToEdit}
                     allowSwipe={true}
                     permissions={permissions}
                     primaryField={columns?.find(d => d.field === "productName")}
                     onClick={(data) => {
-                        setShowProductDialog(true)
-                        setSelectedProductData(data)
+                        if (allowedToEdit) {
+                            setShowProductDialog(true)
+                            setSelectedProductData(data)
+                        }
                     }}
                     dataRows={dataRows}
                     selectedRecords={selectedRecords}
                     dispatch={dispatch}
                     onEdit={(data) => {
-                        setShowProductDialog(true)
-                        setSelectedProductData(data)
+                        if (allowedToEdit) {
+                            setShowProductDialog(true)
+                            setSelectedProductData(data)
+                        }
                     }}
                     extraParamsToCheckDelete={true}
                     onDelete={(data) => {
-                        setShowDeleteConfirmBox(true)
-                        setDeleteBulkAssetCreationProduct([data._id])
+                        if (allowedToEdit) {
+                            setShowDeleteConfirmBox(true)
+                            setDeleteBulkAssetCreationProduct([data._id])
+                        }
                     }}
                     rowCount={rowCount}
                     page={page}
@@ -361,9 +369,9 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                     limit={limit}
                     pageSizes={pageSizes}
                     page={page}
-                    allowAction={true}
+                    allowAction={allowedToEdit}
                     actionWidth={150}
-                    allowSelection={true}
+                    allowSelection={allowedToEdit}
                     isClientSideGrid={true}
                     loading={loading}
                     onCellValueChanged={(row) => {

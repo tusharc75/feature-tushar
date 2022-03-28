@@ -615,6 +615,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             if ([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(rowData?.status)) return "error";
             return "";
           }}
+          renderedFrom="rental_management_receiving_ticket"
+          isClientSideGrid={true}
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
       }
@@ -636,8 +638,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     )}
     {isExistingRentalJob && (
       <ExistingRentalJob
-        refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
-        refrenceData={rentalManagementData}
+        referenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
+        referenceData={rentalManagementData}
         productInventory={selectedAssets}
         onClose={() => setIsExistingRentalJob(false)}
         onSuccess={() => {
