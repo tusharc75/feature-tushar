@@ -319,7 +319,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           )}
           <Box component="span" mx={1} />
         </Box>
-        {allowedToEdit || !isTransferEnded && <Box >
+        {allowedToEdit && !isTransferEnded && <Box >
           {permissions?.transferAsset.isUpdate && (
             <Fragment>
               <Button
@@ -436,7 +436,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       <Box mt={1}>
         {isMobile && !isTablet ? (
           <CustomSwipableList
-            allowSelection={true}
+            allowSelection={allowedToEdit}
             allowSwipe={true}
             permissions={permissions.transferAsset}
             primaryField={columns?.find((d) => d.field)}
@@ -485,7 +485,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             page={page}
             allowAction={false}
             actionWidth={100}
-            allowSelection={true}
+            allowSelection={allowedToEdit}
             isClientSideGrid={true}
             loading={loading}
             renderedFrom={renderedFrom}

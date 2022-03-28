@@ -421,8 +421,7 @@ const RentalManagementDetailsPage = () => {
               </Tabs>
               <TabPanel value={tabValue} index={0}>
                 <Box>
-
-                  {(!loadingDetails && rentalManagementFields.length > 0 ?
+                  {(!loadingDetails && rentalManagementData && rentalManagementFields.length > 0 ?
                     <DetailsPage data={rentalManagementData} fields={rentalManagementFields}
                     /> : null
                   )}

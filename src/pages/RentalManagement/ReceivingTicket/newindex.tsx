@@ -638,8 +638,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     )}
     {isExistingRentalJob && (
       <ExistingRentalJob
-        refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
-        refrenceData={rentalManagementData}
+        referenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
+        referenceData={rentalManagementData}
         productInventory={selectedAssets}
         onClose={() => setIsExistingRentalJob(false)}
         onSuccess={() => {
