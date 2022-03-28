@@ -219,10 +219,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                             name={field.fieldName}
                                             type={field.type}
                                             options={productDescriptionOptions}
-                                            // setFieldValue={(name, value) => {
-                                            //   handleValuesChange({ [name]: value });
-                                            //   setFieldValue(name, value);
-                                            // }}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
@@ -401,11 +397,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                       name={field.fieldName}
                                       type={field.type}
                                       options={field.option}
-
-                                      // setFieldValue={(name, value) => {
-                                      //   handleValuesChange({ [name]: value });
-                                      //   setFieldValue(name, value);
-                                      // }}
                                       required={field.required}
                                       fullWidth
                                       isTooltip={field?.isTooltip || false}
@@ -444,8 +435,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                   </Form>
                   {open?.open && (
                     <CreateProductCategory
-                      // isUpdateDisabled={false}
-                      // productCategoryId={productCategoryId}
                       isClone={open?.isClone}
                       onClose={() => setOpen({ open: false, isClone: false })}
                       onSuccess={(data) => {

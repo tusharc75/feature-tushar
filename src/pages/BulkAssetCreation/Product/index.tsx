@@ -309,7 +309,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                             onClick={() => {
                                 createAsset()
                             }}>
-                            Create Asset
+                            {`Create ${routes.serializedAsset.title}`}
                         </Button>}
                         <Box mx={1} />
                     </Box>
