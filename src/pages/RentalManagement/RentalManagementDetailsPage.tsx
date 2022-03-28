@@ -156,14 +156,13 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
-
-      setRentalManagementData(data);
       setCurrentStep(rentalManagementSteps.indexOf(data?.processStatus) !== -1 ? rentalManagementSteps.indexOf(data?.processStatus) : 0);
       handleMainPoints(data);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner, data.processor].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit);
+      setRentalManagementData(data);
       if (isAllowedToEdit && openEdit === 'true') {
         setOpenUpdateDialog(true);
         const params = new URLSearchParams();
@@ -324,7 +323,7 @@ const RentalManagementDetailsPage = () => {
                       </Button>
                     )} */}
                   {permissions?.rentalManagement?.isUpdate &&
-                    [RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) && (
+                    ([RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) && allowedToEdit) && (
                       <Fragment>
                         <Button
                           variant="outlined"
@@ -451,10 +450,15 @@ const RentalManagementDetailsPage = () => {
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit}
                       />
                     )}
                     {currentStep === 1 && rentalManagementData && (
-                      <AdditionalCost rentalManagementData={rentalManagementData} setNextStep={setNextStep} renderedFrom={`${renderedFrom}_grid-2`} />
+                      <AdditionalCost
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        renderedFrom={`${renderedFrom}_grid-2`}
+                        allowedToEdit={allowedToEdit} />
                     )}
                     {currentStep === 2 && rentalManagementData && (
                       <SerializedAsset
@@ -465,6 +469,7 @@ const RentalManagementDetailsPage = () => {
                         showActivity={showActivity}
                         currencySymbol={currencySymbol}
                         stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit}
                       />
                     )}
                     {currentStep === 3 && rentalManagementData && (
@@ -474,6 +479,7 @@ const RentalManagementDetailsPage = () => {
                         currentStep={currentStep}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-3`}
+                        allowedToEdit={allowedToEdit}
                       />
                     )}
                     {currentStep === 4 && rentalManagementData && (
@@ -483,6 +489,7 @@ const RentalManagementDetailsPage = () => {
                         currentStep={currentStep}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-4`}
+                        allowedToEdit={allowedToEdit}
                       />
                     )}
                     {currentStep === 5 && rentalManagementData && (
@@ -498,6 +505,7 @@ const RentalManagementDetailsPage = () => {
                         showActivity={showActivity}
                         currencySymbol={currencySymbol}
                         stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit}
                       />
                     )}
                   </ContentFullScreen>

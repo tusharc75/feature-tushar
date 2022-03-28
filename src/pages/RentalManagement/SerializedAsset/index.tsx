@@ -28,7 +28,7 @@ import { fetch_rental_product_fields } from '../../../components/RentalManagment
 import { ExpandMore } from '@material-ui/icons';
 import AddNonSerializeAssets from "./AddNonSerializeAssets";
 
-const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol, stepFullScreen }) => {
+const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol, stepFullScreen, allowedToEdit }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -132,7 +132,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             }
             {row.original?.type === "asset" &&
               <span className="d-flex align-items-center gap-2">
-                {(row.original.status === INVENTORY_STATUS.reserved && row.original?.manualStatus !== INVENTORY_STATUS.reserved && !isOffline) &&
+                {(row.original.status === INVENTORY_STATUS.reserved && row.original?.manualStatus !== INVENTORY_STATUS.reserved && !isOffline && allowedToEdit) &&
                   <HtmlTooltip title={`Remove`}>
                     <IconButton size="small" onClick={() => {
                       setShowConfirmBox(true)
@@ -502,149 +502,151 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   };
 
   return (<Fragment>
-    <Box display="flex" justifyContent="flex-end" pt={1} pb={2} >
-      <Box display="flex" alignItems="center" justifyContent={isMobile ? "space-between" : "flex-end"} paddingX={1} gridColumnGap={8} flex={1}>
-        <Box display="flex" gridColumnGap={5}>
-          <Button
-            variant="contained"
-            color="primary"
-            type="button"
-            size="small"
-            disabled={disableAssignSerializedAssets()}
-            onClick={() => {
-              setAddSerializedAssetDialog({ open: true })
-            }}
-          >
-            {`Assign ${routes.serializedAsset.title}`}
-          </Button>
-          <Button
-            variant="outlined"
-            color="default"
-            size="small"
-            onClick={openActions}
-            aria-controls="action-menu"
-          >
-            Actions <ExpandMore />
-          </Button>
-          <Menu
-            anchorEl={anchorActionEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="action-menu"
-            open={Boolean(anchorActionEl)}
-            onClose={closeActions}
-          >
-            {permissions?.bulkAssetCreation?.isCreate &&
-              <MenuItem
-                disabled={showOrderDialog.products.length === 0}
-                onClick={() => {
-                  setOrderDialog(prevState => ({ ...prevState, open: true, type: "bulkAssetCreation" }))
-                  closeActions()
-                }}
-              >
-                {`Create ${routes.bulkAssetCreation.title}`}</MenuItem>
-            }
-            {permissions?.purchaseOrder?.isCreate &&
-              <MenuItem
-                disabled={showOrderDialog.products.length === 0}
-                onClick={() => {
-                  setOrderDialog(prevState => ({ ...prevState, open: true, type: "purchaseOrder" }))
-                  closeActions()
-                }}
-              >
-                {`Create ${routes.purchaseOrder.title}`}</MenuItem>
-            }
-            {permissions?.sublease?.isCreate &&
-              <MenuItem
-                disabled={showOrderDialog.products.length === 0}
-                onClick={() => {
-                  setOrderDialog(prevState => ({ ...prevState, open: true, type: "sublease" }))
-                  closeActions()
-                }}
-              >
-                {`Create ${routes.sublease.title}`}</MenuItem>}
-            <MenuItem
-              disabled={selectedRecords.length === 0 || selectedRecords.filter(d => d.type === "product" && d.serializedProduct === false).length !== selectedRecords.length}
+    {allowedToEdit &&
+      <Box display="flex" justifyContent="flex-end" pt={1} pb={2} >
+        <Box display="flex" alignItems="center" justifyContent={isMobile ? "space-between" : "flex-end"} paddingX={1} gridColumnGap={8} flex={1}>
+          <Box display="flex" gridColumnGap={5}>
+            <Button
+              variant="contained"
+              color="primary"
+              type="button"
+              size="small"
+              disabled={disableAssignSerializedAssets()}
               onClick={() => {
-                setAddNonSerializedAssetDialog(true)
-                closeActions()
+                setAddSerializedAssetDialog({ open: true })
               }}
             >
-              {`Create Non ${routes.serializedAsset.title}`}</MenuItem>
-            <MenuItem
-              disabled={(treeToFlatArray(selectedRecords, "subRows")?.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
-              onClick={() => {
-                setDeleteData(treeToFlatArray(selectedRecords, "subRows")?.filter(d => d.type === "asset").map(d => d?.inventory))
-                setShowConfirmBox(true)
-                closeActions()
-              }}
+              {`Assign ${routes.serializedAsset.title}`}
+            </Button>
+            <Button
+              variant="outlined"
+              color="default"
+              size="small"
+              onClick={openActions}
+              aria-controls="action-menu"
             >
-              {`Remove ${routes.serializedAsset.title}`}</MenuItem>
-          </Menu>
-          {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) &&
-            <IconButton onClick={openLinkActions} size="small" color="primary"  >
-              <ExpandMore fontSize="inherit" />
-            </IconButton>
-          }
-          <Menu
-            anchorEl={anchorLinkActionEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="action-menu"
-            open={Boolean(anchorLinkActionEl)}
-            onClose={closeLinkActions}
-          >
-            {purchaseOrderCount > 0 &&
+              Actions <ExpandMore />
+            </Button>
+            <Menu
+              anchorEl={anchorActionEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorActionEl)}
+              onClose={closeActions}
+            >
+              {permissions?.bulkAssetCreation?.isCreate &&
+                <MenuItem
+                  disabled={showOrderDialog.products.length === 0}
+                  onClick={() => {
+                    setOrderDialog(prevState => ({ ...prevState, open: true, type: "bulkAssetCreation" }))
+                    closeActions()
+                  }}
+                >
+                  {`Create ${routes.bulkAssetCreation.title}`}</MenuItem>
+              }
+              {permissions?.purchaseOrder?.isCreate &&
+                <MenuItem
+                  disabled={showOrderDialog.products.length === 0}
+                  onClick={() => {
+                    setOrderDialog(prevState => ({ ...prevState, open: true, type: "purchaseOrder" }))
+                    closeActions()
+                  }}
+                >
+                  {`Create ${routes.purchaseOrder.title}`}</MenuItem>
+              }
+              {permissions?.sublease?.isCreate &&
+                <MenuItem
+                  disabled={showOrderDialog.products.length === 0}
+                  onClick={() => {
+                    setOrderDialog(prevState => ({ ...prevState, open: true, type: "sublease" }))
+                    closeActions()
+                  }}
+                >
+                  {`Create ${routes.sublease.title}`}</MenuItem>}
               <MenuItem
+                disabled={selectedRecords.length === 0 || selectedRecords.filter(d => d.type === "product" && d.serializedProduct === false).length !== selectedRecords.length}
                 onClick={() => {
-                  history.push(routes.purchaseOrder.path, {
-                    rental: rentalManagementData,
-                  })
+                  setAddNonSerializedAssetDialog(true)
+                  closeActions()
                 }}
               >
-                {`Created ${routes.purchaseOrder.title}`}
-              </MenuItem>}
-            {bulkAssetCreationCount > 0 &&
+                {`Create Non ${routes.serializedAsset.title}`}</MenuItem>
               <MenuItem
+                disabled={(treeToFlatArray(selectedRecords, "subRows")?.filter(d => d.type === "asset" && d.status === INVENTORY_STATUS.reserved).length === 0)}
                 onClick={() => {
-                  history.push(routes.bulkAssetCreation.path, {
-                    rental: rentalManagementData,
-                  })
+                  setDeleteData(treeToFlatArray(selectedRecords, "subRows")?.filter(d => d.type === "asset").map(d => d?.inventory))
+                  setShowConfirmBox(true)
+                  closeActions()
                 }}
               >
-                {`Created ${routes.bulkAssetCreation.title}`}
-              </MenuItem>}
-            {subleaseCount > 0 &&
-              <MenuItem
-                onClick={() => {
-                  history.push(routes.sublease.path, {
-                    rental: rentalManagementData,
-                  })
-                }}
-              >
-                {`Created ${routes.sublease.title}`}
-              </MenuItem>}
-            {transferAssetCount > 0 &&
-              <MenuItem
-                onClick={() => {
-                  history.push(routes.transferAsset.path, {
-                    rental: rentalManagementData,
-                  })
-                }}>
-                {`Created ${routes.transferAsset.title}`}
-              </MenuItem>}
-          </Menu>
+                {`Remove ${routes.serializedAsset.title}`}</MenuItem>
+            </Menu>
+            {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) &&
+              <IconButton onClick={openLinkActions} size="small" color="primary"  >
+                <ExpandMore fontSize="inherit" />
+              </IconButton>
+            }
+            <Menu
+              anchorEl={anchorLinkActionEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorLinkActionEl)}
+              onClose={closeLinkActions}
+            >
+              {purchaseOrderCount > 0 &&
+                <MenuItem
+                  onClick={() => {
+                    history.push(routes.purchaseOrder.path, {
+                      rental: rentalManagementData,
+                    })
+                  }}
+                >
+                  {`Created ${routes.purchaseOrder.title}`}
+                </MenuItem>}
+              {bulkAssetCreationCount > 0 &&
+                <MenuItem
+                  onClick={() => {
+                    history.push(routes.bulkAssetCreation.path, {
+                      rental: rentalManagementData,
+                    })
+                  }}
+                >
+                  {`Created ${routes.bulkAssetCreation.title}`}
+                </MenuItem>}
+              {subleaseCount > 0 &&
+                <MenuItem
+                  onClick={() => {
+                    history.push(routes.sublease.path, {
+                      rental: rentalManagementData,
+                    })
+                  }}
+                >
+                  {`Created ${routes.sublease.title}`}
+                </MenuItem>}
+              {transferAssetCount > 0 &&
+                <MenuItem
+                  onClick={() => {
+                    history.push(routes.transferAsset.path, {
+                      rental: rentalManagementData,
+                    })
+                  }}>
+                  {`Created ${routes.transferAsset.title}`}
+                </MenuItem>}
+            </Menu>
+          </Box>
         </Box>
       </Box>
-    </Box>
+    }
     <Grid container spacing={2}>
       <Grid item xs={12} md={12} sm={12}>
         {columns && rowsData ?
@@ -667,15 +669,15 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               setCellColor={(rowData) => {
                 if (rowData.isTransferAsset) return "isTransferAsset";
                 if (!rowData.isValid) return "error";
-                if (rowData.isPurchaseOrder) return "isPurchaseOrder";
-                if (rowData.isBulkAssetCreation) return "isPurchaseOrder";
+                //if (rowData.isPurchaseOrder) return "isPurchaseOrder";
+                //if (rowData.isBulkAssetCreation) return "isPurchaseOrder";
                 if (rowData.isSubleaseAsset) return "isSublease";
                 return "";
               }}
               onSelect={setSelectedRecords}
               childrenProperty="subRows"
               uniqueKey="_id"
-              hideSelection={isOffline}
+              hideSelection={isOffline || !allowedToEdit}
             />
           </Box>
           : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
