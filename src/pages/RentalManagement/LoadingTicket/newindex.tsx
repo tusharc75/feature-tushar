@@ -445,6 +445,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           onSelect={setSelectedRecords}
           childrenProperty="subRows"
           uniqueKey="_id"
+          renderedFrom="rental_management_loading_ticket"
+          isClientSideGrid={true}
         />
         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
       }

@@ -230,6 +230,8 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                         onSelect={setSelectedProducts}
                         childrenProperty="subRows"
                         uniqueKey="_id"
+                        renderedFrom="receiving_asset"
+                        isClientSideGrid={true}
                     />
                     }
 

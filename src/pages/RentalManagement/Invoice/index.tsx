@@ -484,6 +484,8 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
               childrenProperty="subRows"
               uniqueKey="_id"
               hideSelection={true}
+              renderedFrom="rental_management_serialized_asset"
+              isClientSideGrid={true}
             /></Box>
           : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
         }
