@@ -29,7 +29,7 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
-const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, renderedFrom }) => {
+const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -162,7 +162,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
   return (
     <>
       <Box display="flex" justifyContent="flex-end" pt={1} alignItems="center" className="bg-white">
-        <Box ml={2}>
+        {allowedToEdit && <Box ml={2}>
           <ImportExportLinks
             permissions={permissions?.packages}
             module="packages-products"
@@ -177,9 +177,9 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
             isDownloadExcel={false}
             isBackgroundWhite={true}
           />
-        </Box>
+        </Box>}
         <Box ml={2}>
-          {!isMobile && (
+          {!isMobile && allowedToEdit && (
             <Button
               onClick={() => {
                 setDownlodingFile(true);
@@ -229,7 +229,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
           )}
         </Box>
         <Box mx={1} />
-        {SUBLEASE_STATUS.completed != subleaseData?.status && (
+        {SUBLEASE_STATUS.completed != subleaseData?.status && allowedToEdit && (
           <Fragment>
             {currentStep === 1 && (
               <Fragment>
@@ -320,7 +320,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
         {columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
-              allowSelection={true}
+              allowSelection={allowedToEdit}
               allowSwipe={true}
               permissions={true}
               primaryField={columns?.find((d) => d.field)}
@@ -363,7 +363,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               allowAction={false}
               loading={loading}
               isClientSideGrid={true}
-              allowSelection={true}
+              allowSelection={allowedToEdit}
               renderedFrom={renderedFrom}
               refreshGrid={fetchRecords}
               onCellValueChanged={handleValueUpdate}
