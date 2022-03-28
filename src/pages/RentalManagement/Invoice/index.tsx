@@ -23,7 +23,7 @@ import moment from "moment";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 
 
-const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, fetchRentalData, updateJobStatus, statusOptions, renderedFrom, showActivity, stepFullScreen, currencySymbol }) => {
+const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, fetchRentalData, updateJobStatus, statusOptions, renderedFrom, showActivity, stepFullScreen, currencySymbol, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
 
@@ -367,7 +367,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
   return (<>
     <Box display="flex" justifyContent="space-between" m={1}>
       <Box display="flex" alignItems="center">
-        {(!isOffline && ![RENTAL_STATUS.invoiced, RENTAL_STATUS.closed].includes(rentalManagementData.status)) &&
+        {(!isOffline && ![RENTAL_STATUS.invoiced, RENTAL_STATUS.closed].includes(rentalManagementData.status) && allowedToEdit) &&
           <Fragment>
             <Button
               variant="outlined"

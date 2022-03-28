@@ -62,7 +62,6 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
         let rendererNames = [];
         data.forEach((o) => {
           let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-
           if (currentColumn !== null) {
             if (o.fieldData.type === 'singleLine') {
               currentColumn.columnData.editable = true;
@@ -143,7 +142,6 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
   const handleValueUpdate = async (row) => {
     if (!row || !row?.data) return;
     const assetId = row.data._id;
-    console.log(row);
     const data = [
       {
         _id: assetId,
@@ -268,9 +266,9 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               </Fragment>
             )}
             {selectedRecords.length > 0 &&
-            selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
-            checkUniqWarehouse() &&
-            currentStep === 1 ? (
+              selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+              checkUniqWarehouse() &&
+              currentStep === 1 ? (
               <Fragment>
                 <Tooltip title="Send to Supplier">
                   <Button
@@ -348,7 +346,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (

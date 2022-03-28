@@ -25,6 +25,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
   const [formsData, setFormsData] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [latLngChangedManually, setLatLngChangedManually] = useState(false);
   const [addressDetail, setAddressDetail] = useState(null);
 
   const formikRef = {
@@ -119,26 +120,26 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
       if (type.includes('locality')) {
         fullAddress.city = address.long_name;
       }
-      // if (type.includes('administrative_area_level_1')) {
-      //   if(initialData.values.hasOwnProperty("state")) {
-      //     fullAddress['state'] = address.long_name;
-      //   } else {
-      //     fullAddress['state/Province'] = address.long_name;
-      //   }
-      // }
+      if (type.includes('administrative_area_level_1')) {
+        if (initialData.values.hasOwnProperty('state')) {
+          fullAddress['state'] = address.long_name;
+        } else {
+          fullAddress['state/Province'] = address.long_name;
+        }
+      }
       if (type.includes('administrative_area_level_2')) {
         fullAddress.county = address.long_name;
       }
       if (type.includes('country')) {
         fullAddress.country = address.long_name;
       }
-      // if (type === 'postal_code') {
-      //   if(initialData.values.hasOwnProperty("zipCode")) {
-      //     fullAddress['zipCode'] = address.long_name;
-      //   } else {
-      //     fullAddress['zipCode/PostalCode'] = address.long_name;
-      //   }
-      // }
+      if (type.includes('postal_code')) {
+        if (initialData.values.hasOwnProperty('zipCode')) {
+          fullAddress['zipCode'] = address.long_name;
+        } else {
+          fullAddress['zipCode/PostalCode'] = address.long_name;
+        }
+      }
     });
     fullAddress.latitude = results.geometry.location.lat().toLocaleString();
     fullAddress.longitude = results.geometry.location.lng().toLocaleString();
@@ -156,17 +157,45 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
           setFieldValue(k, addressDetail[k]);
         });
       }
+
+      const city = addressDetail?.city ? `${addressDetail?.city}, ` : '';
+      const state = addressDetail['state/Province'] ? `${addressDetail['state/Province']}, ` : '';
+      const zipCode = addressDetail['zipCode/PostalCode'] ? `${addressDetail['zipCode/PostalCode']}, ` : '';
+      const country = addressDetail?.country ? `${addressDetail?.country}` : '';
+
+      let fullAddress = `${city}${state}${zipCode}${country}`;
+
+      if (latLngChangedManually && !addressDetail?.streetAddress) {
+        setFieldValue('fullAddress', fullAddress);
+        setFieldValue('streetAddress', fullAddress);
+      }
     }
+
+    return () => latLngChangedManually && setLatLngChangedManually(false);
   }, [addressDetail]);
 
-  const onCordChange = (position: google.maps.MapMouseEvent) => {
+  useEffect(() => {
+    if (!addressDetail || !latLngChangedManually || (!addressDetail?.latitude && !addressDetail?.longitude)) return;
+
+    if (addressDetail?.latitude && addressDetail?.longitude) {
+      const latLng = new google.maps.LatLng(addressDetail?.latitude, addressDetail?.longitude);
+      onCordChange(latLng);
+    }
+
+    return () => latLngChangedManually && setLatLngChangedManually(false);
+  }, [addressDetail?.latitude, addressDetail?.longitude]);
+
+  /**
+   * Get Full Address from Grocode
+   * @param latLng Google Position Geo-Coordinates
+   */
+  const onCordChange = (latLng: google.maps.LatLng) => {
     if (!formikRef.current || !window.google) return;
 
     const geocoder = new window.google.maps.Geocoder();
 
-    geocoder.geocode({ location: position.latLng }, (result, status) => {
+    geocoder.geocode({ location: latLng }, (result, status) => {
       if (status === google.maps.GeocoderStatus.OK) {
-        console.log(result);
         setFullAddressFields(result[1]);
       }
     });
@@ -264,7 +293,17 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
                                                 setAddressDetail(null);
                                               }
                                             }
-                                          : null
+                                          : (e: React.ChangeEvent<HTMLInputElement>) => {
+                                              const { name, value } = e.target;
+
+                                              if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
+
+                                              setAddressDetail((prevState: any) => ({
+                                                ...prevState,
+                                                [name]: value
+                                              }));
+                                              setLatLngChangedManually(true);
+                                            }
                                       }
                                     />
                                   }
@@ -300,7 +339,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
                   <p>Drag or click to select new coordinates</p>
                   <Box height={400} width={'100%'} borderRadius={4} overflow="hidden">
                     <GoogleMap
-                      onClick={(position) => onCordChange(position)}
+                      onClick={(position) => onCordChange(position.latLng)}
                       options={{
                         disableDefaultUI: true,
                         mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -345,7 +384,9 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
                       {addressDetail?.latitude && addressDetail?.longitude && (
                         <Marker
                           draggable
-                          onDragEnd={(position) => onCordChange(position)}
+                          onDragEnd={(position) => {
+                            onCordChange(position.latLng);
+                          }}
                           position={new google.maps.LatLng(addressDetail?.latitude, addressDetail?.longitude)}
                         />
                       )}

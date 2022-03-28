@@ -32,9 +32,21 @@ import { FaSuitcase } from "react-icons/fa";
 import MobileSortDialog from "src/components/MobileSortDialog";
 import MobileFilterDialog from "src/components/MobileFilterDialog"
 import { camelCase } from "lodash";
+import HideWhenOffline from "src/components/HideWhenOffline";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
+import queryString from 'query-string';
 
 const BulkAssetCreation = () => {
-
+    const BulkAssetCreationType = [
+        {
+            key: `All ${routes.bulkAssetCreation.title}`,
+            value: 1,
+        },
+        {
+            key: `My ${routes.bulkAssetCreation.title}`,
+            value: 2,
+        },
+    ];
     let renderedFrom = camelCase(routes.bulkAssetCreation?.title)
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
@@ -50,6 +62,10 @@ const BulkAssetCreation = () => {
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
     const [isOpenDialog, setisOpenDialog] = useState(false)
+    const { type }: any = queryString.parse(history.location.search);
+    const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+
+    const [fromRental, setFromRental] = useState(history.location?.state?.rental);
 
     const {
         state: { user, permissions, selectedEntity },
@@ -62,7 +78,7 @@ const BulkAssetCreation = () => {
 
     useEffect(() => {
         fetchBulkAssetCreation()
-    }, [page, limit, filters, sorting, search, selectedEntity]);
+    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, selectedType]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -170,12 +186,17 @@ const BulkAssetCreation = () => {
     };
 
     const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}`;
+        let deepFilter = `?page=${page}&limit=${limit}&filterBulkAssetCreation=${selectedType}`;
         let filterById = [];
 
         if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
         }
+
+        if (fromRental) {
+            filterById.push({ field: "rentalJob", term: fromRental?._id });
+        }
+
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -293,6 +314,18 @@ const BulkAssetCreation = () => {
         setisOpenDialog(false);
     };
 
+    const handleBulkAssetCreationType = (filterValues) => {
+        setSelectedType(filterValues);
+        history.push(`?type=${filterValues}`)
+    }
+
+    const handleFilter = (event, newFilter) => {
+        if (newFilter != null) {
+            handleBulkAssetCreationType(BulkAssetCreationType.find((d) => d.key === newFilter).value);
+
+        }
+    };
+
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
@@ -320,7 +353,6 @@ const BulkAssetCreation = () => {
                     }}
                 />
             </Grid>
-
         </Grid>
         <div className="main-container">
             <div className="header-panel">
@@ -330,7 +362,7 @@ const BulkAssetCreation = () => {
                             <GiStockpiles size={20} style={{ paddingBottom: "3px" }} className="headerLogo" />
                             <span className="listingHeader">{routes.bulkAssetCreation?.title} </span>
                         </div>
-                        {isMobile && (
+                        {isMobile ? (
                             <>
                                 <Grid style={{ display: 'inline-flex' }}>
                                     <Button
@@ -382,8 +414,32 @@ const BulkAssetCreation = () => {
                                     />
                                 </Grid>
                             </>
+                        ) :
+                            <HideWhenOffline>
+                                <div className={`align-items-center gap-1 layout-for-mobile `}>
+                                    {BulkAssetCreationType && (
+                                        <ToggleButtonGroup size="small" className="ml-2" value={BulkAssetCreationType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                                            {BulkAssetCreationType.map((k, index) => {
+                                                return (
+                                                    <ToggleButton value={k.key} key={index}>
+                                                        {k.key}
+                                                    </ToggleButton>
+                                                );
+                                            })}
+                                        </ToggleButtonGroup>
+                                    )}
+                                </div>
+                            </HideWhenOffline>}
+                        {fromRental && (
+                            <Chip
+                                className="ml-3"
+                                color="primary"
+                                label={`Rental Job : ${fromRental?.rentalJobName}`}
+                                onDelete={() => {
+                                    setFromRental(null);
+                                }}
+                            />
                         )}
-
                     </Grid>
                     <Grid xs={12} sm={12} md={6} container className={styles.filter_side} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
@@ -396,9 +452,7 @@ const BulkAssetCreation = () => {
                                     value={search}
                                     style={isMobile ? { flex: 1 } : {}}
                                 />
-
                             </Grid>
-
                             <Grid style={{ display: "flex", gap: "5px" }}>
                                 {permissions?.bulkAssetCreation?.isCreate &&
                                     <Button onClick={() => {
@@ -461,34 +515,9 @@ const BulkAssetCreation = () => {
                             ]}
                             chips={[
                                 {
-                                    label: "Delivery Date: ",
-                                    field: "deliveryDate",
-                                    fieldType: "date",
-                                    setBackground: (data) => { return data.status === "" && new Date() > new Date(data.deliveryDate) ? { backgroundColor: "#efcccc" } : null }
-                                },
-                                {
                                     label: "Status: ",
                                     field: "status",
                                 },
-                                {
-                                    label: "Tax Schedule: ",
-                                    field: "taxSchedule",
-                                },
-                                {
-                                    label: "Country Bill To: ",
-                                    field: "countryBillTo",
-                                },
-                                {
-                                    label: "Country Sell To: ",
-                                    field: "countrysellTo",
-                                },
-                                {
-                                    label: "SupplierContact:  ",
-                                    field: "supplierContact",
-                                },
-
-
-
                             ]}
                             onCreate={false}
                             showClone={true}

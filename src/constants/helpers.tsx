@@ -66,7 +66,7 @@ export const rentalManagementSteps = [
   'Packing Slip'
 ];
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
-export const bulkAssetCreationSteps = ['Add Product', 'Asset List'];
+export const bulkAssetCreationSteps = ['Add Product', 'Serialized Asset'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -699,21 +699,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1549,7 +1549,9 @@ export const INVENTORY_STATUS = {
   lost: 'Lost',
   customer: 'With Customer',
   supplier: 'With Supplier',
-  returned: 'Returned'
+  returned: 'Returned',
+  needRepair: 'Need Repair',
+  needRecert: 'Need Recert'
 };
 
 export const DELIVERY_TICKET_STATUS = {
@@ -1689,9 +1691,8 @@ export const getData = (resource: string, data: any) => {
       };
     case 'customer-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
-          data?.lastName ? data?.lastName : ''
-        }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
+          }`,
         id: data._id
       };
     case 'supplier-account':
@@ -1701,9 +1702,8 @@ export const getData = (resource: string, data: any) => {
       };
     case 'supplier-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
-          data?.lastName ? data?.lastName : ''
-        }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
+          }`,
         id: data._id
       };
     case 'lead':
@@ -1756,14 +1756,19 @@ export const getData = (resource: string, data: any) => {
         name: `${data.subleaseName}`,
         id: data._id
       };
-    case 'salesOrder':
+    case 'sales-order':
       return {
         name: `${data.salesOrderNo}`,
         id: data._id
       };
-    case 'serializedAsset':
+    case 'serialized-asset':
       return {
         name: `${data.assetNumber}`,
+        id: data._id
+      };
+    case 'bulk-asset-creation':
+      return {
+        name: `${data.baNumber}`,
         id: data._id
       };
     default:
@@ -1823,6 +1828,10 @@ export const viewsColors = {
   transferAsset: {
     background: '#ecc19c',
     borderColor: '#d98298'
+  },
+  bulkAsset: {
+    background: '#FFA500',
+    borderColor: '#6c89a6'
   },
   loadingTicket: {
     background: '#e6c6e6',

@@ -36,7 +36,6 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
     const theme = useTheme()
-    const isSmallScreen = useMediaQuery(theme.breakpoints.down('xs'))
     const toastConfig = useContext(CustomToastContext)
     const [serializedProducts, setSerializedProducts] = useState([]);
     const [gridApi, setGridApi] = useState(null);
@@ -236,7 +235,8 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
         else {
             deepFilter = `${deepFilter}&subleaseAsset=0`;
         }
-
+        
+        deepFilter = `${deepFilter}&isNonSerializedAsset=0`;
 
         return deepFilter;
     };
@@ -441,7 +441,8 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                                     </Box>
                                 }
                                 <Box pl={1}>
-                                    <HtmlTooltip title={(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) ? "Direct transfer to customer location" : "Add to Job"}>
+                                    <HtmlTooltip title={(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) ? "Direct transfer to customer location" :
+                                        refrenceType === "Rental Job" ? "Add to Job" : refrenceType === "ReplaceAsset" ? "Replace" : 'Add'}>
                                         <Button
                                             color="primary"
                                             size="small"

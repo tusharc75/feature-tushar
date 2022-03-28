@@ -147,7 +147,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
         let finalObject: any = prepareDataForGrid(d);
         return {
           ...finalObject,
-          assetNumber: `${index + 1}. ${finalObject.assetNumber}`
         }
       })
       gridDispatch({ type: "initialize", data: data, count: data.length })
@@ -282,17 +281,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
               refreshGrid={() => fetchAssetsData(true)}
             /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
       </Box>
-
-      {/* Add Assets Dialog */}
       {openAddNewAssets &&
-        // <AddAssetsDialog
-        //   transferAssetId={transferAssetData?._id ?? ""}
-        //   plantId={transferAssetData?.transferFromPlant.optionValue ?? ""}
-        //   closeDialog={() => setOpenAddNewAssets(false)}
-        //   fetchAssets={() => fetchAssetsData(true)}
-        //   existingAssets={dataRows.map(asset => asset._id)}
-        //   updateTransferStatus={updateTransferStatus}
-        // />
         <AddSerializedAsset
           addSerializedAsset={(newRecordsToAdd) => {
             setIsAdding(true);
@@ -322,7 +311,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           filterByPlant={transferAssetData?.transferFromPlant.optionValue}
         />
       }
-      {/* Confirm Delete Dialog */}
       {showConfirmBox && (
         <ConfirmationDialog
           okBtnLoading={isRemovingAssets}
