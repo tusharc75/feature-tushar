@@ -32,6 +32,7 @@ interface ReceivingGridProps {
   fileDownloading?: boolean;
   renderedFrom?: string;
   isTransferEnded: boolean;
+  allowedToEdit: boolean;
 }
 
 const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
@@ -48,7 +49,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     handleViewPdf,
     fileDownloading,
     isTransferEnded,
-    renderedFrom
+    renderedFrom,
+    allowedToEdit
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -237,7 +239,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   return (
     <Fragment>
-      <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} justifyContent="space-between" mx="4px">
+      {allowedToEdit && <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} justifyContent="space-between" mx="4px">
         <Box>
           {(permissions?.transferAsset?.isRead && !isMobile) && !isMobile && (
             <Button
@@ -336,7 +338,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             </Button>
           ) : null}
         </Box>}
-      </Box>
+      </Box>}
       <Box mt={1}>
         {isMobile && !isTablet ? (
           <CustomSwipableList
