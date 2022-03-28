@@ -130,6 +130,7 @@ function RentalManagementHeader(props) {
     await clearAll(objectStore.deliveryTicket);
     closeActions();
   };
+  
   let toggleInner = options && (
     <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
       {options.map((k, index) => {

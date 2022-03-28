@@ -259,6 +259,16 @@ export default function DeliveryTicketDetail(props) {
     fetchGridColumns()
   }, [])
 
+  useEffect(() => {
+    if (isSmallScreen && tabValue === 0) {
+      setActivityShow(true)
+    }
+    else {
+      setActivityShow(false)
+    }
+  }, [isSmallScreen, tabValue])
+
+
   const fetchGridColumns = async () => {
     try {
       let data;
@@ -385,12 +395,13 @@ export default function DeliveryTicketDetail(props) {
     }
   }
 
-  let label = deliveryTicketData ? deliveryTicketData?.status === "New" ? "Sign-off - Dispatch" :
-    (deliveryTicketData?.status === "In-Transit") ? "Sign-off - Delivery" : "" : ""
 
   const handleSignature = async (signedData) => {
     let signaturesToSend = [...signatures];
-    const status = label === "Sign-off - Dispatch" ? "Start Delivery" : "Sign-Off";
+
+    const status = deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new ? "Start Delivery" : "Sign-Off";
+    const label = deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new ? "Sign-off - Dispatch" :
+      deliveryTicketData?.status === "In-Transit" ? "Sign-off - Delivery" : "";
 
     const { type, sign: newSign, name } = signedData;
     const indexOfExistingSignature = signatures.findIndex((sign) => sign.type === type && sign.status === status);
@@ -483,15 +494,6 @@ export default function DeliveryTicketDetail(props) {
 
 
 
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true)
-    }
-    else {
-      setActivityShow(false)
-    }
-  }, [isSmallScreen, tabValue])
-
 
 
   return (
@@ -537,19 +539,21 @@ export default function DeliveryTicketDetail(props) {
                       {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
                     </Button>
                   )}
-                  {deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id || canEdit ?
-                    label !== "" ?
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        disabled={loading}
-                        style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
-                        onClick={() => setOpenSignatureDialog(true)}>
-                        {isMobile && !isTablet ? <FaFileSignature size={18} /> : label}
-                      </Button>
-                      : null
-                    : null}
+
+                  {/* {deliveryTicketData?.deliveryPerson?.optionValue === user?.user?._id || canEdit &&
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      color="primary"
+                      size="small"
+                      disabled={loading}
+                      style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
+                      onClick={() => setOpenSignatureDialog(true)}>
+                      {isMobile && !isTablet ? <FaFileSignature size={18} /> :
+                        deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new ? "Sign-off - Dispatch" : "Sign-off - Delivery"
+                      }
+                    </Button>
+                  } */}
+
                   {(deliveryTicketData?.signatures?.length > 0) ?
                     <Button
                       variant={isMobile && !isTablet ? "text" : "contained"}
@@ -868,8 +872,8 @@ export default function DeliveryTicketDetail(props) {
         {openSignatureDialog &&
           <SignatureDialog
             submitting={submittingSign}
-            label={label}
-            steps={label === "Sign-off - Dispatch" ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
+            label={deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new ? "Sign-off - Dispatch" : "Sign-off - Delivery"}
+            steps={deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new ? ["Supervisor", "Delivery Person"] : ["Delivery Person", "Receiver"]}
             forDelivery={true}
             open={true}
             onClose={() => {
