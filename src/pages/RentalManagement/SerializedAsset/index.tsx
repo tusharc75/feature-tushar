@@ -678,6 +678,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               childrenProperty="subRows"
               uniqueKey="_id"
               hideSelection={isOffline || !allowedToEdit}
+              renderedFrom="rental_management_serialized_asset"
+              isClientSideGrid={true}
             />
           </Box>
           : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>

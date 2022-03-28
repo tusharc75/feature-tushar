@@ -26,10 +26,11 @@ interface AssetsGridProps {
   handleViewPdf?: any;
   fileDownloading?: boolean
   renderedFrom?: string;
+  allowedToEdit: boolean;
 }
 
 const AssetsGrid: FC<AssetsGridProps> = (props) => {
-  const { permissions, user, fetchAssets, currentStep, setNextStep, updateTransferStatus, transferAssetData, renderedFrom } = props
+  const {allowedToEdit, permissions, user, fetchAssets, currentStep, setNextStep, updateTransferStatus, transferAssetData, renderedFrom } = props
   const toastConfig = useContext(CustomToastContext);
 
 
@@ -191,7 +192,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" mx="4px">
+      {allowedToEdit && <Box display="flex" justifyContent="space-between" mx="4px">
         {permissions?.transferAsset.isUpdate && <Button
           variant={'contained'}
           color="primary"
@@ -218,7 +219,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           {isMobile && !isTablet ? "Remove" : "Remove Assets"}
 
         </Button>}
-      </Box>
+      </Box>}
 
       <Box mt={1}>
         {Object.keys(frameWorkComponent).length > 0 ?
