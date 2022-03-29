@@ -15,7 +15,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { serializedAsset, isObjectEmpty, gridLoadingTimeout, product, warehouse as warehouseHelper, INVENTORY_STATUS } from '../../constants/helpers';
+import { serializedAsset, isObjectEmpty, gridLoadingTimeout, product, warehouse as warehouseHelper, INVENTORY_STATUS, COLOUR_MASTER } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import ManageSerializedAsset from './ManageSerializedAsset';
@@ -25,7 +25,6 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
-import { MdAccountCircle } from 'react-icons/md';
 import { AiFillCrown, MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -76,6 +75,7 @@ const SerializedAsset = () => {
   });
 
   const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
+  const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
@@ -133,6 +133,12 @@ const SerializedAsset = () => {
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
+        data?.some(o => {
+          if (o?.fieldData?.fieldName === "status") {
+            setAllowUpdateStatus(o?.isUpdate)
+            return true
+          }
+        })
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
@@ -147,6 +153,12 @@ const SerializedAsset = () => {
         columns?.forEach((e) => {
           if (e.field === 'assetNumber') {
             e.cellRenderer = 'assetNumberRenderer';
+            e.cellStyle = params => {
+              if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
+                return { backgroundColor: COLOUR_MASTER.lostAssets.background };
+              }
+              return null;
+            }
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
@@ -311,16 +323,16 @@ const SerializedAsset = () => {
 
   const AssetNumberRenderer = (params) => (
     <Fragment>
-      {params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime() && (
-        <Box mr={1} pt={1}>
-          <HtmlTooltip title="Asset needs to be recert">
-            <WarningIcon fontSize="small" color="error" />
-          </HtmlTooltip>
-        </Box>
-      )}
       <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data?._id}`}>
         {params.value}
       </Link>
+      {params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime() && (
+        <Box ml={1} pt={1}>
+          <HtmlTooltip title="Asset needs to be recert">
+            <WarningIcon style={{ fontSize: "14px" }} fontSize="small" color="error" />
+          </HtmlTooltip>
+        </Box>
+      )}
     </Fragment>
   );
 
@@ -380,6 +392,8 @@ const SerializedAsset = () => {
         return field;
     }
   };
+
+  console.log(allowUpdateStatus)
 
   return (
     <Fragment>
@@ -545,21 +559,19 @@ const SerializedAsset = () => {
                       label="Sublease Assets"
                     />
                   )}
-                 
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          name="isNonSerializedAsset"
-                          checked={isNonSerializedAsset}
-                          onChange={(e) => {
-                            setNonSerializedAsset(e.target.checked);
-                          }}
-                          color="primary"
-                        />
-                      }
-                      label="Non Serialized Assets"
-                    />
-                  
+                  {/* <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="isNonSerializedAsset"
+                        checked={isNonSerializedAsset}
+                        onChange={(e) => {
+                          setNonSerializedAsset(e.target.checked);
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label="Non Serialized Assets"
+                  /> */}
                 </Fragment>
               )}
             </Grid>
@@ -591,7 +603,6 @@ const SerializedAsset = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-
                   <HtmlTooltip title="Please select some inventories">
                     <span>
                       <Button
@@ -629,37 +640,18 @@ const SerializedAsset = () => {
                         Delete
                       </MenuItem>
                     )}
-                    {permissions?.serializedAsset?.isUpdate && (
-                      <>
+                    {(permissions?.serializedAsset?.isUpdate && allowUpdateStatus) && (
+                      [INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].map((status) => (
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusUpdate(INVENTORY_STATUS.available);
+                            handleStatusUpdate(status);
                           }}
-                          disabled={selectedRecords?.filter((o) => o.status === INVENTORY_STATUS.underReview).length === selectedRecords.length ? false : true}
+                          disabled={selectedRecords?.filter((o) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(o.status)).length === selectedRecords.length ? false : true}
                         >
-                          {`Status Change - ${INVENTORY_STATUS.available}`}
+                          {`Status Change - ${status}`}
                         </MenuItem>
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            handleStatusUpdate(INVENTORY_STATUS.needRepair);
-                          }}
-                          disabled={selectedRecords?.filter((o) => o.status === INVENTORY_STATUS.underReview).length === selectedRecords.length ? false : true}
-                        >
-                          {`Status Change - ${INVENTORY_STATUS.needRepair}`}
-                        </MenuItem>
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            handleStatusUpdate(INVENTORY_STATUS.needRepair);
-                          }}
-                          disabled={selectedRecords?.filter((o) => o.status === INVENTORY_STATUS.underReview).length === selectedRecords.length ? false : true}
-                        >
-                          {`Status Change - ${INVENTORY_STATUS.needRepair}`}
-                        </MenuItem>
-                      </>
-                    )}
+                      )))}
                   </Menu>
                 </Grid>
               </Box>

@@ -853,6 +853,7 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                             </Button>
                             <CustomButton
                                 disabled={isSubmitting || loading}
+                                loading={loading}
                                 variant="contained"
                                 color="primary"
                                 type="submit"

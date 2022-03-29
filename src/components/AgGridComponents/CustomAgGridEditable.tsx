@@ -306,6 +306,7 @@ export default function CustomAgGridEditable({
       <AgGridColumn
         key={index}
         field={column.field}
+        cellStyle={column.cellStyle}
         headerName={column.headerName}
         filter={column.filter ?? "agTextColumnFilter"}
         sortable={column.sortable ?? true}
@@ -332,6 +333,7 @@ export default function CustomAgGridEditable({
       <AgGridColumn
         key={index}
         field={column.field}
+        cellStyle={column.cellStyle}
         headerName={column.headerName}
         filter={column.filter ?? "agTextColumnFilter"}
         cellRendererParams={column.cellRendererParams ?? null}
