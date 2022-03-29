@@ -80,7 +80,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           return a.indexOf(v) !== -1;
         });
       });
-      let pricingMethod: any = pricingMethodArray.shift().filter(function (v) {
+      let pricingMethod: any = pricingMethodArray?.shift()?.filter(function (v) {
         return pricingMethodArray.every(function (a) {
           return a.indexOf(v) !== -1;
         });
