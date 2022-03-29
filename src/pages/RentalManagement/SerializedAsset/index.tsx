@@ -27,6 +27,7 @@ import { useData } from "../../../StateProvider/Provider";
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { ExpandMore } from '@material-ui/icons';
 import AddNonSerializeAssets from "./AddNonSerializeAssets";
+import { removeAssetsInRental } from '../rentalOfflineHelper';
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol, stepFullScreen, allowedToEdit }) => {
 
@@ -133,11 +134,11 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             }
             {row.original?.type === "asset" &&
               <span className="d-flex align-items-center gap-2">
-                {(row.original.status === INVENTORY_STATUS.reserved && row.original?.manualStatus !== INVENTORY_STATUS.reserved && !isOffline && allowedToEdit) &&
+                {(row.original.status === INVENTORY_STATUS.reserved && row.original?.manualStatus !== INVENTORY_STATUS.reserved && allowedToEdit) &&
                   <HtmlTooltip title={`Remove`}>
                     <IconButton size="small" onClick={() => {
                       setShowConfirmBox(true)
-                      setDeleteData([{ _id: row.original.inventory, isNonSerializeAsset: row.original.isNonSerializeAsset }])
+                      setDeleteData([{ _id: row.original.inventory, assetNumber: row.original.detail, isNonSerializeAsset: row.original.isNonSerializeAsset }])
                     }}>
                       <Delete fontSize="small" color="error" />
                     </IconButton>
@@ -344,7 +345,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         detail: _inventory?.assetNumber ? _inventory?.assetNumber : _inventory.inventoryDetail?.assetNumber,
         type: "asset",
         isNonSerializeAsset: false,
-        status: _inventory.inventoryDetail?.status,
+        status: _inventory?.status ? _inventory?.status : _inventory.inventoryDetail?.status,
         manualStatus: _inventory.inventoryDetail?.manualStatus,
         _id: _inventory.inventory,
         isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
@@ -450,20 +451,33 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     }
   };
 
-  const handleRemoveInventory = () => {
+  const handleRemoveInventory = async () => {
     if (deleteData.length >= 1) {
-      setDeleting(true)
-      axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/inventory/remove`, { products: deleteData })
-        .then(() => {
-          setDeleting(false)
-          fetchProductInventory()
-          setDeleteData(null)
-          setShowConfirmBox(false);
-        }).catch((error) => {
-          setDeleting(false)
-          toastConfig.setToastConfig(error)
-          setDeleteData(null)
-        });
+      if (isOffline) {
+        setDeleting(true)
+        await removeAssetsInRental(rentalManagementData._id, deleteData)
+        setDeleting(false)
+        setDeleteData(null)
+        setShowConfirmBox(false);
+        fetchProductInventory()
+      }
+      else {
+        deleteData?.forEach((e) => {
+          delete e.assetNumber
+        })
+        setDeleting(true)
+        axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/inventory/remove`, { products: deleteData })
+          .then(() => {
+            setDeleting(false)
+            fetchProductInventory()
+            setDeleteData(null)
+            setShowConfirmBox(false);
+          }).catch((error) => {
+            setDeleting(false)
+            toastConfig.setToastConfig(error)
+            setDeleteData(null)
+          });
+      }
     }
   }
 
@@ -642,7 +656,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                   const assets = treeToFlatArray(selectedRecords, "subRows")?.filter(d => d.type === "asset");
                   const dataTodelete = []
                   assets?.forEach((element) => {
-                    dataTodelete.push({ _id: element?.inventory, isNonSerializeAsset: element?.isNonSerializeAsset })
+                    dataTodelete.push({ _id: element?.inventory, assetNumber: element?.detail, isNonSerializeAsset: element?.isNonSerializeAsset })
                   })
                   setDeleteData(dataTodelete)
                   setShowConfirmBox(true)
