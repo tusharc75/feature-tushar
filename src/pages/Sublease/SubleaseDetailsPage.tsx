@@ -32,6 +32,7 @@ const SubleaseDetailsPage = () => {
     const renderedFrom = camelCase(routes?.sublease.title)
     const toastConfig = useContext(CustomToastContext);
     const isSmallScreen = useMediaQuery('(max-width:1300px)');
+    const isTabletScreen = useMediaQuery('(max-width:960px)')
     const [showActivity, setActivityShow] = useState(defaultActivityShow);
 
     const { id } = useParams();
@@ -52,6 +53,7 @@ const SubleaseDetailsPage = () => {
 
     const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
     const [isIssued, setIsIssued] = useState(false);
+    const [stepFullScreen, setStepFullScreen] = useState(false);
 
     function a11yProps(index: any) {
         return {
@@ -261,6 +263,10 @@ const SubleaseDetailsPage = () => {
                                                             isIssued={isIssued}
                                                             renderedFrom={`${renderedFrom}_grid-1`}
                                                             allowedToEdit={allowedToEdit}
+                                                            stepFullScreen={stepFullScreen}
+                                                            isSmallScreen={isSmallScreen}
+                                                            isTabletScreen={isTabletScreen}
+                                                            showActivity={showActivity}
                                                         />
                                                     )}
                                                     {(currentStep === 1 || currentStep === 2) && subleaseData && (

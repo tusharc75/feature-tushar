@@ -43,6 +43,7 @@ import { groupBy, uniq, map, filter } from "lodash";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import AddSerializedAsset from "../SerializedAsset/AddSerializedAsset";
 import ReplaceAssetReason from "../../../components/RentalManagment/ReplaceAssetReason";
+import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -93,6 +94,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} })
   const [replaceLoading, setReplaceLoading] = useState(false)
 
+  const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
+
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -128,6 +131,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       var productAssets: any = [];
       var deliveryTicketList: any = [];
       var products: any = [];
+      var nonSerializeAsset: any = [];
+
       if (isOffline) {
         productAssets = await getRentalProductAssets(rentalManagementData._id);
         productAssets = productAssets?.map(u => ({
@@ -167,6 +172,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
         products = productResponse?.data?.data?.material
+        nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset
 
       }
       products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
@@ -193,6 +199,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           obj.rentalAssetStatus = ele?.status
           obj.startDate = ele?.actualStartDate
           obj.endDate = ele?.actualEndDate
+          obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId)
           productAssets.push(obj)
         }
       })
@@ -276,10 +283,26 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     }).catch((error) => {
     });
   }
+
   const InventoryRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${params.data.type === "Asset" ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
+    <Fragment>
+      <Link className="link text-truncate" title={params.value} to={`${params.data.type === "Asset" ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params.data._id}`}>
+        {params.value}
+      </Link>
+      {(params?.data?.nonSerializeAsset && params?.data?.nonSerializeAsset?.length > 0) &&
+        <Box ml={1}>
+          <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
+            <IconButton size="small" onClick={() => {
+              setShowNonSerializeAsset({
+                open: true, data: { productName: params?.data?.productName, nonSerializeAsset: params?.data?.nonSerializeAsset }
+              })
+            }}>
+              <InfoIcon fontSize="small" color={"primary"} />
+            </IconButton>
+          </HtmlTooltip>
+        </Box>
+      }
+    </Fragment>
   );
 
   const ProductNameRenderer = (params) => (
@@ -665,6 +688,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
                 else {
                   products.push({
                     _id: element?.product?.optionValue,
+                    id: element?.product?.optionValue,
                     productName: element?.product?.optionLabel,
                     qty: 1
                   })
@@ -989,6 +1013,12 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         handleClose={() => setShowReplaceReason({ open: false, data: {} })}
         loading={replaceLoading}
         handleSucess={(data) => { handleReplaceAsset(data?.reason) }}
+      />
+    }
+    {showNonSerializeAsset.open &&
+      <ShowNonSerializeAssets
+        data={showNonSerializeAsset.data}
+        onClose={() => setShowNonSerializeAsset({ open: false, data: {} })}
       />
     }
   </>

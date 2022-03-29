@@ -105,42 +105,18 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
         const alreadyStoredSelectedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
         if (tempProducts.length === 0) {
             selectedProducts.map(d => {
-                if (d.productName) {
-                    if (tempProducts.find(obj => obj.id === d._id)) {
-                        tempProducts.find(obj => obj.id === d._id).qty = d?.qty + tempProducts.find(obj => obj.id === d._id).qty
-                    }
-                    else {
-                        tempProducts.push({ "id": d._id, "name": d.productName, "qty": d?.qty })
-                    }
+                if (tempProducts.find(obj => obj.id === d.id)) {
+                    tempProducts.find(obj => obj.id === d.id).qty = d?.qty + tempProducts.find(obj => obj.id === d.id).qty
                 }
-                if (d.packageName && d?.products?.length > 0) {
-                    d.products.map(u => {
-                        if (tempProducts.find(obj => obj.id === u?.productDetail?._id)) {
-                            tempProducts.find(obj => obj.id === u?.productDetail?._id).qty = (u?.qty * d?.qty) + tempProducts.find(obj => obj.id === u?.productDetail?._id).qty
-                        }
-                        else {
-                            tempProducts.push({ "id": u?.productDetail?._id, "name": u?.productDetail?.productName || "", "qty": u?.qty * d?.qty })
-                        }
-                    })
+                else {
+                    tempProducts.push({ "id": d.id, "name": d.productName, "qty": d?.qty })
                 }
             })
         }
         else {
             tempProducts = []
             selectedProducts.map(d => {
-                if (d.productName) {
-                    tempProducts.push({ "id": d._id, "name": d.productName, "qty": d?.qty - alreadyStoredSelectedRecords.filter(obj => obj.productId === d._id).length })
-                }
-                if (d.packageName && d?.products?.length > 0) {
-                    d.products.map(u => {
-                        if (tempProducts.find(obj => obj.id === d?.productDetail?._id)) {
-                            tempProducts.find(obj => obj.id === d?.productDetail?._id).qty = u?.qty * d?.qty + tempProducts.find(obj => obj.id === d?.productDetail?._id).qty - alreadyStoredSelectedRecords.filter(obj => obj.productId === u?.productDetail?._id).length
-                        }
-                        else {
-                            tempProducts.push({ "id": u?.productDetail?._id, "name": u?.productDetail?.productName || "", "qty": u?.qty * d?.qty - alreadyStoredSelectedRecords.filter(obj => obj.productId === u?.productDetail?._id).length })
-                        }
-                    })
-                }
+                tempProducts.push({ "id": d.id, "name": d.productName, "qty": d?.qty - alreadyStoredSelectedRecords?.filter(obj => obj.productId === d.id).length })
             })
         }
         setSerializedProducts(tempProducts)
@@ -158,7 +134,7 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                 updatedFilters.push({ field: 'product', term: selectedProduct })
             }
             else {
-                updatedFilters = selectedProducts.map(m => { return { "field": "product", "term": m?._id ?? "" } })
+                updatedFilters = selectedProducts.map(m => { return { "field": "product", "term": m?.id ?? "" } })
             }
             queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}&filterByIdType=or`
         }
@@ -235,7 +211,7 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
         else {
             deepFilter = `${deepFilter}&subleaseAsset=0`;
         }
-        
+
         deepFilter = `${deepFilter}&isNonSerializedAsset=0`;
 
         return deepFilter;

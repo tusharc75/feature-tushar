@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   Dialog,
   Box,
@@ -22,21 +22,21 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { CircularProgress } from "@material-ui/core";
+import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
+import { addAssetsInRetal } from '../rentalOfflineHelper';
+
 interface DialogProps {
   closeDialog: () => void;
   products: any[];
-  rentalId: string;
-  warehouse: {
-    address: string;
-    optionLabel: string;
-    optionValue: string;
-  };
+  referenceId: string;
+  warehouse: string;
 }
 
 type TableContent = {
   ['id']: string;
   ['_id']: string;
   ['product']: string;
+  ['serializedProduct']: boolean,
   ['srno']: string;
   ['Name']: string;
   ['Asset Number']: string;
@@ -51,26 +51,26 @@ const useClasses = makeStyles(() => ({
   }
 }));
 
-const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: DialogProps) => {
-
-  console.log(products)
+const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }: DialogProps) => {
 
   const classes = useClasses();
-  const { setToastConfig } = React.useContext(CustomToastContext);
-  const [productData, setProductData] = React.useState<TableContent[]>([]);
-  const [tableData, setTableData] = React.useState<TableContent[]>([]);
-  const [hasError, setHasError] = React.useState(null);
-  const [isSubmitting, setSubmitting] = React.useState(false);
+  const { setToastConfig } = useContext(CustomToastContext);
+  const [productData, setProductData] = useState<TableContent[]>([]);
+  const [tableData, setTableData] = useState<TableContent[]>([]);
+  const [hasError, setHasError] = useState(null);
+  const [isSubmitting, setSubmitting] = useState(false);
+  const { isOffline } = useContext(CustomOfflineContext);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!products) return;
     const mappedTable: TableContent[] = [];
     products.forEach((p: any, index_1) => {
       [...Array(p?.qty).keys()].forEach((_, index_2) => {
         mappedTable.push({
-          id: `${index_1 + 1}.${index_2 + 1}_${p?._id}`,
           _id: p?._id,
+          id: `${index_1 + 1}.${index_2 + 1}_${p?._id}`,
           product: p?.productDetail?._id,
+          serializedProduct: p?.serializedProduct,
           ['srno']: `${index_1 + 1}.${index_2 + 1}`,
           ['Name']: p?.detail,
           ['Asset Number']: ''
@@ -81,7 +81,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
     setProductData(mappedTable);
   }, [products]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (checkErrors() > 0) {
       setHasError(checkErrors());
     } else {
@@ -144,6 +144,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
             id: `${item[0]}_${foundProduct?._id}`,
             _id: foundProduct?._id,
             product: foundProduct?.product,
+            serializedProduct: foundProduct?.serializedProduct,
             ['srno']: item[0],
             ['Name']: item[1],
             ['Asset Number']: item[2]
@@ -157,28 +158,35 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
     e.target.value = null;
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (hasError || !warehouse) return;
-    setSubmitting(true);
-    const dataToSubmit = {
-      warehouse: warehouse?.optionValue,
-      assets: tableData.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'] }))
-    };
-    axiosInstance().post(`${routes.rentalManagement.path}/${rentalId}/inventory/create-non-serialized-assets`, dataToSubmit)
-      .then(() => {
-        setSubmitting(false);
-        closeDialog();
-      })
-      .catch((err) => {
-        setSubmitting(false);
-        setToastConfig(err);
-      });
+    if (isOffline) {
+      setSubmitting(true);
+      addAssetsInRetal(referenceId, tableData.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'], serializedProduct: t.serializedProduct })))
+      closeDialog();
+    }
+    else {
+      if (hasError || !warehouse) return;
+      setSubmitting(true);
+      const dataToSubmit = {
+        warehouse: warehouse,
+        assets: tableData.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'] }))
+      };
+      axiosInstance().post(`${routes.rentalManagement.path}/${referenceId}/inventory/create-non-serialized-assets`, dataToSubmit)
+        .then(() => {
+          setSubmitting(false);
+          closeDialog();
+        })
+        .catch((err) => {
+          setSubmitting(false);
+          setToastConfig(err);
+        });
+    }
   };
 
   return (
     <Dialog open onClose={closeDialog} fullScreen>
-      <CustomDialogHeader title="Create Non Serialize Assets" onClose={closeDialog} />
+      <CustomDialogHeader title={isOffline ? `Assign ${routes.serializedAsset.title}` : `Create Non ${routes.serializedAsset.title}`} onClose={closeDialog} />
       <CustomDialogContent>
         <Box display="flex" flexDirection="column" component={'form'} onSubmit={handleSubmit}>
           <Box alignSelf={'flex-end'} mb={2}>
@@ -214,7 +222,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
                 <TableRow>
                   <TableCell>Sr.No.</TableCell>
                   <TableCell align="left">Product</TableCell>
-                  <TableCell align="left">Serial Number</TableCell>
+                  <TableCell align="left">Asset Number</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -229,7 +237,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
                         required
                         size="small"
                         variant="outlined"
-                        placeholder="Serial Number"
+                        placeholder="Asset Number"
                         value={data['Asset Number']}
                         autoComplete='off'
                         name={data.id}
