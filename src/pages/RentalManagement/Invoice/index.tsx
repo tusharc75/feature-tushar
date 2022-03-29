@@ -479,7 +479,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
               height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 365px)"}
               columns={columns}
               data={rowsData}
-              setCellColor={() => { }}
+              setWholeRowsCellColor={() => { }}
               onSelect={() => { }}
               childrenProperty="subRows"
               uniqueKey="_id"
