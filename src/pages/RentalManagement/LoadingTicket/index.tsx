@@ -6,7 +6,7 @@ import { CommonRenderer } from "../../../components/AgGridComponents/CustomAgGri
 import { Link } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Tooltip, Menu, MenuItem, Dialog, TextField, CircularProgress } from "@material-ui/core";
+import { Button, Tooltip, Menu, MenuItem, Dialog, TextField, CircularProgress, IconButton } from "@material-ui/core";
 import { AiFillFilePdf, AiOutlineLoading3Quarters } from 'react-icons/ai';
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -41,6 +41,9 @@ import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 import { groupBy, uniq, map } from "lodash";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
+import HtmlTooltip from "../../../components/CustomTooltipTitle";
+import InfoIcon from '@material-ui/icons/Info';
+import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -78,6 +81,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
 
+  const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
+
   useEffect(() => {
     fetchRecords();
   }, []);
@@ -92,6 +97,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       var productAssets: any = [];
       var deliveryTicketList: any = [];
       var products: any = [];
+      var nonSerializeAsset: any = [];
+
       dispatch({ type: 'loading', loading: true });
 
       if (isOffline) {
@@ -134,6 +141,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
         products = productResponse?.data?.data?.material
+        nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset
       }
 
       products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
@@ -156,6 +164,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           obj.productId = ele?.productDetail?._id
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue
+          obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId)
           productAssets.push(obj)
         }
       })
@@ -233,9 +242,24 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   );
 
   const InventoryRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${params.data.type === "Asset" ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
+    <Fragment>
+      <Link className="link text-truncate" title={params.value} to={`${params.data.type === "Asset" ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params.data._id}`}>
+        {params.value}
+      </Link>
+      {(params?.data?.nonSerializeAsset && params?.data?.nonSerializeAsset?.length > 0) &&
+        <Box ml={1}>
+          <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
+            <IconButton size="small" onClick={() => {
+              setShowNonSerializeAsset({
+                open: true, data: { productName: params?.data?.productName, nonSerializeAsset: params?.data?.nonSerializeAsset }
+              })
+            }}>
+              <InfoIcon fontSize="small" color={"primary"} />
+            </IconButton>
+          </HtmlTooltip>
+        </Box>
+      }
+    </Fragment>
   );
 
   const ProductNameRenderer = (params) => (
@@ -683,6 +707,12 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           setOpenDeliveryTicketDialog(false)
           fetchRecords()
         }}
+      />
+    }
+    {showNonSerializeAsset.open &&
+      <ShowNonSerializeAssets
+        data={showNonSerializeAsset.data}
+        onClose={() => setShowNonSerializeAsset({ open: false, data: {} })}
       />
     }
   </>

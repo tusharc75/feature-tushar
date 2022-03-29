@@ -53,8 +53,6 @@ const useClasses = makeStyles(() => ({
 
 const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: DialogProps) => {
 
-  console.log(products)
-
   const classes = useClasses();
   const { setToastConfig } = React.useContext(CustomToastContext);
   const [productData, setProductData] = React.useState<TableContent[]>([]);
