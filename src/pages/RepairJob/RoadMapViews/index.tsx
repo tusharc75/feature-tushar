@@ -3,7 +3,7 @@ import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flo
 import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, INVENTORY_STATUS, REPAIR_JOB_STATUS, viewsColors } from 'src/constants/helpers';
+import { deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, INVENTORY_STATUS, REPAIR_JOB_STATUS, COLOUR_MASTER } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -12,34 +12,35 @@ import { MdZoomOutMap } from 'react-icons/md';
 const customNodeStyles = {
   repairJob: {
     name: 'Repair Job',
-    ...viewsColors.repairJob
+    ...COLOUR_MASTER.repairJob
   },
   asset: {
     name: 'Assets',
-    ...viewsColors.assets,
+    ...COLOUR_MASTER.assets,
     cursor: 'pointer'
   },
   lostAssets: {
     name: 'Lost Assets',
-    ...viewsColors.lostAssets
+    ...COLOUR_MASTER.lostAssets
   },
   scrapAssets: {
     name: 'Scrap Assets',
-    ...viewsColors.scrapAssets
+    ...COLOUR_MASTER.scrapAssets
   },
   loadingTicket: {
     name: 'Loading Ticket',
-    ...viewsColors.loadingTicket
+    ...COLOUR_MASTER.loadingTicket
   },
   closedRepairJob: {
     name: 'Completed Repair Job',
-    ...viewsColors.closedRepairJob
+    ...COLOUR_MASTER.closedRepairJob
   }
 };
+
 const customDeliveredNodeStyle = {
   loadingTicket: {
     name: 'Loading Ticket',
-    ...viewsColors.deliveredLoadingTicket,
+    ...COLOUR_MASTER.deliveredLoadingTicket,
     borderLeft: '10px solid #008000'
   }
 };

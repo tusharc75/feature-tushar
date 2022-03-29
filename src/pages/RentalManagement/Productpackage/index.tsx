@@ -248,6 +248,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     setNextStep(false);
     var data: any = [];
     var inventory: any = [];
+    var nonSerializeAsset: any = [];
+
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
       inventory = data.productInventory;
@@ -256,6 +258,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       data = response?.data?.data;
       setMaterial(JSON.parse(JSON.stringify(data.material)));
       inventory = data.inventory;
+      nonSerializeAsset = data.nonSerializeAsset;
     }
     const rows = data.material.filter((e) => e.parentId === null);
 
@@ -265,9 +268,9 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
+      parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : false;
-      parent.subRows = generateNestedData(data.material, inventory, parent);
+      parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
 
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
@@ -280,7 +283,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     setSelectedProducts([]);
   };
 
-  const generateNestedData = (material, inventory, parent) => {
+  const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
@@ -288,9 +291,9 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
+      _subRow.assetQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
-      _subRow.subRows = generateNestedData(material, inventory, _subRow);
+      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
     });
     if (subRows.length === 0 && parent.type === "package") {
       parent.isValid = false;

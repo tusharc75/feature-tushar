@@ -115,6 +115,15 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                     if (fieldsDataForCreate?.some((e) => e.fieldName === "warehouse")) {
                         createValues["warehouse"] = refrenceData?.warehouse?.optionValue
                     }
+                    if (fieldsDataForCreate.some((e) => e.fieldName === "wellName")) {
+                        createValues["wellName"] = refrenceData?.wellName?.optionValue
+                    }
+                    if (fieldsDataForCreate.some((e) => e.fieldName === "afeNumber")) {
+                        createValues["afeNumber"] = refrenceData?.afeNumber
+                    }
+                    if (fieldsDataForCreate.some((e) => e.fieldName === "processor")) {
+                        createValues["processor"] = refrenceData?.processor?.optionValue
+                    }
                 }
                 createValues["actualStartDate"] = ""
                 createValues["actualEndDate"] = ""

@@ -65,16 +65,17 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
       await GetTaskDetail(id)
         .then(({ data }) => {
           setInitialValues(null);
+          console.log(data);
           setInitialValues(data);
           setFormValues(data);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       let initialData = {
         name: '',
         description: '',
         status: status || 'To Do',
-        assignee: '',
+        assignee: [],
         reporter: user._id,
         startDate: new Date(),
         dueDate: new Date()
@@ -122,6 +123,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
   };
 
   const handleValuesChange = (data) => {
+    console.log(data);
     setFormValues((prevState) => ({
       ...prevState,
       ...data
@@ -195,7 +197,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                               }}
                             />
                           </Box>
-                          {id &&
+                          {id && (
                             <Box pt={1}>
                               <Button
                                 variant="contained"
@@ -207,7 +209,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                 Add a child Task
                               </Button>
                             </Box>
-                          }
+                          )}
                           <Box mt={2}>
                             <SubTask
                               openAddSub={openAddSub}
@@ -217,11 +219,11 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                               setId={setId}
                             />
                           </Box>
-                          {id &&
-                            (<Box mt={2}>
+                          {id && (
+                            <Box mt={2}>
                               <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                            </Box>)
-                          }
+                            </Box>
+                          )}
                           {id && (
                             <Box mt={2}>
                               <Divider />
@@ -234,7 +236,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                         <Grid item xs={12} md={5} sm={6}>
                           <Fragment>
                             <Box mt={1}>
-                              <Box >
+                              <Box>
                                 <FormControl variant="outlined" fullWidth>
                                   <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
                                   <Field
@@ -266,8 +268,9 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                         handleValuesChange({ [name]: value });
                                         setFieldValue(name, value);
                                       }}
-                                      multiple={false}
+                                      multiple={true}
                                       value={values['assignee']}
+                                      email={[]}
                                     />
                                   </Grid>
                                   <Grid item xs={12} sm={12} md={12}>
@@ -333,12 +336,9 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                       </Box>
                                     )}
                                   </Grid>
-
                                 </Grid>
                               </Box>
-
                             </Box>
-
                           </Fragment>
                         </Grid>
                       </Grid>

@@ -1776,7 +1776,7 @@ export const getData = (resource: string, data: any) => {
   }
 };
 
-export const viewsColors = {
+export const COLOUR_MASTER = {
   rentalJob: {
     background: '#c3d5e6',
     borderColor: '#6c89a6'
