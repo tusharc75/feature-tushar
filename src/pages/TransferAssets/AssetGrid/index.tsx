@@ -272,7 +272,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
               limit={limit}
               pageSizes={pageSizes}
               page={page}
-              allowAction={true}
+              allowAction={allowedToEdit}
               actionWidth={100}
               allowSelection={allowedToEdit}
               isClientSideGrid={true}
