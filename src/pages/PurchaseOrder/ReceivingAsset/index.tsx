@@ -311,7 +311,13 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                             [{
                                 label: `Quantity: `,
                                 field: "qty",
-                                forceShow: true
+                                forceShow: true,
+                                onClick: (data) => history.push(`${routes.serializedAsset.path}`, {
+                                    productId: data?.productId,
+                                    productName: data?.productDescription,
+                                    pOId: purchaseOrderData?._id,
+                                    pOName: purchaseOrderData?.purchaseOrderNumber
+                                })
                             }]
                         }
                         onCreate={null}
