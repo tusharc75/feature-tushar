@@ -731,7 +731,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 365px)"}
               columns={columns}
               data={rowsData}
-              setCellColor={(rowData) => {
+              setWholeRowsCellColor={(rowData) => {
                 if (rowData.isTransferAsset) return "isTransferAsset";
                 if (!rowData.isValid) return "error";
                 //if (rowData.isPurchaseOrder) return "isPurchaseOrder";

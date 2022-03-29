@@ -594,7 +594,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
                 columns={columns}
                 data={rowsData}
-                setCellColor={(rowData) => !rowData.isValid ? "error" : ""}
+                setWholeRowsCellColor={(rowData) => !rowData.isValid ? "error" : ""}
                 onSelect={setSelectedProducts}
                 childrenProperty="subRows"
                 uniqueKey="_id"
