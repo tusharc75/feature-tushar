@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.84.0](https://github.com/vebholic/oms_frontend/compare/v2.83.2...v2.84.0) (2022-03-29)
+
+
+### Features
+
+* - Ag grid cell color change code done ([96d881b](https://github.com/vebholic/oms_frontend/commit/96d881b905f72066df222944dde3066c7d3914ac))
+* - Build failed issue fixed ([2333cb4](https://github.com/vebholic/oms_frontend/commit/2333cb4902d189b7af4d30233d388128e6311b23))
+* - React table changes done ([4e43ad3](https://github.com/vebholic/oms_frontend/commit/4e43ad31e9a6bb22fa1cc01c8056cfeaad1b17e7))
+* - React table changes done ([24f7284](https://github.com/vebholic/oms_frontend/commit/24f728492a28385769806cfdde18d45108d8292e))
+* - React table changes done ([da876b8](https://github.com/vebholic/oms_frontend/commit/da876b8bf8611f8f077025ea0cc4b6cba9a748ab))
+* **feature/avisekh:** feature/avisekh ([aaabd8b](https://github.com/vebholic/oms_frontend/commit/aaabd8b367f058627e0c22e7ee8c88d4905dcd5d))
+* task assignee multiselect ([8c523a0](https://github.com/vebholic/oms_frontend/commit/8c523a00974686856ffd7da3dcbaced741029f92))
+
+
+### Bug Fixes
+
+* allowed to edit changes in bulk asset creation and sublease ([e65d433](https://github.com/vebholic/oms_frontend/commit/e65d433019f63d5d3b0a600324687d2786936764))
+* bug fix ([5ebf404](https://github.com/vebholic/oms_frontend/commit/5ebf404ed08f37f386ea2db1a6f03cae25322ac2))
+* bug fix ([dacd4cb](https://github.com/vebholic/oms_frontend/commit/dacd4cb6862afb4229cfbbf903f93e6979a084d9))
+* bug fix ([9021a94](https://github.com/vebholic/oms_frontend/commit/9021a949a41221aa226b588a3b71a57e7635a914))
+* bug fix ([7d5b5a6](https://github.com/vebholic/oms_frontend/commit/7d5b5a6983f37bf50c9b5a527349aef32a545152))
+* bug fix ([e20f593](https://github.com/vebholic/oms_frontend/commit/e20f5937d330874919ad7eaca0ab2a16e5713b25))
+* bug fix ([e80295d](https://github.com/vebholic/oms_frontend/commit/e80295d3266b877f1ff2b6f71cc1b4582ad40953))
+* bug fix ([7aca12d](https://github.com/vebholic/oms_frontend/commit/7aca12d26e03d36923d733a59f8aa45457145b37))
+* **repair job:** hide actions ([5cbb51d](https://github.com/vebholic/oms_frontend/commit/5cbb51d0a04ab17b8edf4f38d810612ca79db7bb))
+* **transfer asset:** hide action buttons according to role ([7825967](https://github.com/vebholic/oms_frontend/commit/7825967115fa3ad8ee907b46b61efcc646ddfb51))
+
 ### [2.83.2](https://github.com/vebholic/oms_frontend/compare/v2.83.1...v2.83.2) (2022-03-28)
 
 ### [2.83.1](https://github.com/vebholic/oms_frontend/compare/v2.83.0...v2.83.1) (2022-03-27)
