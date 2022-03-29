@@ -1,7 +1,7 @@
 
 import { objectStore, insertUpdate, findOne, findAll, clearAll } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
-import { rentalManagement } from '../../constants/helpers';
+import { INVENTORY_STATUS, rentalManagement } from '../../constants/helpers';
 
 export const rentalJobOfflineUpdate = async (ids) => {
     try {
@@ -59,7 +59,6 @@ export const updateRentalProcessStatus = async (id, processStatus) => {
     }
 }
 
-
 export const updateRentalAssetStatus = async (id, status, asset) => {
     try {
         const rentalManagement = await findOne(objectStore.rentalManagement, id);
@@ -75,7 +74,6 @@ export const updateRentalAssetStatus = async (id, status, asset) => {
         return false;
     }
 }
-
 
 export const updateRentalProductStatus = async (id, status, product) => {
     try {
@@ -93,3 +91,35 @@ export const updateRentalProductStatus = async (id, status, product) => {
     }
 }
 
+export const addAssetsInRental = async (id, assets) => {
+    try {
+        const offlineDataSync = await findOne(objectStore.offlineDataSync, id);
+        assets?.forEach(element => {
+            element.status = INVENTORY_STATUS.reserved
+        });
+        if (offlineDataSync) {
+            await insertUpdate(objectStore.offlineDataSync, id, { _id: id, type: "assets", data: [...offlineDataSync.data, ...assets] });
+        }
+        else {
+            await insertUpdate(objectStore.offlineDataSync, id, { _id: id, type: "assets", data: assets });
+        }
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
+}
+
+export const removeAssetsInRental = async (id, assets) => {
+    try {
+        const offlineDataSync = await findOne(objectStore.offlineDataSync, id);
+        if (offlineDataSync) {
+            offlineDataSync.data = offlineDataSync.data?.filter((element) => assets?.some((e) => element.assetNumber === e.assetNumber) === false)
+            await insertUpdate(objectStore.offlineDataSync, id, { ...offlineDataSync });
+        }
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
+}

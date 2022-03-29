@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axiosInstance from "../../axios/axiosInstance";
-import { deliveryTicket, sidebarResource, asyncForEach } from "../../constants/helpers";
+import { deliveryTicket, rentalManagement, sidebarResource, asyncForEach } from "../../constants/helpers";
 import { CustomToastContext } from "../CustomToastContext/CustomToastContext";
 import { objectStore, findAll, deleteOne, setUpindexDB } from "../../constants/indexdbhelper";
 import { rentalJobOfflineUpdate } from "../../pages/RentalManagement/rentalOfflineHelper";
@@ -62,14 +62,28 @@ export const CustomOfflineProvider = ({ children }) => {
                     return OrderBy.indexOf(item?.data?.ticketType);
                 });
                 await asyncForEach(data, async (d: any) => {
-                    await axiosInstance().post(`${deliveryTicket.api}/offlinedatasync`, d.data)
-                        .then(({ data: { data } }) => {
-                            deleteOne(objectStore.offlineDataSync, d.data._id)
-                            deleteOne(objectStore.deliveryTicket, d.data._id)
+                    if (d?.type === "deliveryTicket") {
+                        await axiosInstance().post(`${deliveryTicket.api}/offlinedatasync`, d.data)
+                            .then(({ data: { data } }) => {
+                                deleteOne(objectStore.offlineDataSync, d.data._id)
+                                deleteOne(objectStore.deliveryTicket, d.data._id)
+                            })
+                            .catch((error) => {
+                            });
+                        await new Promise(resolve => setTimeout(resolve, 2000))
+                    }
+                    if (d?.type === "assets") {
+                        d.data?.forEach((ele) => {
+                            delete ele.status
                         })
-                        .catch((error) => {
-                        });
-                    await new Promise(resolve => setTimeout(resolve, 2000))
+                        await axiosInstance().post(`${rentalManagement.api}/${d._id}/inventory/sync-assets`, d.data)
+                            .then(({ data: { data } }) => {
+                                deleteOne(objectStore.offlineDataSync, d._id)
+                            })
+                            .catch((error) => {
+                            });
+                        await new Promise(resolve => setTimeout(resolve, 2000))
+                    }
                 })
                 await rentalJobOfflineUpdate([])
                 setIsSynch(false)

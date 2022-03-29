@@ -245,13 +245,14 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
         _id: _inventory.inventoryDetail?._id,
         srno: `${parent.srno}.${(k + 1)}`,
         detail: _inventory.inventoryDetail?.assetNumber,
-        status: _inventory.status,
+        status: _inventory.inventoryDetail?.status,
         actualStartDate: _inventory.startDate,
         actualEndDate: _inventory.endDate,
         type: "Asset",
         qty: 1,
       })
     })
+    
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
     childProduct.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
@@ -479,7 +480,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
               height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 365px)"}
               columns={columns}
               data={rowsData}
-              setCellColor={() => { }}
+              setWholeRowsCellColor={() => { }}
               onSelect={() => { }}
               childrenProperty="subRows"
               uniqueKey="_id"

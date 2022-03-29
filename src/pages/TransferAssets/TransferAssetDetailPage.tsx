@@ -66,7 +66,9 @@ const TransferAssetDetailPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [isTransferEnded, setTransferIsEnded] = useState(false);
-  const [allowedToEdit, setAllowedToEdit] = useState(false); 
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [isProcessor, setProcessor] = useState(false)
+  const [canReceive, setCanReceive] = useState(false)
   const [locationKeys, setLocationKeys] = useState([]);
 
   useEffect(() => {
@@ -171,8 +173,24 @@ const TransferAssetDetailPage = () => {
         const steps = data?.transferType === 'Internal' ? transferSteps : transferSteps1;
         setCurrentStep(steps.indexOf(data?.processStatus) !== -1 ? steps.indexOf(data?.processStatus) : 0);
         setCustomizedRoutes([routes.transferAsset, { title: data.transferAssetNumber }]);
-        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner, data.processor].some((d) => d?.optionValue === user?.user?._id);
+
+        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
+        
+        if(data.processor) {
+          const processor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
+          setProcessor(processor)
+        }
+
+        const userEntity = user?.entity?.map(e => e._id) ?? [];
+        const warehouseEntity = data?.transferType === "Internal" ? data?.transfertoPlant?.entity 
+        : data?.transferType === "External Customer" ? data?.transfertoCustomer?.entity  
+        :  data?.transfertoSupplier?.entity 
+ 
+        const isReceiveable = warehouseEntity.filter((w:any) => userEntity.indexOf(w) > -1)?.length > 0
+
+       setCanReceive(isReceiveable)
+        
         if (permissions?.transferAsset?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
@@ -470,7 +488,8 @@ const TransferAssetDetailPage = () => {
                       fileDownloading={fileDownloading}
                       isTransferEnded={isTransferEnded}
                       renderedFrom={`${renderedFrom}_grid-2`}
-                      allowedToEdit={allowedToEdit}
+                      allowedToEdit={allowedToEdit || isProcessor}
+                      canReceive={canReceive}
                     />
                   )}
                   {currentStep === 2 && (
@@ -489,7 +508,7 @@ const TransferAssetDetailPage = () => {
                       fileDownloading={fileDownloading}
                       isTransferEnded={isTransferEnded}
                       renderedFrom={`${renderedFrom}_grid-3`}
-                      allowedToEdit={allowedToEdit}
+                      allowedToEdit={allowedToEdit || isProcessor}
                     />
                   )}
                 </Box>

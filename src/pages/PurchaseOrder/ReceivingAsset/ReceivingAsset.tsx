@@ -226,7 +226,7 @@ const ReceivingAsset = ({ currencySymbol, purchaseOrderData, purchaseOrderProduc
                     /> : <CustomReactTable
                         columns={columns}
                         data={dataRows}
-                        setCellColor={(rowData) => (rowData?.type?.includes("roduct") && (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0)) ? "error" : ""}
+                        setWholeRowsCellColor={(rowData) => (rowData?.type?.includes("roduct") && (isNaN(rowData?.finalPrice) || rowData?.finalPrice === 0)) ? "error" : ""}
                         onSelect={setSelectedProducts}
                         childrenProperty="subRows"
                         uniqueKey="_id"

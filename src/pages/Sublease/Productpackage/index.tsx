@@ -24,7 +24,7 @@ import { FiPackage } from "react-icons/fi";
 import { RiEditCircleLine } from "react-icons/ri";
 import { fetch_sublease_product_fields } from "../../../components/Sublease/helper";
 
-const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit }) => {
+const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen, isTabletScreen, isSmallScreen, showActivity }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -494,14 +494,14 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                 {columns && rowsData ?
                     <Box
                         zIndex={5}
-                        width={"calc(100vw - 103px)"}
-                        height="calc(100vh - 350px)"
+                        width={stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw - 20px)' : isSmallScreen ? 'calc(100vw - 78px)' : showActivity ? '100%' : 'calc(100vw - 103px)'}
+                        height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
                     >
                         <CustomReactTable
-                            height="calc(100vh - 345px)"
+                            height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
                             columns={columns}
                             data={rowsData}
-                            setCellColor={(rowData) => !rowData.isValid ? "error" : ""}
+                            setWholeRowsCellColor={(rowData) => !rowData.isValid ? "error" : ""}
                             onSelect={setSelectedProducts}
                             childrenProperty="subRows"
                             uniqueKey="_id"
@@ -516,14 +516,17 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                 }
             </Grid>
         </Grid>
-        {deleteData && <ConfirmationDialog
-            open={true}
-            message={`Are you sure you want to delete the record(s)?`}
-            onClose={() => setDeleteData(null)}
-            onOk={() => handleDelete(deleteData)}
-            okBtnLoading={isDeleting}
-        />}
-        {isProductEdit.open &&
+        {
+            deleteData && <ConfirmationDialog
+                open={true}
+                message={`Are you sure you want to delete the record(s)?`}
+                onClose={() => setDeleteData(null)}
+                onOk={() => handleDelete(deleteData)}
+                okBtnLoading={isDeleting}
+            />
+        }
+        {
+            isProductEdit.open &&
             <QtyDialog
                 calculatePrice={calculatePrice}
                 onClose={() => {
@@ -539,7 +542,8 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                 loading={isUpdating}
             />
         }
-        {addExistingProductDialog.open &&
+        {
+            addExistingProductDialog.open &&
             <AddExistingProductInventory
                 isAddingProducts={isAddingProducts}
                 addProductInventory={handleAdd}
@@ -548,7 +552,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                 renderedFrom={addExistingProductDialog.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
             />
         }
-    </Fragment>
+    </Fragment >
     );
 };
 
