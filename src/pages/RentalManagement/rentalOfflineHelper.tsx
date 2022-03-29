@@ -98,10 +98,10 @@ export const addAssetsInRetal = async (id, assets) => {
             element.status = INVENTORY_STATUS.reserved
         });
         if (offlineDataSync) {
-            await insertUpdate(objectStore.offlineDataSync, id, { type: "assets", data: [...offlineDataSync.data, ...assets] });
+            await insertUpdate(objectStore.offlineDataSync, id, { _id: id, type: "assets", data: [...offlineDataSync.data, ...assets] });
         }
         else {
-            await insertUpdate(objectStore.offlineDataSync, id, { type: "assets", data: assets });
+            await insertUpdate(objectStore.offlineDataSync, id, { _id: id, type: "assets", data: assets });
         }
         return true;
     }
