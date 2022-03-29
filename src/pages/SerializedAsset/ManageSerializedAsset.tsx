@@ -56,7 +56,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
         const categoryOptions = data.find((obj) => obj?.fieldData.fieldName === 'productCategory')?.fieldData.option;
         const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'warehouse')?.fieldData.option;
         const productOptions = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData.option;
-        
+
         setProductCategoryOptions(categoryOptions);
         setPlantsCategoryOptions(plantsOptions);
         setProductDescriptionOptions(productOptions)
@@ -67,7 +67,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
             .then(({ data: { data } }) => {
               if (isClone) {
                 const { _id, createdBy, updatedBy, assetNumber, ...rest } = data;
-
                 setCloneHeading(assetNumber);
                 let oldValues = { ...rest };
                 oldValues.status = "New";
@@ -90,11 +89,14 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
             });
         } else {
           let createValues = getObjKeys('', fieldsDataForCreate);
-          if (productId && createValues) {
+          if (productId && fieldsDataForCreate.some((e) => e.fieldName === "product")) {
             createValues['product'] = productId;
           }
-          if (productCategory && createValues) {
+          if (productCategory && fieldsDataForCreate.some((e) => e.fieldName === "productCategory")) {
             createValues['productCategory'] = productCategory;
+          }
+          if (fieldsDataForCreate.some((e) => e.fieldName === "recertDate")) {
+            createValues["recertDate"] = ""
           }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -137,7 +139,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
         });
     }
   };
-
 
   const handleValuesChange = (data) => {
     setFormValues((prevState) => ({

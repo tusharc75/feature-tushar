@@ -45,6 +45,7 @@ const SubleaseDetailsPage = () => {
     const [fields, setFields] = useState([]);
     const [statusOptions, setStatusOptions] = useState([])
     const [allowedToEdit, setAllowedToEdit] = useState(false);
+    const [isProcessor, setIsProcessor] = useState(false);
     const [currentStep, setCurrentStep] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
     const [nextStep, setNextStep] = useState(true);
@@ -110,10 +111,12 @@ const SubleaseDetailsPage = () => {
             const { data: { data } } = await axiosInstance().get(`${sublease.api}/${id}`);
             setCurrentStep(subleaseSteps.indexOf(data?.processStatus) !== -1 ? subleaseSteps.indexOf(data?.processStatus) : 0);
             const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+            const isProcessorToEdit = [data.processor].some((d) => d?.optionValue === user?.user?._id);
             if (data?.productInventory?.length) {
                 setIsIssued(true)
             }
             setAllowedToEdit(isAllowedToEdit);
+            setIsProcessor(isProcessorToEdit);
             setSubleaseData(data);
         } catch (error) {
             toastConfig.setToastConfig(error);
@@ -268,6 +271,7 @@ const SubleaseDetailsPage = () => {
                                                             currentStep={currentStep}
                                                             renderedFrom={`${renderedFrom}_grid-2`}
                                                             allowedToEdit={allowedToEdit}
+                                                            isProcessor={isProcessor}
                                                         />
                                                     )}
                                                 </Paper>

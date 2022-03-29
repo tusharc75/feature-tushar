@@ -29,7 +29,7 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
-const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, renderedFrom, allowedToEdit }) => {
+const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, renderedFrom, allowedToEdit, isProcessor }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -179,7 +179,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
           />
         </Box>}
         <Box ml={2}>
-          {!isMobile && allowedToEdit && (
+          {!isMobile && (
             <Button
               onClick={() => {
                 setDownlodingFile(true);
@@ -229,7 +229,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
           )}
         </Box>
         <Box mx={1} />
-        {SUBLEASE_STATUS.completed != subleaseData?.status && allowedToEdit && (
+        {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && (
           <Fragment>
             {currentStep === 1 && (
               <Fragment>
@@ -297,7 +297,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                 <Box mx={1} />
               </Fragment>
             ) : null}
-            {currentStep === 2 && (
+            {currentStep === 2 && allowedToEdit && (
               <Fragment>
                 <Button
                   variant={'contained'}
@@ -320,7 +320,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
         {columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
-              allowSelection={allowedToEdit}
+              allowSelection={allowedToEdit || isProcessor}
               allowSwipe={true}
               permissions={true}
               primaryField={columns?.find((d) => d.field)}
@@ -363,7 +363,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               allowAction={false}
               loading={loading}
               isClientSideGrid={true}
-              allowSelection={allowedToEdit}
+              allowSelection={allowedToEdit || isProcessor}
               renderedFrom={renderedFrom}
               refreshGrid={fetchRecords}
               onCellValueChanged={handleValueUpdate}

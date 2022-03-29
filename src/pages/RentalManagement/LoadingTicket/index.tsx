@@ -6,7 +6,7 @@ import { CommonRenderer } from "../../../components/AgGridComponents/CustomAgGri
 import { Link } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Tooltip, Menu, MenuItem, Dialog, TextField, CircularProgress } from "@material-ui/core";
+import { Button, Tooltip, Menu, MenuItem, Dialog, TextField, CircularProgress, IconButton } from "@material-ui/core";
 import { AiFillFilePdf, AiOutlineLoading3Quarters } from 'react-icons/ai';
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -41,6 +41,9 @@ import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 import { groupBy, uniq, map } from "lodash";
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
+import HtmlTooltip from "../../../components/CustomTooltipTitle";
+import InfoIcon from '@material-ui/icons/Info';
+import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -55,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom, allowedToEdit }) => {
+const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom, allowedToEdit, isProcessor }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -78,6 +81,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
 
+  const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
+
   useEffect(() => {
     fetchRecords();
   }, []);
@@ -92,6 +97,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       var productAssets: any = [];
       var deliveryTicketList: any = [];
       var products: any = [];
+      var nonSerializeAsset: any = [];
+
       dispatch({ type: 'loading', loading: true });
 
       if (isOffline) {
@@ -134,31 +141,31 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
         products = productResponse?.data?.data?.material
+        nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset
       }
 
       products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
 
       products?.forEach((ele) => {
-        if (productAssets.filter((e) => e.productId === ele.materialId).length === 0) {
-          if (productAssets.filter((e) => e._id === ele.materialId).length) {
-            productAssets.forEach(element => {
-              if (element._id === ele.materialId) {
-                element.qty += ele.qty
-              }
-            });
-          }
-          else {
-            const obj: any = {}
-            obj._id = ele.materialId
-            obj.type = "Product"
-            obj.qty = ele.qty
-            obj.assetNumber = ele?.productDetail?.productName
-            obj.productName = ele?.productDetail?.productName
-            obj.productId = ele?.productDetail?._id
-            obj.warehouse = rentalManagementData?.warehouse?.optionLabel
-            obj.warehouseId = rentalManagementData?.warehouse?.optionValue
-            productAssets.push(obj)
-          }
+        if (productAssets.filter((e) => e._id === ele.materialId).length) {
+          productAssets.forEach(element => {
+            if (element._id === ele.materialId) {
+              element.qty += ele.qty
+            }
+          });
+        }
+        else {
+          const obj: any = {}
+          obj._id = ele.materialId
+          obj.type = "Product"
+          obj.qty = ele.qty
+          obj.assetNumber = ele?.productDetail?.productName
+          obj.productName = ele?.productDetail?.productName
+          obj.productId = ele?.productDetail?._id
+          obj.warehouse = rentalManagementData?.warehouse?.optionLabel
+          obj.warehouseId = rentalManagementData?.warehouse?.optionValue
+          obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId)
+          productAssets.push(obj)
         }
       })
 
@@ -235,9 +242,24 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   );
 
   const InventoryRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${params.data.type === "Asset" ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
+    <Fragment>
+      <Link className="link text-truncate" title={params.value} to={`${params.data.type === "Asset" ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params.data._id}`}>
+        {params.value}
+      </Link>
+      {(params?.data?.nonSerializeAsset && params?.data?.nonSerializeAsset?.length > 0) &&
+        <Box ml={1}>
+          <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
+            <IconButton size="small" onClick={() => {
+              setShowNonSerializeAsset({
+                open: true, data: { productName: params?.data?.productName, nonSerializeAsset: params?.data?.nonSerializeAsset }
+              })
+            }}>
+              <InfoIcon fontSize="small" color={"primary"} />
+            </IconButton>
+          </HtmlTooltip>
+        </Box>
+      }
+    </Fragment>
   );
 
   const ProductNameRenderer = (params) => (
@@ -376,44 +398,46 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         </Button>}
         <Box mx={1} />
         {allowedToEdit &&
+          <Button
+            variant={isMobile && !isTablet ? 'text' : 'outlined'}
+            color="primary"
+            aria-controls="simple-menu"
+            aria-haspopup="true"
+            disabled={selectedRecords.length === 0 || selectedRecords?.some(f => f.type === "Product") || isOffline}
+            size="small"
+            onClick={handleClick}
+            style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
+            endIcon={<ArrowDropDownIcon />}>
+            {'Change Status'}
+          </Button>
+        }
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          <MenuItem onClick={() => {
+            setAnchorEl(null)
+            setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
+          }}>Scrap</MenuItem>
+          <MenuItem onClick={() => {
+            setAnchorEl(null)
+            setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
+          }}>Lost</MenuItem>
+        </Menu>
+        {(allowedToEdit || isProcessor) &&
           <Fragment>
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
-              aria-controls="simple-menu"
-              aria-haspopup="true"
-              disabled={selectedRecords.length === 0 || selectedRecords?.some(f => f.type === "Product") || isOffline}
-              size="small"
-              onClick={handleClick}
-              style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
-              endIcon={<ArrowDropDownIcon />}>
-              {'Change Status'}
-            </Button>
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-            >
-              <MenuItem onClick={() => {
-                setAnchorEl(null)
-                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
-              }}>Scrap</MenuItem>
-              <MenuItem onClick={() => {
-                setAnchorEl(null)
-                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
-              }}>Lost</MenuItem>
-            </Menu>
             <Box mx={1} />
             <Tooltip title={(checkUniqWarehouse() && selectedRecords.length > 1) ? "Selected assets are located in several locations."
               : "Create Loading Ticket"}>
@@ -477,7 +501,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       {columns ?
         isMobile && !isTablet ?
           <CustomSwipableList
-            allowSelection={true}
+            allowSelection={allowedToEdit || isProcessor}
             allowSwipe={true}
             permissions={true}
             primaryField={columns?.find(d => d.field)}
@@ -525,7 +549,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             allowAction={false}
             loading={loading}
             isClientSideGrid={true}
-            allowSelection={allowedToEdit}
+            allowSelection={allowedToEdit || isProcessor}
             // rowClassRules={{
             //   "red-data-row":
             //     function (params) {
@@ -683,6 +707,12 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           setOpenDeliveryTicketDialog(false)
           fetchRecords()
         }}
+      />
+    }
+    {showNonSerializeAsset.open &&
+      <ShowNonSerializeAssets
+        data={showNonSerializeAsset.data}
+        onClose={() => setShowNonSerializeAsset({ open: false, data: {} })}
       />
     }
   </>
