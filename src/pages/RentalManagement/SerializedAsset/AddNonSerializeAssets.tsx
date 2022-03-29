@@ -21,8 +21,8 @@ import { makeStyles, createStyles, withStyles } from '@material-ui/styles';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { CircularProgress } from "@material-ui/core";
-import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
+import { CircularProgress } from '@material-ui/core';
+import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { addAssetsInRetal } from '../rentalOfflineHelper';
 
 interface DialogProps {
@@ -36,7 +36,7 @@ type TableContent = {
   ['id']: string;
   ['_id']: string;
   ['product']: string;
-  ['serializedProduct']: boolean,
+  ['serializedProduct']: boolean;
   ['srno']: string;
   ['Name']: string;
   ['Asset Number']: string;
@@ -52,7 +52,6 @@ const useClasses = makeStyles(() => ({
 }));
 
 const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }: DialogProps) => {
-
   const classes = useClasses();
   const { setToastConfig } = useContext(CustomToastContext);
   const [productData, setProductData] = useState<TableContent[]>([]);
@@ -82,16 +81,28 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
   }, [products]);
 
   useEffect(() => {
-    if (checkErrors() > 0) {
+    if (checkErrors()) {
       setHasError(checkErrors());
     } else {
       setHasError(null);
     }
   }, [tableData]);
 
-  const checkErrors = (): number => {
-    const emptyField = tableData.filter((t) => !t['Asset Number']);
-    return emptyField.length;
+  const checkErrors = (): string => {
+    const emptyField = tableData.filter(t=>!t['Asset Number']);
+    const duplicates = tableData.filter((v1,i,a)=>a.findIndex((v2)=>v1['Asset Number']===v2['Asset Number'])!==i);
+
+    console.log(duplicates)
+
+    if(emptyField.length) {
+      return "All products should have unique asset number"
+    } 
+
+    if(duplicates.length) {
+      return "One or more asset numbers are same!"
+    }
+
+    return null;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,14 +119,13 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
 
   const handleExport = () => {
     let json_data = [
-      ...tableData.map((data: TableContent) => {
-        delete data.id;
-        delete data._id;
-        delete data.product;
-        return data;
-      })
+      ...tableData.map((data: TableContent) => ({
+        'Sr No.': data['srno'],
+        Name: data['Name'],
+        'Asset Number': data['Asset Number']
+      }))
     ];
-    const header = ['srno', 'Name', 'Asset Number'];
+    const header = ['Sr No.', 'Name', 'Asset Number'];
 
     const ws = utils.json_to_sheet(json_data);
     if (header.length) {
@@ -128,7 +138,8 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
-    const files = e.target.files, f = files[0];
+    const files = e.target.files,
+      f = files[0];
     let reader = new FileReader();
     reader.onload = function (e) {
       const data = e.target.result;
@@ -136,8 +147,11 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
       const wsname = readedData.SheetNames[0];
       const ws = readedData.Sheets[wsname];
       const parsedData = utils.sheet_to_json(ws, { header: 1 });
+
       if (parsedData.length > 1) {
+      
         let tableContent = parsedData.slice(1, parsedData.length);
+
         tableContent = tableContent.map((item) => {
           const foundProduct: TableContent = productData.find((p) => p['Name'] === item[1]);
           let tableObj: TableContent = {
@@ -147,7 +161,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
             serializedProduct: foundProduct?.serializedProduct,
             ['srno']: item[0],
             ['Name']: item[1],
-            ['Asset Number']: item[2]
+            ["Asset Number"]: item[2]
           };
           return tableObj;
         });
@@ -162,17 +176,20 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
     e.preventDefault();
     if (isOffline) {
       setSubmitting(true);
-      addAssetsInRetal(referenceId, tableData.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'], serializedProduct: t.serializedProduct })))
+      addAssetsInRetal(
+        referenceId,
+        tableData.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'], serializedProduct: t.serializedProduct }))
+      );
       closeDialog();
-    }
-    else {
+    } else {
       if (hasError || !warehouse) return;
       setSubmitting(true);
       const dataToSubmit = {
         warehouse: warehouse,
         assets: tableData.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'] }))
       };
-      axiosInstance().post(`${routes.rentalManagement.path}/${referenceId}/inventory/create-non-serialized-assets`, dataToSubmit)
+      axiosInstance()
+        .post(`${routes.rentalManagement.path}/${referenceId}/inventory/create-non-serialized-assets`, dataToSubmit)
         .then(() => {
           setSubmitting(false);
           closeDialog();
@@ -186,7 +203,10 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
 
   return (
     <Dialog open onClose={closeDialog} fullScreen>
-      <CustomDialogHeader title={isOffline ? `Assign ${routes.serializedAsset.title}` : `Create Non ${routes.serializedAsset.title}`} onClose={closeDialog} />
+      <CustomDialogHeader
+        title={isOffline ? `Assign ${routes.serializedAsset.title}` : `Create Non ${routes.serializedAsset.title}`}
+        onClose={closeDialog}
+      />
       <CustomDialogContent>
         <Box display="flex" flexDirection="column" component={'form'} onSubmit={handleSubmit}>
           <Box alignSelf={'flex-end'} mb={2}>
@@ -196,7 +216,8 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
               size="small"
               color="primary"
               endIcon={isSubmitting && <CircularProgress size={20} />}
-              disabled={isSubmitting || Boolean(hasError)}>
+              disabled={isSubmitting || Boolean(hasError)}
+            >
               Add
             </Button>
           </Box>
@@ -214,7 +235,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
                 </label>
               </Box>
             </Box>
-            <Box>{hasError && <Typography>Remaining Assets ({hasError})</Typography>}</Box>
+            <Box>{hasError && <Typography color='error'>{hasError}</Typography>}</Box>
           </Box>
           <TableContainer component={Paper}>
             <Table className={classes.table} aria-label="customized table">
@@ -239,7 +260,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
                         variant="outlined"
                         placeholder="Asset Number"
                         value={data['Asset Number']}
-                        autoComplete='off'
+                        autoComplete="off"
                         name={data.id}
                         onChange={handleChange}
                       />
