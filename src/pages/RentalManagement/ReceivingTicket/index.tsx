@@ -283,7 +283,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     }).catch((error) => {
     });
   }
-  
+
   const InventoryRenderer = (params) => (
     <Fragment>
       <Link className="link text-truncate" title={params.value} to={`${params.data.type === "Asset" ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params.data._id}`}>
@@ -688,6 +688,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
                 else {
                   products.push({
                     _id: element?.product?.optionValue,
+                    id: element?.product?.optionValue,
                     productName: element?.product?.optionLabel,
                     qty: 1
                   })

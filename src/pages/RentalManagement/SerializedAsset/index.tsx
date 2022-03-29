@@ -257,6 +257,19 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       if (isOffline) {
         data = await findOne(objectStore.rentalManagement, rentalManagementData._id)
         data.inventory = data.productInventory;
+        data.nonSerializeAsset = data?.nonSerializeAsset;
+
+        const offlineDataSync = await findOne(objectStore.offlineDataSync, rentalManagementData._id)
+        if (offlineDataSync && offlineDataSync?.data) {
+          offlineDataSync?.data?.forEach((element: any) => {
+            if (element?.serializedProduct) {
+              data.inventory.push(element)
+            }
+            else {
+              data.nonSerializeAsset.push(element)
+            }
+          })
+        }
       }
       else {
         const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
@@ -328,7 +341,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       subRows.push({
         ..._inventory,
         srno: `${parent.srno}.${(k + 1)}`,
-        detail: _inventory.inventoryDetail?.assetNumber,
+        detail: _inventory?.assetNumber ? _inventory?.assetNumber : _inventory.inventoryDetail?.assetNumber,
         type: "asset",
         isNonSerializeAsset: false,
         status: _inventory.inventoryDetail?.status,
@@ -485,7 +498,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         else {
           assetProduct.push({
             ...element,
-            _id: element.materialId,
+            _id: element._id,
             id: element.materialId,
             productName: element.productDetail?.productName,
             qty: element.realAssetQty - element.realAssetAssignedQty
@@ -553,20 +566,27 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               size="small"
               disabled={disableAssignSerializedAssets()}
               onClick={() => {
-                setAddSerializedAssetDialog({ open: true })
+                if (isOffline) {
+                  setAddNonSerializedAssetDialog(true)
+                }
+                else {
+                  setAddSerializedAssetDialog({ open: true })
+                }
               }}
             >
               {`Assign ${routes.serializedAsset.title}`}
             </Button>
-            <Button
-              variant="outlined"
-              color="default"
-              size="small"
-              onClick={openActions}
-              aria-controls="action-menu"
-            >
-              Actions <ExpandMore />
-            </Button>
+            {!isOffline &&
+              <Button
+                variant="outlined"
+                color="default"
+                size="small"
+                onClick={openActions}
+                aria-controls="action-menu"
+              >
+                Actions <ExpandMore />
+              </Button>
+            }
             <Menu
               anchorEl={anchorActionEl}
               keepMounted
@@ -722,7 +742,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               onSelect={setSelectedRecords}
               childrenProperty="subRows"
               uniqueKey="_id"
-              hideSelection={isOffline || !allowedToEdit}
+              hideSelection={!allowedToEdit}
               renderedFrom="rental_management_serialized_asset"
               isClientSideGrid={true}
             />
@@ -756,9 +776,10 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             setSelectedRecords([])
             fetchProductInventory()
           }}
-          products={nonSerializedAssetProduct}
-          warehouse={rentalManagementData?.warehouse ?? null}
-          rentalId={rentalManagementData?._id}
+
+          products={isOffline ? [...assetAssignedProduct, ...nonSerializedAssetProduct] : nonSerializedAssetProduct}
+          warehouse={rentalManagementData?.warehouse?.optionValue}
+          referenceId={rentalManagementData?._id}
         />
       )
     }

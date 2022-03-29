@@ -409,6 +409,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                       else {
                         products.push({
                           _id: element?.product?.optionValue,
+                          id: element?.product?.optionValue,
                           productName: element?.product?.optionLabel,
                           qty: 1
                         })

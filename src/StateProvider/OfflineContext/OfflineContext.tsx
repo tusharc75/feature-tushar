@@ -62,14 +62,16 @@ export const CustomOfflineProvider = ({ children }) => {
                     return OrderBy.indexOf(item?.data?.ticketType);
                 });
                 await asyncForEach(data, async (d: any) => {
-                    await axiosInstance().post(`${deliveryTicket.api}/offlinedatasync`, d.data)
-                        .then(({ data: { data } }) => {
-                            deleteOne(objectStore.offlineDataSync, d.data._id)
-                            deleteOne(objectStore.deliveryTicket, d.data._id)
-                        })
-                        .catch((error) => {
-                        });
-                    await new Promise(resolve => setTimeout(resolve, 2000))
+                    if (d?.type === "deliveryTicket") {
+                        await axiosInstance().post(`${deliveryTicket.api}/offlinedatasync`, d.data)
+                            .then(({ data: { data } }) => {
+                                deleteOne(objectStore.offlineDataSync, d.data._id)
+                                deleteOne(objectStore.deliveryTicket, d.data._id)
+                            })
+                            .catch((error) => {
+                            });
+                        await new Promise(resolve => setTimeout(resolve, 2000))
+                    }
                 })
                 await rentalJobOfflineUpdate([])
                 setIsSynch(false)
