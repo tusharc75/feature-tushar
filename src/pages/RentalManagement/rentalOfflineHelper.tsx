@@ -91,7 +91,7 @@ export const updateRentalProductStatus = async (id, status, product) => {
     }
 }
 
-export const addAssetsInRetal = async (id, assets) => {
+export const addAssetsInRental = async (id, assets) => {
     try {
         const offlineDataSync = await findOne(objectStore.offlineDataSync, id);
         assets?.forEach(element => {
@@ -102,6 +102,20 @@ export const addAssetsInRetal = async (id, assets) => {
         }
         else {
             await insertUpdate(objectStore.offlineDataSync, id, { _id: id, type: "assets", data: assets });
+        }
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
+}
+
+export const removeAssetsInRental = async (id, assets) => {
+    try {
+        const offlineDataSync = await findOne(objectStore.offlineDataSync, id);
+        if (offlineDataSync) {
+            offlineDataSync.data = offlineDataSync.data?.filter((element) => assets?.some((e) => element.assetNumber === e.assetNumber) === false)
+            await insertUpdate(objectStore.offlineDataSync, id, { ...offlineDataSync });
         }
         return true;
     }

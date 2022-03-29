@@ -21,9 +21,9 @@ import { makeStyles, createStyles, withStyles } from '@material-ui/styles';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { CircularProgress } from '@material-ui/core';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { addAssetsInRetal } from '../rentalOfflineHelper';
+import { CircularProgress } from "@material-ui/core";
+import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
+import { addAssetsInRental } from '../rentalOfflineHelper';
 
 interface DialogProps {
   closeDialog: () => void;
@@ -176,10 +176,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
     e.preventDefault();
     if (isOffline) {
       setSubmitting(true);
-      addAssetsInRetal(
-        referenceId,
-        tableData.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'], serializedProduct: t.serializedProduct }))
-      );
+      addAssetsInRental(referenceId, tableData.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'], serializedProduct: t.serializedProduct })))
       closeDialog();
     } else {
       if (hasError || !warehouse) return;
