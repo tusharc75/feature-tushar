@@ -37,6 +37,7 @@ interface LoadingGridProps {
   isTransferEnded: boolean;
   renderedFrom?: string;
   allowedToEdit: boolean;
+  canReceive: boolean;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
@@ -54,7 +55,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     fileDownloading,
     isTransferEnded,
     renderedFrom,
-    allowedToEdit
+    allowedToEdit,
+    canReceive
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -386,7 +388,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                 >
                   Create Loading Ticket</MenuItem>
                 <MenuItem
-                  disabled={selectedRecords.length === 0 ||
+                  disabled={!canReceive || selectedRecords.length === 0 ||
                     selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length}
                   onClick={() => {
                     setShowConfirmBoxReceive(true)
