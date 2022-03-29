@@ -438,7 +438,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 365px)"}
           columns={columns}
           data={rowsData}
-          setCellColor={(rowData) => {
+          setWholeRowsCellColor={(rowData) => {
             if ([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(rowData?.status)) return "error";
             return "";
           }}

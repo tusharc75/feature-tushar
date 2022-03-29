@@ -611,7 +611,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           onSelect={setSelectedRecords}
           childrenProperty="subRows"
           uniqueKey="_id"
-          setCellColor={(rowData) => {
+          setWholeRowsCellColor={(rowData) => {
             if ([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(rowData?.status)) return "error";
             return "";
           }}

@@ -127,8 +127,10 @@ const RepairJobDetails = () => {
       .then(({ data: { data } }) => {
         setRepairJobData({ ...data });
         setCurrentStep(repairJobProcessSteps.indexOf(data?.processStatus) !== -1 ? repairJobProcessSteps.indexOf(data?.processStatus) : 0);
-        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner, data.processor].some((d) => d?.optionValue === user?.user?._id);
+        
+        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
+       
         if (permissions?.repairJob?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();

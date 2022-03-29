@@ -269,7 +269,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
-      parent.hideSelection = parent.assetQty > 0 ? true : false;
+      parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
 
@@ -292,7 +292,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       _subRow.assetQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
-      _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
+      _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
     });
     if (subRows.length === 0 && parent.type === "package") {
@@ -594,7 +594,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
                 columns={columns}
                 data={rowsData}
-                setCellColor={(rowData) => !rowData.isValid ? "error" : ""}
+                setWholeRowsCellColor={(rowData) => !rowData.isValid ? "error" : ""}
                 onSelect={setSelectedProducts}
                 childrenProperty="subRows"
                 uniqueKey="_id"

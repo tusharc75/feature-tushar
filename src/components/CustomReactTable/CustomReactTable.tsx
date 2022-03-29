@@ -71,7 +71,7 @@ export default function CustomReactTable({
     columns,
     data,
     onSelect,
-    setCellColor = null,
+    setWholeRowsCellColor = null,   // Use this prop when you want to change whole row's cell color.
     childrenProperty,
     uniqueKey,
     height = "100%",
@@ -398,7 +398,10 @@ export default function CustomReactTable({
                                     <TableRow {...row.getRowProps()} className="tr">
                                         {row.cells.map(cell => {
                                             return (
-                                                <TableCell {...cell.getCellProps()} className={`td ${setCellColor ? setCellColor(row.original) : ""}`}>
+                                                <TableCell {...cell.getCellProps()} className={`td 
+                                                    ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ""} 
+                                                    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ""}`}
+                                                >
                                                     {cell.render('Cell')}
                                                 </TableCell>
                                             )

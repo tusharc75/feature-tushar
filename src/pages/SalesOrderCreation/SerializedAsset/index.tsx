@@ -431,7 +431,7 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
               height="calc(100vh - 365px)"
               columns={columns}
               data={rowsData}
-              setCellColor={(rowData) => !rowData.isValid ? "error" : ""}
+              setWholeRowsCellColor={(rowData) => !rowData.isValid ? "error" : ""}
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
