@@ -32,6 +32,7 @@ const SubleaseDetailsPage = () => {
     const renderedFrom = camelCase(routes?.sublease.title)
     const toastConfig = useContext(CustomToastContext);
     const isSmallScreen = useMediaQuery('(max-width:1300px)');
+    const isTabletScreen = useMediaQuery('(max-width:960px)')
     const [showActivity, setActivityShow] = useState(defaultActivityShow);
 
     const { id } = useParams();
@@ -45,12 +46,14 @@ const SubleaseDetailsPage = () => {
     const [fields, setFields] = useState([]);
     const [statusOptions, setStatusOptions] = useState([])
     const [allowedToEdit, setAllowedToEdit] = useState(false);
+    const [isProcessor, setIsProcessor] = useState(false);
     const [currentStep, setCurrentStep] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
     const [nextStep, setNextStep] = useState(true);
 
     const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
     const [isIssued, setIsIssued] = useState(false);
+    const [stepFullScreen, setStepFullScreen] = useState(false);
 
     function a11yProps(index: any) {
         return {
@@ -110,10 +113,12 @@ const SubleaseDetailsPage = () => {
             const { data: { data } } = await axiosInstance().get(`${sublease.api}/${id}`);
             setCurrentStep(subleaseSteps.indexOf(data?.processStatus) !== -1 ? subleaseSteps.indexOf(data?.processStatus) : 0);
             const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+            const isProcessorToEdit = [data.processor].some((d) => d?.optionValue === user?.user?._id);
             if (data?.productInventory?.length) {
                 setIsIssued(true)
             }
             setAllowedToEdit(isAllowedToEdit);
+            setIsProcessor(isProcessorToEdit);
             setSubleaseData(data);
         } catch (error) {
             toastConfig.setToastConfig(error);
@@ -258,6 +263,10 @@ const SubleaseDetailsPage = () => {
                                                             isIssued={isIssued}
                                                             renderedFrom={`${renderedFrom}_grid-1`}
                                                             allowedToEdit={allowedToEdit}
+                                                            stepFullScreen={stepFullScreen}
+                                                            isSmallScreen={isSmallScreen}
+                                                            isTabletScreen={isTabletScreen}
+                                                            showActivity={showActivity}
                                                         />
                                                     )}
                                                     {(currentStep === 1 || currentStep === 2) && subleaseData && (
@@ -268,6 +277,7 @@ const SubleaseDetailsPage = () => {
                                                             currentStep={currentStep}
                                                             renderedFrom={`${renderedFrom}_grid-2`}
                                                             allowedToEdit={allowedToEdit}
+                                                            isProcessor={isProcessor}
                                                         />
                                                     )}
                                                 </Paper>

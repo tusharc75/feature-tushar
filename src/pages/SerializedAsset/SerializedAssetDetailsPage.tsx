@@ -355,12 +355,6 @@ const SerializedAssetDetailsPage = () => {
       });
     }
   }
-  const getContactEmails = (contacts) => {
-    return contacts.reduce((emails, contact) => {
-      if (contact?.email) emails.push(contact.email);
-      return emails;
-    }, []);
-  };
 
   useEffect(() => {
     if (productInventoryData) {
@@ -371,7 +365,7 @@ const SerializedAssetDetailsPage = () => {
         setManualStatus([INVENTORY_STATUS.lost, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert])
       }
       else if (productInventoryData.status === INVENTORY_STATUS.lost) {
-        setManualStatus([INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert])
+        setManualStatus([INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert, INVENTORY_STATUS.scrap])
       }
       else {
         setManualStatus([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert])

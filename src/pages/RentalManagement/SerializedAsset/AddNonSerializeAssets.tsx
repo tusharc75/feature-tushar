@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   Dialog,
   Box,
@@ -21,22 +21,22 @@ import { makeStyles, createStyles, withStyles } from '@material-ui/styles';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { CircularProgress } from "@material-ui/core";
+import { CircularProgress } from '@material-ui/core';
+import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
+import { addAssetsInRetal } from '../rentalOfflineHelper';
+
 interface DialogProps {
   closeDialog: () => void;
   products: any[];
-  rentalId: string;
-  warehouse: {
-    address: string;
-    optionLabel: string;
-    optionValue: string;
-  };
+  referenceId: string;
+  warehouse: string;
 }
 
 type TableContent = {
   ['id']: string;
   ['_id']: string;
   ['product']: string;
+  ['serializedProduct']: boolean;
   ['srno']: string;
   ['Name']: string;
   ['Asset Number']: string;
@@ -51,26 +51,25 @@ const useClasses = makeStyles(() => ({
   }
 }));
 
-const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: DialogProps) => {
-
-  console.log(products)
-
+const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }: DialogProps) => {
   const classes = useClasses();
-  const { setToastConfig } = React.useContext(CustomToastContext);
-  const [productData, setProductData] = React.useState<TableContent[]>([]);
-  const [tableData, setTableData] = React.useState<TableContent[]>([]);
-  const [hasError, setHasError] = React.useState(null);
-  const [isSubmitting, setSubmitting] = React.useState(false);
+  const { setToastConfig } = useContext(CustomToastContext);
+  const [productData, setProductData] = useState<TableContent[]>([]);
+  const [tableData, setTableData] = useState<TableContent[]>([]);
+  const [hasError, setHasError] = useState(null);
+  const [isSubmitting, setSubmitting] = useState(false);
+  const { isOffline } = useContext(CustomOfflineContext);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!products) return;
     const mappedTable: TableContent[] = [];
     products.forEach((p: any, index_1) => {
       [...Array(p?.qty).keys()].forEach((_, index_2) => {
         mappedTable.push({
-          id: `${index_1 + 1}.${index_2 + 1}_${p?._id}`,
           _id: p?._id,
+          id: `${index_1 + 1}.${index_2 + 1}_${p?._id}`,
           product: p?.productDetail?._id,
+          serializedProduct: p?.serializedProduct,
           ['srno']: `${index_1 + 1}.${index_2 + 1}`,
           ['Name']: p?.detail,
           ['Asset Number']: ''
@@ -81,17 +80,29 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
     setProductData(mappedTable);
   }, [products]);
 
-  React.useEffect(() => {
-    if (checkErrors() > 0) {
+  useEffect(() => {
+    if (checkErrors()) {
       setHasError(checkErrors());
     } else {
       setHasError(null);
     }
   }, [tableData]);
 
-  const checkErrors = (): number => {
-    const emptyField = tableData.filter((t) => !t['Asset Number']);
-    return emptyField.length;
+  const checkErrors = (): string => {
+    const emptyField = tableData.filter(t=>!t['Asset Number']);
+    const duplicates = tableData.filter((v1,i,a)=>a.findIndex((v2)=>v1['Asset Number']===v2['Asset Number'])!==i);
+
+    console.log(duplicates)
+
+    if(emptyField.length) {
+      return "All products should have unique asset number"
+    } 
+
+    if(duplicates.length) {
+      return "One or more asset numbers are same!"
+    }
+
+    return null;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,14 +119,13 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
 
   const handleExport = () => {
     let json_data = [
-      ...tableData.map((data: TableContent) => {
-        delete data.id;
-        delete data._id;
-        delete data.product;
-        return data;
-      })
+      ...tableData.map((data: TableContent) => ({
+        'Sr No.': data['srno'],
+        Name: data['Name'],
+        'Asset Number': data['Asset Number']
+      }))
     ];
-    const header = ['srno', 'Name', 'Asset Number'];
+    const header = ['Sr No.', 'Name', 'Asset Number'];
 
     const ws = utils.json_to_sheet(json_data);
     if (header.length) {
@@ -128,7 +138,8 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
-    const files = e.target.files, f = files[0];
+    const files = e.target.files,
+      f = files[0];
     let reader = new FileReader();
     reader.onload = function (e) {
       const data = e.target.result;
@@ -136,17 +147,21 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
       const wsname = readedData.SheetNames[0];
       const ws = readedData.Sheets[wsname];
       const parsedData = utils.sheet_to_json(ws, { header: 1 });
+
       if (parsedData.length > 1) {
+      
         let tableContent = parsedData.slice(1, parsedData.length);
+
         tableContent = tableContent.map((item) => {
           const foundProduct: TableContent = productData.find((p) => p['Name'] === item[1]);
           let tableObj: TableContent = {
             id: `${item[0]}_${foundProduct?._id}`,
             _id: foundProduct?._id,
             product: foundProduct?.product,
+            serializedProduct: foundProduct?.serializedProduct,
             ['srno']: item[0],
             ['Name']: item[1],
-            ['Asset Number']: item[2]
+            ["Asset Number"]: item[2]
           };
           return tableObj;
         });
@@ -157,28 +172,41 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
     e.target.value = null;
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (hasError || !warehouse) return;
-    setSubmitting(true);
-    const dataToSubmit = {
-      warehouse: warehouse?.optionValue,
-      assets: tableData.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'] }))
-    };
-    axiosInstance().post(`${routes.rentalManagement.path}/${rentalId}/inventory/create-assets-non-serialized-product`, dataToSubmit)
-      .then(() => {
-        setSubmitting(false);
-        closeDialog();
-      })
-      .catch((err) => {
-        setSubmitting(false);
-        setToastConfig(err);
-      });
+    if (isOffline) {
+      setSubmitting(true);
+      addAssetsInRetal(
+        referenceId,
+        tableData.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'], serializedProduct: t.serializedProduct }))
+      );
+      closeDialog();
+    } else {
+      if (hasError || !warehouse) return;
+      setSubmitting(true);
+      const dataToSubmit = {
+        warehouse: warehouse,
+        assets: tableData.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'] }))
+      };
+      axiosInstance()
+        .post(`${routes.rentalManagement.path}/${referenceId}/inventory/create-non-serialized-assets`, dataToSubmit)
+        .then(() => {
+          setSubmitting(false);
+          closeDialog();
+        })
+        .catch((err) => {
+          setSubmitting(false);
+          setToastConfig(err);
+        });
+    }
   };
 
   return (
     <Dialog open onClose={closeDialog} fullScreen>
-      <CustomDialogHeader title="Create Non Serialize Assets" onClose={closeDialog} />
+      <CustomDialogHeader
+        title={isOffline ? `Assign ${routes.serializedAsset.title}` : `Create Non ${routes.serializedAsset.title}`}
+        onClose={closeDialog}
+      />
       <CustomDialogContent>
         <Box display="flex" flexDirection="column" component={'form'} onSubmit={handleSubmit}>
           <Box alignSelf={'flex-end'} mb={2}>
@@ -188,7 +216,8 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
               size="small"
               color="primary"
               endIcon={isSubmitting && <CircularProgress size={20} />}
-              disabled={isSubmitting || Boolean(hasError)}>
+              disabled={isSubmitting || Boolean(hasError)}
+            >
               Add
             </Button>
           </Box>
@@ -206,7 +235,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
                 </label>
               </Box>
             </Box>
-            <Box>{hasError && <Typography>Remaining Assets ({hasError})</Typography>}</Box>
+            <Box>{hasError && <Typography color='error'>{hasError}</Typography>}</Box>
           </Box>
           <TableContainer component={Paper}>
             <Table className={classes.table} aria-label="customized table">
@@ -231,7 +260,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
                         variant="outlined"
                         placeholder="Asset Number"
                         value={data['Asset Number']}
-                        autoComplete='off'
+                        autoComplete="off"
                         name={data.id}
                         onChange={handleChange}
                       />

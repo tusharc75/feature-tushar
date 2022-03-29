@@ -25,7 +25,6 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
-import { MdAccountCircle } from 'react-icons/md';
 import { AiFillCrown, MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -76,6 +75,7 @@ const SerializedAsset = () => {
   });
 
   const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
+  const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
@@ -133,6 +133,12 @@ const SerializedAsset = () => {
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
+        data?.some(o => {
+          if (o?.fieldData?.fieldName === "status") {
+            setAllowUpdateStatus(o?.isUpdate)
+            return true
+          }
+        })
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
@@ -387,6 +393,8 @@ const SerializedAsset = () => {
     }
   };
 
+  console.log(allowUpdateStatus)
+
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -551,8 +559,7 @@ const SerializedAsset = () => {
                       label="Sublease Assets"
                     />
                   )}
-
-                  <FormControlLabel
+                  {/* <FormControlLabel
                     control={
                       <Checkbox
                         name="isNonSerializedAsset"
@@ -564,8 +571,7 @@ const SerializedAsset = () => {
                       />
                     }
                     label="Non Serialized Assets"
-                  />
-
+                  /> */}
                 </Fragment>
               )}
             </Grid>
@@ -597,7 +603,6 @@ const SerializedAsset = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-
                   <HtmlTooltip title="Please select some inventories">
                     <span>
                       <Button
@@ -635,37 +640,18 @@ const SerializedAsset = () => {
                         Delete
                       </MenuItem>
                     )}
-                    {permissions?.serializedAsset?.isUpdate && (
-                      <>
+                    {(permissions?.serializedAsset?.isUpdate && allowUpdateStatus) && (
+                      [INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].map((status) => (
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusUpdate(INVENTORY_STATUS.available);
+                            handleStatusUpdate(status);
                           }}
-                          disabled={selectedRecords?.filter((o) => o.status === INVENTORY_STATUS.underReview).length === selectedRecords.length ? false : true}
+                          disabled={selectedRecords?.filter((o) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(o.status)).length === selectedRecords.length ? false : true}
                         >
-                          {`Status Change - ${INVENTORY_STATUS.available}`}
+                          {`Status Change - ${status}`}
                         </MenuItem>
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            handleStatusUpdate(INVENTORY_STATUS.needRepair);
-                          }}
-                          disabled={selectedRecords?.filter((o) => o.status === INVENTORY_STATUS.underReview).length === selectedRecords.length ? false : true}
-                        >
-                          {`Status Change - ${INVENTORY_STATUS.needRepair}`}
-                        </MenuItem>
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            handleStatusUpdate(INVENTORY_STATUS.needRepair);
-                          }}
-                          disabled={selectedRecords?.filter((o) => o.status === INVENTORY_STATUS.underReview).length === selectedRecords.length ? false : true}
-                        >
-                          {`Status Change - ${INVENTORY_STATUS.needRepair}`}
-                        </MenuItem>
-                      </>
-                    )}
+                      )))}
                   </Menu>
                 </Grid>
               </Box>
