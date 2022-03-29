@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom, allowedToEdit }) => {
+const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom, allowedToEdit, isProcessor }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -139,26 +139,24 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
 
       products?.forEach((ele) => {
-        if (productAssets.filter((e) => e.productId === ele.materialId).length === 0) {
-          if (productAssets.filter((e) => e._id === ele.materialId).length) {
-            productAssets.forEach(element => {
-              if (element._id === ele.materialId) {
-                element.qty += ele.qty
-              }
-            });
-          }
-          else {
-            const obj: any = {}
-            obj._id = ele.materialId
-            obj.type = "Product"
-            obj.qty = ele.qty
-            obj.assetNumber = ele?.productDetail?.productName
-            obj.productName = ele?.productDetail?.productName
-            obj.productId = ele?.productDetail?._id
-            obj.warehouse = rentalManagementData?.warehouse?.optionLabel
-            obj.warehouseId = rentalManagementData?.warehouse?.optionValue
-            productAssets.push(obj)
-          }
+        if (productAssets.filter((e) => e._id === ele.materialId).length) {
+          productAssets.forEach(element => {
+            if (element._id === ele.materialId) {
+              element.qty += ele.qty
+            }
+          });
+        }
+        else {
+          const obj: any = {}
+          obj._id = ele.materialId
+          obj.type = "Product"
+          obj.qty = ele.qty
+          obj.assetNumber = ele?.productDetail?.productName
+          obj.productName = ele?.productDetail?.productName
+          obj.productId = ele?.productDetail?._id
+          obj.warehouse = rentalManagementData?.warehouse?.optionLabel
+          obj.warehouseId = rentalManagementData?.warehouse?.optionValue
+          productAssets.push(obj)
         }
       })
 
@@ -376,44 +374,46 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         </Button>}
         <Box mx={1} />
         {allowedToEdit &&
+          <Button
+            variant={isMobile && !isTablet ? 'text' : 'outlined'}
+            color="primary"
+            aria-controls="simple-menu"
+            aria-haspopup="true"
+            disabled={selectedRecords.length === 0 || selectedRecords?.some(f => f.type === "Product") || isOffline}
+            size="small"
+            onClick={handleClick}
+            style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
+            endIcon={<ArrowDropDownIcon />}>
+            {'Change Status'}
+          </Button>
+        }
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          <MenuItem onClick={() => {
+            setAnchorEl(null)
+            setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
+          }}>Scrap</MenuItem>
+          <MenuItem onClick={() => {
+            setAnchorEl(null)
+            setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
+          }}>Lost</MenuItem>
+        </Menu>
+        {(allowedToEdit || isProcessor) &&
           <Fragment>
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
-              aria-controls="simple-menu"
-              aria-haspopup="true"
-              disabled={selectedRecords.length === 0 || selectedRecords?.some(f => f.type === "Product") || isOffline}
-              size="small"
-              onClick={handleClick}
-              style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
-              endIcon={<ArrowDropDownIcon />}>
-              {'Change Status'}
-            </Button>
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-            >
-              <MenuItem onClick={() => {
-                setAnchorEl(null)
-                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
-              }}>Scrap</MenuItem>
-              <MenuItem onClick={() => {
-                setAnchorEl(null)
-                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
-              }}>Lost</MenuItem>
-            </Menu>
             <Box mx={1} />
             <Tooltip title={(checkUniqWarehouse() && selectedRecords.length > 1) ? "Selected assets are located in several locations."
               : "Create Loading Ticket"}>
@@ -477,7 +477,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       {columns ?
         isMobile && !isTablet ?
           <CustomSwipableList
-            allowSelection={true}
+            allowSelection={allowedToEdit || isProcessor}
             allowSwipe={true}
             permissions={true}
             primaryField={columns?.find(d => d.field)}
@@ -525,7 +525,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             allowAction={false}
             loading={loading}
             isClientSideGrid={true}
-            allowSelection={allowedToEdit}
+            allowSelection={allowedToEdit || isProcessor}
             // rowClassRules={{
             //   "red-data-row":
             //     function (params) {

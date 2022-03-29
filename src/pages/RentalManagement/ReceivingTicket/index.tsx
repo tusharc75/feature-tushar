@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom, allowedToEdit }) => {
+const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom, allowedToEdit, isProcessor }) => {
 
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -172,30 +172,28 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
 
       products?.forEach((ele) => {
-        if (productAssets.filter((e) => e.productId === ele.materialId).length === 0) {
-          if (productAssets.filter((e) => e._id === ele.materialId).length) {
-            productAssets.forEach(element => {
-              if (element._id === ele.materialId) {
-                element.qty += ele.qty
-              }
-            });
-          }
-          else {
-            const obj: any = {}
-            obj._id = ele.materialId
-            obj.type = "Product"
-            obj.qty = ele.qty
-            obj.assetNumber = ele?.productDetail?.productName
-            obj.productName = ele?.productDetail?.productName
-            obj.productId = ele?.productDetail?._id
-            obj.warehouse = rentalManagementData?.warehouse?.optionLabel
-            obj.warehouseId = rentalManagementData?.warehouse?.optionValue
-            obj.status = ele?.status
-            obj.rentalAssetStatus = ele?.status
-            obj.startDate = ele?.actualStartDate
-            obj.endDate = ele?.actualEndDate
-            productAssets.push(obj)
-          }
+        if (productAssets.filter((e) => e._id === ele.materialId).length) {
+          productAssets.forEach(element => {
+            if (element._id === ele.materialId) {
+              element.qty += ele.qty
+            }
+          });
+        }
+        else {
+          const obj: any = {}
+          obj._id = ele.materialId
+          obj.type = "Product"
+          obj.qty = ele.qty
+          obj.assetNumber = ele?.productDetail?.productName
+          obj.productName = ele?.productDetail?.productName
+          obj.productId = ele?.productDetail?._id
+          obj.warehouse = rentalManagementData?.warehouse?.optionLabel
+          obj.warehouseId = rentalManagementData?.warehouse?.optionValue
+          obj.status = ele?.status
+          obj.rentalAssetStatus = ele?.status
+          obj.startDate = ele?.actualStartDate
+          obj.endDate = ele?.actualEndDate
+          productAssets.push(obj)
         }
       })
 
@@ -517,202 +515,200 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         </Button>}
         <Box mx={1} />
         {allowedToEdit &&
-          <Fragment>
-            <Button variant={isMobile && !isTablet ? 'text' : 'outlined'} color="primary" aria-controls="simple-menu"
-              aria-haspopup="true"
-              disabled={selectedRecords?.length === 0 || isOffline}
-              size="small"
-              onClick={handleClick}
-              style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
-              endIcon={<ArrowDropDownIcon />}>
-              {'Change Status'}
-            </Button>
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
-              }}
-            >
-              {(selectedRecords?.filter((f) => f.type === "Asset").length === selectedRecords.length) &&
-                <Fragment>
-                  {(selectedRecords?.filter(f =>
-                    ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                      (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
-                    && [INVENTORY_STATUS.underReview].includes(f.status)
-                  )?.length === selectedRecords?.length) &&
-                    <Fragment>
-                      <MenuItem onClick={() => {
-                        setAnchorEl(null)
-                        setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: "" })
-                      }}>{INVENTORY_STATUS.available}</MenuItem>
-                    </Fragment>}
-                  <MenuItem onClick={() => {
-                    setAnchorEl(null)
-                    setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
-                  }}>{INVENTORY_STATUS.scrap}</MenuItem>
-                  <MenuItem onClick={() => {
-                    setAnchorEl(null)
-                    setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
-                  }}>{INVENTORY_STATUS.lost}</MenuItem>
-                  <MenuItem onClick={() => {
-                    setAnchorEl(null)
-                    setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.needRepair, message: "" })
-                  }}>{INVENTORY_STATUS.needRepair}</MenuItem>
-                  <MenuItem onClick={() => {
-                    setAnchorEl(null)
-                    setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.needRecert, message: "" })
-                  }}>{INVENTORY_STATUS.needRecert}</MenuItem>
-                </Fragment>
-              }
-              {(selectedRecords?.filter((f) => f.type === "Product" && f.hasOwnProperty("loadingTicketId")).length === selectedRecords.length) &&
-                <MenuItem onClick={() => {
-                  setAnchorEl(null)
-                  setShowConformationConsume(true)
-                }}>{RENTAL_INTERNAL_ASSET_STATUS.consumed}</MenuItem>
-              }
-            </Menu>
-            <Box mx={1} />
-            <Button
-              variant="outlined"
-              color="default"
-              size="small"
-              onClick={openActions}
-              aria-controls="action-menu"
-              disabled={(selectedRecords.length === 0)}
-            >
-              Actions <ExpandMore />
-            </Button>
-            <Menu
-              anchorEl={anchorActionEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorActionEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                disabled={(selectedRecords.length === 0) ||
-                  (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
-                    || !f.hasOwnProperty("loadingTicketId")
-                    || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
-                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant) }}>
-                Create Receiving Ticket</MenuItem>
-
-              {(selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("receivingTicketId") &&
-                f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedRecords?.length) ?
-                <MenuItem onClick={() => { setShowRemoveAssetFromReceivingTicketDialog(true) }}>Remove Receiving Ticket</MenuItem>
-                : null}
-
-              <MenuItem
-                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant) }}
-                disabled={(selectedRecords.length === 0)
-                  || (selectedRecords.some(f =>
-                    !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
-                    || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
-              >
-                Create Return Ticket</MenuItem>
-
-
-              <MenuItem
-                onClick={() => handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier)}
-                disabled={(selectedRecords.length === 0) || isOffline
-                  || (selectedRecords.some(f =>
-                    !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
-                    || !f.subleaseAsset || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
-              >Create Supplier Delivery Ticket</MenuItem>
-
-              <MenuItem
-                onClick={() => {
-                  setIsExistingRentalJob(true)
-                  closeActions()
-                }}
-                disabled={isOffline || !checkTransferValid()}
-              >
-                {`Transfer to another ${routes.rentalManagement.title}`}</MenuItem>
-
-              {(selectedRecords.length && selectedRecords?.filter(f =>
+          <Button variant={isMobile && !isTablet ? 'text' : 'outlined'} color="primary" aria-controls="simple-menu"
+            aria-haspopup="true"
+            disabled={selectedRecords?.length === 0 || isOffline}
+            size="small"
+            onClick={handleClick}
+            style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
+            endIcon={<ArrowDropDownIcon />}>
+            {'Change Status'}
+          </Button>
+        }
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right'
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right'
+          }}
+        >
+          {(selectedRecords?.filter((f) => f.type === "Asset").length === selectedRecords.length) &&
+            <Fragment>
+              {(selectedRecords?.filter(f =>
                 ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                  (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) || f.status === INVENTORY_STATUS.scrap)
-                && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.available, INVENTORY_STATUS.needRecert, INVENTORY_STATUS.needRepair].includes(f.status)
-                && !f.subleaseAsset && checkUniqWarehouse()
-              )?.length === selectedRecords?.length && !isOffline) ?
+                  (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
+                && [INVENTORY_STATUS.underReview].includes(f.status)
+              )?.length === selectedRecords?.length) &&
+                <Fragment>
+                  <MenuItem onClick={() => {
+                    setAnchorEl(null)
+                    setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: "" })
+                  }}>{INVENTORY_STATUS.available}</MenuItem>
+                </Fragment>}
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
+              }}>{INVENTORY_STATUS.scrap}</MenuItem>
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: "" })
+              }}>{INVENTORY_STATUS.lost}</MenuItem>
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.needRepair, message: "" })
+              }}>{INVENTORY_STATUS.needRepair}</MenuItem>
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.needRecert, message: "" })
+              }}>{INVENTORY_STATUS.needRecert}</MenuItem>
+            </Fragment>
+          }
+          {(selectedRecords?.filter((f) => f.type === "Product" && f.hasOwnProperty("loadingTicketId")).length === selectedRecords.length) &&
+            <MenuItem onClick={() => {
+              setAnchorEl(null)
+              setShowConformationConsume(true)
+            }}>{RENTAL_INTERNAL_ASSET_STATUS.consumed}</MenuItem>
+          }
+        </Menu>
+        <Box mx={1} />
+        <Button
+          variant="outlined"
+          color="default"
+          size="small"
+          onClick={openActions}
+          aria-controls="action-menu"
+          disabled={(selectedRecords.length === 0)}
+        >
+          Actions <ExpandMore />
+        </Button>
+        <Menu
+          anchorEl={anchorActionEl}
+          keepMounted
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left'
+          }}
+          id="action-menu"
+          open={Boolean(anchorActionEl)}
+          onClose={closeActions}
+        >
+          <MenuItem
+            disabled={(selectedRecords.length === 0) ||
+              (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
+                || !f.hasOwnProperty("loadingTicketId")
+                || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
+            onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant) }}>
+            Create Receiving Ticket</MenuItem>
 
-                <MenuItem
-                  onClick={() => setShowRepairJobDialog(true)}
-                >Create Repair Job</MenuItem>
-                : null}
+          {(selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("receivingTicketId") &&
+            f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedRecords?.length) ?
+            <MenuItem onClick={() => { setShowRemoveAssetFromReceivingTicketDialog(true) }}>Remove Receiving Ticket</MenuItem>
+            : null}
 
-              <MenuItem
-                onClick={() => {
-                  const products = []
-                  selectedRecords?.forEach((element) => {
-                    const foundProduct = products.filter((e) => e._id === element?.product?.optionValue)
-                    if (foundProduct.length) {
-                      foundProduct[0].qty += 1
-                    }
-                    else {
-                      products.push({
-                        _id: element?.product?.optionValue,
-                        productName: element?.product?.optionLabel,
-                        qty: 1
-                      })
-                    }
+          <MenuItem
+            onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant) }}
+            disabled={(selectedRecords.length === 0)
+              || (selectedRecords.some(f =>
+                !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
+                || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
+          >
+            Create Return Ticket</MenuItem>
+
+
+          <MenuItem
+            onClick={() => handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier)}
+            disabled={(selectedRecords.length === 0) || isOffline
+              || (selectedRecords.some(f =>
+                !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
+                || !f.subleaseAsset || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
+          >Create Supplier Delivery Ticket</MenuItem>
+
+          <MenuItem
+            onClick={() => {
+              setIsExistingRentalJob(true)
+              closeActions()
+            }}
+            disabled={isOffline || !checkTransferValid()}
+          >
+            {`Transfer to another ${routes.rentalManagement.title}`}</MenuItem>
+
+          {(selectedRecords.length && selectedRecords?.filter(f =>
+            ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+              (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) || f.status === INVENTORY_STATUS.scrap)
+            && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.available, INVENTORY_STATUS.needRecert, INVENTORY_STATUS.needRepair].includes(f.status)
+            && !f.subleaseAsset && checkUniqWarehouse()
+          )?.length === selectedRecords?.length && !isOffline) ?
+
+            <MenuItem
+              onClick={() => setShowRepairJobDialog(true)}
+            >Create Repair Job</MenuItem>
+            : null}
+
+          <MenuItem
+            onClick={() => {
+              const products = []
+              selectedRecords?.forEach((element) => {
+                const foundProduct = products.filter((e) => e._id === element?.product?.optionValue)
+                if (foundProduct.length) {
+                  foundProduct[0].qty += 1
+                }
+                else {
+                  products.push({
+                    _id: element?.product?.optionValue,
+                    productName: element?.product?.optionLabel,
+                    qty: 1
                   })
-                  setAddSerializedAssetDialog({ open: true, products: products });
-                  closeActions()
+                }
+              })
+              setAddSerializedAssetDialog({ open: true, products: products });
+              closeActions()
+            }}
+            disabled={(selectedRecords.length === 0) || isOffline || (selectedRecords.some((f: any) => f.type !== "Asset" ||
+              !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
+            ))}
+          >
+            Replace Assets</MenuItem>
+        </Menu>
+        <Box mx={1} />
+        {(showProcessDeliveryTicket && !isOffline) &&
+          <Fragment>
+            <Tooltip
+              title="Process Multiple Receiving/Return Ticket(s)">
+              <Button
+                variant={isMobile && !isTablet ? "text" : "contained"}
+                color="primary"
+                size="small"
+                onClick={() => {
+                  setOpenDeliveryTicketDialog(true)
                 }}
-                disabled={(selectedRecords.length === 0) || isOffline || (selectedRecords.some((f: any) => f.type !== "Asset" ||
-                  !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
-                ))}
               >
-                Replace Assets</MenuItem>
-            </Menu>
+                {isMobile && !isTablet ? <AddBoxRoundedIcon /> : "Process Ticket"}
+              </Button>
+            </Tooltip>
             <Box mx={1} />
-            {(showProcessDeliveryTicket && !isOffline) &&
-              <Fragment>
-                <Tooltip
-                  title="Process Multiple Receiving/Return Ticket(s)">
-                  <Button
-                    variant={isMobile && !isTablet ? "text" : "contained"}
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      setOpenDeliveryTicketDialog(true)
-                    }}
-                  >
-                    {isMobile && !isTablet ? <AddBoxRoundedIcon /> : "Process Ticket"}
-                  </Button>
-                </Tooltip>
-                <Box mx={1} />
-              </Fragment>}
-            {repairJobCount > 0 &&
-              <Fragment>
-                <HtmlTooltip title={`Created ${routes.repairJob.title}`}>
-                  <IconButton size="small" onClick={() => {
-                    history.push(routes.repairJob.path, {
-                      rental: rentalManagementData,
-                    })
-                  }}>
-                    <InfoIcon color={"primary"} />
-                  </IconButton>
-                </HtmlTooltip>
-                <Box mx={1} />
-              </Fragment>
-            }
+          </Fragment>}
+        {repairJobCount > 0 &&
+          <Fragment>
+            <HtmlTooltip title={`Created ${routes.repairJob.title}`}>
+              <IconButton size="small" onClick={() => {
+                history.push(routes.repairJob.path, {
+                  rental: rentalManagementData,
+                })
+              }}>
+                <InfoIcon color={"primary"} />
+              </IconButton>
+            </HtmlTooltip>
+            <Box mx={1} />
           </Fragment>
         }
       </Box>
@@ -721,7 +717,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       {columns ? (
         isMobile ? (
           <CustomSwipableList
-            allowSelection={allowedToEdit}
+            allowSelection={allowedToEdit || isProcessor}
             allowSwipe={true}
             permissions={true}
             primaryField={columns?.find((d) => d.field)}
@@ -780,7 +776,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             loading={loading}
             isClientSideGrid={true}
             renderedFrom={renderedFrom}
-            allowSelection={allowedToEdit}
+            allowSelection={allowedToEdit || isProcessor}
             refreshGrid={fetchRecords}
           />
         )

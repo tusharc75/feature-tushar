@@ -74,6 +74,8 @@ const RentalManagementDetailsPage = () => {
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [isProcessor, setIsProcessor] = useState(false);
+
   const [statusOptions, setStatusOptions] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -160,8 +162,10 @@ const RentalManagementDetailsPage = () => {
       handleMainPoints(data);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner, data.processor].some((d) => d?.optionValue === user?.user?._id);
+      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit);
+      const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
+      setIsProcessor(isProcessor);
       setRentalManagementData(data);
       if (isAllowedToEdit && openEdit === 'true') {
         setOpenUpdateDialog(true);
@@ -479,6 +483,7 @@ const RentalManagementDetailsPage = () => {
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-3`}
                         allowedToEdit={allowedToEdit}
+                        isProcessor={isProcessor}
                       />
                     )}
                     {currentStep === 4 && rentalManagementData && (
@@ -489,6 +494,7 @@ const RentalManagementDetailsPage = () => {
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-4`}
                         allowedToEdit={allowedToEdit}
+                        isProcessor={isProcessor}
                       />
                     )}
                     {currentStep === 5 && rentalManagementData && (
