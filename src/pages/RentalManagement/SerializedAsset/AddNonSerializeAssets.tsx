@@ -165,7 +165,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
       warehouse: warehouse?.optionValue,
       assets: tableData.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'] }))
     };
-    axiosInstance().post(`${routes.rentalManagement.path}/${rentalId}/inventory/create-assets-non-serialized-product`, dataToSubmit)
+    axiosInstance().post(`${routes.rentalManagement.path}/${rentalId}/inventory/create-non-serialized-assets`, dataToSubmit)
       .then(() => {
         setSubmitting(false);
         closeDialog();
@@ -214,7 +214,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
                 <TableRow>
                   <TableCell>Sr.No.</TableCell>
                   <TableCell align="left">Product</TableCell>
-                  <TableCell align="left">Asset Number</TableCell>
+                  <TableCell align="left">Serial Number</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -229,7 +229,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, rentalId }: D
                         required
                         size="small"
                         variant="outlined"
-                        placeholder="Asset Number"
+                        placeholder="Serial Number"
                         value={data['Asset Number']}
                         autoComplete='off'
                         name={data.id}
