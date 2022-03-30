@@ -63,7 +63,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
         data.forEach((o) => {
           let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
           if (currentColumn !== null) {
-            if (o.fieldData.type === 'singleLine') {
+            if (o.fieldData.type === 'singleLine' && o.fieldData.fieldName !== "assetNumber") {
               currentColumn.columnData.editable = true;
             }
             columns = [...columns, currentColumn?.columnData];
@@ -231,7 +231,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
         <Box mx={1} />
         {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && (
           <Fragment>
-            {currentStep === 1 && (
+            {/* {currentStep === 1 && (
               <Fragment>
                 <Tooltip title="Transfer to Plant">
                   <Button
@@ -264,7 +264,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                 </Tooltip>
                 <Box mx={1} />
               </Fragment>
-            )}
+            )} */}
             {selectedRecords.length > 0 &&
               selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
               checkUniqWarehouse() &&
@@ -276,7 +276,6 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                     color="primary"
                     size="small"
                     onClick={() => {
-                      console.log(selectedRecords);
                       const data = {};
                       data['ticketName'] = subleaseData.subleaseName;
                       data['refrenceId'] = subleaseData._id;
@@ -288,6 +287,15 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                       data['deliveryToAddress'] = subleaseData?.shippingAddress?.optionValue;
                       data['isPickupFromDisable'] = true;
                       data['isDeliveryToDisable'] = true;
+                      if (subleaseData?.wellName?.optionValue) {
+                        data["wellName"] = subleaseData?.wellName?.optionValue;
+                      }
+                      if (subleaseData?.afeNumber) {
+                        data["afeNumber"] = subleaseData?.afeNumber;
+                      }
+                      if (subleaseData?.processor?.optionValue) {
+                        data["processor"] = subleaseData?.processor?.optionValue;
+                      }
                       setShowTicketDialog({ open: true, data: data });
                     }}
                   >

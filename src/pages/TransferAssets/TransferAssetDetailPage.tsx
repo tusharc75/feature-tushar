@@ -454,7 +454,6 @@ const TransferAssetDetailPage = () => {
                   setCurrentStep={setCurrentStep}
                   updateStatus={updateStatus}
                 />
-
                 <Box my={1}>
                   {currentStep === 0 && (
                     <AssetsGrid
@@ -490,6 +489,7 @@ const TransferAssetDetailPage = () => {
                       renderedFrom={`${renderedFrom}_grid-2`}
                       allowedToEdit={allowedToEdit || isProcessor}
                       canReceive={canReceive}
+                      fetchTransferAssetData={fetchTransferAssetData}
                     />
                   )}
                   {currentStep === 2 && (

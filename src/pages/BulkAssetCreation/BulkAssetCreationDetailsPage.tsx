@@ -36,6 +36,7 @@ import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Steps from '../RentalManagement/Steps';
 import { camelCase } from 'lodash';
 import SerializedAsset from './SerializedAsset';
+import ContentFullScreen from 'src/components/ContentFullScreen';
 
 const BulkAssetCreationDetailsPage = () => {
 
@@ -62,6 +63,7 @@ const BulkAssetCreationDetailsPage = () => {
     const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
     const [showActivity, setActivityShow] = useState(defaultActivityShow);
     const [nextStep, setNextStep] = useState(true);
+    const [stepFullScreen, setStepFullScreen] = useState(false);
 
     function a11yProps(index: any) {
         return {
@@ -298,26 +300,29 @@ const BulkAssetCreationDetailsPage = () => {
                                                         currentStep={currentStep}
                                                         setCurrentStep={setCurrentStep}
                                                         isStepEnded={false}
+                                                        setStepFullScreen={() => setStepFullScreen(true)}
                                                     />
-                                                    {currentStep === 0 && (
-                                                        <Product
-                                                            bulkAssetCreationData={bulkAssetCreationData}
-                                                            setNextStep={setNextStep}
-                                                            setBulkAssetCreationProduct={setBulkAssetCreationProduct}
-                                                            renderedFrom={`${renderedFrom}_grid-1`}
-                                                            handleUpdateData={handleUpdateData}
-                                                            fetchData={fetchData}
-                                                            allowedToEdit={allowedToEdit}
-                                                        />
-                                                    )}
-                                                    {currentStep === 1 && (
-                                                        <SerializedAsset
-                                                            bulkAssetCreationData={bulkAssetCreationData}
-                                                            renderedFrom={`${renderedFrom}_grid-2`}
-                                                            allowedToEdit={allowedToEdit}
-                                                        />
-                                                    )}
+                                                    <ContentFullScreen title={bulkAssetCreationSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
 
+                                                        {currentStep === 0 && (
+                                                            <Product
+                                                                bulkAssetCreationData={bulkAssetCreationData}
+                                                                setNextStep={setNextStep}
+                                                                setBulkAssetCreationProduct={setBulkAssetCreationProduct}
+                                                                renderedFrom={`${renderedFrom}_grid-1`}
+                                                                handleUpdateData={handleUpdateData}
+                                                                fetchData={fetchData}
+                                                                allowedToEdit={allowedToEdit}
+                                                            />
+                                                        )}
+                                                        {currentStep === 1 && (
+                                                            <SerializedAsset
+                                                                bulkAssetCreationData={bulkAssetCreationData}
+                                                                renderedFrom={`${renderedFrom}_grid-2`}
+                                                                allowedToEdit={allowedToEdit}
+                                                            />
+                                                        )}
+                                                    </ContentFullScreen>
                                                 </Paper>
                                             </Grid>
                                         )}

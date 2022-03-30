@@ -1856,5 +1856,9 @@ export const COLOUR_MASTER = {
   deliveredReturnTicket: {
     background: '#ff9980',
     borderColor: '#db765c'
+  },
+  replaceAssetColor: {
+    background: '#FFFF99',
+    borderColor: '#FFFF99'
   }
 };
