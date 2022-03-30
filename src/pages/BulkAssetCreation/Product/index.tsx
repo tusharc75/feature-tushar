@@ -46,7 +46,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-    const [anchorEl, setAnchorEl] = useState(null);
+    const [loadingButton, setLoadingButton] = useState(false);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteBulkAssetCreationProduct, setDeleteBulkAssetCreationProduct] = useState([]);
     const [isRateRequired, setIsRateRequired] = useState(false);
@@ -237,6 +237,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     }
 
     const createAsset = () => {
+        setLoadingButton(true)
         let tempProducts = selectedRecords.map(d => {
             return {
                 "bulkAssetCreationId": bulkAssetCreationData?._id,
@@ -249,6 +250,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
             .then(({ data }) => {
                 fetchBulkAssetCreationProduct()
                 fetchData()
+                setLoadingButton(false)
                 toastConfig.setToastConfig({
                     open: true,
                     type: "success",
@@ -293,10 +295,11 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                             variant={isMobile && !isTablet ? "text" : "contained"}
                             color="primary"
                             size="small"
-                            disabled={selectedRecords.length === 0}
+                            disabled={selectedRecords.length === 0 || loadingButton}
                             onClick={() => {
                                 setShowDeleteConfirmBox(true)
                                 setDeleteBulkAssetCreationProduct(selectedRecords.map(d => d._id))
+                                setLoadingButton(true)
                             }}>
                             Delete
                         </Button>}
@@ -305,7 +308,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                             variant={isMobile && !isTablet ? "text" : "contained"}
                             color="primary"
                             size="small"
-                            disabled={selectedRecords.length === 0}
+                            disabled={selectedRecords.length === 0 || loadingButton}
                             onClick={() => {
                                 createAsset()
                             }}>

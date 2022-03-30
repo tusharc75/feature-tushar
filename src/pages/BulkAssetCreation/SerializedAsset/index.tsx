@@ -22,7 +22,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit })
     const { state: { user, permissions } }: any = useData();
     const history = useHistory();
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting, selectedRecords } = state;
     const [gridApi, setGridApi] = useState(null);
     const [columns, setColumns] = useState(null)
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
@@ -31,6 +31,10 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit })
     useEffect(() => {
         fetchColumns()
     }, []);
+
+    useEffect(() => {
+        fetchProductInventory()
+    }, [page, limit, filters, sorting]);
 
     const fetchColumns = () => {
         axiosInstance()
@@ -214,7 +218,6 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit })
                             limit={limit}
                             pageSizes={pageSizes}
                             page={page}
-                            actionWidth={150}
                             loading={loading}
                             allowSelection={allowedToEdit}
                             allowAction={false}
