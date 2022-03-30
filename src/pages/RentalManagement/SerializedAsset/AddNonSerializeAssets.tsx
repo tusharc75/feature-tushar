@@ -48,6 +48,9 @@ const useClasses = makeStyles(() => ({
   },
   input: {
     display: 'none'
+  },
+  tableContainer: {
+    maxHeight: 600
   }
 }));
 
@@ -91,8 +94,6 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
   const checkErrors = (): string => {
     const emptyField = tableData.filter(t => !t['Asset Number']);
     const duplicates = tableData.filter((v1, i, a) => a.findIndex((v2) => v1['Asset Number'] === v2['Asset Number']) !== i);
-
-    console.log(duplicates)
 
     if (emptyField.length) {
       return "All products should have unique asset number"
@@ -234,7 +235,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
             </Box>
             <Box>{hasError && <Typography color='error'>{hasError}</Typography>}</Box>
           </Box>
-          <TableContainer component={Paper}>
+          <TableContainer className={classes.tableContainer} component={Paper}>
             <Table className={classes.table} aria-label="customized table">
               <TableHead>
                 <TableRow>
