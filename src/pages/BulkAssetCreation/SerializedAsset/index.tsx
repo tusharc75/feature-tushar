@@ -5,7 +5,7 @@ import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
 import axiosInstance from "src/axios/axiosInstance";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serializedAsset } from "src/constants/helpers";
+import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serializedAsset } from "src/constants/helpers";
 import { useData } from "src/StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
@@ -27,6 +27,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit })
     const [columns, setColumns] = useState(null)
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
     const { getColumnData } = useColumns();
+    const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
     useEffect(() => {
         fetchColumns()
@@ -45,7 +46,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit })
                 data.forEach((o) => {
                     let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
                     if (currentColumn !== null) {
-                        if (o.fieldData.type === 'singleLine') {
+                        if (o.fieldData.type === 'singleLine' && o.fieldData.fieldName !== "assetNumber") {
                             currentColumn.columnData.editable = true;
                         }
                         columns = [...columns, currentColumn?.columnData];
@@ -162,10 +163,18 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit })
                     }}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
-                    recordsToExport={selectedRecords.length ? selectedRecords.length : dataRows.length}
-                    ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
-                    isDownloadExcel={false}
+                    recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+                    ids={
+                        getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                            ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                            : []
+                    }
+                    onExportToExcelSuccess={() => {
+                        if (gridApi) gridApi.deselectAll()
+                        else fetchProductInventory()
+                    }} isDownloadExcel={false}
                     isBackgroundWhite={true}
+                    additionalParams={`&filterById=${JSON.stringify([{ field: "bulkAssetCreation", term: bulkAssetCreationData?._id }])}`}
                 />
             </Box>}
             <Box mx={1} />
