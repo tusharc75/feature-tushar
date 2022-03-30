@@ -4,6 +4,8 @@ import CommonSkeleton from "../Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "../AgGridComponents/CustomAgGrid";
 import routes from "../Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
+import Button from "@material-ui/core/Button";
+import { AiFillFilePdf } from 'react-icons/ai';
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { gridLoadingTimeout, deliveryTicket, serializedAsset, DELIVERY_TICKET_REFRENCE_TYPE } from '../../constants/helpers';
@@ -27,6 +29,7 @@ const TypewiseTickets = ({ refrenceType, refrenceId, renderedFrom }) => {
     const { getColumnData } = useColumns();
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [columns, setColumns] = useState(null)
+    const [downlodingFile, setDownlodingFile] = useState(false);
     const { state: { user, permissions, selectedEntity } }: any = useData();
 
     useEffect(() => {
@@ -89,7 +92,46 @@ const TypewiseTickets = ({ refrenceType, refrenceId, renderedFrom }) => {
     };
 
     return (<>
-        <Box display="flex" justifyContent="flex-end" pt={1}>
+        <Box display="flex" justifyContent="flex-end" p={1} pt={1} pb={0}>
+        {!isMobile && <Button
+          onClick={() => {
+            setDownlodingFile(true);
+            axiosInstance().post(`/delivery-ticket/pdf`, { 
+                "ids": 
+                    selectedRecords.length > 0 
+                    ? selectedRecords.map(s => s._id) 
+                    : dataRows.map(d => d._id) })
+              .then(({ data }) => {
+                axiosInstance()
+                  .get(`user/download?fileName=${data.data.fileName}`, {
+                    responseType: "blob",
+                  })
+                  .then(({ data }) => {
+                    const file = new Blob([data], { type: "application/pdf" });
+                    const fileURL = URL.createObjectURL(file);
+                    const pdfWindow = window.open();
+                    pdfWindow.location.href = fileURL;
+                    toastConfig.setToastConfig({ open: true, type: "success", message: "Preview file downloaded successfully." })
+                    setDownlodingFile(false);
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                  });
+              }).catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+              })
+          }}
+          variant={isMobile && !isTablet ? 'text' : 'outlined'}
+          color="primary"
+          type="button"
+          size="small"
+          disabled={downlodingFile || dataRows.length === 0}
+          startIcon={<AiFillFilePdf />}
+        >
+          {downlodingFile ? "Please wait..." : "Preview"}
+        </Button>}
         </Box>
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns ?
