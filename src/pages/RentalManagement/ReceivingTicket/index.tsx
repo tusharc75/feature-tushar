@@ -96,7 +96,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
   const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
 
-
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -155,7 +154,15 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
-        productAssets = productAssets.map(d => ({ ...d.inventory, rentalAssetStatus: d.status, startDate: d.startDate, endDate: d.endDate })).map(u => ({
+        productAssets = productAssets.map(d => ({
+          ...d.inventory,
+          rentalAssetStatus: d.status,
+          startDate: d.startDate,
+          endDate: d.endDate,
+          isReplaced: d.isReplaced,
+          replaceReason: d.replaceReason,
+          replaceAsset: d.replaceAsset
+        })).map(u => ({
           ...u,
           type: "Asset",
           qty: 1,
@@ -204,15 +211,16 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         }
       })
 
-      if (deliveryTicketList.length) {
-        if (deliveryTicketList.filter((e) => [DELIVERY_TICKET_TYPE.receiving, DELIVERY_TICKET_TYPE.return].includes(e.ticketType) &&
-          [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status)).length) {
-          setShowProcessDeliveryTicket(true)
-        }
-        else {
-          setShowProcessDeliveryTicket(false)
-        }
-      }
+      // if (deliveryTicketList.length) {
+      //   if (deliveryTicketList.filter((e) => [DELIVERY_TICKET_TYPE.receiving, DELIVERY_TICKET_TYPE.return].includes(e.ticketType) &&
+      //     [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status)).length) {
+      //     setShowProcessDeliveryTicket(true)
+      //   }
+      //   else {
+      //     setShowProcessDeliveryTicket(false)
+      //   }
+      // }
+
       deliveryTicketList?.map(obj => {
         productAssets?.map((d, index) => {
           if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
@@ -252,8 +260,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
       productAssets.forEach((d) => {
         d["isChecked"] = false;
-        d["hideSelection"] = [INVENTORY_STATUS.indTransit, INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved
-          || d?.status === RENTAL_INTERNAL_ASSET_STATUS.consumed;
+        d["hideSelection"] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved || d?.status === RENTAL_INTERNAL_ASSET_STATUS.consumed;
       })
 
       if (productAssets.filter((e) =>
@@ -286,7 +293,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
   const InventoryRenderer = (params) => (
     <Fragment>
-      <Link className="link text-truncate" title={params.value} to={`${params.data.type === "Asset" ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params.data._id}`}>
+      <Link className="link text-truncate" title={params.value}
+        to={`${params.data.type === "Asset" ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params.data._id}`}>
         {params.value}
       </Link>
       {(params?.data?.nonSerializeAsset && params?.data?.nonSerializeAsset?.length > 0) &&
@@ -299,6 +307,13 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             }}>
               <InfoIcon fontSize="small" color={"primary"} />
             </IconButton>
+          </HtmlTooltip>
+        </Box>
+      }
+      {(params?.data?.isReplaced) &&
+        <Box ml={1} mt={1}>
+          <HtmlTooltip title={`Replaced Asset with ${params?.data?.replaceAsset} Reason-${params?.data?.replaceReason}`}>
+            <InfoIcon fontSize="small" color={"primary"} />
           </HtmlTooltip>
         </Box>
       }
@@ -366,6 +381,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
           return { backgroundColor: COLOUR_MASTER.lostAssets.background };
         }
+        if (params?.data?.isReplaced) {
+          return { backgroundColor: COLOUR_MASTER.replaceAssetColor.background };
+        }
         return null;
       }
     },
@@ -421,6 +439,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     if (rentalManagementData?.processor?.optionValue) {
       data["processor"] = rentalManagementData?.processor?.optionValue;
     }
+    data["status"] = DELIVERY_TICKET_STATUS.indTransit;
+
     setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
     closeActions()
   };
@@ -496,6 +516,28 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       return false;
     }
   };
+
+  const handelProcessTickets = () => {
+    let data = {}
+    const receivingTicketId = uniq(map(selectedRecords, 'receivingTicketId'));
+    const returnTicketId = uniq(map(selectedRecords, 'returnTicketId'));
+    const ticketIds = [...receivingTicketId, ...returnTicketId]
+    if (ticketIds.length) {
+      data["_ids"] = ticketIds?.map((e) => e);
+      data["status"] = DELIVERY_TICKET_STATUS.delivered
+      data["signatures"] = []
+      axiosInstance().post(`${deliveryTicket.api}/updatebulk`, data).then(({ data: { data } }) => {
+        fetchRecords()
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Receiving Successfully`
+        });
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    }
+  }
 
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
@@ -647,6 +689,16 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           >
             Create Return Ticket</MenuItem>
 
+          <MenuItem
+            disabled={selectedRecords.length === 0 ||
+              selectedRecords.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit ||
+                e?.returnTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length}
+            onClick={() => {
+              closeActions()
+              handelProcessTickets()
+            }}
+          >
+            Receive Assets</MenuItem>
 
           <MenuItem
             onClick={() => handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier)}
