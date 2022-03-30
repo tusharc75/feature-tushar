@@ -62,12 +62,18 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
 
     const [showAddressDialog, setShowAddressDialog] = useState(false);
     const [addressType, setAddressType] = useState('');
+    const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Sublease").then(({ data: { data } }) => {
             data = data.filter((d) => !["rentalJob"].includes(d.fieldData.fieldName));
             let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+            data?.forEach((e: any) => {
+                if (e?.fieldData?.fieldName === "warehouse" && e?.fieldData?.option) {
+                    setOptionsPlantsEntity(e?.fieldData?.option?.filter((a) => a.entity?.includes(selectedEntity)));
+                }
+            })
             if (subleaseId) {
                 axiosInstance().get(`${sublease.api}/` + subleaseId).then(({ data: { data } }) => {
                     setSubleaseData(data)
@@ -598,84 +604,17 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                         size="small"
                                                                     />
                                                                 )
-                                                                    // : field.fieldName === "billingAddress" ? (
-                                                                    //     <FormTypes
-                                                                    //         {...field}
-                                                                    //         disabled={Boolean(subleaseId) && field.disableOnEdit && !isClone}
-                                                                    //         values={values}
-                                                                    //         errors={errors}
-                                                                    //         touched={touched}
-                                                                    //         label={field.fieldLabel}
-                                                                    //         name={field.fieldName}
-                                                                    //         type={field.type}
-                                                                    //         options={countryBillToDropDown}
-                                                                    //         setFieldValue={(name, value) => {
-                                                                    //             setFieldValue(name, value)
-                                                                    //         }}
-                                                                    //         required={field.required}
-                                                                    //         fullWidth
-                                                                    //         isTooltip={field?.isTooltip || false}
-                                                                    //         tooltipMessage={field?.tooltipMessage}
-                                                                    //         size="small"
-                                                                    //         onOpen={() =>
-                                                                    //             onCountryBillToDropDownOpen(values["supplierAccount"])
-                                                                    //         }
-                                                                    //     />)
-                                                                    : field.fieldName === "shippingAddress" ? (
-                                                                        <Box display="flex">
-                                                                            <Box flexGrow={1}>
-                                                                                <FormTypes
-                                                                                    {...field}
-                                                                                    disabled={Boolean(subleaseId) && field.disableOnEdit && !isClone}
-                                                                                    fieldData={field}
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={shippingAddress}
-                                                                                    setFieldValue={(name, value) => {
-                                                                                        setFieldValue(name, value)
-                                                                                    }}
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={field?.isTooltip || false}
-                                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                                    size="small"
-                                                                                    onOpen={() =>
-                                                                                        onShippingAddressOpen(values["supplierAccount"], values["shippingAddress"])
-                                                                                    }
-                                                                                />
-                                                                            </Box>
-                                                                            <Box>
-                                                                                <Tooltip title={`Add ${field.fieldLabel}`} className="mt-1">
-                                                                                    <IconButton
-                                                                                        onClick={() => {
-                                                                                            setShowAddressDialog(true);
-                                                                                            setAddressType('shippingAddress');
-                                                                                        }}
-                                                                                        disabled={field.disableOnEdit}
-                                                                                        size="small"
-                                                                                    >
-                                                                                        <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                                                    </IconButton>
-                                                                                </Tooltip>
-                                                                            </Box>
-                                                                        </Box>
-                                                                    )
-                                                                        : <FormTypes
-                                                                            isNew={Boolean(subleaseId)}
+                                                                    : (field.fieldName === "plant" || field.fieldName === "warehouse") ? (
+                                                                        <FormTypes
                                                                             {...field}
-                                                                            fieldData={field}
-                                                                            disabled={(Boolean(subleaseId) && field.disableOnEdit && !isClone)}
                                                                             values={values}
+                                                                            fieldData={field}
                                                                             errors={errors}
                                                                             touched={touched}
                                                                             label={field.fieldLabel}
                                                                             name={field.fieldName}
                                                                             type={field.type}
-                                                                            options={field.option}
+                                                                            options={optionsPlantsEntity}
                                                                             setFieldValue={(name, value) => {
                                                                                 setFieldValue(name, value)
                                                                             }}
@@ -684,7 +623,71 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
                                                                             isTooltip={field?.isTooltip || false}
                                                                             tooltipMessage={field?.tooltipMessage}
                                                                             size="small"
-                                                                        />
+                                                                        />)
+                                                                        : field.fieldName === "shippingAddress" ? (
+                                                                            <Box display="flex">
+                                                                                <Box flexGrow={1}>
+                                                                                    <FormTypes
+                                                                                        {...field}
+                                                                                        disabled={Boolean(subleaseId) && field.disableOnEdit && !isClone}
+                                                                                        fieldData={field}
+                                                                                        values={values}
+                                                                                        errors={errors}
+                                                                                        touched={touched}
+                                                                                        label={field.fieldLabel}
+                                                                                        name={field.fieldName}
+                                                                                        type={field.type}
+                                                                                        options={shippingAddress}
+                                                                                        setFieldValue={(name, value) => {
+                                                                                            setFieldValue(name, value)
+                                                                                        }}
+                                                                                        required={field.required}
+                                                                                        fullWidth
+                                                                                        isTooltip={field?.isTooltip || false}
+                                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                                        size="small"
+                                                                                        onOpen={() =>
+                                                                                            onShippingAddressOpen(values["supplierAccount"], values["shippingAddress"])
+                                                                                        }
+                                                                                    />
+                                                                                </Box>
+                                                                                <Box>
+                                                                                    <Tooltip title={`Add ${field.fieldLabel}`} className="mt-1">
+                                                                                        <IconButton
+                                                                                            onClick={() => {
+                                                                                                setShowAddressDialog(true);
+                                                                                                setAddressType('shippingAddress');
+                                                                                            }}
+                                                                                            disabled={field.disableOnEdit}
+                                                                                            size="small"
+                                                                                        >
+                                                                                            <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
+                                                                                        </IconButton>
+                                                                                    </Tooltip>
+                                                                                </Box>
+                                                                            </Box>
+                                                                        )
+                                                                            : <FormTypes
+                                                                                isNew={Boolean(subleaseId)}
+                                                                                {...field}
+                                                                                fieldData={field}
+                                                                                disabled={(Boolean(subleaseId) && field.disableOnEdit && !isClone)}
+                                                                                values={values}
+                                                                                errors={errors}
+                                                                                touched={touched}
+                                                                                label={field.fieldLabel}
+                                                                                name={field.fieldName}
+                                                                                type={field.type}
+                                                                                options={field.option}
+                                                                                setFieldValue={(name, value) => {
+                                                                                    setFieldValue(name, value)
+                                                                                }}
+                                                                                required={field.required}
+                                                                                fullWidth
+                                                                                isTooltip={field?.isTooltip || false}
+                                                                                tooltipMessage={field?.tooltipMessage}
+                                                                                size="small"
+                                                                            />
                                                             }
                                                         </Grid>
                                                     ))}

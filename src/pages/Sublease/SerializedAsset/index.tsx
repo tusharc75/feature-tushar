@@ -63,7 +63,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
         data.forEach((o) => {
           let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
           if (currentColumn !== null) {
-            if (o.fieldData.type === 'singleLine') {
+            if (o.fieldData.type === 'singleLine' && o.fieldData.fieldName !== "assetNumber") {
               currentColumn.columnData.editable = true;
             }
             columns = [...columns, currentColumn?.columnData];
