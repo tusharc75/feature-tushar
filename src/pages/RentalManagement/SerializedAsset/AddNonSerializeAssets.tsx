@@ -89,16 +89,16 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
   }, [tableData]);
 
   const checkErrors = (): string => {
-    const emptyField = tableData.filter(t=>!t['Asset Number']);
-    const duplicates = tableData.filter((v1,i,a)=>a.findIndex((v2)=>v1['Asset Number']===v2['Asset Number'])!==i);
+    const emptyField = tableData.filter(t => !t['Asset Number']);
+    const duplicates = tableData.filter((v1, i, a) => a.findIndex((v2) => v1['Asset Number'] === v2['Asset Number']) !== i);
 
     console.log(duplicates)
 
-    if(emptyField.length) {
+    if (emptyField.length) {
       return "All products should have unique asset number"
-    } 
+    }
 
-    if(duplicates.length) {
+    if (duplicates.length) {
       return "One or more asset numbers are same!"
     }
 
@@ -149,7 +149,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
       const parsedData = utils.sheet_to_json(ws, { header: 1 });
 
       if (parsedData.length > 1) {
-      
+
         let tableContent = parsedData.slice(1, parsedData.length);
 
         tableContent = tableContent.map((item) => {
@@ -240,7 +240,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
                 <TableRow>
                   <TableCell>Sr.No.</TableCell>
                   <TableCell align="left">Product</TableCell>
-                  <TableCell align="left">Asset Number</TableCell>
+                  <TableCell align="left">{isOffline ? "Asset Number" : "Serial Number"}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -255,7 +255,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
                         required
                         size="small"
                         variant="outlined"
-                        placeholder="Asset Number"
+                        placeholder={isOffline ? "Asset Number" : "Serial Number"}
                         value={data['Asset Number']}
                         autoComplete="off"
                         name={data.id}
