@@ -44,6 +44,7 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import InfoIcon from '@material-ui/icons/Info';
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
+import { ExpandMore } from '@material-ui/icons';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -82,6 +83,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
 
   const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   useEffect(() => {
     fetchRecords();
@@ -164,19 +166,21 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           obj.productId = ele?.productDetail?._id
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue
+          obj.status = ele?.status
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId)
           productAssets.push(obj)
         }
       })
 
-      if (deliveryTicketList.length) {
-        if ((deliveryTicketList.filter((e) => [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status))).length > 0) {
-          setShowProcessDeliveryTicket(true)
-        }
-        else {
-          setShowProcessDeliveryTicket(false)
-        }
-      }
+      // if (deliveryTicketList.length) {
+      //   if ((deliveryTicketList.filter((e) => [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status))).length > 0) {
+      //     setShowProcessDeliveryTicket(true)
+      //   }
+      //   else {
+      //     setShowProcessDeliveryTicket(false)
+      //   }
+      // }
+
       deliveryTicketList.map(obj => {
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           productAssets.map((d, index) => {
@@ -199,7 +203,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         d['hideSelection'] =
           [
             INVENTORY_STATUS.inUse,
-            INVENTORY_STATUS.indTransit,
             INVENTORY_STATUS.repair,
             INVENTORY_STATUS.scrap,
             INVENTORY_STATUS.lost,
@@ -336,6 +339,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       if (rentalManagementData?.processor?.optionValue) {
         data["processor"] = rentalManagementData?.processor?.optionValue;
       }
+      data["status"] = DELIVERY_TICKET_STATUS.indTransit;
+
       setShowTicketDialog({ open: true, data: data });
     }
   };
@@ -348,6 +353,14 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     setAnchorEl(null);
   };
 
+  const openActions = (event) => {
+    setAnchorActionEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorActionEl(null);
+  };
+
   const checkUniqWarehouse = () => {
     if (selectedRecords.length === 0) {
       return true;
@@ -357,6 +370,26 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       return true;
     }
   };
+
+  const handelProcessTickets = () => {
+    let data = {}
+    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
+    if (loadingTicketIds.length) {
+      data["_ids"] = loadingTicketIds?.map((e) => e);
+      data["status"] = DELIVERY_TICKET_STATUS.delivered
+      data["signatures"] = []
+      axiosInstance().post(`${deliveryTicket.api}/updatebulk`, data).then(({ data: { data } }) => {
+        fetchRecords()
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Delivered Successfully`
+        });
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    }
+  }
 
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
@@ -439,21 +472,47 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         {(allowedToEdit || isProcessor) &&
           <Fragment>
             <Box mx={1} />
-            <Tooltip title={(checkUniqWarehouse() && selectedRecords.length > 1) ? "Selected assets are located in several locations."
-              : "Create Loading Ticket"}>
-              <span>
-                <Button
-                  onClick={() => { handleDeliveryTicketDialog() }}
-                  variant={isMobile && !isTablet ? "text" : "outlined"}
-                  color="primary"
-                  size="small"
-                  disabled={(selectedRecords.length === 0)
-                    || (selectedRecords.some(f => f.hasOwnProperty("loadingTicketId")) || checkUniqWarehouse())}
-                >
-                  {'Create Loading Ticket'}
-                </Button>
-              </span>
-            </Tooltip>
+            <Button
+              variant="outlined"
+              color="default"
+              size="small"
+              onClick={openActions}
+              aria-controls="action-menu"
+              disabled={(selectedRecords.length === 0)}
+            >
+              Actions <ExpandMore />
+            </Button>
+            <Menu
+              anchorEl={anchorActionEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorActionEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                onClick={() => { handleDeliveryTicketDialog() }}
+
+                disabled={(selectedRecords.length === 0)
+                  || (selectedRecords.some(f => f.hasOwnProperty("loadingTicketId")) || checkUniqWarehouse())}
+              >
+                Create Loading Ticket</MenuItem>
+
+              <MenuItem
+                disabled={selectedRecords.length === 0 ||
+                  selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length}
+                onClick={() => {
+                  handelProcessTickets()
+                  closeActions()
+                }}
+              >
+                Delivered to customer</MenuItem>
+
+            </Menu>
             <Box mx={1} />
             {(selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("loadingTicketId") &&
               f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedRecords?.length) ?
