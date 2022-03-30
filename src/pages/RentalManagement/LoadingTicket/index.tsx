@@ -44,6 +44,7 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import InfoIcon from '@material-ui/icons/Info';
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
+import { ExpandMore } from '@material-ui/icons';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -82,6 +83,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
 
   const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   useEffect(() => {
     fetchRecords();
@@ -96,13 +98,13 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       }
       var productAssets: any = [];
       var deliveryTicketList: any = [];
+      var material: any = [];
       var products: any = [];
       var nonSerializeAsset: any = [];
 
       dispatch({ type: 'loading', loading: true });
 
       if (isOffline) {
-
         productAssets = await getRentalProductAssets(rentalManagementData._id)
         productAssets = productAssets?.map(u => ({
           ...u,
@@ -118,8 +120,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id)
 
         const productResponse = await findOne(objectStore.rentalManagement, rentalManagementData._id);
-        products = productResponse.material;
-
+        material = productResponse.material
       }
       else {
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`)
@@ -140,17 +141,17 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         deliveryTicketList = result?.data?.data
 
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
-        products = productResponse?.data?.data?.material
+        material = productResponse?.data?.data?.material
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset
       }
 
-      products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
+      products = material.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
 
       products?.forEach((ele) => {
         if (productAssets.filter((e) => e._id === ele.materialId).length) {
           productAssets.forEach(element => {
             if (element._id === ele.materialId) {
-              element.qty += ele.qty
+              element.qty += getNestedQty(material, ele)
             }
           });
         }
@@ -158,25 +159,27 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           const obj: any = {}
           obj._id = ele.materialId
           obj.type = "Product"
-          obj.qty = ele.qty
+          obj.qty = getNestedQty(material, ele);
           obj.assetNumber = ele?.productDetail?.productName
           obj.productName = ele?.productDetail?.productName
           obj.productId = ele?.productDetail?._id
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue
+          obj.status = ele?.status
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId)
           productAssets.push(obj)
         }
       })
 
-      if (deliveryTicketList.length) {
-        if ((deliveryTicketList.filter((e) => [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status))).length > 0) {
-          setShowProcessDeliveryTicket(true)
-        }
-        else {
-          setShowProcessDeliveryTicket(false)
-        }
-      }
+      // if (deliveryTicketList.length) {
+      //   if ((deliveryTicketList.filter((e) => [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status))).length > 0) {
+      //     setShowProcessDeliveryTicket(true)
+      //   }
+      //   else {
+      //     setShowProcessDeliveryTicket(false)
+      //   }
+      // }
+
       deliveryTicketList.map(obj => {
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           productAssets.map((d, index) => {
@@ -199,7 +202,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         d['hideSelection'] =
           [
             INVENTORY_STATUS.inUse,
-            INVENTORY_STATUS.indTransit,
             INVENTORY_STATUS.repair,
             INVENTORY_STATUS.scrap,
             INVENTORY_STATUS.lost,
@@ -221,6 +223,16 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       toastConfig.setToastConfig(error);
     }
   };
+
+  const getNestedQty = (material, parent) => {
+    const subRows: any = material.filter((e) => e._id === parent.parentId);
+    if (subRows.length === 1) {
+      return parent.qty * getNestedQty(material, subRows[0]);
+    }
+    else {
+      return parent.qty
+    }
+  }
 
   const TicketRenderer = (params) =>
     params?.value ? (
@@ -336,6 +348,8 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       if (rentalManagementData?.processor?.optionValue) {
         data["processor"] = rentalManagementData?.processor?.optionValue;
       }
+      data["status"] = DELIVERY_TICKET_STATUS.indTransit;
+
       setShowTicketDialog({ open: true, data: data });
     }
   };
@@ -348,6 +362,14 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     setAnchorEl(null);
   };
 
+  const openActions = (event) => {
+    setAnchorActionEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorActionEl(null);
+  };
+
   const checkUniqWarehouse = () => {
     if (selectedRecords.length === 0) {
       return true;
@@ -357,6 +379,26 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       return true;
     }
   };
+
+  const handelProcessTickets = () => {
+    let data = {}
+    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
+    if (loadingTicketIds.length) {
+      data["_ids"] = loadingTicketIds?.map((e) => e);
+      data["status"] = DELIVERY_TICKET_STATUS.delivered
+      data["signatures"] = []
+      axiosInstance().post(`${deliveryTicket.api}/updatebulk`, data).then(({ data: { data } }) => {
+        fetchRecords()
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Delivered Successfully`
+        });
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    }
+  }
 
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
@@ -439,21 +481,49 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         {(allowedToEdit || isProcessor) &&
           <Fragment>
             <Box mx={1} />
-            <Tooltip title={(checkUniqWarehouse() && selectedRecords.length > 1) ? "Selected assets are located in several locations."
-              : "Create Loading Ticket"}>
-              <span>
-                <Button
-                  onClick={() => { handleDeliveryTicketDialog() }}
-                  variant={isMobile && !isTablet ? "text" : "outlined"}
-                  color="primary"
-                  size="small"
-                  disabled={(selectedRecords.length === 0)
-                    || (selectedRecords.some(f => f.hasOwnProperty("loadingTicketId")) || checkUniqWarehouse())}
-                >
-                  {'Create Loading Ticket'}
-                </Button>
-              </span>
-            </Tooltip>
+            <Button
+              variant="outlined"
+              color="default"
+              size="small"
+              onClick={openActions}
+              aria-controls="action-menu"
+              disabled={(selectedRecords.length === 0)}
+            >
+              Actions <ExpandMore />
+            </Button>
+            <Menu
+              anchorEl={anchorActionEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorActionEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  handleDeliveryTicketDialog()
+                }}
+                disabled={(selectedRecords.length === 0)
+                  || (selectedRecords.some(f => f.hasOwnProperty("loadingTicketId")) || checkUniqWarehouse())}
+              >
+                Create Loading Ticket</MenuItem>
+
+              <MenuItem
+                disabled={selectedRecords.length === 0 ||
+                  selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length}
+                onClick={() => {
+                  handelProcessTickets()
+                  closeActions()
+                }}
+              >
+                Delivered to customer</MenuItem>
+
+            </Menu>
             <Box mx={1} />
             {(selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("loadingTicketId") &&
               f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedRecords?.length) ?

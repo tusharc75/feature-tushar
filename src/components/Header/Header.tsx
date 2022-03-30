@@ -39,6 +39,7 @@ import ChatIcon from '@material-ui/icons/Chat';
 import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { backendApi } from '../../config';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { AiOutlineClear } from 'react-icons/ai';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -199,33 +200,31 @@ const Header = ({ toggleDrawer }) => {
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [notificationList, setNotificationList] = useState([]);
 
-
   // For FullScreen Notification - Start
   const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      saveEntity()
+      saveEntity();
     }
-  }, [selectedEntity])
+  }, [selectedEntity]);
 
   const saveEntity = () => {
     axiosInstance()
       .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
-      .then(({ data }) => {
-      })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const handleFullScreenNotificationClick = (event) => {
     setFullScreenNotificationAnchorEl(event.currentTarget);
     setLoadingNotifications(true);
 
     axiosInstance()
-      .get('/user/notification')
+      .get('/notification/all')
       .then(({ data: { data } }) => {
         setNotificationList(data);
         setLoadingNotifications(false);
@@ -253,7 +252,7 @@ const Header = ({ toggleDrawer }) => {
     setLoadingNotifications(true);
 
     await axiosInstance()
-      .get('/user/notification')
+      .get('/notification/all')
       .then(({ data: { data } }) => {
         setNotificationList(data);
         setLoadingNotifications(false);
@@ -481,8 +480,8 @@ const Header = ({ toggleDrawer }) => {
     id === selectedEntity
       ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
       : hasAccessToEntity(id)
-        ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-        : '';
+      ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+      : '';
 
   function handleListKeyDown(event) {
     if (event.key === 'Tab') {
@@ -532,7 +531,7 @@ const Header = ({ toggleDrawer }) => {
           <Typography
             onClick={() => {
               axiosInstance()
-                .put('/user/notification/all-read', { toggle: true })
+                .put('/notification/all-read', { toggle: true })
                 .then(({ data }) => {
                   let updatedNotificationList = [];
                   notificationList.map((notification) => {
@@ -555,9 +554,34 @@ const Header = ({ toggleDrawer }) => {
                 });
             }}
             className="cursor-pointer"
+            style={{ marginRight: 20 }}
           >
             <FiCheckCircle className="mr-2 pt-1" size={16} />
             <span>Mark all as read</span>
+          </Typography>
+          <Typography
+            onClick={() => {
+              axiosInstance()
+                .put('/notification/clear')
+                .then(({ data }) => {
+                  toastConfig.setToastConfig({
+                    open: true,
+                    message: data.message,
+                    type: 'success'
+                  });
+                  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                  !isMobile ? handleFullScreenNotificationClick : handleMobileScreenNotificationClick;
+                  setFullScreenNotificationAnchorEl(null);
+                  setMobileScreenNotificationAnchorEl(null);
+                })
+                .catch((error) => {
+                  toastConfig.setToastConfig(error);
+                });
+            }}
+            className="cursor-pointer"
+          >
+            <AiOutlineClear className="mr-2 pt-1" size={16} />
+            <span>Clear all</span>
           </Typography>
         </div>
         <div className={classes.notificationContent}>
@@ -576,7 +600,7 @@ const Header = ({ toggleDrawer }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => { })
+                      .then(() => {})
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -669,7 +693,7 @@ const Header = ({ toggleDrawer }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => { })
+                      .then(() => {})
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -730,20 +754,20 @@ const Header = ({ toggleDrawer }) => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-          <MenuItem
-            title={curEntity.entityName}
-            key={curEntity._id}
-            selected={selectedEntity === curEntity._id}
-            onClick={() => {
-              handleSelectedEnity(curEntity._id);
-              closeEntitiesMenu();
-            }}
-          >
-            <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
-            <Box component="span" marginX={1} />
-            {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
-          </MenuItem>
-        ))
+            <MenuItem
+              title={curEntity.entityName}
+              key={curEntity._id}
+              selected={selectedEntity === curEntity._id}
+              onClick={() => {
+                handleSelectedEnity(curEntity._id);
+                closeEntitiesMenu();
+              }}
+            >
+              <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
+              <Box component="span" marginX={1} />
+              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+            </MenuItem>
+          ))
         : null}
     </Menu>
   );
@@ -774,7 +798,7 @@ const Header = ({ toggleDrawer }) => {
 
       {/* Remove below false to show chat notification icon */}
 
-      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => { }}>
+      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => {}}>
         <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary" aria-describedby={mobileScreenChatNotificationId}>
           <ChatIcon />
         </Badge>
@@ -805,7 +829,7 @@ const Header = ({ toggleDrawer }) => {
         </Popover>
       </MenuItem>
 
-      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => { }}>
+      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => {}}>
         <Badge badgeContent={notification ? notification.count : 0} color="secondary" aria-describedby={mobileScreenNotificationId}>
           <Notifications />
         </Badge>
@@ -886,25 +910,25 @@ const Header = ({ toggleDrawer }) => {
       history.push({ pathname: routes.purchaseOrder.path });
     }
     if (history.location.pathname.includes(routes.transferAssetDetail.path)) {
-      history.push({ pathname: routes.transferAsset.path })
+      history.push({ pathname: routes.transferAsset.path });
     }
     if (history.location.pathname.includes(routes.rentalManagementDetail.path)) {
-      history.push({ pathname: routes.rentalManagement.path })
+      history.push({ pathname: routes.rentalManagement.path });
     }
     if (history.location.pathname.includes(routes.repairJobDetail.path)) {
-      history.push({ pathname: routes.repairJob.path })
+      history.push({ pathname: routes.repairJob.path });
     }
     if (history.location.pathname.includes(routes.deliveryTicketDetail.path)) {
-      history.push({ pathname: routes.deliveryTicket.path })
+      history.push({ pathname: routes.deliveryTicket.path });
     }
     if (history.location.pathname.includes(routes.serializedAssetDetail.path)) {
-      history.push({ pathname: routes.serializedAsset.path })
+      history.push({ pathname: routes.serializedAsset.path });
     }
     if (history.location.pathname.includes(routes.pricingConditionDetail.path)) {
-      history.push({ pathname: routes.pricingCondition.path })
+      history.push({ pathname: routes.pricingCondition.path });
     }
     if (history.location.pathname.includes('/dashboards')) {
-      history.push({ pathname: '/dashboards' })
+      history.push({ pathname: '/dashboards' });
     }
   }
 

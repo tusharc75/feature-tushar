@@ -30,6 +30,7 @@ import { GiAbstract055 } from 'react-icons/gi';
 import { camelCase } from 'lodash';
 import { RiFlowChart } from 'react-icons/ri';
 import RepairJobViews from './RoadMapViews/index';
+import ContentFullScreen from 'src/components/ContentFullScreen';
 
 function a11yProps(index: any) {
   return {
@@ -60,7 +61,7 @@ const RepairJobDetails = () => {
   const [showRepairJobCompleteConfirmationDialog, setShowRepairJobCompleteConfirmationDialog] = useState(false);
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
-  const [allowedToEdit, setAllowedToEdit] = useState(false); 
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
 
@@ -69,6 +70,7 @@ const RepairJobDetails = () => {
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
 
   const [locationKeys, setLocationKeys] = useState([]);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity);
@@ -127,10 +129,10 @@ const RepairJobDetails = () => {
       .then(({ data: { data } }) => {
         setRepairJobData({ ...data });
         setCurrentStep(repairJobProcessSteps.indexOf(data?.processStatus) !== -1 ? repairJobProcessSteps.indexOf(data?.processStatus) : 0);
-        
+
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
-       
+
         if (permissions?.repairJob?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
@@ -313,30 +315,29 @@ const RepairJobDetails = () => {
                       currentStep={currentStep}
                       setCurrentStep={setCurrentStep}
                       isStepEnded={[REPAIR_JOB_STATUS.completed].includes(repairJobData?.status)}
+                      setStepFullScreen={() => setStepFullScreen(true)}
                     />
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={12} md={12} lg={12}>
-                        {currentStep === 0 && (
-                          <AddSerializedAsset
-                            repairJobData={repairJobData}
-                            setNextStep={setNextStep}
-                            updateJobStatus={updateJobStatus}
-                            repairedAssetStatus={repairedAssetStatus}
-                            renderedFrom={`${renderedFrom}_grid-1`}
-                            allowedToEdit={allowedToEdit}
-                          />
-                        )}
-                        {currentStep === 1 && (
-                          <SerializedAsset
-                            repairJobData={repairJobData}
-                            fetchRepairJobData={fetchRepairJobData}
-                            repairedAssetStatus={repairedAssetStatus}
-                            renderedFrom={`${renderedFrom}_grid-2`}
-                            allowedToEdit={allowedToEdit}
-                          />
-                        )}
-                      </Grid>
-                    </Grid>
+                    <ContentFullScreen title={repairJobProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                      {currentStep === 0 && (
+                        <AddSerializedAsset
+                          repairJobData={repairJobData}
+                          setNextStep={setNextStep}
+                          updateJobStatus={updateJobStatus}
+                          repairedAssetStatus={repairedAssetStatus}
+                          renderedFrom={`${renderedFrom}_grid-1`}
+                          allowedToEdit={allowedToEdit}
+                        />
+                      )}
+                      {currentStep === 1 && (
+                        <SerializedAsset
+                          repairJobData={repairJobData}
+                          fetchRepairJobData={fetchRepairJobData}
+                          repairedAssetStatus={repairedAssetStatus}
+                          renderedFrom={`${renderedFrom}_grid-2`}
+                          allowedToEdit={allowedToEdit}
+                        />
+                      )}
+                    </ContentFullScreen>
                   </Paper>
                 </Grid>
               </TabPanel>
