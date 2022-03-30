@@ -226,11 +226,13 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     }
 
     const handleDelete = () => {
+        setLoadingButton(true)
         axiosInstance().post(`${bulkAssetCreation.api}/product/${bulkAssetCreationData._id}/delete`, { ids: deleteBulkAssetCreationProduct })
             .then(() => {
                 fetchBulkAssetCreationProduct()
                 setShowDeleteConfirmBox(false)
                 setDeleteBulkAssetCreationProduct([])
+                setLoadingButton(false)
             }).catch((error) => {
                 toastConfig.setToastConfig(error)
             });
@@ -299,7 +301,6 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                             onClick={() => {
                                 setShowDeleteConfirmBox(true)
                                 setDeleteBulkAssetCreationProduct(selectedRecords.map(d => d._id))
-                                setLoadingButton(true)
                             }}>
                             Delete
                         </Button>}
