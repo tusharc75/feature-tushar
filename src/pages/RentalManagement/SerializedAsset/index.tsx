@@ -386,13 +386,13 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       _subRow.isBulkAssetCreation = bulkAssetCreationProduct?.some(e => e.productId === _subRow.materialId)
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct);
       subRows.push(_subRow)
-      assetQtySUM += _subRow.assetQty
-      assetAssignedQtySUM += _subRow.assetAssignedQty
+      assetQtySUM += _subRow.serializedProduct ? _subRow.assetQty : 0;
+      assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
 
     parent.assetQty += assetQtySUM - (parent.type === "package" ? parent.qty : 0);
     parent.assetAssignedQty += assetAssignedQtySUM;
-    parent.isValid = parent.serializedProduct ? parent.assetAssignedQty === parent.assetQty ? true : false : true;
+    parent.isValid = (parent.serializedProduct || parent.type === "package") ? parent.assetAssignedQty === parent.assetQty ? true : false : true;
 
     return subRows;
   }
