@@ -1,31 +1,29 @@
 import { useState, useEffect, useContext, useMemo, Fragment, useReducer } from "react";
 import Box from "@material-ui/core/Box/Box";
-import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import routes from "../../../components/Helpers/Routes";
+import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import routes from "src/components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Chip, IconButton, Menu, MenuItem } from "@material-ui/core";
-import axiosInstance from "../../../axios/axiosInstance";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import { Button, IconButton, Menu, MenuItem } from "@material-ui/core";
+import axiosInstance from "src/axios/axiosInstance";
+import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "../../RentalManagement/SerializedAsset/AddSerializedAsset";
-import { sidebarResource, INVENTORY_STATUS, CHILD_RESOURCE, REPAIR_JOB_STATUS, repairJob, prepareDataForGrid, gridLoadingTimeout } from "../../../constants/helpers";
-import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
-import HtmlTooltip from "../../../components/CustomTooltipTitle";
-import { useHistory } from "react-router-dom";
-import InfoIcon from '@material-ui/icons/Info';
+import { sidebarResource, INVENTORY_STATUS, CHILD_RESOURCE, REPAIR_JOB_STATUS, repairJob, prepareDataForGrid, gridLoadingTimeout } from "src/constants/helpers";
+import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
+import { useHistory, Link } from "react-router-dom";
 import { isMobile, isTablet } from "react-device-detect";
-import { useData } from "../../../StateProvider/Provider";
-import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
-import { getFrameworkComponents, genrateColoum } from '../../../constants/columns';
-import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
+import { useData } from "src/StateProvider/Provider";
+import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
+import { getFrameworkComponents, genrateColoum } from 'src/constants/columns';
+import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import { MdAdd, MdDelete } from 'react-icons/md';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import { RiEditCircleLine, RiExchangeFundsLine } from 'react-icons/ri';
-import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
+import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ManageAssetDialog from './ManageAssetDialog';
-import AssetScrapRepairDialog from '../../../components/AssetScrapRepairDialog/AssetScrapRepairDialog';
+import AssetScrapRepairDialog from 'src/components/AssetScrapRepairDialog/AssetScrapRepairDialog';
+import { Edit } from "@material-ui/icons";
+import Tooltip from 'src/components/CustomTooltipTitle'
 
 const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus, renderedFrom, allowedToEdit }) => {
 
@@ -117,27 +115,10 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
   }
 
   const AssetNumberRenderer = (params) => (
-    <span className="d-flex gap-2 align-items-center">
-      <span className="link cursor-pointer" onClick={() => setShowEditAssetDialog({ open: true, asset: params.data, selectedRecords: [] })}>
+      <Link to={`${routes.serializedAssetDetail.path}/${params.data._id}`} className="link cursor-pointer">
         {params.value}
-      </span>
-      <HtmlTooltip title="Details">
-        <IconButton
-          size="small"
-          aria-label="Details"
-          onClick={() => {
-            window.open(`${routes.serializedAssetDetail.path}/${params.data._id}`);
-          }}
-        >
-          <InfoIcon fontSize="small" />
-        </IconButton>
-      </HtmlTooltip>
-      {
-        params.data.repaired && <HtmlTooltip title="Repaired">
-          <CheckCircleIcon color="primary" fontSize="small" />
-        </HtmlTooltip>
-      }
-    </span>
+      </Link>
+   
   );
 
   const ActionsRenderer = (params) => (
@@ -151,6 +132,20 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
         }}
         entity={sidebarResource.serializedAsset}
       /> : ""
+      }
+      {
+        <Tooltip title={permissions?.repairJob?.isUpdate && params.data?.createdById === user?.user?._id ? "Edit" : "You are not permitted to edit"}>
+          <span>
+            <IconButton
+              disabled={!permissions?.repairJob?.isUpdate || params.data?.createdById !== user?.user?._id}
+              color='primary' 
+              size='small'
+              onClick={() => setShowEditAssetDialog({ open: true, asset: params.data, selectedRecords: [] })}
+            >
+              <Edit/>
+            </IconButton>
+          </span>
+        </Tooltip>
       }
     </div>
   );
