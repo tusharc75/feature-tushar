@@ -134,7 +134,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
       /> : ""
       }
       {
-        <Tooltip title={params.data?.createdById === user?.user?._id ? "Edit" : "You are not permitted to edit"}>
+        <Tooltip title={permissions?.repairJob?.isUpdate && params.data?.createdById === user?.user?._id ? "Edit" : "You are not permitted to edit"}>
           <span>
             <IconButton
               disabled={!permissions?.repairJob?.isUpdate || params.data?.createdById !== user?.user?._id}
