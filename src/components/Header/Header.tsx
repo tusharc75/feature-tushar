@@ -224,7 +224,7 @@ const Header = ({ toggleDrawer }) => {
     setLoadingNotifications(true);
 
     axiosInstance()
-      .get('/user/notification')
+      .get('/notification/all')
       .then(({ data: { data } }) => {
         setNotificationList(data);
         setLoadingNotifications(false);
@@ -252,7 +252,7 @@ const Header = ({ toggleDrawer }) => {
     setLoadingNotifications(true);
 
     await axiosInstance()
-      .get('/user/notification')
+      .get('/notification/all')
       .then(({ data: { data } }) => {
         setNotificationList(data);
         setLoadingNotifications(false);
@@ -531,7 +531,7 @@ const Header = ({ toggleDrawer }) => {
           <Typography
             onClick={() => {
               axiosInstance()
-                .put('/user/notification/all-read', { toggle: true })
+                .put('/notification/all-read', { toggle: true })
                 .then(({ data }) => {
                   let updatedNotificationList = [];
                   notificationList.map((notification) => {
@@ -562,7 +562,7 @@ const Header = ({ toggleDrawer }) => {
           <Typography
             onClick={() => {
               axiosInstance()
-                .put('/user/clear-notification')
+                .put('/notification/clear')
                 .then(({ data }) => {
                   toastConfig.setToastConfig({
                     open: true,
