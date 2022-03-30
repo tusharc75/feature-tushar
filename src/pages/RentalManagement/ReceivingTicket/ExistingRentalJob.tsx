@@ -9,7 +9,7 @@ import { CustomDialogTransition, gridLoadingTimeout, deliveryTicket, rentalManag
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
 import routes from "../../../components/Helpers/Routes";
-import { prepareDataForGrid, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_TYPE } from "../../../constants/helpers";
+import { prepareDataForGrid, DELIVERY_TICKET_REFRENCE_TYPE, getObjKeys, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_TYPE, sidebarResource, generateUniqueIdOnly } from "../../../constants/helpers";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../../constants/useColumns"
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
@@ -29,7 +29,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  
+
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   useEffect(() => {
@@ -152,34 +152,63 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
     }
     else {
       setAssetsAdd(assetsAdd);
-      const data = {}
-      data["ticketName"] = referenceData.rentalJobName;
-      data["refrenceId"] = referenceData._id;
-      data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
-      data["pickupFrom"] = referenceData?.customerAccount?.optionValue;
-      data["pickupFromAddress"] = referenceData.shippingAddress?.optionValue;
-      data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.customer;
-      data["deliveryTo"] = rentalData?.deliveryTo;
-      data["deliveryToAddress"] = rentalData?.deliveryToAddress;
-      data["startDate"] = referenceData?.estimateStartDate;
-      data["endDate"] = referenceData?.estimateStartDate;
-      data["wellName"] = referenceData?.wellName?.optionValue;
-      data["afeNumber"] = referenceData?.afeNumber;
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource["deliveryTicket"]}`)
+      let fieldsDataForCreate = response?.data?.data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+      const tempInitialData = getObjKeys("", fieldsDataForCreate)
+      tempInitialData["ticketName"] = `${referenceData?.rentalJobName}_${generateUniqueIdOnly()}`;
+      tempInitialData["ticketType"] = DELIVERY_TICKET_TYPE.receiving;
+      tempInitialData["type"] = DELIVERY_TICKET_REFRENCE_TYPE.rentalJob;
+      tempInitialData["rentalJob"] = referenceData._id;
+      tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
+      tempInitialData["pickupFrom"] = referenceData?.customerAccount?.optionValue;
+      tempInitialData["pickupFromAddress"] = referenceData.shippingAddress?.optionValue;
+      tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.customer;
+      tempInitialData["deliveryTo"] = rentalData?.deliveryTo;
+      tempInitialData["deliveryToAddress"] = rentalData?.deliveryToAddress;
+      tempInitialData["wellName"] = referenceData?.wellName?.optionValue;
+      tempInitialData["afeNumber"] = referenceData?.afeNumber;
       if (referenceData?.processor?.optionValue) {
-        data["processor"] = referenceData?.processor?.optionValue;
+        tempInitialData["deliveryPerson"] = referenceData?.processor?.optionValue;
       }
-      data["isPickupFromDisable"] = true;
-      data["isDeliveryToDisable"] = true;
-      setShowTicketDialog({ open: true, ticketType: DELIVERY_TICKET_TYPE.receiving, data: data, rentalJob: rentalData._id });
+      tempInitialData["productInventory"] = productInventory?.filter((e) => e.type === "Asset")?.map(d => d?._id)
+      tempInitialData["products"] = []
+      productInventory?.filter((e) => e.type === "Product")?.forEach((ele) => {
+        tempInitialData["products"].push({ product: ele._id, qty: ele.qty })
+      })
+      axiosInstance().post(`${deliveryTicket.api}`, tempInitialData).then(({ data }) => {
+        handleCreateLoadingTicketAddAsstes(data?.data, rentalData._id, assetsAdd)
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+
+      // const data = {}
+      // data["ticketName"] = referenceData.rentalJobName;
+      // data["refrenceId"] = referenceData._id;
+      // data["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
+      // data["pickupFrom"] = referenceData?.customerAccount?.optionValue;
+      // data["pickupFromAddress"] = referenceData.shippingAddress?.optionValue;
+      // data["deliveryToType"] = DELIVERY_FROM_TO_TYPE.customer;
+      // data["deliveryTo"] = rentalData?.deliveryTo;
+      // data["deliveryToAddress"] = rentalData?.deliveryToAddress;
+      // data["startDate"] = referenceData?.estimateStartDate;
+      // data["endDate"] = referenceData?.estimateStartDate;
+      // data["wellName"] = referenceData?.wellName?.optionValue;
+      // data["afeNumber"] = referenceData?.afeNumber;
+      // if (referenceData?.processor?.optionValue) {
+      //   data["processor"] = referenceData?.processor?.optionValue;
+      // }
+      // data["isPickupFromDisable"] = true;
+      // data["isDeliveryToDisable"] = true;
+      // setShowTicketDialog({ open: true, ticketType: DELIVERY_TICKET_TYPE.receiving, data: data, rentalJob: rentalData._id });
     }
   }
 
-  const handleCreateLoadingTicketAddAsstes = (data) => {
+  const handleCreateLoadingTicketAddAsstes = (data, rentalJob, assets) => {
     const deliveryTicketData: any = {};
     deliveryTicketData._id = data._id;
-    deliveryTicketData.rentalJob = showTicketDialog.rentalJob;
+    deliveryTicketData.rentalJob = rentalJob;
     deliveryTicketData.ticketType = DELIVERY_TICKET_TYPE.loading;
-    axiosInstance().post(`${rentalManagement.api}/${showTicketDialog.rentalJob}/inventory`, { "products": assetsAdd })
+    axiosInstance().post(`${rentalManagement.api}/${rentalJob}/inventory`, { "products": assets })
       .then(({ data }) => {
         axiosInstance().post(`${deliveryTicket.api}/auto-create-ticket`, deliveryTicketData).then(({ data }) => {
           setShowTicketDialog({ open: false, ticketType: "", data: {}, rentalJob: null });
@@ -282,7 +311,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
         products={productInventory?.filter((e) => e.type === "Product")}
         onClose={() => setShowTicketDialog({ open: false, ticketType: "", data: {}, rentalJob: null })}
         onSuccess={(data) => {
-          handleCreateLoadingTicketAddAsstes(data)
+          handleCreateLoadingTicketAddAsstes(data, showTicketDialog.rentalJob, assetsAdd)
         }}
       />
     )}

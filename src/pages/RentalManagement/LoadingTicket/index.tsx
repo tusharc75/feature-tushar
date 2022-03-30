@@ -98,13 +98,13 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       }
       var productAssets: any = [];
       var deliveryTicketList: any = [];
+      var material: any = [];
       var products: any = [];
       var nonSerializeAsset: any = [];
 
       dispatch({ type: 'loading', loading: true });
 
       if (isOffline) {
-
         productAssets = await getRentalProductAssets(rentalManagementData._id)
         productAssets = productAssets?.map(u => ({
           ...u,
@@ -120,8 +120,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id)
 
         const productResponse = await findOne(objectStore.rentalManagement, rentalManagementData._id);
-        products = productResponse.material;
-
+        material = productResponse.material
       }
       else {
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`)
@@ -142,17 +141,17 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         deliveryTicketList = result?.data?.data
 
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
-        products = productResponse?.data?.data?.material
+        material = productResponse?.data?.data?.material
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset
       }
 
-      products = products.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
+      products = material.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
 
       products?.forEach((ele) => {
         if (productAssets.filter((e) => e._id === ele.materialId).length) {
           productAssets.forEach(element => {
             if (element._id === ele.materialId) {
-              element.qty += ele.qty
+              element.qty += getNestedQty(material, ele)
             }
           });
         }
@@ -160,7 +159,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
           const obj: any = {}
           obj._id = ele.materialId
           obj.type = "Product"
-          obj.qty = ele.qty
+          obj.qty = getNestedQty(material, ele);
           obj.assetNumber = ele?.productDetail?.productName
           obj.productName = ele?.productDetail?.productName
           obj.productId = ele?.productDetail?._id
@@ -224,6 +223,16 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       toastConfig.setToastConfig(error);
     }
   };
+
+  const getNestedQty = (material, parent) => {
+    const subRows: any = material.filter((e) => e._id === parent.parentId);
+    if (subRows.length === 1) {
+      return parent.qty * getNestedQty(material, subRows[0]);
+    }
+    else {
+      return parent.qty
+    }
+  }
 
   const TicketRenderer = (params) =>
     params?.value ? (
@@ -495,8 +504,10 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
               onClose={closeActions}
             >
               <MenuItem
-                onClick={() => { handleDeliveryTicketDialog() }}
-
+                onClick={() => {
+                  closeActions();
+                  handleDeliveryTicketDialog()
+                }}
                 disabled={(selectedRecords.length === 0)
                   || (selectedRecords.some(f => f.hasOwnProperty("loadingTicketId")) || checkUniqWarehouse())}
               >
