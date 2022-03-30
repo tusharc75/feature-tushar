@@ -302,7 +302,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         parent.srno = i + 1;
         parent.detail = `${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
         parent.serializedProduct = parent.type === "product" ? parent.productDetail?.serializedProduct : false;
-        parent.assetQty = parent.type === "product" ? parent.qty : 0;
+        parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct ? data.inventory?.filter((e) => e._id === parent._id).length : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length;
         parent.realAssetQty = parent.assetQty;
         parent.realAssetAssignedQty = parent.assetAssignedQty;
