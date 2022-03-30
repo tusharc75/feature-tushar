@@ -318,12 +318,12 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleStatusChange = o => {
-    if (o.optionValue === "Scrap" || o.optionValue === "Lost") {
+    if (o.optionValue === INVENTORY_STATUS.scrap || o.optionValue === INVENTORY_STATUS.lost) {
       setStatus(o.optionValue)
       setShowReasonDialog(true)
     }
     else {
-      handleUpdateData({ status: o.optionValue })
+      handleStatusUpdate({ status: o.optionValue })
     }
   }
 
@@ -337,24 +337,29 @@ const SerializedAssetDetailsPage = () => {
       })
   }
 
-  const handleUpdateData = (obj) => {
+  const handleStatusUpdate = (obj) => {
     setUpdateLoading(true)
-    if (obj.status) {
-      const fieldsDataForUpdate = productInventoryFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-      let values = getObjKeysWithValues(productInventoryData, fieldsDataForUpdate)
-      values["status"] = obj.status
-      if (obj.reason) values[status === "Scrap" ? "scrapingReason" : "lostReason"] = obj.reason
-      values["_id"] = productInventoryData._id
-      axiosInstance().put(`${serializedAsset.api}`, values).then(({ data: { data } }) => {
+    axiosInstance()
+      .put(`${serializedAsset.api}/update-status`, {
+        assets: [productInventoryData._id],
+        status: obj?.status,
+        comment: obj?.reason ? obj?.reason : "",
+        reference: { _id: productInventoryData._id, type: 'Inventory' }
+      })
+      .then(() => {
         setUpdateLoading(false)
         fetchProductInventoryData()
         fetchProductInventoryHistory()
-      }).catch((error) => {
-        setUpdateLoading(false)
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${obj?.status}`
+        });
+      })
+      .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-    }
-  }
+  };
 
   useEffect(() => {
     if (productInventoryData) {
@@ -770,7 +775,7 @@ const SerializedAssetDetailsPage = () => {
             onClose={() => setShowReasonDialog(false)}
             status={status}
             onAddReason={(reason) => {
-              handleUpdateData({ status: status, reason: reason })
+              handleStatusUpdate({ status: status, reason: reason })
               setShowReasonDialog(false)
             }}
           /> : null

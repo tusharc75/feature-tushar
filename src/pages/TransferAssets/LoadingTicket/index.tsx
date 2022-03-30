@@ -4,7 +4,7 @@ import { Link, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { deliveryTicket, sidebarResource, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_FROM_TO_TYPE } from 'src/constants/helpers';
+import { deliveryTicket, sidebarResource, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_FROM_TO_TYPE, INVENTORY_STATUS, COLOUR_MASTER } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
@@ -18,6 +18,8 @@ import { uniq, map, groupBy } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
 import ReplaceAssetReason from "../../../components/RentalManagment/ReplaceAssetReason";
+import HtmlTooltip from "../../../components/CustomTooltipTitle";
+import InfoIcon from '@material-ui/icons/Info';
 
 
 interface LoadingGridProps {
@@ -38,6 +40,7 @@ interface LoadingGridProps {
   renderedFrom?: string;
   allowedToEdit: boolean;
   canReceive: boolean;
+  fetchTransferAssetData?: any;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
@@ -56,7 +59,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     isTransferEnded,
     renderedFrom,
     allowedToEdit,
-    canReceive
+    canReceive,
+    fetchTransferAssetData
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -74,7 +78,18 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const columns = [
-    { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
+    {
+      field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer',
+      cellStyle: params => {
+        if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
+          return { backgroundColor: COLOUR_MASTER.lostAssets.background };
+        }
+        if (params?.data?.isReplaced) {
+          return { backgroundColor: COLOUR_MASTER.replaceAssetColor.background };
+        }
+        return null;
+      }
+    },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
     { field: 'productDescription', headerName: 'Product Type', show: true, cellRenderer: 'productRenderer' },
@@ -88,9 +103,18 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   const AssetRenderer = (params) =>
     params.value ? (
-      <Link className="link cursor-pointer" to={`${routes.serializedAssetDetail.path}/${params.data._id}`}>
-        <p title={params.value}>{params.value}</p>
-      </Link>
+      <Fragment>
+        <Link className="link cursor-pointer" to={`${routes.serializedAssetDetail.path}/${params.data._id}`}>
+          <p title={params.value}>{params.value}</p>
+        </Link>
+        {(params?.data?.isReplaced) &&
+          <Box ml={1} mt={1}>
+            <HtmlTooltip title={`Replaced Asset with ${params?.data?.replaceAsset} Reason-${params?.data?.replaceReason}`}>
+              <InfoIcon fontSize="small" color={"primary"} />
+            </HtmlTooltip>
+          </Box>
+        }
+      </Fragment>
     ) : (
       <NoDataCell />
     );
@@ -133,6 +157,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       gridApi.setRowData([]);
     }
     try {
+      let replaceAssetLog = transferAssetData?.replaceAssetLog ? transferAssetData?.replaceAssetLog : []
       let assetData = await fetchAssets(forceRefresh);
       let ticketData: any = await fetchLoadingTickets();
       ticketData = ticketData.filter((ticket: any) => ticket.ticketType === DELIVERY_TICKET_TYPE.loading)
@@ -144,6 +169,16 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             assetData[j].loadingTicketStatus = ticketData[i].status;
           }
         }
+      }
+      if (replaceAssetLog?.length) {
+        assetData?.forEach((element) => {
+          const logRes = replaceAssetLog?.filter((e) => e.assetId == element._id);
+          if (logRes.length) {
+            element.isReplaced = true;
+            element.replaceReason = logRes[0]?.replaceReason;
+            element.replaceAsset = logRes[0]?.replaceAsset;;
+          }
+        })
       }
       setExistingAssets(assetData);
       dispatch({ type: 'initialize', data: assetData, count: assetData.length });
@@ -268,6 +303,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     setReplaceLoading(true)
     axiosInstance().post(`${deliveryTicket.api}/replace-assets`, { ...showReplaceReason.data, reason: reason })
       .then(({ data }) => {
+        fetchTransferAssetData()
         setShowReplaceReason({ open: false, data: [] })
         setAddSerializedAssetDialog({ open: false, products: [] })
         setReplaceLoading(false)
