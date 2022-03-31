@@ -32,7 +32,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
+import { getRentalProductAssets, getRentalDeliveryTicket, uniqueProduct, getNestedQty } from './../rentalOfflineHelper';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -146,27 +146,53 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset
       }
 
-      products = material.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
-
-      products?.forEach((ele) => {
-        if (productAssets.filter((e) => e._id === ele.materialId).length) {
-          productAssets.forEach(element => {
-            if (element._id === ele.materialId) {
-              element.qty += getNestedQty(material, ele)
-            }
+      const loadingTicketProducts = []
+      deliveryTicketList?.forEach(element => {
+        if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products && element?.products?.length) {
+          element?.products?.forEach(ele => {
+            loadingTicketProducts.push({
+              ...ele,
+              loadingTicketId: element._id,
+              loadingTicket: element?.ticketName,
+              loadingTicketStatus: element?.status
+            })
           });
         }
-        else {
+      })
+
+      products = uniqueProduct(material)
+      
+      products?.forEach((element) => {
+        var qty = element.qty;
+        const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
+        ticketProduct?.forEach(ele => {
           const obj: any = {}
-          obj._id = ele.materialId
+          obj._id = element?.productDetail?._id + "_" + ele.loadingTicketId
           obj.type = "Product"
-          obj.qty = getNestedQty(material, ele);
-          obj.assetNumber = ele?.productDetail?.productName
-          obj.productName = ele?.productDetail?.productName
-          obj.productId = ele?.productDetail?._id
+          obj.qty = ele.qty;
+          obj.assetNumber = element?.productDetail?.productName
+          obj.productName = element?.productDetail?.productName
+          obj.productId = element?.productDetail?._id
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue
-          obj.status = ele?.status
+          obj.status = element?.status
+          obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId)
+          obj.loadingTicket = ele?.loadingTicket
+          obj.loadingTicketId = ele?.loadingTicketId
+          obj.loadingTicketStatus = ele?.loadingTicketStatus
+          productAssets.push(obj)
+          qty = qty - ele.qty;
+        })
+        if (qty > 0) {
+          const obj: any = {}
+          obj._id = element.materialId
+          obj.type = "Product"
+          obj.qty = qty;
+          obj.assetNumber = element?.productDetail?.productName
+          obj.productName = element?.productDetail?.productName
+          obj.productId = element?.productDetail?._id
+          obj.warehouse = rentalManagementData?.warehouse?.optionLabel
+          obj.warehouseId = rentalManagementData?.warehouse?.optionValue
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId)
           productAssets.push(obj)
         }
@@ -185,11 +211,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           productAssets.map((d, index) => {
             if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
-              productAssets[index]['loadingTicket'] = obj?.ticketName;
-              productAssets[index]['loadingTicketId'] = obj?._id;
-              productAssets[index]['loadingTicketStatus'] = obj?.status;
-            }
-            if (obj?.products?.some((p) => d?._id === p?.product)) {
               productAssets[index]['loadingTicket'] = obj?.ticketName;
               productAssets[index]['loadingTicketId'] = obj?._id;
               productAssets[index]['loadingTicketStatus'] = obj?.status;
@@ -225,16 +246,6 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     }
   };
 
-  const getNestedQty = (material, parent) => {
-    const subRows: any = material.filter((e) => e._id === parent.parentId);
-    if (subRows.length === 1) {
-      return parent.qty * getNestedQty(material, subRows[0]);
-    }
-    else {
-      return parent.qty
-    }
-  }
-
   const TicketRenderer = (params) =>
     params?.value ? (
       <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
@@ -256,7 +267,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
 
   const InventoryRenderer = (params) => (
     <Fragment>
-      <Link className="link text-truncate" title={params.value} to={`${params.data.type === "Asset" ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params.data._id}`}>
+      <Link className="link text-truncate" title={params.value} to={`${params.data.type === "Asset" ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split("_")[0]}`}>
         {params.value}
       </Link>
       {(params?.data?.nonSerializeAsset && params?.data?.nonSerializeAsset?.length > 0) &&
