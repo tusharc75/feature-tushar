@@ -109,7 +109,7 @@ const SerializedAsset = () => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`${warehouseHelper.warehouseApi}?sortBy=warehouseName&orderBy=asc`)
+      .get(`${warehouseHelper.warehouseApi}?noEntityWise=1&sortBy=warehouseName&orderBy=asc`)
       .then(({ data: { data } }) => {
         setPlantOptions(data);
       });
