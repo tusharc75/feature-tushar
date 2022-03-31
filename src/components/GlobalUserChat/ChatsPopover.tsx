@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { createStyles, Theme, makeStyles, useTheme } from '@material-ui/core/styles';
-import { Popover, Box, Typography, Divider, Button, List, useMediaQuery, Dialog } from '@material-ui/core';
+import { Popover, Box, Typography, Divider, IconButton, List, useMediaQuery } from '@material-ui/core';
 import { Create, Clear, ArrowBack, Group } from '@material-ui/icons';
 
 import ChatList from './ChatList';
@@ -10,9 +10,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 import HtmlTooltip from '../CustomTooltipTitle';
-import CustomDialogContent from '../CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -65,14 +62,22 @@ const ChatsPopover = (props) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth={!isSmallScreen ? 'sm' : 'md'} fullWidth fullScreen={isSmallScreen}>
-      <CustomDialogHeader
-        title={selectedChat ? selectedChat?.chatTitle : newChat ? 'New chat' : `Chats (${chatList?.length})`}
-        showRequiredLabel={false}
-        onClose={onClose}
-      />
-      {/* <Box width={isSmallScreen ? '100vw' : 350} height={isSmallScreen ? '100vh' : 450} overflow="hidden"> */}
-      {/* <Box mx={1} height={50} display="flex" justifyContent="space-between" alignItems="center">
+    <Popover
+      id={open ? 'chats-popover' : undefined}
+      open={open}
+      anchorEl={anchorEl}
+      onClose={onClose}
+      anchorOrigin={{
+        vertical: 'top',
+        horizontal: 'left'
+      }}
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'center'
+      }}
+    >
+      <Box width={isSmallScreen ? 'calc(96vw - 4px)' : 350} height={isSmallScreen ? '95vh' : 450} overflow="hidden">
+        <Box mx={1} height={50} display="flex" justifyContent="space-between" alignItems="center">
           {selectedChat || newChat ? (
             <HtmlTooltip title="Go Back">
               <IconButton
@@ -127,8 +132,8 @@ const ChatsPopover = (props) => {
           </HtmlTooltip>
         </Box>
 
-        <Divider orientation="horizontal" /> */}
-      <CustomDialogContent>
+        <Divider orientation="horizontal" />
+
         <Box height={isSmallScreen ? '100%' : 400} style={{ overflowY: 'auto' }}>
           {newChat ? (
             <NewChat userId={user._id} setNewChat={setNewChat} setSelectedChat={setSelectedChat} users={users} />
@@ -142,39 +147,8 @@ const ChatsPopover = (props) => {
             </List>
           )}
         </Box>
-      </CustomDialogContent>
-      <CustomDialogFooter>
-        {selectedChat || newChat ? (
-          <Button
-            color="primary"
-            variant="outlined"
-            size="small"
-            onClick={() => {
-              setSelectedChat(null);
-              setNewChat(false);
-            }}
-          >
-            Back
-          </Button>
-        ) : (
-          <Button
-            color="primary"
-            variant="outlined"
-            size="small"
-            onClick={() => {
-              if (selectedChat) setSelectedChat(null);
-              setNewChat(!newChat);
-            }}
-          >
-            New Chat
-          </Button>
-        )}
-        <Button color="primary" variant="contained" size="small" onClick={onClose}>
-          Close
-        </Button>
-      </CustomDialogFooter>
-      {/* </Box> */}
-    </Dialog>
+      </Box>
+    </Popover>
   );
 };
 

@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.86.0](https://github.com/vebholic/oms_frontend/compare/v2.85.0...v2.86.0) (2022-03-31)
+
+
+### Features
+
+* notification clear feature add PO-1403 ([5ab786d](https://github.com/vebholic/oms_frontend/commit/5ab786dabf9d76eac0f130947493c4087f1fa4da))
+* **tickets:** add pdf preview button ([2200fa3](https://github.com/vebholic/oms_frontend/commit/2200fa32408ec8112594cdfb10e4e8b1b9b0f0f8))
+
+
+### Bug Fixes
+
+* bug fix ([5706604](https://github.com/vebholic/oms_frontend/commit/5706604f36f336fdb5fee7ef413f60010b461057))
+* bug fix ([13148c0](https://github.com/vebholic/oms_frontend/commit/13148c08670a94e4825c33d06158e0bef0fc1859))
+* bug fix ([27c50d4](https://github.com/vebholic/oms_frontend/commit/27c50d4288892020a30ad7efa6f7b7fb825563cf))
+* bug fix ([e78cf10](https://github.com/vebholic/oms_frontend/commit/e78cf10400312968aeead8f45b1eac5097f24b26))
+* bug fix ([4cdb491](https://github.com/vebholic/oms_frontend/commit/4cdb49172d1716d5ed8b5fb659352e489f45ae8a))
+* bug fix ([0a3149d](https://github.com/vebholic/oms_frontend/commit/0a3149df510c0c45017fd1355b5fb0afcc8b3ab5))
+* bulk asset creation issue ([334bf26](https://github.com/vebholic/oms_frontend/commit/334bf26659432f7f866a858e9c42a8289023ff23))
+* bulk asset creation product edit issue ([842fe65](https://github.com/vebholic/oms_frontend/commit/842fe65fc9d9d2d26b05b83ed81460b3df2f8a11))
+* bulk asset issue ([8b771a6](https://github.com/vebholic/oms_frontend/commit/8b771a691aab74285a17707938c4209cdea20f05))
+* bulkasset creation delete loading button ([59b3c0d](https://github.com/vebholic/oms_frontend/commit/59b3c0d01aebb64dbaae7577dec36b602aaeafc5))
+* **non serialize asset dialog:** let add at least one asset number ([22b28dd](https://github.com/vebholic/oms_frontend/commit/22b28ddd9bc9424b3fa8e6436ce321cc20cbb00b))
+* **non serialze asset:** fix ([004409b](https://github.com/vebholic/oms_frontend/commit/004409bc9580f933b58a7791801ac0268dea3685))
+* notification api changes ([b5788d6](https://github.com/vebholic/oms_frontend/commit/b5788d6a3fd02a726f7450354b96eefd3a712aa5))
+* repair job details full screen for steps ([ef64791](https://github.com/vebholic/oms_frontend/commit/ef647914dc9100fe30019d2fa03e1b38561b5b50))
+* **repair job:** add edit button in assets grid ([8cd8df2](https://github.com/vebholic/oms_frontend/commit/8cd8df2b4475113f5473d12ea20a01bd19935b63))
+* **repair job:** change in grid add asset ([8208bc8](https://github.com/vebholic/oms_frontend/commit/8208bc893acaaaf0f381a09c5b0227a91e404864))
+
 ## [2.85.0](https://github.com/vebholic/oms_frontend/compare/v2.84.0...v2.85.0) (2022-03-30)
 
 

@@ -1,4 +1,4 @@
-import { useEffect, useState, Fragment } from 'react';
+import { useEffect, useState, useContext, Fragment } from 'react';
 import { Container, Grid, Paper, Box, Typography, Button, List, ListItem, ListItemText, ListSubheader } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
@@ -13,9 +13,11 @@ import { FaRegistered } from 'react-icons/fa';
 import { AiFillAccountBook } from 'react-icons/ai';
 import { TextField, InputAdornment } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
-import routes from '../../components/Helpers/Routes';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import routes from 'src/components/Helpers/Routes';
 
 function Dashboard() {
+  const { isOffline } = useContext(CustomOfflineContext);
   const history = useHistory();
   const { dispatch }: any = useData();
   const {
@@ -26,18 +28,18 @@ function Dashboard() {
   const [filteredData, setFilteredData] = useState([]);
 
   useEffect(() => {
-    const arr = [];
+    let arr = [];
     let allData = [];
     // let allData = user && [...user?.role.sideBar];
     let entityData;
-      if (user?.entity && user.entity.length) {
-        entityData = user.entity.find(
-          (curEntity) => curEntity._id === selectedEntity
-        );
+    if (user?.entity && user.entity.length) {
+      entityData = user.entity.find(
+        (curEntity) => curEntity._id === selectedEntity
+      );
 
-      }
+    }
     if (entityData?.resource) {
-      allData = entityData.resource ;
+      allData = entityData.resource;
     }
     // if (['local', 'development'].includes(process.env.REACT_APP_ENV) && allData) {
     //   const indexOfProduct = allData.findIndex((d) => d.name === 'Product');
@@ -67,6 +69,26 @@ function Dashboard() {
 
       !arr.includes(u.sectionName) && arr.push(u.sectionName);
     });
+
+    //  In offline mode ROM section will be visible even if the user does not have permission.
+    //  No scenarios are discussed for this.
+    if (isOffline) {
+      const rom = "ROM";
+      arr = [rom];
+
+      allData = [{
+        "name": "Rental Management",
+        "resourceLabel": routes.rentalManagement.title,
+        "sectionName": rom,
+        "isRead": true,
+        "isCreate": true,
+        "isUpdate": true,
+        "isDelete": true,
+        "resourceId": "6215f88cbf69343f7d4fee97",
+        "sectionNameLowerCase": rom.toLowerCase(),
+        "resourceLabelLowerCase": routes.rentalManagement.title.toLowerCase()
+      }]
+    }
 
     const data = arr.map((sec) => {
       // const list = allData?.filter((u) => sec === u.sectionName && u.isRead);
@@ -246,16 +268,16 @@ function Dashboard() {
                                 {
                                   <Box height="215px" style={{ overflowY: 'auto' }} className={styles.back_box_content}>
                                     {
-                                    section.items.
-                                    filter((item) => !(("hiddenResource" in item) && item?.hiddenResource)).map((item) => (
-                                      <div key={item.name}>
-                                        <Box marginY={1} component="div" className={styles.list_component}>
-                                          <Typography paragraph className={styles.hover_list_box}>
-                                            <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
-                                          </Typography>
-                                        </Box>
-                                      </div>
-                                    ))}
+                                      section.items.
+                                        filter((item) => !(("hiddenResource" in item) && item?.hiddenResource)).map((item) => (
+                                          <div key={item.name}>
+                                            <Box marginY={1} component="div" className={styles.list_component}>
+                                              <Typography paragraph className={styles.hover_list_box}>
+                                                <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
+                                              </Typography>
+                                            </Box>
+                                          </div>
+                                        ))}
                                   </Box>
                                 }
                               </Grid>

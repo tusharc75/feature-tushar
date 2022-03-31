@@ -27,6 +27,7 @@ import { camelCase } from "lodash";
 import HideWhenOffline from "src/components/HideWhenOffline";
 import Activity from '../../components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import ContentFullScreen from "src/components/ContentFullScreen";
 
 const SubleaseDetailsPage = () => {
     const renderedFrom = camelCase(routes?.sublease.title)
@@ -254,32 +255,37 @@ const SubleaseDetailsPage = () => {
                                                         currentStep={currentStep}
                                                         setCurrentStep={setCurrentStep}
                                                         isStepEnded={[SUBLEASE_STATUS.completed].includes(subleaseData?.status)}
+                                                        setStepFullScreen={() => setStepFullScreen(true)}
                                                     />
-                                                    {currentStep === 0 && subleaseData && (
-                                                        <Productpackage
-                                                            subleaseData={subleaseData}
-                                                            setNextStep={setNextStep}
-                                                            fetchData={fetchData}
-                                                            isIssued={isIssued}
-                                                            renderedFrom={`${renderedFrom}_grid-1`}
-                                                            allowedToEdit={allowedToEdit}
-                                                            stepFullScreen={stepFullScreen}
-                                                            isSmallScreen={isSmallScreen}
-                                                            isTabletScreen={isTabletScreen}
-                                                            showActivity={showActivity}
-                                                        />
-                                                    )}
-                                                    {(currentStep === 1 || currentStep === 2) && subleaseData && (
-                                                        <SerializedAsset
-                                                            fetchData={fetchData}
-                                                            subleaseData={subleaseData}
-                                                            setNextStep={setNextStep}
-                                                            currentStep={currentStep}
-                                                            renderedFrom={`${renderedFrom}_grid-2`}
-                                                            allowedToEdit={allowedToEdit}
-                                                            isProcessor={isProcessor}
-                                                        />
-                                                    )}
+                                                    <ContentFullScreen title={subleaseSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+
+                                                        {currentStep === 0 && subleaseData && (
+                                                            <Productpackage
+                                                                subleaseData={subleaseData}
+                                                                setNextStep={setNextStep}
+                                                                fetchData={fetchData}
+                                                                isIssued={isIssued}
+                                                                renderedFrom={`${renderedFrom}_grid-1`}
+                                                                allowedToEdit={allowedToEdit}
+                                                                stepFullScreen={stepFullScreen}
+                                                                isSmallScreen={isSmallScreen}
+                                                                isTabletScreen={isTabletScreen}
+                                                                showActivity={showActivity}
+                                                            />
+                                                        )}
+                                                        {(currentStep === 1 || currentStep === 2) && subleaseData && (
+                                                            <SerializedAsset
+                                                                fetchData={fetchData}
+                                                                subleaseData={subleaseData}
+                                                                setNextStep={setNextStep}
+                                                                currentStep={currentStep}
+                                                                renderedFrom={`${renderedFrom}_grid-2`}
+                                                                allowedToEdit={allowedToEdit}
+                                                                isProcessor={isProcessor}
+                                                            />
+                                                        )}
+                                                    </ContentFullScreen>
+
                                                 </Paper>
                                             </>
                                         </Grid>

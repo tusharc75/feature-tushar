@@ -110,8 +110,8 @@ const AssignEntityDialog = ({
           setRoleConst(data.filter(role => !assignedEntity.find(element => element.entity._id === selectedData[0]).role.some(item => item?._id === role?._id)).map(obj => ({ ...obj, isChecked: false })))
         }
         else {
-          setRole(data.filter((item) => roleAccessIds.includes(item._id)).map(obj => ({ ...obj, isChecked: false })))
-          setRoleConst(data.filter((item) => roleAccessIds.includes(item._id)).map(obj => ({ ...obj, isChecked: false })))
+          setRole(data.filter((item) => roleAccessIds && roleAccessIds.length > 0 ? roleAccessIds.includes(item._id) : true).map(obj => ({ ...obj, isChecked: false })))
+          setRoleConst(data.filter((item) => roleAccessIds && roleAccessIds.length > 0 ? roleAccessIds.includes(item._id) : true).map(obj => ({ ...obj, isChecked: false })))
         }
         setLoadingData(false);
       })
