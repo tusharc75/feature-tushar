@@ -51,6 +51,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Bulk Asset Creation").then(({ data: { data } }) => {
+            data = data?.filter((obj) => !["rentalJob"].includes(obj?.fieldData?.fieldName));
             let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             if (bulkAssetCreationId) {

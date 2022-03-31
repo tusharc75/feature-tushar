@@ -39,7 +39,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 
 const CaseSchema = object().shape({
   name: string().required('Please enter case name'),
-  assignee: string().required('Please select assignee'),
+  // assignee: string().required('Please select assignee'),
   reporter: string().required(),
   startDate: string().required('Please enter start date'),
   dueDate: string().required('Please enter due date')
@@ -76,7 +76,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
         name: '',
         description: '',
         status: status || 'To Do',
-        assignee: '',
+        assignee: [],
         reporter: user._id,
         startDate: new Date(),
         dueDate: new Date()
@@ -129,7 +129,6 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
     }));
   };
 
-
   return (
     <>
       <CustomDialogHeader
@@ -158,8 +157,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                           {initialValues.parent &&
                             initialValues.parent.map((_p, index) => {
                               return (
-                                
-                                <Button variant='text' key={index} className="cursor-pointer uppercase" onClick={() => setId(_p._id)} >
+                                <Button variant="text" key={index} className="cursor-pointer uppercase" onClick={() => setId(_p._id)}>
                                   {_p.name}
                                 </Button>
                               );
@@ -269,8 +267,9 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                                 handleValuesChange({ [name]: value });
                                 setFieldValue(name, value);
                               }}
-                              multiple={false}
+                              multiple={true}
                               value={values['assignee']}
+                              email={[]}
                             />
                           </Box>
                           <Box pt={1}>

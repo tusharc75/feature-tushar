@@ -140,14 +140,15 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     }
 
     const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
-        <span className="link" onClick={() => {
-            if (allowedToEdit) {
-                setShowProductDialog(true)
-                setSelectedProductData(params.data)
-            }
+        {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && allowedToEdit ? <span className="link" onClick={() => {
+
+            setShowProductDialog(true)
+            setSelectedProductData(params.data)
+
         }}>
             <CustomRenderCell value={params.value} />
         </span>
+            : <CustomRenderCell value={params.value} />}
         {params.data.productId && allowedToEdit && <HtmlTooltip title="Details">
             <IconButton
                 size="small"
@@ -326,7 +327,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                     permissions={permissions}
                     primaryField={columns?.find(d => d.field === "productName")}
                     onClick={(data) => {
-                        if (allowedToEdit) {
+                        if ((data?.actualReceived === undefined || data?.actualReceived === 0) && allowedToEdit) {
                             setShowProductDialog(true)
                             setSelectedProductData(data)
                         }
@@ -335,7 +336,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                     selectedRecords={selectedRecords}
                     dispatch={dispatch}
                     onEdit={(data) => {
-                        if (allowedToEdit) {
+                        if ((data?.actualReceived === undefined || data?.actualReceived === 0) && allowedToEdit) {
                             setShowProductDialog(true)
                             setSelectedProductData(data)
                         }

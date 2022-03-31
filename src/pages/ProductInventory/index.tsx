@@ -42,7 +42,7 @@ const InventoryProduct = () => {
 
     const getPlants = () => {
         axiosInstance()
-            .get(`/warehouse`)
+            .get(`/warehouse?noEntityWise=1`)
             .then(({ data: { data } }) => {
                 plantId === null && setPlantId(data[0]._id)
                 setPlantOptions(data);

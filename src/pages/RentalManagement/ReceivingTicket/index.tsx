@@ -31,7 +31,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { getRentalProductAssets, getRentalDeliveryTicket } from './../rentalOfflineHelper';
+import { getRentalProductAssets, getRentalDeliveryTicket, uniqueProduct, getNestedQty } from './../rentalOfflineHelper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 import ManageRepairJob from '../../RepairJob/ManageRepairJob'
@@ -44,6 +44,7 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import AddSerializedAsset from "../SerializedAsset/AddSerializedAsset";
 import ReplaceAssetReason from "../../../components/RentalManagment/ReplaceAssetReason";
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
+import ConsumeProduct from "../../../components/RentalManagment/ConsumeProduct";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -95,6 +96,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   const [replaceLoading, setReplaceLoading] = useState(false)
 
   const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
+  const [seletedProducts, setSeletedProducts] = useState([]);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -132,6 +134,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       var material: any = [];
       var products: any = [];
       var nonSerializeAsset: any = [];
+      var consumeProducts: any = [];
+
 
       if (isOffline) {
         productAssets = await getRentalProductAssets(rentalManagementData._id);
@@ -181,32 +185,69 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
         material = productResponse?.data?.data?.material
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset
+        consumeProducts = productResponse?.data?.data?.consumeProducts
 
       }
-      products = material.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")
 
-      products?.forEach((ele) => {
-        if (productAssets.filter((e) => e._id === ele.materialId).length) {
-          productAssets.forEach(element => {
-            if (element._id === ele.materialId) {
-              element.qty += getNestedQty(material, ele)
-            }
+      const loadingTicketProducts = []
+      deliveryTicketList?.forEach(element => {
+        if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products && element?.products?.length) {
+          element?.products?.forEach(ele => {
+            loadingTicketProducts.push({
+              ...ele,
+              loadingTicketId: element._id,
+              loadingTicket: element?.ticketName,
+              loadingTicketStatus: element?.status
+            })
           });
         }
-        else {
+      })
+
+      products = uniqueProduct(material)
+
+      products?.forEach((element) => {
+        var qty = getNestedQty(material, element);
+        var consumeQty = 0;
+        consumeProducts?.filter(e => e.product === element.materialId)?.forEach((e) => {
+          consumeQty = consumeQty + e.qty;
+        })
+
+        const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
+        ticketProduct?.forEach(ele => {
           const obj: any = {}
-          obj._id = ele.materialId
+          obj._id = element?.productDetail?._id + "_" + ele.loadingTicketId
+          obj.materialId = element?.productDetail?._id
           obj.type = "Product"
-          obj.qty = getNestedQty(material, ele)
-          obj.assetNumber = ele?.productDetail?.productName
-          obj.productName = ele?.productDetail?.productName
-          obj.productId = ele?.productDetail?._id
+          obj.qty = ele.qty;
+          obj.consumeQty = consumeQty;
+          obj.assetNumber = element?.productDetail?.productName
+          obj.productName = element?.productDetail?.productName
+          obj.productId = element?.productDetail?._id
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue
-          obj.status = ele?.status
-          obj.rentalAssetStatus = ele?.status
-          obj.startDate = ele?.actualStartDate
-          obj.endDate = ele?.actualEndDate
+          obj.status = element?.status
+          obj.rentalAssetStatus = element?.status
+          obj.startDate = element?.actualStartDate
+          obj.endDate = element?.actualEndDate
+          obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId)
+          obj.loadingTicket = ele?.loadingTicket
+          obj.loadingTicketId = ele?.loadingTicketId
+          obj.loadingTicketStatus = ele?.loadingTicketStatus
+          productAssets.push(obj)
+          qty = qty - ele.qty;
+        })
+        if (qty > 0) {
+          const obj: any = {}
+          obj._id = element.materialId
+          obj.materialId = element?.materialId
+          obj.type = "Product"
+          obj.qty = qty;
+          obj.consumeQty = consumeQty;
+          obj.assetNumber = element?.productDetail?.productName
+          obj.productName = element?.productDetail?.productName
+          obj.productId = element?.productDetail?._id
+          obj.warehouse = rentalManagementData?.warehouse?.optionLabel
+          obj.warehouseId = rentalManagementData?.warehouse?.optionValue
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId)
           productAssets.push(obj)
         }
@@ -228,6 +269,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
               productAssets[index]['loadingTicket'] = obj?.ticketName;
               productAssets[index]['loadingTicketId'] = obj?._id;
+              productAssets[index]['loadingTicketStatus'] = obj?.status;
             }
             if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving) {
               productAssets[index]['receivingTicket'] = obj?.ticketName;
@@ -240,17 +282,13 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               productAssets[index]['returnTicketStatus'] = obj?.status;
             }
           }
-          if (obj?.products?.some((p) => d?._id === p?.product)) {
-            if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
-              productAssets[index]['loadingTicket'] = obj?.ticketName;
-              productAssets[index]['loadingTicketId'] = obj?._id;
-            }
-            if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving) {
+          if (obj?.products?.some((p) => d?._id?.split("_")[0] === p?.product)) {
+            if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving && productAssets[index]['loadingTicketId']) {
               productAssets[index]['receivingTicket'] = obj?.ticketName;
               productAssets[index]['receivingTicketId'] = obj?._id;
               productAssets[index]['receivingTicketStatus'] = obj?.status;
             }
-            if (obj.ticketType === DELIVERY_TICKET_TYPE.return) {
+            if (obj.ticketType === DELIVERY_TICKET_TYPE.return && productAssets[index]['loadingTicketId']) {
               productAssets[index]['returnTicket'] = obj?.ticketName;
               productAssets[index]['returnTicketId'] = obj?._id;
               productAssets[index]['returnTicketStatus'] = obj?.status;
@@ -261,7 +299,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
       productAssets.forEach((d) => {
         d["isChecked"] = false;
-        d["hideSelection"] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved || d?.status === RENTAL_INTERNAL_ASSET_STATUS.consumed;
+        d["hideSelection"] = [INVENTORY_STATUS.lost].includes(d.status)
+          || d?.manualStatus === INVENTORY_STATUS.reserved || (d?.status === RENTAL_INTERNAL_ASSET_STATUS.consumed && d?.qty === d?.consumeQty);
       })
 
       if (productAssets.filter((e) =>
@@ -282,17 +321,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     }
   };
 
-
-  const getNestedQty = (material, parent) => {
-    const subRows: any = material.filter((e) => e._id === parent.parentId);
-    if (subRows.length === 1) {
-      return parent.qty * getNestedQty(material, subRows[0]);
-    }
-    else {
-      return parent.qty
-    }
-  }
-
   const fetchRepairJob = async () => {
     let filterById = [];
     filterById.push({ field: "rentalJob", term: rentalManagementData?._id });
@@ -306,7 +334,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   const InventoryRenderer = (params) => (
     <Fragment>
       <Link className="link text-truncate" title={params.value}
-        to={`${params.data.type === "Asset" ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params.data._id}`}>
+        to={`${params.data.type === "Asset" ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split("_")[0]}`}>
         {params.value}
       </Link>
       {(params?.data?.nonSerializeAsset && params?.data?.nonSerializeAsset?.length > 0) &&
@@ -551,6 +579,46 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     }
   }
 
+  const handleConsumProduct = (data) => {
+    const products = []
+    selectedRecords?.forEach((e) => {
+      products.push({ product: e.materialId, qty: parseInt(data.qty) })
+    })
+    setOkBtnLoading(true);
+    axiosInstance().post(`${rentalManagement.api}/consume-product/${rentalManagementData._id}`, { "products": products })
+      .then(({ data }) => {
+        setOkBtnLoading(false);
+        setShowConformationConsume(false);
+        fetchRecords();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+  }
+
+  useEffect(() => {
+    const product = selectedRecords?.filter((e => e.type === "Product"))
+    if (product.length) {
+      const result: any = []
+      product?.forEach((ele) => {
+        if (result.filter((e) => e._id === ele.materialId).length) {
+          result.forEach(element => {
+            if (element._id === ele.materialId) {
+              element.qty += ele.qty
+            }
+          });
+        }
+        else {
+          result.push({ _id: ele.materialId, qty: ele.qty })
+        }
+      })
+      setSeletedProducts(result)
+    }
+    else {
+      setSeletedProducts([])
+    }
+  }, [selectedRecords])
+
   return (<>
     <Box display="flex" justifyContent="flex-end" pt={1}>
       <Box display="flex" alignItems="center">
@@ -620,9 +688,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         >
           {(selectedRecords?.filter((f) => f.type === "Asset").length === selectedRecords.length) &&
             <Fragment>
-              {(selectedRecords?.filter(f =>
-                ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                  (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
+              {(selectedRecords?.filter(f => ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
                 && [INVENTORY_STATUS.underReview].includes(f.status)
               )?.length === selectedRecords?.length) &&
                 <Fragment>
@@ -631,6 +698,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
                     setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: "" })
                   }}>{INVENTORY_STATUS.available}</MenuItem>
                 </Fragment>}
+
               <MenuItem onClick={() => {
                 setAnchorEl(null)
                 setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
@@ -649,7 +717,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               }}>{INVENTORY_STATUS.needRecert}</MenuItem>
             </Fragment>
           }
-          {(selectedRecords?.filter((f) => f.type === "Product" && f.hasOwnProperty("loadingTicketId")).length === selectedRecords.length) &&
+
+          {(selectedRecords?.length === 1 && selectedRecords?.filter((f) => f.type === "Product" && f.hasOwnProperty("loadingTicketId")).length === selectedRecords.length) &&
             <MenuItem onClick={() => {
               setAnchorEl(null)
               setShowConformationConsume(true)
@@ -880,7 +949,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
         refrenceData={showTicketDialog.data}
         productInventory={selectedRecords?.filter((e => e.type === "Asset"))}
-        products={selectedRecords?.filter((e => e.type === "Product"))}
+        products={seletedProducts}
         onClose={() => setShowTicketDialog({ open: false, ticketType: "", data: {} })}
         onSuccess={() => {
           setShowTicketDialog({ open: false, ticketType: "", data: {} });
@@ -893,7 +962,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       <ExistingRentalJob
         referenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
         referenceData={rentalManagementData}
-        productInventory={selectedRecords}
+        productInventory={selectedRecords?.filter((e => e.type === "Asset"))}
         onClose={() => setIsExistingRentalJob(false)}
         onSuccess={() => {
           setIsExistingRentalJob(false)
@@ -935,28 +1004,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             });
         }}
         okBtnLoading={okBtnLoading}
-      />
-    )}
-    {showConformationConsume && (
-      <ConfirmationDialog
-        open={showConformationConsume}
-        message={`Are you sure you want to consume selected records?`}
-        onClose={() => {
-          setShowConformationConsume(false);
-        }}
-        okBtnLoading={okBtnLoading}
-        onOk={() => {
-          setOkBtnLoading(true);
-          axiosInstance().post(`${rentalManagement.api}/consume-product/${rentalManagementData._id}`, { "products": selectedRecords?.map(s => s._id) })
-            .then(({ data }) => {
-              setOkBtnLoading(false);
-              setShowConformationConsume(false);
-              fetchRecords();
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            })
-        }}
       />
     )}
     {statusToUpdate.open && (
@@ -1077,6 +1124,14 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         handleClose={() => setShowReplaceReason({ open: false, data: {} })}
         loading={replaceLoading}
         handleSucess={(data) => { handleReplaceAsset(data?.reason) }}
+      />
+    }
+    {showConformationConsume &&
+      <ConsumeProduct
+        products={selectedRecords}
+        handleClose={() => setShowConformationConsume(false)}
+        loading={okBtnLoading}
+        handleSucess={(data) => { handleConsumProduct(data) }}
       />
     }
     {showNonSerializeAsset.open &&
