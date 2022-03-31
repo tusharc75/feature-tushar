@@ -123,3 +123,30 @@ export const removeAssetsInRental = async (id, assets) => {
         return false;
     }
 }
+
+export const uniqueProduct = (material) => {
+    const result: any = []
+    material.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")?.forEach((ele) => {
+        if (result.filter((e) => e.materialId === ele.materialId).length) {
+            result.forEach(element => {
+                if (element.materialId === ele.materialId) {
+                    element.qty += getNestedQty(material, ele)
+                }
+            });
+        }
+        else {
+            result.push({ ...ele, qty: getNestedQty(material, ele) })
+        }
+    })
+    return result;
+}
+
+export const getNestedQty = (material, parent) => {
+    const subRows: any = material.filter((e) => e._id === parent.parentId);
+    if (subRows.length === 1) {
+        return parent.qty * getNestedQty(material, subRows[0]);
+    }
+    else {
+        return parent.qty
+    }
+}
