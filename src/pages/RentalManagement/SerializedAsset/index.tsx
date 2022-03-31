@@ -9,7 +9,7 @@ import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import AddSerializedAsset from "./AddSerializedAsset";
-import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, serializedAsset, INVENTORY_STATUS } from "../../../constants/helpers";
+import { dateFormat, formatAmountWithCurrency, rentalManagement, sidebarResource, treeToFlatArray, serializedAsset, INVENTORY_STATUS, INVENTORY_OWNER_TYPE } from "../../../constants/helpers";
 import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
@@ -28,6 +28,7 @@ import { fetch_rental_product_fields } from '../../../components/RentalManagment
 import { ExpandMore } from '@material-ui/icons';
 import AddNonSerializeAssets from "./AddNonSerializeAssets";
 import { removeAssetsInRental } from '../rentalOfflineHelper';
+import WarningIcon from '@material-ui/icons/Warning';
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol, stepFullScreen, allowedToEdit }) => {
 
@@ -132,6 +133,11 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                 </IconButton>
               </HtmlTooltip>
             }
+            {row.original?.isOfflineError &&
+              <HtmlTooltip title={`Error in assets ${row.original?.offlineErrorAsset} while store in Offline to Online`}>
+                <WarningIcon fontSize="small" color={"error"} />
+              </HtmlTooltip>
+            }
             {row.original?.type === "asset" &&
               <span className="d-flex align-items-center gap-2">
                 {(row.original.status === INVENTORY_STATUS.reserved && row.original?.manualStatus !== INVENTORY_STATUS.reserved && allowedToEdit) &&
@@ -158,6 +164,10 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           </div>),
         Footer: () => {
           return <>Total</>
+        },
+        setCellClassNames: (row) => {
+          if (row?.isTransferAsset || (row?.type === "asset" && row?.warehouse && row?.warehouse !== rentalManagementData?.warehouse?.optionValue)) return "isTransferAsset";
+          if (row?.isSubleaseAsset) return "isSublease";
         }
       },
       {
@@ -254,6 +264,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       var purchaseOrderProduct: any = []
       var bulkAssetCreationProduct: any = []
       var subleaseProduct: any = []
+      var offlineAssetErrorLog: any = []
 
       if (isOffline) {
         data = await findOne(objectStore.rentalManagement, rentalManagementData._id)
@@ -275,6 +286,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       else {
         const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
         data = response?.data?.data
+        offlineAssetErrorLog = data?.offlineAssetErrorLog
 
         const result = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`)
         const transactionData = result?.data?.data
@@ -310,7 +322,11 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         parent.isSublease = subleaseProduct?.some(e => e.materialId === parent.materialId)
         parent.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === parent.materialId)
         parent.isBulkAssetCreation = bulkAssetCreationProduct?.some(e => e.productId === parent.materialId)
-        parent.subRows = generateNestedData(data.material, data.inventory, data.nonSerializeAsset, parent, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct);
+        parent.isOfflineError = offlineAssetErrorLog?.some(e => e._id === parent._id)
+        if (parent.isOfflineError) {
+          parent.offlineErrorAsset = offlineAssetErrorLog?.filter(e => e._id === parent._id).map((e) => e.assetNumber);
+        }
+        parent.subRows = generateNestedData(data.material, data.inventory, data?.nonSerializeAsset, parent, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct, offlineAssetErrorLog);
       });
 
       if (rows.filter(_rows => _rows.isValid === false).length > 0) {
@@ -327,7 +343,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     }
   };
 
-  const generateNestedData = (material, inventory, nonSerializeAsset, parent, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct) => {
+  const generateNestedData = (material, inventory, nonSerializeAsset, parent, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct, offlineAssetErrorLog) => {
 
     const subRows: any = [];
     const inventory_result = inventory?.filter((e) => e._id === parent._id);
@@ -347,6 +363,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         isNonSerializeAsset: false,
         status: _inventory?.status ? _inventory?.status : _inventory.inventoryDetail?.status,
         manualStatus: _inventory.inventoryDetail?.manualStatus,
+        warehouse: _inventory.inventoryDetail?.warehouse,
         _id: _inventory.inventory,
         isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
         isTransferAsset: isTransferAsset,
@@ -365,6 +382,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         type: "asset",
         isNonSerializeAsset: true,
         status: _inventory?.status,
+        warehouse: rentalManagementData?.warehouse?.optionValue,
         isValid: true
       })
     })
@@ -384,7 +402,11 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
       _subRow.isSublease = subleaseProduct?.some(e => e.materialId === _subRow.materialId)
       _subRow.isPurchaseOrder = purchaseOrderProduct?.some(e => e.productId === _subRow.materialId)
       _subRow.isBulkAssetCreation = bulkAssetCreationProduct?.some(e => e.productId === _subRow.materialId)
-      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct);
+      _subRow.isOfflineError = offlineAssetErrorLog?.some(e => e._id === _subRow._id)
+      if (_subRow.isOfflineError) {
+        _subRow.offlineErrorAsset = offlineAssetErrorLog?.filter(e => e._id === _subRow._id).map((e) => e.assetNumber);
+      }
+      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct, offlineAssetErrorLog);
       subRows.push(_subRow)
       assetQtySUM += _subRow.serializedProduct ? _subRow.assetQty : 0;
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
@@ -746,11 +768,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => {
-                if (rowData.isTransferAsset) return "isTransferAsset";
                 if (!rowData.isValid) return "error";
                 //if (rowData.isPurchaseOrder) return "isPurchaseOrder";
                 //if (rowData.isBulkAssetCreation) return "isPurchaseOrder";
-                if (rowData.isSubleaseAsset) return "isSublease";
                 return "";
               }}
               onSelect={setSelectedRecords}
