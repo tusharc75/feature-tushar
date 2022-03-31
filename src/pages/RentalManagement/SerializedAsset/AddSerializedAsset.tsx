@@ -69,7 +69,7 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
     }, [])
 
     useEffect(() => {
-        axiosInstance().get(`/warehouse`)
+        axiosInstance().get(`/warehouse?noEntityWise=1`)
             .then(({ data: { data, count } }) => {
                 setPlantList(data)
             })
