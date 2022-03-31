@@ -67,6 +67,12 @@ export default (history = null, passedHeaders = null) => {
         new Promise((resolve, reject) => {
             resolve(response);
         }), (error) => {
+            if (!navigator.onLine) {
+                new Promise((resolve, reject) => {
+                    resolve({ data: {}, status: 200, message: "Api call stopped on offline mode" });
+                })
+            }
+
             if (error.request.responseType === 'blob' && error.response.data.type.toLowerCase().indexOf('json') != -1) {
                 return new Promise(async (resolve, reject) => {
                     const bufferArray = await error.response.data.text()
@@ -127,7 +133,6 @@ export default (history = null, passedHeaders = null) => {
                     })
                 }
             }
-
             // reject(error);
         }
     );

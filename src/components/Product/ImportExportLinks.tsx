@@ -67,7 +67,8 @@ export default function ImportExportLinks({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onExportToExcelSuccess = () => {},
-  total = 0
+  total = 0,
+  additionalParams = null
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
@@ -148,6 +149,10 @@ export default function ImportExportLinks({
       message: `Your file will be downloaded/uploaded in a matter of seconds`
     });
     let exportApi = `${api}/template?export=true` + '&refrenceId=' + refrenceId;
+    if (additionalParams) {
+      exportApi = `${exportApi}&${additionalParams}`;
+    }
+
     if (recordsToExport > 0) {
       if (exportSelectedRecords) {
         exportSelectedRecords();
