@@ -22,7 +22,8 @@ import {
   DELIVERY_TICKET_REFRENCE_TYPE,
   serializedAsset,
   DELIVERY_FROM_TO_TYPE,
-  COLOUR_MASTER
+  COLOUR_MASTER,
+  INVENTORY_OWNER_TYPE
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { useHistory } from 'react-router-dom';
@@ -294,6 +295,9 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       cellStyle: params => {
         if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
           return { backgroundColor: COLOUR_MASTER.lostAssets.background };
+        }
+        if (params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue) {
+          return { backgroundColor: COLOUR_MASTER.transferAsset.background };
         }
         return null;
       }
