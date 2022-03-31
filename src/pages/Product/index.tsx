@@ -538,7 +538,7 @@ const Product = () => {
       }
     />
   );
-  
+
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -568,6 +568,11 @@ const Product = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchProduct();
             }}
+            additionalParams={
+              productCategory && productCategory !== ''
+                ? `&filterById=${JSON.stringify([{ field: 'productCategory', term: productCategory }])}`
+                : null
+            }
           />
         </Grid>
       </Grid>
