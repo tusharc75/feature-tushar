@@ -80,7 +80,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
   const user = (data: any) => chatUsers.find((_d) => _d?._id === data.userid);
 
   return (
-    <Box height={isSmallScreen ? '100%' : '470px'} className="global-chatbox">
+    <Box height={isSmallScreen ? '100%' : '400px'} className="global-chatbox">
       {selectedChat.chatTitle === 'eQuip-t User' && (
         <div className="not-found">
           <p>Account Deleted</p>
@@ -96,7 +96,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
           </div>
         </Box>
       ) : (
-        <Box height={isSmallScreen ? 'calc(100% - 70px)' : '470px'} className="chatbox-container">
+        <Box height={isSmallScreen ? 'calc(100% - 120px)' : '360px'} className="chatbox-container">
           {messages &&
             messages.map((data, i) => (
               <div key={i} className={`message-container ${data.userid === currentUser ? 'my-message' : ''}`}>
@@ -125,7 +125,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
       )}
 
       {!loadingChat && (
-        <form onSubmit={sendMessage} className='chatbox-input_mobile'>
+        <form onSubmit={sendMessage} className={isSmallScreen ? 'chatbox-input_mobile' : 'chatbox-input'}>
           <input
             disabled={selectedChat.chatTitle === 'eQuip-t User'}
             placeholder="Start Typing..."
