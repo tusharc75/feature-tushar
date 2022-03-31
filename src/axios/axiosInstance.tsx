@@ -9,6 +9,12 @@ const ERROR_CODE = {
 };
 Object.freeze(ERROR_CODE);
 
+const generateFakeResponse: any = () => {
+    return new Promise((resolve, reject) => {
+        resolve({ data: {}, status: 200, message: "Api call stopped on offline mode" });
+    })
+}
+
 export default (history = null, passedHeaders = null) => {
     let headers: any = passedHeaders ? passedHeaders : {};
 
@@ -67,12 +73,6 @@ export default (history = null, passedHeaders = null) => {
         new Promise((resolve, reject) => {
             resolve(response);
         }), (error) => {
-            if (!navigator.onLine) {
-                new Promise((resolve, reject) => {
-                    resolve({ data: {}, status: 200, message: "Api call stopped on offline mode" });
-                })
-            }
-
             if (error.request.responseType === 'blob' && error.response.data.type.toLowerCase().indexOf('json') != -1) {
                 return new Promise(async (resolve, reject) => {
                     const bufferArray = await error.response.data.text()
@@ -136,6 +136,16 @@ export default (history = null, passedHeaders = null) => {
             // reject(error);
         }
     );
+
+    if (!navigator.onLine) {
+        return {
+            get: () => generateFakeResponse(),
+            delete: () => generateFakeResponse(),
+            post: () => generateFakeResponse(),
+            put: () => generateFakeResponse(),
+            patch: () => generateFakeResponse(),
+        }
+    }
 
     return axiosInstance;
 }
