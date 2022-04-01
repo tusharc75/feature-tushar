@@ -17,7 +17,7 @@ export const Provider = ({ children }) => {
         .get("/user/me")
         .then(({ data: response }) => {
           const { data } = response;
-          localStorage.setItem("userOfflineData", data)
+          localStorage.setItem("userOfflineData", JSON.stringify(data))
           dispatch({ type: SET_USER, payload: data });
           let prevSelectedEntity = localStorage.getItem("selectedEntity")
           if (prevSelectedEntity && prevSelectedEntity !== 'null') {
@@ -40,7 +40,7 @@ export const Provider = ({ children }) => {
         });
     }
     else if (!navigator.onLine && localStorage.getItem("userOfflineData")) {
-      const data: any = localStorage.getItem("userOfflineData")
+      const data: any = JSON.stringify(localStorage.getItem("userOfflineData"))
       dispatch({ type: SET_USER, payload: data });
       let prevSelectedEntity = localStorage.getItem("selectedEntity")
       if (prevSelectedEntity && prevSelectedEntity !== 'null') {
