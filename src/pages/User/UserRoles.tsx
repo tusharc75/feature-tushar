@@ -86,7 +86,7 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                       }
                     >
                       <IconButton
-                        disabled={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin}
+                        //disabled={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin}
                         size="small"
                         edge="end"
                         aria-label="delete"
@@ -101,7 +101,8 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                           //     ? "disabled"
                           //     : "error"
                           // }
-                          color={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin ? "disabled" : "error"}
+                          color={"error"}
+                        //color={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin ? "disabled" : "error"}
                         />
                       </IconButton>
                     </ListItemSecondaryAction>
