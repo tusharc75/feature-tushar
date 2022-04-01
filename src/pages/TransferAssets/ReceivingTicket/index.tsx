@@ -239,7 +239,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   return (
     <Fragment>
-      {allowedToEdit && <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} justifyContent="space-between" mx="4px">
+      {allowedToEdit && <Box display="flex" flexDirection={isMobile && !isTablet ? 'column' : 'row'} justifyContent="space-between" mx="4px">
         <Box>
           {(permissions?.transferAsset?.isRead && !isMobile) && !isMobile && (
             <Button
@@ -274,7 +274,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             </Button>
           )}
         </Box>
-        {!isTransferEnded && <Box marginTop={isMobile ? 2 : 0}>
+        {!isTransferEnded && <Box marginTop={isMobile && !isTablet ? 2 : 0}>
           {permissions?.transferAsset.isUpdate && (
             <Button
               variant="contained"
