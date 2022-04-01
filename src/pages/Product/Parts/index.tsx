@@ -21,6 +21,7 @@ function Parts({ id }) {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const { state: { permissions, user, selectedEntity } }: any = useData();
+  const hasPermissions = permissions && permissions[product.permission]?.isUpdate
   const { setToastConfig } = useContext(CustomToastContext);
 
   const [parts, setParts] = useState([]);
@@ -161,8 +162,9 @@ function Parts({ id }) {
   }
 
   const ActionsRenderer = (params) => (
-    <Tooltip title="Delete">
+   hasPermissions && <Tooltip title="Delete">
       <IconButton
+        size="small"
         onClick={() => {
           setShowConfirmBox({ open: true, data: [params.data] })
         }}
@@ -174,7 +176,7 @@ function Parts({ id }) {
 
   return (
     <div>
-      <Box p={1}>
+     {hasPermissions && <Box p={1}>
         <Grid container>
           <Grid item xs={6} md={6} sm={6}>
             <Button
@@ -204,8 +206,10 @@ function Parts({ id }) {
             </Box>
           </Grid>
         </Grid>
-      </Box>
+      </Box>}
       {frameWorkComponent ? <CustomAgGrid
+        allowSelection={hasPermissions}
+        allowAction={hasPermissions}
         columns={columns}
         dataRows={dataRows}
         isClientSideGrid={true}
