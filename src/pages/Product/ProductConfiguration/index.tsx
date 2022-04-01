@@ -3,7 +3,7 @@ import { Box, Button, IconButton } from '@material-ui/core';
 import AddConfigurationDialog from './AddConfigurationDialog';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, product } from '../../../constants/helpers';
 import CarouselDialog from '../../../components/CarouselDialog';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
 import useColumns, { getFrameworkComponents } from '../../../constants/useColumns';
@@ -11,6 +11,8 @@ import { Delete, Edit } from '@material-ui/icons';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteButton from '../../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import {useData} from 'src/StateProvider/Provider'
+
 interface ConfigProps {
   productFields: any[];
   productData: any | {};
@@ -20,6 +22,8 @@ interface ConfigProps {
 
 const ProductConfiguration = (props: ConfigProps) => {
   const initialRender = React.useRef(true);
+  const { state: { permissions } }: any = useData();
+  const hasPermissions = permissions && permissions[product.permission]?.isUpdate
   const { productData, id, renderedFrom } = props;
   const {setToastConfig} = React.useContext(CustomToastContext)
   const [specFields, setSpecFields] = React.useState([]);
@@ -172,8 +176,7 @@ const ProductConfiguration = (props: ConfigProps) => {
 
   return (
     <Box>
-      <Box p={2} display="flex" justifyContent="space-between">
-        <div />
+      {hasPermissions && <Box p={2} display="flex" justifyContent="space-between">
         <Box display="flex">
           <Box mr={2} component={'div'}>
             <DeleteButton
@@ -193,12 +196,12 @@ const ProductConfiguration = (props: ConfigProps) => {
             Add Images
           </Button>
         </Box>
-      </Box>
+      </Box>}
       <Box>
         {Object.keys(frameWorkComponent).length > 0 && (
           <CustomAgGrid
-            allowSelection={true}
-            allowAction={true}
+            allowSelection={hasPermissions}
+            allowAction={hasPermissions}
             columns={columns}
             dataRows={dataRows}
             frameworkComponents={frameWorkComponent}

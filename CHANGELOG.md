@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.87.0](https://github.com/vebholic/oms_frontend/compare/v2.86.0...v2.87.0) (2022-04-01)
+
+
+### Features
+
+* - Api calls stopped on offline mode ([c9e84d6](https://github.com/vebholic/oms_frontend/commit/c9e84d6588e22d60305eb34c9dd19d390dc85e9e))
+* - Api calls stopped on offline mode ([cb8d0df](https://github.com/vebholic/oms_frontend/commit/cb8d0df441b32dc5463e96fbd48f520443fbb6f8))
+* - Api calls stopped on offline mode ([ebf619e](https://github.com/vebholic/oms_frontend/commit/ebf619e54caa533830acba9251bc5397615c51f2))
+* - Dashboard offline changes done ([cc5bd2e](https://github.com/vebholic/oms_frontend/commit/cc5bd2ec9abf81c611e9e047992c64407122e381))
+* - Dashboard will show only rental job on offline mode ([38891c9](https://github.com/vebholic/oms_frontend/commit/38891c955edd997dd8c4b2eb948cba5bc00dd1a5))
+* cases - allow to add multiple assignee PO-1410 ([d2d6fbd](https://github.com/vebholic/oms_frontend/commit/d2d6fbdb1926dde1742e93e128b9b1b6fc855dde))
+* **transfer asset:** full screen step ([f62c5b7](https://github.com/vebholic/oms_frontend/commit/f62c5b728aca852863f7b03dc8c51df5f9f6173c))
+
+
+### Bug Fixes
+
+* bug fix ([655fc94](https://github.com/vebholic/oms_frontend/commit/655fc9472e9d46c7be63a3087fe2643d37b52416))
+* bug fix ([72c6da9](https://github.com/vebholic/oms_frontend/commit/72c6da9f8a20f0d5f8d17c2b856c10cf8a9e1170))
+* bug fix ([0b43f9e](https://github.com/vebholic/oms_frontend/commit/0b43f9ea4814d841b2d27589ae4105f3978cb9b0))
+* **chat:** revert back ([fa14c1a](https://github.com/vebholic/oms_frontend/commit/fa14c1aea315491c25350a41744bb5b77356f849))
+* **entity:** roles not showing ([7899cd7](https://github.com/vebholic/oms_frontend/commit/7899cd795fa3765dd2c303ba7a7dfe812339b8da))
+* export to excel not working according to product category PO-1338 ([7c150e7](https://github.com/vebholic/oms_frontend/commit/7c150e75f9d88bcb85844c06aaae409cfcb297bc))
+* fullscreen mode for sublese stepper ([54519fa](https://github.com/vebholic/oms_frontend/commit/54519fa7bb016422b8d7aade5c1586522879c81e))
+
 ## [2.86.0](https://github.com/vebholic/oms_frontend/compare/v2.85.0...v2.86.0) (2022-03-31)
 
 

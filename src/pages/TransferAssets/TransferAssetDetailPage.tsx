@@ -28,6 +28,7 @@ import { FaWpforms } from 'react-icons/fa';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+import Steps from 'src/pages/RentalManagement/Steps'
 
 const transferSteps = ['Add Assets', 'Loading Ticket'];
 const transferSteps1 = ['Add Assets', 'Loading Ticket', 'Receiving Ticket'];
@@ -440,7 +441,17 @@ const TransferAssetDetailPage = () => {
 
               <TabPanel value={tabValue} index={1}>
                 <Box my={2}>
-                  <TransferStepper
+                  <Steps
+                    isNextStep={false}
+                    nextStep={isNextStep}
+                    steps={transferAssetData?.transferType === 'Internal' ? transferSteps : transferSteps1}
+                    currentStep={currentStep}
+                    setCurrentStep={setCurrentStep}
+                    isStepEnded={isTransferEnded}
+                    setStepFullScreen={() => setStepFullScreen(true)}
+                    updateStatus={updateStatus}
+                  />
+                  {/* <TransferStepper
                     isInternal={transferAssetData?.transferType === 'Internal'}
                     hasAssets={existingAssets.length > 0}
                     isTransferEnded={isTransferEnded}
@@ -451,7 +462,7 @@ const TransferAssetDetailPage = () => {
                     setCurrentStep={setCurrentStep}
                     updateStatus={updateStatus}
                     setStepFullScreen={() => setStepFullScreen(true)}
-                  />
+                  /> */}
 
                   <ContentFullScreen
                     title={transferAssetData?.transferType === 'Internal' ? transferSteps[currentStep] : transferSteps1[currentStep]}

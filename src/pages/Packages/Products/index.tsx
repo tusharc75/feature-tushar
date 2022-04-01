@@ -30,6 +30,7 @@ const ProductsTable = (props: Props) => {
   const {
     state: { permissions }
   }: any = useData();
+  const hasPermissions = permissions && permissions[packages.permissions]?.isUpdate
   const [columns, setColumns] = useState([]);
   const [showProductConfirmBox, setShowProductConfirmBox] = useState(false);
   const [gridApi, setGridApi] = useState(null);
@@ -143,9 +144,9 @@ const ProductsTable = (props: Props) => {
     <Box mt={2} className="bg-white">
       <Box mb={1} p={1} display="flex" justifyContent="space-between" alignItems="center">
         <Box width={'118px'}>
-          <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
+          {hasPermissions && <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
             Add Products
-          </Button>
+          </Button>}
         </Box>
         <>
           <ImportExportLinks
@@ -162,7 +163,7 @@ const ProductsTable = (props: Props) => {
             additionalParams={`refrenceId=${packageId}`}
             isBackgroundWhite={true}
           />
-          <Box ml={1}>
+          {hasPermissions && <Box ml={1}>
             <DeleteButton
               disabled={selectedRecords.length === 0 || isRemovingProducts}
               text={'Delete'}
@@ -170,14 +171,14 @@ const ProductsTable = (props: Props) => {
                 setShowProductConfirmBox(true);
               }}
             />
-          </Box>
+          </Box>}
         </>
       </Box>
       {isMobile && !isTablet ? (
         <CustomSwipableList
-          allowSelection={true}
-          allowSwipe={true}
-          permissions={permissions.product}
+          allowSelection={hasPermissions}
+          allowSwipe={hasPermissions}
+          permissions={hasPermissions && permissions[packages.permissions]}
           primaryField={columns?.find((d) => d.primaryField)}
           onClick={(data) => {
             history.push(`${routes.productDetail.path}/${data._id}`);
@@ -220,10 +221,10 @@ const ProductsTable = (props: Props) => {
           isClientSideGrid={true}
           actionWidth={150}
           loading={loading}
-          allowSelection={true}
+          allowSelection={hasPermissions}
           actionLabel="Qty"
           renderedFrom={renderedFrom}
-          actionEditable={true}
+          actionEditable={hasPermissions}
           onCellValueChanged={handleUpdateQuantity}
         />
       ) : (
