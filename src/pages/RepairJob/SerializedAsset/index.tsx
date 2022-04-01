@@ -28,7 +28,7 @@ import { GiAutoRepair } from 'react-icons/gi';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { groupBy, uniq, map } from "lodash";
 
-const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit }) => {
+const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowStatusChange }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions, selectedEntity } }: any = useData();
@@ -269,9 +269,9 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 <Box mx={1} />
                 {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed &&
                     <Fragment>
-                        <Button variant="outlined" color="primary" aria-controls="simple-menu"
+                        <Button title={!allowStatusChange && "You do not have permission to change status"} variant="outlined" color="primary" aria-controls="simple-menu"
                             aria-haspopup="true"
-                            disabled={selectedRecords.length === 0}
+                            disabled={selectedRecords.length === 0 || !allowStatusChange}
                             size="small"
                             onClick={handleClick}
                             endIcon={<ArrowDropDownIcon />}>
