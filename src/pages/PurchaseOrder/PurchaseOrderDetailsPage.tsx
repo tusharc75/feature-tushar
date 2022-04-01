@@ -422,6 +422,7 @@ const PurchaseOrderDetailsPage = () => {
                               setNextStep={setNextStep}
                               setPurchaseOrderProduct={setPurchaseOrderProduct}
                               renderedFrom={`${renderedFrom}_grid-1`}
+                              allowedToEdit={allowedToEdit}
                             />
                           )}
                           {currentStep === 1 &&
