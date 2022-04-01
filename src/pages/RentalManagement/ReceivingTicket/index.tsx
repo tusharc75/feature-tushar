@@ -44,6 +44,7 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import AddSerializedAsset from "../SerializedAsset/AddSerializedAsset";
 import ReplaceAssetReason from "../../../components/RentalManagment/ReplaceAssetReason";
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
+import ConsumeProduct from "../../../components/RentalManagment/ConsumeProduct";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -133,6 +134,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       var material: any = [];
       var products: any = [];
       var nonSerializeAsset: any = [];
+      var consumeProducts: any = [];
+
 
       if (isOffline) {
         productAssets = await getRentalProductAssets(rentalManagementData._id);
@@ -182,6 +185,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`)
         material = productResponse?.data?.data?.material
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset
+        consumeProducts = productResponse?.data?.data?.consumeProducts
 
       }
 
@@ -198,11 +202,16 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           });
         }
       })
-      
+
       products = uniqueProduct(material)
-      
+
       products?.forEach((element) => {
         var qty = getNestedQty(material, element);
+        var consumeQty = 0;
+        consumeProducts?.filter(e => e.product === element.materialId)?.forEach((e) => {
+          consumeQty = consumeQty + e.qty;
+        })
+
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
         ticketProduct?.forEach(ele => {
           const obj: any = {}
@@ -210,6 +219,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           obj.materialId = element?.productDetail?._id
           obj.type = "Product"
           obj.qty = ele.qty;
+          obj.consumeQty = consumeQty;
           obj.assetNumber = element?.productDetail?.productName
           obj.productName = element?.productDetail?.productName
           obj.productId = element?.productDetail?._id
@@ -232,6 +242,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           obj.materialId = element?.materialId
           obj.type = "Product"
           obj.qty = qty;
+          obj.consumeQty = consumeQty;
           obj.assetNumber = element?.productDetail?.productName
           obj.productName = element?.productDetail?.productName
           obj.productId = element?.productDetail?._id
@@ -288,7 +299,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
       productAssets.forEach((d) => {
         d["isChecked"] = false;
-        d["hideSelection"] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved || d?.status === RENTAL_INTERNAL_ASSET_STATUS.consumed;
+        d["hideSelection"] = [INVENTORY_STATUS.lost].includes(d.status)
+          || d?.manualStatus === INVENTORY_STATUS.reserved || (d?.status === RENTAL_INTERNAL_ASSET_STATUS.consumed && d?.qty === d?.consumeQty);
       })
 
       if (productAssets.filter((e) =>
@@ -567,6 +579,23 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     }
   }
 
+  const handleConsumProduct = (data) => {
+    const products = []
+    selectedRecords?.forEach((e) => {
+      products.push({ product: e.materialId, qty: parseInt(data.qty) })
+    })
+    setOkBtnLoading(true);
+    axiosInstance().post(`${rentalManagement.api}/consume-product/${rentalManagementData._id}`, { "products": products })
+      .then(({ data }) => {
+        setOkBtnLoading(false);
+        setShowConformationConsume(false);
+        fetchRecords();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+  }
+
   useEffect(() => {
     const product = selectedRecords?.filter((e => e.type === "Product"))
     if (product.length) {
@@ -659,9 +688,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         >
           {(selectedRecords?.filter((f) => f.type === "Asset").length === selectedRecords.length) &&
             <Fragment>
-              {(selectedRecords?.filter(f =>
-                ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                  (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
+              {(selectedRecords?.filter(f => ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
                 && [INVENTORY_STATUS.underReview].includes(f.status)
               )?.length === selectedRecords?.length) &&
                 <Fragment>
@@ -670,6 +698,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
                     setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: "" })
                   }}>{INVENTORY_STATUS.available}</MenuItem>
                 </Fragment>}
+
               <MenuItem onClick={() => {
                 setAnchorEl(null)
                 setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
@@ -688,7 +717,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               }}>{INVENTORY_STATUS.needRecert}</MenuItem>
             </Fragment>
           }
-          {(selectedRecords?.filter((f) => f.type === "Product" && f.hasOwnProperty("loadingTicketId")).length === selectedRecords.length) &&
+
+          {(selectedRecords?.length === 1 && selectedRecords?.filter((f) => f.type === "Product" && f.hasOwnProperty("loadingTicketId")).length === selectedRecords.length) &&
             <MenuItem onClick={() => {
               setAnchorEl(null)
               setShowConformationConsume(true)
@@ -976,28 +1006,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         okBtnLoading={okBtnLoading}
       />
     )}
-    {showConformationConsume && (
-      <ConfirmationDialog
-        open={showConformationConsume}
-        message={`Are you sure you want to consume selected records?`}
-        onClose={() => {
-          setShowConformationConsume(false);
-        }}
-        okBtnLoading={okBtnLoading}
-        onOk={() => {
-          setOkBtnLoading(true);
-          axiosInstance().post(`${rentalManagement.api}/consume-product/${rentalManagementData._id}`, { "products": seletedProducts?.map(s => s._id) })
-            .then(({ data }) => {
-              setOkBtnLoading(false);
-              setShowConformationConsume(false);
-              fetchRecords();
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            })
-        }}
-      />
-    )}
     {statusToUpdate.open && (
       <Dialog
         open
@@ -1116,6 +1124,14 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         handleClose={() => setShowReplaceReason({ open: false, data: {} })}
         loading={replaceLoading}
         handleSucess={(data) => { handleReplaceAsset(data?.reason) }}
+      />
+    }
+    {showConformationConsume &&
+      <ConsumeProduct
+        products={selectedRecords}
+        handleClose={() => setShowConformationConsume(false)}
+        loading={okBtnLoading}
+        handleSucess={(data) => { handleConsumProduct(data) }}
       />
     }
     {showNonSerializeAsset.open &&

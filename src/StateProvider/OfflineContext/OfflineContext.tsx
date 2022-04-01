@@ -52,10 +52,14 @@ export const CustomOfflineProvider = ({ children }) => {
     });
 
     const synchronizationData = async () => {
+        if (localStorage.getItem("isSynchronizationData") === "true") {
+            return false
+        }
         if (!isOffline) {
             await setUpindexDB()
             var data = await findAll(objectStore.offlineDataSync);
             if (data?.length) {
+                localStorage.setItem("isSynchronizationData", "true")
                 setIsSynch(true)
                 var OrderBy = ["Loading", "Receiving"];
                 data = sortBy(data, function (item: any) {
@@ -86,6 +90,7 @@ export const CustomOfflineProvider = ({ children }) => {
                     }
                 })
                 await rentalJobOfflineUpdate([])
+                localStorage.removeItem("isSynchronizationData")
                 setIsSynch(false)
             }
             else {
