@@ -239,7 +239,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   return (
     <Fragment>
-      {allowedToEdit && <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} justifyContent="space-between" mx="4px">
+      {allowedToEdit && <Box display="flex" flexDirection={isMobile && !isTablet ? 'column' : 'row'} justifyContent="space-between" mx="4px">
         <Box>
           {(permissions?.transferAsset?.isRead && !isMobile) && !isMobile && (
             <Button
@@ -274,7 +274,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             </Button>
           )}
         </Box>
-        {!isTransferEnded && <Box marginTop={isMobile ? 2 : 0}>
+        {!isTransferEnded && <Box marginTop={isMobile && !isTablet ? 2 : 0}>
           {permissions?.transferAsset.isUpdate && (
             <Button
               variant="contained"
@@ -342,9 +342,9 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       <Box mt={1}>
         {isMobile && !isTablet ? (
           <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={permissions}
+            allowSelection={allowedToEdit}
+            allowSwipe={false}
+            permissions={permissions?.transferAsset}
             primaryField={columns?.find((d) => d.field)}
             onClick={(data) => {
               history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
@@ -396,7 +396,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             page={page}
             allowAction={false}
             actionWidth={100}
-            allowSelection={true}
+            allowSelection={allowedToEdit}
             isClientSideGrid={true}
             loading={loading}
             renderedFrom={renderedFrom}
