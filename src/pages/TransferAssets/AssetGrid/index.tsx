@@ -225,7 +225,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           isMobile && !isTablet ?
             <CustomSwipableList
               allowSelection={allowedToEdit}
-              allowSwipe={true}
+              allowSwipe={allowedToEdit}
               permissions={permissions.transferAsset}
               primaryField={columns?.find(d => d.primaryField)}
               onClick={(data) => {
