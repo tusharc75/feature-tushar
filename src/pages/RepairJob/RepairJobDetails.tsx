@@ -62,6 +62,7 @@ const RepairJobDetails = () => {
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowStatusChange, setAllowStatusChange] = useState(true)
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
 
@@ -117,6 +118,8 @@ const RepairJobDetails = () => {
       .get(`/field?resource=${sidebarResource.repairJob}`)
       .then(({ data: { data } }) => {
         setRepairJobFields(data);
+        const statusField = data.find((d:any) => d.fieldData.fieldName === 'status');
+        setAllowStatusChange(statusField?.isUpdate)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -326,6 +329,7 @@ const RepairJobDetails = () => {
                           repairedAssetStatus={repairedAssetStatus}
                           renderedFrom={`${renderedFrom}_grid-1`}
                           allowedToEdit={allowedToEdit}
+                          allowStatusChange={allowStatusChange}
                         />
                       )}
                       {currentStep === 1 && (
@@ -335,6 +339,7 @@ const RepairJobDetails = () => {
                           repairedAssetStatus={repairedAssetStatus}
                           renderedFrom={`${renderedFrom}_grid-2`}
                           allowedToEdit={allowedToEdit}
+                          allowStatusChange={allowStatusChange}
                         />
                       )}
                     </ContentFullScreen>
