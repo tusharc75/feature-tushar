@@ -119,11 +119,28 @@ const Steps = (props) => {
         currentStep,
         setCurrentStep,
         isStepEnded,
-        setStepFullScreen = null
+        setStepFullScreen = null,
+        updateStatus = null,
     } = props;
 
     const classes = useStyles();
     let activeStep = currentStep;
+
+    const goNext = () => {
+        setCurrentStep((prevStep) => {
+          const newStep = prevStep + 1;
+          if(updateStatus) {updateStatus(newStep)};
+          return newStep;
+        });
+      };
+    
+      const goPrev = () => {
+        setCurrentStep((prevStep) => {
+          const newStep = prevStep - 1;
+         if(updateStatus)  {updateStatus(newStep)};
+          return newStep;
+        });
+      };
 
     return (
         <div>
@@ -139,10 +156,8 @@ const Steps = (props) => {
                 //             color="primary"
                 //             disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep || isStepEnded} variant="contained"
                 //             endIcon={<KeyboardArrowRight />}
-                //             onClick={() => {
-                //                 setCurrentStep(currentStep + 1)
-                //             }}
-                //         >
+                //             onClick={goNext}     
+                //          >
                 //             {steps[currentStep + 1] ?? ""}
                 //         </Button>
                 //     }
@@ -166,9 +181,7 @@ const Steps = (props) => {
                             disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep || isStepEnded}
                             endIcon={<AiOutlineRight />}
                             className="ml-1 MobileStep-next-back-button"
-                            onClick={() => {
-                                setCurrentStep(currentStep + 1)
-                            }}
+                            onClick={goNext}
                         >
                             {"Next"}
                         </Button>
@@ -178,9 +191,7 @@ const Steps = (props) => {
                         <Button size="small" variant="text" color={"primary"} startIcon={<AiOutlineLeft />}
                             disabled={currentStep === steps.length || currentStep === 0 || isStepEnded}
                             className="mr-1 MobileStep-next-back-button"
-                            onClick={() => {
-                                setCurrentStep(currentStep - 1)
-                            }}
+                            onClick={goPrev}
                         >
                             {"Back"}
                         </Button>
@@ -192,9 +203,7 @@ const Steps = (props) => {
                             {!isMobile && !isStepEnded && <IconButton
                                 disabled={currentStep === steps.length || currentStep === 0}
                                 className={"stepperButton"}
-                                onClick={() => {
-                                    setCurrentStep(currentStep - 1)
-                                }}
+                                onClick={goPrev}
                             >
                                 <TiArrowBack size={30} />
                             </IconButton>}
@@ -215,9 +224,7 @@ const Steps = (props) => {
                                                         disabled={
                                                             currentStep === steps.length || currentStep === 0 || isStepEnded
                                                         }
-                                                        onClick={() => {
-                                                            setCurrentStep(currentStep - 1)
-                                                        }}
+                                                        onClick={goPrev}
                                                         size="small"
                                                     >
                                                         <TiArrowBack size={24} />
@@ -239,9 +246,7 @@ const Steps = (props) => {
 
                                                     <IconButton
                                                         color="primary"
-                                                        onClick={() => {
-                                                            setCurrentStep(currentStep + 1)
-                                                        }}
+                                                        onClick={goNext}
                                                         size="small"
                                                         disabled={
                                                             currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep || isStepEnded
@@ -273,7 +278,7 @@ const Steps = (props) => {
                                                 className={"currentStepColor"}
                                             >
                                                 {label}
-                                                {(setStepFullScreen && currentStep === i) &&
+                                                {!isStepEnded && (setStepFullScreen && currentStep === i) &&
                                                     <HtmlTooltip title={`Full Screen`}>
                                                         <IconButton
                                                             aria-label="Full Screen"
@@ -292,9 +297,7 @@ const Steps = (props) => {
                         <Grid item xs={12} sm={isMobile ? 12 : 1} md={1} className="d-flex align-items-center justify-content-center mt-2 " >
                             {!isMobile && !isStepEnded && <Fragment>
                                 <IconButton
-                                    onClick={() => {
-                                        setCurrentStep(currentStep + 1)
-                                    }}
+                                    onClick={goNext}
                                     disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep}
                                     className={"stepperButtonNext"}
                                 >
