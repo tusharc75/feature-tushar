@@ -28,11 +28,11 @@ import InfoIcon from "@material-ui/icons/Info";
 import { RiEditCircleLine } from "react-icons/ri";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 
-const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom }) => {
+const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit:hasPermission }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
-
+    const allowedToEdit = hasPermission || permissions?.purchaseOrder.isUpdate
     const [columns, setColumns] = useState([{ field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" }])
 
@@ -247,7 +247,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
 
     return (
         <Fragment>
-            <Box display="flex" justifyContent="space-between" m={1}>
+            {allowedToEdit && <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex" alignItems="center">
                     <Button
                         variant={"contained"}
@@ -350,11 +350,11 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                         </Menu>
                     }
                 </div>
-            </Box>
+            </Box>}
             {columns && frameWorkComponent ? isMobile && !isTablet ?
                 <CustomSwipableList
-                    allowSelection={true}
-                    allowSwipe={true}
+                    allowSelection={allowedToEdit}
+                    allowSwipe={allowedToEdit}
                     permissions={permissions}
                     primaryField={columns?.find(d => d.field === "productName")}
                     onClick={(data) => {
@@ -400,9 +400,9 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     limit={limit}
                     pageSizes={pageSizes}
                     page={page}
-                    allowAction={true}
+                    allowAction={allowedToEdit}
                     actionWidth={150}
-                    allowSelection={true}
+                    allowSelection={allowedToEdit}
                     isClientSideGrid={true}
                     loading={loading}
                     onCellValueChanged={(row) => {

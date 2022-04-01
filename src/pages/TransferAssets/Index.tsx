@@ -58,7 +58,7 @@ const TransferAsset = () => {
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [open, setOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false)
   const history = useHistory();
@@ -79,7 +79,7 @@ const TransferAsset = () => {
 
   useEffect(() => {
     fetchTransferAsset();
-  }, [page, limit, filters, sorting, search, fromRental, selectedEntity, selectedType]);
+  }, [page, limit, filters, sorting, search, fromRental, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -148,6 +148,11 @@ const TransferAsset = () => {
       let filterById = [];
       filterById.push({ field: "rentalJob", term: fromRental?._id });
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
+    }
+
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
     }
 
     if (!isObjectEmpty(filters)) {
@@ -562,7 +567,6 @@ const TransferAsset = () => {
                 page={page}
                 actionWidth={150}
                 loading={loading}
-                isClientSideGrid={true}
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchTransferAsset}
               />
