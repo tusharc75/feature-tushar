@@ -28,7 +28,9 @@ export const CustomOfflineProvider = ({ children }) => {
     const [offlineGridData, setOfflineGridData] = useState(null);
 
     useEffect(() => {
-        synchronizationData();
+        if (localStorage.getItem("token")) {
+            synchronizationData();
+        }
     }, [isOffline])
 
     window.addEventListener(
