@@ -25,7 +25,7 @@ import AssetScrapRepairDialog from 'src/components/AssetScrapRepairDialog/AssetS
 import { Edit } from "@material-ui/icons";
 import Tooltip from 'src/components/CustomTooltipTitle'
 
-const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus, renderedFrom, allowedToEdit, allowStatusChange }) => {
+const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus }) => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -115,10 +115,10 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
   }
 
   const AssetNumberRenderer = (params) => (
-      <Link to={`${routes.serializedAssetDetail.path}/${params.data._id}`} className="link cursor-pointer">
-        {params.value}
-      </Link>
-   
+    <Link to={`${routes.serializedAssetDetail.path}/${params.data._id}`} className="link cursor-pointer">
+      {params.value}
+    </Link>
+
   );
 
   const ActionsRenderer = (params) => (
@@ -138,11 +138,11 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
           <span>
             <IconButton
               disabled={!permissions?.repairJob?.isUpdate || params.data?.createdById !== user?.user?._id}
-              color='primary' 
+              color='primary'
               size='small'
               onClick={() => setShowEditAssetDialog({ open: true, asset: params.data, selectedRecords: [] })}
             >
-              <Edit/>
+              <Edit />
             </IconButton>
           </span>
         </Tooltip>
@@ -190,12 +190,11 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
         <Box display="flex" className="gap-2">
           {repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed &&
             <Button
-              title={!allowStatusChange && "You do not have permission to change status"}
               variant={isMobile && !isTablet ? "text" : "outlined"}
               color="primary"
               aria-controls="simple-menu"
               aria-haspopup="true"
-              disabled={selectedRecords.length === 0 || !allowStatusChange}
+              disabled={selectedRecords.length === 0 || !allowUpdateStatus}
               size="small"
               style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
 

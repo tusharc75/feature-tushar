@@ -11,7 +11,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { repairJob, sidebarResource, repairJobProcessSteps, REPAIR_JOB_STATUS, ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { repairJob, sidebarResource, repairJobProcessSteps, REPAIR_JOB_STATUS, ACTIVITY_RESOURCE, serializedAsset } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRepairJob from './ManageRepairJob';
@@ -62,7 +62,6 @@ const RepairJobDetails = () => {
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [allowStatusChange, setAllowStatusChange] = useState(true)
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
 
@@ -72,6 +71,7 @@ const RepairJobDetails = () => {
 
   const [locationKeys, setLocationKeys] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity);
@@ -105,6 +105,7 @@ const RepairJobDetails = () => {
 
   useEffect(() => {
     getResourceFields();
+    fetchAssetStatusRights();
   }, []);
 
   useEffect(() => {
@@ -118,11 +119,25 @@ const RepairJobDetails = () => {
       .get(`/field?resource=${sidebarResource.repairJob}`)
       .then(({ data: { data } }) => {
         setRepairJobFields(data);
-        const statusField = data.find((d:any) => d.fieldData.fieldName === 'status');
-        setAllowStatusChange(statusField?.isUpdate)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchAssetStatusRights = () => {
+    axiosInstance().get(`/field?resource=${serializedAsset.resource}&view=true`)
+      .then(({ data }) => {
+        if (data.data && data.data.length) {
+          data.data.some(o => {
+            if (o?.fieldData?.fieldName === "status") {
+              setAllowUpdateStatus(o?.isUpdate)
+              return true
+            }
+          })
+        }
+      })
+      .catch((err) => {
       });
   };
 
@@ -329,7 +344,7 @@ const RepairJobDetails = () => {
                           repairedAssetStatus={repairedAssetStatus}
                           renderedFrom={`${renderedFrom}_grid-1`}
                           allowedToEdit={allowedToEdit}
-                          allowStatusChange={allowStatusChange}
+                          allowUpdateStatus={allowUpdateStatus}
                         />
                       )}
                       {currentStep === 1 && (
@@ -339,7 +354,7 @@ const RepairJobDetails = () => {
                           repairedAssetStatus={repairedAssetStatus}
                           renderedFrom={`${renderedFrom}_grid-2`}
                           allowedToEdit={allowedToEdit}
-                          allowStatusChange={allowStatusChange}
+                          allowUpdateStatus={allowUpdateStatus}
                         />
                       )}
                     </ContentFullScreen>
