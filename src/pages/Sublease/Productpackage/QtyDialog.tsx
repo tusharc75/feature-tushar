@@ -70,17 +70,17 @@ const QtyDialog: FC<EditDialogProps> = (
         if (element?.[`${element.type}Detail`]?.unit) {
           unitArray.push([...element?.[`${element.type}Detail`].unit])
         }
-        if (element?.[`${element.type}Detail`].pricingMethod) {
-          pricingMethodArray.push([...element?.[`${element.type}Detail`].pricingMethod])
+        if (element?.[`${element.type}Detail`]?.pricingMethod) {
+          pricingMethodArray.push([...element?.[`${element.type}Detail`]?.pricingMethod])
         }
       });
-      let unit: any = unitArray.shift().filter(function (v) {
-        return unitArray.every(function (a) {
+      let unit: any = unitArray?.shift()?.filter(function (v) {
+        return unitArray?.every(function (a) {
           return a.indexOf(v) !== -1;
         });
       });
-      let pricingMethod: any = pricingMethodArray.shift().filter(function (v) {
-        return pricingMethodArray.every(function (a) {
+      let pricingMethod: any = pricingMethodArray?.shift()?.filter(function (v) {
+        return pricingMethodArray?.every(function (a) {
           return a.indexOf(v) !== -1;
         });
       });
@@ -107,10 +107,10 @@ const QtyDialog: FC<EditDialogProps> = (
       let unitOptions: any = []
       let pricingMethodOptions: any = []
       if (rowData?.[`${rowData.type}Detail`]?.unit) {
-        unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].unit);
+        unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.unit);
       }
       if (rowData?.[`${rowData.type}Detail`].pricingMethod) {
-        pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].pricingMethod);
+        pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
       data.forEach(element => {
         if (element.fieldName === "unit") {
