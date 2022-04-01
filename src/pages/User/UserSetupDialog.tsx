@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import {
     Dialog,
     Stepper,
@@ -16,6 +16,7 @@ import { useData } from '../../StateProvider/Provider';
 import { userType } from '../../constants/helpers';
 import AssignRolesDialog from '../../components/AssignRolesDialog/AssignRolesDialog';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -38,12 +39,14 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
     const [activeStep, setActiveStep] = useState(0)
     const [stepsLabel, setStepsLabel] = useState([]);
     const classes = useStyles();
+    const toastConfig = useContext(CustomToastContext);
+
     useEffect(() => {
-        if(isApprovalProcess){
-            setStepsLabel((prevStep) => [...prevStep,'Set Approval Process'])
+        if (isApprovalProcess) {
+            setStepsLabel((prevStep) => [...prevStep, 'Set Approval Process'])
         }
-        if (isRoleSetUpPermission){
-            setStepsLabel((prevStep) => [...prevStep,'Assign Role'])
+        if (isRoleSetUpPermission) {
+            setStepsLabel((prevStep) => [...prevStep, 'Assign Role'])
         }
     }, [])
 
@@ -61,6 +64,11 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                             if (isRoleSetUpPermission) {
                                 setActiveStep((prevStep) => prevStep + 1)
                             } else {
+                                toastConfig.setToastConfig({
+                                    open: true,
+                                    type: 'success',
+                                    message: "The user configuration is completed"
+                                })
                                 close()
                                 fetchUsers()
                             }
@@ -82,6 +90,11 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                         assignedEntity={[]}
                         regionalRole={false}
                         onSuccess={() => {
+                            toastConfig.setToastConfig({
+                                open: true,
+                                type: 'success',
+                                message: "The user configuration is completed"
+                            })
                             close()
                             fetchUsers()
 
