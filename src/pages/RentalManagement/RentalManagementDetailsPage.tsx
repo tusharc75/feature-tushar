@@ -326,7 +326,7 @@ const RentalManagementDetailsPage = () => {
                         {'Cancel ' + routes.rentalManagement.title}
                       </Button>
                     )} */}
-                  {permissions?.rentalManagement?.isUpdate &&
+                  {(permissions?.rentalManagement?.isUpdate && !isOffline) &&
                     ([RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) && allowedToEdit) && (
                       <Fragment>
                         <Button
