@@ -567,7 +567,6 @@ const TransferAsset = () => {
                 page={page}
                 actionWidth={150}
                 loading={loading}
-                isClientSideGrid={false}
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchTransferAsset}
               />
