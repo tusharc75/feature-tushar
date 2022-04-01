@@ -237,7 +237,7 @@ function RentalManagementHeader(props) {
             </HideWhenOffline>
             <Grid style={{ display: 'flex', gap: '5px' }}>
               <HideWhenOffline>
-                {RentalManagementPermissions.isCreate && RentalManagementPermissions.isUpdate && (
+                {RentalManagementPermissions?.isCreate && RentalManagementPermissions?.isUpdate && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
@@ -250,7 +250,7 @@ function RentalManagementHeader(props) {
                     {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                   </Button>
                 )}
-                {RentalManagementPermissions.isDelete && (
+                {RentalManagementPermissions?.isDelete && (
                   <>
                     <Button
                       //disabled={canDelete}
