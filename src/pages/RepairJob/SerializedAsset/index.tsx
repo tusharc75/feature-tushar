@@ -28,7 +28,7 @@ import { GiAutoRepair } from 'react-icons/gi';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { groupBy, uniq, map } from "lodash";
 
-const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowStatusChange }) => {
+const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions, selectedEntity } }: any = useData();
@@ -269,9 +269,10 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 <Box mx={1} />
                 {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed &&
                     <Fragment>
-                        <Button title={!allowStatusChange && "You do not have permission to change status"} variant="outlined" color="primary" aria-controls="simple-menu"
+                        <Button
+                            variant="outlined" color="primary" aria-controls="simple-menu"
                             aria-haspopup="true"
-                            disabled={selectedRecords.length === 0 || !allowStatusChange}
+                            disabled={selectedRecords.length === 0 || !allowUpdateStatus}
                             size="small"
                             onClick={handleClick}
                             endIcon={<ArrowDropDownIcon />}>
@@ -381,7 +382,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             {columns ?
                 isMobile && !isTablet ? <CustomSwipableList
                     allowSelection={allowedToEdit}
-                    allowSwipe={allowedToEdit &&  repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed ? true : false}
+                    allowSwipe={allowedToEdit && repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed ? true : false}
                     permissions={true}
                     primaryField={columns?.find(d => d.field)}
                     onClick={(data) => {
@@ -422,7 +423,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                     limit={limit}
                     pageSizes={pageSizes}
                     page={page}
-                    allowSelection={allowedToEdit &&  repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed ? true : false}
+                    allowSelection={allowedToEdit && repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed ? true : false}
                     allowAction={allowedToEdit}
                     loading={loading}
                     renderedFrom={renderedFrom}

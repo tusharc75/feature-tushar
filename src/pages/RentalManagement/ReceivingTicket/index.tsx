@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom, allowedToEdit, isProcessor }) => {
+const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom, allowedToEdit, isProcessor, allowUpdateStatus }) => {
 
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -686,7 +686,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             horizontal: 'right'
           }}
         >
-          {(selectedRecords?.filter((f) => f.type === "Asset").length === selectedRecords.length) &&
+          {(selectedRecords?.filter((f) => f.type === "Asset").length === selectedRecords.length && allowUpdateStatus) &&
             <Fragment>
               {(selectedRecords?.filter(f => ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                 (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
@@ -698,7 +698,6 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
                     setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: "" })
                   }}>{INVENTORY_STATUS.available}</MenuItem>
                 </Fragment>}
-
               <MenuItem onClick={() => {
                 setAnchorEl(null)
                 setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: "" })
@@ -717,8 +716,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               }}>{INVENTORY_STATUS.needRecert}</MenuItem>
             </Fragment>
           }
-
-          {(selectedRecords?.length === 1 && selectedRecords?.filter((f) => f.type === "Product" && f.hasOwnProperty("loadingTicketId")).length === selectedRecords.length) &&
+          {(selectedRecords?.length === 1 && selectedRecords?.filter((f) => f.type === "Product"
+            && f.hasOwnProperty("loadingTicketId") && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length) &&
             <MenuItem onClick={() => {
               setAnchorEl(null)
               setShowConformationConsume(true)
