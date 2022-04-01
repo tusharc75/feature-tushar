@@ -199,7 +199,7 @@ const RentalManagement = () => {
   const ActionsRenderer = (params) => (
     <>
       {
-        permissions.rentalManagement.isCreate ? (
+        permissions?.rentalManagement?.isCreate ? (
           <Tooltip title="Clone">
             <IconButton
               size="small"
@@ -439,7 +439,7 @@ const RentalManagement = () => {
               <Grid item xs={12} sm={12}>
                 <Grid container justify="flex-end">
                   <ImportExportLinks
-                    permissions={permissions.rentalManagement}
+                    permissions={permissions?.rentalManagement}
                     module="rentalManagements"
                     api={rentalManagement.api}
                     afterImportCompleted={() => {
@@ -473,7 +473,7 @@ const RentalManagement = () => {
               options={RentalManagementType}
               onSearch={handleSearch}
               searchVal={search}
-              RentalManagementPermissions={permissions.rentalManagement}
+              RentalManagementPermissions={permissions?.rentalManagement}
               onCreate={clickCreateNew}
               showConfirmBox={showConfirmBox}
               columns={columns}
@@ -509,7 +509,7 @@ const RentalManagement = () => {
                 <CustomSwipableList
                   allowSelection={true}
                   allowSwipe={true}
-                  permissions={permissions.rentalManagement}
+                  permissions={permissions?.rentalManagement}
                   primaryField={columns?.find(d => d.primaryField)}
                   onClick={(data) => {
                     history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
