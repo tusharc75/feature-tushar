@@ -342,9 +342,9 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       <Box mt={1}>
         {isMobile && !isTablet ? (
           <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={permissions}
+            allowSelection={allowedToEdit}
+            allowSwipe={false}
+            permissions={permissions?.transferAsset}
             primaryField={columns?.find((d) => d.field)}
             onClick={(data) => {
               history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
@@ -396,7 +396,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             page={page}
             allowAction={false}
             actionWidth={100}
-            allowSelection={true}
+            allowSelection={allowedToEdit}
             isClientSideGrid={true}
             loading={loading}
             renderedFrom={renderedFrom}
