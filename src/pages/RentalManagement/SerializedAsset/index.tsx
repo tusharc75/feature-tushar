@@ -134,7 +134,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
               </HtmlTooltip>
             }
             {row.original?.isOfflineError &&
-              <HtmlTooltip title={`Error in assets ${row.original?.offlineErrorAsset} while store in Offline to Online`}>
+              <HtmlTooltip title={`The assets listed below were added in Offline but do not exist in the Assets List.
+              ${row.original?.offlineErrorAsset}
+              Please re-add the left over Quanity`}>
                 <WarningIcon fontSize="small" color={"error"} />
               </HtmlTooltip>
             }
