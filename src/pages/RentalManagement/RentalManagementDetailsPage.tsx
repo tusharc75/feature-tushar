@@ -12,6 +12,7 @@ import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import {
+  serializedAsset,
   getUniqueCurrencies,
   gridLoadingTimeout,
   rentalManagement,
@@ -86,6 +87,8 @@ const RentalManagementDetailsPage = () => {
   const [showCancelConfirmBox, setShowCancelConfirmBox] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
+  const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
+
   useEffect(() => {
     return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
@@ -136,7 +139,26 @@ const RentalManagementDetailsPage = () => {
       getRentalManagementFields();
       fetchRentalManagementData();
     }
+    if (!isOffline) {
+      fetchAssetStatusRights()
+    }
   }, [id]);
+
+  const fetchAssetStatusRights = () => {
+    axiosInstance().get(`/field?resource=${serializedAsset.resource}&view=true`)
+      .then(({ data }) => {
+        if (data.data && data.data.length) {
+          data.data.some(o => {
+            if (o?.fieldData?.fieldName === "status") {
+              setAllowUpdateStatus(o?.isUpdate)
+              return true
+            }
+          })
+        }
+      })
+      .catch((err) => {
+      });
+  };
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
@@ -484,6 +506,7 @@ const RentalManagementDetailsPage = () => {
                         renderedFrom={`${renderedFrom}_grid-3`}
                         allowedToEdit={allowedToEdit}
                         isProcessor={isProcessor}
+                        allowUpdateStatus={allowUpdateStatus}
                       />
                     )}
                     {currentStep === 4 && rentalManagementData && (
@@ -495,6 +518,7 @@ const RentalManagementDetailsPage = () => {
                         renderedFrom={`${renderedFrom}_grid-4`}
                         allowedToEdit={allowedToEdit}
                         isProcessor={isProcessor}
+                        allowUpdateStatus={allowUpdateStatus}
                       />
                     )}
                     {currentStep === 5 && rentalManagementData && (

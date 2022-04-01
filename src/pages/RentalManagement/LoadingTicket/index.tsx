@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom, allowedToEdit, isProcessor }) => {
+const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, setNextStep, renderedFrom, allowedToEdit, isProcessor, allowUpdateStatus }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -161,7 +161,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
       })
 
       products = uniqueProduct(material)
-      
+
       products?.forEach((element) => {
         var qty = element.qty;
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
@@ -460,7 +460,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
             color="primary"
             aria-controls="simple-menu"
             aria-haspopup="true"
-            disabled={selectedRecords.length === 0 || selectedRecords?.some(f => f.type === "Product") || isOffline}
+            disabled={!allowUpdateStatus || selectedRecords.length === 0 || selectedRecords?.some(f => f.type === "Product") || isOffline}
             size="small"
             onClick={handleClick}
             style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
