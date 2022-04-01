@@ -352,7 +352,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       }
       {(params?.data?.isReplaced) &&
         <Box ml={1} mt={1}>
-          <HtmlTooltip title={`Replaced Asset with ${params?.data?.replaceAsset} Reason-${params?.data?.replaceReason}`}>
+          <HtmlTooltip title={`This asset has replaced ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}>
             <InfoIcon fontSize="small" color={"primary"} />
           </HtmlTooltip>
         </Box>

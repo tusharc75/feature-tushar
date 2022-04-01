@@ -25,7 +25,7 @@ import AssetScrapRepairDialog from 'src/components/AssetScrapRepairDialog/AssetS
 import { Edit } from "@material-ui/icons";
 import Tooltip from 'src/components/CustomTooltipTitle'
 
-const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus, renderedFrom, allowedToEdit }) => {
+const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus, renderedFrom, allowedToEdit, allowStatusChange }) => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -190,11 +190,12 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
         <Box display="flex" className="gap-2">
           {repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed &&
             <Button
+              title={!allowStatusChange && "You do not have permission to change status"}
               variant={isMobile && !isTablet ? "text" : "outlined"}
               color="primary"
               aria-controls="simple-menu"
               aria-haspopup="true"
-              disabled={selectedRecords.length === 0}
+              disabled={selectedRecords.length === 0 || !allowStatusChange}
               size="small"
               style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
 

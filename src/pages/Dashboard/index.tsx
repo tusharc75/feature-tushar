@@ -13,11 +13,9 @@ import { FaRegistered } from 'react-icons/fa';
 import { AiFillAccountBook } from 'react-icons/ai';
 import { TextField, InputAdornment } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import routes from 'src/components/Helpers/Routes';
 
 function Dashboard() {
-  const { isOffline } = useContext(CustomOfflineContext);
   const history = useHistory();
   const { dispatch }: any = useData();
   const {
@@ -72,7 +70,7 @@ function Dashboard() {
 
     //  In offline mode ROM section will be visible even if the user does not have permission.
     //  No scenarios are discussed for this.
-    if (isOffline) {
+    if (!navigator.onLine) {
       const rom = "ROM";
       arr = [rom];
 

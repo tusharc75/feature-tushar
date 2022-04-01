@@ -145,7 +145,7 @@ const ProductDetailsPage = () => {
       .get('/field?resource=Product')
       .then(({ data: { data } }) => {
         const _productField: any = [];
-        const filteredData = data.filter((obj) => obj.isCreate);
+        const filteredData = data.filter((obj) => obj.isRead);
         filteredData.forEach((_f) => {
           if (!ignoreField.includes(_f.fieldData.fieldName)) {
             _productField.push(_f.fieldData);

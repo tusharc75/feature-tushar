@@ -390,7 +390,8 @@ export const salesOrder = {
 
 export const packages = {
   packageResource: 'packages',
-  packageApi: '/packages'
+  packageApi: '/packages',
+  permissions: 'packages'
 };
 
 export const warehouse = {
