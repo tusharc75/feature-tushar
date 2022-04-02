@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.88.0](https://github.com/vebholic/oms_frontend/compare/v2.87.0...v2.88.0) (2022-04-02)
+
+
+### Features
+
+* bulk asset creation index filtering from rental ([7ed20ef](https://github.com/vebholic/oms_frontend/commit/7ed20efbe48c8bfffe2cdfd1ede375093ee5c525))
+
+
+### Bug Fixes
+
+* bug fix ([ed0ef84](https://github.com/vebholic/oms_frontend/commit/ed0ef84d0bb8a73c07cc05d9c3b1eb6ead5b1f7d))
+* bug fix ([300ad36](https://github.com/vebholic/oms_frontend/commit/300ad36e696bf01b54cc3cf36ac56acae079f02f))
+* bug fix ([c9e38ae](https://github.com/vebholic/oms_frontend/commit/c9e38ae81f1a497e91a597111f703564c9392e47))
+* bug fix ([6b6af90](https://github.com/vebholic/oms_frontend/commit/6b6af90cf3d6405169073154009f42ec83ca7fe4))
+* bug fix ([c0ac722](https://github.com/vebholic/oms_frontend/commit/c0ac722ad2e0ecb9074a98f24cda2f1598631920))
+* bug fix ([e20e57c](https://github.com/vebholic/oms_frontend/commit/e20e57ce64875a4f39b11844a0558e20351fa52f))
+* bug fix ([059cad8](https://github.com/vebholic/oms_frontend/commit/059cad8ed653a6e00c38e48a18fb00d9ac3206e1))
+* bug fix ([9bd1929](https://github.com/vebholic/oms_frontend/commit/9bd1929770a587a7dfce1205c225ed979fde8cd7))
+* bug fix ([7412fed](https://github.com/vebholic/oms_frontend/commit/7412fed5fa888b358dd34e22322da788fcafa6a4))
+* bug fix ([c46e0b6](https://github.com/vebholic/oms_frontend/commit/c46e0b6da6d67571df56a42fe79fc55a9b9c50d9))
+* bug fix ([1f7190c](https://github.com/vebholic/oms_frontend/commit/1f7190cd3d76cfe64f9b78da3413b181e06ee842))
+* bug fix ([ae17fbc](https://github.com/vebholic/oms_frontend/commit/ae17fbc84dae6864a5b7d05f09139dc7cbc50fc6))
+* bug fix ([467b0d4](https://github.com/vebholic/oms_frontend/commit/467b0d40cbfccb6a9d7ef7a39d6327bc53a91be7))
+* bug fx ([63c8db3](https://github.com/vebholic/oms_frontend/commit/63c8db375a6c76a8c12ea3ac0973456ce8c314df))
+* **product package:** permission fix ([3870784](https://github.com/vebholic/oms_frontend/commit/387078424c47b17a0e75a1f1c4aef622d446dc19))
+* **repair job:** fix status change permission ([0cec23c](https://github.com/vebholic/oms_frontend/commit/0cec23cb4f25d92c941e51744fa198733b3495a7))
+* transfer asset details receiving step button ui changes ([2e45f7e](https://github.com/vebholic/oms_frontend/commit/2e45f7ed3e3f5a03446c9372f38da60f16948f96))
+* **transfer asset:** fix ([c7a884e](https://github.com/vebholic/oms_frontend/commit/c7a884e618122370c82cf57dd94e10b43fe2763f))
+* **transfer asset:** fix ([3f13448](https://github.com/vebholic/oms_frontend/commit/3f134486d463bc2a1b5fa2860a5cb2d8a73be71d))
+* **transfer asset:** minor fix ([2d6a630](https://github.com/vebholic/oms_frontend/commit/2d6a6306e4fda786cac108cf1eb5634f8a4ae1f2))
+* user setup toast message change ([0a6c830](https://github.com/vebholic/oms_frontend/commit/0a6c8303d694b03a450fa35d5ab52ef92c35306f))
+
 ## [2.87.0](https://github.com/vebholic/oms_frontend/compare/v2.86.0...v2.87.0) (2022-04-01)
 
 
