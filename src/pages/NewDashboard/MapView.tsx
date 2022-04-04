@@ -16,19 +16,18 @@ type locationType = {
 
 interface MapViewProps {
   data: any[];
-  loading?: boolean;
-  smallScreen?: boolean;
+  height: number | string;
 }
 
 const MapView = (props: MapViewProps) => {
-  const { data, smallScreen } = props;
+  const { data, height } = props;
   const [isFetching, setFetching] = React.useState(false);
   const [center, setCenter] = React.useState(null);
   const [selectedAsset, setSelectedAsset] = React.useState([]);
   const [selectedBase, setSelectedBase] = React.useState(null);
 
   const containerStyle = {
-    minHeight: smallScreen ? '500px' : '700px',
+    minHeight: '100%',
     height: '100%',
     maxWidth: '600px',
     minWidth: '100%'
@@ -51,10 +50,10 @@ const MapView = (props: MapViewProps) => {
     }
   }, []);
 
-  if(!window.google || typeof window.google !== 'object') return <div>Loading...</div>
+  if (!window.google || typeof window.google !== 'object') return <div>Loading...</div>;
 
   return (
-    <Box height={smallScreen ? '500px' : '700px'} borderRadius={8} overflow="hidden" className='table-box-design px-5 pt'>
+    <Box height={height} borderRadius={4} overflow="hidden" className="">
       <GoogleMap
         options={{
           mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -79,7 +78,7 @@ const MapView = (props: MapViewProps) => {
             { featureType: 'transit', stylers: [{ visibility: 'off' }] },
             { featureType: 'poi', stylers: [{ visibility: 'off' }] }
           ],
-           gestureHandling: 'cooperative'
+          gestureHandling: 'cooperative'
         }}
         mapContainerStyle={containerStyle}
         center={center || { lat: 37.09, lng: -95.713 }}
@@ -95,7 +94,7 @@ const MapView = (props: MapViewProps) => {
                     label={{
                       text: asset.count.toString(),
                       fontWeight: 'bold',
-                      color: 'white',
+                      color: 'black',
                       fontSize: '14px'
                     }}
                     onClick={() => {

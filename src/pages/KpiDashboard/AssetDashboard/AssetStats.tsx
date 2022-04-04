@@ -5,17 +5,9 @@ import { startCase } from 'lodash';
 
 
 import axiosInstance from 'src/axios/axiosInstance';
-import { FilterType } from '.';
 import VirtualizedList from 'src/components/VirtualizedList';
 
-interface FilterProps {
-  filter: FilterType;
-  assets?: any[];
-  loading: boolean;
-}
-
-const AssetStats = (props: FilterProps) => {
-  const { loading } = props;
+const AssetStats = () => {
   const [selectedAssets, setSelectedAssets] = React.useState([]);
   const [assets, setAssets] = React.useState([]);
   const [assetStats, setAssetStats] = React.useState(null);
@@ -87,7 +79,7 @@ const AssetStats = (props: FilterProps) => {
               <TextField
                 {...params}
                 variant="outlined"
-                label="Select Assets"
+                label="Search Assets"
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (
@@ -103,7 +95,7 @@ const AssetStats = (props: FilterProps) => {
         </Box>
         {selectedAssets.length === 0 && (
           <Box width={'100%'} py={2}>
-            <Typography>Select assets to see their stats</Typography>
+            <Typography>Search and select assets to see their stats</Typography>
           </Box>
         )}
         <Grid container spacing={2}>

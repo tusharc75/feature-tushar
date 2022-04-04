@@ -46,6 +46,7 @@ import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityD
 import { FaSuitcase, MdFilterList, MdSort, MdWeb } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
+import { camelCase } from 'lodash';
 
 const ContactTypes = [
   {
@@ -116,7 +117,7 @@ export default function Contact(props) {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
   const columnState = JSON.parse(localStorage.getItem(contactResource));
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
@@ -124,6 +125,7 @@ export default function Contact(props) {
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [entityAccess, setEntityAccess] = useState([]);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
+  let renderedFrom = camelCase(contactResource)
   const localStorageSelectedRecords = `${contactResource}_selected`;
 
 
@@ -138,36 +140,36 @@ export default function Contact(props) {
         queryType && querySearch && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
           : queryType && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-          : queryType && querySearch
-          ? `?page=${page}&type=${queryType}&search=${querySearch}`
-          : queryColFilter && querySearch
-          ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
-          : queryType
-          ? `?page=${page}&type=${queryType}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}`
-          : querySearch
-          ? `?page=${page}&search=${querySearch}`
-          : `?page=${page}`
+            ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+            : queryType && querySearch
+              ? `?page=${page}&type=${queryType}&search=${querySearch}`
+              : queryColFilter && querySearch
+                ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+                : queryType
+                  ? `?page=${page}&type=${queryType}`
+                  : queryColFilter
+                    ? `?page=${page}&colFilter=${queryColFilter}`
+                    : querySearch
+                      ? `?page=${page}&search=${querySearch}`
+                      : `?page=${page}`
       );
     } else {
       history.replace(
         queryType && querySearch && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
           : queryType && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-          : queryType && querySearch
-          ? `?page=${page}&type=${queryType}&search=${querySearch}`
-          : queryColFilter && querySearch
-          ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
-          : queryType
-          ? `?page=${page}&type=${queryType}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}`
-          : querySearch
-          ? `?page=${page}&search=${querySearch}`
-          : `?page=${page}`
+            ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+            : queryType && querySearch
+              ? `?page=${page}&type=${queryType}&search=${querySearch}`
+              : queryColFilter && querySearch
+                ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+                : queryType
+                  ? `?page=${page}&type=${queryType}`
+                  : queryColFilter
+                    ? `?page=${page}&colFilter=${queryColFilter}`
+                    : querySearch
+                      ? `?page=${page}&search=${querySearch}`
+                      : `?page=${page}`
       );
     }
   }, [page, queryPage]);
@@ -241,12 +243,12 @@ export default function Contact(props) {
         querySearch && queryColFilter
           ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}&search=${search}`
           : queryColFilter
-          ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
-          : querySearch
-          ? `?page=${page}&type=${newFilter}&search=${search}`
-          : `?page=${page}&type=${newFilter}`
+            ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
+            : querySearch
+              ? `?page=${page}&type=${newFilter}&search=${search}`
+              : `?page=${page}&type=${newFilter}`
       );
-      sessionStorage.setItem('filterSuccess',JSON.stringify('filterSuccess'));
+      sessionStorage.setItem('filterSuccess', JSON.stringify('filterSuccess'));
     }
   };
 
@@ -282,7 +284,7 @@ export default function Contact(props) {
     if (renderCount > 0) {
       getContacts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, location]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, location, showFilteredRecordsOnly]);
 
   useEffect(() => {
     if (search) {
@@ -290,20 +292,20 @@ export default function Contact(props) {
         queryType && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${search}`
           : queryType
-          ? `?page=${page}&type=${queryType}&search=${search}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
-          : `?page=${page}&search=${search}`
+            ? `?page=${page}&type=${queryType}&search=${search}`
+            : queryColFilter
+              ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
+              : `?page=${page}&search=${search}`
       );
     } else {
       history.replace(
         queryType && queryColFilter
           ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
           : queryType
-          ? `?page=${page}&type=${queryType}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}`
-          : `?page=${page}`
+            ? `?page=${page}&type=${queryType}`
+            : queryColFilter
+              ? `?page=${page}&colFilter=${queryColFilter}`
+              : `?page=${page}`
       );
     }
   }, [search]);
@@ -331,10 +333,10 @@ export default function Contact(props) {
         queryType && querySearch
           ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]&search=${querySearch}`
           : queryType
-          ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
-          : querySearch
-          ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-          : `?page=${page}&colFilter=[${serialize(filters)}]`
+            ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
+            : querySearch
+              ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+              : `?page=${page}&colFilter=[${serialize(filters)}]`
       );
     }
 
@@ -343,10 +345,10 @@ export default function Contact(props) {
         queryType && querySearch
           ? `?page=${page}&type=${queryType}&search=${querySearch}`
           : queryType
-          ? `?page=${page}&type=${queryType}`
-          : querySearch
-          ? `?page=${page}&search=${querySearch}`
-          : `?page=${page}`
+            ? `?page=${page}&type=${queryType}`
+            : querySearch
+              ? `?page=${page}&search=${querySearch}`
+              : `?page=${page}`
       );
     }
     if (Object.keys(filters).length === 0 && queryColFilter === undefined) {
@@ -552,7 +554,10 @@ export default function Contact(props) {
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
-
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+    }
     return deepFilter;
   };
 
@@ -1025,7 +1030,7 @@ export default function Contact(props) {
               onClone={(data) => {
                 setShowCreateContactDialog({ open: true, isClone: true, idToClone: data._id });
               }}
-              renderedFrom={contactResource}
+              renderedFrom={renderedFrom}
             />
           ) : (
             <CustomAgGrid
@@ -1040,8 +1045,9 @@ export default function Contact(props) {
               actionWidth={170}
               page={page}
               loading={loading}
-              renderedFrom={contactResource}
+              renderedFrom={renderedFrom}
               refreshGrid={getContacts}
+              showOnlyShowFilteredRecordSwitch={true}
             />
           ))}
 

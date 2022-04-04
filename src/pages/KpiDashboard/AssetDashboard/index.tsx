@@ -231,7 +231,7 @@ const AssetDashboard = ({ salesFilter }) => {
           </Grid>
         </Box>
         <Box mt={2}>
-          <AssetStats loading={loadingDropdown} filter={filter} />
+          <AssetStats />
         </Box>
       </Box>
     </div>

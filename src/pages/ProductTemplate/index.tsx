@@ -29,10 +29,10 @@ import CustomContainer from "../../components/CustomContainer";
 import DeleteIcon from '@material-ui/icons/Delete';
 import { ImInsertTemplate } from 'react-icons/im';
 import SearchBox from '../../components/Helpers/SearchBox'
-import {AddOutlined, ExpandMore} from "@material-ui/icons";
+import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { MdAccountCircle } from "react-icons/md";
-import {AiFillCrown, MdAdd,MdSort, MdFilterList} from "react-icons/all";
+import { AiFillCrown, MdAdd, MdSort, MdFilterList } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { prepareDataForGrid } from "../../constants/helpers";
@@ -64,10 +64,10 @@ const ProductTemplate: FC = () => {
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
-    const localStorageSelectedRecords = "productTemplatePage_selected";
+    const localStorageSelectedRecords = `${renderedFrom}_selected`;
     const [open, setOpen] = useState(false);
     const [isOpenDialog, setisOpenDialog] = useState(false)
     // const [showGridFilters, setShowGridFilters] = useState(true)
@@ -110,7 +110,7 @@ const ProductTemplate: FC = () => {
         if (renderCount > 0) {
             fetchProductTemplate();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [page, limit, filters, sorting, selectedEntity]);
+    }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
 
     const NameRenderer = params => <Link className="link"
@@ -232,7 +232,10 @@ const ProductTemplate: FC = () => {
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
         }
-
+        if (showFilteredRecordsOnly) {
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+        }
         return deepFilter;
     };
 
@@ -293,27 +296,27 @@ const ProductTemplate: FC = () => {
 
     const handleOpen = () => {
         setisOpenDialog(true);
-      };
-    
-      const handleClose = () => {
+    };
+
+    const handleClose = () => {
         setisOpenDialog(false);
-      };
-    
-      
-    
-      const handleClickOpen = () => {
+    };
+
+
+
+    const handleClickOpen = () => {
         setOpen(true);
-      };
-    
-      const handleClickClose = () => {
+    };
+
+    const handleClickClose = () => {
         setOpen(false);
-    
-      };
+
+    };
 
 
-    
-    
-    
+
+
+
     return (
         <Fragment>
             <Grid container className="headerbox">
@@ -324,109 +327,109 @@ const ProductTemplate: FC = () => {
             <CustomContainer>
                 <div className="header-panel">
                     <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
-                         <div className="d-flex align-items-center">
-                            <ImInsertTemplate size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.productTemplate.title}</span>
-                           </div>
+                        <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+                            <div className="d-flex align-items-center">
+                                <ImInsertTemplate size={20} style={{ paddingBottom: "3px" }} /> <span className="listingHeader">{routes.productTemplate.title}</span>
+                            </div>
                             {isMobile && !isTablet &&
-        <div className="d-flex ">
-        <Button
-        onClick={handleClickOpen}
-        id="demo-customized-button"
-        aria-controls="demo-customized-menu"
-        aria-haspopup="true"
-        // aria-expanded={open ? 'true' : undefined}
-        color="secondary"
-        variant="text"
-        disableElevation
-        startIcon={<MdSort />}
-      >
-        Sort 
-        </Button>
+                                <div className="d-flex ">
+                                    <Button
+                                        onClick={handleClickOpen}
+                                        id="demo-customized-button"
+                                        aria-controls="demo-customized-menu"
+                                        aria-haspopup="true"
+                                        // aria-expanded={open ? 'true' : undefined}
+                                        color="secondary"
+                                        variant="text"
+                                        disableElevation
+                                        startIcon={<MdSort />}
+                                    >
+                                        Sort
+                                    </Button>
 
-        <MobileSortDialog
-        isOpen={open}
-        handleClose={handleClickClose}
-        contentPart={null}
-        secHeading={["Sort Product Template"]}
-        columns={columns}
-        dispatch={dispatch}
-        />
+                                    <MobileSortDialog
+                                        isOpen={open}
+                                        handleClose={handleClickClose}
+                                        contentPart={null}
+                                        secHeading={["Sort Product Template"]}
+                                        columns={columns}
+                                        dispatch={dispatch}
+                                    />
 
-        <Button
-        id="demo-customized-button"
-        aria-controls="demo-customized-menu"
-        aria-haspopup="true"
-        // aria-expanded={open ? 'true' : undefined}
-        variant="text"
-        color="secondary"
-        disableElevation
-        startIcon={<MdFilterList />}
-        onClick={handleOpen}
-      >
-        Filter 
-        </Button>
+                                    <Button
+                                        id="demo-customized-button"
+                                        aria-controls="demo-customized-menu"
+                                        aria-haspopup="true"
+                                        // aria-expanded={open ? 'true' : undefined}
+                                        variant="text"
+                                        color="secondary"
+                                        disableElevation
+                                        startIcon={<MdFilterList />}
+                                        onClick={handleOpen}
+                                    >
+                                        Filter
+                                    </Button>
 
 
-        <MobileFilterDialog
-        isOpen={isOpenDialog}
-        handleClose={handleClose}
-        contentPart={null}
-        secHeading={["Filter Product Template"]}
-        columns={columns}
-        dispatch={dispatch}
-        />
-        </div>}
-                       
+                                    <MobileFilterDialog
+                                        isOpen={isOpenDialog}
+                                        handleClose={handleClose}
+                                        contentPart={null}
+                                        secHeading={["Filter Product Template"]}
+                                        columns={columns}
+                                        dispatch={dispatch}
+                                    />
+                                </div>}
+
                         </Grid>
                         <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
                             <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
 
-                                <Grid style={{display: "flex", flex:1}}>
+                                <Grid style={{ display: "flex", flex: 1 }}>
                                     <SearchBox
                                         onSearch={handleSearch}
                                         searchbox={styles.search_box_input}
                                         width={isMobile ? "200px" : "242px"}
-                                        style={isMobile ? {flex:1} : {}}
+                                        style={isMobile ? { flex: 1 } : {}}
                                         value={search}
                                     />
                                 </Grid>
 
-                                <Grid style={{display: "flex" , gap:"5px"}}>
-                                        {productTemplatePermissions.isCreate &&
-                                            <Button onClick={() => CreateNew("0", false)} variant={isMobile && !isTablet ? "text" : "contained"} size="small" color="primary" className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
-                                                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}>
-                                                {isMobile && !isTablet ? <MdAdd size={23}/> : "Add"}
-                                            </Button>
-                                        }
-                                        {productTemplatePermissions.isDelete &&
-                                            <Button
-                                                variant={isMobile && !isTablet ? "text" : "outlined"}
-                                                color="default"
-                                                size="small"
-                                                onClick={openActions}
-                                                disabled={selectedRecords.length ? false : true}
-                                                aria-controls="action-menu"
-                                                className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                                <Grid style={{ display: "flex", gap: "5px" }}>
+                                    {productTemplatePermissions.isCreate &&
+                                        <Button onClick={() => CreateNew("0", false)} variant={isMobile && !isTablet ? "text" : "contained"} size="small" color="primary" className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                                            startIcon={isMobile && !isTablet ? null : <AddOutlined />}>
+                                            {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
+                                        </Button>
+                                    }
+                                    {productTemplatePermissions.isDelete &&
+                                        <Button
+                                            variant={isMobile && !isTablet ? "text" : "outlined"}
+                                            color="default"
+                                            size="small"
+                                            onClick={openActions}
+                                            disabled={selectedRecords.length ? false : true}
+                                            aria-controls="action-menu"
+                                            className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
 
 
-                                            >{isMobile && !isTablet ? "" :  "Actions" } <ExpandMore/>
-                                            </Button>
-                                        }
-                                        <Menu
-                                            anchorEl={anchorEl}
-                                            keepMounted
-                                            getContentAnchorEl={null}
-                                            anchorOrigin={{
-                                                vertical: "bottom",
-                                                horizontal: "left",
-                                            }}
-                                            id="action-menu"
-                                            open={Boolean(anchorEl)}
-                                            onClose={closeActions}
-                                        >
-                                            <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                                        </Menu>
+                                        >{isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                                        </Button>
+                                    }
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        getContentAnchorEl={null}
+                                        anchorOrigin={{
+                                            vertical: "bottom",
+                                            horizontal: "left",
+                                        }}
+                                        id="action-menu"
+                                        open={Boolean(anchorEl)}
+                                        onClose={closeActions}
+                                    >
+                                        <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                                    </Menu>
                                 </Grid>
                             </Box>
                         </Grid>
@@ -471,6 +474,7 @@ const ProductTemplate: FC = () => {
                         loading={loading}
                         renderedFrom={renderedFrom}
                         refreshGrid={fetchProductTemplate}
+                        showOnlyShowFilteredRecordSwitch={true}
                     />
                 }
                 {showDeleteConfirmBox &&

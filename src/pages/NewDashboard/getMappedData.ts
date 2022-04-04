@@ -4,7 +4,7 @@ import { getExchangeRates, formatAmountWithCurrency } from 'src/constants/helper
 import { ChartDataType } from './ChartTypes';
 
 export default async (chart: ChartDataType, data: any, currencyTo: string, currencyFrom: string, status: string = 'Open') => {
-  if (!data) return null;
+  if (!data || (Array.isArray(data) && data.length === 0)) return null;
 
   let dataObject: any;
   let cardsId = ['bookedRevenueCard', 'offeredRevenueCard'];
@@ -201,7 +201,7 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
         ['totalOffered GM']: totalOfferedMargin,
         ['totalBookedVolume MT']: totalBookedVolume,
         totalBookedValue,
-        ['totalBooked GM']: totalBookedMargin,
+        ['totalBooked GM']: totalBookedMargin
       });
     }
 
@@ -677,6 +677,188 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
         }
       ]
     };
+  }
+
+  if (chart.uniqueId === 'assetsByMap') {
+    dataObject = data;
+  }
+
+  if (chart.uniqueId === 'utilizationChart1') {
+    const length = data.length;
+    let total = data.map((_d: any) => _d?.inUsePercentage).reduce((acc: number, val: number) => acc + val) / length ?? 0;
+    total = total !== 0 ? parseFloat(total.toFixed(4)) : total;
+    dataObject = {
+      labels: [`In Use (${total} %)`, 'Total Utilization (%)'],
+      datasets: [
+        {
+          label: '(%) Utilization',
+          data: [total, 100],
+          backgroundColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+          fill: true
+        }
+      ]
+    };
+  }
+
+  if (chart.uniqueId === 'utilizationChart2') {
+    const msToH = (msTime: number, isDay = false) => {
+      if (!msTime || msTime === 0) return 0;
+      msTime = msTime / (1000 * 60 * 60);
+
+      if (msTime > 60 * 24 && isDay) msTime = msTime / (60 * 24);
+
+      return msTime;
+    };
+
+    const labels = data.map((_d: any) => _d?.categoryName);
+    const dataSet = data.map((_d: any) => msToH(_d?.totalUseTime));
+
+    dataObject = {
+      labels,
+      datasets: [
+        {
+          label: 'Utilization in hours',
+          data: dataSet,
+          backgroundColor: 'rgb(54, 162, 235)'
+        }
+      ]
+    };
+    if (chart.hasTableView) {
+      const tableData = data.map((_d) => {
+        let dayInMs = 60 * 24 * 60 * 1000;
+        let totalTime = _d?.totalUseTime > dayInMs ? Math.floor(msToH(_d?.totalUseTime, true)) : msToH(_d?.totalUseTime, false).toFixed(2);
+        return {
+          ['Category Name']: _d?.categoryName,
+          [`Use Time (${_d?.totalUseTime > dayInMs ? 'In Days' : 'In Hours'})`]: totalTime
+        };
+      });
+
+      Object.assign(dataObject, { tableData });
+    }
+  }
+
+  if (chart.uniqueId === 'assetCount') {
+    const getSum = (array, column) => {
+      let values = array.map((item) => parseInt(item[column]) || 0);
+      return values.reduce((a, b) => a + b);
+    };
+
+    const ignoreId = ['productName', '_id'];
+    let labels = [];
+    let values = [];
+
+    Object.keys(data.data[0]).forEach((label: any) => {
+      if (!ignoreId.includes(label)) {
+        const val = getSum(data.data, label);
+        if (val) {
+          values.push(val);
+          labels.push(label);
+        }
+      }
+    });
+
+    dataObject = {
+      labels: labels,
+      datasets: [
+        {
+          label: '(%) Utilization',
+          data: values,
+          backgroundColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
+            'rgba(255, 159, 64, 0.6)',
+            'rgba(255, 99, 132, 0.6)'
+          ],
+          fill: true
+        }
+      ]
+    };
+
+    if (chart.hasTableView) {
+      const tableData = data.data.map((d: any) => {
+        const oldData = { ...d };
+        delete oldData.productName;
+        delete oldData._id;
+
+        const total = Object.values(oldData).reduce((acc: number, val: number) => acc + val);
+
+        return {
+          ['Product']: d.productName,
+          ['Total Assets']: total
+        };
+      });
+      Object.assign(dataObject, { tableData });
+    }
+  }
+
+  if (chart.uniqueId === 'rentalByCustomer') {
+    let labels = [];
+    let dataset = [];
+
+    data.forEach(async (_d: any) => {
+      if (_d?.rentalJob.length > 0) {
+        labels.push(_d.accountName);
+        let totalCount = _d.rentalJob.map((c: { count: boolean; status: string }) => c.count).reduce((acc, val) => acc + val);
+        dataset.push(totalCount);
+      }
+    });
+
+
+    dataObject = {
+      labels: labels,
+      datasets: [
+        {
+          label: '(%) Utilization',
+          data: dataset,
+          backgroundColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
+            'rgba(255, 159, 64, 0.6)',
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(178,34,34, 1)',
+            'rgba(255,127,80, 1)',
+            'rgba(184,134,11, 1)',
+            'rgba(0,128,0, 1)',
+            'rgba(32,178,170, 1)',
+            'rgba(0,139,139, 1)',
+            'rgba(100,149,237, 1)',
+            'rgba(65,105,225, 1)',
+            'rgba(138,43,226, 1)',
+            'rgba(106,90,205, 1)',
+            'rgba(147,112,219, 1)',
+            'rgba(153,50,204, 1)',
+            'rgba(255,20,147, 1)',
+            'rgba(210,105,30, 1)',
+            'rgba(205,133,63, 1)',
+            'rgba(119,136,153, 1)',
+            'rgba(176,196,222, 1)'
+          ],
+          fill: true
+        }
+      ]
+    };
+
+    if (chart.hasTableView) {
+      const tableData = data.map((d: any) => ({
+        ['Account Name']: d?.accountName,
+        ['No. Rental Jobs']:
+          d?.rentalJob.length === 0
+            ? 0
+            : d?.rentalJob.map((c: { count: boolean; status: string }) => c.count).reduce((acc: number, val: number) => acc + val)
+      }));
+
+      Object.assign(dataObject, { tableData });
+    }
   }
 
   return dataObject;

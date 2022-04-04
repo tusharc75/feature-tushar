@@ -38,7 +38,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import MobileSortDialog from "src/components/MobileSortDialog"
 import MobileFilterDialog from "src/components/MobileFilterDialog"
-import {camelCase} from 'lodash'
+import { camelCase } from 'lodash'
 
 const AddressResource = () => {
   const renderedFrom = camelCase(routes?.warehouse.title)
@@ -76,7 +76,7 @@ const AddressResource = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([])
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -199,7 +199,7 @@ const AddressResource = () => {
 
   useEffect(() => {
     fetchWarehouses();
-  }, [page, limit, filters, sorting, search, selectedEntity]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const NameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
@@ -324,7 +324,10 @@ const AddressResource = () => {
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
-
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+    }
     return deepFilter;
   };
 
@@ -613,6 +616,7 @@ const AddressResource = () => {
               loading={loading}
               renderedFrom={renderedFrom}
               refreshGrid={fetchWarehouses}
+              showOnlyShowFilteredRecordSwitch={true}
             /> : null}
 
         {showDeleteConfirmBox && (

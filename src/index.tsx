@@ -27,7 +27,7 @@ import { CustomOfflineProvider } from './StateProvider/OfflineContext/OfflineCon
 import { version } from '../package.json';
 
 // @ts-ignore
-if (process.env.REACT_APP_ENV !== 'local') {
+if (process.env.REACT_APP_ENV !== 'local' && navigator.onLine) {
   init({
     environment: process.env.REACT_APP_ENV,
     release: version,

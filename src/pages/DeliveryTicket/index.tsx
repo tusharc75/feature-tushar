@@ -70,7 +70,7 @@ const DeliveryTicket = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
   const { isOffline } = useContext(CustomOfflineContext);
   const localStorageSelectedRecords = `${renderedFrom}_selected`
 
@@ -183,7 +183,7 @@ const DeliveryTicket = () => {
     if (renderCount > 0) {
       fetchDeliveryTicket();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, selectedEntity, isOffline, selectedType]);
+  }, [page, limit, filters, sorting, selectedEntity, isOffline, selectedType, showFilteredRecordsOnly]);
 
   const ActionsRenderer = (params) => (
     <>
@@ -242,6 +242,10 @@ const DeliveryTicket = () => {
     }
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
+    }
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
     }
     return deepFilter;
   };
@@ -477,6 +481,7 @@ const DeliveryTicket = () => {
               allowAction={false}
               renderedFrom={renderedFrom}
               refreshGrid={fetchDeliveryTicket}
+              showOnlyShowFilteredRecordSwitch={true}
             />
           ) : null}
 
