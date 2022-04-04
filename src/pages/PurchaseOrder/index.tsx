@@ -65,7 +65,7 @@ const PurchaseOrder = () => {
     const [columns, setColumns] = useState([])
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [clonedData, setClonedData] = useState([])
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -85,7 +85,7 @@ const PurchaseOrder = () => {
 
     useEffect(() => {
         fetchPurchaseOrder()
-    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, fromSalesOrder, selectedType]);
+    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, fromSalesOrder, selectedType, showFilteredRecordsOnly]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -227,6 +227,10 @@ const PurchaseOrder = () => {
 
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
+        }
+        if (showFilteredRecordsOnly) {
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
         }
 
         return deepFilter;
@@ -376,9 +380,9 @@ const PurchaseOrder = () => {
                     total={rowCount}
                     recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
                     ids={
-                      getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                        ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                        : []
+                        getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                            ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                            : []
                     }
                     onExportToExcelSuccess={() => {
                         if (gridApi) gridApi.deselectAll()
@@ -628,6 +632,7 @@ const PurchaseOrder = () => {
                             loading={loading}
                             renderedFrom={renderedFrom}
                             refreshGrid={fetchPurchaseOrder}
+                            showOnlyShowFilteredRecordSwitch={true}
                         /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

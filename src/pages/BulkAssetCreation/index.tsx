@@ -59,7 +59,7 @@ const BulkAssetCreation = () => {
     const [columns, setColumns] = useState([])
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
     const [isOpenDialog, setisOpenDialog] = useState(false)
     const { type }: any = queryString.parse(history.location.search);
@@ -78,7 +78,7 @@ const BulkAssetCreation = () => {
 
     useEffect(() => {
         fetchBulkAssetCreation()
-    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, selectedType]);
+    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, selectedType, showFilteredRecordsOnly]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -216,7 +216,10 @@ const BulkAssetCreation = () => {
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
         }
-
+        if (showFilteredRecordsOnly) {
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+        }
         return deepFilter;
     };
 
@@ -538,6 +541,7 @@ const BulkAssetCreation = () => {
                             loading={loading}
                             renderedFrom={renderedFrom}
                             refreshGrid={fetchBulkAssetCreation}
+                            showOnlyShowFilteredRecordSwitch={true}
                         /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
