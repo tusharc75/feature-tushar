@@ -11,7 +11,6 @@ export const Provider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    console.log(navigator.onLine)
     if (token && navigator.onLine) {
       dispatch({ type: USER_LOADING, payload: true });
       axiosInstance()
@@ -42,7 +41,9 @@ export const Provider = ({ children }) => {
     }
     else if (token && localStorage.getItem("userData")) {
       const data = JSON.parse(localStorage.getItem("userData"))
-      console.log(data)
+      data?.entity?.forEach((element) => {
+        element.resource = element.resource?.filter((e) => e.name === "Rental Management")
+      })
       dispatch({ type: SET_USER, payload: data });
       let prevSelectedEntity = localStorage.getItem("selectedEntity")
       if (prevSelectedEntity && prevSelectedEntity !== 'null') {
