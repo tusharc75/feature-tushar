@@ -73,7 +73,7 @@ const SalesOrder = () => {
   });
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const { getColumnData } = useColumns();
   const [frameworkComponent, setFrameworkComponent] = useState({});
@@ -134,7 +134,7 @@ const SalesOrder = () => {
     if (renderCount > 0) {
       fetchSalesOrder();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
 
   const handleSingleDeleteSalesOrder = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -232,6 +232,10 @@ const SalesOrder = () => {
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterSalesOrder=${selectedType}`;
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+    }
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
@@ -541,6 +545,7 @@ const SalesOrder = () => {
               loading={loading}
               renderedFrom={renderedFrom}
               refreshGrid={fetchSalesOrder}
+              showOnlyShowFilteredRecordSwitch={true}
             />
           ) : null}
         {showDeleteWarningConfirmBox ? (

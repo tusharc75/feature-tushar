@@ -49,6 +49,7 @@ import MobileFilterDialog from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import { IoFilterCircle, MdFilterList, MdSort, MdWeb } from 'react-icons/all';
 import { FaSuitcase, FaAddressBook, FaAddressCard } from 'react-icons/fa';
+import { camelCase } from 'lodash';
 
 const AccTypes = [
   {
@@ -98,6 +99,8 @@ export default function Account(props) {
   const [accountId, setAccountId] = useState(null);
   const [sortOpen, setSortOpen] = React.useState(false);
   const [showEntityDialog, setShowEntityDialog] = useState(false);
+  let renderedFrom = camelCase(accountResource)
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const [singleAccountDelete, setSingleAccountDelete] = useState({
     id: null,
@@ -131,7 +134,7 @@ export default function Account(props) {
   const [state, dispatch] = useReducer(reducer, intialState);
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
 
   const columnState = JSON.parse(localStorage.getItem(accountResource));
 
@@ -320,7 +323,7 @@ export default function Account(props) {
     if (renderCount > 0) {
       fetchAccounts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, type, sorting, selectedEntity, location]);
+  }, [page, limit, selectedType, type, sorting, selectedEntity, location, showFilteredRecordsOnly]);
 
   useEffect(() => {
     if (search) {
@@ -667,6 +670,12 @@ export default function Account(props) {
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
+
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+    }
+
     return deepFilter;
   };
 
@@ -1378,7 +1387,7 @@ export default function Account(props) {
               onClone={(data) => {
                 cloneAccount(data);
               }}
-              renderedFrom={accountResource}
+              renderedFrom={renderedFrom}
             />
           ) : (
             <CustomAgGrid
@@ -1392,11 +1401,12 @@ export default function Account(props) {
               pageSizes={pageSizes}
               page={page}
               loading={loading}
-              renderedFrom={accountResource}
+              renderedFrom={renderedFrom}
               refreshGrid={fetchAccounts}
               isClientSideGrid={isOffline}
               allowAction={!isOffline}
               allowSelection={!isOffline}
+              showOnlyShowFilteredRecordSwitch={true}
             />
           )
         ) : null}

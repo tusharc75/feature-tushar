@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Box, Divider, Button, TextField, CircularProgress, Typography } from '@material-ui/core';
+import { Grid, Box, Button, TextField, CircularProgress, Typography } from '@material-ui/core';
 import { useParams, useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
 import { MdDashboardCustomize } from 'react-icons/md';
@@ -148,8 +148,8 @@ const DashboardBuilder = () => {
           ]}
         />
       </div>
-      <div className="main-container">
-        <Box p={1.2} display="flex" justifyContent="space-between" alignItems={'center'}>
+      <div className="detail-container">
+        <Box bgcolor={'white'} p={1.2} display="flex" justifyContent="space-between" alignItems={'center'}>
           <Box>
             <TextField
               disabled={isLoading}
@@ -176,7 +176,7 @@ const DashboardBuilder = () => {
             </Button>
           </Box>
         </Box>
-        <Divider />
+
         <Box bgcolor="#f5f5f5" p={1}>
           <Grid container spacing={2} className={classes.root}>
             <Grid item xs={12} sm={4}>

@@ -7,58 +7,59 @@ import { formatAmountWithCurrency } from '../../constants/helpers';
 import { startCase } from 'lodash';
 import { ChartDataType } from './ChartTypes';
 
-const getTitle = (uniqueId: string, currency: string): { fileName: string; title: string } => {
-  switch (uniqueId) {
-    case 'bookedVSBudget':
-      return {
-        fileName: 'Entity Sales Chart',
-        title: `Total offered Value In ${currency}`
-      };
+// const getTitle = (uniqueId: string, currency: string): { fileName: string; title: string } => {
+//   switch (uniqueId) {
+//     case 'bookedVSBudget':
+//       return {
+//         fileName: 'Entity Sales Chart',
+//         title: `Total offered Value In ${currency}`
+//       };
 
-    case 'offeredVsEntities':
-      return {
-        fileName: 'Sales Chart',
-        title: `Total offered value in ${currency} vs Entities`
-      };
+//     case 'offeredVsEntities':
+//       return {
+//         fileName: 'Sales Chart',
+//         title: `Total offered value in ${currency} vs Entities`
+//       };
 
-    case 'offeredVsBudget':
-      return {
-        fileName: 'Sales Chart',
-        title: `Total offered value in ${currency} vs Total booked value in ${currency}`
-      };
+//     case 'offeredVsBudget':
+//       return {
+//         fileName: 'Sales Chart',
+//         title: `Total offered value in ${currency} vs Total booked value in ${currency}`
+//       };
 
-    case 'regionalSale':
-      return {
-        fileName: 'Regional Sales',
-        title: `Regional Sales Data`
-      };
+//     case 'regionalSale':
+//       return {
+//         fileName: 'Regional Sales',
+//         title: `Regional Sales Data`
+//       };
 
-    case 'topCategory':
-      return {
-        fileName: 'Top Category',
-        title: 'Top Selling Product Category'
-      };
+//     case 'topCategory':
+//       return {
+//         fileName: 'Top Category',
+//         title: 'Top Selling Product Category'
+//       };
 
-    case 'volumeVsBudget':
-      return {
-        fileName: 'Total Booked Volume',
-        title: 'Total Booked Volume in MT vs Budget'
-      };
+//     case 'volumeVsBudget':
+//       return {
+//         fileName: 'Total Booked Volume',
+//         title: 'Total Booked Volume in MT vs Budget'
+//       };
 
-    case 'volume2VsBudget':
-      return {
-        fileName: 'Total Booked Margin',
-        title: `Total Booked GM in ${currency} vs Budget`
-      };
+//     case 'volume2VsBudget':
+//       return {
+//         fileName: 'Total Booked Margin',
+//         title: `Total Booked GM in ${currency} vs Budget`
+//       };
 
-    default:
-      return;
-  }
-};
+//     default:
+//       return;
+//   }
+// };
 
 export default async (type: string, currency: string, tableData: any[], chart: ChartDataType) => {
-  const { uniqueId, type: chartType } = chart;
-  const { fileName, title } = getTitle(uniqueId, currency);
+  const { uniqueId, type: chartType, title: chartTitle } = chart;
+  const { title, fileName } = { title: chartTitle.replaceAll('currency', currency), fileName: chartTitle.replaceAll('currency', currency) };
+
   if (chartType !== 'list') {
     switch (type) {
       case 'ppt': {

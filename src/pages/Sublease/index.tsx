@@ -63,7 +63,7 @@ const Sublease = () => {
     const [columns, setColumns] = useState([])
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
 
     const [isOpenDialog, setisOpenDialog] = useState(false)
     const [fromRental, setFromRental] = useState(history.location?.state?.rental);
@@ -80,7 +80,7 @@ const Sublease = () => {
 
     useEffect(() => {
         fetchData()
-    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, selectedType]);
+    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, selectedType, showFilteredRecordsOnly]);
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -189,6 +189,10 @@ const Sublease = () => {
         }
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
+        }
+        if (showFilteredRecordsOnly) {
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
         }
         return deepFilter;
     };

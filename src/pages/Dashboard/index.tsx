@@ -70,23 +70,23 @@ function Dashboard() {
 
     //  In offline mode ROM section will be visible even if the user does not have permission.
     //  No scenarios are discussed for this.
-    if (!navigator.onLine) {
-      const rom = "ROM";
-      arr = [rom];
+    // if (!navigator.onLine) {
+    //   const rom = "ROM";
+    //   arr = [rom];
 
-      allData = [{
-        "name": "Rental Management",
-        "resourceLabel": routes.rentalManagement.title,
-        "sectionName": rom,
-        "isRead": true,
-        "isCreate": true,
-        "isUpdate": true,
-        "isDelete": true,
-        "resourceId": "6215f88cbf69343f7d4fee97",
-        "sectionNameLowerCase": rom.toLowerCase(),
-        "resourceLabelLowerCase": routes.rentalManagement.title.toLowerCase()
-      }]
-    }
+    //   allData = [{
+    //     "name": "Rental Management",
+    //     "resourceLabel": routes.rentalManagement.title,
+    //     "sectionName": rom,
+    //     "isRead": true,
+    //     "isCreate": true,
+    //     "isUpdate": true,
+    //     "isDelete": true,
+    //     "resourceId": "6215f88cbf69343f7d4fee97",
+    //     "sectionNameLowerCase": rom.toLowerCase(),
+    //     "resourceLabelLowerCase": routes.rentalManagement.title.toLowerCase()
+    //   }]
+    // }
 
     const data = arr.map((sec) => {
       // const list = allData?.filter((u) => sec === u.sectionName && u.isRead);

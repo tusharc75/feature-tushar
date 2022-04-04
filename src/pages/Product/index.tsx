@@ -56,7 +56,7 @@ const Product = () => {
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
 
   const [productCategoryList, setProductCategoryList] = useState([]);
   const [productTemplateList, setProductTemplateList] = useState([]);
@@ -119,7 +119,7 @@ const Product = () => {
     if (productColoums && productColoums.length) {
       fetchProduct();
     }
-  }, [page, limit, filters, sorting, search, selectedEntity, productColoums, productCategory, productTemplate, productType]);
+  }, [page, limit, filters, sorting, search, selectedEntity, productColoums, productCategory, productTemplate, productType, showFilteredRecordsOnly]);
 
   useEffect(() => {
     axiosInstance()
@@ -366,6 +366,10 @@ const Product = () => {
 
     if (updatedFilters.length > 0) return `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
 
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+    }
     return deepFilter;
   };
 
@@ -827,6 +831,7 @@ const Product = () => {
               loading={loading}
               renderedFrom={renderedFrom}
               refreshGrid={fetchProduct}
+              showOnlyShowFilteredRecordSwitch={true}
             />
           )
         ) : (
