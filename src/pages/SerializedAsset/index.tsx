@@ -46,7 +46,7 @@ const SerializedAsset = () => {
   const [columns, setColumns] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
   const [productCategoryList, setProductCategoryList] = useState([]);
@@ -58,6 +58,7 @@ const SerializedAsset = () => {
   const [selectedPlant, setSelectedPlant] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
   const [isNonSerializedAsset, setNonSerializedAsset] = useState(false);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
     state: { permissions }
@@ -96,7 +97,8 @@ const SerializedAsset = () => {
     productCategory,
     productFilter,
     subleaseAsset,
-    isNonSerializedAsset
+    isNonSerializedAsset,
+    showFilteredRecordsOnly
   ]);
 
   useEffect(() => {
@@ -271,6 +273,10 @@ const SerializedAsset = () => {
       deepFilter = `${deepFilter}&isNonSerializedAsset=1`;
     } else {
       deepFilter = `${deepFilter}&isNonSerializedAsset=0`;
+    }
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
     }
     return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
@@ -712,6 +718,7 @@ const SerializedAsset = () => {
               loading={loading}
               renderedFrom={renderedFrom}
               refreshGrid={fetchProductInventory}
+              showOnlyShowFilteredRecordSwitch={true}
             />
           ) : null
         ) : (

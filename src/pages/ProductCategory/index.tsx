@@ -17,7 +17,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { gridLoadingTimeout, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
-import CustomAgGrid from '../../components/AgGridComponents/CustomAgGrid';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
 import { Box, Chip, Menu, MenuItem } from '@material-ui/core';
@@ -38,98 +38,6 @@ import MobileSortDialog from "../../components/MobileSortDialog"
 import MobileFilterDialog from "../../components/MobileFilterDialog"
 import { camelCase } from 'lodash';
 
-
-
-
-function reducer(state, action) {
-  switch (action.type) {
-    case 'loading':
-      return {
-        ...state,
-        loading: action.loading
-      };
-
-    case 'initialize':
-      return {
-        ...state,
-        dataRows: action.data,
-        rowCount: action.count
-      };
-
-    case 'selection':
-      return {
-        ...state,
-        selectedRecords: action.selectedRecords
-      };
-
-    case 'update':
-      return {
-        ...state,
-        dataRows: action.data,
-        loading: false
-      };
-
-    case 'filter':
-      return {
-        ...state,
-        loading: true,
-        filters: action.filters,
-        page: 0
-      };
-
-    case 'sort':
-      return {
-        ...state,
-        sorting: action.sorting,
-        loading: true
-      };
-
-    case 'search':
-      return {
-        ...state,
-        search: action.search,
-        loading: true
-      };
-
-    case 'pageChange':
-      return {
-        ...state,
-        page: action.page
-      };
-
-    case 'pageSizeChange':
-      return {
-        ...state,
-        limit: action.limit,
-        page: 0,
-        loading: true
-      };
-
-    case 'complete':
-      return {
-        ...state,
-        loading: false
-      };
-
-    default:
-      break;
-  }
-
-  return state;
-}
-
-const intialState = {
-  dataRows: [],
-  rowCount: 0,
-  loading: false,
-  page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
-  search: '',
-  filters: {},
-  sorting: [],
-  selectedRecords: []
-};
 
 const ProductCategory = () => {
   const renderedFrom = camelCase(routes?.productCategory.title)
@@ -162,7 +70,7 @@ const ProductCategory = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
@@ -199,7 +107,7 @@ const ProductCategory = () => {
 
   useEffect(() => {
     fetchProductCategory();
-  }, [page, limit, filters, sorting, search, selectedEntity]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -357,7 +265,10 @@ const ProductCategory = () => {
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
-
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+    }
     return deepFilter;
   };
 
@@ -747,6 +658,7 @@ const ProductCategory = () => {
               loading={loading}
               renderedFrom={renderedFrom}
               refreshGrid={fetchProductCategory}
+              showOnlyShowFilteredRecordSwitch={true}
             />
           )
         ) : null}
