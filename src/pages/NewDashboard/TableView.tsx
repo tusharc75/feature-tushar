@@ -8,9 +8,10 @@ interface Props {
   isScreenSmall: boolean;
   currency: string;
   type: string;
+  selectedDashboard: string;
 }
 
-const TableView = ({ id, chartData, isScreenSmall, currency }: Props) => {
+const TableView = ({ id, chartData, isScreenSmall, currency, selectedDashboard }: Props) => {
   return (
     <TableContainer id={id} style={{ height: isScreenSmall ? '350px' : '400px', width: 'auto' }}>
       <Table stickyHeader id={'table_' + id} aria-label="simple table">
@@ -30,8 +31,10 @@ const TableView = ({ id, chartData, isScreenSmall, currency }: Props) => {
                 <TableCell key={key} align={i < 1 ? 'left' : 'right'}>
                   {isNaN(data[key])
                     ? data[key]
-                    : id === 'volumeVsBudget' || key.includes("MT")
+                    : id === 'volumeVsBudget' || key.includes('MT')
                     ? data[key].toFixed(2)
+                    : selectedDashboard && selectedDashboard.includes('Asset')
+                    ? data[key]
                     : formatAmountWithCurrency(currency, Number(data[key]) ? data[key] : '00').fullFormatAmount}
                 </TableCell>
               ))}

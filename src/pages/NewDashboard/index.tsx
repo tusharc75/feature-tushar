@@ -16,7 +16,6 @@ import Loader from 'src/components/Loader';
 import placeholder_img from 'src/assets/PerformanceTuning.png';
 import { useData } from 'src/StateProvider/Provider';
 import { ChartDataType } from './ChartTypes';
-import AssetDashboard from '../KpiDashboard/AssetDashboard';
 
 const DashbaordNew = () => {
   const {
@@ -48,14 +47,13 @@ const DashbaordNew = () => {
       try {
         const {
           data: { data }
-        } = await axiosInstance().get(
-          `sa-formbuilder/lookup?lookupResource=Product Category,Market Segment,Sub Market Segment,Customer Account,Sub-Market Segment,User`
-        );
+        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product Category,Market Segment,Customer Account,Product,User`);
         if (!data) return;
 
         Object.keys(data).forEach((_d) => {
-          setFilterOptions((prevState: any): any => ({
-            ...prevState,
+          setFilterOptions(({
+            productDescription: data["Product"],
+            productCategory: data['Product Category'],
             customerAccount: data['Customer Account'].filter((c: any) =>
               Array.isArray(c?.entity) ? c?.entity?.findIndex((entity: any) => entity === selectedEntity) !== -1 : c?.entity === selectedEntity
             ),
@@ -63,7 +61,7 @@ const DashbaordNew = () => {
             marketSegment: data['Market Segment'].filter((d) => !d.parentMarketSegment),
             subMarketSegment: data['Market Segment'].filter((d) => d.parentMarketSegment),
             countryBillTo: countriesData,
-            countrySellTo: countriesData,
+            countrySellTo: countriesData
           }));
         });
       } catch (error) {
@@ -86,26 +84,22 @@ const DashbaordNew = () => {
             <React.Fragment>
               <GlobalFilter globalFilters={globalFilters} setGlobalFilters={setGlobalFilters} />
               <Box bgcolor="#efefef" p={1} pt={1}>
-                {typeOfDashboard.includes('Asset') ? (
-                  <AssetDashboard salesFilter={globalFilters} />
-                ) : (
-                  <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
-                    {chartData?.charts ? (
-                      chartData?.charts.map((chart: ChartDataType, index: number) => (
-                        <ChartTypes
-                          globalFilters={globalFilters}
-                          key={chart.type + ' ' + index + 1}
-                          chart={chart}
-                          filterData={{ ...filtersOptions }}
-                          commonSalesData={commonSalesData}
-                          setCommonSalesData={setCommonSalesData}
-                        />
-                      ))
-                    ) : (
-                      <Loader minHeight="100%" noLoader={true} text="Something went wrong" />
-                    )}
-                  </Grid>
-                )}
+                <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
+                  {chartData?.charts ? (
+                    chartData?.charts.map((chart: ChartDataType, index: number) => (
+                      <ChartTypes
+                        globalFilters={globalFilters}
+                        key={chart.type + ' ' + index + 1}
+                        chart={chart}
+                        filterData={{ ...filtersOptions }}
+                        commonSalesData={commonSalesData}
+                        setCommonSalesData={setCommonSalesData}
+                      />
+                    ))
+                  ) : (
+                    <Loader minHeight="100%" noLoader={true} text="Something went wrong" />
+                  )}
+                </Grid>
               </Box>
             </React.Fragment>
           ) : (

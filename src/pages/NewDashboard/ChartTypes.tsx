@@ -17,6 +17,7 @@ import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { startCase } from 'lodash';
+import MapView from './MapView';
 
 export type ChartDataType = {
   col: any;
@@ -109,6 +110,10 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
 
     const keys = Object.keys(params);
     keys.forEach((key) => {
+      if(Array.isArray(params[key]) && params[key].length > 0) {
+        url = `${url}${key}=${JSON.stringify(params[key].map((p:any) => p.optionValue))}&`
+      }
+
       if (params[key]) {
         if (key === 'between') {
           url = `${url}${key}=${params[key]}&`;
@@ -147,7 +152,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
         setChartData(chartData);
         setLoading(false);
       })
-      .catch((err) => {
+      .catch((err:any) => {
         setToastConfig(err);
         setLoading(false);
       });
@@ -261,9 +266,12 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                   chartData={chartData.tableData}
                   isScreenSmall={isScreenSmall}
                   currency={globalFilters.currency || currency}
-                />
-              ) : (
-                <Chart
+                  selectedDashboard={globalFilters?.dashboardType}
+                  />
+                  ) : chart.type === 'map' ? (
+                    <MapView height={isScreenSmall ? 350 : chart.col <= 6 ? 400 : 500} data={chartData} />
+                    ) : (
+                      <Chart
                   id={chart.uniqueId}
                   type={chart.type}
                   data={chartData}
@@ -273,13 +281,14 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                   }}
                 />
               )
-            ) : (
+              ) : (
               <TableView
                 id={chart.uniqueId}
                 type={chart.type}
                 chartData={chartData}
                 isScreenSmall={isScreenSmall}
                 currency={globalFilters.currency || currency}
+                selectedDashboard={globalFilters?.dashboardType}
               />
             )}
           </Box>
