@@ -55,6 +55,7 @@ const useClasses = makeStyles(() => ({
 }));
 
 const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }: DialogProps) => {
+
   const classes = useClasses();
   const { setToastConfig } = useContext(CustomToastContext);
   const [productData, setProductData] = useState<TableContent[]>([]);
@@ -84,19 +85,8 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
   }, [products]);
 
   useEffect(() => {
-
     setDataWithNumber(tableData.filter(t => t['Asset Number']))
   }, [tableData]);
-
-  const checkErrors = (): string => {
-    const duplicates = dataWithNumber.filter((v1, i, a) => a.findIndex((v2) => v1['Asset Number'] === v2['Asset Number']) !== i);
-  
-    if (duplicates.length) {
-      return "One or more asset numbers are same!"
-    }
-
-    return null;
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -165,38 +155,41 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
     e.target.value = null;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isOffline) {
-      setSubmitting(true);
-      addAssetsInRental(referenceId, tableData.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'], serializedProduct: t.serializedProduct })))
-      closeDialog();
-    } else {
-
-      if(checkErrors()) {
-        setToastConfig({
-          open: true,
-          message: checkErrors(),
-          type: 'error'
-        })
-        return
+    const duplicates = dataWithNumber.filter((v1, i, a) => a.findIndex((v2) => v1['Asset Number'] === v2['Asset Number']) !== i);
+    if (duplicates.length) {
+      setToastConfig({
+        open: true,
+        message: "One or more asset numbers are same!",
+        type: 'error'
+      })
+      return false;
+    }
+    else {
+      if (isOffline) {
+        setSubmitting(true);
+        await addAssetsInRental(referenceId, dataWithNumber.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'], serializedProduct: t.serializedProduct })))
+        setSubmitting(false);
+        closeDialog();
       }
-
-      setSubmitting(true);
-      const dataToSubmit = {
-        warehouse: warehouse,
-        assets: dataWithNumber.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'] }))
-      };
-      axiosInstance()
-        .post(`${routes.rentalManagement.path}/${referenceId}/inventory/create-non-serialized-assets`, dataToSubmit)
-        .then(() => {
-          setSubmitting(false);
-          closeDialog();
-        })
-        .catch((err) => {
-          setSubmitting(false);
-          setToastConfig(err);
-        });
+      else {
+        setSubmitting(true);
+        const dataToSubmit = {
+          warehouse: warehouse,
+          assets: dataWithNumber.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'] }))
+        };
+        axiosInstance()
+          .post(`${routes.rentalManagement.path}/${referenceId}/inventory/create-non-serialized-assets`, dataToSubmit)
+          .then(() => {
+            setSubmitting(false);
+            closeDialog();
+          })
+          .catch((err) => {
+            setSubmitting(false);
+            setToastConfig(err);
+          });
+      }
     }
   };
 
@@ -234,7 +227,6 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
                 </label>
               </Box>
             </Box>
-            {/* <Box>{hasError && <Typography color='error'>{hasError}</Typography>}</Box> */}
           </Box>
           <TableContainer className={classes.tableContainer} component={Paper}>
             <Table className={classes.table} aria-label="customized table">
