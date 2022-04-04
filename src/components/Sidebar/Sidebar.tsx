@@ -26,6 +26,7 @@ import { RiFolderSettingsFill, RiAccountPinCircleFill } from "react-icons/ri";
 import { SiCivicrm } from "react-icons/si";
 import { AiFillSetting } from "react-icons/ai"
 import { BsChatLeftTextFill } from "react-icons/bs"
+import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 
 
 import { AccountCircle } from "@material-ui/icons";
@@ -100,6 +101,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const {
     state: { permissions, user, selectedEntity, tour },
   }: any = useData();
+  const { isOffline } = useContext(CustomOfflineContext);
+
   const { setOpen: setChatOpen } = useContext(GlobalChatContext)
   const history = useHistory();
   const classes = useStyles();
@@ -265,21 +268,23 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                   .join(" ")}
               />
             </ListItem>
-            <Link to="/dashboards">
-              <Tooltip title={!toggleDrawer ? "Dashboards" : ""}>
-                <ListItem
-                  button
-                  selected={location.pathname === "/dashboards"}
-                  className="list-item"
-                >
-                  <ListItemIcon>
-                    <MdDashboard size={15} className="sidebar-icon" />
-                  </ListItemIcon>
-                  <ListItemText primary="Dashboards" />
-                </ListItem>
-              </Tooltip>
-            </Link>
-            {permissions?.rentalManagement?.isRead &&
+            {!isOffline &&
+              <Link to="/dashboards">
+                <Tooltip title={!toggleDrawer ? "Dashboards" : ""}>
+                  <ListItem
+                    button
+                    selected={location.pathname === "/dashboards"}
+                    className="list-item"
+                  >
+                    <ListItemIcon>
+                      <MdDashboard size={15} className="sidebar-icon" />
+                    </ListItemIcon>
+                    <ListItemText primary="Dashboards" />
+                  </ListItem>
+                </Tooltip>
+              </Link>
+            }
+            {(permissions?.rentalManagement?.isRead && !isOffline) &&
               <Link to="/reports">
                 <Tooltip title={!toggleDrawer ? "Reports" : ""}>
                   <ListItem
@@ -349,16 +354,18 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
               ))}
           </List>
         </div>
-        <List style={{ bottom: "0px", marginTop: 'auto' }}>
-          <ListItem button onClick={() => setChatOpen(prevState => !prevState)}>
-            <ListItemIcon>
-              <BsChatLeftTextFill size={16} className="sidebar-icon" />
-            </ListItemIcon>
-            <ListItemText primary="Chat" />
-          </ListItem>
-        </List>
-      </Drawer>
-    </div>
+        {!isOffline &&
+          <List style={{ bottom: "0px", marginTop: 'auto' }}>
+            <ListItem button onClick={() => setChatOpen(prevState => !prevState)}>
+              <ListItemIcon>
+                <BsChatLeftTextFill size={16} className="sidebar-icon" />
+              </ListItemIcon>
+              <ListItemText primary="Chat" />
+            </ListItem>
+          </List>
+        }
+      </Drawer >
+    </div >
   );
 }
 
