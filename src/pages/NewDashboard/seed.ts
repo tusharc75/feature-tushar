@@ -443,6 +443,17 @@ export default [
         hasExport: true,
         hasTableView: true,
         filters: []
+      },
+      {
+        col: 12,
+        title: 'Asset Stats',
+        kpi: '',
+        type: '',
+        hasFilter: false,
+        uniqueId: 'assetStats',
+        hasExport: false,
+        hasTableView: false,
+        filters: []
       }
     ]
   }

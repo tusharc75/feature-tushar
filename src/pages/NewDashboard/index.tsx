@@ -16,6 +16,7 @@ import Loader from 'src/components/Loader';
 import placeholder_img from 'src/assets/PerformanceTuning.png';
 import { useData } from 'src/StateProvider/Provider';
 import { ChartDataType } from './ChartTypes';
+import AssetStats from '../KpiDashboard/AssetDashboard/AssetStats';
 
 const DashbaordNew = () => {
   const {
@@ -51,8 +52,8 @@ const DashbaordNew = () => {
         if (!data) return;
 
         Object.keys(data).forEach((_d) => {
-          setFilterOptions(({
-            productDescription: data["Product"],
+          setFilterOptions({
+            productDescription: data['Product'],
             productCategory: data['Product Category'],
             customerAccount: data['Customer Account'].filter((c: any) =>
               Array.isArray(c?.entity) ? c?.entity?.findIndex((entity: any) => entity === selectedEntity) !== -1 : c?.entity === selectedEntity
@@ -62,7 +63,7 @@ const DashbaordNew = () => {
             subMarketSegment: data['Market Segment'].filter((d) => d.parentMarketSegment),
             countryBillTo: countriesData,
             countrySellTo: countriesData
-          }));
+          });
         });
       } catch (error) {
         alert(JSON.stringify(error));
@@ -86,16 +87,22 @@ const DashbaordNew = () => {
               <Box bgcolor="#efefef" p={1} pt={1}>
                 <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
                   {chartData?.charts ? (
-                    chartData?.charts.map((chart: ChartDataType, index: number) => (
-                      <ChartTypes
-                        globalFilters={globalFilters}
-                        key={chart.type + ' ' + index + 1}
-                        chart={chart}
-                        filterData={{ ...filtersOptions }}
-                        commonSalesData={commonSalesData}
-                        setCommonSalesData={setCommonSalesData}
-                      />
-                    ))
+                    chartData?.charts.map((chart: ChartDataType, index: number) =>
+                      chart.uniqueId === 'assetStats' ? (
+                        <Grid item xs={12}>
+                          <AssetStats />
+                        </Grid>
+                      ) : (
+                        <ChartTypes
+                          globalFilters={globalFilters}
+                          key={chart.type + ' ' + index + 1}
+                          chart={chart}
+                          filterData={{ ...filtersOptions }}
+                          commonSalesData={commonSalesData}
+                          setCommonSalesData={setCommonSalesData}
+                        />
+                      )
+                    )
                   ) : (
                     <Loader minHeight="100%" noLoader={true} text="Something went wrong" />
                   )}
