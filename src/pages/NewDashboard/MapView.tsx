@@ -94,8 +94,8 @@ const MapView = (props: MapViewProps) => {
                     label={{
                       text: asset.count.toString(),
                       fontWeight: 'bold',
-                      color: 'white',
-                      fontSize: '14px'
+                      color: 'black',
+                      fontSize: '12px'
                     }}
                     onClick={() => {
                       setCenter(new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude));
