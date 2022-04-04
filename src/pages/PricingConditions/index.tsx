@@ -29,7 +29,7 @@ import { startCase } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
 import MobileSortDialog from 'src/components/MobileSortDialog';
 import MobileFilterDialog from 'src/components/MobileFilterDialog';
-import {camelCase} from 'lodash'
+import { camelCase } from 'lodash'
 
 let timeout;
 
@@ -49,10 +49,11 @@ const PricingConditions = () => {
   const [gridApi, setGridApi] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { getColumnData } = useColumns();
   const [frameworkComponent, setFrameworkComponent] = useState(null);
   const [columns, setColumns] = useState([]);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   useEffect(() => {
     fetchGridMetadata();
@@ -60,7 +61,7 @@ const PricingConditions = () => {
 
   useEffect(() => {
     fetchPriceConditionList();
-  }, [page, limit, filters, sorting, search]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   const fetchGridMetadata = () => {
     axiosInstance()
@@ -198,6 +199,10 @@ const PricingConditions = () => {
     }
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
+    }
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
     }
     return deepFilter;
   };
@@ -432,6 +437,7 @@ const PricingConditions = () => {
                 loading={loading}
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchPriceConditionList}
+                showOnlyShowFilteredRecordSwitch={true}
               />
             </Box>
           )
