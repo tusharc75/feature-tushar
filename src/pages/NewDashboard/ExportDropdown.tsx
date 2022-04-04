@@ -1,6 +1,7 @@
 import React from 'react';
 import { Menu, MenuItem } from '@material-ui/core';
 import exportData from './exportData';
+import { ChartDataType } from './ChartTypes';
 
 interface Props {
   anchorEl: any;
@@ -8,19 +9,7 @@ interface Props {
   chartData?: any;
   currency: string;
   tableData: any[];
-  chart: {
-    col: any;
-    type: string;
-    filters: { key: string; title: string; multiple: boolean }[];
-    title: string;
-    kpi: string;
-    hasFilter: boolean;
-    hasTableView: boolean;
-    hasExport: boolean;
-    uniqueId: string;
-    axis?: string;
-    numberOfCards?: number;
-  };
+  chart: ChartDataType;
 }
 
 const ExportDropdown = ({ anchorEl, setAnchorClose, currency, tableData, chart, chartData }: Props) => {
@@ -44,8 +33,8 @@ const ExportDropdown = ({ anchorEl, setAnchorClose, currency, tableData, chart, 
     >
       <MenuItem onClick={() => handleClose('ppt')}>Powerpoint</MenuItem>
       <MenuItem onClick={() => handleClose('pdf')}>PDF</MenuItem>
-      <MenuItem onClick={() => handleClose('excel')}>Excel</MenuItem>
-      <MenuItem onClick={() => handleClose('json')}>Raw JSON</MenuItem>
+      {chart.hasTableView && <MenuItem onClick={() => handleClose('excel')}>Excel</MenuItem>}
+      {chart.hasTableView && <MenuItem onClick={() => handleClose('json')}>Raw JSON</MenuItem>}
     </Menu>
   );
 };

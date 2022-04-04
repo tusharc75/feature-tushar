@@ -373,5 +373,77 @@ export default [
         ]
       }
     ]
+  },
+  {
+    name: 'Asset Dashboard',
+    charts: [
+      {
+        col: 6,
+        title: 'Asset Location Base',
+        kpi: 'location-base-assets',
+        type: 'map',
+        hasFilter: true,
+        uniqueId: 'assetsByMap',
+        hasExport: false,
+        hasTableView: false,
+        filters: [
+          { key: 'productCategory', title: 'Product Category', multiple: true },
+          { key: 'productDescription', title: "Product Master", multiple: true }
+        ]
+      },
+      {
+        col: 6,
+        title: 'Total Utilization',
+        kpi: 'assets-total-in-use',
+        type: 'pie',
+        hasFilter: true,
+        uniqueId: 'utilizationChart1',
+        hasExport: true,
+        hasTableView: false,
+        filters: [
+          { key: 'productCategory', title: 'Product Category', multiple: true },
+          { key: 'productDescription', title: "Product Master", multiple: true }
+        ]
+      },
+      {
+        col: 6,
+        title: 'Assets by Category',
+        kpi: 'assets-in-use-by-category',
+        type: 'bar',
+        axis: 'x',
+        hasFilter: true,
+        uniqueId: 'utilizationChart2',
+        hasExport: true,
+        hasTableView: true,
+        filters: [
+          { key: 'productCategory', title: 'Product Category', multiple: true },
+          { key: 'productDescription', title: "Product Master", multiple: true }
+        ]
+      },
+      {
+        col: 6,
+        title: 'Asset Count',
+        kpi: 'product-with-status-count',
+        type: 'pie',
+        hasFilter: true,
+        uniqueId: 'assetCount',
+        hasExport: true,
+        hasTableView: true,
+        filters: [
+          { key: 'productCategory', title: 'Product Category', multiple: true },
+        ]
+      },
+      {
+        col: 6,
+        title: 'Rental Job by Customers',
+        kpi: 'customer-in-resource',
+        type: 'pie',
+        hasFilter: false,
+        uniqueId: 'rentalByCustomer',
+        hasExport: true,
+        hasTableView: true,
+        filters: []
+      }
+    ]
   }
 ];
