@@ -11,12 +11,14 @@ export const Provider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    if (token) {
+    console.log(navigator.onLine)
+    if (token && navigator.onLine) {
       dispatch({ type: USER_LOADING, payload: true });
       axiosInstance()
         .get("/user/me")
         .then(({ data: response }) => {
           const { data } = response;
+          localStorage.setItem("userData", JSON.stringify(data))
           dispatch({ type: SET_USER, payload: data });
           let prevSelectedEntity = localStorage.getItem("selectedEntity")
           if (prevSelectedEntity && prevSelectedEntity !== 'null') {
@@ -38,21 +40,36 @@ export const Provider = ({ children }) => {
           dispatch({ type: USER_LOADING, payload: false });
         });
     }
+    else if (token && localStorage.getItem("userData")) {
+      const data = JSON.parse(localStorage.getItem("userData"))
+      console.log(data)
+      dispatch({ type: SET_USER, payload: data });
+      let prevSelectedEntity = localStorage.getItem("selectedEntity")
+      if (prevSelectedEntity && prevSelectedEntity !== 'null') {
+        dispatch({
+          type: SET_SELECTED_ENTITY,
+          payload: prevSelectedEntity,
+        });
+      }
+      else if (data?.role?.selectedEntity?._id) {
+        dispatch({
+          type: SET_SELECTED_ENTITY,
+          payload: data.role.selectedEntity._id,
+        });
+      }
+      dispatch({ type: USER_LOADING, payload: false });
+    }
 
     localStorage.setItem("dateFormat", "DD/MM/YYYY")
     localStorage.setItem("dateTimeFormat", "DD/MM/YYYY hh:mm A")
     localStorage.setItem("cardDateFormat", "MMM DD, YYYY")
-
     localStorage.setItem("dateFormatForInputControl", "dd/MM/yyyy")
-
     if (Intl.DateTimeFormat().resolvedOptions().timeZone?.indexOf("America/") === 0) {
       localStorage.setItem("dateFormat", "MM/DD/YYYY")
       localStorage.setItem("dateTimeFormat", "MM/DD/YYYY hh:mm A")
       localStorage.setItem("cardDateFormat", "MMM DD, YYYY")
-
       localStorage.setItem("dateFormatForInputControl", "MM/dd/yyyy")
     }
-
   }, [token]);
 
   return (
