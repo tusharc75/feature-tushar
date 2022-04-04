@@ -21,7 +21,7 @@ export const CustomOfflineProvider = ({ children }) => {
 
     const toastConfig = useContext(CustomToastContext);
 
-    const [isOffline, setIsOffline] = useState(false)
+    const [isOffline, setIsOffline] = useState(navigator.onLine)
     const [isSynch, setIsSynch] = useState(false)
 
     const [offlineFieldsData, setOfflineFieldsData] = useState(null);
