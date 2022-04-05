@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.88.3](https://github.com/vebholic/oms_frontend/compare/v2.88.2...v2.88.3) (2022-04-05)
+
+
+### Bug Fixes
+
+* bug fix ([ad24a71](https://github.com/vebholic/oms_frontend/commit/ad24a71c7685030ea66524421231c3daa8897d8c))
+* bug fix ([1aa30c4](https://github.com/vebholic/oms_frontend/commit/1aa30c4c1b983820b91c394a971bb2246012d207))
+* bug fix ([fecae3d](https://github.com/vebholic/oms_frontend/commit/fecae3dd86ebd56bad44ec1e3f1e3015af073068))
+* bug fix ([aed672c](https://github.com/vebholic/oms_frontend/commit/aed672ca6f327ec45552859ebf80e42df2b5ff59))
+* bug fix ([8af25ba](https://github.com/vebholic/oms_frontend/commit/8af25baf08ca0292521434922e1ee0a087e7353d))
+* bug fix ([fde53d3](https://github.com/vebholic/oms_frontend/commit/fde53d3e8d72153c42d78166acf60f160fcd258c))
+* **dashboard:** fix ([1f2540e](https://github.com/vebholic/oms_frontend/commit/1f2540e81f02661abe8ce990614b338633a04c75))
+* **dashboard:** fix ([aaf776c](https://github.com/vebholic/oms_frontend/commit/aaf776cf8a93a28c6f10ba7cab80fb0ef0ff4da4))
+* **dashboard:** fix ([99222e0](https://github.com/vebholic/oms_frontend/commit/99222e027e1a1fee02dc7ea9714009358902f946))
+* **dashboard:** map count fix ([ea12953](https://github.com/vebholic/oms_frontend/commit/ea129535512ecfc2d99600541dc2d7b64b29e54a))
+* show only selected features in grid ([1bff409](https://github.com/vebholic/oms_frontend/commit/1bff409e9801c4e2cbee6f29851297a1911850ae))
+* show only selected in ROM ag grid ([72a4865](https://github.com/vebholic/oms_frontend/commit/72a4865d17dad93acc6eb5e6e4ce03d33866d9ae))
+
 ### [2.88.2](https://github.com/vebholic/oms_frontend/compare/v2.88.1...v2.88.2) (2022-04-04)
 
 
