@@ -29,8 +29,8 @@ import { prepareDataForGrid } from '../../constants/helpers';
 import { useLocation, useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { MdAdd,MdSort, MdFilterList} from 'react-icons/md';
-import { FaSuitcase,IoIosCreate} from 'react-icons/all';
+import { MdAdd, MdSort, MdFilterList } from 'react-icons/md';
+import { FaSuitcase, IoIosCreate } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
@@ -58,10 +58,11 @@ const MarketSegment = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+  const localStorageSelectedRecords = `${renderedFrom}_selected`
 
 
   const handleOpen = () => {
@@ -90,7 +91,7 @@ const MarketSegment = () => {
 
   useEffect(() => {
     fetchMarketSegment();
-  }, [page, limit, filters, sorting, search]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -231,7 +232,10 @@ const MarketSegment = () => {
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
-
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+    }
     return deepFilter;
   };
 
@@ -327,9 +331,9 @@ const MarketSegment = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
               <div className="d-flex align-items-center">
-              <GiAbstract055 /> <span className="listingHeader">{routes.marketSegment.title}</span>
+                <GiAbstract055 /> <span className="listingHeader">{routes.marketSegment.title}</span>
               </div>
               {isMobile && (
                 <>
@@ -384,7 +388,7 @@ const MarketSegment = () => {
                   </Grid>
                 </>
               )}
-           
+
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -470,25 +474,25 @@ const MarketSegment = () => {
             loading={loading}
             additionalDetails={[
               {
-                icon:<FaSuitcase size={18}/>,
-                field:"parentMarketSegment"
+                icon: <FaSuitcase size={18} />,
+                field: "parentMarketSegment"
               }
             ]}
             chips={[
               {
-                icon:<IoIosCreate />,
-                label:"CreatedBy: ",
-                field:"createdBy",
+                icon: <IoIosCreate />,
+                label: "CreatedBy: ",
+                field: "createdBy",
               },
               {
-                label:"UpdatedBy: ",
-                field:"updatedBy",
+                label: "UpdatedBy: ",
+                field: "updatedBy",
               }
             ]}
             owerCollaboratorInitialsOrImages=""
             onCreate={() => setOpen({ open: true, idToClone: null, isClone: null })}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -506,6 +510,7 @@ const MarketSegment = () => {
             loading={loading}
             renderedFrom={renderedFrom}
             refreshGrid={fetchMarketSegment}
+            showOnlyShowFilteredRecordSwitch={true}
           />
         ) : null}
 

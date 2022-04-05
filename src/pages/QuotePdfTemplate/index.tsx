@@ -21,10 +21,10 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { MdAdd,MdSort, MdFilterList,FaSuitcase} from 'react-icons/all';
+import { MdAdd, MdSort, MdFilterList, FaSuitcase } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
-import {camelCase} from 'lodash'
+import { camelCase } from 'lodash'
 
 let quotePdfTemplateTimeout;
 
@@ -46,10 +46,11 @@ const QuotePdfTemplate: FC = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem('quotePdfPage'));
+  const localStorageSelectedRecords = `${renderedFrom}_selected`
 
   const columns = [
     { field: 'name', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
@@ -101,7 +102,7 @@ const QuotePdfTemplate: FC = () => {
     if (renderCount > 0) {
       fetchQuotePdfTemplate();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, selectedEntity]);
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const previewPdfTemplate = (templateId) => {
     toastConfig.setToastConfig({
@@ -264,7 +265,10 @@ const QuotePdfTemplate: FC = () => {
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
-
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+    }
     return deepFilter;
   };
 
@@ -314,10 +318,10 @@ const QuotePdfTemplate: FC = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
               <div className="d-flex align-items-center">
-              <GiAbstract055 /> <span className="listingHeader">{routes.quotePdfTemplate.title}</span>
-             </div>
+                <GiAbstract055 /> <span className="listingHeader">{routes.quotePdfTemplate.title}</span>
+              </div>
               {isMobile && (
                 <>
                   <Grid style={{ display: 'inline-flex' }}>
@@ -454,16 +458,16 @@ const QuotePdfTemplate: FC = () => {
             page={page}
             loading={loading}
             additionalDetails={[
-                {
-                    icon:< FaSuitcase size={18} />,
-                    field:"createdBy"
-                }
+              {
+                icon: < FaSuitcase size={18} />,
+                field: "createdBy"
+              }
             ]}
             chips={[]}
             owerCollaboratorInitialsOrImages=""
             onCreate={false}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -481,6 +485,7 @@ const QuotePdfTemplate: FC = () => {
             loading={loading}
             renderedFrom={renderedFrom}
             refreshGrid={fetchQuotePdfTemplate}
+            showOnlyShowFilteredRecordSwitch={true}
           />
         )}
 
