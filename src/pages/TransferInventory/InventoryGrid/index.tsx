@@ -17,7 +17,7 @@ import AddInventory from './AddInventory';
 import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 
 const InventoryGrid = (props) => {
-  const { transferData, updateTransferStatus, setTransferIsEnded, renderedFrom } = props;
+  const { transferData, updateTransferStatus, setTransferIsEnded, renderedFrom, fetchData } = props;
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -69,7 +69,7 @@ const InventoryGrid = (props) => {
         dispatch({ type: 'loading', loading: true });
         let rows = data?.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['productId'] = u._product;
+          finalObject['productId'] = u.product;
           finalObject['productName'] = u.productDetail.productName;
           finalObject['qty'] = u.qty;
 
@@ -138,7 +138,7 @@ const InventoryGrid = (props) => {
   };
 
   const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`/product/detail/${params.data._id}`}>
+    <Link className="link" title={params.value} to={`/product/detail/${params.data.product}`}>
       {params.value}
     </Link>
   );
@@ -177,6 +177,7 @@ const InventoryGrid = (props) => {
         });
         setTransferIsEnded(true);
         setCompleting(false);
+        fetchData()
       })
       .catch((err) => {
         setCompleting(false);
@@ -280,9 +281,9 @@ const InventoryGrid = (props) => {
             limit={limit}
             pageSizes={pageSizes}
             page={page}
-            allowAction={true}
+            allowAction={permissions?.transferInventory.isUpdate}
             actionWidth={120}
-            allowSelection={true}
+            allowSelection={permissions?.transferInventory.isUpdate}
             isClientSideGrid={true}
             loading={loading}
             // onCellValueChanged={onCellValueChanged}
@@ -292,7 +293,14 @@ const InventoryGrid = (props) => {
         )}
       </Box>
       {openAddNewInventory && (
-        <AddInventory isAdding={isAdding} submit={handleSave} close={closeDialog} plantId={transferData?.transferFromPlant.optionValue} renderedFrom={`${renderedFrom}_sub-1`} />
+        <AddInventory
+          existingProducts={dataRows}
+          isAdding={isAdding}
+          submit={handleSave}
+          close={closeDialog}
+          plantId={transferData?.transferFromPlant.optionValue}
+          renderedFrom={`${renderedFrom}_sub-1`}
+        />
       )}
       {showConfirmBox && (
         <ConfirmationDialog

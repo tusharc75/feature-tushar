@@ -16,6 +16,7 @@ import { transferInventory } from 'src/constants/helpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
 import TransferStepper from './TransferInventorySteps';
+import Steps from 'src/pages/RentalManagement/Steps';
 
 import { MdEdit } from 'react-icons/md';
 import { defaultActivityShow } from 'src/constants/helpers';
@@ -49,10 +50,10 @@ const TransferInventoryDetailPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [transferInventoryFields, setTransferInventoryFields] = useState([]);
-  const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [isTransferEnded, setTransferIsEnded] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
   const [locationKeys, setLocationKeys] = useState([]);
 
   useEffect(() => {
@@ -82,12 +83,6 @@ const TransferInventoryDetailPage = () => {
     // eslint-disable-next-line
   }, [id]);
 
-  const handleMainPoints = (data) => {
-    let mainPoint = {};
-    mainPoint['Transfer Number'] = data.transferNumber;
-    setMainPoints(mainPoint);
-  };
-
   const getRessourceFields = () => {
     axiosInstance()
       .get('/field?resource=Transfer Inventory')
@@ -107,10 +102,12 @@ const TransferInventoryDetailPage = () => {
       .then(({ data: { data } }) => {
         getRessourceFields();
         setTransferInventoryData(data);
-        handleMainPoints(data);
         setHeadingLabel(data.transferNumber);
         setCustomizedRoutes([routes.transferInventory, { title: data.transferNumber }]);
-
+        if(data?.status === 'Completed') {
+          setCurrentStep(1)
+          setTransferIsEnded(true)
+        } 
         if (permissions?.transferInventory?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
@@ -179,8 +176,6 @@ const TransferInventoryDetailPage = () => {
     setActivityShow(!showActivity);
   };
 
-  let currentStep = transferInventoryData ? (transferInventoryData?.status === 'Completed' ? 1 : 0) : 0;
-
   return (
     <>
       <Grid container className="headerbox">
@@ -200,9 +195,9 @@ const TransferInventoryDetailPage = () => {
                   </Box>
                 </div>
               ) : (
-                <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
+                <DetailsPageHeader heading={headingLabel} mainPoints={{}} showHeading={true}>
                   {permissions?.transferInventory?.isUpdate && !isTransferEnded && (
-                    <Button className="buttonStyleBigScreen" variant="contained" size="small" onClick={handleOpenUpdateDialog}>
+                    <Button color='primary' className="buttonStyleBigScreen" variant="contained" size="small" onClick={handleOpenUpdateDialog}>
                       Edit
                     </Button>
                   )}
@@ -268,11 +263,19 @@ const TransferInventoryDetailPage = () => {
 
               <TabPanel value={tabValue} index={1}>
                 <Box my={2}>
-                  <TransferStepper
+                  <Steps
+                    steps={TRANSFER_STEPS}
+                    currentStep={currentStep}
+                    isNextStep={false}
+                    nextStep={false}
+                    buttonsNeeded={false}
+                    isStepEnded={transferInventoryData?.status.includes('Completed') || isTransferEnded}
+                  />
+                  {/* <TransferStepper
                     currentStep={currentStep}
                     steps={TRANSFER_STEPS}
                     isTransferEnded={transferInventoryData?.status.includes('Completed') || isTransferEnded}
-                  />
+                  /> */}
 
                   <Box my={1}>
                     {currentStep === 0 && (
@@ -281,6 +284,7 @@ const TransferInventoryDetailPage = () => {
                         updateTransferStatus={updateTransferStatus}
                         setTransferIsEnded={setTransferIsEnded}
                         renderedFrom={`${renderedFrom}_grid-1`}
+                        fetchData={fetchTransferInventoryData}
                       />
                     )}
                     {currentStep === 1 && (
