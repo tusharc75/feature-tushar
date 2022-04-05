@@ -609,21 +609,17 @@ const SerializedAsset = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  <HtmlTooltip title="Please select some inventories">
-                    <span>
-                      <Button
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        disabled={selectedRecords.length ? false : true}
-                        aria-controls="action-menu"
-                      >
-                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                      </Button>
-                    </span>
-                  </HtmlTooltip>
+                  <Button
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    disabled={selectedRecords.length ? false : true}
+                    aria-controls="action-menu"
+                  >
+                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                  </Button>
                   <Menu
                     anchorEl={anchorEl}
                     keepMounted
