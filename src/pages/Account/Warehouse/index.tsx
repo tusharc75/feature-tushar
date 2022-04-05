@@ -149,19 +149,17 @@ const Warehouse = ({ accountApi, accountId, renderedFrom }) => {
     }
 
     return (<>
-        <Box display="flex" justifyContent="flex-start" pt={1} alignItems="center" className="bg-white">
-            <Box mx={1} />
+        <Box display="flex" justifyContent="flex-start" pl={1} pr={1} pt={2} alignItems="center" className="bg-white">
             <Button
                 variant={isMobile && !isTablet ? 'text' : 'contained'}
                 color="primary"
                 size="small"
-                startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                 disabled={loading}
                 onClick={() => {
                     setOpenAssignWarehouse(true);
                 }}
             >
-                {isMobile && !isTablet ? <MdAdd size={23} /> : `Add ${routes.warehouse.title}`}
+                {`Add ${routes.warehouse.title}`}
             </Button>
         </Box>
         <Grid item xs={12} md={12} sm={12} className="mt-3">
@@ -191,7 +189,6 @@ const Warehouse = ({ accountApi, accountId, renderedFrom }) => {
                             label: "Storage Type",
                             field: "storageType",
                         },
-
                     ]}
                     owerCollaboratorInitialsOrImages=""
                     onCreate={false}
