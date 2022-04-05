@@ -11,7 +11,7 @@ import styles from "../Leads/Header.module.scss";
 import routes from "src/components/Helpers/Routes";
 import { reducer, intialState } from "src/components/AgGridComponents/CustomAgGrid";
 import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable"
-import { serializedAsset, isObjectEmpty, gridLoadingTimeout,productInventory } from 'src/constants/helpers';
+import { serializedAsset, isObjectEmpty, gridLoadingTimeout, productInventory } from 'src/constants/helpers';
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { useData } from "src/StateProvider/Provider";
 import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
@@ -19,26 +19,29 @@ import { prepareDataForGrid } from "src/constants/helpers"
 import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from "@material-ui/lab";
 import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
-import {camelCase} from 'lodash'
+import { camelCase } from 'lodash'
+import useColumns, { getFrameworkComponents, getStaticFields } from "src/constants/useColumns";
 
 const InventoryProduct = () => {
     const renderedFrom = camelCase(routes?.productInventory.title)
     const toastConfig = useContext(CustomToastContext)
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
     const [plant, setPlant] = useState('')
     const [plantOptions, setPlantOptions] = useState([])
     const [plantId, setPlantId] = useState(null);
     const [plantLabel, setPlantLabel] = useState('');
+    const localStorageSelectedRecords = `${renderedFrom}_selected`;
     const {
         state: { permissions },
     }: any = useData();
+    const { getColumnData } = useColumns();
 
     useEffect(() => {
         getPlants()
         fetchProductInventory()
-    }, [plant, plantId, page, limit, filters, sorting, search]);
+    }, [plant, plantId, page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
     const getPlants = () => {
         axiosInstance()
@@ -50,11 +53,50 @@ const InventoryProduct = () => {
             });
     }
 
-    let columns = [
-        { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer' },
-        { field: 'inventory', headerName: 'Inventory', show: true, disabled: false, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
-        { field: 'minInventory', headerName: 'Min Inventory', show: true, disabled: false, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
-    ]
+    const [frameworkComponents, setFrameworkComponents] = useState({})
+    const [columns, setColumns] = useState([])
+
+    useEffect(() => {
+        fetchGridColumns()
+    },[])
+
+    const fetchGridColumns = () => {
+        axiosInstance()
+          .get('/field?resource=Product Inventory')
+          .then(({ data: { data } }) => {
+            let columns = [];
+            let rendererNames = [];
+            data.forEach((o) => {
+              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
+              if (currentColumn !== null) {
+                if(currentColumn?.columnData.field !== 'plant') {
+                    if(o.fieldData.type === 'number') {
+                        columns.push({...currentColumn?.columnData, cellEditor: "numericCellEditor", editable: true})
+                    } else if(o.fieldData.fieldName === "product") {
+                        columns.push({...currentColumn?.columnData, 
+                          field: "productName",
+                          headerName: "Product Description",
+                          cellRenderer: 'productNameRenderer',
+                          primaryField: true
+                        })
+                    } else {
+                        columns.push(currentColumn?.columnData)
+                    }
+                }
+                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                  if(currentColumn?.columnData.field === "product") {
+                    rendererNames.push("productNameRenderer");
+                  } else {
+                    rendererNames.push(currentColumn?.rendererName);
+                  }
+                }
+              }
+            });
+            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+            setFrameworkComponents({ ...tempFrameworkComponent, productNameRenderer: ProductNameRenderer });
+            setColumns(columns);
+          });
+      };
 
     const fetchProductInventory = () => {
         dispatch({ type: "loading", loading: true });
@@ -105,6 +147,10 @@ const InventoryProduct = () => {
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
         }
+        if (showFilteredRecordsOnly) {
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+        }
         return `${deepFilter}&filterType=and`;
     };
 
@@ -123,11 +169,6 @@ const InventoryProduct = () => {
             {params.value}
         </Link>
     )
-
-    const frameworkComponents = {
-        commonRenderer: CommonRenderer,
-        productNameRenderer: ProductNameRenderer,
-    };
 
     const replaceFieldName = (field) => {
         switch (field) {
@@ -153,7 +194,7 @@ const InventoryProduct = () => {
             </Grid>
             <Grid item md={8} sm={1} xs={2}>
                 <ImportExportLinks
-      
+
                     additionalParams={`wareHouse=${plantId}`}
                     permissions={permissions?.productInventory}
                     module="product inventory"
@@ -247,7 +288,7 @@ const InventoryProduct = () => {
 
                 Object.keys(frameworkComponents).length > 0 ?
                     <CustomAgGridEditable
-                        allowSelection={false}
+                        allowSelection={true}
                         allowAction={false}
                         columns={columns}
                         dataRows={dataRows}
@@ -263,6 +304,7 @@ const InventoryProduct = () => {
                         loading={loading}
                         renderedFrom={renderedFrom}
                         refreshGrid={fetchProductInventory}
+                        showOnlyShowFilteredRecordSwitch={true}
                     /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>

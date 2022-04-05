@@ -67,7 +67,7 @@ const RepairJob = () => {
   });
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [frameworkComponents, setFrameworkComponents] = useState({});
   const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
@@ -165,7 +165,7 @@ const RepairJob = () => {
     if (renderCount > 0) {
       fetchRepairJobs();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, fromRental, selectedEntity]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, fromRental, selectedEntity, showFilteredRecordsOnly]);
 
   const handleSingleDeleteRepairJob = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -297,6 +297,10 @@ const RepairJob = () => {
     }
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
+    }
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
     }
     return deepFilter;
   };
@@ -541,6 +545,7 @@ const RepairJob = () => {
                 loading={loading}
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchRepairJobs}
+                showOnlyShowFilteredRecordSwitch={true}
               /> : null
         }
 

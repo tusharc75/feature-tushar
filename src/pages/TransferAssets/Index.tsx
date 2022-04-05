@@ -569,6 +569,7 @@ const TransferAsset = () => {
                 loading={loading}
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchTransferAsset}
+                showOnlyShowFilteredRecordSwitch={true}
               />
             )
           ) : null

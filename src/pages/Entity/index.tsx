@@ -17,10 +17,10 @@ import AssignUsersDialog from "../../components/AssignRolesDialog/AssignEntityDi
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
-import { FaUser,FaSuitcase,BsCurrencyExchange,FaAddressCard,IoCreate} from "react-icons/all";
+import { FaUser, FaSuitcase, BsCurrencyExchange, FaAddressCard, IoCreate } from "react-icons/all";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { prepareDataForGrid } from "../../constants/helpers"
-import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ResourceTransferDialog from "../../components/ResourceTransferDialog"
 import { isMobile, isTablet } from 'react-device-detect';
@@ -40,7 +40,7 @@ const Entity: FC = () => {
   const {
     state: { permissions, user },
   }: any = useData();
-  const {getColumnData} = useColumns();
+  const { getColumnData } = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, entityId: null });
   const [renderCount, setRenderCount] = useState(0);
   const [usersDialogOpen, setUsersDialogOpen] = useState(false);
@@ -51,11 +51,12 @@ const Entity: FC = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const [deleteEntity, setDeleteEntity] = useState<any>({})
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const localStorageSelectedRecords = `${renderedFrom}_selected`
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
@@ -88,7 +89,7 @@ const Entity: FC = () => {
     if (renderCount > 0) {
       fetchEntity();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting]);
+  }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   useEffect(() => {
     if (selectedRecords.length === 1) {
@@ -231,7 +232,10 @@ const Entity: FC = () => {
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
-
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+    }
     return deepFilter;
   };
 
@@ -369,26 +373,26 @@ const Entity: FC = () => {
             loading={loading}
             additionalDetails={[
               {
-                icon:<FaSuitcase />,
-                field:"parentEntity"
+                icon: <FaSuitcase />,
+                field: "parentEntity"
               },
-              
+
             ]}
             chips={[
               {
-                icon:<BsCurrencyExchange />,
-                label:"Currency: ",
-                field:"currency"
+                icon: <BsCurrencyExchange />,
+                label: "Currency: ",
+                field: "currency"
               },
               {
-                icon:<FaAddressCard />,
-                label:"Address: ",
-                field:"address"
+                icon: <FaAddressCard />,
+                label: "Address: ",
+                field: "address"
               },
               {
-                icon:<IoCreate />,
-                label:"Created By: ",
-                field:"createdBy"
+                icon: <IoCreate />,
+                label: "Created By: ",
+                field: "createdBy"
               }
             ]}
             owerCollaboratorInitialsOrImages=""
@@ -402,6 +406,7 @@ const Entity: FC = () => {
               dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150}
               loading={loading} renderedFrom={renderedFrom}
               refreshGrid={fetchEntity}
+              showOnlyShowFilteredRecordSwitch={true}
             /> : null
         }
 

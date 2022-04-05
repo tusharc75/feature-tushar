@@ -318,10 +318,10 @@ const ProductDetailsPage = () => {
       rowsData = packages
         ? packages.map((p) => ({
           ...p,
-          createdBy: p.createdBy.user.concatedName,
-          createdByDate: p.createdBy.date,
-          updatedBy: p.updatedBy.user.concatedName,
-          updatedByDate: p.updatedBy.date
+          createdBy: p?.createdBy?.user?.concatedName,
+          createdByDate: p?.createdBy?.date,
+          updatedBy: p?.updatedBy?.user?.concatedName,
+          updatedByDate: p?.updatedBy?.date
         }))
         : [];
       newColumns = [
