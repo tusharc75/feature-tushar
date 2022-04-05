@@ -14,7 +14,7 @@ import {
 import { isMobile, isTablet } from "react-device-detect";
 
 import { useHistory, useParams } from "react-router-dom";
-import { reverse as _reverse } from "lodash";
+import { camelCase, reverse as _reverse } from "lodash";
 import { Alert, Skeleton } from "@material-ui/lab";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import { accountPage } from "../../routes/Accounts";
@@ -77,6 +77,7 @@ import queryString from 'query-string';
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { BiEdit } from "react-icons/bi";
+import Warehouse from "./Warehouse";
 
 function DisplayData({ label, value, icon }) {
   return (
@@ -1066,6 +1067,19 @@ export default function AccountDetailPage(props) {
 
                       />
                     }
+                    {
+                      !isOffline && accountResource === "customerAccount" && <Tab
+                        label={
+                          <div className="tab-font">
+                            {routes.warehouse.title}
+                          </div>
+                        }
+                        aria-controls="a11y-tabpanel-2"
+                        id="a11y-tab-2"
+                        className="tabLayout"
+
+                      />
+                    }
                     <div className={'uio'}> </div>
                   </Tabs>
 
@@ -1115,8 +1129,14 @@ export default function AccountDetailPage(props) {
                       />
                     </Box>
                   </TabPanel>
-
-
+                  {
+                    !isOffline && accountResource === "customerAccount" &&
+                    <TabPanel value={tabValue} index={3}>
+                      <Warehouse
+                        accountApi={accountApi}
+                        accountId={id}
+                        renderedFrom={`${camelCase(accountResource)}_grid1`} />
+                    </TabPanel>}
 
                   <div className="p-3">
 
