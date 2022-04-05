@@ -121,6 +121,7 @@ const Steps = (props) => {
         isStepEnded,
         setStepFullScreen = null,
         updateStatus = null,
+        buttonsNeeded = true
     } = props;
 
     const classes = useStyles();
@@ -174,7 +175,7 @@ const Steps = (props) => {
                 // />
                 <CustomMobileStepperOpportunities
                     stepName={((activeStep + 1) + "/" + steps.length) + " " + steps[currentStep] ?? ""}
-                    nextButton={
+                    nextButton={buttonsNeeded &&
                         <Button size="small"
                             variant="text"
                             color="primary"
@@ -187,7 +188,7 @@ const Steps = (props) => {
                         </Button>
 
 
-                    } backButton={
+                    } backButton={buttonsNeeded &&
                         <Button size="small" variant="text" color={"primary"} startIcon={<AiOutlineLeft />}
                             disabled={currentStep === steps.length || currentStep === 0 || isStepEnded}
                             className="mr-1 MobileStep-next-back-button"
@@ -200,7 +201,7 @@ const Steps = (props) => {
                 <div className="position-relative">
                     <Grid container className={styles.main_step_box} xs={12}>
                         <Grid item xs={12} sm={isMobile ? 12 : 1} md={1} className="d-flex align-items-center justify-content-center mt-2" >
-                            {!isMobile && !isStepEnded && <IconButton
+                            {buttonsNeeded && !isMobile && !isStepEnded && <IconButton
                                 disabled={currentStep === steps.length || currentStep === 0}
                                 className={"stepperButton"}
                                 onClick={goPrev}
@@ -216,7 +217,7 @@ const Steps = (props) => {
                                         xs={6}
                                         className="d-flex align-items-center justify-content-start "
                                     >
-                                        {isMobile && (
+                                        {buttonsNeeded && isMobile && (
                                             <>
                                                 <div>
                                                     <IconButton
@@ -240,7 +241,7 @@ const Steps = (props) => {
                                         xs={6}
                                         className="d-flex align-items-center justify-content-end"
                                     >
-                                        {isMobile && (
+                                        {buttonsNeeded && isMobile && (
                                             <>
                                                 <div>
 
@@ -295,7 +296,7 @@ const Steps = (props) => {
                             </div>
                         </Grid>
                         <Grid item xs={12} sm={isMobile ? 12 : 1} md={1} className="d-flex align-items-center justify-content-center mt-2 " >
-                            {!isMobile && !isStepEnded && <Fragment>
+                            {buttonsNeeded && !isMobile && !isStepEnded && <Fragment>
                                 <IconButton
                                     onClick={goNext}
                                     disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep}

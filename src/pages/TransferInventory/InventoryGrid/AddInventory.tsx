@@ -72,7 +72,7 @@ const AddInventory = (props: Props) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['productId'] = u._id;
           finalObject['qty'] = 0;
-          finalObject['inventory'] = !isNaN(Number(u.inventory)) ? Number(u.inventory) : 0;
+          finalObject['inventory'] = u?.inventory && !isNaN(Number(u.inventory)) ? Number(u.inventory) : 0;
 
           return {
             ...finalObject
@@ -158,6 +158,14 @@ const AddInventory = (props: Props) => {
         open: true
       });
     }
+    const newRecords = selectedRecords.map((d:any) => {
+      if(data?._id === d?._id) {
+        return data
+      }
+
+      return d
+    })
+    dispatch({type: "selection", selectedRecords: newRecords})
   };
 
   let disableSave =
@@ -168,7 +176,7 @@ const AddInventory = (props: Props) => {
 
   return (
     <Dialog open fullScreen fullWidth onClose={close}>
-      <CustomDialogHeader title="Add Product" onClose={close} />
+      <CustomDialogHeader title="Add Product" onClose={close} showRequiredLabel={false}/>
       <CustomDialogContent>
         <Box
           display={'flex'}
@@ -206,7 +214,7 @@ const AddInventory = (props: Props) => {
               variant="contained"
               color="primary"
             >
-              Save
+              Add
             </Button>
           </Box>
         </Box>

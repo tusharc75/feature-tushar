@@ -1,5 +1,5 @@
 export const STATUS = ['New', 'In Progress', 'Completed'];
-export const TRANSFER_STEPS = ['Add Inventories', 'Completed'];
+export const TRANSFER_STEPS = ['Add Products', 'Completed'];
 export const mapPlantOption = (data: any, length: number) => {
   return {
     address: data.address,
