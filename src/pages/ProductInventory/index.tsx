@@ -71,7 +71,7 @@ const InventoryProduct = () => {
               if (currentColumn !== null) {
                 if(currentColumn?.columnData.field !== 'plant') {
                     if(o.fieldData.type === 'number') {
-                        columns.push({...currentColumn?.columnData, cellEditor: "numericCellEditor", editable: true})
+                        columns.push({...currentColumn?.columnData, cellEditor: "numericCellEditor", editable: permissions?.productInventory.isUpdate})
                     } else if(o.fieldData.fieldName === "product") {
                         columns.push({...currentColumn?.columnData, 
                           field: "productName",
@@ -160,6 +160,7 @@ const InventoryProduct = () => {
             product: row?.data?.productId,
             inventory: row?.data?.inventory,
             minInventory: row?.data?.minInventory,
+            maxInventory: row?.data?.maxInventory,
         }
         axiosInstance().put(`/product-inventory`, inputData);
     }

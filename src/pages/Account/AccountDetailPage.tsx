@@ -1067,22 +1067,19 @@ export default function AccountDetailPage(props) {
 
                       />
                     }
-                    {
-                      !isOffline && accountResource === "customerAccount" && <Tab
-                        label={
-                          <div className="tab-font">
-                            {routes.warehouse.title}
-                          </div>
-                        }
-                        aria-controls="a11y-tabpanel-2"
-                        id="a11y-tab-2"
-                        className="tabLayout"
-
-                      />
+                    {(!isOffline && accountResource === "customerAccount" && permissions?.productInventory) && <Tab
+                      label={
+                        <div className="tab-font">
+                          {routes.warehouse.title}
+                        </div>
+                      }
+                      aria-controls="a11y-tabpanel-2"
+                      id="a11y-tab-2"
+                      className="tabLayout"
+                    />
                     }
                     <div className={'uio'}> </div>
                   </Tabs>
-
                   <TabPanel value={tabValue} index={0}>
                     <Box>
                       {
@@ -1129,19 +1126,14 @@ export default function AccountDetailPage(props) {
                       />
                     </Box>
                   </TabPanel>
-                  {
-                    !isOffline && accountResource === "customerAccount" &&
+                  {(!isOffline && accountResource === "customerAccount" && permissions?.productInventory) &&
                     <TabPanel value={tabValue} index={3}>
                       <Warehouse
                         accountApi={accountApi}
                         accountId={id}
                         renderedFrom={`${camelCase(accountResource)}_grid1`} />
                     </TabPanel>}
-
                   <div className="p-3">
-
-
-
                     {permissions?.opportunity?.isRead && (
                       <span id='opportunityAccordion'>
                         <OpportunityInAccordian

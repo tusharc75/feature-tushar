@@ -207,7 +207,6 @@ const Warehouse = ({ accountApi, accountId, renderedFrom }) => {
                             label: "Storage Type",
                             field: "storageType",
                         },
-
                     ]}
                     owerCollaboratorInitialsOrImages=""
                     onCreate={false}

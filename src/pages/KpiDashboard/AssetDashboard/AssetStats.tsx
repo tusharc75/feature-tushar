@@ -62,6 +62,7 @@ const AssetStats = () => {
       <Box my={2} bgcolor={'#f5f5f5'} p={1}>
         <Box my={1}>
           <Autocomplete
+            disableCloseOnSelect
             ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
             options={assets}
             disableListWrap
