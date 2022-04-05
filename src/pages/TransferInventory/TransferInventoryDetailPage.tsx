@@ -284,6 +284,7 @@ const TransferInventoryDetailPage = () => {
                         updateTransferStatus={updateTransferStatus}
                         setTransferIsEnded={setTransferIsEnded}
                         renderedFrom={`${renderedFrom}_grid-1`}
+                        fetchData={fetchTransferInventoryData}
                       />
                     )}
                     {currentStep === 1 && (
