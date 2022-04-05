@@ -21,10 +21,11 @@ interface Props {
   isAdding?: boolean;
   submit: (p: any[]) => any;
   renderedFrom: string;
+  existingProducts: any[];
 }
 
 const AddInventory = (props: Props) => {
-  const { plantId, close, isAdding, submit, renderedFrom } = props;
+  const { plantId, close, isAdding, submit, renderedFrom, existingProducts } = props;
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -38,7 +39,7 @@ const AddInventory = (props: Props) => {
   }, [page, limit, filters, sorting, search]);
 
   let columns = [
-    { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer' },
+    { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
     {
       field: 'qty',
       headerName: 'Quantity',
@@ -67,18 +68,20 @@ const AddInventory = (props: Props) => {
     const queryString = getQueryString();
     axiosInstance()
       .get(`/product-inventory?wareHouse=${plantId}&${queryString}`)
-      .then(({ data }) => {
-        let rows = data.data?.map((u: any) => {
+      .then(({ data: { data, count } }) => {
+        const exisitingIds = existingProducts.map((d: any) => d.productName);
+        data = data.filter((d: any) => !exisitingIds.includes(d.productName));
+        let rows = data?.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['productId'] = u._id;
           finalObject['qty'] = 0;
-          finalObject['inventory'] = !isNaN(Number(u.inventory)) ? Number(u.inventory) : 0;
+          finalObject['inventory'] = u?.inventory && !isNaN(Number(u.inventory)) ? Number(u.inventory) : 0;
 
           return {
             ...finalObject
           };
         });
-        dispatch({ type: 'initialize', data: rows, count: data.count });
+        dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -117,20 +120,13 @@ const AddInventory = (props: Props) => {
   const handleClickSave = () => {
     const _data = selectedRecords.map((d) => ({
       product: d.productId,
-      qty: isNaN(d?.inventory) ? 0 : Number(d?.inventory)
+      qty: Number(d.qty)
     }));
     submit(_data);
   };
 
-  const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`/product/detail/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
   const frameworkComponents = {
-    commonRenderer: CommonRenderer,
-    productNameRenderer: ProductNameRenderer
+    commonRenderer: CommonRenderer
   };
 
   const replaceFieldName = (field) => {
@@ -158,6 +154,14 @@ const AddInventory = (props: Props) => {
         open: true
       });
     }
+    const newRecords = selectedRecords.map((d: any) => {
+      if (data?._id === d?._id) {
+        return data;
+      }
+
+      return d;
+    });
+    dispatch({ type: 'selection', selectedRecords: newRecords });
   };
 
   let disableSave =
@@ -168,7 +172,7 @@ const AddInventory = (props: Props) => {
 
   return (
     <Dialog open fullScreen fullWidth onClose={close}>
-      <CustomDialogHeader title="Add Product" onClose={close} />
+      <CustomDialogHeader title="Add Product" onClose={close} showRequiredLabel={false} />
       <CustomDialogContent>
         <Box
           display={'flex'}
@@ -206,7 +210,7 @@ const AddInventory = (props: Props) => {
               variant="contained"
               color="primary"
             >
-              Save
+              Add
             </Button>
           </Box>
         </Box>

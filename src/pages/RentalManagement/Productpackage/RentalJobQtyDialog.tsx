@@ -276,7 +276,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         }
 
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, fieldAll)
-        if (element.type === "product" && element.parentId === null) {
+        if (element.type === "product") {
           rows.push({ ...element, ...calValues })
         }
         else if (element.type === "package") {
