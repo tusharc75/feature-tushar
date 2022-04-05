@@ -24,7 +24,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
-import {MdSort,MdFilterList,ImCalendar,FaSuitcase} from "react-icons/all";
+import { MdSort, MdFilterList, ImCalendar, FaSuitcase } from "react-icons/all";
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import MobileSortDialog from "../../components/MobileSortDialog";
@@ -59,7 +59,8 @@ function Budget() {
   const [gridApi, setGridApi] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const localStorageSelectedRecords = `${renderedFrom}_selected`
 
 
 
@@ -86,7 +87,7 @@ function Budget() {
 
   };
 
- 
+
 
 
   useEffect(() => {
@@ -103,7 +104,7 @@ function Budget() {
 
   useEffect(() => {
     fetchBudgetList();
-  }, [page, limit, filters, sorting, selectedEntity]);
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   useEffect(() => {
     const parsedParams = queryString.parse(location?.search);
@@ -254,6 +255,11 @@ function Budget() {
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
+
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+    }
     return deepFilter;
   };
 
@@ -367,65 +373,65 @@ function Budget() {
         <CustomContainer>
           <div className="header-panel">
             <Grid className={styles.filter_side_container} container justify="space-between">
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
-            <div className="d-flex align-items-center">  
-                <MdContacts className="headerLogo" />
-                <span className="listingHeader">{routes.budget.title}</span>
+              <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+                <div className="d-flex align-items-center">
+                  <MdContacts className="headerLogo" />
+                  <span className="listingHeader">{routes.budget.title}</span>
                 </div>
                 {isMobile && !isTablet &&
-        <div className="d-flex ">
-        <Button
-        onClick={handleClickOpen}
-        id="demo-customized-button"
-        aria-controls="demo-customized-menu"
-        aria-haspopup="true"
-        // aria-expanded={open ? 'true' : undefined}
-        color="secondary"
-        variant="text"
-        disableElevation
-        startIcon={<MdSort />}
-      >
-        Sort 
-        </Button>
+                  <div className="d-flex ">
+                    <Button
+                      onClick={handleClickOpen}
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      color="secondary"
+                      variant="text"
+                      disableElevation
+                      startIcon={<MdSort />}
+                    >
+                      Sort
+                    </Button>
 
-        <MobileSortDialog
-        isOpen={open}
-        handleClose={handleClickClose}
-        contentPart={null}
-        secHeading={["Sort Budget"]}
-        columns={columns}
-        dispatch={dispatch}
-        />
-
-
-
-        <Button
-        id="demo-customized-button"
-        aria-controls="demo-customized-menu"
-        aria-haspopup="true"
-        // aria-expanded={open ? 'true' : undefined}
-        variant="text"
-        color="secondary"
-        disableElevation
-        startIcon={<MdFilterList />}
-        onClick={handleOpen}
-      >
-        Filter 
-        </Button>
+                    <MobileSortDialog
+                      isOpen={open}
+                      handleClose={handleClickClose}
+                      contentPart={null}
+                      secHeading={["Sort Budget"]}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
 
 
-        <MobileFilterDialog
-        isOpen={isOpenDialog}
-        handleClose={handleClose}
-        contentPart={null}
-        secHeading={["Filter Budget"]}
-        columns={columns}
-        dispatch={dispatch}
-        />
-        </div>
-        }
 
-              
+                    <Button
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      variant="text"
+                      color="secondary"
+                      disableElevation
+                      startIcon={<MdFilterList />}
+                      onClick={handleOpen}
+                    >
+                      Filter
+                    </Button>
+
+
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleClose}
+                      contentPart={null}
+                      secHeading={["Filter Budget"]}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+                  </div>
+                }
+
+
               </Grid>
               <Grid className={styles.filter_side} item md={6} sm={12} xs={12}>
                 <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -438,59 +444,59 @@ function Budget() {
                     width="242px"
                     style={isMobile ? { flex: 1 } : {}}
                   />
-                  
+
                   <Grid style={{ display: 'flex', gap: '5px' }}>
-                  <>
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      onClick={() => {
-                        setShowManageBudgetDialog({ show: true, id: null, isClone: false });
-                      }}
-                    >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                    </Button>
-                  </>
+                    <>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        color="primary"
+                        size="small"
+                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                        onClick={() => {
+                          setShowManageBudgetDialog({ show: true, id: null, isClone: false });
+                        }}
+                      >
+                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                      </Button>
+                    </>
 
-                  <>
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="default"
-                      size="small"
-                      className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_new_submit_btn}`}
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                    >
-                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                    </Button>
+                    <>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                        color="default"
+                        size="small"
+                        className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_new_submit_btn}`}
+                        onClick={openActions}
+                        disabled={selectedRecords.length ? false : true}
+                        aria-controls="action-menu"
+                      >
+                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      </Button>
 
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                    </Menu>
-                    
-                  </>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                      </Menu>
+
+                    </>
                   </Grid>
                 </Box>
               </Grid>
             </Grid>
           </div>
           <Box component="div">
-            { Object.keys(frameWorkComponent).length > 0 ? (
+            {Object.keys(frameWorkComponent).length > 0 ? (
               isMobile && !isTablet ? (
                 <CustomSwipableList
                   allowSelection={true}
@@ -516,40 +522,41 @@ function Budget() {
                   loading={loading}
                   additionalDetails={[
                     {
-                      icon:<FaSuitcase />,
-                      field:"entity"
+                      icon: <FaSuitcase />,
+                      field: "entity"
                     }
                   ]}
                   chips={[
                     {
-                      icon:<ImCalendar />,
-                      label:"Year: ",
+                      icon: <ImCalendar />,
+                      label: "Year: ",
                       field: "year"
                     },
-                   
+
                   ]}
                   owerCollaboratorInitialsOrImages=""
                   onCreate={() => setShowManageBudgetDialog({ show: true, id: null, isClone: null })}
                   showClone={false}
-                  onClone={() => {}}
+                  onClone={() => { }}
                   renderedFrom={renderedFrom}
                 />
               ) :
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={100}
-                loading={loading}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchBudgetList}
-              />
+                <CustomAgGrid
+                  columns={columns}
+                  dataRows={dataRows}
+                  frameworkComponents={frameWorkComponent}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={rowCount}
+                  limit={limit}
+                  pageSizes={pageSizes}
+                  page={page}
+                  actionWidth={100}
+                  loading={loading}
+                  renderedFrom={renderedFrom}
+                  refreshGrid={fetchBudgetList}
+                  showOnlyShowFilteredRecordSwitch={true}
+                />
             ) : null}
           </Box>
         </CustomContainer>
