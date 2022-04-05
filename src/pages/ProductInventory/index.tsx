@@ -20,6 +20,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from "@material-ui/lab";
 import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import { camelCase } from 'lodash'
+import useColumns, { getFrameworkComponents, getStaticFields } from "src/constants/useColumns";
 
 const InventoryProduct = () => {
     const renderedFrom = camelCase(routes?.productInventory.title)
@@ -35,6 +36,7 @@ const InventoryProduct = () => {
     const {
         state: { permissions },
     }: any = useData();
+    const { getColumnData } = useColumns();
 
     useEffect(() => {
         getPlants()
@@ -51,11 +53,50 @@ const InventoryProduct = () => {
             });
     }
 
-    let columns = [
-        { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer' },
-        { field: 'inventory', headerName: 'Inventory', show: true, disabled: false, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
-        { field: 'minInventory', headerName: 'Min Inventory', show: true, disabled: false, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
-    ]
+    const [frameworkComponents, setFrameworkComponents] = useState({})
+    const [columns, setColumns] = useState([])
+
+    useEffect(() => {
+        fetchGridColumns()
+    },[])
+
+    const fetchGridColumns = () => {
+        axiosInstance()
+          .get('/field?resource=Product Inventory')
+          .then(({ data: { data } }) => {
+            let columns = [];
+            let rendererNames = [];
+            data.forEach((o) => {
+              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
+              if (currentColumn !== null) {
+                if(currentColumn?.columnData.field !== 'plant') {
+                    if(o.fieldData.type === 'number') {
+                        columns.push({...currentColumn?.columnData, cellEditor: "numericCellEditor", editable: true})
+                    } else if(o.fieldData.fieldName === "product") {
+                        columns.push({...currentColumn?.columnData, 
+                          field: "productName",
+                          headerName: "Product Description",
+                          cellRenderer: 'productNameRenderer',
+                          primaryField: true
+                        })
+                    } else {
+                        columns.push(currentColumn?.columnData)
+                    }
+                }
+                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                  if(currentColumn?.columnData.field === "product") {
+                    rendererNames.push("productNameRenderer");
+                  } else {
+                    rendererNames.push(currentColumn?.rendererName);
+                  }
+                }
+              }
+            });
+            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+            setFrameworkComponents({ ...tempFrameworkComponent, productNameRenderer: ProductNameRenderer });
+            setColumns(columns);
+          });
+      };
 
     const fetchProductInventory = () => {
         dispatch({ type: "loading", loading: true });
@@ -128,11 +169,6 @@ const InventoryProduct = () => {
             {params.value}
         </Link>
     )
-
-    const frameworkComponents = {
-        commonRenderer: CommonRenderer,
-        productNameRenderer: ProductNameRenderer,
-    };
 
     const replaceFieldName = (field) => {
         switch (field) {
@@ -252,7 +288,7 @@ const InventoryProduct = () => {
 
                 Object.keys(frameworkComponents).length > 0 ?
                     <CustomAgGridEditable
-                        allowSelection={false}
+                        allowSelection={true}
                         allowAction={false}
                         columns={columns}
                         dataRows={dataRows}
