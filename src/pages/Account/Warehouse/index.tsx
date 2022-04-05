@@ -149,20 +149,36 @@ const Warehouse = ({ accountApi, accountId, renderedFrom }) => {
     }
 
     return (<>
-        <Box display="flex" justifyContent="flex-start" pt={1} alignItems="center" className="bg-white">
-            <Box mx={1} />
-            <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                color="primary"
-                size="small"
-                startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                disabled={loading}
-                onClick={() => {
-                    setOpenAssignWarehouse(true);
-                }}
-            >
-                {isMobile && !isTablet ? <MdAdd size={23} /> : `Add ${routes.warehouse.title}`}
-            </Button>
+        <Box display="flex" justifyContent="space-between" m={1}>
+            <Box display="flex" alignItems="center">
+                <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    color="primary"
+                    size="small"
+                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                    disabled={loading}
+                    onClick={() => {
+                        setOpenAssignWarehouse(true);
+                    }}
+                >
+                    {isMobile && !isTablet ? <MdAdd size={23} /> : `Add ${routes.warehouse.title}`}
+                </Button>
+            </Box>
+            <div className="d-flex gap-2">
+                <Box display={"flex"} justifyContent="flex-end">
+                    {permissions?.warehouse?.isDelete && <Button
+                        variant={isMobile && !isTablet ? "text" : "contained"}
+                        color="primary"
+                        size="small"
+                        disabled={selectedRecords.length === 0 || isDeleting}
+                        onClick={() => {
+                            setShowConfirmBox({ open: true, data: selectedRecords })
+                        }}>
+                        Delete
+                    </Button>}
+                    <Box mx={1} />
+                </Box>
+            </div>
         </Box>
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns ?
