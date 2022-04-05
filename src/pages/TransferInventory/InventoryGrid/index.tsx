@@ -280,9 +280,9 @@ const InventoryGrid = (props) => {
             limit={limit}
             pageSizes={pageSizes}
             page={page}
-            allowAction={true}
+            allowAction={permissions?.transferInventory.isUpdate}
             actionWidth={120}
-            allowSelection={true}
+            allowSelection={permissions?.transferInventory.isUpdate}
             isClientSideGrid={true}
             loading={loading}
             // onCellValueChanged={onCellValueChanged}
