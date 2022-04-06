@@ -82,8 +82,8 @@ const Processing = ({ transferInventoryData, setNextStep, statusOptions, current
     <Fragment>
       {(currentStep === 1 && statusOptions?.length) &&
         <Box mt={1}>
-          <Box>
-            <Box>
+          <Grid container spacing={2}>
+            <Grid item xs={8} sm={10} md={10}>
               <Stepper activeStep={statusOptions?.findIndex(f => f.optionLabel === transferInventoryData?.status)} alternativeLabel>
                 {statusOptions?.map(({ optionLabel }) => (
                   <Step key={optionLabel}>
@@ -91,27 +91,27 @@ const Processing = ({ transferInventoryData, setNextStep, statusOptions, current
                   </Step>
                 ))}
               </Stepper>
-            </Box>
-          </Box>
-          {transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered &&
-            <Box>
-              <Button
-                variant='contained'
-                size="small"
-                color="primary"
-                onClick={() => {
-                  var index = 0;
-                  if (statusOptions?.findIndex(f => f.optionLabel === transferInventoryData?.status) >= 0) {
-                    index = statusOptions?.findIndex(f => f.optionLabel === transferInventoryData?.status) + 1;
-                  }
-                  updateTransferInventoryStatus(statusOptions[index]?.optionLabel)
-                }}
-              >{statusOptions?.findIndex(f => f.optionLabel === transferInventoryData?.status) >= 0 ?
-                statusOptions[statusOptions?.findIndex(f => f.optionLabel === transferInventoryData?.status) + 1]?.optionLabel :
-                statusOptions[0]?.optionLabel}
-              </Button>
-            </Box>
-          }
+            </Grid>
+            <Grid item xs={4} sm={2} md={2}>
+              {transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered &&
+                <Button
+                  variant='contained'
+                  size="small"
+                  color="primary"
+                  onClick={() => {
+                    var index = 0;
+                    if (statusOptions?.findIndex(f => f.optionLabel === transferInventoryData?.status) >= 0) {
+                      index = statusOptions?.findIndex(f => f.optionLabel === transferInventoryData?.status) + 1;
+                    }
+                    updateTransferInventoryStatus(statusOptions[index]?.optionLabel)
+                  }}
+                >{statusOptions?.findIndex(f => f.optionLabel === transferInventoryData?.status) >= 0 ?
+                  statusOptions[statusOptions?.findIndex(f => f.optionLabel === transferInventoryData?.status) + 1]?.optionLabel :
+                  statusOptions[0]?.optionLabel}
+                </Button>
+              }
+            </Grid>
+          </Grid>
         </Box>
       }
       <Box mt={1}>

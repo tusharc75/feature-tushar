@@ -63,7 +63,6 @@ const ManageTransferInventory: FC<Props> = (props) => {
 
   useEffect(() => {
     if (!user || !user?.user || !user?.user?.customerAccountId || !user?.user?.customerContactId) return;
-
     setCustomer(true);
     const fetchPlants = () => {
       axiosInstance()
@@ -78,15 +77,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
             order: index,
             default: false
           }));
-
           setCustomerPlants(data);
-
-          // optionValue:"62160f3fa274fa4c4e6888c0"
-          // optionLabel:"Longview Yard"
-          // address:"62160e565379934ad093758a"
-          // entity:["6215f92cbf69343f7d4feecd"]
-          // order:0
-          // default:true
         })
         .catch((err) => {
           toastConfig.setToastConfig(err);

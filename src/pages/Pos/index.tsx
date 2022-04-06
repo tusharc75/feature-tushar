@@ -183,148 +183,86 @@ const Pos = () => {
                 </Grid>
             </Grid>
             <CustomContainer>
-                <div className="main-container">
-                    <div className="header-panel">
-                        <Grid container >
-                            <Grid item xs={12} sm={12} md={4} className="d-flex align-items-center gap-1">
-                                <>
-                                    <Autocomplete
-                                        style={{ width: "250px" }}
-                                        options={plantOptions}
-                                        getOptionLabel={(option: any) => option.warehouseName}
-                                        disableClearable
-                                        getOptionSelected={(option: any, val) =>
-                                            option._id === val
-                                        }
-                                        value={plantOptions.filter((data) => data._id === plantId).length
-                                            ? plantOptions.filter((data) => data._id === plantId)[0]
-                                            : ""
-                                        }
-                                        onChange={(e, val) => {
-                                            if (val !== null) {
-                                                setPlantId(val && val._id ? val._id : "")
-                                            }
-                                        }}
-                                        renderInput={(params) => (
-                                            isMobile && !isTablet ?
-                                                <TextField
-                                                    {...params}
-                                                    margin="dense"
-                                                    name="plant"
-                                                    placeholder="Plant"
-                                                    variant="standard"
-                                                    fullWidth
-                                                    className={isMobile ? "serchBox" : ""}
-                                                /> :
-                                                <TextField
-                                                    {...params}
-                                                    margin="dense"
-                                                    name="plant"
-                                                    label="Plant"
-                                                    variant="outlined"
-                                                    fullWidth
-                                                />
-                                        )}
-                                    />
-                                </>
-
-                            </Grid>
-                            <Grid item xs={12} sm={12} md={8} className="d-flex align-items-center gap-1">
-                                <ClickAwayListener onClickAway={() => {
-                                    setOpen(false);
-                                }}>
-                                    <div className={`${classes.search} position-relative d-flex`}>
-                                        <div className={classes.searchIcon}>
-                                            <SearchIcon />
-                                        </div>
-
-                                        <InputBase
-                                            value={search}
-                                            placeholder="Search..."
-                                            onChange={(e) => {
-                                                setSearch(e.target.value)
-                                            }}
-                                            classes={{
-                                                root: classes.inputRoot,
-                                                input: classes.inputInput,
-                                            }}
-                                            inputProps={{ 'aria-label': 'search' }}
+                <div className="header-panel">
+                    <Grid container >
+                        <Grid item xs={12} sm={12} md={4} className="d-flex align-items-center gap-1">
+                            <Autocomplete
+                                style={{ width: "250px" }}
+                                options={plantOptions}
+                                getOptionLabel={(option: any) => option.warehouseName}
+                                disableClearable
+                                getOptionSelected={(option: any, val) =>
+                                    option._id === val
+                                }
+                                value={plantOptions.filter((data) => data._id === plantId).length
+                                    ? plantOptions.filter((data) => data._id === plantId)[0]
+                                    : ""
+                                }
+                                onChange={(e, val) => {
+                                    if (val !== null) {
+                                        setPlantId(val && val._id ? val._id : "")
+                                    }
+                                }}
+                                renderInput={(params) => (
+                                    isMobile && !isTablet ?
+                                        <TextField
+                                            {...params}
+                                            margin="dense"
+                                            name="plant"
+                                            placeholder="Plant"
+                                            variant="standard"
+                                            fullWidth
+                                            className={isMobile ? "serchBox" : ""}
+                                        /> :
+                                        <TextField
+                                            {...params}
+                                            margin="dense"
+                                            name="plant"
+                                            label="Plant"
+                                            variant="outlined"
+                                            fullWidth
                                         />
-
-                                        {
-                                            loading ? <div className="position-absolute border d-flex align-items-center justify-content-center"
-                                                style={{ background: "white", zIndex: 10, marginTop: "2.5rem", height: 150, width: 450, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}>
-                                                <h4 className="loading-dots">Loading</h4>
-                                            </div> : (
-                                                open && <div className={`position-absolute border ${searchItems.length === 0 ? "d-flex align-items-center justify-content-center" : ""}`}
-                                                    style={{ background: "white", zIndex: 10, marginTop: "2.5rem", height: searchItems.length > 0 ? 500 : 150, width: 450, boxShadow: "2px 4px 12px 0px #8b8b8b", overflow: "auto", color: "black" }}
-                                                >
-
-                                                    {
-                                                        searchItems.length > 0 ? <List className={classes.root}>
-                                                            {
-                                                                searchItems.map((m) => (
-                                                                    <Fragment key={m._id}>
-                                                                        <ListItem alignItems="flex-start">
-                                                                            <ListItemText
-                                                                                primary={m.name}
-                                                                                secondary={
-                                                                                    <div className="d-flex flex-column gap-2">
-                                                                                        <Typography
-                                                                                            component="span"
-                                                                                            variant="body2"
-                                                                                            className={classes.inline}
-                                                                                            color="textPrimary"
-                                                                                        >
-                                                                                            {capitalize(m.type)}
-                                                                                        </Typography>
-
-                                                                                        <div className="d-flex gap-3">
-                                                                                            <Chip className="cursor-pointer" label="Rent" color="primary" title="Rent" onClick={() => {
-                                                                                                setSearch("")
-                                                                                                setOpen(false)
-                                                                                                history.push(`${routes.productDetail.path}/${m._id}/Rent`)
-                                                                                            }} />
-                                                                                            <Chip className="cursor-pointer" label="Buy" color="primary" title="Buy" onClick={() => {
-                                                                                                setSearch("")
-                                                                                                setOpen(false)
-                                                                                                history.push(`${routes.productDetail.path}/${m._id}/Sale`)
-                                                                                            }} />
-                                                                                        </div>
-                                                                                    </div>
-                                                                                }
-                                                                            />
-                                                                        </ListItem>
-                                                                        <Divider />
-                                                                    </Fragment>
-                                                                ))
-                                                            }
-                                                        </List> : <h4>No Products Found...</h4>
-                                                    }
-                                                </div>
-                                            )
-                                        }
-
-                                        <IconButton
-                                            onClick={() => {
-                                            }}
-                                            size="small"
-                                            className="mr-2"
-                                            edge="start"
-                                            color="inherit"
-                                            aria-label="open drawer"
-                                        >
-                                            <CropFreeIcon style={{ color: "black" }} />
-                                        </IconButton>
-
-                                    </div>
-                                </ClickAwayListener>
-                            </Grid>
+                                )}
+                            />
                         </Grid>
-
-                    </div>
+                        <Grid item xs={12} sm={12} md={8} className="d-flex align-items-center gap-1">
+                            <ClickAwayListener onClickAway={() => {
+                                setOpen(false);
+                            }}>
+                                <div className={`${classes.search} position-relative d-flex`}>
+                                    <div className={classes.searchIcon}>
+                                        <SearchIcon />
+                                    </div>
+                                    <InputBase
+                                        value={search}
+                                        placeholder="Search..."
+                                        onChange={(e) => {
+                                            setSearch(e.target.value)
+                                        }}
+                                        classes={{
+                                            root: classes.inputRoot,
+                                            input: classes.inputInput,
+                                        }}
+                                        inputProps={{ 'aria-label': 'search' }}
+                                    />
+                                    <IconButton
+                                        onClick={() => {
+                                        }}
+                                        size="small"
+                                        className="mr-2"
+                                        edge="start"
+                                        color="inherit"
+                                        aria-label="open drawer"
+                                    >
+                                        <CropFreeIcon style={{ color: "black" }} />
+                                    </IconButton>
+                                </div>
+                            </ClickAwayListener>
+                        </Grid>
+                    </Grid>
+                </div>
+                <Box p={1}>
                     <InfiniteScroll
-                        // className='pb-3'
                         dataLength={products.length}
                         next={fetchMoreData}
                         hasMore={hasMore}
@@ -353,8 +291,7 @@ const Pos = () => {
                         }
 
                     </InfiniteScroll>
-
-                </div>
+                </Box>
             </CustomContainer>
         </Fragment>
     );
