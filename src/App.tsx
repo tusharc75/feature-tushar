@@ -122,6 +122,7 @@ import DashboardsList from './pages/DashboardBuilder';
 import WellMasterDetailsPage from './pages/WellMaster/WellMasterDetailsPage';
 import BulkAssetCreation from './pages/BulkAssetCreation';
 import BulkAssetCreationDetailsPage from './pages/BulkAssetCreation/BulkAssetCreationDetailsPage';
+import Pos from './pages/Pos';
 
 var notificationInterval: any = null;
 
@@ -665,13 +666,15 @@ function App() {
             <PrivateRoute exact path={`${routes.bulkAssetCreationDetail.path}/:id`}>
               <BulkAssetCreationDetailsPage />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.pos.path}`}>
+              <Pos />
+            </PrivateRoute>
             <PrivateRoute exact path={"/dashboard-builder/:id"}>
               <DashboardBuilder />
             </PrivateRoute>
             <PrivateRoute exact path={"/dashboard-builder"}>
               <DashboardsList />
             </PrivateRoute>
-
             <Route exact path={'/customer-sign/:id'}>
               <CustomerSign />
             </Route>

@@ -186,7 +186,8 @@ export const sidebarResource = {
   zone: 'Zone',
   projectSales: 'Project Sales',
   wellMaster: 'Well Master',
-  bulkAssetCreation: 'Bulk Asset Creation'
+  bulkAssetCreation: 'Bulk Asset Creation',
+  pos: 'Pos'
 };
 
 export const resourceNames = {
@@ -245,7 +246,8 @@ export const resourceNames = {
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
   wellMaster: 'Well Master',
-  bulkAssetCreation: 'Bulk Asset Creation'
+  bulkAssetCreation: 'Bulk Asset Creation',
+  pos: 'Pos'
 };
 
 export const primaryFields = {
@@ -309,10 +311,11 @@ export const RESOURCE_LABEL = {
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventories',
+  transferInventory: 'Transfer Inventory',
   zone: "Zone",
   wellMaster: "Well Master",
-  bulkAssetCreation: "Bulk Asset Creation"
+  bulkAssetCreation: "Bulk Asset Creation",
+  pos: "POS"
 };
 
 export const CHILD_RESOURCE = {
