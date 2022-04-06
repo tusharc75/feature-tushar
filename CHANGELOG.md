@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.89.0](https://github.com/vebholic/oms_frontend/compare/v2.88.3...v2.89.0) (2022-04-06)
+
+
+### Features
+
+* delete button in plant of account detail page ([8e2299e](https://github.com/vebholic/oms_frontend/commit/8e2299e160de09020509d8e34f26bf80eb1bdcb3))
+* quote Pdf template tables form add PO-1424 ([74f33aa](https://github.com/vebholic/oms_frontend/commit/74f33aa8ad5be371640b56a9b39b769e7e8dd460))
+
+
+### Bug Fixes
+
+* bug fix ([7d916b9](https://github.com/vebholic/oms_frontend/commit/7d916b9eee0f921e2e7a38ea5feab8379c01ec41))
+* bug fix ([61958c2](https://github.com/vebholic/oms_frontend/commit/61958c25863f8bfb6533afc5305f078dd8b74c6f))
+* bug fix ([769cef0](https://github.com/vebholic/oms_frontend/commit/769cef07a9c2a862f266a60b37192b6b8b5c907e))
+* **inventory:** fix ([df32119](https://github.com/vebholic/oms_frontend/commit/df321190ae115a2cb20dc75d9527398ee54cb0a0))
+* plant in customer account details tab ([95f2e26](https://github.com/vebholic/oms_frontend/commit/95f2e26669d20bd0df06bbd6fec8d32bbfc96ddf))
+* **product inventory:** changes and fix ([d9b0e3c](https://github.com/vebholic/oms_frontend/commit/d9b0e3cab622e2c1000734581a7d314adbe21f7b))
+* show only select in grids ([899f75a](https://github.com/vebholic/oms_frontend/commit/899f75a40e006f8f72d32d24c4b74fbdb1a4b704))
+* **transfer inventory:** fix and changes ([00a3348](https://github.com/vebholic/oms_frontend/commit/00a3348fae62c8f34ae593b46a10fea364b5dc88))
+
 ### [2.88.3](https://github.com/vebholic/oms_frontend/compare/v2.88.2...v2.88.3) (2022-04-05)
 
 
