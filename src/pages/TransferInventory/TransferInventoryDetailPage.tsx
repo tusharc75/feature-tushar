@@ -51,8 +51,6 @@ const TransferInventoryDetailPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [locationKeys, setLocationKeys] = useState([]);
   const [nextStep, setNextStep] = useState(false);
-  const [existingProducts, setExistingProducts] = useState([])
-
   const [statusOptions, setStatusOptions] = useState([]);
 
   useEffect(() => {
@@ -79,7 +77,6 @@ const TransferInventoryDetailPage = () => {
     if (id) {
       fetchTransferInventoryData();
     }
-    // eslint-disable-next-line
   }, [id]);
 
   const getRessourceFields = () => {
@@ -158,6 +155,11 @@ const TransferInventoryDetailPage = () => {
   const updateTransferInventoryStatus = (status: string) => {
     axiosInstance().put(`${routes.transferInventory.path}/${id}/status`, { status })
       .then(() => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status updated ${status} Successfully`
+        });
         if (status === TRANSFER_INVENTORY_STATUS.delivered) {
           deliveredTransfer()
           updateProcessStatus(2)
@@ -298,8 +300,6 @@ const TransferInventoryDetailPage = () => {
                         transferInventoryData={transferInventoryData}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-1`}
-                        fetchData={fetchTransferInventoryData}
-                        setExistingProducts={setExistingProducts}
                       />
                     )}
                     {currentStep === 1 && (
@@ -339,7 +339,7 @@ const TransferInventoryDetailPage = () => {
               )}
               <div style={{ display: showActivity ? 'block' : 'none' }}>
                 <Grid container>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} >
                     {transferInventoryData && (
                       <div>
                         <Activity

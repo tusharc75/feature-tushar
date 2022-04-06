@@ -17,7 +17,7 @@ import AddInventory from './AddInventory';
 import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
 
-const Products = ({ transferInventoryData, setNextStep, setExistingProducts, renderedFrom, fetchData }) => {
+const Products = ({ transferInventoryData, setNextStep, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -34,7 +34,6 @@ const Products = ({ transferInventoryData, setNextStep, setExistingProducts, ren
   const [state, dispatch] = useReducer(gridReducer, gridState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const [isAdding, setIsAdding] = useState(false);
-  const [isCompleting, setCompleting] = useState(false);
   const columns = [
     { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer', primaryField: true },
     {
@@ -57,10 +56,8 @@ const Products = ({ transferInventoryData, setNextStep, setExistingProducts, ren
   useEffect(() => {
     if (!transferInventoryData) return;
     let timeout = setTimeout(fetchProducts, 200);
-
     return () => clearTimeout(timeout);
   }, [transferInventoryData]);
-
 
   const fetchProducts = () => {
     setNextStep(false);
@@ -72,7 +69,6 @@ const Products = ({ transferInventoryData, setNextStep, setExistingProducts, ren
       .get(`${routes.transferInventory.path}/${transferInventoryData._id}/product`)
       .then(({ data: { data } }) => {
         dispatch({ type: 'loading', loading: true });
-        setExistingProducts(data);
         let rows = data?.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['productId'] = u.product;
@@ -145,7 +141,7 @@ const Products = ({ transferInventoryData, setNextStep, setExistingProducts, ren
   );
 
   const ActionRenderer = (params) =>
-    permissions?.transferInventory.isUpdate ? (
+    permissions?.transferInventory.isUpdate && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inTransit]?.includes(transferInventoryData?.status) ? (
       <>
         <GridDeleteIcon
           hasDeletePermission={permissions?.transferInventory.isUpdate}
@@ -194,54 +190,40 @@ const Products = ({ transferInventoryData, setNextStep, setExistingProducts, ren
 
   return (
     <React.Fragment>
-      <Box display="flex" justifyContent="space-between" mx="4px">
-        {permissions?.transferInventory.isUpdate && (
-          <Button
-            variant={isMobile ? 'text' : 'contained'}
-            color="primary"
-            size="small"
-            style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-            onClick={() => {
-              setAddInventoryDialog(true);
-            }}
-            disabled={isCompleting}
-          >
-            {isMobile && !isTablet ? <MdAdd size={22} /> : `Add Product`}
-          </Button>
-        )}
-        <Box display="flex">
+      {[TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inTransit]?.includes(transferInventoryData?.status) &&
+        <Box display="flex" justifyContent="space-between" mx="4px">
           {permissions?.transferInventory.isUpdate && (
             <Button
               variant={isMobile ? 'text' : 'contained'}
-              size="small"
               color="primary"
-              style={isMobile && !isTablet ? { color: 'var(--danger-light)' } : {}}
-              disabled={selectedRecords.length === 0 || isCompleting}
+              size="small"
+              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
               onClick={() => {
-                setShowConfirmBox(true);
-                setRemoveData(selectedRecords.map((inv: any) => inv?._id));
+                setAddInventoryDialog(true);
               }}
             >
-              {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : 'Remove Product'}
+              {isMobile && !isTablet ? <MdAdd size={22} /> : `Add Product`}
             </Button>
           )}
-
-          {/* {permissions?.transferInventory.isUpdate && (
-            <Button
-              className="ml-2"
-              variant={isMobile ? 'text' : 'contained'}
-              size="small"
-              color="primary"
-              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-              disabled={dataRows.length === 0 || isCompleting}
-              onClick={completeTransfer}
-              startIcon={isCompleting && <CircularProgress color="inherit" size={18} />}
-            >
-              {isMobile && !isTablet ? <MdDone size={22} /> : 'Complete Transfer'}
-            </Button>
-          )} */}
+          <Box display="flex">
+            {permissions?.transferInventory.isUpdate && (
+              <Button
+                variant={isMobile ? 'text' : 'contained'}
+                size="small"
+                color="primary"
+                style={isMobile && !isTablet ? { color: 'var(--danger-light)' } : {}}
+                disabled={selectedRecords.length === 0}
+                onClick={() => {
+                  setShowConfirmBox(true);
+                  setRemoveData(selectedRecords.map((inv: any) => inv?._id));
+                }}
+              >
+                {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : 'Remove Product'}
+              </Button>
+            )}
+          </Box>
         </Box>
-      </Box>
+      }
       <Box mt={1}>
         {isMobile && !isTablet ? (
           <CustomSwipableList
