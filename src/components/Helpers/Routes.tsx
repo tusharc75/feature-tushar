@@ -360,6 +360,10 @@ const routes = {
     title: (storedRoutes && storedRoutes.bulkAssetCreation && storedRoutes.bulkAssetCreation.title) ? storedRoutes.bulkAssetCreation?.title : RESOURCE_LABEL.bulkAssetCreation,
     path: "/bulk-asset-creation/detail",
   },
+  pos: {
+    title: (storedRoutes && storedRoutes.pos && storedRoutes.pos.title) ? storedRoutes.pos?.title : RESOURCE_LABEL.pos,
+    path: "/pos",
+  },
 };
 
 export default routes;
