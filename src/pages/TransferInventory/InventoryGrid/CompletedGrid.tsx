@@ -9,10 +9,10 @@ import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from '
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { useData } from 'src/StateProvider/Provider';
-import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 
 const CompletedGrid = (props) => {
-  const { transferData, setTransferIsEnded, renderedFrom } = props;
+  const { transferData, setTransferIsEnded, currentStep, renderedFrom, updateTransferStatus } = props;
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions }
@@ -40,6 +40,22 @@ const CompletedGrid = (props) => {
     fetchInventories();
   }, [transferData]);
 
+  useEffect(() => {
+    if (!transferData) return;
+
+    if(currentStep === 1 && transferData?.status !== TRANSFER_INVENTORY_STATUS.inTransit) {
+      updateTransferStatus(TRANSFER_INVENTORY_STATUS.inTransit);
+    }
+
+    if (currentStep > 1) {
+      setTransferIsEnded(true);
+
+      if (transferData?.status !== TRANSFER_INVENTORY_STATUS.delivered) {
+        updateTransferStatus(TRANSFER_INVENTORY_STATUS.delivered);
+      }
+    }
+  }, [currentStep, transferData]);
+
   const fetchInventories = () => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
@@ -54,9 +70,6 @@ const CompletedGrid = (props) => {
           finalObject['productId'] = u._id;
           finalObject['productName'] = u.productDetail.productName;
           finalObject['qty'] = u.qty;
-
-          setTransferIsEnded(true);
-
           return {
             ...finalObject
           };
