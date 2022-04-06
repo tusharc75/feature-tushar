@@ -91,13 +91,14 @@ export default function NewCreateQuotePdfTemplate() {
 
   const typeOptions = [
     RESOURCE_LABEL.quoteBuilder,
-    'Rental Job',
+    RESOURCE_LABEL.rentalManagement,
     RESOURCE_LABEL.repairJob,
     RESOURCE_LABEL.purchaseOrder,
     RESOURCE_LABEL.deliveryTicket,
     RESOURCE_LABEL.transferAsset,
     RESOURCE_LABEL.sublease,
-    RESOURCE_LABEL.bulkAssetCreation
+    RESOURCE_LABEL.bulkAssetCreation,
+    RESOURCE_LABEL.transferInventory
   ].filter((d) => d);
 
   const [variables, setVariables] = useState([]);
@@ -566,8 +567,8 @@ export default function NewCreateQuotePdfTemplate() {
                               setFieldValue('entity', val && val?.map((d) => d._id));
                               val && val.length !== 0
                                 ? setOwnerCollaboratorData(
-                                    ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                                  )
+                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                                )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                             }}
                             renderInput={(params) => (
@@ -602,10 +603,10 @@ export default function NewCreateQuotePdfTemplate() {
                             onOpen={() =>
                               values['entity'] && values['entity'].length !== 0
                                 ? setOwnerCollaboratorData(
-                                    ownerCollaboratorDataConst.filter((data) =>
-                                      values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                    )
+                                  ownerCollaboratorDataConst.filter((data) =>
+                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
                                   )
+                                )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                             }
                             renderInput={(params) => (
@@ -642,10 +643,10 @@ export default function NewCreateQuotePdfTemplate() {
                             onOpen={() =>
                               values['entity'] && values['entity'].length !== 0
                                 ? setOwnerCollaboratorData(
-                                    ownerCollaboratorDataConst.filter((data) =>
-                                      values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                    )
+                                  ownerCollaboratorDataConst.filter((data) =>
+                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
                                   )
+                                )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                             }
                             renderInput={(params) => (
