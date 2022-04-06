@@ -25,14 +25,14 @@ interface Props {
 }
 
 const AddInventory = (props: Props) => {
+  
   const { plantId, close, isAdding, submit, renderedFrom, existingProducts } = props;
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
-  const {
-    state: { permissions }
-  }: any = useData();
+
+  const { state: { permissions } }: any = useData();
 
   useEffect(() => {
     fetchProductInventory();
@@ -76,7 +76,6 @@ const AddInventory = (props: Props) => {
           finalObject['productId'] = u._id;
           finalObject['qty'] = 0;
           finalObject['inventory'] = u?.inventory && !isNaN(Number(u.inventory)) ? Number(u.inventory) : 0;
-
           return {
             ...finalObject
           };
@@ -137,10 +136,8 @@ const AddInventory = (props: Props) => {
         return 'plant';
       case 'createdBy':
         return 'createdBy.user.concatedName';
-
       case 'updatedBy':
         return 'updatedBy.user.concatedName';
-
       default:
         return field;
     }
@@ -158,7 +155,6 @@ const AddInventory = (props: Props) => {
       if (data?._id === d?._id) {
         return data;
       }
-
       return d;
     });
     dispatch({ type: 'selection', selectedRecords: newRecords });
@@ -203,18 +199,20 @@ const AddInventory = (props: Props) => {
               value={search}
             />
             <Box mx={1} />
-            <Button
-              startIcon={isAdding && <CircularProgress size={18} color="inherit" />}
-              disabled={disableSave}
-              onClick={handleClickSave}
-              variant="contained"
-              color="primary"
-            >
-              Add
-            </Button>
+            <Box>
+              <Button
+                startIcon={isAdding && <CircularProgress size={18} color="inherit" />}
+                disabled={disableSave}
+                onClick={handleClickSave}
+                variant="contained"
+                color="primary"
+                size="small"
+              >
+                Add
+              </Button>
+            </Box>
           </Box>
         </Box>
-
         {columns.length > 0 && (
           <CustomAgGridEditable
             allowSelection={true}
