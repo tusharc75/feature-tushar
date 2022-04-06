@@ -17,8 +17,8 @@ import AddInventory from './AddInventory';
 import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
 
-const InventoryGrid = (props) => {
-  const { transferData, updateTransferStatus, setNextStep, currentStep, setTransferIsEnded, setExistingProducts, renderedFrom, fetchData } = props;
+const Products = ({ transferInventoryData, setNextStep, setExistingProducts, renderedFrom, fetchData }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -55,29 +55,21 @@ const InventoryGrid = (props) => {
   };
 
   useEffect(() => {
-    if (!transferData) return;
+    if (!transferInventoryData) return;
     let timeout = setTimeout(fetchProducts, 200);
 
     return () => clearTimeout(timeout);
-  }, [transferData]);
+  }, [transferInventoryData]);
 
-  useEffect(() => {
-    if (currentStep === 0) {
-      if (dataRows.length > 0) {
-        setNextStep(true);
-      } else {
-        setNextStep(false);
-      }
-    }
-  }, [dataRows, currentStep]);
 
   const fetchProducts = () => {
+    setNextStep(false);
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${routes.transferInventory.path}/${transferData._id}/product`)
+      .get(`${routes.transferInventory.path}/${transferInventoryData._id}/product`)
       .then(({ data: { data } }) => {
         dispatch({ type: 'loading', loading: true });
         setExistingProducts(data);
@@ -87,20 +79,13 @@ const InventoryGrid = (props) => {
           finalObject['productName'] = u.productDetail.productName;
           finalObject['qty'] = u.qty;
           finalObject['inventory'] = u.inventoryDetail?.inventory || 0;
-
           return {
             ...finalObject
           };
         });
-
-        if (currentStep === 0) {
-          if (data.length === 0 && transferData?.status !== 'New') {
-            updateTransferStatus(TRANSFER_INVENTORY_STATUS.new);
-          } else if (data.length > 0 && transferData?.status !== TRANSFER_INVENTORY_STATUS.inProgress) {
-            updateTransferStatus(TRANSFER_INVENTORY_STATUS.inProgress);
-          }
+        if (rows?.length) {
+          setNextStep(true);
         }
-
         dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -113,9 +98,8 @@ const InventoryGrid = (props) => {
 
   const handleSave = (products: any) => {
     setIsAdding(true);
-
     axiosInstance()
-      .post(`${routes.transferInventory.path}/${transferData?._id}/product`, {
+      .post(`${routes.transferInventory.path}/${transferInventoryData?._id}/product`, {
         products
       })
       .then(() => {
@@ -138,7 +122,7 @@ const InventoryGrid = (props) => {
     if (removeData.length > 0) {
       setRemovingInventory(true);
       try {
-        await axiosInstance().put(`${routes.transferInventory.path}/${transferData?._id}/product/remove`, {
+        await axiosInstance().put(`${routes.transferInventory.path}/${transferInventoryData?._id}/product/remove`, {
           ids: removeData
         });
         setRemoveData([]);
@@ -165,7 +149,7 @@ const InventoryGrid = (props) => {
       <>
         <GridDeleteIcon
           hasDeletePermission={permissions?.transferInventory.isUpdate}
-          ownerId={transferData?.createdBy.user._id}
+          ownerId={transferInventoryData?.createdBy.user._id}
           userId={user?.user?._id}
           onDelete={() => {
             setShowConfirmBox(true);
@@ -182,26 +166,6 @@ const InventoryGrid = (props) => {
     actionsRenderer: ActionRenderer
   };
 
-  const completeTransfer = () => {
-    setCompleting(true);
-    axiosInstance()
-      .patch(`${routes.transferInventory.path}/${transferData?._id}/complete`)
-      .then(() => {
-        toastConfig.setToastConfig({
-          open: true,
-          message: 'Transfer completed',
-          type: 'success'
-        });
-        setTransferIsEnded(true);
-        setCompleting(false);
-        fetchData();
-      })
-      .catch((err) => {
-        setCompleting(false);
-        toastConfig.setToastConfig(err);
-      });
-  };
-
   const onCellValueChanged = ({ data }) => {
     if (Number(data.qty) > Number(data.inventory)) {
       toastConfig.setToastConfig({
@@ -209,16 +173,14 @@ const InventoryGrid = (props) => {
         message: "Qty can't be greater then inventory",
         open: true
       });
-
       return;
     }
-
     updateQTY(data?._id, data.qty);
   };
 
   const updateQTY = (id: string, qty: string) => {
     axiosInstance()
-      .put(`${routes.transferInventory.path}/${transferData._id}/product`, {
+      .put(`${routes.transferInventory.path}/${transferInventoryData._id}/product`, {
         ids: [id],
         qty: Number(qty)
       })
@@ -280,7 +242,6 @@ const InventoryGrid = (props) => {
           )} */}
         </Box>
       </Box>
-
       <Box mt={1}>
         {isMobile && !isTablet ? (
           <CustomSwipableList
@@ -298,7 +259,7 @@ const InventoryGrid = (props) => {
               // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
             }}
             extraParamsToCheckDelete={true}
-            onDelete={(data) => {}}
+            onDelete={(data) => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -312,7 +273,7 @@ const InventoryGrid = (props) => {
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
             onCreate={false}
             showClone={false}
-            onClone={(data) => {}}
+            onClone={(data) => { }}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -333,17 +294,17 @@ const InventoryGrid = (props) => {
             loading={loading}
             onCellValueChanged={onCellValueChanged}
             renderedFrom={renderedFrom}
-            refreshGrid={() => {}}
+            refreshGrid={() => { }}
           />
         )}
       </Box>
-      {openAddNewInventory && transferData?.transferFromPlant?.optionValue && (
+      {openAddNewInventory && transferInventoryData?.transferFromPlant?.optionValue && (
         <AddInventory
           existingProducts={dataRows}
           isAdding={isAdding}
           submit={handleSave}
           close={closeDialog}
-          plantId={transferData?.transferFromPlant.optionValue}
+          plantId={transferInventoryData?.transferFromPlant.optionValue}
           renderedFrom={`${renderedFrom}_sub-1`}
         />
       )}
@@ -362,4 +323,4 @@ const InventoryGrid = (props) => {
   );
 };
 
-export default InventoryGrid;
+export default Products;
