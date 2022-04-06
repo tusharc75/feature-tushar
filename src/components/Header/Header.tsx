@@ -687,13 +687,6 @@ const Header = ({ toggleDrawer }) => {
                 axiosInstance()
                   .put('/user/user-notification/clear-all', { toggle: true })
                   .then(({ data }) => {
-                    let updatedNotificationList = [];
-                    chatNotificationList.map((notification) => {
-                      notification.read = true;
-                      updatedNotificationList.push(notification);
-                    });
-
-                    setChatNotificationList(updatedNotificationList);
                     toastConfig.setToastConfig({
                       open: true,
                       message: data.message,
