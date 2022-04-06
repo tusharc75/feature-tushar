@@ -213,7 +213,7 @@ const Header = ({ toggleDrawer }) => {
   const saveEntity = () => {
     axiosInstance()
       .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -480,8 +480,8 @@ const Header = ({ toggleDrawer }) => {
     id === selectedEntity
       ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
       : hasAccessToEntity(id)
-        ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-        : '';
+      ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+      : '';
 
   function handleListKeyDown(event) {
     if (event.key === 'Tab') {
@@ -604,7 +604,7 @@ const Header = ({ toggleDrawer }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => { })
+                      .then(() => {})
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -648,37 +648,64 @@ const Header = ({ toggleDrawer }) => {
   const ChatNotificationContent = ({ data }) => {
     return (
       <div className={`${data.length === 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: 'relative' }}>
-        <div className={`${classes.markAll} d-flex align-items-center gap-1`} style={{ position: 'sticky', top: 0 }}>
-          <Typography
-            onClick={() => {
-              axiosInstance()
-                .put('/user/user-notification/all-read', { toggle: true })
-                .then(({ data }) => {
-                  let updatedNotificationList = [];
-                  chatNotificationList.map((notification) => {
-                    notification.read = true;
-                    updatedNotificationList.push(notification);
-                  });
+        <div className={`d-flex align-items-center gap-1`} style={{ position: 'sticky', top: 0 }}>
+          <div className={classes.markAll}>
+            <Typography
+              onClick={() => {
+                axiosInstance()
+                  .put('/user/user-notification/all-read', { toggle: true })
+                  .then(({ data }) => {
+                    let updatedNotificationList = [];
+                    chatNotificationList.map((notification) => {
+                      notification.read = true;
+                      updatedNotificationList.push(notification);
+                    });
 
-                  setChatNotificationList(updatedNotificationList);
-                  toastConfig.setToastConfig({
-                    open: true,
-                    message: data.message,
-                    type: 'success'
-                  });
+                    setChatNotificationList(updatedNotificationList);
+                    toastConfig.setToastConfig({
+                      open: true,
+                      message: data.message,
+                      type: 'success'
+                    });
 
-                  setFullScreenChatNotificationAnchorEl(null);
-                  setMobileScreenChatNotificationAnchorEl(null);
-                })
-                .catch((error) => {
-                  toastConfig.setToastConfig(error);
-                });
-            }}
-            className="cursor-pointer"
-          >
-            <FiCheckCircle className="mr-2 pt-1" size={16} />
-            <span>Mark all as read</span>
-          </Typography>
+                    setFullScreenChatNotificationAnchorEl(null);
+                    setMobileScreenChatNotificationAnchorEl(null);
+                  })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+              }}
+              className="cursor-pointer"
+            >
+              <FiCheckCircle className="mr-2 pt-1" size={16} />
+              <span>Mark all as read</span>
+            </Typography>
+          </div>
+          <div className={classes.markAll}>
+            <Typography
+              onClick={() => {
+                axiosInstance()
+                  .put('/user/user-notification/clear-all', { toggle: true })
+                  .then(({ data }) => {
+                    toastConfig.setToastConfig({
+                      open: true,
+                      message: data.message,
+                      type: 'success'
+                    });
+
+                    setFullScreenChatNotificationAnchorEl(null);
+                    setMobileScreenChatNotificationAnchorEl(null);
+                  })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+              }}
+              className="cursor-pointer"
+            >
+              <AiOutlineClear className="mr-2 pt-1" size={16} />
+              <span>Clear All</span>
+            </Typography>
+          </div>
         </div>
 
         <div className={classes.notificationContent}>
@@ -697,7 +724,7 @@ const Header = ({ toggleDrawer }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => { })
+                      .then(() => {})
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -758,20 +785,20 @@ const Header = ({ toggleDrawer }) => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-          <MenuItem
-            title={curEntity.entityName}
-            key={curEntity._id}
-            selected={selectedEntity === curEntity._id}
-            onClick={() => {
-              handleSelectedEnity(curEntity._id);
-              closeEntitiesMenu();
-            }}
-          >
-            <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
-            <Box component="span" marginX={1} />
-            {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
-          </MenuItem>
-        ))
+            <MenuItem
+              title={curEntity.entityName}
+              key={curEntity._id}
+              selected={selectedEntity === curEntity._id}
+              onClick={() => {
+                handleSelectedEnity(curEntity._id);
+                closeEntitiesMenu();
+              }}
+            >
+              <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
+              <Box component="span" marginX={1} />
+              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+            </MenuItem>
+          ))
         : null}
     </Menu>
   );
@@ -802,7 +829,7 @@ const Header = ({ toggleDrawer }) => {
 
       {/* Remove below false to show chat notification icon */}
 
-      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => { }}>
+      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => {}}>
         <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary" aria-describedby={mobileScreenChatNotificationId}>
           <ChatIcon />
         </Badge>
@@ -833,7 +860,7 @@ const Header = ({ toggleDrawer }) => {
         </Popover>
       </MenuItem>
 
-      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => { }}>
+      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => {}}>
         <Badge badgeContent={notification ? notification.count : 0} color="secondary" aria-describedby={mobileScreenNotificationId}>
           <Notifications />
         </Badge>

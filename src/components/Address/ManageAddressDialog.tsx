@@ -142,8 +142,8 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
       }
     });
     if (!latLngChangedManually) {
-      fullAddress.latitude = results.geometry.location.lat().toLocaleString();
-      fullAddress.longitude = results.geometry.location.lng().toLocaleString();
+      fullAddress.latitude = results?.geometry?.location?.lat()?.toString();
+      fullAddress.longitude = results?.geometry?.location?.lng()?.toString();
     } else {
       fullAddress.latitude = addressDetail?.latitude;
       fullAddress.longitude = addressDetail?.longitude;
