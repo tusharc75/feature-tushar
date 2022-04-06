@@ -14,10 +14,11 @@ import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { MdAdd, MdDone } from 'react-icons/md';
 import { useData } from 'src/StateProvider/Provider';
 import AddInventory from './AddInventory';
-import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
+import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
 
 const InventoryGrid = (props) => {
-  const { transferData, updateTransferStatus, setTransferIsEnded, renderedFrom, fetchData } = props;
+  const { transferData, updateTransferStatus, setNextStep, currentStep, setTransferIsEnded, setExistingProducts, renderedFrom, fetchData } = props;
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -43,7 +44,7 @@ const InventoryGrid = (props) => {
       disabled: false,
       cellRenderer: 'commonRenderer',
       cellEditor: 'numericCellEditor',
-      editable: true
+      editable: permissions?.transferInventory.isUpdate
     }
   ];
 
@@ -55,10 +56,22 @@ const InventoryGrid = (props) => {
 
   useEffect(() => {
     if (!transferData) return;
-    fetchInventories();
+    let timeout = setTimeout(fetchProducts, 200);
+
+    return () => clearTimeout(timeout);
   }, [transferData]);
 
-  const fetchInventories = () => {
+  useEffect(() => {
+    if (currentStep === 0) {
+      if (dataRows.length > 0) {
+        setNextStep(true);
+      } else {
+        setNextStep(false);
+      }
+    }
+  }, [dataRows, currentStep]);
+
+  const fetchProducts = () => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
@@ -67,21 +80,25 @@ const InventoryGrid = (props) => {
       .get(`${routes.transferInventory.path}/${transferData._id}/product`)
       .then(({ data: { data } }) => {
         dispatch({ type: 'loading', loading: true });
+        setExistingProducts(data);
         let rows = data?.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['productId'] = u.product;
           finalObject['productName'] = u.productDetail.productName;
           finalObject['qty'] = u.qty;
+          finalObject['inventory'] = u.inventoryDetail?.inventory || 0;
 
           return {
             ...finalObject
           };
         });
 
-        if (data && data.length === 0 && transferData?.status !== 'New') {
-          updateTransferStatus('New');
-        } else if (data.length > 0 && !['In Progress', 'Completed'].includes(transferData?.status)) {
-          updateTransferStatus('In Progress');
+        if (currentStep === 0) {
+          if (data.length === 0 && transferData?.status !== 'New') {
+            updateTransferStatus(TRANSFER_INVENTORY_STATUS.new);
+          } else if (data.length > 0 && transferData?.status !== TRANSFER_INVENTORY_STATUS.inProgress) {
+            updateTransferStatus(TRANSFER_INVENTORY_STATUS.inProgress);
+          }
         }
 
         dispatch({ type: 'initialize', data: rows, count: data.count });
@@ -102,7 +119,7 @@ const InventoryGrid = (props) => {
         products
       })
       .then(() => {
-        fetchInventories();
+        fetchProducts();
         toastConfig.setToastConfig({
           open: true,
           message: 'Records added successfully',
@@ -127,7 +144,7 @@ const InventoryGrid = (props) => {
         setRemoveData([]);
         setShowConfirmBox(false);
         setRemovingInventory(false);
-        fetchInventories();
+        fetchProducts();
       } catch (error) {
         setShowConfirmBox(false);
         setRemovingInventory(false);
@@ -177,10 +194,38 @@ const InventoryGrid = (props) => {
         });
         setTransferIsEnded(true);
         setCompleting(false);
-        fetchData()
+        fetchData();
       })
       .catch((err) => {
         setCompleting(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const onCellValueChanged = ({ data }) => {
+    if (Number(data.qty) > Number(data.inventory)) {
+      toastConfig.setToastConfig({
+        type: 'warning',
+        message: "Qty can't be greater then inventory",
+        open: true
+      });
+
+      return;
+    }
+
+    updateQTY(data?._id, data.qty);
+  };
+
+  const updateQTY = (id: string, qty: string) => {
+    axiosInstance()
+      .put(`${routes.transferInventory.path}/${transferData._id}/product`, {
+        ids: [id],
+        qty: Number(qty)
+      })
+      .then(() => {
+        fetchProducts();
+      })
+      .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
@@ -219,7 +264,7 @@ const InventoryGrid = (props) => {
             </Button>
           )}
 
-          {permissions?.transferInventory.isUpdate && (
+          {/* {permissions?.transferInventory.isUpdate && (
             <Button
               className="ml-2"
               variant={isMobile ? 'text' : 'contained'}
@@ -232,7 +277,7 @@ const InventoryGrid = (props) => {
             >
               {isMobile && !isTablet ? <MdDone size={22} /> : 'Complete Transfer'}
             </Button>
-          )}
+          )} */}
         </Box>
       </Box>
 
@@ -271,7 +316,7 @@ const InventoryGrid = (props) => {
             renderedFrom={renderedFrom}
           />
         ) : (
-          <CustomAgGrid
+          <CustomAgGridEditable
             columns={columns}
             dataRows={dataRows}
             frameworkComponents={frameworkComponents}
@@ -286,13 +331,13 @@ const InventoryGrid = (props) => {
             allowSelection={permissions?.transferInventory.isUpdate}
             isClientSideGrid={true}
             loading={loading}
-            // onCellValueChanged={onCellValueChanged}
+            onCellValueChanged={onCellValueChanged}
             renderedFrom={renderedFrom}
             refreshGrid={() => {}}
           />
         )}
       </Box>
-      {openAddNewInventory && (
+      {openAddNewInventory && transferData?.transferFromPlant?.optionValue && (
         <AddInventory
           existingProducts={dataRows}
           isAdding={isAdding}

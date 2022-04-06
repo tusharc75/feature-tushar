@@ -31,17 +31,18 @@ interface Props {
   onClose?: any;
   onSuccess?: any;
   number?: string;
-  isMainInfoEditable?: boolean;
   refrenceType?: string;
   refrenceId?: string;
   refrenceData?: any;
+  transferFromDisable?: boolean;
+  transferToDisable?: boolean;
 }
 
 const ManageTransferInventory: FC<Props> = (props) => {
   const {
-    state: { selectedEntity, permissions }
+    state: { selectedEntity, permissions, user }
   }: any = useData();
-  const { isClone = false, transferInventoryId = null, onClose, onSuccess, number = '', isMainInfoEditable = false } = props;
+  const { isClone = false, transferInventoryId = null, onClose, onSuccess, number = '', transferFromDisable, transferToDisable } = props;
 
   const toastConfig = useContext(CustomToastContext);
   const initialRender = useRef(true);
@@ -53,11 +54,47 @@ const ManageTransferInventory: FC<Props> = (props) => {
 
   const [plantsFromOptions, setPlantsFromOptions] = useState([]);
   const [plantToOptions, setPlantToOptions] = useState([]);
+  const [customerPlants, setCustomerPlants] = useState([]);
   const [cloneHeading, setCloneHeading] = useState('');
   const [plantToOpen, setPlantToOpen] = useState(false);
   const [plantFromOpen, setPlantFromOpen] = useState(false);
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [isCustomer, setCustomer] = useState(false);
+
+  useEffect(() => {
+    if (!user || !user?.user || !user?.user?.customerAccountId || !user?.user?.customerContactId) return;
+
+    setCustomer(true);
+    const fetchPlants = () => {
+      axiosInstance()
+        .get(`${routes.warehouse.path}/customer-account`)
+        .then(({ data: { data } }) => {
+          data = data?.map((d: any, index) => ({
+            ...d,
+            optionValue: d?.warehouse,
+            optionLabel: d?.warehouseDetail?.warehouseName,
+            address: d?.warehouseDetail?.address?.optionValue,
+            entity: d?.entity,
+            order: index,
+            default: false
+          }));
+
+          setCustomerPlants(data);
+
+          // optionValue:"62160f3fa274fa4c4e6888c0"
+          // optionLabel:"Longview Yard"
+          // address:"62160e565379934ad093758a"
+          // entity:["6215f92cbf69343f7d4feecd"]
+          // order:0
+          // default:true
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    };
+
+    fetchPlants();
+  }, [user]);
 
   useEffect(() => {
     axiosInstance()
@@ -210,11 +247,26 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                 {['transfertoPlant', 'transferFromPlant'].includes(field.fieldName) ? (
                                   <Grid key={index2} item xs={12} sm={6}>
                                     <Grid container spacing={1} alignItems="center">
-                                      <Grid item xs={plantFields.includes(field.fieldName) && permissions?.warehouse.isCreate ? 11 : 12}>
+                                      <Grid
+                                        item
+                                        xs={
+                                          (plantFields.includes(field.fieldName) &&
+                                            permissions?.warehouse.isCreate &&
+                                            field.fieldName === 'transferFromPlant' &&
+                                            !transferFromDisable) ||
+                                          (field.fieldName === 'transfertoPlant' && !transferToDisable)
+                                            ? 11
+                                            : 12
+                                        }
+                                      >
                                         <FormTypes
                                           isNew={Boolean(transferInventoryId)}
                                           {...field}
-                                          disabled={(Boolean(transferInventoryId) && field.disableOnEdit) || isMainInfoEditable}
+                                          disabled={
+                                            (Boolean(transferInventoryId) && field.disableOnEdit) ||
+                                            (field.fieldName === 'transferFromPlant' && transferFromDisable) ||
+                                            (field.fieldName === 'transfertoPlant' && transferToDisable)
+                                          }
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -223,7 +275,9 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                           fieldData={field}
                                           type={field.type}
                                           options={
-                                            plantFields.includes(field.fieldName) && field.fieldName === 'transfertoPlant'
+                                            isCustomer
+                                              ? customerPlants
+                                              : plantFields.includes(field.fieldName) && field.fieldName === 'transfertoPlant'
                                               ? plantToOptions?.filter((o: any) => o?.entity.includes(selectedEntity))
                                               : field.fieldName === 'transferFromPlant'
                                               ? plantsFromOptions?.filter((o: any) => o?.entity.includes(selectedEntity))
@@ -249,26 +303,29 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                           size="small"
                                         />
                                       </Grid>
-                                      {plantFields.includes(field.fieldName) && permissions?.warehouse.isCreate && (
-                                        <Grid item xs={1}>
-                                          <HtmlTooltip title="Add new plant">
-                                            <IconButton
-                                              size="small"
-                                              onClick={() => {
-                                                if (field.fieldName === 'transfertoPlant') {
-                                                  setPlantToOpen(true);
-                                                }
+                                      {((field.fieldName === 'transferFromPlant' && !transferFromDisable) ||
+                                        (field.fieldName === 'transfertoPlant' && !transferToDisable)) &&
+                                        plantFields.includes(field.fieldName) &&
+                                        permissions?.warehouse.isCreate && (
+                                          <Grid item xs={1}>
+                                            <HtmlTooltip title="Add new plant">
+                                              <IconButton
+                                                size="small"
+                                                onClick={() => {
+                                                  if (field.fieldName === 'transfertoPlant') {
+                                                    setPlantToOpen(true);
+                                                  }
 
-                                                if (field.fieldName === 'transferFromPlant') {
-                                                  setPlantFromOpen(true);
-                                                }
-                                              }}
-                                            >
-                                              <AddIcon fontSize="small" color={'primary'} />
-                                            </IconButton>
-                                          </HtmlTooltip>
-                                        </Grid>
-                                      )}
+                                                  if (field.fieldName === 'transferFromPlant') {
+                                                    setPlantFromOpen(true);
+                                                  }
+                                                }}
+                                              >
+                                                <AddIcon fontSize="small" color={'primary'} />
+                                              </IconButton>
+                                            </HtmlTooltip>
+                                          </Grid>
+                                        )}
                                     </Grid>
                                   </Grid>
                                 ) : (
@@ -279,8 +336,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                       disabled={
                                         (Boolean(transferInventoryId) && field.disableOnEdit) ||
                                         field.fieldName === 'transferNumber' ||
-                                        field.fieldName === 'status' ||
-                                        isMainInfoEditable
+                                        field.fieldName === 'status'
                                       }
                                       values={values}
                                       errors={errors}
