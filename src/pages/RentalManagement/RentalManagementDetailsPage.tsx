@@ -163,6 +163,7 @@ const RentalManagementDetailsPage = () => {
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
       updateProcessStatus(rentalManagementSteps[currentStep]);
+      setNextStep(false)
     }
   }, [currentStep]);
 

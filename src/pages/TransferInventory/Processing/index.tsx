@@ -1,5 +1,4 @@
-import React, { useReducer, useState, useEffect, useContext } from 'react';
-import { Box } from '@material-ui/core';
+import React, { useReducer, useState, useEffect, useContext, Fragment } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -9,17 +8,17 @@ import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from '
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { useData } from 'src/StateProvider/Provider';
-import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
+import { Container, Paper, Typography, Box, Grid, Button, Step, StepLabel, Stepper } from '@material-ui/core';
 
-const CompletedGrid = (props) => {
-  const { transferData, setTransferIsEnded, renderedFrom } = props;
+const Processing = ({ transferInventoryData, setNextStep, statusOptions, currentStep, renderedFrom, updateTransferInventoryStatus }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions }
-  } = useData();
+  const { state: { permissions } } = useData();
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(gridReducer, gridState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+
   const columns = [
     { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer', primaryField: true },
     {
@@ -36,17 +35,17 @@ const CompletedGrid = (props) => {
   const history = useHistory();
 
   useEffect(() => {
-    if (!transferData) return;
     fetchInventories();
-  }, [transferData]);
+  }, [transferInventoryData]);
 
   const fetchInventories = () => {
+    setNextStep(false)
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${routes.transferInventory.path}/${transferData._id}/product`)
+      .get(`${routes.transferInventory.path}/${transferInventoryData._id}/product`)
       .then(({ data: { data } }) => {
         dispatch({ type: 'loading', loading: true });
         let rows = data?.map((u: any) => {
@@ -54,14 +53,10 @@ const CompletedGrid = (props) => {
           finalObject['productId'] = u._id;
           finalObject['productName'] = u.productDetail.productName;
           finalObject['qty'] = u.qty;
-
-          setTransferIsEnded(true);
-
           return {
             ...finalObject
           };
         });
-
         dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -84,7 +79,41 @@ const CompletedGrid = (props) => {
   };
 
   return (
-    <React.Fragment>
+    <Fragment>
+      {(currentStep === 1 && statusOptions?.length) &&
+        <Box mt={1}>
+          <Grid container spacing={2}>
+            <Grid item xs={8} sm={10} md={10}>
+              <Stepper activeStep={statusOptions?.findIndex(f => f.optionLabel === transferInventoryData?.status)} alternativeLabel>
+                {statusOptions?.map(({ optionLabel }) => (
+                  <Step key={optionLabel}>
+                    <StepLabel>{optionLabel}</StepLabel>
+                  </Step>
+                ))}
+              </Stepper>
+            </Grid>
+            <Grid item xs={4} sm={2} md={2}>
+              {transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered &&
+                <Button
+                  variant='contained'
+                  size="small"
+                  color="primary"
+                  onClick={() => {
+                    var index = 0;
+                    if (statusOptions?.findIndex(f => f.optionLabel === transferInventoryData?.status) >= 0) {
+                      index = statusOptions?.findIndex(f => f.optionLabel === transferInventoryData?.status) + 1;
+                    }
+                    updateTransferInventoryStatus(statusOptions[index]?.optionLabel)
+                  }}
+                >{statusOptions?.findIndex(f => f.optionLabel === transferInventoryData?.status) >= 0 ?
+                  statusOptions[statusOptions?.findIndex(f => f.optionLabel === transferInventoryData?.status) + 1]?.optionLabel :
+                  statusOptions[0]?.optionLabel}
+                </Button>
+              }
+            </Grid>
+          </Grid>
+        </Box>
+      }
       <Box mt={1}>
         {isMobile && !isTablet ? (
           <CustomSwipableList
@@ -98,9 +127,9 @@ const CompletedGrid = (props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => {}}
+            onEdit={() => { }}
             extraParamsToCheckDelete={true}
-            onDelete={() => {}}
+            onDelete={() => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -114,7 +143,7 @@ const CompletedGrid = (props) => {
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
             onCreate={false}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -134,12 +163,12 @@ const CompletedGrid = (props) => {
             isClientSideGrid={true}
             loading={loading}
             renderedFrom={renderedFrom}
-            refreshGrid={() => {}}
+            refreshGrid={() => { }}
           />
         )}
       </Box>
-    </React.Fragment>
+    </Fragment >
   );
 };
 
-export default CompletedGrid;
+export default Processing;

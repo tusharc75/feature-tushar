@@ -15,22 +15,20 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { transferInventory } from 'src/constants/helpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
-import TransferStepper from './TransferInventorySteps';
 import Steps from 'src/pages/RentalManagement/Steps';
-
 import { MdEdit } from 'react-icons/md';
-import { defaultActivityShow } from 'src/constants/helpers';
+import { defaultActivityShow, transferInventorySteps, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import TabPanel from 'src/components/TabPanel';
 import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import { TRANSFER_STEPS, STATUS } from './transferInventoryHelpers';
-import InventoryGrid from './InventoryGrid';
-import CompletedGrid from './InventoryGrid/CompletedGrid';
+import Products from './Products';
+import Processing from './Processing';
 import { camelCase } from 'lodash';
 
 const TransferInventoryDetailPage = () => {
+
   const renderedFrom = camelCase(routes?.transferInventory.title);
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -38,9 +36,7 @@ const TransferInventoryDetailPage = () => {
   const parsed = queryString.parse(history.location.search);
   const { openEdit, tab }: any = parsed;
   const parsedTab = tab !== undefined ? parseInt(tab) : 1;
-  const {
-    state: { permissions }
-  }: any = useData();
+  const { state: { permissions } }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
   const [tabValue, setTabValue] = useState(parsedTab);
   const [loading, setLoading] = useState(true);
@@ -52,9 +48,10 @@ const TransferInventoryDetailPage = () => {
   const [transferInventoryFields, setTransferInventoryFields] = useState([]);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
-  const [isTransferEnded, setTransferIsEnded] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [locationKeys, setLocationKeys] = useState([]);
+  const [nextStep, setNextStep] = useState(false);
+  const [statusOptions, setStatusOptions] = useState([]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -80,13 +77,18 @@ const TransferInventoryDetailPage = () => {
     if (id) {
       fetchTransferInventoryData();
     }
-    // eslint-disable-next-line
   }, [id]);
 
   const getRessourceFields = () => {
     axiosInstance()
       .get('/field?resource=Transfer Inventory')
       .then(({ data: { data } }) => {
+        data?.some((o) => {
+          if (o?.fieldData?.fieldName === 'status') {
+            setStatusOptions(o.fieldData.option?.filter((e) => ![TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inProgress].includes(e.optionValue)));
+            return true;
+          }
+        });
         setTransferInventoryFields(data);
         setLoading(false);
       })
@@ -104,10 +106,7 @@ const TransferInventoryDetailPage = () => {
         setTransferInventoryData(data);
         setHeadingLabel(data.transferNumber);
         setCustomizedRoutes([routes.transferInventory, { title: data.transferNumber }]);
-        if(data?.status === 'Completed') {
-          setCurrentStep(1)
-          setTransferIsEnded(true)
-        } 
+        setCurrentStep(transferInventorySteps.indexOf(data?.processStatus) !== -1 ? transferInventorySteps.indexOf(data?.processStatus) : 0);
         if (permissions?.transferInventory?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
@@ -141,13 +140,11 @@ const TransferInventoryDetailPage = () => {
       });
   };
 
-  /**
-   * Tab Change
-   */
   const handleMainTabChange = (_, newValue: number) => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
   };
+
   function a11yProps(index: any) {
     return {
       id: `main-tab-${index}`,
@@ -155,18 +152,44 @@ const TransferInventoryDetailPage = () => {
     };
   }
 
-  const updateTransferStatus = (status: string) => {
-    axiosInstance()
-      .put(`${routes.transferInventory.path}`, {
-        transferNumber: transferInventoryData.transferNumber,
-        transferFromPlant: transferInventoryData?.transferFromPlant.optionValue,
-        transfertoPlant: transferInventoryData?.transfertoPlant.optionValue,
-        status: status,
-        owner: transferInventoryData?.owner.optionValue,
-        collaborator: transferInventoryData.collaborator.length > 0 ? transferInventoryData.collaborator.map((d) => d.optionValue) : [],
-        _id: id
+  const updateTransferInventoryStatus = (status: string) => {
+    axiosInstance().put(`${routes.transferInventory.path}/${id}/status`, { status })
+      .then(() => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status updated ${status} Successfully`
+        });
+        if (status === TRANSFER_INVENTORY_STATUS.delivered) {
+          deliveredTransfer()
+          updateProcessStatus(2)
+        }
+        else {
+          fetchTransferInventoryData()
+        }
       })
-      .then(() => fetchTransferInventoryData())
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const deliveredTransfer = () => {
+    axiosInstance()
+      .patch(`${routes.transferInventory.path}/${id}/complete`)
+      .then(() => {
+        fetchTransferInventoryData()
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const updateProcessStatus = (step: number) => {
+    axiosInstance()
+      .put(`${routes.transferInventory.path}/${id}/process-status`, {
+        processStatus: transferInventorySteps[step]
+      })
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -196,19 +219,18 @@ const TransferInventoryDetailPage = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={headingLabel} mainPoints={{}} showHeading={true}>
-                  {permissions?.transferInventory?.isUpdate && !isTransferEnded && (
-                    <Button color='primary' className="buttonStyleBigScreen" variant="contained" size="small" onClick={handleOpenUpdateDialog}>
+                  {permissions?.transferInventory?.isUpdate && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
+                    <Button color="primary" className="buttonStyleBigScreen" variant="contained" size="small" onClick={handleOpenUpdateDialog}>
                       Edit
                     </Button>
                   )}
-                  {permissions?.transferInventory?.isUpdate && !isTransferEnded && (
+                  {permissions?.transferInventory?.isUpdate && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
                     <Button className="buttonStyleSmallScreen" variant="contained" size="small" onClick={handleOpenUpdateDialog}>
                       <MdEdit size={24} />
                     </Button>
                   )}
                 </DetailsPageHeader>
               )}
-
               <Tabs
                 className="quote-tab"
                 value={tabValue}
@@ -264,34 +286,40 @@ const TransferInventoryDetailPage = () => {
               <TabPanel value={tabValue} index={1}>
                 <Box my={2}>
                   <Steps
-                    steps={TRANSFER_STEPS}
+                    steps={transferInventorySteps}
                     currentStep={currentStep}
+                    setCurrentStep={setCurrentStep}
                     isNextStep={false}
-                    nextStep={false}
-                    buttonsNeeded={false}
-                    isStepEnded={transferInventoryData?.status.includes('Completed') || isTransferEnded}
+                    nextStep={nextStep}
+                    updateStatus={updateProcessStatus}
+                    isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
                   />
-                  {/* <TransferStepper
-                    currentStep={currentStep}
-                    steps={TRANSFER_STEPS}
-                    isTransferEnded={transferInventoryData?.status.includes('Completed') || isTransferEnded}
-                  /> */}
-
                   <Box my={1}>
                     {currentStep === 0 && (
-                      <InventoryGrid
-                        transferData={transferInventoryData}
-                        updateTransferStatus={updateTransferStatus}
-                        setTransferIsEnded={setTransferIsEnded}
+                      <Products
+                        transferInventoryData={transferInventoryData}
+                        setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-1`}
-                        fetchData={fetchTransferInventoryData}
                       />
                     )}
                     {currentStep === 1 && (
-                      <CompletedGrid
-                        transferData={transferInventoryData}
-                        setTransferIsEnded={setTransferIsEnded}
+                      <Processing
+                        transferInventoryData={transferInventoryData}
+                        updateTransferInventoryStatus={updateTransferInventoryStatus}
+                        currentStep={currentStep}
+                        setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
+                        statusOptions={statusOptions}
+                      />
+                    )}
+                    {currentStep === 2 && (
+                      <Processing
+                        transferInventoryData={transferInventoryData}
+                        updateTransferInventoryStatus={updateTransferInventoryStatus}
+                        currentStep={currentStep}
+                        setNextStep={setNextStep}
+                        renderedFrom={`${renderedFrom}_grid-2`}
+                        statusOptions={statusOptions}
                       />
                     )}
                   </Box>
@@ -301,7 +329,6 @@ const TransferInventoryDetailPage = () => {
           </div>
           <Box my={1} />
         </div>
-
         <div className="position-relative">
           <HideWhenOffline>
             <Paper>
@@ -310,10 +337,9 @@ const TransferInventoryDetailPage = () => {
                   {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
                 </span>
               )}
-
               <div style={{ display: showActivity ? 'block' : 'none' }}>
                 <Grid container>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} >
                     {transferInventoryData && (
                       <div>
                         <Activity
@@ -331,7 +357,7 @@ const TransferInventoryDetailPage = () => {
                               type: 'transferInventory'
                             }
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                           emails={[]}
                         />
                       </div>
@@ -343,8 +369,6 @@ const TransferInventoryDetailPage = () => {
           </HideWhenOffline>
         </div>
       </div>
-
-      {/* Confirm Delete Dialog */}
       {showConfirmBox && (
         <ConfirmationDialog
           okBtnLoading={isDeleting}
@@ -356,10 +380,10 @@ const TransferInventoryDetailPage = () => {
           onOk={handleDelete}
         />
       )}
-      {/* Manage Transfer Inventory Data */}
       {openUpdateDialog && (
         <ManageTransferInventory
-          isMainInfoEditable={currentStep !== 0}
+          transferFromDisable={currentStep > 0 || transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.inProgress}
+          transferToDisable={currentStep >= 1}
           number={transferInventoryData?.transferNumber}
           isClone={false}
           transferInventoryId={id}

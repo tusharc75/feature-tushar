@@ -14,10 +14,11 @@ import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { MdAdd, MdDone } from 'react-icons/md';
 import { useData } from 'src/StateProvider/Provider';
 import AddInventory from './AddInventory';
-import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
+import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
 
-const InventoryGrid = (props) => {
-  const { transferData, updateTransferStatus, setTransferIsEnded, renderedFrom, fetchData } = props;
+const Products = ({ transferInventoryData, setNextStep, renderedFrom }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -33,7 +34,6 @@ const InventoryGrid = (props) => {
   const [state, dispatch] = useReducer(gridReducer, gridState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const [isAdding, setIsAdding] = useState(false);
-  const [isCompleting, setCompleting] = useState(false);
   const columns = [
     { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer', primaryField: true },
     {
@@ -43,7 +43,7 @@ const InventoryGrid = (props) => {
       disabled: false,
       cellRenderer: 'commonRenderer',
       cellEditor: 'numericCellEditor',
-      editable: true
+      editable: permissions?.transferInventory.isUpdate
     }
   ];
 
@@ -54,17 +54,19 @@ const InventoryGrid = (props) => {
   };
 
   useEffect(() => {
-    if (!transferData) return;
-    fetchInventories();
-  }, [transferData]);
+    if (!transferInventoryData) return;
+    let timeout = setTimeout(fetchProducts, 200);
+    return () => clearTimeout(timeout);
+  }, [transferInventoryData]);
 
-  const fetchInventories = () => {
+  const fetchProducts = () => {
+    setNextStep(false);
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${routes.transferInventory.path}/${transferData._id}/product`)
+      .get(`${routes.transferInventory.path}/${transferInventoryData._id}/product`)
       .then(({ data: { data } }) => {
         dispatch({ type: 'loading', loading: true });
         let rows = data?.map((u: any) => {
@@ -72,18 +74,14 @@ const InventoryGrid = (props) => {
           finalObject['productId'] = u.product;
           finalObject['productName'] = u.productDetail.productName;
           finalObject['qty'] = u.qty;
-
+          finalObject['inventory'] = u.inventoryDetail?.inventory || 0;
           return {
             ...finalObject
           };
         });
-
-        if (data && data.length === 0 && transferData?.status !== 'New') {
-          updateTransferStatus('New');
-        } else if (data.length > 0 && !['In Progress', 'Completed'].includes(transferData?.status)) {
-          updateTransferStatus('In Progress');
+        if (rows?.length) {
+          setNextStep(true);
         }
-
         dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -96,13 +94,12 @@ const InventoryGrid = (props) => {
 
   const handleSave = (products: any) => {
     setIsAdding(true);
-
     axiosInstance()
-      .post(`${routes.transferInventory.path}/${transferData?._id}/product`, {
+      .post(`${routes.transferInventory.path}/${transferInventoryData?._id}/product`, {
         products
       })
       .then(() => {
-        fetchInventories();
+        fetchProducts();
         toastConfig.setToastConfig({
           open: true,
           message: 'Records added successfully',
@@ -121,13 +118,13 @@ const InventoryGrid = (props) => {
     if (removeData.length > 0) {
       setRemovingInventory(true);
       try {
-        await axiosInstance().put(`${routes.transferInventory.path}/${transferData?._id}/product/remove`, {
+        await axiosInstance().put(`${routes.transferInventory.path}/${transferInventoryData?._id}/product/remove`, {
           ids: removeData
         });
         setRemoveData([]);
         setShowConfirmBox(false);
         setRemovingInventory(false);
-        fetchInventories();
+        fetchProducts();
       } catch (error) {
         setShowConfirmBox(false);
         setRemovingInventory(false);
@@ -144,11 +141,11 @@ const InventoryGrid = (props) => {
   );
 
   const ActionRenderer = (params) =>
-    permissions?.transferInventory.isUpdate ? (
+    permissions?.transferInventory.isUpdate && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inTransit]?.includes(transferInventoryData?.status) ? (
       <>
         <GridDeleteIcon
           hasDeletePermission={permissions?.transferInventory.isUpdate}
-          ownerId={transferData?.createdBy.user._id}
+          ownerId={transferInventoryData?.createdBy.user._id}
           userId={user?.user?._id}
           onDelete={() => {
             setShowConfirmBox(true);
@@ -165,77 +162,68 @@ const InventoryGrid = (props) => {
     actionsRenderer: ActionRenderer
   };
 
-  const completeTransfer = () => {
-    setCompleting(true);
+  const onCellValueChanged = ({ data }) => {
+    if (Number(data.qty) > Number(data.inventory)) {
+      toastConfig.setToastConfig({
+        type: 'warning',
+        message: "Qty can't be greater then inventory",
+        open: true
+      });
+      return;
+    }
+    updateQTY(data?._id, data.qty);
+  };
+
+  const updateQTY = (id: string, qty: string) => {
     axiosInstance()
-      .patch(`${routes.transferInventory.path}/${transferData?._id}/complete`)
+      .put(`${routes.transferInventory.path}/${transferInventoryData._id}/product`, {
+        ids: [id],
+        qty: Number(qty)
+      })
       .then(() => {
-        toastConfig.setToastConfig({
-          open: true,
-          message: 'Transfer completed',
-          type: 'success'
-        });
-        setTransferIsEnded(true);
-        setCompleting(false);
-        fetchData()
+        fetchProducts();
       })
       .catch((err) => {
-        setCompleting(false);
         toastConfig.setToastConfig(err);
       });
   };
 
   return (
     <React.Fragment>
-      <Box display="flex" justifyContent="space-between" mx="4px">
-        {permissions?.transferInventory.isUpdate && (
-          <Button
-            variant={isMobile ? 'text' : 'contained'}
-            color="primary"
-            size="small"
-            style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-            onClick={() => {
-              setAddInventoryDialog(true);
-            }}
-            disabled={isCompleting}
-          >
-            {isMobile && !isTablet ? <MdAdd size={22} /> : `Add Product`}
-          </Button>
-        )}
-        <Box display="flex">
+      {[TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inTransit]?.includes(transferInventoryData?.status) &&
+        <Box display="flex" justifyContent="space-between" mx="4px">
           {permissions?.transferInventory.isUpdate && (
             <Button
               variant={isMobile ? 'text' : 'contained'}
-              size="small"
               color="primary"
-              style={isMobile && !isTablet ? { color: 'var(--danger-light)' } : {}}
-              disabled={selectedRecords.length === 0 || isCompleting}
+              size="small"
+              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
               onClick={() => {
-                setShowConfirmBox(true);
-                setRemoveData(selectedRecords.map((inv: any) => inv?._id));
+                setAddInventoryDialog(true);
               }}
             >
-              {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : 'Remove Product'}
+              {isMobile && !isTablet ? <MdAdd size={22} /> : `Add Product`}
             </Button>
           )}
-
-          {permissions?.transferInventory.isUpdate && (
-            <Button
-              className="ml-2"
-              variant={isMobile ? 'text' : 'contained'}
-              size="small"
-              color="primary"
-              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-              disabled={dataRows.length === 0 || isCompleting}
-              onClick={completeTransfer}
-              startIcon={isCompleting && <CircularProgress color="inherit" size={18} />}
-            >
-              {isMobile && !isTablet ? <MdDone size={22} /> : 'Complete Transfer'}
-            </Button>
-          )}
+          <Box display="flex">
+            {permissions?.transferInventory.isUpdate && (
+              <Button
+                variant={isMobile ? 'text' : 'contained'}
+                size="small"
+                color="primary"
+                style={isMobile && !isTablet ? { color: 'var(--danger-light)' } : {}}
+                disabled={selectedRecords.length === 0}
+                onClick={() => {
+                  setShowConfirmBox(true);
+                  setRemoveData(selectedRecords.map((inv: any) => inv?._id));
+                }}
+              >
+                {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : 'Remove Product'}
+              </Button>
+            )}
+          </Box>
         </Box>
-      </Box>
-
+      }
       <Box mt={1}>
         {isMobile && !isTablet ? (
           <CustomSwipableList
@@ -253,7 +241,7 @@ const InventoryGrid = (props) => {
               // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
             }}
             extraParamsToCheckDelete={true}
-            onDelete={(data) => {}}
+            onDelete={(data) => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -267,11 +255,11 @@ const InventoryGrid = (props) => {
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
             onCreate={false}
             showClone={false}
-            onClone={(data) => {}}
+            onClone={(data) => { }}
             renderedFrom={renderedFrom}
           />
         ) : (
-          <CustomAgGrid
+          <CustomAgGridEditable
             columns={columns}
             dataRows={dataRows}
             frameworkComponents={frameworkComponents}
@@ -286,19 +274,19 @@ const InventoryGrid = (props) => {
             allowSelection={permissions?.transferInventory.isUpdate}
             isClientSideGrid={true}
             loading={loading}
-            // onCellValueChanged={onCellValueChanged}
+            onCellValueChanged={onCellValueChanged}
             renderedFrom={renderedFrom}
-            refreshGrid={() => {}}
+            refreshGrid={() => { }}
           />
         )}
       </Box>
-      {openAddNewInventory && (
+      {openAddNewInventory && transferInventoryData?.transferFromPlant?.optionValue && (
         <AddInventory
           existingProducts={dataRows}
           isAdding={isAdding}
           submit={handleSave}
           close={closeDialog}
-          plantId={transferData?.transferFromPlant.optionValue}
+          plantId={transferInventoryData?.transferFromPlant.optionValue}
           renderedFrom={`${renderedFrom}_sub-1`}
         />
       )}
@@ -317,4 +305,4 @@ const InventoryGrid = (props) => {
   );
 };
 
-export default InventoryGrid;
+export default Products;

@@ -65,6 +65,7 @@ export const rentalManagementSteps = [
   'Receiving Ticket',
   'Packing Slip'
 ];
+export const transferInventorySteps= ["Add Products", "Processing", "Delivered"]
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Product', 'Serialized Asset'];
 
@@ -1640,6 +1641,14 @@ export const INVENTORY_OWNER_TYPE = {
   supplierAccount: 'Supplier Account',
   customerAccount: 'Customer Account'
 } as const;
+
+export const TRANSFER_INVENTORY_STATUS = {
+  new: "New",
+  inProgress: "In Progress",
+  readyToShip: "Ready to ship",
+  inTransit: "In-Transit",
+  delivered: "Delivered"
+}
 
 export const asyncForEach = async (array: any[], callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>) => {
   for (let index = 0; index < array.length; index++) {
