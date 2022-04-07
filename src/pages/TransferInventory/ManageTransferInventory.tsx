@@ -94,8 +94,23 @@ const ManageTransferInventory: FC<Props> = (props) => {
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-        setPlantsFromOptions(data.find((obj) => obj?.fieldData.fieldName === 'transferFromPlant')?.fieldData?.option ?? []);
-        setPlantToOptions(data.find((obj) => obj?.fieldData.fieldName === 'transfertoPlant')?.fieldData?.option ?? []);
+        let fromOptions = data.find((obj: any) => obj?.fieldData.fieldName === 'transferFromPlant')?.fieldData?.option ?? [];
+        let toOptions = data.find((obj: any) => obj?.fieldData.fieldName === 'transfertoPlant')?.fieldData?.option ?? [];
+        let filteredFromOptions = [];
+        let filteredToOptions = [];
+        fromOptions.forEach((plant: any) => {
+          if (plant?.entity && (plant?.entity.length === 0 || plant?.entity.includes(selectedEntity))) {
+            filteredFromOptions.push(plant);
+          }
+        });
+        toOptions.forEach((plant: any) => {
+          if (plant?.entity && (plant?.entity.length === 0 || plant?.entity.includes(selectedEntity))) {
+            filteredToOptions.push(plant);
+          }
+        });
+
+        setPlantsFromOptions(filteredFromOptions);
+        setPlantToOptions(filteredToOptions);
 
         if (transferInventoryId) {
           axiosInstance()
@@ -268,10 +283,10 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                           options={
                                             isCustomer
                                               ? customerPlants
-                                              : plantFields.includes(field.fieldName) && field.fieldName === 'transfertoPlant'
-                                              ? plantToOptions?.filter((o: any) => o?.entity.includes(selectedEntity))
+                                              : field.fieldName === 'transfertoPlant'
+                                              ? plantToOptions
                                               : field.fieldName === 'transferFromPlant'
-                                              ? plantsFromOptions?.filter((o: any) => o?.entity.includes(selectedEntity))
+                                              ? plantsFromOptions
                                               : []
                                           }
                                           setFieldValue={(name, value) => {

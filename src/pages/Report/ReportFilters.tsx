@@ -192,7 +192,7 @@ const ReportFilters = (props: FiltersProps) => {
                         inputVariant="outlined"
                         name={field.fieldName}
                         label={field.fieldLabel}
-                        value={betweenDate && betweenDate[field.fieldName] ? betweenDate[field.fieldName] : new Date()}
+                        value={betweenDate && betweenDate[field.fieldName] ? betweenDate[field.fieldName] : null}
                         onChange={(date: any) => {
                           setBetweenDate((prevState) => ({ ...prevState, [field.fieldName]: date }));
                         }}

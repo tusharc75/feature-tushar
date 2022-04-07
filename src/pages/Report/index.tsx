@@ -190,12 +190,14 @@ const Report = () => {
         filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
       }
     }
-    if (betweenDate && (betweenDate.actualStartDate || betweenDate.actualEndDate) && (betweenDate.EstimateStartDate || betweenDate.EstimateEndDate)) {
-      let tempBetween = {
-        from: betweenDate.actualStartDate || betweenDate.actualEndDate,
-        to: betweenDate.actualStartDate || betweenDate.actualEndDate
-      };
-      filterQuery = `${filterQuery}between=${JSON.stringify(tempBetween)}&`;
+    if (betweenDate) {
+      if ((betweenDate.actualStartDate || betweenDate.actualEndDate) && (betweenDate.EstimateStartDate || betweenDate.EstimateEndDate)) {
+        let tempBetween = {
+          from: betweenDate.actualStartDate || betweenDate.actualEndDate,
+          to: betweenDate.actualStartDate || betweenDate.actualEndDate
+        };
+        filterQuery = `${filterQuery}between=${JSON.stringify(tempBetween)}&`;
+      } 
     }
 
     return `?${filterQuery}`;
@@ -496,7 +498,6 @@ const Report = () => {
                       loading={loading}
                       renderedFrom={renderedFrom}
                       allowSelection={false}
-                      isClientSideGrid={true}
                       allowAction={false}
                       refreshGrid={fetchResourceData}
                       showOnlyShowFilteredRecordSwitch={false}
