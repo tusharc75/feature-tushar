@@ -6,17 +6,22 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomContainer from '../../components/CustomContainer';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { isMobile, isTablet } from 'react-device-detect';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import axiosInstance from "src/axios/axiosInstance";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import ProductCard from '../../components/ProductCard/index'
 import styles from './pos-page.module.scss'
-import LocationOnOutlinedIcon from '@material-ui/icons/LocationOnOutlined';
-import SearchIcon from '@material-ui/icons/Search';
+import styles2 from '../Leads/Header.module.scss';
 import CropFreeIcon from '@material-ui/icons/CropFree';
 import { makeStyles } from '@material-ui/core';
+import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid } from 'src/constants/helpers';
+import { CommonRenderer, ImageRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import { MdAddShoppingCart, MdBorderAll, MdList } from 'react-icons/md';
+import { camelCase, filter } from 'lodash';
+import Scan from 'src/components/Scan';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -107,6 +112,7 @@ const Pos = () => {
 
     const history = useHistory();
     const classes = useStyles();
+    const renderedFrom = camelCase(routes?.pos.title);
 
     const toastConfig = useContext(CustomToastContext);
     const [plant, setPlant] = useState('')
@@ -115,19 +121,57 @@ const Pos = () => {
     const {
         state: { user, permissions, selectedEntity }
     }: any = useData();
-    const limit = 21;
     const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(false)
     const [hasMore, setHasMore] = useState(false)
-    const [page, setPage] = useState(0);
-    const [search, setSearch] = useState("")
-    const [open, setOpen] = useState(false);
-    const [searchItems, setSearchItems] = useState([]);
+    const [scanDialog, setScanDialog] = useState(false)
+    const [gridApi, setGridApi] = useState(null);
+    const [state, dispatch] = useReducer(reducer, intialState);
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting } = state;
+
+    const columns = [
+        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productImage", headerName: "Product Image", show: true, disabled: true, cellRenderer: "imageRenderer" },
+        { field: "productDesc", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productNumber", headerName: "Product Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
+    ]
+
+    const [filter, setFilter] = useState("grid");
+
+    const handleFilter = (event, newFilter) => {
+        if (newFilter != null) {
+            setFilter(newFilter);
+        }
+    };
+
+    const ActionsRenderer = (params) => (
+        <Fragment>
+            <Tooltip
+                title={'Add to cart'}
+            >
+                <IconButton
+                    size="small"
+                    aria-label="Clone"
+                    onClick={() => {
+                    }}
+                >
+                    <MdAddShoppingCart fontSize="small" color="primary" />
+                </IconButton>
+            </Tooltip>
+        </Fragment>
+    );
+    const frameWorkComponent = {
+        commonRenderer: CommonRenderer,
+        imageRenderer: ImageRenderer,
+        actionsRenderer: ActionsRenderer
+    };
+
+    useEffect(() => {
+        if (plantId) fetchProducts();
+    }, [page, limit, filters, sorting, search, plant, plantId]);
 
     useEffect(() => {
         getPlants()
-        if (plantId) fetchProducts()
-    }, [plant, plantId])
+    }, [])
 
     const getPlants = () => {
         axiosInstance()
@@ -138,20 +182,62 @@ const Pos = () => {
                 plantId === null && setPlant(data[0].warehouseName);
             });
     }
-    const fetchProducts = () => {
-        setProducts([]);
-        setLoading(true);
-        let api = `/pos?wareHouse=${plantId}&page=${page}&limit=${limit}`;
-        axiosInstance().get(api).then(({ data: { data, count } }) => {
-            setProducts([...data]);
-            setHasMore(data.length !== count);
-            setLoading(false);
 
+    const getQueryString = () => {
+        let deepFilter = `&page=${page}&limit=${limit}`;
+
+        if (!isObjectEmpty(filters)) {
+            const updatedFilters = [];
+
+            Object.keys(filters).forEach((field) => {
+                updatedFilters.push({
+                    field: field,
+                    term: filters[field].filter
+                });
+            });
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+        }
+
+        if (sorting.length > 0) {
+            deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+        }
+
+        if (search) {
+            deepFilter = `${deepFilter}&search=${search}`;
+        }
+        return deepFilter;
+    };
+
+    const fetchProducts = () => {
+        dispatch({ type: 'loading', loading: true });
+        const queryString = getQueryString();
+
+        if (gridApi) {
+            gridApi.setRowData([]);
+        }
+        let api = `/pos?wareHouse=${plantId}${queryString}`;
+        axiosInstance().get(api).then(({ data: { data, count } }) => {
+            setProducts((prevState) => {
+                if (search) {
+                    return [...data];
+                }
+                return [...prevState, ...data];
+            });
+            setHasMore(data.length !== count);
+            let rows = data.map((u) => {
+                let finalObject = prepareDataForGrid(u);
+                return {
+                    ...finalObject
+                };
+            });
+            dispatch({ type: 'initialize', data: rows, count: count });
+            setTimeout(() => {
+                dispatch({ type: 'loading', loading: false });
+            }, gridLoadingTimeout);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
-        }).finally(() => {
-            setLoading(false);
-        });
+            dispatch({ type: 'loading', loading: false });
+        })
     }
 
 
@@ -159,7 +245,7 @@ const Pos = () => {
         setTimeout(() => {
             let api = `/pos?wareHouse=${plantId}&page=${page}&limit=${limit}`;
             axiosInstance().get(api).then(({ data: { data, count } }) => {
-                setPage(prevState => prevState + 1)
+                // setPage(prevState => prevState + 1)
                 setProducts(prevState => [...prevState, ...data]);
 
                 if ((products.length + data.length) >= count) {
@@ -169,11 +255,15 @@ const Pos = () => {
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
             }).finally(() => {
-                setLoading(false);
+                // setLoading(false);
             });
 
         }, 500)
     }
+
+    const handleSearch = (e) => {
+        dispatch({ type: 'search', search: e.target.value });
+    };
 
     return (
         <Fragment>
@@ -184,8 +274,8 @@ const Pos = () => {
             </Grid>
             <CustomContainer>
                 <div className="header-panel">
-                    <Grid container >
-                        <Grid item xs={12} sm={12} md={4} className="d-flex align-items-center gap-1">
+                    <Grid container className={styles2.filter_side_container}>
+                        <Grid item xs={12} md={6} sm={12} className={isMobile ? styles2.mobile_panel : 'd-flex align-items-center gap-1'}>
                             <Autocomplete
                                 style={{ width: "250px" }}
                                 options={plantOptions}
@@ -225,43 +315,65 @@ const Pos = () => {
                                 )}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={12} md={8} className="d-flex align-items-center gap-1">
-                            <ClickAwayListener onClickAway={() => {
-                                setOpen(false);
-                            }}>
-                                <div className={`${classes.search} position-relative d-flex`}>
-                                    <div className={classes.searchIcon}>
-                                        <SearchIcon />
-                                    </div>
-                                    <InputBase
-                                        value={search}
-                                        placeholder="Search..."
-                                        onChange={(e) => {
-                                            setSearch(e.target.value)
-                                        }}
-                                        classes={{
-                                            root: classes.inputRoot,
-                                            input: classes.inputInput,
-                                        }}
-                                        inputProps={{ 'aria-label': 'search' }}
-                                    />
-                                    <IconButton
-                                        onClick={() => {
-                                        }}
-                                        size="small"
-                                        className="mr-2"
-                                        edge="start"
-                                        color="inherit"
-                                        aria-label="open drawer"
-                                    >
-                                        <CropFreeIcon style={{ color: "black" }} />
-                                    </IconButton>
-                                </div>
-                            </ClickAwayListener>
+
+                        <Grid md={6} sm={12} xs={12} container className={styles2.filter_side}>
+                            <Box className={isMobile ? styles2.mobile_filter_side_header : styles2.filter_side_header} component="div">
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    searchbox={styles2.search_box_input}
+                                    value={search}
+                                    size="small"
+                                    width="350px"
+                                    placeholder="Search Product"
+                                    style={isMobile ? { flex: 1 } : {}}
+                                />
+
+                                <IconButton
+                                    onClick={() => { setScanDialog(true) }}
+                                    size="small"
+                                    className="mr-2"
+                                    edge="start"
+                                    color="inherit"
+                                    aria-label="open drawer"
+                                >
+                                    <CropFreeIcon style={{ color: "black" }} />
+                                </IconButton>
+                            </Box>
                         </Grid>
                     </Grid>
                 </div>
-                <Box p={1}>
+                <ToggleButtonGroup
+                    size="small"
+                    className=" toggle-button-layout"
+                    value={filter}
+                    exclusive
+                    onChange={handleFilter}
+                >
+                    <ToggleButton value={'grid'} key={0}>
+                        <MdList fontSize="small" color="primary" />
+                    </ToggleButton>
+                    <ToggleButton value={'tile'} key={1}>
+                        <MdBorderAll fontSize="small" color="primary" />
+                    </ToggleButton>
+                </ToggleButtonGroup>
+                {Object.keys(frameWorkComponent).length > 0 && filter === 'grid' && (
+                    <CustomAgGrid
+                        columns={columns}
+                        dataRows={dataRows}
+                        frameworkComponents={frameWorkComponent}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount}
+                        limit={limit}
+                        pageSizes={pageSizes}
+                        page={page}
+                        actionWidth={100}
+                        loading={loading}
+                        renderedFrom={renderedFrom}
+                        refreshGrid={fetchProducts}
+                        allowSelection={false} />
+                )}
+                {filter === 'tile' &&
                     <InfiniteScroll
                         dataLength={products.length}
                         next={fetchMoreData}
@@ -290,9 +402,12 @@ const Pos = () => {
                             </div>)
                         }
 
-                    </InfiniteScroll>
-                </Box>
+                    </InfiniteScroll>}
+                {
+                    scanDialog && <Scan onClose={() => setScanDialog(false)} />
+                }
             </CustomContainer>
+
         </Fragment>
     );
 };
