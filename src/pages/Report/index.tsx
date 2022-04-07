@@ -1,8 +1,9 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, filter, startCase } from 'lodash';
 import axios from 'axios';
+import moment from 'moment';
 import { MdDescription, MdChevronLeft } from 'react-icons/md';
 import styles from '../Leads/Header.module.scss';
 
@@ -56,7 +57,7 @@ const Report = () => {
   const [columns, setColumns] = React.useState(null);
   const [gridApi, setGridApi] = React.useState(null);
   const [state, dispatch] = React.useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+  const { dataRows, rowCount, loading, page, sorting, search, limit, pageSizes } = state;
 
   const fetchGridColumns = () => {
     setLoadingColumns(true);
@@ -111,13 +112,15 @@ const Report = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }, [showGrid]);
+  }, [showGrid, page, sorting, search, limit]);
 
   /**
    * Fetch resource data for selected filters,
    * @returns none if no data selected
    */
   const fetchResourceData = () => {
+    let filterQuery = getFilter();
+
     if (cancelTokenSource) {
       cancelTokenSource.cancel();
     }
@@ -127,19 +130,18 @@ const Report = () => {
       gridApi.setRowData([]);
     }
     setShowGrid(true);
-    let filterQuery = getFilter();
 
     axiosInstance()
       .get(`${resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'}/report${filterQuery}`, {
         cancelToken: cancelTokenSource.token
       })
-      .then(({ data: { data } }) => {
+      .then(({ data: { data, count } }) => {
         data = data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
           return finalObject;
         });
 
-        dispatch({ type: 'initialize', data: data, count: data.length });
+        dispatch({ type: 'initialize', data: data, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -156,48 +158,62 @@ const Report = () => {
 
   // Create and return query for filters
   const getFilter = () => {
-    let filterQuery = '';
-    if (selectedData) {
-      const keys = Object.keys(selectedData);
-      const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
-      const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
-
-      let filterById = idFilter.map((key) => {
-        const options = selectedData[key].value;
-        return {
-          field: key,
-          term: {
-            $in: options.map((d: any) => d.optionValue)
-          }
-        };
-      });
-
+    let filterQuery = `page=${page}&limit=${limit}`;
+    if (sorting.length > 0) {
+      filterQuery = `${filterQuery}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      filterQuery = `${filterQuery}&search=${search}`;
+    }
+    if (selectedResources.length > 0) {
       let deepFilter = [];
-      forDeepFilter.forEach((key) => {
-        const options = selectedData[key].value;
-        const filters = options.map((o: any) => ({
-          field: key,
-          term: o.optionValue
-        }));
-        deepFilter = [...deepFilter, ...filters];
-      });
+      if (selectedData) {
+        const keys = selectedData ? Object.keys(selectedData) : [];
+        const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
+        const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
 
-      if (filterById.length > 0) {
-        filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
+        let filterById = idFilter.map((key) => {
+          const options = selectedData[key].value;
+          return {
+            field: key,
+            term: {
+              $in: options.map((d: any) => d.optionValue)
+            }
+          };
+        });
+
+        forDeepFilter.forEach((key) => {
+          const options = selectedData[key].value;
+          const filters = options.map((o: any) => ({
+            field: key,
+            term: o.optionValue
+          }));
+          deepFilter.push(filters);
+        });
+
+        if (filterById.length > 0) {
+          filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
+        }
+      }
+
+      if (betweenDate) {
+        const fields = Object.keys(betweenDate);
+        const filters = [];
+        fields.forEach((field) => {
+          if (betweenDate[field]) {
+            filters.push({
+              field,
+              term: moment(betweenDate[field]).format('DD/MM/YYYY')
+            });
+          }
+        });
+
+        deepFilter.push(filters);
       }
 
       if (deepFilter && deepFilter.length > 0) {
         filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
       }
-    }
-    if (betweenDate) {
-      if ((betweenDate.actualStartDate || betweenDate.actualEndDate) && (betweenDate.EstimateStartDate || betweenDate.EstimateEndDate)) {
-        let tempBetween = {
-          from: betweenDate.actualStartDate || betweenDate.actualEndDate,
-          to: betweenDate.actualStartDate || betweenDate.actualEndDate
-        };
-        filterQuery = `${filterQuery}between=${JSON.stringify(tempBetween)}&`;
-      } 
     }
 
     return `?${filterQuery}`;
