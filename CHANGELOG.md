@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.90.0](https://github.com/vebholic/oms_frontend/compare/v2.89.0...v2.90.0) (2022-04-07)
+
+
+### Features
+
+* pos initial changes ([67aa14d](https://github.com/vebholic/oms_frontend/commit/67aa14d3275eeef0f75068bfcdb2396c65d2c966))
+
+
+### Bug Fixes
+
+* bug fix ([6731a2a](https://github.com/vebholic/oms_frontend/commit/6731a2a0f5b105aa6987e9744af4bd066252cb37))
+* bug fix ([3627aec](https://github.com/vebholic/oms_frontend/commit/3627aecca9e9f055013083d8fa87fc65866e3050))
+* bug fix ([10a6e59](https://github.com/vebholic/oms_frontend/commit/10a6e59de77a099df3e0cdb288bfa2590c3eca81))
+* bug fix ([4a6b2f0](https://github.com/vebholic/oms_frontend/commit/4a6b2f0914e0995f7179a7be7b01a36d262f35ef))
+* bug fix ([76fd7f3](https://github.com/vebholic/oms_frontend/commit/76fd7f33ced19e7a52422934759c06ecce9b916a))
+* clear all chatter notification and change clear notification success message PO-1425 ([8908a30](https://github.com/vebholic/oms_frontend/commit/8908a30842817eaa77e9e974c27708d8313e121c))
+* **transfer inventory:** changes and fix ([d6b43d1](https://github.com/vebholic/oms_frontend/commit/d6b43d1fe26f40b7c784bf9e96b54f74ee48e753))
+
 ## [2.89.0](https://github.com/vebholic/oms_frontend/compare/v2.88.3...v2.89.0) (2022-04-06)
 
 
