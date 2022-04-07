@@ -88,7 +88,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
                 let res: any = {
                     ...prepareDataForGrid(item),
                 };
-                res["canDelete"] = permissions?.rentalManagement?.isDelete && allowedToEdit;
+                res["canDelete"] = permissions?.rentalManagement?.isUpdate && allowedToEdit;
                 res["allowedToEdit"] = permissions?.rentalManagement?.isUpdate && allowedToEdit;
                 res["isChecked"] = false;
                 return res;
@@ -118,7 +118,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
                 </IconButton>
             </HtmlTooltip>
             <GridDeleteIcon
-                hasDeletePermission={permissions?.rentalManagement?.isDelete}
+                hasDeletePermission={permissions?.rentalManagement?.isUpdate && allowedToEdit}
                 ownerId={user?.user?._id}
                 userId={user?.user?._id}
                 onDelete={() => {
