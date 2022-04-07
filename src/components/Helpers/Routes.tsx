@@ -364,6 +364,14 @@ const routes = {
     title: (storedRoutes && storedRoutes.pos && storedRoutes.pos.title) ? storedRoutes.pos?.title : RESOURCE_LABEL.pos,
     path: "/pos",
   },
+  repairType: {
+    title: (storedRoutes && storedRoutes.repairType && storedRoutes.repairType.title) ? storedRoutes.repairType?.title : RESOURCE_LABEL.repairType,
+    path: "/repair-type",
+  },
+  repairTypeDetail: {
+    title: (storedRoutes && storedRoutes.repairType && storedRoutes.repairType.title) ? storedRoutes.repairType?.title : RESOURCE_LABEL.repairType,
+    path: "/repair-type/detail",
+  },
 };
 
 export default routes;
