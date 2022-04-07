@@ -28,7 +28,6 @@ import Processing from './Processing';
 import { camelCase } from 'lodash';
 
 const TransferInventoryDetailPage = () => {
-
   const renderedFrom = camelCase(routes?.transferInventory.title);
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -36,7 +35,9 @@ const TransferInventoryDetailPage = () => {
   const parsed = queryString.parse(history.location.search);
   const { openEdit, tab }: any = parsed;
   const parsedTab = tab !== undefined ? parseInt(tab) : 1;
-  const { state: { permissions } }: any = useData();
+  const {
+    state: { permissions, user }
+  }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
   const [tabValue, setTabValue] = useState(parsedTab);
   const [loading, setLoading] = useState(true);
@@ -51,6 +52,7 @@ const TransferInventoryDetailPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [locationKeys, setLocationKeys] = useState([]);
   const [nextStep, setNextStep] = useState(false);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [statusOptions, setStatusOptions] = useState([]);
 
   useEffect(() => {
@@ -85,7 +87,9 @@ const TransferInventoryDetailPage = () => {
       .then(({ data: { data } }) => {
         data?.some((o) => {
           if (o?.fieldData?.fieldName === 'status') {
-            setStatusOptions(o.fieldData.option?.filter((e) => ![TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inProgress].includes(e.optionValue)));
+            setStatusOptions(
+              o.fieldData.option?.filter((e) => ![TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inProgress].includes(e.optionValue))
+            );
             return true;
           }
         });
@@ -107,6 +111,10 @@ const TransferInventoryDetailPage = () => {
         setHeadingLabel(data.transferNumber);
         setCustomizedRoutes([routes.transferInventory, { title: data.transferNumber }]);
         setCurrentStep(transferInventorySteps.indexOf(data?.processStatus) !== -1 ? transferInventorySteps.indexOf(data?.processStatus) : 0);
+
+        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
+
         if (permissions?.transferInventory?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
@@ -153,7 +161,8 @@ const TransferInventoryDetailPage = () => {
   }
 
   const updateTransferInventoryStatus = (status: string) => {
-    axiosInstance().put(`${routes.transferInventory.path}/${id}/status`, { status })
+    axiosInstance()
+      .put(`${routes.transferInventory.path}/${id}/status`, { status })
       .then(() => {
         toastConfig.setToastConfig({
           open: true,
@@ -161,11 +170,10 @@ const TransferInventoryDetailPage = () => {
           message: `Status updated ${status} Successfully`
         });
         if (status === TRANSFER_INVENTORY_STATUS.delivered) {
-          deliveredTransfer()
-          updateProcessStatus(2)
-        }
-        else {
-          fetchTransferInventoryData()
+          deliveredTransfer();
+          updateProcessStatus(2);
+        } else {
+          fetchTransferInventoryData();
         }
       })
       .catch((error) => {
@@ -177,7 +185,7 @@ const TransferInventoryDetailPage = () => {
     axiosInstance()
       .patch(`${routes.transferInventory.path}/${id}/complete`)
       .then(() => {
-        fetchTransferInventoryData()
+        fetchTransferInventoryData();
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -189,7 +197,7 @@ const TransferInventoryDetailPage = () => {
       .put(`${routes.transferInventory.path}/${id}/process-status`, {
         processStatus: transferInventorySteps[step]
       })
-      .then(() => { })
+      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -219,12 +227,12 @@ const TransferInventoryDetailPage = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={headingLabel} mainPoints={{}} showHeading={true}>
-                  {permissions?.transferInventory?.isUpdate && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
+                  {allowedToEdit && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
                     <Button color="primary" className="buttonStyleBigScreen" variant="contained" size="small" onClick={handleOpenUpdateDialog}>
                       Edit
                     </Button>
                   )}
-                  {permissions?.transferInventory?.isUpdate && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
+                  {allowedToEdit && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
                     <Button className="buttonStyleSmallScreen" variant="contained" size="small" onClick={handleOpenUpdateDialog}>
                       <MdEdit size={24} />
                     </Button>
@@ -300,6 +308,7 @@ const TransferInventoryDetailPage = () => {
                         transferInventoryData={transferInventoryData}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-1`}
+                        allowedToEdit={allowedToEdit}
                       />
                     )}
                     {currentStep === 1 && (
@@ -310,6 +319,7 @@ const TransferInventoryDetailPage = () => {
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
                         statusOptions={statusOptions}
+                        allowedToEdit={allowedToEdit}
                       />
                     )}
                     {currentStep === 2 && (
@@ -320,6 +330,7 @@ const TransferInventoryDetailPage = () => {
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
                         statusOptions={statusOptions}
+                        allowedToEdit={allowedToEdit}
                       />
                     )}
                   </Box>
@@ -339,7 +350,7 @@ const TransferInventoryDetailPage = () => {
               )}
               <div style={{ display: showActivity ? 'block' : 'none' }}>
                 <Grid container>
-                  <Grid item xs={12} >
+                  <Grid item xs={12}>
                     {transferInventoryData && (
                       <div>
                         <Activity
@@ -357,7 +368,7 @@ const TransferInventoryDetailPage = () => {
                               type: 'transferInventory'
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>
