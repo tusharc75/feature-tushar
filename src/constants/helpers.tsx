@@ -65,7 +65,7 @@ export const rentalManagementSteps = [
   'Receiving Ticket',
   'Packing Slip'
 ];
-export const transferInventorySteps= ["Add Products", "Processing", "Delivered"]
+export const transferInventorySteps = ["Add Products", "Processing", "Delivered"]
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Product', 'Serialized Asset'];
 
@@ -188,7 +188,8 @@ export const sidebarResource = {
   projectSales: 'Project Sales',
   wellMaster: 'Well Master',
   bulkAssetCreation: 'Bulk Asset Creation',
-  pos: 'Pos'
+  pos: 'Pos',
+  repairType: 'Repair Type',
 };
 
 export const resourceNames = {
@@ -316,7 +317,8 @@ export const RESOURCE_LABEL = {
   zone: "Zone",
   wellMaster: "Well Master",
   bulkAssetCreation: "Bulk Asset Creation",
-  pos: "POS"
+  pos: "POS",
+  repairType: "Repair Types"
 };
 
 export const CHILD_RESOURCE = {
@@ -548,6 +550,13 @@ export const bulkAssetCreation = {
   route: '/bulk-asset-creation',
   permission: 'bulkAssetCreation',
   resource: 'bulkAssetCreation'
+};
+
+export const repairType = {
+  api: '/repair-type',
+  route: '/repair-type',
+  permission: 'Repair Type',
+  resource: 'Repair Type'
 };
 
 export const profileMenuItems = {

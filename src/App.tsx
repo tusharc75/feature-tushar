@@ -59,7 +59,6 @@ import QuoteDetail from './pages/QuoteBuilderCombined/QuoteDetail/index';
 import DOARequest from './pages/DOA';
 import CurrencyConverter from './pages/CurrencyConverter';
 import Dashboard from './pages/Dashboard';
-import KpiDashboards from './pages/KpiDashboard/Dashboard';
 import FormBuilder from './pages/FormBuilder';
 import CreateFormBuilder from './pages/FormBuilder/CreateFormBuilder';
 import UserProfilePage from './pages/ProfilePage/index';
@@ -123,6 +122,8 @@ import WellMasterDetailsPage from './pages/WellMaster/WellMasterDetailsPage';
 import BulkAssetCreation from './pages/BulkAssetCreation';
 import BulkAssetCreationDetailsPage from './pages/BulkAssetCreation/BulkAssetCreationDetailsPage';
 import Pos from './pages/Pos';
+import RepairType from './pages/RepairType';
+import RepairTypeDetailsPage from './pages/RepairType/RepairTypeDetailsPage';
 
 var notificationInterval: any = null;
 
@@ -665,6 +666,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.bulkAssetCreationDetail.path}/:id`}>
               <BulkAssetCreationDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.repairType.path}`}>
+              <RepairType />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.repairTypeDetail.path}/:id`}>
+              <RepairTypeDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.pos.path}`}>
               <Pos />
