@@ -15,7 +15,15 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { serializedAsset, isObjectEmpty, gridLoadingTimeout, product, warehouse as warehouseHelper, INVENTORY_STATUS, COLOUR_MASTER } from '../../constants/helpers';
+import {
+  serializedAsset,
+  isObjectEmpty,
+  gridLoadingTimeout,
+  product,
+  warehouse as warehouseHelper,
+  INVENTORY_STATUS,
+  COLOUR_MASTER
+} from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import ManageSerializedAsset from './ManageSerializedAsset';
@@ -46,7 +54,8 @@ const SerializedAsset = () => {
   const [columns, setColumns] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
   const [productCategoryList, setProductCategoryList] = useState([]);
@@ -135,12 +144,12 @@ const SerializedAsset = () => {
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        data?.some(o => {
-          if (o?.fieldData?.fieldName === "status") {
-            setAllowUpdateStatus(o?.isUpdate)
-            return true
+        data?.some((o) => {
+          if (o?.fieldData?.fieldName === 'status') {
+            setAllowUpdateStatus(o?.isUpdate);
+            return true;
           }
-        })
+        });
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
@@ -155,12 +164,16 @@ const SerializedAsset = () => {
         columns?.forEach((e) => {
           if (e.field === 'assetNumber') {
             e.cellRenderer = 'assetNumberRenderer';
-            e.cellStyle = params => {
-              if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
+            e.cellStyle = (params) => {
+              if (
+                [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(
+                  params?.data?.status
+                )
+              ) {
                 return { backgroundColor: COLOUR_MASTER.lostAssets.background };
               }
               return null;
-            }
+            };
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
@@ -221,8 +234,8 @@ const SerializedAsset = () => {
       });
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     let filterById = [];
     if (warehouse?.optionValue) {
       filterById.push({ field: 'warehouse', term: warehouse?.optionValue });
@@ -276,9 +289,9 @@ const SerializedAsset = () => {
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
+    return `${deepFilter}${!isExport ? '&filterType=and&filterByIdType=and' : ''}`;
   };
 
   const handleDelete = () => {
@@ -312,7 +325,7 @@ const SerializedAsset = () => {
       })
       .then(() => {
         if (gridApi) {
-          gridApi.deselectAll()
+          gridApi.deselectAll();
         }
         fetchProductInventory();
         setAnchorEl(null);
@@ -335,7 +348,7 @@ const SerializedAsset = () => {
       {params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime() && (
         <Box ml={1} pt={1}>
           <HtmlTooltip title="Asset needs to be recert">
-            <WarningIcon style={{ fontSize: "14px" }} fontSize="small" color="error" />
+            <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
           </HtmlTooltip>
         </Box>
       )}
@@ -399,7 +412,7 @@ const SerializedAsset = () => {
     }
   };
 
-  console.log(allowUpdateStatus)
+  console.log(allowUpdateStatus);
 
   return (
     <Fragment>
@@ -423,6 +436,7 @@ const SerializedAsset = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchProductInventory();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>
@@ -642,18 +656,24 @@ const SerializedAsset = () => {
                         Delete
                       </MenuItem>
                     )}
-                    {(permissions?.serializedAsset?.isUpdate && allowUpdateStatus) && (
+                    {permissions?.serializedAsset?.isUpdate &&
+                      allowUpdateStatus &&
                       [INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].map((status) => (
                         <MenuItem
                           onClick={() => {
                             closeActions();
                             handleStatusUpdate(status);
                           }}
-                          disabled={selectedRecords?.filter((o) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(o.status)).length === selectedRecords.length ? false : true}
+                          disabled={
+                            selectedRecords?.filter((o) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(o.status)).length ===
+                            selectedRecords.length
+                              ? false
+                              : true
+                          }
                         >
                           {`Status Change - ${status}`}
                         </MenuItem>
-                      )))}
+                      ))}
                   </Menu>
                 </Grid>
               </Box>
@@ -738,8 +758,9 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.serializedAsset.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes.serializedAsset.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDelete}
         />

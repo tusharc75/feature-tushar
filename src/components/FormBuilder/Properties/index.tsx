@@ -73,6 +73,7 @@ const LookupResource = [
   { name: 'Zone', value: 'Zone' },
   { name: 'Well Master', value: 'Well Master' },
   { name: 'Bulk Asset Creation', value: 'Bulk Asset Creation' },
+  { name: 'Repair Type', value: 'Repair Type' },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, isCalculativeField }) => {
