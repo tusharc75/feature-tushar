@@ -134,10 +134,10 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
       /> : ""
       }
       {
-        <Tooltip title={permissions?.repairJob?.isUpdate && params.data?.createdById === user?.user?._id ? "Edit" : "You are not permitted to edit"}>
+        <Tooltip title={permissions?.repairJob?.isUpdate ? "Edit" : "You are not permitted to edit"}>
           <span>
             <IconButton
-              disabled={!permissions?.repairJob?.isUpdate || params.data?.createdById !== user?.user?._id}
+              disabled={!permissions?.repairJob?.isUpdate}
               color='primary'
               size='small'
               onClick={() => setShowEditAssetDialog({ open: true, asset: params.data, selectedRecords: [] })}
@@ -168,7 +168,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
         toastConfig.setToastConfig(error);
       })
   }
-
 
   return (<Fragment>
     {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed &&
