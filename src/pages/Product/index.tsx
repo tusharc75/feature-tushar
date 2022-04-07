@@ -56,7 +56,8 @@ const Product = () => {
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
 
   const [productCategoryList, setProductCategoryList] = useState([]);
   const [productTemplateList, setProductTemplateList] = useState([]);
@@ -329,8 +330,8 @@ const Product = () => {
     });
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -368,7 +369,7 @@ const Product = () => {
 
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -572,11 +573,7 @@ const Product = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchProduct();
             }}
-            additionalParams={
-              productCategory && productCategory !== ''
-                ? `&filterById=${JSON.stringify([{ field: 'productCategory', term: productCategory }])}`
-                : null
-            }
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>
