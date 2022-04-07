@@ -112,7 +112,7 @@ const Report = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }, [showGrid, page, sorting, search, limit]);
+  }, [showGrid, page, sorting, limit]);
 
   /**
    * Fetch resource data for selected filters,
@@ -158,12 +158,12 @@ const Report = () => {
 
   // Create and return query for filters
   const getFilter = () => {
-    let filterQuery = `page=${page}&limit=${limit}`;
+    let filterQuery = `page=${page}&limit=${limit}&`;
     if (sorting.length > 0) {
-      filterQuery = `${filterQuery}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+      filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}&search=${search}`;
+      filterQuery = `${filterQuery}search=${search}&`;
     }
     if (selectedResources.length > 0) {
       let deepFilter = [];
@@ -208,7 +208,9 @@ const Report = () => {
           }
         });
 
-        deepFilter.push(filters);
+        if (filters.length > 0) {
+          deepFilter.push(filters);
+        }
       }
 
       if (deepFilter && deepFilter.length > 0) {
