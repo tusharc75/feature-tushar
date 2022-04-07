@@ -291,7 +291,6 @@ const Report = () => {
                           color="primary"
                           disableElevation
                           onClick={() => {
-                            setSelectedData(null);
                             setShowGrid(false);
                           }}
                           startIcon={<MdChevronLeft />}
