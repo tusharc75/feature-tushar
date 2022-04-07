@@ -184,11 +184,12 @@ const Report = () => {
 
         forDeepFilter.forEach((key) => {
           const options = selectedData[key].value;
-          const filters = options.map((o: any) => ({
-            field: key,
-            term: o.optionValue
-          }));
-          deepFilter.push(filters);
+          options.forEach((o: any) => {
+            deepFilter.push({
+              field: key,
+              term: o.optionValue
+            });
+          });
         });
 
         if (filterById.length > 0) {
@@ -198,19 +199,15 @@ const Report = () => {
 
       if (betweenDate) {
         const fields = Object.keys(betweenDate);
-        const filters = [];
+
         fields.forEach((field) => {
           if (betweenDate[field]) {
-            filters.push({
+            deepFilter.push({
               field,
               term: moment(betweenDate[field]).format('DD/MM/YYYY')
             });
           }
         });
-
-        if (filters.length > 0) {
-          deepFilter.push(filters);
-        }
       }
 
       if (deepFilter && deepFilter.length > 0) {
