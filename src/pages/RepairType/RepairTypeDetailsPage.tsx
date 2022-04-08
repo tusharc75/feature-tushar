@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from "react";
-import { Grid, Box, Button, Paper } from "@material-ui/core";
+import { Grid, Box, Button, Paper, Typography } from "@material-ui/core";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
@@ -103,7 +103,23 @@ const RepairTypeDetailsPage = () => {
                 </Paper>
             </Grid>
             <Grid item xs={12} sm={12} md={4} lg={4}>
-
+                <Paper style={{ overflow: 'hidden' }}>
+                    <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
+                        <Typography variant="subtitle2">Repair Steps</Typography>
+                    </Box>
+                    {repairTypeData?.steps?.map((steps, index) => (
+                        <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                            <Grid container >
+                                <Grid item xs={2} sm={2} md={2} lg={2}>
+                                    <Typography variant="body2">{steps.order}</Typography>
+                                </Grid>
+                                <Grid item xs={10} sm={10} md={10} lg={10}>
+                                    <Typography variant="body2">{steps.name}</Typography>
+                                </Grid>
+                            </Grid>
+                        </Box>
+                    ))}
+                </Paper>
             </Grid>
         </Grid>
         {showConfirmBox && (

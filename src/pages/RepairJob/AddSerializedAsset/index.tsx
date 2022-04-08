@@ -123,6 +123,17 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
 
   const ActionsRenderer = (params) => (
     <div className="d-flex gap-1">
+      {<Tooltip title={permissions?.repairJob?.isUpdate ? "Edit" : "You are not permitted to edit"}>
+        <IconButton
+          disabled={!permissions?.repairJob?.isUpdate}
+          color='primary'
+          size='small'
+          onClick={() => setShowEditAssetDialog({ open: true, asset: params.data, selectedRecords: [] })}
+        >
+          <Edit />
+        </IconButton>
+      </Tooltip>
+      }
       {params.data?.status === INVENTORY_STATUS.reserved ? <GridDeleteIcon
         hasDeletePermission={permissions?.repairJob?.isUpdate}
         ownerId={user?.user?._id}
@@ -132,20 +143,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
         }}
         entity={sidebarResource.serializedAsset}
       /> : ""
-      }
-      {
-        <Tooltip title={permissions?.repairJob?.isUpdate ? "Edit" : "You are not permitted to edit"}>
-          <span>
-            <IconButton
-              disabled={!permissions?.repairJob?.isUpdate}
-              color='primary'
-              size='small'
-              onClick={() => setShowEditAssetDialog({ open: true, asset: params.data, selectedRecords: [] })}
-            >
-              <Edit />
-            </IconButton>
-          </span>
-        </Tooltip>
       }
     </div>
   );
