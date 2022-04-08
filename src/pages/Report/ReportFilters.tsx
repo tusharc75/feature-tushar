@@ -146,6 +146,20 @@ const ReportFilters = (props: FiltersProps) => {
     setIsStatusPeriod(resource.includes('Serialized Asset') && Boolean(selectedResources.find((res) => res.fieldName === 'status')));
   }, [selectedResources]);
 
+  useEffect(() => {
+    setStatusPeriodDate((prevState) => {
+      let keys = prevState ? Object.keys(prevState) : [];
+      keys.forEach((key) => {
+        if (key.includes('to') || key.includes('from')) {
+          if (!selectedResources.map((d) => d.fieldName).includes(key.split('_')[1])) {
+            delete prevState[key];
+          }
+        }
+      });
+      return prevState;
+    });
+  }, [statusPeriod]);
+
   return (
     <Container maxWidth="sm">
       <Box height={'100%'} my={2}>
