@@ -13,13 +13,15 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, setFieldsInAscendingOrder, repairType } from "../../constants/helpers";
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid, Typography, IconButton, TextField } from '@material-ui/core';
 import FormTypes from "../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { FaDiceOne } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import { isEqual } from 'lodash';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 
 const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuccess }) => {
 
@@ -33,7 +35,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [formsData, setFormsData] = useState([]);
     const [repairTypeData, setRepairTypeData] = useState(null);
-
+    const [repairSteps, setRepairSteps] = useState([]);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
@@ -43,6 +45,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
             if (repairTypeId) {
                 axiosInstance().get(`${repairType.api}/` + repairTypeId).then(({ data: { data } }) => {
                     setRepairTypeData(data)
+                    setRepairSteps(data?.steps ? data?.steps : [])
                     if (isClone) {
                         const { _id, createdBy, updatedBy, repairType, ...rest } = data
                         setInitialData({
@@ -78,9 +81,28 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
     }, [initialData.fields]);
 
     const handleSubmit = (values) => {
+        if (repairSteps?.length === 0) {
+            toastConfig.setToastConfig({
+                open: true,
+                type: 'error',
+                message: "Please add repair steps"
+            });
+            return
+        }
+        else {
+            if (repairSteps?.filter((e) => e.name?.trim() === "").length) {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'error',
+                    message: "Step name can not be blank"
+                });
+                return
+            }
+        }
         setLoading(true)
         if (repairTypeId && isClone === false) {
             values._id = repairTypeId
+            values.steps = repairSteps;
             axiosInstance().put(`${repairType.api}`, values).then(({ data }) => {
                 toastConfig.setToastConfig({
                     open: true,
@@ -95,6 +117,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
             });
         }
         else {
+            values.steps = repairSteps;
             axiosInstance().post(`${repairType.api}`, values).then(({ data }) => {
                 toastConfig.setToastConfig({
                     open: true,
@@ -122,6 +145,20 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                 inline: 'start',
             });
         }
+    }
+
+    const handleAddRepairSteps = () => {
+        setRepairSteps([...repairSteps, { name: "", order: repairSteps.length + 1 }])
+    }
+
+    const handleRemoveRepairSteps = (index) => {
+        setRepairSteps(repairSteps?.filter((e, i) => i !== index))
+    }
+
+    const handleonChangeValue = (index, value) => {
+        const data = [...repairSteps];
+        data[index].name = value;
+        setRepairSteps(data)
     }
 
     return (<Dialog
@@ -207,6 +244,60 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                                             </Box>
                                         </div>
                                     ))}
+                                <div className={"detail-box-content"}>
+                                    <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                    <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>Repair Steps</h2>
+                                </div>
+                                <Grid container>
+                                    <Grid item xs={12} sm={6} md={6} lg={6}>
+                                        <Box style={{ maxHeight: "350px", overflow: "auto" }} bgcolor="white" border={1} mt={2} mb={1} borderColor="grey.300" width={'100%'}>
+                                            <Box p={1} >
+                                                <Grid container>
+                                                    <Grid item xs={2} sm={2} md={2} lg={2}>
+                                                        <Typography variant="body2">Sr.</Typography>
+                                                    </Grid>
+                                                    <Grid item xs={8} sm={8} md={8} lg={8}>
+                                                        <Typography variant="body2">Step Name</Typography>
+                                                    </Grid>
+                                                    <Grid item xs={2} sm={2} md={2} lg={2}>
+                                                        <Grid container justifyContent="flex-end">
+                                                            <IconButton size="small" aria-label="setting" onClick={() => handleAddRepairSteps()}>
+                                                                <AddCircleOutlineIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Grid>
+                                            </Box>
+                                            {repairSteps?.map((steps, index) => (
+                                                <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                                                    <Grid container >
+                                                        <Grid item xs={2} sm={2} md={2} lg={2}>
+                                                            <Typography variant="body2">{steps.order}</Typography>
+                                                        </Grid>
+                                                        <Grid item xs={8} sm={8} md={8} lg={8}>
+                                                            <TextField
+                                                                id="standard-basic"
+                                                                variant="outlined"
+                                                                margin="dense"
+                                                                fullWidth
+                                                                style={{ margin: 0 }}
+                                                                value={steps?.name}
+                                                                onChange={(event) => handleonChangeValue(index, event.target.value)}
+                                                            />
+                                                        </Grid>
+                                                        <Grid item xs={2} sm={2} md={2} lg={2}>
+                                                            <Grid container justifyContent="flex-end">
+                                                                <IconButton size="small" aria-label="setting" onClick={() => handleRemoveRepairSteps(index)}>
+                                                                    <RemoveCircleOutlineIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Box>
+                                            ))}
+                                        </Box>
+                                    </Grid>
+                                </Grid>
                             </Form>
                         </CustomDialogContent>
                         <CustomDialogFooter>
