@@ -42,6 +42,7 @@ const Report = () => {
   const [showGrid, setShowGrid] = React.useState(false);
   const [selectedData, setSelectedData] = React.useState(null);
   const [betweenDate, setBetweenDate] = React.useState(null);
+  const [statusPeriodDate, setStatusPeriodDate] = React.useState(null);
   const [filterOptions, setFilterOptions] = React.useState([]);
   const [selectedResources, setSelectedResources] = React.useState([]);
   const [resourceOptions, setResourceOptions] = React.useState(null);
@@ -49,6 +50,7 @@ const Report = () => {
   const [resourceColumns, setResourceColumns] = React.useState([]);
   const [isExporting, setExporting] = React.useState(false);
   const [loadingColumns, setLoadingColumns] = React.useState(false);
+  const [statusPeriod, setStatusPeriod] = React.useState(false);
   const [reportList, setReportList] = React.useState([]);
   const [selectedReportView, setSelectedReportView] = React.useState(null);
   // Grid Configs
@@ -199,7 +201,6 @@ const Report = () => {
 
       if (betweenDate) {
         const fields = Object.keys(betweenDate);
-
         fields.forEach((field) => {
           if (betweenDate[field]) {
             deepFilter.push({
@@ -213,6 +214,15 @@ const Report = () => {
       if (deepFilter && deepFilter.length > 0) {
         filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
       }
+    }
+
+    if (statusPeriod && statusPeriodDate) {
+      const fields = Object.keys(statusPeriodDate);
+      fields.forEach((field) => {
+        if (statusPeriodDate[field]) {
+          filterQuery = `${filterQuery}${field}=${moment(statusPeriodDate[field]).format('MM/DD/YYYY')}&`;
+        }
+      });
     }
 
     return `?${filterQuery}`;
@@ -262,16 +272,18 @@ const Report = () => {
             <Grid container direction="row">
               <Grid item xs={12} sm={12}>
                 <Grid container justifyContent="flex-end">
-                  <div id="importExportLinks" style={{ minWidth: 80 }}>
-                    <span
-                      aria-disabled={isExporting}
-                      onClick={exportData}
-                      className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
-                      style={{ color: theme.palette.info.light }}
-                    >
-                      Export All
-                    </span>
-                  </div>
+                  {showGrid && (
+                    <div id="importExportLinks" style={{ minWidth: 80 }}>
+                      <span
+                        aria-disabled={isExporting}
+                        onClick={exportData}
+                        className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
+                        style={{ color: theme.palette.info.light }}
+                      >
+                        Export All
+                      </span>
+                    </div>
+                  )}
                 </Grid>
               </Grid>
             </Grid>
@@ -306,138 +318,6 @@ const Report = () => {
               </Grid>
             </div>
             <hr />
-            {/* <div className="header-panel">
-              <Grid container className={styles.rental_header_layout} spacing={1}>
-                <Grid item xs={12} md={3}>
-                  <Autocomplete
-                    options={['All', ...resourceOptions]}
-                    limitTags={2}
-                    disableListWrap
-                    ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
-                    disableCloseOnSelect={false}
-                    multiple
-                    value={selectedResource ?? []}
-                    onChange={(_, val) => {
-                      if (val.includes('All')) {
-                        setSelectedResource(resourceOptions);
-                      } else {
-                        setSelectedResource(val);
-                      }
-                      if (selectedData) {
-                        setSelectedData((prevState) => {
-                          const data = Object.keys(prevState);
-                          const unselected = data.filter((d) => !val.includes(d));
-                          const unselectedData = { ...prevState };
-                          unselected.forEach((_d) => {
-                            if (unselectedData[_d]) {
-                              delete unselectedData[_d];
-                            }
-                          });
-                          return unselectedData;
-                        });
-                      }
-                    }}
-                    fullWidth
-                    getOptionSelected={(option, val) => option === val}
-                    getOptionLabel={(option) => option}
-                    renderInput={(params) => <TextField {...params} variant="outlined" label="Select Filter" size="small" />}
-                  />
-                </Grid>
-                <Grid item xs={12} md={7}>
-                  <Grid container spacing={1}>
-                    {selectedResource &&
-                      selectedResource.length > 0 &&
-                      selectedResource.map((data: string) => {
-                        data = data === 'Plant' ? 'Warehouse' : data;
-                        const options = data === 'Status' ? status[resourceCamelCase] : dropdownList && dropdownList[data] ? dropdownList[data] : [];
-                        if (data === 'Date') {
-                          return (
-                            <MuiPickersUtilsProvider utils={MomentUtils}>
-                              <KeyboardDatePicker
-                                autoOk
-                                size="medium"
-                                variant="inline"
-                                inputVariant="outlined"
-                                name="startDate"
-                                label="Start Date"
-                                value={betweenDate.startDate}
-                                onChange={(date: any) => {
-                                  setBetweenDate({
-                                    ...betweenDate,
-                                    startDate: date
-                                  });
-                                }}
-                                format={dateFormat}
-                                InputLabelProps={{
-                                  shrink: true
-                                }}
-                                margin="dense"
-                              />
-                              <Box mx={1} />
-                              <KeyboardDatePicker
-                                autoOk
-                                size="medium"
-                                variant="inline"
-                                inputVariant="outlined"
-                                name="endDate"
-                                label="End Date"
-                                value={betweenDate.endDate}
-                                onChange={(date: any) => {
-                                  setBetweenDate({
-                                    ...betweenDate,
-                                    endDate: date
-                                  });
-                                }}
-                                format={dateFormat}
-                                InputLabelProps={{
-                                  shrink: true
-                                }}
-                                margin="dense"
-                              />
-                            </MuiPickersUtilsProvider>
-                          );
-                        } else {
-                          return (
-                            <Grid item xs={12} sm={4} key={data}>
-                              <Autocomplete
-                                options={options}
-                                limitTags={2}
-                                disableCloseOnSelect={false}
-                                disableListWrap
-                                ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
-                                multiple
-                                value={selectedData && selectedData[data] ? selectedData[data] : []}
-                                onChange={(_, val) => setSelectedData({ ...selectedData, [data]: val })}
-                                fullWidth
-                                getOptionSelected={(option, val) => (data === 'Status' ? option === val : option.optionValue === val.optionValue)}
-                                getOptionLabel={(option) => (data === 'Status' ? option : option.optionLabel)}
-                                renderInput={(params) => (
-                                  <TextField {...params} variant="outlined" label={data === 'Warehouse' ? 'Plant' : data} size="small" />
-                                )}
-                              />
-                            </Grid>
-                          );
-                        }
-                      })}
-                  </Grid>
-                </Grid>
-                <Grid item xs={12} md={2}>
-                  <Box display="flex" justifyContent="flex-end" alignItems="center">
-                    <Button
-                      onClick={fetchResourceData}
-                      startIcon={loading ? <CircularProgress color="inherit" size={18} /> : <List />}
-                      color="primary"
-                      variant="contained"
-                      size="small"
-                      disableElevation
-                      disabled={loading}
-                    >
-                      Show
-                    </Button>
-                  </Box>
-                </Grid>
-              </Grid>
-            </div> */}
             {!showGrid ? (
               <ReportFilters
                 resourceColumns={resourceColumns}
@@ -460,6 +340,10 @@ const Report = () => {
                 selectedReportView={selectedReportView}
                 reportList={reportList}
                 setReportList={setReportList}
+                statusPeriod={statusPeriod}
+                setStatusPeriod={setStatusPeriod}
+                statusPeriodDate={statusPeriodDate}
+                setStatusPeriodDate={setStatusPeriodDate}
               />
             ) : (
               <div>

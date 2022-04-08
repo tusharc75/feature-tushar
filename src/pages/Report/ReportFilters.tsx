@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Box, Container, TextField, Grid, Button, CircularProgress, Typography, IconButton } from '@material-ui/core';
+import { Box, Container, TextField, Grid, Button, CircularProgress, Typography, IconButton, FormControlLabel, Checkbox } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { Delete, List } from '@material-ui/icons';
 import { KeyboardDatePicker } from '@material-ui/pickers';
@@ -31,10 +31,15 @@ interface FiltersProps {
   selectedReportView: any;
   reportList: any;
   setReportList: any;
+  statusPeriod?: boolean;
+  setStatusPeriod?: any;
+  statusPeriodDate?: any;
+  setStatusPeriodDate?: any;
 }
 
 const ReportFilters = (props: FiltersProps) => {
   const {
+    resource,
     resourceColumns,
     fetchReportData,
     loading,
@@ -53,10 +58,15 @@ const ReportFilters = (props: FiltersProps) => {
     setSelectedReportView,
     selectedReportView,
     reportList,
-    setReportList
+    setReportList,
+    statusPeriod,
+    setStatusPeriod,
+    statusPeriodDate,
+    setStatusPeriodDate
   } = props;
   const [showConfirmDialog, setShowConfirmDialog] = React.useState({ open: false, id: null, name: '' });
   const [isDeleting, setDeleting] = React.useState(false);
+  const [isStatusPeriod, setIsStatusPeriod] = React.useState(false);
 
   React.useEffect(() => {
     if (!resourceColumns && resourceColumns.length === 0) return;
@@ -133,6 +143,7 @@ const ReportFilters = (props: FiltersProps) => {
       });
       return prevState;
     });
+    setIsStatusPeriod(resource.includes('Serialized Asset') && Boolean(selectedResources.find((res) => res.fieldName === 'status')));
   }, [selectedResources]);
 
   return (
@@ -154,19 +165,6 @@ const ReportFilters = (props: FiltersProps) => {
             } else {
               setSelectedResources(val);
             }
-            // if (selectedData) {
-            //   setSelectedData((prevState) => {
-            //     const data = Object.keys(prevState);
-            //     const unselected = data.filter((d) => !val.includes(d));
-            //     const unselectedData = { ...prevState };
-            //     unselected.forEach((_d) => {
-            //       if (unselectedData[_d]) {
-            //         delete unselectedData[_d];
-            //       }
-            //     });
-            //     return unselectedData;
-            //   });
-            // }
           }}
           fullWidth
           getOptionSelected={(option, val) => option.fieldName === val.fieldName}
@@ -196,6 +194,65 @@ const ReportFilters = (props: FiltersProps) => {
                     </Grid>
                   )}
 
+                  {isStatusPeriod ? (
+                    <>
+                      <Grid item key={field._id} xs={12}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox checked={statusPeriod} onChange={(e) => setStatusPeriod((state: boolean) => !state)} name="statusPeriod" />
+                          }
+                          label="Status Period"
+                        />
+                      </Grid>
+
+                      {statusPeriod && (
+                        <>
+                          {' '}
+                          <Grid key={field._id} item xs={12} sm={6}>
+                            <KeyboardDatePicker
+                              autoOk
+                              fullWidth
+                              size="medium"
+                              variant="inline"
+                              inputVariant="outlined"
+                              name={`from_statusPeriod`}
+                              label={`From Status Period`}
+                              value={statusPeriodDate && statusPeriodDate[`from_statusPeriod`] ? statusPeriodDate[`from_statusPeriod`] : null}
+                              onChange={(date: any) => {
+                                setStatusPeriodDate((prevState) => ({ ...prevState, [`from_statusPeriod`]: date }));
+                              }}
+                              format={dateFormat}
+                              InputLabelProps={{
+                                shrink: true
+                              }}
+                              margin="dense"
+                            />
+                          </Grid>
+                          <Grid key={field._id} item xs={12} sm={6}>
+                            <KeyboardDatePicker
+                              autoOk
+                              fullWidth
+                              size="medium"
+                              variant="inline"
+                              inputVariant="outlined"
+                              name={`to_statusPeriod`}
+                              label={`To Status Period`}
+                              value={statusPeriodDate && statusPeriodDate[`to_statusPeriod`] ? statusPeriodDate[`to_statusPeriod`] : null}
+                              onChange={(date: any) => {
+                                setStatusPeriodDate((prevState) => ({ ...prevState, [`to_statusPeriod`]: date }));
+                              }}
+                              format={dateFormat}
+                              InputLabelProps={{
+                                shrink: true
+                              }}
+                              margin="dense"
+                            />
+                          </Grid>
+                        </>
+                      )}
+                    </>
+                  ) : null}
+
                   {field.type === 'date' && (
                     <>
                       <Grid key={field._id} item xs={12} sm={6}>
@@ -209,17 +266,7 @@ const ReportFilters = (props: FiltersProps) => {
                           label={`From ${field.fieldLabel}`}
                           value={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : null}
                           onChange={(date: any) => {
-                            if (date) {
-                              setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
-                            } else {
-                              setBetweenDate((prevSate) => {
-                                if (prevSate[`from_${field.fieldName}`]) {
-                                  delete prevSate[`from_${field.fieldName}`];
-                                }
-
-                                return prevSate;
-                              });
-                            }
+                            setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
                           }}
                           format={dateFormat}
                           InputLabelProps={{
@@ -239,17 +286,7 @@ const ReportFilters = (props: FiltersProps) => {
                           label={`To ${field.fieldLabel}`}
                           value={betweenDate && betweenDate[`to_${field.fieldName}`] ? betweenDate[`to_${field.fieldName}`] : null}
                           onChange={(date: any) => {
-                            if (date) {
-                              setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
-                            } else {
-                              setBetweenDate((prevSate) => {
-                                if (prevSate[`to_${field.fieldName}`]) {
-                                  delete prevSate[`to_${field.fieldName}`];
-                                }
-
-                                return prevSate;
-                              });
-                            }
+                            setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
                           }}
                           format={dateFormat}
                           InputLabelProps={{
