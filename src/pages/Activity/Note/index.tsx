@@ -424,6 +424,7 @@ const Note = () => {
                             showConfirmBox(selectedRecords);
                             closeActions();
                           }}
+                          disabled={!permissions.note.isDelete}
                         >
                           Delete
                         </MenuItem>
