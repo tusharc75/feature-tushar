@@ -65,7 +65,6 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
       await GetTaskDetail(id)
         .then(({ data }) => {
           setInitialValues(null);
-          console.log(data);
           setInitialValues(data);
           setFormValues(data);
         })
@@ -123,7 +122,6 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
   };
 
   const handleValuesChange = (data) => {
-    console.log(data);
     setFormValues((prevState) => ({
       ...prevState,
       ...data

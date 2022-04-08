@@ -76,7 +76,6 @@ const AddInventory = (props: Props) => {
         data = data.filter((d: any) => !exisitingIds.includes(d.productName));
         let rows = data?.map((u: any) => {
           const selectedData = selectedProducts.find((d: any) => d._id === u._id);
-          console.log(selectedData ? selectedData.qty : 0)
           let finalObject = prepareDataForGrid(u);
           finalObject['productId'] = u._id;
           finalObject['qty'] = selectedData ? selectedData.qty : 0;
