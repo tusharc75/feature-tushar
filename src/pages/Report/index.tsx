@@ -204,7 +204,7 @@ const Report = () => {
           if (betweenDate[field]) {
             deepFilter.push({
               field,
-              term: moment(betweenDate[field]).format('DD/MM/YYYY')
+              term: moment(betweenDate[field]).format('mm/dd/yyyy')
             });
           }
         });
