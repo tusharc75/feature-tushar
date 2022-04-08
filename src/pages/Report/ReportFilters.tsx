@@ -143,7 +143,11 @@ const ReportFilters = (props: FiltersProps) => {
       });
       return prevState;
     });
-    setIsStatusPeriod(resource.includes('Serialized Asset') && Boolean(selectedResources.find((res) => res.fieldName === 'status')));
+    setIsStatusPeriod(
+      resource.includes('Serialized Asset') &&
+        Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
+        formValues?.hasOwnProperty('status')
+    );
   }, [selectedResources]);
 
   useEffect(() => {
@@ -208,65 +212,6 @@ const ReportFilters = (props: FiltersProps) => {
                     </Grid>
                   )}
 
-                  {isStatusPeriod ? (
-                    <>
-                      <Grid item key={field._id} xs={12}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox checked={statusPeriod} onChange={(e) => setStatusPeriod((state: boolean) => !state)} name="statusPeriod" />
-                          }
-                          label="Status Period"
-                        />
-                      </Grid>
-
-                      {statusPeriod && (
-                        <>
-                          {' '}
-                          <Grid key={field._id} item xs={12} sm={6}>
-                            <KeyboardDatePicker
-                              autoOk
-                              fullWidth
-                              size="medium"
-                              variant="inline"
-                              inputVariant="outlined"
-                              name={`from_statusPeriod`}
-                              label={`From Status Period`}
-                              value={statusPeriodDate && statusPeriodDate[`from_statusPeriod`] ? statusPeriodDate[`from_statusPeriod`] : null}
-                              onChange={(date: any) => {
-                                setStatusPeriodDate((prevState) => ({ ...prevState, [`from_statusPeriod`]: date }));
-                              }}
-                              format={dateFormat}
-                              InputLabelProps={{
-                                shrink: true
-                              }}
-                              margin="dense"
-                            />
-                          </Grid>
-                          <Grid key={field._id} item xs={12} sm={6}>
-                            <KeyboardDatePicker
-                              autoOk
-                              fullWidth
-                              size="medium"
-                              variant="inline"
-                              inputVariant="outlined"
-                              name={`to_statusPeriod`}
-                              label={`To Status Period`}
-                              value={statusPeriodDate && statusPeriodDate[`to_statusPeriod`] ? statusPeriodDate[`to_statusPeriod`] : null}
-                              onChange={(date: any) => {
-                                setStatusPeriodDate((prevState) => ({ ...prevState, [`to_statusPeriod`]: date }));
-                              }}
-                              format={dateFormat}
-                              InputLabelProps={{
-                                shrink: true
-                              }}
-                              margin="dense"
-                            />
-                          </Grid>
-                        </>
-                      )}
-                    </>
-                  ) : null}
-
                   {field.type === 'date' && (
                     <>
                       <Grid key={field._id} item xs={12} sm={6}>
@@ -318,6 +263,62 @@ const ReportFilters = (props: FiltersProps) => {
                 <Typography>No filters selected</Typography>
               </Box>
             )}
+            {isStatusPeriod ? (
+              <>
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={<Checkbox checked={statusPeriod} onChange={(e) => setStatusPeriod((state: boolean) => !state)} name="statusPeriod" />}
+                    label="Status Period"
+                  />
+                </Grid>
+
+                {statusPeriod && (
+                  <>
+                    {' '}
+                    <Grid item xs={12} sm={6}>
+                      <KeyboardDatePicker
+                        autoOk
+                        fullWidth
+                        size="medium"
+                        variant="inline"
+                        inputVariant="outlined"
+                        name={`from_statusPeriod`}
+                        label={`From Status Period`}
+                        value={statusPeriodDate && statusPeriodDate[`from_statusPeriod`] ? statusPeriodDate[`from_statusPeriod`] : null}
+                        onChange={(date: any) => {
+                          setStatusPeriodDate((prevState) => ({ ...prevState, [`from_statusPeriod`]: date }));
+                        }}
+                        format={dateFormat}
+                        InputLabelProps={{
+                          shrink: true
+                        }}
+                        margin="dense"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <KeyboardDatePicker
+                        autoOk
+                        fullWidth
+                        size="medium"
+                        variant="inline"
+                        inputVariant="outlined"
+                        name={`to_statusPeriod`}
+                        label={`To Status Period`}
+                        value={statusPeriodDate && statusPeriodDate[`to_statusPeriod`] ? statusPeriodDate[`to_statusPeriod`] : null}
+                        onChange={(date: any) => {
+                          setStatusPeriodDate((prevState) => ({ ...prevState, [`to_statusPeriod`]: date }));
+                        }}
+                        format={dateFormat}
+                        InputLabelProps={{
+                          shrink: true
+                        }}
+                        margin="dense"
+                      />
+                    </Grid>
+                  </>
+                )}
+              </>
+            ) : null}
           </Grid>
         </Box>
         <Box mt={2}>
