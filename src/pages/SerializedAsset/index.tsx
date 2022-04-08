@@ -291,7 +291,7 @@ const SerializedAsset = () => {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
-    return `${deepFilter}${!isExport ? '&filterType=and&filterByIdType=and' : ''}`;
+    return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
 
   const handleDelete = () => {
