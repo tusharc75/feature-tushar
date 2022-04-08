@@ -21,11 +21,16 @@ import emailStyles from "../../../pages/Activity/Email/email.module.scss"
 import ImagePreview from "../Email/ImagePreview";
 import ConfirmationDialog from "../../Helpers/ConfirmationDialog";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
+import { useData } from '../../../StateProvider/Provider';
+
 
 const AttachmentSchema = object().shape({
     name: string().required("please add attachment name"),
     fileUrl: string().required("please upload attachment"),
 });
+
+
+
 
 const fileIcons = [
     {
@@ -77,6 +82,9 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [formValues, setFormValues] = useState({})
 
+    const {
+        state: { permissions }
+      }: any = useData();
     useEffect(() => {
         fetchAttachmentDetail();
     }, []);
@@ -265,7 +273,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                                                             <GetAppIcon />
                                                         }
                                                     </IconButton>
-                                                    {canEdit ? <IconButton >
+                                                    {canEdit && permissions.attachment.isDelete ? <IconButton >
                                                         {
                                                             <DeleteIcon color='error'
                                                                 onClick={() => {
@@ -278,7 +286,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                                                     </IconButton> :
                                                         <Tooltip
                                                             className='cursor-stop'
-                                                            title="Signed quote attachments can not be deleted"
+                                                            title={permissions.quoteBuilder.isDelete ? "Signed quote attachments can not be deleted": "You don't have permissions to delete attachment"}
                                                         >
                                                             <IconButton>
                                                                 <DeleteIcon color='disabled' />

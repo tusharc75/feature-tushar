@@ -133,7 +133,6 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit })
     const handleValueUpdate = async (row) => {
         if (!row || !row?.data) return;
         const assetId = row.data._id;
-        console.log(row);
         const data = [
             {
                 _id: assetId,

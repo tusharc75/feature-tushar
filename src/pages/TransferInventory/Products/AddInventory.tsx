@@ -7,7 +7,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from 'src/pages/Leads/Header.module.scss';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import { isObjectEmpty, gridLoadingTimeout } from 'src/constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { isMobile } from 'react-device-detect';
@@ -25,18 +25,20 @@ interface Props {
 }
 
 const AddInventory = (props: Props) => {
-  
   const { plantId, close, isAdding, submit, renderedFrom, existingProducts } = props;
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
-  const { state: { permissions } }: any = useData();
+  const {
+    state: { permissions }
+  }: any = useData();
 
   useEffect(() => {
     fetchProductInventory();
-  }, [page, limit, filters, sorting, search]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   let columns = [
     { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
@@ -69,17 +71,23 @@ const AddInventory = (props: Props) => {
     axiosInstance()
       .get(`/product-inventory?wareHouse=${plantId}&${queryString}`)
       .then(({ data: { data, count } }) => {
+        const selectedProducts = getLocalStorageArrayData(localStorageSelectedRecords);
         const exisitingIds = existingProducts.map((d: any) => d.productName);
         data = data.filter((d: any) => !exisitingIds.includes(d.productName));
         let rows = data?.map((u: any) => {
+          const selectedData = selectedProducts.find((d: any) => d._id === u._id);
           let finalObject = prepareDataForGrid(u);
           finalObject['productId'] = u._id;
-          finalObject['qty'] = 0;
+          finalObject['qty'] = selectedData ? selectedData.qty : 0;
           finalObject['inventory'] = u?.inventory && !isNaN(Number(u.inventory)) ? Number(u.inventory) : 0;
           return {
             ...finalObject
           };
         });
+        if (selectedProducts.length > 0 && showFilteredRecordsOnly) {
+          rows = selectedProducts;
+        }
+
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -107,6 +115,11 @@ const AddInventory = (props: Props) => {
       });
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
     }
+
+    if (showFilteredRecordsOnly) {
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
+    }
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -157,6 +170,7 @@ const AddInventory = (props: Props) => {
       }
       return d;
     });
+    localStorage.setItem(localStorageSelectedRecords, JSON.stringify(newRecords));
     dispatch({ type: 'selection', selectedRecords: newRecords });
   };
 
@@ -227,6 +241,7 @@ const AddInventory = (props: Props) => {
             pageSizes={pageSizes}
             page={page}
             onCellValueChanged={onCellValueChanged}
+            showOnlyShowFilteredRecordSwitch={true}
             actionWidth={150}
             loading={loading}
             renderedFrom={renderedFrom}
