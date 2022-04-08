@@ -423,9 +423,8 @@ export default function Contact(props) {
 
   const ActionsRenderer = (params) => (
     <>
-      <Tooltip
-        className={contactPermissions.isCreate ? '' : 'cursor-stop'}
-        title={contactPermissions.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
+      {contactPermissions.isCreate ? (<Tooltip
+        title='Clone'
       >
         <IconButton
           size="small"
@@ -436,7 +435,21 @@ export default function Contact(props) {
         >
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
-      </Tooltip>
+      </Tooltip>) :
+        (
+          <Tooltip
+            className='cursor-stop'
+            title='You do not have permission to clone/create'
+          >
+            <IconButton
+              size="small"
+              aria-label="Clone"
+            >
+              <FileCopyIcon fontSize="small" color="disabled" />
+            </IconButton>
+          </Tooltip>
+        )
+      }
       <GridDeleteIcon
         hasDeletePermission={contactPermissions.isDelete}
         ownerId={params.data.ownerId}
