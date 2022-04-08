@@ -1,5 +1,5 @@
 import { useState, FC, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Box, Button, capitalize, Chip, ClickAwayListener, Divider, Grid, IconButton, InputBase, List, ListItem, ListItemText, Menu, MenuItem, TextField, Tooltip, Typography } from '@material-ui/core';
+import { Badge, Box, Button, capitalize, Chip, ClickAwayListener, Divider, Grid, IconButton, InputBase, List, ListItem, ListItemText, Menu, MenuItem, TextField, Tooltip, Typography } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -19,9 +19,10 @@ import { makeStyles } from '@material-ui/core';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid } from 'src/constants/helpers';
 import { CommonRenderer, ImageRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
-import { MdAddShoppingCart, MdBorderAll, MdList } from 'react-icons/md';
+import { MdAddShoppingCart, MdBorderAll, MdList, MdShoppingCart } from 'react-icons/md';
 import { camelCase, filter } from 'lodash';
 import Scan from 'src/components/Scan';
+import CartDialog from './CartDialog';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -124,6 +125,7 @@ const Pos = () => {
     const [products, setProducts] = useState([]);
     const [hasMore, setHasMore] = useState(false)
     const [scanDialog, setScanDialog] = useState(false)
+    const [cartDialog, setCartDialog] = useState(false)
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting } = state;
@@ -146,12 +148,14 @@ const Pos = () => {
     const ActionsRenderer = (params) => (
         <Fragment>
             <Tooltip
-                title={'Add to cart'}
+                title={!params.data?.inventory || params.data?.inventory === 0 ? 'No inventory' : 'Add to cart'}
             >
                 <IconButton
                     size="small"
-                    aria-label="Clone"
+                    disabled={!params.data?.inventory || params.data?.inventory === 0}
+                    aria-label="Add to cart"
                     onClick={() => {
+                        handleAddToCart([params.data])
                     }}
                 >
                     <MdAddShoppingCart fontSize="small" color="primary" />
@@ -174,12 +178,19 @@ const Pos = () => {
     }, [])
 
     const getPlants = () => {
+        let api = (user?.user?.customerAccountId || user?.user?.customerContactId) ? `${routes.warehouse.path}/customer-account` : `/warehouse?noEntityWise=1`
         axiosInstance()
-            .get(`/warehouse?noEntityWise=1`)
+            .get(api)
             .then(({ data: { data } }) => {
-                plantId === null && setPlantId(data[0]._id)
-                setPlantOptions(data);
-                plantId === null && setPlant(data[0].warehouseName);
+                let row;
+                row = data.map(d => ({
+                    "warehouseId": d.warehouse || d._id,
+                    "warehouseName": d.warehouseName,
+                }))
+
+                plantId === null && setPlantId(row[0].warehouseId)
+                setPlantOptions(row);
+                plantId === null && setPlant(row[0].warehouseName);
             });
     }
 
@@ -224,13 +235,13 @@ const Pos = () => {
                 return [...prevState, ...data];
             });
             setHasMore(data.length !== count);
-            let rows = data.map((u) => {
-                let finalObject = prepareDataForGrid(u);
-                return {
-                    ...finalObject
-                };
-            });
-            dispatch({ type: 'initialize', data: rows, count: count });
+            // let rows = data.map((u) => {
+            //     let finalObject = prepareDataForGrid(u);
+            //     return {
+            //         ...finalObject
+            //     };
+            // });
+            dispatch({ type: 'initialize', data: data, count: count });
             setTimeout(() => {
                 dispatch({ type: 'loading', loading: false });
             }, gridLoadingTimeout);
@@ -265,11 +276,45 @@ const Pos = () => {
         dispatch({ type: 'search', search: e.target.value });
     };
 
+    const handleAddToCart = (product) => {
+        let tempProductArray = product.map(d => ({
+            "product": d._id,
+            "qty": d?.qty ? parseInt(d.qty) : 1,
+        }))
+        axiosInstance().post(`/pos/cart`, tempProductArray)
+            .then(({ data }) => {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: data.message
+                });
+            }).catch((error) => {
+                toastConfig.setToastConfig(error)
+            });
+    };
+
     return (
         <Fragment>
             <Grid container className="headerbox">
                 <Grid item md={4} sm={11} xs={10}>
                     <CustomBreadCrumbs routes={[routes.pos]} />
+                </Grid>
+                <Grid item md={8} sm={11} xs={10}>
+                    <Box display={"flex"} justifyContent="flex-end">
+                        <IconButton
+                            id="Cart"
+                            aria-label="settings"
+                            color="inherit"
+                            title="Cart"
+                            onClick={() => { setCartDialog(true) }}
+                            className="showIconLayout"
+                        >
+                            <Badge badgeContent={1} color="secondary">
+                                <MdShoppingCart style={{ color: "white" }} />
+                            </Badge>
+                        </IconButton>
+                        <Box mx={1} />
+                    </Box>
                 </Grid>
             </Grid>
             <CustomContainer>
@@ -282,15 +327,15 @@ const Pos = () => {
                                 getOptionLabel={(option: any) => option.warehouseName}
                                 disableClearable
                                 getOptionSelected={(option: any, val) =>
-                                    option._id === val
+                                    option.warehouseId === val
                                 }
-                                value={plantOptions.filter((data) => data._id === plantId).length
-                                    ? plantOptions.filter((data) => data._id === plantId)[0]
+                                value={plantOptions.filter((data) => data.warehouseId === plantId).length
+                                    ? plantOptions.filter((data) => data.warehouseId === plantId)[0]
                                     : ""
                                 }
                                 onChange={(e, val) => {
                                     if (val !== null) {
-                                        setPlantId(val && val._id ? val._id : "")
+                                        setPlantId(val && val.warehouseId ? val.warehouseId : "")
                                     }
                                 }}
                                 renderInput={(params) => (
@@ -339,23 +384,26 @@ const Pos = () => {
                                     <CropFreeIcon style={{ color: "black" }} />
                                 </IconButton>
                             </Box>
+                            <Box display="flex" alignItems="center">
+                                <ToggleButtonGroup
+                                    size="small"
+                                    className=" toggle-button-layout"
+                                    value={filter}
+                                    exclusive
+                                    onChange={handleFilter}
+                                >
+                                    <ToggleButton value={'grid'} key={0}>
+                                        <MdList fontSize="small" color="primary" />
+                                    </ToggleButton>
+                                    <ToggleButton value={'tile'} key={1}>
+                                        <MdBorderAll fontSize="small" color="primary" />
+                                    </ToggleButton>
+                                </ToggleButtonGroup>
+                            </Box>
                         </Grid>
                     </Grid>
                 </div>
-                <ToggleButtonGroup
-                    size="small"
-                    className=" toggle-button-layout"
-                    value={filter}
-                    exclusive
-                    onChange={handleFilter}
-                >
-                    <ToggleButton value={'grid'} key={0}>
-                        <MdList fontSize="small" color="primary" />
-                    </ToggleButton>
-                    <ToggleButton value={'tile'} key={1}>
-                        <MdBorderAll fontSize="small" color="primary" />
-                    </ToggleButton>
-                </ToggleButtonGroup>
+
                 {Object.keys(frameWorkComponent).length > 0 && filter === 'grid' && (
                     <CustomAgGrid
                         columns={columns}
@@ -388,7 +436,7 @@ const Pos = () => {
                             products.length !== 0 ? <div className={`${styles.product_list_container}`}>
                                 {
                                     products.map((product, index: number) => (
-                                        <ProductCard key={index} product={product} />
+                                        <ProductCard key={index} product={product} handleAddToCart={handleAddToCart} />
                                     ))
                                 }
                             </div> : (loading === true ? <div className={`${styles.product_list_container}`}>
@@ -405,6 +453,12 @@ const Pos = () => {
                     </InfiniteScroll>}
                 {
                     scanDialog && <Scan onClose={() => setScanDialog(false)} />
+                }
+                {
+                    cartDialog && <CartDialog
+                        cartDialogOpen={cartDialog}
+                        handleCloseDialog={() => { setCartDialog(false) }}
+                    />
                 }
             </CustomContainer>
 

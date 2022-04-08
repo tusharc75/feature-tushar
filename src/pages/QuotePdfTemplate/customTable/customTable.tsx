@@ -43,7 +43,6 @@ export default function customTable({ id, classes, entity, table, setTable }) {
                 variant="contained"
                 color="primary"
                 onClick={() => {
-                  console.log(table);
                   setTable((tables) => [...tables, { resourceName: null, columns: [''], fieldsOptions: [] }]);
                 }}
               >
@@ -52,7 +51,6 @@ export default function customTable({ id, classes, entity, table, setTable }) {
               </Button>
               <Fragment>
                 {table.map((data, index) => {
-                  console.log(table);
                   return (
                     <Box key={index} border={1} borderColor={'grey.300'} borderRadius={1} padding={0.8} marginTop={1}>
                       <Box style={{ display: 'flex', justifyContent: 'space-between' }}>
