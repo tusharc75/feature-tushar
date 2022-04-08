@@ -146,9 +146,10 @@ const ReportFilters = (props: FiltersProps) => {
     setIsStatusPeriod(
       resource.includes('Serialized Asset') &&
         Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
-        formValues?.hasOwnProperty('status')
+        formValues?.hasOwnProperty('status') &&
+        formValues.status.length > 0
     );
-  }, [selectedResources]);
+  }, [selectedResources, formValues]);
 
   useEffect(() => {
     setStatusPeriodDate((prevState) => {
@@ -193,9 +194,9 @@ const ReportFilters = (props: FiltersProps) => {
           <Grid container spacing={2}>
             {selectedResources.length > 0 ? (
               selectedResources.map((field: any) => (
-                <>
+                <React.Fragment key={field._id}>
                   {field.fieldName !== 'all' && field.type !== 'date' && (
-                    <Grid key={field._id} item xs={12} sm={6} md={6}>
+                    <Grid item xs={12} sm={6} md={6}>
                       <FormTypes
                         values={formValues}
                         errors={{}}
@@ -214,7 +215,7 @@ const ReportFilters = (props: FiltersProps) => {
 
                   {field.type === 'date' && (
                     <>
-                      <Grid key={field._id} item xs={12} sm={6}>
+                      <Grid item xs={12} sm={6}>
                         <KeyboardDatePicker
                           autoOk
                           fullWidth
@@ -234,7 +235,7 @@ const ReportFilters = (props: FiltersProps) => {
                           margin="dense"
                         />
                       </Grid>
-                      <Grid key={field._id} item xs={12} sm={6}>
+                      <Grid item xs={12} sm={6}>
                         <KeyboardDatePicker
                           autoOk
                           fullWidth
@@ -256,7 +257,7 @@ const ReportFilters = (props: FiltersProps) => {
                       </Grid>
                     </>
                   )}
-                </>
+                </React.Fragment>
               ))
             ) : (
               <Box textAlign="center" width="100%">
