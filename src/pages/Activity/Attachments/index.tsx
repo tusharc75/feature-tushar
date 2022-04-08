@@ -315,14 +315,14 @@ export default function Attachment() {
           <GoArrowDown size={26} />
         </IconButton>
       </Tooltip>
-      {params.data.canEdit ? (
+      {params.data.canEdit && permissions.attachment.isDelete ? (
         <Tooltip title="Delete">
           <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(params.data)}>
             <DeleteIcon fontSize="small" color="error" />
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip className="cursor-stop" title="Signed Quote Attachment can not be deleted">
+        <Tooltip className="cursor-stop" title={permissions.quoteBuilder.isRead ? "Signed Quote Attachment can not be deleted": "You don't have permission to delete attachment"}>
           <IconButton size="small" aria-label="Delete">
             <DeleteIcon fontSize="small" color="disabled" />
           </IconButton>
@@ -557,7 +557,7 @@ export default function Attachment() {
                       onClose={closeActions}
                     >
                       <MenuItem
-                        disabled={!selectedRecords.some((records) => records.canEdit)}
+                        disabled={permissions.attachment.isDelete ? !selectedRecords.some((records) => records.canEdit): true}
                         onClick={() => {
                           showConfirmBox(null);
                           closeActions();

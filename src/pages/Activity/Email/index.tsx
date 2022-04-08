@@ -227,11 +227,19 @@ const Email = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      <Tooltip title="Delete">
+      {permissions.email.isDelete ? 
+      (<Tooltip title="Delete">
         <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(params.data)}>
           <DeleteIcon fontSize="small" color="error" />
         </IconButton>
-      </Tooltip>
+      </Tooltip>)
+      : (
+        <Tooltip className="cursor-stop" title="You don't have the permissions to delete">
+          <IconButton size="small" aria-label="Delete">
+            <DeleteIcon fontSize="small" color="disabled" />
+          </IconButton>
+        </Tooltip>
+      )}
     </>
   );
 
@@ -511,6 +519,7 @@ const Email = () => {
                           showConfirmBox(null);
                           closeActions();
                         }}
+                        disabled={!permissions.email.isDelete}
                       >
                         Delete
                       </MenuItem>
