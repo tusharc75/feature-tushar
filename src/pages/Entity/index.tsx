@@ -151,18 +151,20 @@ const Entity: FC = () => {
     <Tooltip
       className={permissions[entityResource]?.isCreate ? "" : "cursor-stop"}
       title={permissions[entityResource]?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
-      <IconButton
-        size="small"
-        aria-label="Clone"
-        onClick={() => {
-          setIsOpen({ open: true, isClone: true, entityId: params.data._id })
-        }}
-      >
-        <FileCopyIcon fontSize="small" color="primary" />
-      </IconButton>
+      <span>
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          disabled={!permissions[entityResource]?.isCreate}
+          onClick={() => {
+            setIsOpen({ open: true, isClone: true, entityId: params.data._id })
+          }}
+        >
+          <FileCopyIcon fontSize="small" color={permissions[entityResource]?.isCreate ? "primary" : "inherit"} />
+        </IconButton>
+      </span>
     </Tooltip>
     {permissions[entityResource]?.isUpdate && permissions?.role.isRead && permissions?.user.isRead ?
-
       <Tooltip title="Assign users">
         <IconButton
           size="small"
@@ -175,11 +177,10 @@ const Entity: FC = () => {
         >
           <FaUser className="text-primary" />
         </IconButton>
-      </Tooltip>
-      :
+      </Tooltip> :
       <Tooltip className="cursor-stop" title={`You don't have permission to update this entity`}>
         <IconButton size="small" aria-label="Assign users">
-          <FaUser className="text-primary" />
+          <FaUser />
         </IconButton>
       </Tooltip>
     }
