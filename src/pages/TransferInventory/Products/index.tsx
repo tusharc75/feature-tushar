@@ -17,8 +17,7 @@ import AddInventory from './AddInventory';
 import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
 
-const Products = ({ transferInventoryData, setNextStep, renderedFrom }) => {
-
+const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -141,7 +140,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom }) => {
   );
 
   const ActionRenderer = (params) =>
-    permissions?.transferInventory.isUpdate && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inTransit]?.includes(transferInventoryData?.status) ? (
+    [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inTransit]?.includes(transferInventoryData?.status) ? (
       <>
         <GridDeleteIcon
           hasDeletePermission={permissions?.transferInventory.isUpdate}
@@ -190,45 +189,42 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom }) => {
 
   return (
     <React.Fragment>
-      {[TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inTransit]?.includes(transferInventoryData?.status) &&
+      {allowedToEdit && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inTransit]?.includes(transferInventoryData?.status) && (
         <Box display="flex" justifyContent="space-between" mx="4px">
-          {permissions?.transferInventory.isUpdate && (
+          <Button
+            variant={isMobile ? 'text' : 'contained'}
+            color="primary"
+            size="small"
+            style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
+            onClick={() => {
+              setAddInventoryDialog(true);
+            }}
+          >
+            {isMobile && !isTablet ? <MdAdd size={22} /> : `Add Product`}
+          </Button>
+
+          <Box display="flex">
             <Button
               variant={isMobile ? 'text' : 'contained'}
-              color="primary"
               size="small"
-              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
+              color="primary"
+              style={isMobile && !isTablet ? { color: 'var(--danger-light)' } : {}}
+              disabled={selectedRecords.length === 0}
               onClick={() => {
-                setAddInventoryDialog(true);
+                setShowConfirmBox(true);
+                setRemoveData(selectedRecords.map((inv: any) => inv?._id));
               }}
             >
-              {isMobile && !isTablet ? <MdAdd size={22} /> : `Add Product`}
+              {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : 'Remove Product'}
             </Button>
-          )}
-          <Box display="flex">
-            {permissions?.transferInventory.isUpdate && (
-              <Button
-                variant={isMobile ? 'text' : 'contained'}
-                size="small"
-                color="primary"
-                style={isMobile && !isTablet ? { color: 'var(--danger-light)' } : {}}
-                disabled={selectedRecords.length === 0}
-                onClick={() => {
-                  setShowConfirmBox(true);
-                  setRemoveData(selectedRecords.map((inv: any) => inv?._id));
-                }}
-              >
-                {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : 'Remove Product'}
-              </Button>
-            )}
           </Box>
         </Box>
-      }
+      )}
       <Box mt={1}>
         {isMobile && !isTablet ? (
           <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
+            allowSelection={allowedToEdit}
+            allowSwipe={allowedToEdit}
             permissions={permissions?.transferInventory}
             primaryField={columns?.find((d: any) => d.primaryField)}
             onClick={(data) => {
@@ -241,7 +237,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom }) => {
               // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
             }}
             extraParamsToCheckDelete={true}
-            onDelete={(data) => { }}
+            onDelete={(data) => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -255,7 +251,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom }) => {
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
             onCreate={false}
             showClone={false}
-            onClone={(data) => { }}
+            onClone={(data) => {}}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -269,14 +265,14 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom }) => {
             limit={limit}
             pageSizes={pageSizes}
             page={page}
-            allowAction={permissions?.transferInventory.isUpdate}
+            allowAction={allowedToEdit}
             actionWidth={120}
-            allowSelection={permissions?.transferInventory.isUpdate}
+            allowSelection={allowedToEdit}
             isClientSideGrid={true}
             loading={loading}
             onCellValueChanged={onCellValueChanged}
             renderedFrom={renderedFrom}
-            refreshGrid={() => { }}
+            refreshGrid={() => {}}
           />
         )}
       </Box>

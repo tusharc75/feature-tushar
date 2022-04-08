@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.91.0](https://github.com/vebholic/oms_frontend/compare/v2.90.0...v2.91.0) (2022-04-08)
+
+
+### Features
+
+* export to excel query pass to like find data in serialized asset and product PO-1432 ([bd404f9](https://github.com/vebholic/oms_frontend/commit/bd404f9956f7719e6c72e677b2959f8e8526b99a))
+* pos barcode scanner ([545cce7](https://github.com/vebholic/oms_frontend/commit/545cce7834270045b6b3e98039132911ca0846b1))
+
+
+### Bug Fixes
+
+* bug fix ([460e5a0](https://github.com/vebholic/oms_frontend/commit/460e5a017fc668afa0dc18415d390df59f458838))
+* bug fix ([d0c2c7d](https://github.com/vebholic/oms_frontend/commit/d0c2c7d463adca8c60f0563d627943ab205f8c38))
+* **report fix:** fix ([e9f275e](https://github.com/vebholic/oms_frontend/commit/e9f275e9c64e8ba7a5d72b5da4077ac52367ddab))
+* **report:** fix ([776a50a](https://github.com/vebholic/oms_frontend/commit/776a50aab19a31cde99eacc0bcdf06b191a7b83b))
+* **report:** fix ([c871af2](https://github.com/vebholic/oms_frontend/commit/c871af2b40633400428dbb551816939de8233d38))
+* **report:** fix ([f24691b](https://github.com/vebholic/oms_frontend/commit/f24691be4988a1b52996fa1de4b1932c45d86588))
+* **transfer inventory:** fix ([e4b5d8a](https://github.com/vebholic/oms_frontend/commit/e4b5d8a8b7273f61cf8f1d3dce22da4c893bcda0))
+
 ## [2.90.0](https://github.com/vebholic/oms_frontend/compare/v2.89.0...v2.90.0) (2022-04-07)
 
 

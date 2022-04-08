@@ -190,21 +190,37 @@ const ProductCategory = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      <Tooltip
-        className={productCategoryPermissions.isCreate ? '' : 'cursor-stop'}
-        title={productCategoryPermissions.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
-      >
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setProductCategoryId(params.data.id);
-            setOpen({ open: true, isClone: true });
-          }}
-        >
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
+      {
+        productCategoryPermissions.isCreate ?
+          (
+            <Tooltip
+              title='Clone'
+            >
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                onClick={() => {
+                  setProductCategoryId(params.data.id);
+                  setOpen({ open: true, isClone: true });
+                }}
+              >
+                <FileCopyIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Tooltip>) :
+          (
+            <Tooltip
+              className='cursor-stop'
+              title='You do not have permission to clone/create'
+            >
+              <IconButton
+                size="small"
+                aria-label="Clone"
+              >
+                <FileCopyIcon fontSize="small" color="disabled" />
+              </IconButton>
+            </Tooltip>
+          )
+      }
       {productCategoryPermissions.isDelete ? (
         <Tooltip title="Delete">
           <IconButton

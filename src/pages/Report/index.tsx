@@ -1,8 +1,9 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, filter, startCase } from 'lodash';
 import axios from 'axios';
+import moment from 'moment';
 import { MdDescription, MdChevronLeft } from 'react-icons/md';
 import styles from '../Leads/Header.module.scss';
 
@@ -41,6 +42,7 @@ const Report = () => {
   const [showGrid, setShowGrid] = React.useState(false);
   const [selectedData, setSelectedData] = React.useState(null);
   const [betweenDate, setBetweenDate] = React.useState(null);
+  const [statusPeriodDate, setStatusPeriodDate] = React.useState(null);
   const [filterOptions, setFilterOptions] = React.useState([]);
   const [selectedResources, setSelectedResources] = React.useState([]);
   const [resourceOptions, setResourceOptions] = React.useState(null);
@@ -48,6 +50,7 @@ const Report = () => {
   const [resourceColumns, setResourceColumns] = React.useState([]);
   const [isExporting, setExporting] = React.useState(false);
   const [loadingColumns, setLoadingColumns] = React.useState(false);
+  const [statusPeriod, setStatusPeriod] = React.useState(false);
   const [reportList, setReportList] = React.useState([]);
   const [selectedReportView, setSelectedReportView] = React.useState(null);
   // Grid Configs
@@ -56,7 +59,7 @@ const Report = () => {
   const [columns, setColumns] = React.useState(null);
   const [gridApi, setGridApi] = React.useState(null);
   const [state, dispatch] = React.useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+  const { dataRows, rowCount, loading, page, sorting, search, limit, pageSizes } = state;
 
   const fetchGridColumns = () => {
     setLoadingColumns(true);
@@ -111,13 +114,15 @@ const Report = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }, [showGrid]);
+  }, [showGrid, page, sorting, limit]);
 
   /**
    * Fetch resource data for selected filters,
    * @returns none if no data selected
    */
   const fetchResourceData = () => {
+    let filterQuery = getFilter();
+
     if (cancelTokenSource) {
       cancelTokenSource.cancel();
     }
@@ -127,19 +132,18 @@ const Report = () => {
       gridApi.setRowData([]);
     }
     setShowGrid(true);
-    let filterQuery = getFilter();
 
     axiosInstance()
       .get(`${resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'}/report${filterQuery}`, {
         cancelToken: cancelTokenSource.token
       })
-      .then(({ data: { data } }) => {
+      .then(({ data: { data, count } }) => {
         data = data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
           return finalObject;
         });
 
-        dispatch({ type: 'initialize', data: data, count: data.length });
+        dispatch({ type: 'initialize', data: data, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -156,46 +160,69 @@ const Report = () => {
 
   // Create and return query for filters
   const getFilter = () => {
-    let filterQuery = '';
-    if (selectedData) {
-      const keys = Object.keys(selectedData);
-      const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
-      const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
-
-      let filterById = idFilter.map((key) => {
-        const options = selectedData[key].value;
-        return {
-          field: key,
-          term: {
-            $in: options.map((d: any) => d.optionValue)
-          }
-        };
-      });
-
+    let filterQuery = `page=${page}&limit=${limit}&`;
+    if (sorting.length > 0) {
+      filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
+    }
+    if (search) {
+      filterQuery = `${filterQuery}search=${search}&`;
+    }
+    if (selectedResources.length > 0) {
       let deepFilter = [];
-      forDeepFilter.forEach((key) => {
-        const options = selectedData[key].value;
-        const filters = options.map((o: any) => ({
-          field: key,
-          term: o.optionValue
-        }));
-        deepFilter = [...deepFilter, ...filters];
-      });
+      if (selectedData) {
+        const keys = selectedData ? Object.keys(selectedData) : [];
+        const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
+        const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
 
-      if (filterById.length > 0) {
-        filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
+        let filterById = idFilter.map((key) => {
+          const options = selectedData[key].value;
+          return {
+            field: key,
+            term: {
+              $in: options.map((d: any) => d.optionValue)
+            }
+          };
+        });
+
+        forDeepFilter.forEach((key) => {
+          const options = selectedData[key].value;
+          options.forEach((o: any) => {
+            deepFilter.push({
+              field: key,
+              term: o.optionValue
+            });
+          });
+        });
+
+        if (filterById.length > 0) {
+          filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
+        }
+      }
+
+      if (betweenDate) {
+        const fields = Object.keys(betweenDate);
+        fields.forEach((field) => {
+          if (betweenDate[field]) {
+            deepFilter.push({
+              field,
+              term: moment(betweenDate[field]).format('MM/DD/YYYY')
+            });
+          }
+        });
       }
 
       if (deepFilter && deepFilter.length > 0) {
         filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
       }
     }
-    if (betweenDate && (betweenDate.actualStartDate || betweenDate.actualEndDate) && (betweenDate.EstimateStartDate || betweenDate.EstimateEndDate)) {
-      let tempBetween = {
-        from: betweenDate.actualStartDate || betweenDate.actualEndDate,
-        to: betweenDate.actualStartDate || betweenDate.actualEndDate
-      };
-      filterQuery = `${filterQuery}between=${JSON.stringify(tempBetween)}&`;
+
+    if (statusPeriod && statusPeriodDate) {
+      const fields = Object.keys(statusPeriodDate);
+      fields.forEach((field) => {
+        if (statusPeriodDate[field]) {
+          filterQuery = `${filterQuery}${field}=${moment(statusPeriodDate[field]).format('MM/DD/YYYY')}&`;
+        }
+      });
     }
 
     return `?${filterQuery}`;
@@ -245,16 +272,18 @@ const Report = () => {
             <Grid container direction="row">
               <Grid item xs={12} sm={12}>
                 <Grid container justifyContent="flex-end">
-                  <div id="importExportLinks" style={{ minWidth: 80 }}>
-                    <span
-                      aria-disabled={isExporting}
-                      onClick={exportData}
-                      className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
-                      style={{ color: theme.palette.info.light }}
-                    >
-                      Export All
-                    </span>
-                  </div>
+                  {showGrid && (
+                    <div id="importExportLinks" style={{ minWidth: 80 }}>
+                      <span
+                        aria-disabled={isExporting}
+                        onClick={exportData}
+                        className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
+                        style={{ color: theme.palette.info.light }}
+                      >
+                        Export All
+                      </span>
+                    </div>
+                  )}
                 </Grid>
               </Grid>
             </Grid>
@@ -274,7 +303,6 @@ const Report = () => {
                           color="primary"
                           disableElevation
                           onClick={() => {
-                            setSelectedData(null);
                             setShowGrid(false);
                           }}
                           startIcon={<MdChevronLeft />}
@@ -290,138 +318,6 @@ const Report = () => {
               </Grid>
             </div>
             <hr />
-            {/* <div className="header-panel">
-              <Grid container className={styles.rental_header_layout} spacing={1}>
-                <Grid item xs={12} md={3}>
-                  <Autocomplete
-                    options={['All', ...resourceOptions]}
-                    limitTags={2}
-                    disableListWrap
-                    ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
-                    disableCloseOnSelect={false}
-                    multiple
-                    value={selectedResource ?? []}
-                    onChange={(_, val) => {
-                      if (val.includes('All')) {
-                        setSelectedResource(resourceOptions);
-                      } else {
-                        setSelectedResource(val);
-                      }
-                      if (selectedData) {
-                        setSelectedData((prevState) => {
-                          const data = Object.keys(prevState);
-                          const unselected = data.filter((d) => !val.includes(d));
-                          const unselectedData = { ...prevState };
-                          unselected.forEach((_d) => {
-                            if (unselectedData[_d]) {
-                              delete unselectedData[_d];
-                            }
-                          });
-                          return unselectedData;
-                        });
-                      }
-                    }}
-                    fullWidth
-                    getOptionSelected={(option, val) => option === val}
-                    getOptionLabel={(option) => option}
-                    renderInput={(params) => <TextField {...params} variant="outlined" label="Select Filter" size="small" />}
-                  />
-                </Grid>
-                <Grid item xs={12} md={7}>
-                  <Grid container spacing={1}>
-                    {selectedResource &&
-                      selectedResource.length > 0 &&
-                      selectedResource.map((data: string) => {
-                        data = data === 'Plant' ? 'Warehouse' : data;
-                        const options = data === 'Status' ? status[resourceCamelCase] : dropdownList && dropdownList[data] ? dropdownList[data] : [];
-                        if (data === 'Date') {
-                          return (
-                            <MuiPickersUtilsProvider utils={MomentUtils}>
-                              <KeyboardDatePicker
-                                autoOk
-                                size="medium"
-                                variant="inline"
-                                inputVariant="outlined"
-                                name="startDate"
-                                label="Start Date"
-                                value={betweenDate.startDate}
-                                onChange={(date: any) => {
-                                  setBetweenDate({
-                                    ...betweenDate,
-                                    startDate: date
-                                  });
-                                }}
-                                format={dateFormat}
-                                InputLabelProps={{
-                                  shrink: true
-                                }}
-                                margin="dense"
-                              />
-                              <Box mx={1} />
-                              <KeyboardDatePicker
-                                autoOk
-                                size="medium"
-                                variant="inline"
-                                inputVariant="outlined"
-                                name="endDate"
-                                label="End Date"
-                                value={betweenDate.endDate}
-                                onChange={(date: any) => {
-                                  setBetweenDate({
-                                    ...betweenDate,
-                                    endDate: date
-                                  });
-                                }}
-                                format={dateFormat}
-                                InputLabelProps={{
-                                  shrink: true
-                                }}
-                                margin="dense"
-                              />
-                            </MuiPickersUtilsProvider>
-                          );
-                        } else {
-                          return (
-                            <Grid item xs={12} sm={4} key={data}>
-                              <Autocomplete
-                                options={options}
-                                limitTags={2}
-                                disableCloseOnSelect={false}
-                                disableListWrap
-                                ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
-                                multiple
-                                value={selectedData && selectedData[data] ? selectedData[data] : []}
-                                onChange={(_, val) => setSelectedData({ ...selectedData, [data]: val })}
-                                fullWidth
-                                getOptionSelected={(option, val) => (data === 'Status' ? option === val : option.optionValue === val.optionValue)}
-                                getOptionLabel={(option) => (data === 'Status' ? option : option.optionLabel)}
-                                renderInput={(params) => (
-                                  <TextField {...params} variant="outlined" label={data === 'Warehouse' ? 'Plant' : data} size="small" />
-                                )}
-                              />
-                            </Grid>
-                          );
-                        }
-                      })}
-                  </Grid>
-                </Grid>
-                <Grid item xs={12} md={2}>
-                  <Box display="flex" justifyContent="flex-end" alignItems="center">
-                    <Button
-                      onClick={fetchResourceData}
-                      startIcon={loading ? <CircularProgress color="inherit" size={18} /> : <List />}
-                      color="primary"
-                      variant="contained"
-                      size="small"
-                      disableElevation
-                      disabled={loading}
-                    >
-                      Show
-                    </Button>
-                  </Box>
-                </Grid>
-              </Grid>
-            </div> */}
             {!showGrid ? (
               <ReportFilters
                 resourceColumns={resourceColumns}
@@ -444,6 +340,10 @@ const Report = () => {
                 selectedReportView={selectedReportView}
                 reportList={reportList}
                 setReportList={setReportList}
+                statusPeriod={statusPeriod}
+                setStatusPeriod={setStatusPeriod}
+                statusPeriodDate={statusPeriodDate}
+                setStatusPeriodDate={setStatusPeriodDate}
               />
             ) : (
               <div>
@@ -496,7 +396,6 @@ const Report = () => {
                       loading={loading}
                       renderedFrom={renderedFrom}
                       allowSelection={false}
-                      isClientSideGrid={true}
                       allowAction={false}
                       refreshGrid={fetchResourceData}
                       showOnlyShowFilteredRecordSwitch={false}

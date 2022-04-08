@@ -42,9 +42,9 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
   const { state: { user, permissions } }: any = useData();
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
-  const [showEditAssetDialog, setShowEditAssetDialog] = useState({ open: false, asset: null, selectedRecords: [] })
+  const [showEditAssetDialog, setShowEditAssetDialog] = useState({ open: false, isBulkedit: false, inventory: null, selectedRecords: [] })
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
-  const [serializedAssetFields, setSerializedAssetFields] = useState(null)
+  const [repairJobAssetFields, setRepairJobAssetFields] = useState(null)
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: "", message: "" })
 
   useEffect(() => {
@@ -74,7 +74,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
       const columns = [...commonColumns];
       let rendererNames = [];
       genrateColoum(data, columns, rendererNames, false, renderedFrom);
-      setSerializedAssetFields(data)
+      setRepairJobAssetFields(data)
       let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
       tempFrameworkComponent = {
         assetNumberRenderer: AssetNumberRenderer,
@@ -99,7 +99,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
           let finalObject = prepareDataForGrid(u, user);
           finalObject["canDelete"] = false;
           finalObject["isChecked"] = false;
-          finalObject["allowedToEdit"] = true;
+          finalObject["allowedToEdit"] = allowedToEdit;
           return finalObject;
         });
         if (rows.length) {
@@ -123,6 +123,17 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
 
   const ActionsRenderer = (params) => (
     <div className="d-flex gap-1">
+      {<Tooltip title={permissions?.repairJob?.isUpdate ? "Edit" : "You are not permitted to edit"}>
+        <IconButton
+          disabled={!permissions?.repairJob?.isUpdate}
+          color='primary'
+          size='small'
+          onClick={() => setShowEditAssetDialog({ open: true, isBulkedit: false, inventory: params.data.inventory, selectedRecords: [] })}
+        >
+          <Edit />
+        </IconButton>
+      </Tooltip>
+      }
       {params.data?.status === INVENTORY_STATUS.reserved ? <GridDeleteIcon
         hasDeletePermission={permissions?.repairJob?.isUpdate}
         ownerId={user?.user?._id}
@@ -132,20 +143,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
         }}
         entity={sidebarResource.serializedAsset}
       /> : ""
-      }
-      {
-        <Tooltip title={permissions?.repairJob?.isUpdate ? "Edit" : "You are not permitted to edit"}>
-          <span>
-            <IconButton
-              disabled={!permissions?.repairJob?.isUpdate}
-              color='primary'
-              size='small'
-              onClick={() => setShowEditAssetDialog({ open: true, asset: params.data, selectedRecords: [] })}
-            >
-              <Edit />
-            </IconButton>
-          </span>
-        </Tooltip>
       }
     </div>
   );
@@ -235,7 +232,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
             size="small"
             disabled={selectedRecords.length === 0}
             onClick={() => {
-              setShowEditAssetDialog({ open: true, asset: null, selectedRecords: selectedRecords })
+              setShowEditAssetDialog({ open: true, isBulkedit: true, inventory: null, selectedRecords: selectedRecords })
             }}
           >
             {isMobile && !isTablet ? <RiEditCircleLine size={20} /> : "Bulk Edit"}
@@ -254,8 +251,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
             {isMobile && !isTablet ? <MdDelete size={20} /> : "Delete"}
           </Button>
         </Box>
-      </Box>
-    }
+      </Box>}
     <Grid item xs={12} md={12} sm={12} className="mt-3">
       {columns && Object.keys(frameWorkComponent).length > 0 ?
         isMobile && !isTablet ?
@@ -265,7 +261,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
             permissions={permissions}
             primaryField={columns?.find(d => d.field)}
             onClick={(data) => {
-              setShowEditAssetDialog({ open: true, asset: data, selectedRecords: [] })
+              setShowEditAssetDialog({ open: true, isBulkedit: false, inventory: data?.inventory, selectedRecords: [] })
             }}
             dataRows={dataRows}
             selectedRecords={true}
@@ -282,7 +278,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
             loading={loading}
             chips={[
               {
-                label: "Product Desc. : ",
+                label: "Product Type : ",
                 field: "product",
               }
             ]}
@@ -363,18 +359,11 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
     )}
     {showEditAssetDialog.open && (
       <ManageAssetDialog
-        open={showEditAssetDialog.open}
         repairJobData={repairJobData}
-        fields={serializedAssetFields}
-        asset={showEditAssetDialog.asset}
-        selectedRecords={showEditAssetDialog.selectedRecords}
+        repairJobAssetFields={repairJobAssetFields}
+        isBulkedit={showEditAssetDialog.isBulkedit}
         onClose={() => {
-          setShowEditAssetDialog(prevState => {
-            return {
-              ...prevState,
-              open: false
-            }
-          });
+          setShowEditAssetDialog({ open: false, isBulkedit: false, inventory: null, selectedRecords: [] });
         }}
         onSuccess={() => {
           if (showEditAssetDialog.selectedRecords.length > 0) {
@@ -382,12 +371,10 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
             dispatch({ type: "selection", selectedRecords: [] })
           }
           fetchRecords();
-          setShowEditAssetDialog({
-            open: false,
-            asset: null,
-            selectedRecords: [],
-          });
+          setShowEditAssetDialog({ open: false, isBulkedit: false, inventory: null, selectedRecords: [] });
         }}
+        inventory={showEditAssetDialog.inventory}
+        selectedRecords={showEditAssetDialog.selectedRecords}
       />
     )}
     {statusToUpdate.open && <AssetScrapRepairDialog

@@ -223,18 +223,20 @@ const AddressResource = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      <Tooltip
-        className={warehousePermissions.isCreate ? "" : "cursor-stop"}
+      <Tooltip className={warehousePermissions.isCreate ? "" : "cursor-stop"}
         title={warehousePermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setAddressResource(params.data);
-            setOpen({ open: true, isClone: true })
-          }}>
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
+        <span>
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            disabled={!warehousePermissions.isCreate}
+            onClick={() => {
+              setAddressResource(params.data);
+              setOpen({ open: true, isClone: true })
+            }}>
+            <FileCopyIcon fontSize="small" color={warehousePermissions.isCreate ? "primary" : "inherit"} />
+          </IconButton>
+        </span>
       </Tooltip>
       {warehousePermissions.isDelete && params?.data?.createdById === user?.user?._id ? (
         <Tooltip title="Delete">
@@ -255,36 +257,35 @@ const AddressResource = () => {
           </IconButton>
         </Tooltip>
       )}
-      {
-        warehousePermissions.isUpdate && params.data?.isAllowedToUpdate ?
-          <Tooltip title="Entity">
-            <IconButton
-              size="small"
-              aria-label="Entity"
-              onClick={() => {
-                setShowEntityDialog(true)
-                setWarehouseId(params.data._id)
-                if (params?.data?.entity) {
-                  let entities = []
-                  if (params?.data?.entityId) {
-                    entities.push(params?.data?.entityId)
-                  }
-                  if (params?.data?.restentity) {
-                    let restEntities = params?.data?.restentity.map(o => o.optionValue)
-                    entities = [...entities, ...restEntities]
-                  }
-                  setEntities([...entities])
+      {warehousePermissions.isUpdate && params.data?.isAllowedToUpdate ?
+        <Tooltip title="Entity">
+          <IconButton
+            size="small"
+            aria-label="Entity"
+            onClick={() => {
+              setShowEntityDialog(true)
+              setWarehouseId(params.data._id)
+              if (params?.data?.entity) {
+                let entities = []
+                if (params?.data?.entityId) {
+                  entities.push(params?.data?.entityId)
                 }
-              }}>
-              <AiOutlineDeploymentUnit fontSize="15" color="primary" />
+                if (params?.data?.restentity) {
+                  let restEntities = params?.data?.restentity.map(o => o.optionValue)
+                  entities = [...entities, ...restEntities]
+                }
+                setEntities([...entities])
+              }
+            }}>
+            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
+          </IconButton>
+        </Tooltip> : (
+          <Tooltip className="cursor-stop" title="You do not have permission to update entity">
+            <IconButton aria-label="Clone" size="small">
+              <AiOutlineDeploymentUnit fontSize="15" />
             </IconButton>
-          </Tooltip> : (
-            <Tooltip className="cursor-stop" title="You do not have permission to update entity">
-              <IconButton aria-label="Clone" size="small">
-                <AiOutlineDeploymentUnit fontSize="15" />
-              </IconButton>
-            </Tooltip>
-          )
+          </Tooltip>
+        )
       }
     </>
   );

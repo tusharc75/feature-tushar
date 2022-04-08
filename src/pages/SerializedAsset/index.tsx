@@ -291,7 +291,7 @@ const SerializedAsset = () => {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
-    return `${deepFilter}${!isExport ? '&filterType=and&filterByIdType=and' : ''}`;
+    return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
 
   const handleDelete = () => {
@@ -412,7 +412,6 @@ const SerializedAsset = () => {
     }
   };
 
-  console.log(allowUpdateStatus);
 
   return (
     <Fragment>
@@ -607,7 +606,6 @@ const SerializedAsset = () => {
                     value={search}
                   />
                 </Grid>
-
                 <Grid style={{ display: 'flex', gap: '5px' }}>
                   {permissions?.serializedAsset?.isCreate && (
                     <Button
@@ -646,16 +644,15 @@ const SerializedAsset = () => {
                     open={Boolean(anchorEl)}
                     onClose={closeActions}
                   >
-                    {permissions?.serializedAsset?.isDelete && (
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        Delete
-                      </MenuItem>
-                    )}
+                    <MenuItem
+                      disabled={!permissions?.serializedAsset?.isDelete}
+                      onClick={() => {
+                        closeActions();
+                        setShowDeleteConfirmBox(true);
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
                     {permissions?.serializedAsset?.isUpdate &&
                       allowUpdateStatus &&
                       [INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].map((status) => (
@@ -666,7 +663,7 @@ const SerializedAsset = () => {
                           }}
                           disabled={
                             selectedRecords?.filter((o) => [INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(o.status)).length ===
-                            selectedRecords.length
+                              selectedRecords.length
                               ? false
                               : true
                           }
@@ -758,9 +755,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.serializedAsset.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes.serializedAsset.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDelete}
         />
