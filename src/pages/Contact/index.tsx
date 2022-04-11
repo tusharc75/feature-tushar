@@ -968,7 +968,7 @@ export default function Contact(props) {
                           closeActions();
                         }}
                       >
-                        Add Plants &nbsp; <Chip size="small" label={selectedRecords.length} />
+                        Add {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords.length} />
                       </MenuItem>
                     )}
                       {contactPermissions.isUpdate && (

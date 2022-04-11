@@ -20,51 +20,46 @@ import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from "src/axios/axiosInstance";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
-import Loader from "src/components/Loader";
 import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
 import { MdAdd, MdOutlineHorizontalRule } from "react-icons/md";
 
-const AssignCartDialog = ({ handleCloseDialog }) => {
+const AssignCartDialog = ({ handleCloseDialog, fetchCart, products }) => {
+
     const toastConfig = useContext(CustomToastContext);
-    const [products, setProducts] = useState([]);
-    const [loadingProducts, setLoadingProducts] = useState(false);
-    const [isAssigning, setIsAssigning] = useState(false);
-
-    useEffect(() => {
-        fetchCart()
-    }, []);
-
-    const fetchCart = () => {
-        setLoadingProducts(true);
-        axiosInstance().get(`/pos/cart`)
-            .then(({ data: { data } }) => {
-                setProducts(data)
-                setLoadingProducts(false);
-            })
-            .catch((error) => {
-                setLoadingProducts(false);
-                toastConfig.setToastConfig(error);
-            });
-    }
 
     const handleUpdateCart = (product, operation) => {
-        let tempProduct = {
+        let data = {
             "_id": product._id,
             "qty": operation === "add" ? parseInt(product?.qty || 0) + 1 : parseInt(product?.qty || 0) - 1,
         }
-        axiosInstance().put(`/pos/cart`, tempProduct)
-            .then(({ data }) => {
-                fetchCart()
-                toastConfig.setToastConfig({
-                    open: true,
-                    type: 'success',
-                    message: data.message
+        if (data?.qty) {
+            axiosInstance().put(`/pos/cart`, data)
+                .then(({ data }) => {
+                    fetchCart()
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: 'success',
+                        message: data.message
+                    });
+                }).catch((error) => {
+                    toastConfig.setToastConfig(error)
                 });
-            }).catch((error) => {
-                toastConfig.setToastConfig(error)
-            });
+        }
+        else {
+            axiosInstance().put(`/pos/cart/remove`, { ids: [data._id] })
+                .then(({ data }) => {
+                    fetchCart()
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: 'success',
+                        message: data.message
+                    });
+                }).catch((error) => {
+                    toastConfig.setToastConfig(error)
+                });
+        }
     };
-
+    
     return (<Dialog
         fullWidth
         maxWidth="sm"
@@ -74,11 +69,9 @@ const AssignCartDialog = ({ handleCloseDialog }) => {
     >
         <CustomDialogHeader title="Cart" showRequiredLabel={false} onClose={handleCloseDialog} />
         <CustomDialogContent>
-            {loadingProducts ? (
-                <Loader text="Loading Products" />
-            ) : products?.length ? (
+            {products?.length ? (
                 <List style={{ padding: 0 }}>
-                    {products.map((product) => (
+                    {products?.map((product) => (
                         <ListItem divider key={product._id}>
                             <ListItemAvatar>
                                 <Avatar
@@ -106,15 +99,16 @@ const AssignCartDialog = ({ handleCloseDialog }) => {
             )}
         </CustomDialogContent>
         <CustomDialogFooter>
-            <Button
-                disabled={isAssigning}
-                onClick={() => { }}
-                color="primary"
-                size="small"
-                variant="contained"
-            >
-                {isAssigning ? <CircularProgress size={22} /> : "Place your order"}
-            </Button>
+            {(products?.length > 0) &&
+                <Button
+                    onClick={() => { }}
+                    color="primary"
+                    size="small"
+                    variant="contained"
+                >
+                    {"Place your order"}
+                </Button>
+            }
         </CustomDialogFooter>
     </Dialog>
     );
