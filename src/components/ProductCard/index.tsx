@@ -24,11 +24,9 @@ const useStyles = makeStyles(() => ({
         height: "500px",
         maxWidth: "500px",
     },
-
-
-
 }));
-const ProductCad = ({ product, showSkeleton = false, handleAddToCart = null }) => {
+
+const ProductCad = ({ product, showSkeleton = false, handleAddToCart = null, disabledCart = false }) => {
     const history = useHistory();
     const classes = useStyles();
     const [productImages, setProductImages] = useState([])
@@ -112,7 +110,7 @@ const ProductCad = ({ product, showSkeleton = false, handleAddToCart = null }) =
                             }
                         </div>
                         <div>
-                            {!product?.inventory || product?.inventory === 0 && (showSkeleton ? <Skeleton width={30} height={30} /> : <Avatar className={`${styles.cart_icon} cursor-pointer`} onClick={() => { handleAddToCart([product]) }}>
+                            {!disabledCart && (showSkeleton ? <Skeleton width={30} height={30} /> : <Avatar className={`${styles.cart_icon} cursor-pointer`} onClick={() => { handleAddToCart([product]) }}>
                                 <MdAddShoppingCart size={18} />
                             </Avatar>)
                             }

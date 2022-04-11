@@ -1659,6 +1659,12 @@ export const TRANSFER_INVENTORY_STATUS = {
   delivered: "Delivered"
 }
 
+export const REPAIR_PROCESS_STATUS = {
+  start: 'Start',
+  complete: 'Complete',
+  failed: 'Failed',
+} as const;
+
 export const asyncForEach = async (array: any[], callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>) => {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
