@@ -21,7 +21,7 @@ import { styles } from "@material-ui/pickers/views/Calendar/Calendar";
 import { MdAdd } from "react-icons/md";
 import WarhouseList from "./WarhouseList";
 
-const Warehouse = ({ accountApi, accountId, renderedFrom }) => {
+const Warehouse = ({reference, api, id, renderedFrom, accountId = '' }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -44,7 +44,8 @@ const Warehouse = ({ accountApi, accountId, renderedFrom }) => {
     }, []);
 
     useEffect(() => {
-        fetchAccountWarehouse()
+        const timeout = setTimeout(fetchAccountWarehouse, 500);
+        return () => clearTimeout(timeout)
     }, [page, limit, filters, sorting]);
 
 
@@ -92,7 +93,7 @@ const Warehouse = ({ accountApi, accountId, renderedFrom }) => {
         if (gridApi) {
             gridApi.setRowData([]);
         }
-        axiosInstance().get(`/${accountApi}/${accountId}/warehouse`).then(({ data }) => {
+        axiosInstance().get(`/${api}/${id}/warehouse`).then(({ data }) => {
             setWarehouseArray(data.data)
             let rows = data.data?.map((u, user) => {
                 let finalObject = prepareDataForGrid(u?.warehouseDetail);
@@ -118,7 +119,7 @@ const Warehouse = ({ accountApi, accountId, renderedFrom }) => {
         setIsDeleting(true)
         const { data } = showConfirmBox
         let tempArray = warehouseArray.filter(obj => data.some(d => d._id === obj.warehouse)).map(d => d._id)
-        axiosInstance().put(`/${accountApi}/${accountId}/warehouse/remove`, {
+        axiosInstance().put(`/${api}/${id}/warehouse/remove`, {
             ids: tempArray
         })
             .then(() => {
@@ -136,7 +137,7 @@ const Warehouse = ({ accountApi, accountId, renderedFrom }) => {
 
     const handleAddWarehouse = (rows) => {
         setAddingWarehouse(true)
-        axiosInstance().post(`/${accountApi}/${accountId}/warehouse`, { "warehouse": rows.map(d => d._id) })
+        axiosInstance().post(`/${api}/${id}/warehouse`, { "warehouse": rows.map(d => d._id) })
             .then(() => {
                 setOpenAssignWarehouse(false)
                 fetchAccountWarehouse()
@@ -246,6 +247,8 @@ const Warehouse = ({ accountApi, accountId, renderedFrom }) => {
         )}
         {openAssignWarehouse &&
             <WarhouseList
+                isCustomer={reference === "customerContact"}
+                api={reference === "customerContact" ? `/customer-contact/${accountId}/warehouse` : "/warehouse"}
                 isAddingWarehouse={isAddingWarehouse}
                 addWarehouse={handleAddWarehouse}
                 onClose={() => { setOpenAssignWarehouse(false) }}

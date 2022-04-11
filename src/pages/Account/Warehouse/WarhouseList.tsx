@@ -20,7 +20,7 @@ import { useData } from "../../../StateProvider/Provider";
 
 let searchTimeout;
 
-const WarhouseList = ({ addWarehouse, onClose, isAddingWarehouse, renderedFrom, assignedWarehouse }) => {
+const WarhouseList = ({api, isCustomer=false, addWarehouse, onClose, isAddingWarehouse, renderedFrom, assignedWarehouse }) => {
 
     const localStorageSelectedRecords = `${renderedFrom}_selected`
     const toastConfig = useContext(CustomToastContext)
@@ -55,7 +55,7 @@ const WarhouseList = ({ addWarehouse, onClose, isAddingWarehouse, renderedFrom, 
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(`/warehouse${queryString}`).then(({ data: { data, count } }) => {
+        axiosInstance().get(`${api}${queryString}`).then(({ data: { data, count } }) => {
             let rows = data.map((u) => {
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = false;

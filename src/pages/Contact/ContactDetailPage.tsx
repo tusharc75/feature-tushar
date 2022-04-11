@@ -843,8 +843,10 @@ const ContactDetailsPage = (props) => {
                   </Box>
                  {!isOffline && contactResource === "customerContact" && permissions?.productInventory.isUpdate && <Box hidden={currentTabIndex !== 2}>
                     <Warehouse
-                      accountApi={accountApi}
-                      accountId={id}
+                      reference={contactResource}
+                      api={contactApi}
+                      id={id}
+                      accountId={contactData?.accountName?.optionValue}
                       renderedFrom={`${camelCase(contactResource)}_grid1`} 
                     />
                   </Box>}
