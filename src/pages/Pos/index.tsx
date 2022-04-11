@@ -6,48 +6,34 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomContainer from '../../components/CustomContainer';
-import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Autocomplete } from '@material-ui/lab';
 import { isMobile, isTablet } from 'react-device-detect';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import axiosInstance from "src/axios/axiosInstance";
-import InfiniteScroll from 'react-infinite-scroll-component';
-import ProductCard from '../../components/ProductCard/index'
 import styles2 from '../Leads/Header.module.scss';
 import CropFreeIcon from '@material-ui/icons/CropFree';
-import { makeStyles } from '@material-ui/core';
 import { MdBorderAll, MdList, MdShoppingCart } from 'react-icons/md';
 import { camelCase, filter } from 'lodash';
 import Scan from 'src/components/Scan';
-import CartDialog from './CartDialog';
-import ProductGridLayout from './ProductGridLayout';
-import ProductCardLayout from './ProductCardLayout';
+import Cart from './Cart';
+import ProductGrid from './Product/Grid';
+import ProductCard from './Product/Card';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 
 
 const Pos = () => {
 
-    const history = useHistory();
     const renderedFrom = camelCase(routes?.pos.title);
 
     const toastConfig = useContext(CustomToastContext);
     const [searchVal, setSearchVal] = useState('')
     const [plantOptions, setPlantOptions] = useState([])
     const [plantId, setPlantId] = useState(null);
-    const {
-        state: { user, permissions, selectedEntity }
-    }: any = useData();
-    const [products, setProducts] = useState([]);
-    const [hasMore, setHasMore] = useState(false)
+    const { state: { user, permissions, selectedEntity } }: any = useData();
     const [scanDialog, setScanDialog] = useState(false)
     const [cartDialog, setCartDialog] = useState(false)
 
-    const [filter, setFilter] = useState("grid");
-
-    const handleFilter = (event, newFilter) => {
-        if (newFilter != null) {
-            setFilter(newFilter);
-        }
-    };
-
+    const [viewType, setViewType] = useState("grid");
 
     useEffect(() => {
         getPlants()
@@ -63,30 +49,22 @@ const Pos = () => {
                     "warehouseId": d.warehouse || d._id,
                     "warehouseName": d.warehouseName,
                 }))
-
                 plantId === null && setPlantId(row[0].warehouseId)
                 setPlantOptions(row);
             });
     }
 
-
-
-
-
-
-
-
     const handleAddToCart = (product) => {
-        let tempProductArray = product.map(d => ({
+        let data = product.map(d => ({
             "product": d._id,
             "qty": d?.qty ? parseInt(d.qty) : 1,
         }))
-        axiosInstance().post(`/pos/cart`, tempProductArray)
+        axiosInstance().post(`/pos/cart`, data)
             .then(({ data }) => {
                 toastConfig.setToastConfig({
                     open: true,
                     type: 'success',
-                    message: data.message
+                    message: "Add to cart successfully"
                 });
             }).catch((error) => {
                 toastConfig.setToastConfig(error)
@@ -107,7 +85,6 @@ const Pos = () => {
                             color="inherit"
                             title="Cart"
                             onClick={() => { setCartDialog(true) }}
-                            className="showIconLayout"
                         >
                             <Badge badgeContent={1} color="secondary">
                                 <MdShoppingCart style={{ color: "white" }} />
@@ -119,7 +96,7 @@ const Pos = () => {
             </Grid>
             <CustomContainer>
                 <div className="header-panel">
-                    <Grid container className={styles2.filter_side_container}>
+                    <Grid container >
                         <Grid item xs={12} md={6} sm={12} className={isMobile ? styles2.mobile_panel : 'd-flex align-items-center gap-1'}>
                             <Autocomplete
                                 style={{ width: "250px" }}
@@ -160,7 +137,6 @@ const Pos = () => {
                                 )}
                             />
                         </Grid>
-
                         <Grid md={6} sm={12} xs={12} container className={styles2.filter_side}>
                             <Box className={isMobile ? styles2.mobile_filter_side_header : styles2.filter_side_header} component="div">
                                 <SearchBox
@@ -172,7 +148,6 @@ const Pos = () => {
                                     placeholder="Search Product"
                                     style={isMobile ? { flex: 1 } : {}}
                                 />
-
                                 <IconButton
                                     onClick={() => { setScanDialog(true) }}
                                     size="small"
@@ -184,43 +159,48 @@ const Pos = () => {
                                     <CropFreeIcon style={{ color: "black" }} />
                                 </IconButton>
                             </Box>
-                            <Box display="flex" alignItems="center">
-                                <ToggleButtonGroup
-                                    size="small"
-                                    className=" toggle-button-layout"
-                                    value={filter}
-                                    exclusive
-                                    onChange={handleFilter}
-                                >
-                                    <ToggleButton value={'grid'} key={0}>
-                                        <MdList fontSize="small" color="primary" />
-                                    </ToggleButton>
-                                    <ToggleButton value={'card'} key={1}>
-                                        <MdBorderAll fontSize="small" color="primary" />
-                                    </ToggleButton>
-                                </ToggleButtonGroup>
-                            </Box>
                         </Grid>
                     </Grid>
+                    <Box display={"flex"} justifyContent="flex-end">
+                        <ButtonGroup color="primary" aria-label="outlined primary button group">
+                            <Button
+                                variant={viewType === "grid" ? "contained" : "outlined"}
+                                size='small'
+                                onClick={() => setViewType("grid")}
+                            >
+                                <MdList fontSize="small" color="primary" />
+                            </Button>
+                            <Button
+                                size='small'
+                                variant={viewType === "card" ? "contained" : "outlined"}
+                                onClick={() => setViewType("card")}
+                            >
+                                <MdBorderAll fontSize="small" color="primary" />
+                            </Button>
+                        </ButtonGroup>
+                    </Box>
                 </div>
-
-                {filter === 'grid' && (
-                    <ProductGridLayout renderedFrom={renderedFrom} handleAddToCart={handleAddToCart} plantId={plantId} searchVal={searchVal} />
-                )}
-                {filter === 'card' &&
-                    <ProductCardLayout handleAddToCart={handleAddToCart} plantId={plantId} searchVal={searchVal} />
+                {viewType === 'grid' ?
+                    <ProductGrid
+                        renderedFrom={renderedFrom}
+                        handleAddToCart={handleAddToCart}
+                        plantId={plantId}
+                        searchVal={searchVal} />
+                    :
+                    <ProductCard
+                        handleAddToCart={handleAddToCart}
+                        plantId={plantId}
+                        searchVal={searchVal} />
                 }
-                {
-                    scanDialog && <Scan onClose={() => setScanDialog(false)} />
+                {scanDialog &&
+                    <Scan onClose={() => setScanDialog(false)} />
                 }
-                {
-                    cartDialog && <CartDialog
-                        cartDialogOpen={cartDialog}
+                {cartDialog &&
+                    <Cart
                         handleCloseDialog={() => { setCartDialog(false) }}
                     />
                 }
             </CustomContainer>
-
         </Fragment>
     );
 };

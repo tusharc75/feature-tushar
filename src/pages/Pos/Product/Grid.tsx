@@ -10,39 +10,27 @@ import { CommonRenderer, ImageRenderer } from "src/components/AgGridComponents/C
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import { MdAddShoppingCart } from "react-icons/md";
-import NoDataCell from "src/components/Helpers/NoDataCell";
+import HtmlTooltip from "../../../components/CustomTooltipTitle";
+import { prepareDataForGrid } from '../../../constants/helpers';
 
 const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }) => {
 
     const toastConfig = useContext(CustomToastContext);
+
     const { state: { user, permissions } }: any = useData();
-
-
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
     const columns = [
         { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productImage", headerName: "Product Image", show: true, disabled: true, cellRenderer: "imageRenderer" },
-        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "productCategoryRenderer" },
+        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
     ]
 
-    const ProductCategoryRenderer = (params) =>
-        params.data.productCategory ? (
-            <Chip
-                className="ml-3"
-                style={{ backgroundColor: `${params.data.productCategory.chipColor}` }}
-                label={`${params.data.productCategory.optionLabel}`}
-            />
-        ) : (
-            <NoDataCell />
-        );
-
     const ActionsRenderer = (params) => (
-        <Fragment>
-            <Tooltip
-                title={!params.data?.inventory || params.data?.inventory === 0 ? 'No inventory' : 'Add to cart'}
-            >
+        <HtmlTooltip title={params?.data?.inventory ? 'Add to cart' : 'No inventory'} >
+            <span>
                 <IconButton
                     size="small"
                     disabled={!params.data?.inventory || params.data?.inventory === 0}
@@ -50,21 +38,24 @@ const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }
                     onClick={() => {
                         handleAddToCart([params.data])
                     }}
+                    color={params?.data?.inventory ? "secondary" : "inherit"}
                 >
-                    <MdAddShoppingCart fontSize="small" color="primary" />
+                    <MdAddShoppingCart />
                 </IconButton>
-            </Tooltip>
-        </Fragment>
+            </span>
+        </HtmlTooltip>
     );
+
     const frameWorkComponent = {
         commonRenderer: CommonRenderer,
         imageRenderer: ImageRenderer,
-        productCategoryRenderer: ProductCategoryRenderer,
         actionsRenderer: ActionsRenderer
     };
 
     useEffect(() => {
-        if (plantId) fetchProducts();
+        if (plantId) {
+            fetchProducts();
+        }
     }, [page, limit, filters, sorting, search, plantId]);
 
     useEffect(() => {
@@ -74,10 +65,8 @@ const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }
 
     const getQueryString = () => {
         let deepFilter = `&page=${page}&limit=${limit}`;
-
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
-
             Object.keys(filters).forEach((field) => {
                 updatedFilters.push({
                     field: field,
@@ -86,11 +75,9 @@ const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }
             });
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
         }
-
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
         }
-
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
         }
@@ -100,14 +87,18 @@ const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }
     const fetchProducts = () => {
         dispatch({ type: 'loading', loading: true });
         const queryString = getQueryString();
-
         if (gridApi) {
             gridApi.setRowData([]);
         }
         let api = `/pos?wareHouse=${plantId}${queryString}`;
         axiosInstance().get(api).then(({ data: { data, count } }) => {
-
-            dispatch({ type: 'initialize', data: data, count: count });
+            let rows = data?.map((u) => {
+                let finalObject = prepareDataForGrid(u);
+                return {
+                    ...finalObject
+                };
+            });
+            dispatch({ type: 'initialize', data: rows, count: count });
             setTimeout(() => {
                 dispatch({ type: 'loading', loading: false });
             }, gridLoadingTimeout);
@@ -119,7 +110,6 @@ const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }
 
     return (
         <Fragment>
-
             {columns && frameWorkComponent ? isMobile && !isTablet ?
                 <CustomSwipableList
                     allowSelection={false}
@@ -127,17 +117,14 @@ const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }
                     permissions={permissions}
                     primaryField={columns?.find(d => d.field === "productName")}
                     onClick={(data) => {
-
                     }}
                     dataRows={dataRows}
                     selectedRecords={selectedRecords}
                     dispatch={dispatch}
                     onEdit={(data) => {
-
                     }}
                     extraParamsToCheckDelete={true}
                     onDelete={(data) => {
-
                     }}
                     rowCount={rowCount}
                     page={page}
@@ -177,7 +164,6 @@ const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }
                     <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
             }
-
         </Fragment>
     );
 };
