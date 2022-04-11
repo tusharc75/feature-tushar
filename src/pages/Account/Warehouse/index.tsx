@@ -224,6 +224,7 @@ const Warehouse = ({reference, api, id, renderedFrom, accountId = '' }) => {
                             rowCount={rowCount}
                             limit={limit}
                             pageSizes={pageSizes}
+                            actionWidth={100}
                             page={page}
                             loading={loading}
                             allowSelection={true}
@@ -248,7 +249,7 @@ const Warehouse = ({reference, api, id, renderedFrom, accountId = '' }) => {
         {openAssignWarehouse &&
             <WarhouseList
                 isCustomer={reference === "customerContact"}
-                api={reference === "customerContact" ? `/customer-contact/${accountId}/warehouse` : "/warehouse"}
+                api={reference === "customerContact" ? `/customer-account/${accountId}/warehouse` : "/warehouse"}
                 isAddingWarehouse={isAddingWarehouse}
                 addWarehouse={handleAddWarehouse}
                 onClose={() => { setOpenAssignWarehouse(false) }}
