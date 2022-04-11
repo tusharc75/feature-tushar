@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import {
+    Avatar,
     Button,
     Checkbox,
     CircularProgress,
@@ -10,6 +11,7 @@ import {
     IconButton,
     List,
     ListItem,
+    ListItemAvatar,
     ListItemIcon,
     ListItemText,
     Typography,
@@ -71,7 +73,7 @@ const AssignCartDialog = ({
     return (
         <Dialog
             fullWidth
-            maxWidth="xs"
+            maxWidth="sm"
             open={cartDialogOpen}
             onClose={handleCloseDialog}
             aria-labelledby="assign-roles-dialog"
@@ -85,19 +87,24 @@ const AssignCartDialog = ({
                         <List style={{ padding: 0 }}>
                             {products.map((product) => (
                                 <ListItem divider key={product._id}>
-
+                                    <ListItemAvatar>
+                                        <Avatar
+                                            src={product?.product?.productImage}
+                                            alt={product?.product?.optionLabel ?? ''}
+                                        />
+                                    </ListItemAvatar>
                                     <ListItemText
                                         primary={product?.product?.optionLabel}
-                                        secondary={`Quantity : ${product?.qty}`}
                                     />
-                                    <ListItemIcon>
-                                        <IconButton onClick={() => { handleUpdateCart(product, "add") }}>
-                                            <MdAdd color="primary" />
-                                        </IconButton>
-                                        <IconButton onClick={() => { handleUpdateCart(product, "subtract") }}>
-                                            <MdOutlineHorizontalRule color="primary" />
-                                        </IconButton>
-                                    </ListItemIcon>
+                                    <Button variant="outlined" color="primary" style={{ borderRadius: 45 }} onClick={() => { handleUpdateCart(product, "add") }}>
+                                        <MdAdd color="primary" />
+                                    </Button>
+                                    <Button color="primary" disabled>
+                                        {`${product?.qty}`}
+                                    </Button>
+                                    <Button variant="outlined" color="primary" style={{ borderRadius: 45 }} onClick={() => { handleUpdateCart(product, "subtract") }}>
+                                        <MdOutlineHorizontalRule color="primary" />
+                                    </Button>
                                 </ListItem>
                             ))}
                         </List>
@@ -107,14 +114,6 @@ const AssignCartDialog = ({
                 )}
             </CustomDialogContent>
             <CustomDialogFooter>
-                {/* <Button
-                    disabled={isAssigning}
-                    onClick={handleCloseDialog}
-                    color="primary"
-                    size="small"
-                >
-                    Cancel
-                </Button>
                 <Button
                     disabled={isAssigning}
                     onClick={() => { }}
@@ -122,8 +121,8 @@ const AssignCartDialog = ({
                     size="small"
                     variant="contained"
                 >
-                    {isAssigning ? <CircularProgress size={22} /> : "Save"}
-                </Button> */}
+                    {isAssigning ? <CircularProgress size={22} /> : "Place your order"}
+                </Button>
             </CustomDialogFooter>
         </Dialog>
     );

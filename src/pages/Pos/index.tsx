@@ -12,111 +12,24 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import axiosInstance from "src/axios/axiosInstance";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import ProductCard from '../../components/ProductCard/index'
-import styles from './pos-page.module.scss'
 import styles2 from '../Leads/Header.module.scss';
 import CropFreeIcon from '@material-ui/icons/CropFree';
 import { makeStyles } from '@material-ui/core';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid } from 'src/constants/helpers';
-import { CommonRenderer, ImageRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
-import { MdAddShoppingCart, MdBorderAll, MdList, MdShoppingCart } from 'react-icons/md';
+import { MdBorderAll, MdList, MdShoppingCart } from 'react-icons/md';
 import { camelCase, filter } from 'lodash';
 import Scan from 'src/components/Scan';
 import CartDialog from './CartDialog';
+import ProductGridLayout from './ProductGridLayout';
+import ProductCardLayout from './ProductCardLayout';
 
-
-const useStyles = makeStyles((theme) => ({
-    grow: {
-        flexGrow: 1,
-    },
-    menuButton: {
-        marginRight: theme.spacing(2),
-    },
-    title: {
-        display: 'none',
-        [theme.breakpoints.up('sm')]: {
-            display: 'block',
-        },
-    },
-    search: {
-        position: 'relative',
-        borderRadius: theme.shape.borderRadius,
-        border: '1px solid lightgrey',
-        backgroundColor: "white",
-        '&:hover': {
-            backgroundColor: "white",
-        },
-        marginRight: theme.spacing(2),
-        marginLeft: 0,
-        width: '100%',
-        [theme.breakpoints.up('sm')]: {
-            marginLeft: theme.spacing(3),
-            // width: 'auto',
-        },
-    },
-    searchIcon: {
-        padding: theme.spacing(0, 2),
-        height: '100%',
-        position: 'absolute',
-        pointerEvents: 'none',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: theme.palette.primary.main
-    },
-    inputRoot: {
-        // color: 'inherit',
-        width: "100%"
-    },
-    inputInput: {
-        padding: theme.spacing(1, 1, 1, 0),
-        // vertical padding + font size from searchIcon
-        paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
-        transition: theme.transitions.create('width'),
-        width: '100%',
-        // [theme.breakpoints.up('md')]: {
-        //     width: '20ch',
-        // },
-    },
-    sectionDesktop: {
-        display: 'none',
-        [theme.breakpoints.up('md')]: {
-            display: 'flex',
-        },
-    },
-    sectionMobile: {
-        display: 'flex',
-        [theme.breakpoints.up('md')]: {
-            display: 'none',
-        },
-    },
-    logo: {
-        width: '140px'
-    },
-    root: {
-        width: '100%',
-        // maxWidth: '36ch',
-        backgroundColor: theme.palette.background.paper,
-    },
-    inline: {
-        display: 'inline',
-    },
-    brandLogo: {
-        maxWidth: '10%',
-        height: '45px',
-        borderRadius: '4px',
-        marginRight: '5px'
-    },
-}));
 
 const Pos = () => {
 
     const history = useHistory();
-    const classes = useStyles();
     const renderedFrom = camelCase(routes?.pos.title);
 
     const toastConfig = useContext(CustomToastContext);
-    const [plant, setPlant] = useState('')
+    const [searchVal, setSearchVal] = useState('')
     const [plantOptions, setPlantOptions] = useState([])
     const [plantId, setPlantId] = useState(null);
     const {
@@ -126,16 +39,6 @@ const Pos = () => {
     const [hasMore, setHasMore] = useState(false)
     const [scanDialog, setScanDialog] = useState(false)
     const [cartDialog, setCartDialog] = useState(false)
-    const [gridApi, setGridApi] = useState(null);
-    const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting } = state;
-
-    const columns = [
-        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "productImage", headerName: "Product Image", show: true, disabled: true, cellRenderer: "imageRenderer" },
-        { field: "productDesc", headerName: "Product Description", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "productNumber", headerName: "Product Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    ]
 
     const [filter, setFilter] = useState("grid");
 
@@ -145,33 +48,6 @@ const Pos = () => {
         }
     };
 
-    const ActionsRenderer = (params) => (
-        <Fragment>
-            <Tooltip
-                title={!params.data?.inventory || params.data?.inventory === 0 ? 'No inventory' : 'Add to cart'}
-            >
-                <IconButton
-                    size="small"
-                    disabled={!params.data?.inventory || params.data?.inventory === 0}
-                    aria-label="Add to cart"
-                    onClick={() => {
-                        handleAddToCart([params.data])
-                    }}
-                >
-                    <MdAddShoppingCart fontSize="small" color="primary" />
-                </IconButton>
-            </Tooltip>
-        </Fragment>
-    );
-    const frameWorkComponent = {
-        commonRenderer: CommonRenderer,
-        imageRenderer: ImageRenderer,
-        actionsRenderer: ActionsRenderer
-    };
-
-    useEffect(() => {
-        if (plantId) fetchProducts();
-    }, [page, limit, filters, sorting, search, plant, plantId]);
 
     useEffect(() => {
         getPlants()
@@ -190,91 +66,15 @@ const Pos = () => {
 
                 plantId === null && setPlantId(row[0].warehouseId)
                 setPlantOptions(row);
-                plantId === null && setPlant(row[0].warehouseName);
             });
     }
 
-    const getQueryString = () => {
-        let deepFilter = `&page=${page}&limit=${limit}`;
-
-        if (!isObjectEmpty(filters)) {
-            const updatedFilters = [];
-
-            Object.keys(filters).forEach((field) => {
-                updatedFilters.push({
-                    field: field,
-                    term: filters[field].filter
-                });
-            });
-            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
-        }
-
-        if (sorting.length > 0) {
-            deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-        }
-
-        if (search) {
-            deepFilter = `${deepFilter}&search=${search}`;
-        }
-        return deepFilter;
-    };
-
-    const fetchProducts = () => {
-        dispatch({ type: 'loading', loading: true });
-        const queryString = getQueryString();
-
-        if (gridApi) {
-            gridApi.setRowData([]);
-        }
-        let api = `/pos?wareHouse=${plantId}${queryString}`;
-        axiosInstance().get(api).then(({ data: { data, count } }) => {
-            setProducts((prevState) => {
-                if (search) {
-                    return [...data];
-                }
-                return [...prevState, ...data];
-            });
-            setHasMore(data.length !== count);
-            // let rows = data.map((u) => {
-            //     let finalObject = prepareDataForGrid(u);
-            //     return {
-            //         ...finalObject
-            //     };
-            // });
-            dispatch({ type: 'initialize', data: data, count: count });
-            setTimeout(() => {
-                dispatch({ type: 'loading', loading: false });
-            }, gridLoadingTimeout);
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-            dispatch({ type: 'loading', loading: false });
-        })
-    }
 
 
-    const fetchMoreData = () => {
-        setTimeout(() => {
-            let api = `/pos?wareHouse=${plantId}&page=${page}&limit=${limit}`;
-            axiosInstance().get(api).then(({ data: { data, count } }) => {
-                // setPage(prevState => prevState + 1)
-                setProducts(prevState => [...prevState, ...data]);
 
-                if ((products.length + data.length) >= count) {
-                    setHasMore(false);
-                }
 
-            }).catch((error) => {
-                toastConfig.setToastConfig(error);
-            }).finally(() => {
-                // setLoading(false);
-            });
 
-        }, 500)
-    }
 
-    const handleSearch = (e) => {
-        dispatch({ type: 'search', search: e.target.value });
-    };
 
     const handleAddToCart = (product) => {
         let tempProductArray = product.map(d => ({
@@ -364,9 +164,9 @@ const Pos = () => {
                         <Grid md={6} sm={12} xs={12} container className={styles2.filter_side}>
                             <Box className={isMobile ? styles2.mobile_filter_side_header : styles2.filter_side_header} component="div">
                                 <SearchBox
-                                    onSearch={handleSearch}
+                                    onSearch={(e) => { setSearchVal(e.target.value) }}
                                     searchbox={styles2.search_box_input}
-                                    value={search}
+                                    value={searchVal}
                                     size="small"
                                     width="350px"
                                     placeholder="Search Product"
@@ -395,7 +195,7 @@ const Pos = () => {
                                     <ToggleButton value={'grid'} key={0}>
                                         <MdList fontSize="small" color="primary" />
                                     </ToggleButton>
-                                    <ToggleButton value={'tile'} key={1}>
+                                    <ToggleButton value={'card'} key={1}>
                                         <MdBorderAll fontSize="small" color="primary" />
                                     </ToggleButton>
                                 </ToggleButtonGroup>
@@ -404,53 +204,12 @@ const Pos = () => {
                     </Grid>
                 </div>
 
-                {Object.keys(frameWorkComponent).length > 0 && filter === 'grid' && (
-                    <CustomAgGrid
-                        columns={columns}
-                        dataRows={dataRows}
-                        frameworkComponents={frameWorkComponent}
-                        setGridApi={setGridApi}
-                        dispatch={dispatch}
-                        rowCount={rowCount}
-                        limit={limit}
-                        pageSizes={pageSizes}
-                        page={page}
-                        actionWidth={100}
-                        loading={loading}
-                        renderedFrom={renderedFrom}
-                        refreshGrid={fetchProducts}
-                        allowSelection={false} />
+                {filter === 'grid' && (
+                    <ProductGridLayout renderedFrom={renderedFrom} handleAddToCart={handleAddToCart} plantId={plantId} searchVal={searchVal} />
                 )}
-                {filter === 'tile' &&
-                    <InfiniteScroll
-                        dataLength={products.length}
-                        next={fetchMoreData}
-                        hasMore={hasMore}
-                        loader={
-                            <h4 className="text-center border mt-3 p-3 loading-dots">
-                                Loading more product(s)
-                            </h4>
-                        }
-                    >
-                        {
-                            products.length !== 0 ? <div className={`${styles.product_list_container}`}>
-                                {
-                                    products.map((product, index: number) => (
-                                        <ProductCard key={index} product={product} handleAddToCart={handleAddToCart} />
-                                    ))
-                                }
-                            </div> : (loading === true ? <div className={`${styles.product_list_container}`}>
-                                {
-                                    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((_, index: number) => (
-                                        <ProductCard key={index} product={null} showSkeleton={true} />
-                                    ))
-                                }
-                            </div> : <div className="d-flex align-items-center justify-content-center w-100 border" style={{ height: 200 }}>
-                                <h3>No Products Found</h3>
-                            </div>)
-                        }
-
-                    </InfiniteScroll>}
+                {filter === 'card' &&
+                    <ProductCardLayout handleAddToCart={handleAddToCart} plantId={plantId} searchVal={searchVal} />
+                }
                 {
                     scanDialog && <Scan onClose={() => setScanDialog(false)} />
                 }
