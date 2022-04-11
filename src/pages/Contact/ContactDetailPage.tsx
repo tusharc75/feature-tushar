@@ -49,12 +49,17 @@ import AddReportsToContact from './AddReportsToContact';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import accountClass from '../Account/account.module.scss';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import Warehouse from '../Account/Warehouse';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { camelCase } from 'lodash';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
+  const { isOffline } = useContext(CustomOfflineContext);
+
   const {
     contact: { contactApi, contactResource, contactRoute },
-    account: { accountResource },
+    account: { accountResource, accountApi },
     contactBreadcrumb
   } = props;
   const history = useHistory();
@@ -815,6 +820,7 @@ const ContactDetailsPage = (props) => {
                   >
                     <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
                     <Tab label="Org Chart" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className="tabLayout" />
+                    <Tab label="Plants" aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
                   </Tabs>
                   <Box hidden={currentTabIndex !== 0}>
                     {showAtLast ? (
@@ -835,6 +841,13 @@ const ContactDetailsPage = (props) => {
                       isInContact={true}
                     />
                   </Box>
+                 {!isOffline && contactResource === "customerContact" && permissions?.productInventory.isUpdate && <Box hidden={currentTabIndex !== 2}>
+                    <Warehouse
+                      accountApi={accountApi}
+                      accountId={id}
+                      renderedFrom={`${camelCase(contactResource)}_grid1`} 
+                    />
+                  </Box>}
                 </>
               )}
             </Box>
