@@ -56,7 +56,6 @@ const WarhouseList = ({api, isCustomer=false, addWarehouse, onClose, isAddingWar
         }
         const queryString = getQueryString();
         axiosInstance().get(`${api}${queryString}`).then(({ data: { data, count } }) => {
-            console.log(data)
             let rows = data.map((u) => {
                 let finalObject = prepareDataForGrid(isCustomer ? u?.warehouseDetail : u);
                 finalObject["isChecked"] = false;
