@@ -24,10 +24,8 @@ const useStyles = makeStyles(() => ({
         height: "500px",
         maxWidth: "500px",
     },
-
-
-
 }));
+
 const ProductCad = ({ product, showSkeleton = false, handleAddToCart = null, disabledCart = false }) => {
     const history = useHistory();
     const classes = useStyles();
