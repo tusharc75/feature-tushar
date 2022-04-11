@@ -50,6 +50,7 @@ import MobileSortDialog from '../../components/MobileSortDialog';
 import { IoFilterCircle, MdFilterList, MdSort, MdWeb } from 'react-icons/all';
 import { FaSuitcase, FaAddressBook, FaAddressCard } from 'react-icons/fa';
 import { camelCase } from 'lodash';
+import WarhouseList from './Warehouse/WarhouseList';
 
 const AccTypes = [
   {
@@ -98,7 +99,9 @@ export default function Account(props) {
   const [selectedType, setselectedType] = useState(1);
   const [accountId, setAccountId] = useState(null);
   const [sortOpen, setSortOpen] = React.useState(false);
+  const [openAddPlantsDialog, setOpenAddPlantsDialog] = React.useState(false);
   const [showEntityDialog, setShowEntityDialog] = useState(false);
+  const [isAddingWarehouse, setAddingWarehouse] = useState(false);
   let renderedFrom = camelCase(accountResource);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -1270,6 +1273,17 @@ export default function Account(props) {
                       <MenuItem
                         disabled={selectedRecords.length === 0}
                         onClick={() => {
+                          setOpenAddPlantsDialog(true)
+                          closeActions();
+                        }}
+                      >
+                        Add {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords.length} />
+                      </MenuItem>
+                    )}
+                    {accountPermissions.isUpdate && (
+                      <MenuItem
+                        disabled={selectedRecords.length === 0}
+                        onClick={() => {
                           if (selectedRecords.some((d) => d?.isAllowedToUpdate === false)) {
                             closeActions();
                             setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
@@ -1487,6 +1501,31 @@ export default function Account(props) {
             accountNameForClone={accountNameForClone}
           />
         ) : null}
+        {openAddPlantsDialog &&
+          <WarhouseList
+            isCustomer={false}
+            api="/warehouse"
+            isAddingWarehouse={isAddingWarehouse}
+            addWarehouse={(selectedPlants:any) => {
+              setAddingWarehouse(true)
+              axiosInstance().post(`/customer-account/assign-warehouse`, {
+                ids: selectedRecords.map((d:any) => d._id),
+                warehouse: selectedPlants.map((d:any) => d._id),
+              }).then(() => {
+                fetchAccounts();
+                setAddingWarehouse(false)
+                setOpenAddPlantsDialog(false)
+              }).catch(err => {
+                toastConfig.setToastConfig(err)
+                setAddingWarehouse(false)
+                setOpenAddPlantsDialog(false)
+              })
+            }}
+            onClose={() => setOpenAddPlantsDialog(false) }
+            renderedFrom={renderedFrom}
+            assignedWarehouse={[]}
+          />
+        }
         {showEntityDialog ? (
           <EntitySelectionsDialog
             open={showEntityDialog}

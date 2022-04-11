@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.92.2](https://github.com/vebholic/oms_frontend/compare/v2.92.1...v2.92.2) (2022-04-11)
+
+### [2.92.1](https://github.com/vebholic/oms_frontend/compare/v2.92.0...v2.92.1) (2022-04-10)
+
+## [2.92.0](https://github.com/vebholic/oms_frontend/compare/v2.91.0...v2.92.0) (2022-04-09)
+
+
+### Features
+
+* pos cart ([89061cc](https://github.com/vebholic/oms_frontend/commit/89061cc6975eb726eb22cf491cb3aae2d8d3c04e))
+* **report:** status period dates ([bd4ebe5](https://github.com/vebholic/oms_frontend/commit/bd4ebe59066091a61221fc816b92c44f5cb18810))
+
+
+### Bug Fixes
+
+* **Attachment:** Delete issue fixed ([6a5ec56](https://github.com/vebholic/oms_frontend/commit/6a5ec5621a7fa3d091e8129f02b48da15a7beda9))
+* bug fix ([789a2a0](https://github.com/vebholic/oms_frontend/commit/789a2a06f20f0d6da4f052c45aa962eda8ce7e8e))
+* bug fix ([f14bb96](https://github.com/vebholic/oms_frontend/commit/f14bb96360d9eea7c9d9da82f4d11e7abfff22b0))
+* bug fix ([64957f9](https://github.com/vebholic/oms_frontend/commit/64957f995a39e6fa7f4513dbcaa672c12e1c9d04))
+* ca - export to excel - multiple page select export PO-1439 ([a52dbe8](https://github.com/vebholic/oms_frontend/commit/a52dbe87bb5bb54756515e0e1a18c7b7be5721c8))
+* **report:** bug fix ([bebf7e6](https://github.com/vebholic/oms_frontend/commit/bebf7e6c79cd2e7d10c1652dcd95f7cd8e2da37d))
+* **report:** clear dates if statusPeriod false ([8364316](https://github.com/vebholic/oms_frontend/commit/836431606ef0adb3ac4f7e9b3ee7a144ecefac85))
+* **report:** date fix ([939ea01](https://github.com/vebholic/oms_frontend/commit/939ea013c4b8f109c863ce357323628825e49c1f))
+* **report:** fix ([568d657](https://github.com/vebholic/oms_frontend/commit/568d6578edf57511893c4ceb58194e30eb8a0e50))
+* **report:** no date range if no status selected ([5c87095](https://github.com/vebholic/oms_frontend/commit/5c870958a75fba9c4f4bc92605d2ae3f4d3af42c))
+* serialized asset export query string issue fixed ([93bf2ce](https://github.com/vebholic/oms_frontend/commit/93bf2ce789adb308399f1178522d80a3b3d244a4))
+
 ## [2.91.0](https://github.com/vebholic/oms_frontend/compare/v2.90.0...v2.91.0) (2022-04-08)
 
 

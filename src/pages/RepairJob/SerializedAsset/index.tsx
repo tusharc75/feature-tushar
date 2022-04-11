@@ -27,6 +27,8 @@ import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import { GiAutoRepair } from 'react-icons/gi';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { groupBy, uniq, map } from "lodash";
+import RepairProcess from "../RepairProcess";
+import LayersIcon from '@material-ui/icons/Layers';
 
 const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus }) => {
 
@@ -52,6 +54,9 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     const [anchorActionEl, setAnchorActionEl] = useState(null);
     const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: "", data: {} });
     const [repairAssetDialog, setRepairAssetDialog] = useState({ open: false, assetId: null, assetName: null, assetIds: [] })
+
+    const [repairProcessDialog, setRepairProcessDialog] = useState({ open: false, assetId: null, assetNumber: null, repaired: false })
+
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -120,7 +125,6 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 });
                 dispatch({ type: "initialize", data: rows, count: rows.length });
                 setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
-
             }).catch((error) => {
                 toastConfig.setToastConfig(error)
             });
@@ -128,12 +132,27 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
 
     const ActionsRenderer = (params) => (
         <div className="d-flex gap-1">
+            {params?.data?.repairTypeId &&
+                <HtmlTooltip title="Repair Process">
+                    <IconButton
+                        size="small"
+                        aria-label="Repair Process"
+                        color="primary"
+                        onClick={() => {
+                            setRepairProcessDialog({ open: true, assetId: params.data._id, assetNumber: params.data.assetNumber, repaired: params.data.repaired })
+                        }}
+                    >
+                        <LayersIcon fontSize="small" />
+                    </IconButton>
+                </HtmlTooltip>
+            }
             {params.data.repaired ?
                 <HtmlTooltip title="Repaired">
                     <CheckCircleIcon color="primary" fontSize="small" />
                 </HtmlTooltip>
                 :
-                ![INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].includes(params.data?.status) && params.data?.currentOwnerType === INVENTORY_OWNER_TYPE.brand ?
+                ![INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].includes(params.data?.status) &&
+                    params.data?.currentOwnerType === INVENTORY_OWNER_TYPE.brand && !params?.data?.repairTypeId ?
                     <HtmlTooltip title="Repair Asset">
                         <IconButton
                             size="small"
@@ -149,7 +168,6 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             }
         </div>
     );
-
 
     const handleTicketDialog = (ticketType, pickupFromType, deliveryToType) => {
         const data = {}
@@ -310,7 +328,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                             type="button"
                             size="small"
                             style={isMobile && !isTablet ? { color: "#FFFF5C" } : {}}
-                            disabled={selectedRecords.length === 0 || selectedRecords.some(s => s.repaired === true) || checkUniqcurrentOwnerType()}
+                            disabled={selectedRecords.length === 0 || selectedRecords.some(s => s.repaired === true || s.repairTypeId) || checkUniqcurrentOwnerType()}
                             onClick={() => {
                                 setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...selectedRecords.map(m => m._id)] })
                             }}
@@ -517,6 +535,19 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             }}
             okBtnLoading={okBtnLoading}
         />
+        }
+        {repairProcessDialog.open &&
+            <RepairProcess
+                onClose={() => { setRepairProcessDialog({ open: false, assetId: null, assetNumber: null, repaired: false }) }}
+                assetId={repairProcessDialog.assetId}
+                assetNumber={repairProcessDialog.assetNumber}
+                repairJobData={repairJobData}
+                repaired={repairProcessDialog.repaired}
+                onSuccess={() => {
+                    setRepairProcessDialog({ open: false, assetId: null, assetNumber: null, repaired: false })
+                    fetchRecords();
+                }}
+            />
         }
     </>
     );
