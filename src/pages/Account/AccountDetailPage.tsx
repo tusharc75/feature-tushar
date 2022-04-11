@@ -1129,8 +1129,9 @@ export default function AccountDetailPage(props) {
                   {(!isOffline && accountResource === "customerAccount" && permissions?.productInventory) &&
                     <TabPanel value={tabValue} index={3}>
                       <Warehouse
-                        accountApi={accountApi}
-                        accountId={id}
+                        reference={accountResource}
+                        api={accountApi}
+                        id={id}
                         renderedFrom={`${camelCase(accountResource)}_grid1`} />
                     </TabPanel>}
                   <div className="p-3">
