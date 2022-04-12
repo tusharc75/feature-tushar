@@ -19,6 +19,7 @@ import Cart from './Cart';
 import ProductGrid from './Product/Grid';
 import ProductCard from './Product/Card';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import QuantityDialog from './QuantityDialog';
 
 
 const Pos = () => {
@@ -32,7 +33,9 @@ const Pos = () => {
     const { state: { user, permissions, selectedEntity } }: any = useData();
     const [scanDialog, setScanDialog] = useState(false)
     const [cartDialog, setCartDialog] = useState(false)
+    const [qtyDialog, setQtyDialog] = useState(false)
     const [cartProduct, setCartProduct] = useState([])
+    const [assignCartProductQty, setAssignCartProductQty] = useState(null)
 
     const [viewType, setViewType] = useState("grid");
 
@@ -71,7 +74,7 @@ const Pos = () => {
         });
     }
 
-    const handleAddToCart = async (product) => {
+    const handleAddToCart = async (product, qty) => {
 
         if (product?.length === 1) {
             let tempCart
@@ -80,11 +83,12 @@ const Pos = () => {
             if (tempCartProduct) {
                 let data = {
                     "_id": tempCartProduct._id,
-                    "qty": parseInt(tempCartProduct?.qty || 0) + 1,
+                    "qty": parseInt(tempCartProduct?.qty || 0) + qty,
                 }
                 axiosInstance().put(`/pos/cart`, data)
                     .then(({ data }) => {
                         fetchCart()
+                        setQtyDialog(false)
                         toastConfig.setToastConfig({
                             open: true,
                             type: 'success',
@@ -97,12 +101,13 @@ const Pos = () => {
             else {
                 let data = [{
                     "product": product[0]._id,
-                    "qty": product[0]?.qty ? parseInt(product[0].qty) : 1,
+                    "qty": parseInt(qty),
                     "warehouse": plantId ?? product[0]?.plantId
                 }]
                 axiosInstance().post(`/pos/cart`, data)
                     .then(({ data }) => {
                         fetchCart()
+                        setQtyDialog(false)
                         toastConfig.setToastConfig({
                             open: true,
                             type: 'success',
@@ -227,18 +232,27 @@ const Pos = () => {
             {viewType === 'grid' ?
                 <ProductGrid
                     renderedFrom={renderedFrom}
-                    handleAddToCart={handleAddToCart}
+                    setAssignCartProductQty={(data) => {
+                        setQtyDialog(true)
+                        setAssignCartProductQty(data)
+                    }}
                     plantId={plantId}
                     searchVal={searchVal} />
                 :
                 <ProductCard
-                    handleAddToCart={handleAddToCart}
+                    setAssignCartProductQty={(data) => {
+                        setQtyDialog(true)
+                        setAssignCartProductQty(data)
+                    }}
                     plantId={plantId}
                     searchVal={searchVal} />
             }
             {scanDialog &&
                 <Scan
-                    handleAddToCart={handleAddToCart}
+                    setAssignCartProductQty={(data) => {
+                        setQtyDialog(true)
+                        setAssignCartProductQty(data)
+                    }}
                     plantId={plantId}
                     onClose={() => setScanDialog(false)} />
             }
@@ -247,6 +261,13 @@ const Pos = () => {
                     fetchCart={fetchCart}
                     products={cartProduct}
                     handleCloseDialog={() => { setCartDialog(false) }}
+                />
+            }
+            {qtyDialog &&
+                <QuantityDialog
+                    handleAddToCart={handleAddToCart}
+                    product={assignCartProductQty}
+                    handleCloseDialog={() => { setQtyDialog(false) }}
                 />
             }
         </CustomContainer>

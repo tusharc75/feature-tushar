@@ -15,12 +15,12 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const ProductCardLayout = ({ handleAddToCart, plantId, searchVal }) => {
+const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal }) => {
 
     const limit = 20
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
-    const [page, setPage] = useState(0);
+    const [page, setPage] = useState(1);
     const [products, setProducts] = useState([]);
     const [hasMore, setHasMore] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -32,7 +32,7 @@ const ProductCardLayout = ({ handleAddToCart, plantId, searchVal }) => {
     const fetchProducts = () => {
         setProducts([]);
         setLoading(true);
-        let api = searchVal ? `/pos?wareHouse=${plantId}&page=${page}&limit=${limit}&search=${searchVal}` : `/pos?wareHouse=${plantId}&page=0&limit=${limit}`;
+        let api = searchVal ? `/pos?wareHouse=${plantId}&page=0&limit=${limit}&search=${searchVal}` : `/pos?wareHouse=${plantId}&page=0&limit=${limit}`;
         axiosInstance().get(api).then(({ data: { data, count } }) => {
             setProducts([...data]);
             setHasMore(data.length !== count);
@@ -44,7 +44,7 @@ const ProductCardLayout = ({ handleAddToCart, plantId, searchVal }) => {
 
     const fetchMoreData = () => {
         setTimeout(() => {
-            let api = searchVal ? `/pos?wareHouse=${plantId}&page=${page}&limit=${limit}&search=${searchVal}` : `/pos?wareHouse=${plantId}&page=0&limit=${limit}`;
+            let api = searchVal ? `/pos?wareHouse=${plantId}&page=${page}&limit=${limit}&search=${searchVal}` : `/pos?wareHouse=${plantId}&page=${page}&limit=${limit}`;
             axiosInstance().get(api).then(({ data: { data, count } }) => {
                 setPage(prevState => prevState + 1)
                 setProducts(prevState => [...prevState, ...data]);
@@ -78,7 +78,7 @@ const ProductCardLayout = ({ handleAddToCart, plantId, searchVal }) => {
                                 <ProductCard
                                     key={index}
                                     product={product}
-                                    handleAddToCart={handleAddToCart}
+                                    setAssignCartProductQty={setAssignCartProductQty}
                                     disabledCart={!product?.inventory || product?.inventory === 0} />
                             ))}
                         </div> : (loading === true ?
