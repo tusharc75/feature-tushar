@@ -176,18 +176,16 @@ const Activity = (props) => {
   };
 
   const fetchUsersEmails = () => {
-    axiosInstance()
-      .get("/user")
-      .then(({ data: { data, count } }) => {
-        data = data.reduce((emails, obj) => {
-          if (obj?.email && emailUsersOptions.indexOf(obj.email) < 0)
-            emails.push(obj.email);
-          return emails;
-        }, []);
-        setEmailUsersOptions((prevState) => {
-          return [...prevState, ...data];
-        });
-      })
+    axiosInstance().get("/user").then(({ data: { data, count } }) => {
+      data = data.reduce((emails, obj) => {
+        if (obj?.email && emailUsersOptions.indexOf(obj.email) < 0)
+          emails.push(obj.email);
+        return emails;
+      }, []);
+      setEmailUsersOptions((prevState) => {
+        return [...prevState, ...data];
+      });
+    })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });

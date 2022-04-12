@@ -111,10 +111,8 @@ const TransferInventoryDetailPage = () => {
         setHeadingLabel(data.transferNumber);
         setCustomizedRoutes([routes.transferInventory, { title: data.transferNumber }]);
         setCurrentStep(transferInventorySteps.indexOf(data?.processStatus) !== -1 ? transferInventorySteps.indexOf(data?.processStatus) : 0);
-
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
-
         if (permissions?.transferInventory?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
