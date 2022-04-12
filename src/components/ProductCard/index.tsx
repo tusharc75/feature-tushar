@@ -44,13 +44,12 @@ const ProductCad = ({ product, showSkeleton = false, handleAddToCart = null, dis
     return (
         <Fragment>
             <div className={styles.product_card}>
-
                 <div className={styles.title}>
                     {
                         showSkeleton ? <Skeleton width={120} height={30} /> : <h4
                             className="cursor-pointer"
                             onClick={() => {
-                                history.push(`${routes.productDetail.path}/${product._id}`);
+                                history.push(`${routes.posProductDetail.path}/${product._id}`);
                             }}
                         >{`${product?.productName} `}</h4>
                     }
@@ -86,13 +85,13 @@ const ProductCad = ({ product, showSkeleton = false, handleAddToCart = null, dis
                                 <div key={i} className={classes.imageContainer}>
                                     <img className={classes.img} src={image}
                                         onClick={() => {
-                                            history.push(`${routes.productDetail.path}/${product._id}`);
+                                            history.push(`${routes.posProductDetail.path}/${product._id}`);
                                         }}
                                     />
                                 </div>
                             ))}
                         </Carousel> : <BsImage className={`${styles.no_image} cursor-pointer`} onClick={() => {
-                            history.push(`${routes.productDetail.path}/${product?._id}`);
+                            history.push(`${routes.posProductDetail.path}/${product?._id}`);
                         }} />)
                     }
 
