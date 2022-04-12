@@ -15,7 +15,7 @@ import { MdAddShoppingCart } from 'react-icons/md';
 
 
 
-export default function Scan({ onClose, plantId, handleAddToCart }) {
+export default function Scan({ onClose, plantId, setAssignCartProductQty }) {
 
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
@@ -37,7 +37,7 @@ export default function Scan({ onClose, plantId, handleAddToCart }) {
         const deepFilter = `&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
         axiosInstance().get(`/pos?wareHouse=${plantId}${deepFilter}`).then(({ data: { data, count } }) => {
             if (data?.length === 1) {
-                handleAddToCart(data)
+                setAssignCartProductQty(data[0])
             }
             else if (data?.length) {
                 setScanResult({ open: true, result: data })
@@ -95,7 +95,7 @@ export default function Scan({ onClose, plantId, handleAddToCart }) {
                                     <ListItemText
                                         primary={product?.productName}
                                     />
-                                    <Button variant="outlined" color="primary" size='large' onClick={() => { handleAddToCart([product]) }}>
+                                    <Button variant="outlined" color="primary" size='large' onClick={() => { setAssignCartProductQty(product) }}>
                                         <MdAddShoppingCart />
                                     </Button>
                                 </ListItem>
