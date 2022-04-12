@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.93.0](https://github.com/vebholic/oms_frontend/compare/v2.92.2...v2.93.0) (2022-04-12)
+
+
+### Features
+
+* **customer account:** add plant tab ([84fbf38](https://github.com/vebholic/oms_frontend/commit/84fbf38471ee6bbc2293851248b9aa93f9962af0))
+* **warehouse:** add warehouse option ([fb26e4a](https://github.com/vebholic/oms_frontend/commit/fb26e4a0a38171064ff0ed281a22202c7d2319ea))
+
+
+### Bug Fixes
+
+* bug fix ([8189de6](https://github.com/vebholic/oms_frontend/commit/8189de6e41c819f95ffb11c85d64d9394de16db3))
+* bug fix ([b81c7bb](https://github.com/vebholic/oms_frontend/commit/b81c7bb345f796f34ac9b5f630be84c28f6d487d))
+* bug fix ([60383ee](https://github.com/vebholic/oms_frontend/commit/60383ee7c9e6789bc07d1d96fc106151b424a8c2))
+* pos cart and product layout ([9928019](https://github.com/vebholic/oms_frontend/commit/9928019b9f45f1668f931446c8e0e8c6a79733ac))
+* **warehouse:** fix ([49bf608](https://github.com/vebholic/oms_frontend/commit/49bf60827836cd49189a4c93482ee7058a768973))
+* **warehouselist:** remove console ([e1e14af](https://github.com/vebholic/oms_frontend/commit/e1e14af56acb85b73152a8b67d90d01df0b3996c))
+
 ### [2.92.2](https://github.com/vebholic/oms_frontend/compare/v2.92.1...v2.92.2) (2022-04-11)
 
 ### [2.92.1](https://github.com/vebholic/oms_frontend/compare/v2.92.0...v2.92.1) (2022-04-10)
