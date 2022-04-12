@@ -1,38 +1,56 @@
-import { useState, FC, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Badge, Box, Button, capitalize, Chip, ClickAwayListener, Divider, Grid, IconButton, InputBase, List, ListItem, ListItemText, Menu, MenuItem, TextField, Tooltip, Typography } from '@material-ui/core';
-import { Link, useHistory } from 'react-router-dom';
+import { useState, useEffect, Fragment } from 'react';
+import { Box, Grid } from '@material-ui/core';
+import { useParams, useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import { useData } from '../../../StateProvider/Provider';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomContainer from '../../../components/CustomContainer';
-import { Autocomplete } from '@material-ui/lab';
-import { isMobile, isTablet } from 'react-device-detect';
-import SearchBox from 'src/components/Helpers/SearchBox';
 import axiosInstance from "src/axios/axiosInstance";
-import styles2 from '../Leads/Header.module.scss';
-import CropFreeIcon from '@material-ui/icons/CropFree';
-import { MdBorderAll, MdList, MdShoppingCart } from 'react-icons/md';
-import { camelCase, filter } from 'lodash';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
+
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 
 const ProductDetails = () => {
 
-
     const { state: { user, permissions, selectedEntity } }: any = useData();
+    const { id } = useParams();
+    const [productData, setProductData] = useState(null);
+
+    useEffect(() => {
+        if (id) {
+            fetchProductData();
+        }
+    }, [id]);
+
+
+    const fetchProductData = () => {
+        axiosInstance()
+            .get(`/pos/product/${id}`)
+            .then(({ data: { data } }) => {
+                setProductData(data?.productData)
+            })
+            .catch((err) => {
+            });
+    }
+
+
 
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[routes.pos, "Product"]} />
+                <CustomBreadCrumbs routes={[routes.pos, { title: productData?.productName }]} />
             </Grid>
             <Grid item md={8} sm={11} xs={10}>
             </Grid>
         </Grid>
         <CustomContainer>
             <div className="header-panel">
-
+                {productData ?
+                    <h5>{productData?.productName}</h5> :
+                    <Box p={2} height={500} bgcolor="white">
+                        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                    </Box>
+                }
             </div>
         </CustomContainer>
     </Fragment>
