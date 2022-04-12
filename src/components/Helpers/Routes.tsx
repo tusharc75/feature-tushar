@@ -364,6 +364,10 @@ const routes = {
     title: (storedRoutes && storedRoutes.pos && storedRoutes.pos.title) ? storedRoutes.pos?.title : RESOURCE_LABEL.pos,
     path: "/pos",
   },
+  posProductDetail: {
+    title: (storedRoutes && storedRoutes.pos && storedRoutes.pos.title) ? storedRoutes.pos?.title : RESOURCE_LABEL.pos,
+    path: "/pos/product",
+  },
   repairType: {
     title: (storedRoutes && storedRoutes.repairType && storedRoutes.repairType.title) ? storedRoutes.repairType?.title : RESOURCE_LABEL.repairType,
     path: "/repair-type",
