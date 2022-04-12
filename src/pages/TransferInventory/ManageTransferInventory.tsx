@@ -23,7 +23,17 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
 import ManageWarehouse from '../Warehouse/ManageWarehouse';
 import { FaDiceOne } from 'react-icons/fa';
-import { mapPlantOption } from './transferInventoryHelpers';
+
+const mapPlantOption = (data: any, length: number) => {
+  return {
+    address: data.address,
+    default: false,
+    entity: data.entity,
+    optionLabel: data.warehouseName,
+    optionValue: data._id,
+    order: length
+  };
+};
 
 interface Props {
   isClone?: boolean;
@@ -260,7 +270,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                             permissions?.warehouse.isCreate &&
                                             field.fieldName === 'transferFromPlant' &&
                                             !transferFromDisable) ||
-                                          (field.fieldName === 'transfertoPlant' && !transferToDisable)
+                                            (field.fieldName === 'transfertoPlant' && !transferToDisable)
                                             ? 11
                                             : 12
                                         }
@@ -284,10 +294,10 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                             isCustomer
                                               ? customerPlants
                                               : field.fieldName === 'transfertoPlant'
-                                              ? plantToOptions
-                                              : field.fieldName === 'transferFromPlant'
-                                              ? plantsFromOptions
-                                              : []
+                                                ? plantToOptions
+                                                : field.fieldName === 'transferFromPlant'
+                                                  ? plantsFromOptions
+                                                  : []
                                           }
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
