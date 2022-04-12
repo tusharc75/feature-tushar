@@ -14,7 +14,7 @@ import styles2 from '../Leads/Header.module.scss';
 import CropFreeIcon from '@material-ui/icons/CropFree';
 import { MdBorderAll, MdList, MdShoppingCart } from 'react-icons/md';
 import { camelCase, filter } from 'lodash';
-import Scan from 'src/components/Scan';
+import Scan from './Scan';
 import Cart from './Cart';
 import ProductGrid from './Product/Grid';
 import ProductCard from './Product/Card';
@@ -68,7 +68,6 @@ const Pos = () => {
     }
 
     const handleAddToCart = (product) => {
-        console.log(cartProduct)
         if (product?.length === 1) {
             let data = [{
                 "product": product[0]._id,
@@ -209,7 +208,10 @@ const Pos = () => {
                     searchVal={searchVal} />
             }
             {scanDialog &&
-                <Scan onClose={() => setScanDialog(false)} />
+                <Scan
+                    handleAddToCart={handleAddToCart}
+                    plantId={plantId}
+                    onClose={() => setScanDialog(false)} />
             }
             {cartDialog &&
                 <Cart
