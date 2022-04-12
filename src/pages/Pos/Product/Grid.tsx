@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 
-const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }) => {
+const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, searchVal }) => {
 
     const toastConfig = useContext(CustomToastContext);
 
@@ -49,7 +49,7 @@ const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }
                     disabled={!params.data?.inventory || params.data?.inventory === 0}
                     aria-label="Add to cart"
                     onClick={() => {
-                        handleAddToCart([params.data])
+                        setAssignCartProductQty(params.data)
                     }}
                     color={params?.data?.inventory ? "secondary" : "inherit"}
                 >
