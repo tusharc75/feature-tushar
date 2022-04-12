@@ -108,6 +108,7 @@ const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }
             let rows = data?.map((u) => {
                 let finalObject = prepareDataForGrid(u);
                 return {
+                    plantId: plantId,
                     ...finalObject
                 };
             });

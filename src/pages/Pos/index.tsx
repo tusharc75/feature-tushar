@@ -58,32 +58,61 @@ const Pos = () => {
     }
 
     const fetchCart = () => {
-        axiosInstance().get(`/pos/cart`)
-            .then(({ data: { data } }) => {
-                setCartProduct(data)
-            })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-            });
+        return new Promise((resolve, reject) => {
+            axiosInstance().get(`/pos/cart`)
+                .then(({ data: { data } }) => {
+                    setCartProduct(data)
+                    resolve(data)
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                    reject(error)
+                });
+        });
     }
 
-    const handleAddToCart = (product) => {
+    const handleAddToCart = async (product) => {
+
         if (product?.length === 1) {
-            let data = [{
-                "product": product[0]._id,
-                "qty": product[0]?.qty ? parseInt(product[0].qty) : 1,
-            }]
-            axiosInstance().post(`/pos/cart`, data)
-                .then(({ data }) => {
-                    fetchCart()
-                    toastConfig.setToastConfig({
-                        open: true,
-                        type: 'success',
-                        message: "Add to cart successfully"
+            let tempCart
+            if (cartProduct.length === 0) { tempCart = await fetchCart() }
+            let tempCartProduct = cartProduct.length === 0 ? tempCart.find(d => d.product.optionValue === product[0]._id) : cartProduct.find(d => d.product.optionValue === product[0]._id)
+            if (tempCartProduct) {
+                let data = {
+                    "_id": tempCartProduct._id,
+                    "qty": parseInt(tempCartProduct?.qty || 0) + 1,
+                }
+                axiosInstance().put(`/pos/cart`, data)
+                    .then(({ data }) => {
+                        fetchCart()
+                        toastConfig.setToastConfig({
+                            open: true,
+                            type: 'success',
+                            message: data.message
+                        });
+                    }).catch((error) => {
+                        toastConfig.setToastConfig(error)
                     });
-                }).catch((error) => {
-                    toastConfig.setToastConfig(error)
-                });
+            }
+            else {
+                let data = [{
+                    "product": product[0]._id,
+                    "qty": product[0]?.qty ? parseInt(product[0].qty) : 1,
+                    "warehouse": plantId ?? product[0]?.plantId
+                }]
+                axiosInstance().post(`/pos/cart`, data)
+                    .then(({ data }) => {
+                        fetchCart()
+                        toastConfig.setToastConfig({
+                            open: true,
+                            type: 'success',
+                            message: "Add to cart successfully"
+                        });
+                    }).catch((error) => {
+                        toastConfig.setToastConfig(error)
+                    });
+            }
+
         }
     };
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState, Fragment } from 'react';
-import { Box, Button, capitalize, Chip, Dialog, Divider, List, ListItem, ListItemText, Typography } from '@material-ui/core';
+import { Box, Button, capitalize, Chip, Dialog, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
 import { useHistory } from 'react-router-dom'
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
@@ -11,6 +11,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import BarcodeScannerComponent from "react-qr-barcode-scanner";
+import { MdAddShoppingCart } from 'react-icons/md';
 
 
 
@@ -82,23 +83,23 @@ export default function Scan({ onClose, plantId, handleAddToCart }) {
                 />
                 <CustomDialogContent>
                     {scanResult?.result?.length > 0 ?
-                        <List>
-                            {scanResult?.result?.map((m) => (
-                                <Fragment key={m._id}>
-                                    <ListItem alignItems="flex-start">
-                                        <ListItemAvatar className="mr-3">
-                                            <Avatar variant="rounded" style={{ height: 80, width: 80 }}>
-                                                {m.productImage ?
-                                                    <img src={m.productImage} alt={m.productName} loading="lazy" className="w-100" /> : <ImageIcon />
-                                                }
-                                            </Avatar>
-                                        </ListItemAvatar>
-                                        <ListItemText primary={m.productName} />
-                                    </ListItem>
-                                    <Divider />
-                                </Fragment>
-                            ))
-                            }
+                        <List style={{ padding: 0 }}>
+                            {scanResult?.result?.map((product) => (
+                                <ListItem divider key={product._id}>
+                                    <ListItemAvatar className="mr-3">
+                                        <Avatar variant="rounded" style={{ height: 80, width: 80 }}
+                                            src={product?.productImage}
+                                            alt={product?.productName ?? ''}
+                                        />
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                        primary={product?.productName}
+                                    />
+                                    <Button variant="outlined" color="primary" size='large' onClick={() => { handleAddToCart([product]) }}>
+                                        <MdAddShoppingCart />
+                                    </Button>
+                                </ListItem>
+                            ))}
                         </List> : <h2 className="my-3">No Products Found...</h2>
                     }
                 </CustomDialogContent>
