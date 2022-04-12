@@ -12,8 +12,11 @@ import CustomSwipableList from "src/components/SwipableListComponents/CustomSwip
 import { MdAddShoppingCart } from "react-icons/md";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { prepareDataForGrid } from '../../../constants/helpers';
+import { Link } from 'react-router-dom'
+import routes from "../../../components/Helpers/Routes";
+import NoDataCell from "../../../components/Helpers/NoDataCell";
 
-const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }) => {
+const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, searchVal }) => {
 
     const toastConfig = useContext(CustomToastContext);
 
@@ -23,10 +26,20 @@ const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
     const columns = [
-        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "productNameRenderer" },
         { field: "productImage", headerName: "Product Image", show: true, disabled: true, cellRenderer: "imageRenderer" },
         { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
     ]
+
+    const ProductNameRenderer = (params) => (
+        params?.value ? (
+            <Link className="link text-truncate" title={params.value} to={`${routes.posProductDetail.path}/${params.data?._id}`}>
+                {params.value}
+            </Link>
+        ) : (
+            <NoDataCell />
+        )
+    );
 
     const ActionsRenderer = (params) => (
         <HtmlTooltip title={params?.data?.inventory ? 'Add to cart' : 'No inventory'} >
@@ -36,7 +49,7 @@ const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }
                     disabled={!params.data?.inventory || params.data?.inventory === 0}
                     aria-label="Add to cart"
                     onClick={() => {
-                        handleAddToCart([params.data])
+                        setAssignCartProductQty(params.data)
                     }}
                     color={params?.data?.inventory ? "secondary" : "inherit"}
                 >
@@ -49,6 +62,7 @@ const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }
     const frameWorkComponent = {
         commonRenderer: CommonRenderer,
         imageRenderer: ImageRenderer,
+        productNameRenderer: ProductNameRenderer,
         actionsRenderer: ActionsRenderer
     };
 
@@ -61,7 +75,6 @@ const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }
     useEffect(() => {
         dispatch({ type: 'search', search: searchVal });
     }, [searchVal]);
-
 
     const getQueryString = () => {
         let deepFilter = `&page=${page}&limit=${limit}`;
@@ -95,6 +108,7 @@ const ProductGridLayout = ({ renderedFrom, handleAddToCart, plantId, searchVal }
             let rows = data?.map((u) => {
                 let finalObject = prepareDataForGrid(u);
                 return {
+                    plantId: plantId,
                     ...finalObject
                 };
             });

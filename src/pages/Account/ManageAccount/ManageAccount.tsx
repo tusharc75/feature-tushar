@@ -513,7 +513,7 @@ export default function ManageAccount(props) {
                                       <FormTypes
                                         isNew={isNew}
                                         {...field}
-                                        disabled={!isNew && field.disableOnEdit}
+                                        disabled={!isNew && (field.disableOnEdit || values["owner"] !== user.user._id)}
                                         multiple
                                         values={values}
                                         errors={errors}
