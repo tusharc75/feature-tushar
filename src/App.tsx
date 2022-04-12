@@ -122,6 +122,7 @@ import WellMasterDetailsPage from './pages/WellMaster/WellMasterDetailsPage';
 import BulkAssetCreation from './pages/BulkAssetCreation';
 import BulkAssetCreationDetailsPage from './pages/BulkAssetCreation/BulkAssetCreationDetailsPage';
 import Pos from './pages/Pos';
+import PosProductDetails from './pages/Pos/ProductDetails';
 import RepairType from './pages/RepairType';
 import RepairTypeDetailsPage from './pages/RepairType/RepairTypeDetailsPage';
 
@@ -675,6 +676,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.pos.path}`}>
               <Pos />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.posProductDetail.path}/:id`}>
+              <PosProductDetails />
             </PrivateRoute>
             <PrivateRoute exact path={"/dashboard-builder/:id"}>
               <DashboardBuilder />

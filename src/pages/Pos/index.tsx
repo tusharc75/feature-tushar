@@ -19,6 +19,7 @@ import Cart from './Cart';
 import ProductGrid from './Product/Grid';
 import ProductCard from './Product/Card';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import QuantityDialog from './QuantityDialog';
 
 
 const Pos = () => {
@@ -32,7 +33,9 @@ const Pos = () => {
     const { state: { user, permissions, selectedEntity } }: any = useData();
     const [scanDialog, setScanDialog] = useState(false)
     const [cartDialog, setCartDialog] = useState(false)
+    const [qtyDialog, setQtyDialog] = useState(false)
     const [cartProduct, setCartProduct] = useState([])
+    const [assignCartProductQty, setAssignCartProductQty] = useState(null)
 
     const [viewType, setViewType] = useState("grid");
 
@@ -58,32 +61,63 @@ const Pos = () => {
     }
 
     const fetchCart = () => {
-        axiosInstance().get(`/pos/cart`)
-            .then(({ data: { data } }) => {
-                setCartProduct(data)
-            })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-            });
+        return new Promise((resolve, reject) => {
+            axiosInstance().get(`/pos/cart`)
+                .then(({ data: { data } }) => {
+                    setCartProduct(data)
+                    resolve(data)
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                    reject(error)
+                });
+        });
     }
 
-    const handleAddToCart = (product) => {
+    const handleAddToCart = async (product, qty) => {
+
         if (product?.length === 1) {
-            let data = [{
-                "product": product[0]._id,
-                "qty": product[0]?.qty ? parseInt(product[0].qty) : 1,
-            }]
-            axiosInstance().post(`/pos/cart`, data)
-                .then(({ data }) => {
-                    fetchCart()
-                    toastConfig.setToastConfig({
-                        open: true,
-                        type: 'success',
-                        message: "Add to cart successfully"
+            let tempCart
+            if (cartProduct.length === 0) { tempCart = await fetchCart() }
+            let tempCartProduct = cartProduct.length === 0 ? tempCart.find(d => d.product.optionValue === product[0]._id) : cartProduct.find(d => d.product.optionValue === product[0]._id)
+            if (tempCartProduct) {
+                let data = {
+                    "_id": tempCartProduct._id,
+                    "qty": parseInt(tempCartProduct?.qty || 0) + qty,
+                }
+                axiosInstance().put(`/pos/cart`, data)
+                    .then(({ data }) => {
+                        fetchCart()
+                        setQtyDialog(false)
+                        toastConfig.setToastConfig({
+                            open: true,
+                            type: 'success',
+                            message: data.message
+                        });
+                    }).catch((error) => {
+                        toastConfig.setToastConfig(error)
                     });
-                }).catch((error) => {
-                    toastConfig.setToastConfig(error)
-                });
+            }
+            else {
+                let data = [{
+                    "product": product[0]._id,
+                    "qty": parseInt(qty),
+                    "warehouse": plantId ?? product[0]?.plantId
+                }]
+                axiosInstance().post(`/pos/cart`, data)
+                    .then(({ data }) => {
+                        fetchCart()
+                        setQtyDialog(false)
+                        toastConfig.setToastConfig({
+                            open: true,
+                            type: 'success',
+                            message: "Add to cart successfully"
+                        });
+                    }).catch((error) => {
+                        toastConfig.setToastConfig(error)
+                    });
+            }
+
         }
     };
 
@@ -198,18 +232,27 @@ const Pos = () => {
             {viewType === 'grid' ?
                 <ProductGrid
                     renderedFrom={renderedFrom}
-                    handleAddToCart={handleAddToCart}
+                    setAssignCartProductQty={(data) => {
+                        setQtyDialog(true)
+                        setAssignCartProductQty(data)
+                    }}
                     plantId={plantId}
                     searchVal={searchVal} />
                 :
                 <ProductCard
-                    handleAddToCart={handleAddToCart}
+                    setAssignCartProductQty={(data) => {
+                        setQtyDialog(true)
+                        setAssignCartProductQty(data)
+                    }}
                     plantId={plantId}
                     searchVal={searchVal} />
             }
             {scanDialog &&
                 <Scan
-                    handleAddToCart={handleAddToCart}
+                    setAssignCartProductQty={(data) => {
+                        setQtyDialog(true)
+                        setAssignCartProductQty(data)
+                    }}
                     plantId={plantId}
                     onClose={() => setScanDialog(false)} />
             }
@@ -218,6 +261,13 @@ const Pos = () => {
                     fetchCart={fetchCart}
                     products={cartProduct}
                     handleCloseDialog={() => { setCartDialog(false) }}
+                />
+            }
+            {qtyDialog &&
+                <QuantityDialog
+                    handleAddToCart={handleAddToCart}
+                    product={assignCartProductQty}
+                    handleCloseDialog={() => { setQtyDialog(false) }}
                 />
             }
         </CustomContainer>
