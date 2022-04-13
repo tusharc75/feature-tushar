@@ -30,6 +30,7 @@ import { camelCase } from 'lodash';
 import Parts from './Parts';
 import ParentProduct from './ParentProduct';
 import NonSerializedAssetProductInventory from './inventory';
+import ProductRepairType from './RepairType';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -412,6 +413,9 @@ const ProductDetailsPage = () => {
                 {permissions?.serializedAsset && <Tab label="Parent Product" value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
                 {permissions?.serializedAsset && <Tab label="Child Product" value={3} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
                 {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <Tab value={4} label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />}
+                {permissions.hasOwnProperty("repairType") && 
+                  <Tab label="Repair Types" value={5} aria-controls="a11y-tabpanel-5" id="a11y-tab-5" />
+                }
               </Tabs>
               {tabValue === 0 &&
                 <Box>
@@ -461,6 +465,9 @@ const ProductDetailsPage = () => {
                 id={id}
                 renderedFrom={`${renderedFrom}_grid-3`}
               />}
+              {tabValue === 5 && (
+                <ProductRepairType id={id} renderedFrom={`${renderedFrom}_grid-4`} />
+              )}
             </Paper>
           </Grid>
           {permissions?.serializedAsset ? (
