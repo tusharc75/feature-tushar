@@ -227,19 +227,19 @@ const Email = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions.email.isDelete ? 
-      (<Tooltip title="Delete">
-        <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(params.data)}>
-          <DeleteIcon fontSize="small" color="error" />
-        </IconButton>
-      </Tooltip>)
-      : (
-        <Tooltip className="cursor-stop" title="You don't have the permissions to delete">
-          <IconButton size="small" aria-label="Delete">
-            <DeleteIcon fontSize="small" color="disabled" />
+      {permissions.email.isDelete ?
+        (<Tooltip title="Delete">
+          <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(params.data)}>
+            <DeleteIcon fontSize="small" color="error" />
           </IconButton>
-        </Tooltip>
-      )}
+        </Tooltip>)
+        : (
+          <Tooltip className="cursor-stop" title="You don't have the permissions to delete">
+            <IconButton size="small" aria-label="Delete">
+              <DeleteIcon fontSize="small" color="disabled" />
+            </IconButton>
+          </Tooltip>
+        )}
     </>
   );
 
@@ -433,7 +433,12 @@ const Email = () => {
                   value={resource}
                   onChange={(event, newValue) => {
                     setResource(newValue);
-                    setFilter([])
+                    if (newValue) {
+                      setFilter((prevState) => ([...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]))
+                    }
+                    else {
+                      setFilter([])
+                    }
                   }}
                   size="small"
                   renderInput={(params) =>

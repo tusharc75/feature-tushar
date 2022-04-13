@@ -163,68 +163,68 @@ export default function Account(props) {
         queryType && queryApproval && queryColFilter && querySearch
           ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
           : queryType && queryApproval && queryColFilter
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
-          : queryType && queryApproval && querySearch
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
-          : queryType && querySearch && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
-          : queryApproval && querySearch && queryColFilter
-          ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&seach=${search}`
-          : queryType && queryApproval
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
-          : queryType && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-          : queryType && querySearch
-          ? `?page=${page}&type=${queryType}&search=${querySearch}`
-          : queryApproval && queryColFilter
-          ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
-          : queryApproval && querySearch
-          ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
-          : queryColFilter && querySearch
-          ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
-          : queryType
-          ? `?page=${page}&type=${queryType}`
-          : queryApproval
-          ? `?page=${page}&approval=${queryApproval}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}`
-          : querySearch
-          ? `?page=${page}&search=${querySearch}`
-          : `?page=${page}`
+            ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
+            : queryType && queryApproval && querySearch
+              ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
+              : queryType && querySearch && queryColFilter
+                ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
+                : queryApproval && querySearch && queryColFilter
+                  ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&seach=${search}`
+                  : queryType && queryApproval
+                    ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+                    : queryType && queryColFilter
+                      ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+                      : queryType && querySearch
+                        ? `?page=${page}&type=${queryType}&search=${querySearch}`
+                        : queryApproval && queryColFilter
+                          ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
+                          : queryApproval && querySearch
+                            ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
+                            : queryColFilter && querySearch
+                              ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+                              : queryType
+                                ? `?page=${page}&type=${queryType}`
+                                : queryApproval
+                                  ? `?page=${page}&approval=${queryApproval}`
+                                  : queryColFilter
+                                    ? `?page=${page}&colFilter=${queryColFilter}`
+                                    : querySearch
+                                      ? `?page=${page}&search=${querySearch}`
+                                      : `?page=${page}`
       );
     } else {
       history.replace(
         queryType && queryApproval && queryColFilter && querySearch
           ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
           : queryType && queryApproval && queryColFilter
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
-          : queryType && queryApproval && querySearch
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
-          : queryType && querySearch && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
-          : queryApproval && querySearch && queryColFilter
-          ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&seach=${search}`
-          : queryType && queryApproval
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
-          : queryType && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-          : queryType && querySearch
-          ? `?page=${page}&type=${queryType}&search=${querySearch}`
-          : queryApproval && queryColFilter
-          ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
-          : queryApproval && querySearch
-          ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
-          : queryColFilter && querySearch
-          ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
-          : queryType
-          ? `?page=${page}&type=${queryType}`
-          : queryApproval
-          ? `?page=${page}&approval=${queryApproval}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}`
-          : querySearch
-          ? `?page=${page}&search=${querySearch}`
-          : `?page=${page}`
+            ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
+            : queryType && queryApproval && querySearch
+              ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
+              : queryType && querySearch && queryColFilter
+                ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
+                : queryApproval && querySearch && queryColFilter
+                  ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&seach=${search}`
+                  : queryType && queryApproval
+                    ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+                    : queryType && queryColFilter
+                      ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+                      : queryType && querySearch
+                        ? `?page=${page}&type=${queryType}&search=${querySearch}`
+                        : queryApproval && queryColFilter
+                          ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
+                          : queryApproval && querySearch
+                            ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
+                            : queryColFilter && querySearch
+                              ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
+                              : queryType
+                                ? `?page=${page}&type=${queryType}`
+                                : queryApproval
+                                  ? `?page=${page}&approval=${queryApproval}`
+                                  : queryColFilter
+                                    ? `?page=${page}&colFilter=${queryColFilter}`
+                                    : querySearch
+                                      ? `?page=${page}&search=${querySearch}`
+                                      : `?page=${page}`
       );
     }
   }, [page, queryPage]);
@@ -335,36 +335,36 @@ export default function Account(props) {
         queryType && queryApproval && queryColFilter
           ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
           : queryType && queryApproval
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${search}`
-          : queryType && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${search}`
-          : queryApproval && queryColFilter
-          ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
-          : queryType
-          ? `?page=${page}&type=${queryType}&search=${search}`
-          : queryApproval
-          ? `?page=${page}&approval=${queryApproval}&search=${search}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
-          : `?page=${page}&search=${search}`
+            ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${search}`
+            : queryType && queryColFilter
+              ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${search}`
+              : queryApproval && queryColFilter
+                ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
+                : queryType
+                  ? `?page=${page}&type=${queryType}&search=${search}`
+                  : queryApproval
+                    ? `?page=${page}&approval=${queryApproval}&search=${search}`
+                    : queryColFilter
+                      ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
+                      : `?page=${page}&search=${search}`
       );
     } else {
       history.replace(
         queryType && queryApproval && queryColFilter
           ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
           : queryType && queryApproval
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
-          : queryType && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-          : queryApproval && queryColFilter
-          ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
-          : queryType
-          ? `?page=${page}&type=${queryType}`
-          : queryApproval
-          ? `?page=${page}&approval=${queryApproval}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}`
-          : `?page=${page}`
+            ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+            : queryType && queryColFilter
+              ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
+              : queryApproval && queryColFilter
+                ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
+                : queryType
+                  ? `?page=${page}&type=${queryType}`
+                  : queryApproval
+                    ? `?page=${page}&approval=${queryApproval}`
+                    : queryColFilter
+                      ? `?page=${page}&colFilter=${queryColFilter}`
+                      : `?page=${page}`
       );
     }
   }, [search]);
@@ -392,18 +392,18 @@ export default function Account(props) {
         queryType && queryApproval && querySearch
           ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[${serialize(filters)}]&search=${querySearch}`
           : queryType && queryApproval
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[${serialize(filters)}]`
-          : queryType && querySearch
-          ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-          : queryApproval && querySearch
-          ? `?page=${page}&approval=${queryApproval}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-          : queryType
-          ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
-          : queryApproval
-          ? `?page=${page}&approval=${queryApproval}&colFilter=[${serialize}]`
-          : querySearch
-          ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-          : `?page=${page}&colFilter=[${serialize(filters)}]`
+            ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[${serialize(filters)}]`
+            : queryType && querySearch
+              ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+              : queryApproval && querySearch
+                ? `?page=${page}&approval=${queryApproval}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+                : queryType
+                  ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
+                  : queryApproval
+                    ? `?page=${page}&approval=${queryApproval}&colFilter=[${serialize}]`
+                    : querySearch
+                      ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
+                      : `?page=${page}&colFilter=[${serialize(filters)}]`
       );
     }
 
@@ -412,18 +412,18 @@ export default function Account(props) {
         queryType && queryApproval && querySearch
           ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
           : queryType && queryApproval
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
-          : queryType && querySearch
-          ? `?page=${page}&type=${queryType}&search=${querySearch}`
-          : queryApproval && querySearch
-          ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
-          : queryType
-          ? `?page=${page}&type=${queryType}`
-          : queryApproval
-          ? `?page=${page}&approval=${queryApproval}`
-          : querySearch
-          ? `?page=${page}&search=${querySearch}`
-          : `?page=${page}`
+            ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
+            : queryType && querySearch
+              ? `?page=${page}&type=${queryType}&search=${querySearch}`
+              : queryApproval && querySearch
+                ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
+                : queryType
+                  ? `?page=${page}&type=${queryType}`
+                  : queryApproval
+                    ? `?page=${page}&approval=${queryApproval}`
+                    : querySearch
+                      ? `?page=${page}&search=${querySearch}`
+                      : `?page=${page}`
       );
     }
     if (Object.keys(filters).length === 0 && queryColFilter === undefined) {
@@ -695,18 +695,18 @@ export default function Account(props) {
       queryType && queryColFilter && querySearch
         ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}&search=${querySearch}`
         : queryType && queryColFilter
-        ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}`
-        : queryType && querySearch
-        ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}&search=${search}`
-        : querySearch && queryColFilter
-        ? `?page=${page}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}&search=${search}`
-        : queryType
-        ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}`
-        : queryColFilter
-        ? `?page=${page}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}`
-        : querySearch
-        ? `?page=${page}&approval=${encodeURIComponent(options[index])}&search=${search}`
-        : `?page=${page}&approval=${encodeURIComponent(options[index])}`
+          ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}`
+          : queryType && querySearch
+            ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}&search=${search}`
+            : querySearch && queryColFilter
+              ? `?page=${page}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}&search=${search}`
+              : queryType
+                ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}`
+                : queryColFilter
+                  ? `?page=${page}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}`
+                  : querySearch
+                    ? `?page=${page}&approval=${encodeURIComponent(options[index])}&search=${search}`
+                    : `?page=${page}&approval=${encodeURIComponent(options[index])}`
     );
   };
 
@@ -938,18 +938,18 @@ export default function Account(props) {
         queryApproval && queryColFilter && querySearch
           ? `?page=${page}&type=${newFilter}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
           : queryApproval && queryColFilter
-          ? `?page=${page}&type=${newFilter}&approval=${queryApproval}&colFilter=${queryColFilter}`
-          : queryApproval && querySearch
-          ? `?page=${page}&type=${newFilter}&approval=${queryApproval}&search=${search}`
-          : queryColFilter && querySearch
-          ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}&search=${search}`
-          : queryApproval
-          ? `?page=${page}&type=${newFilter}&approval=${queryApproval}`
-          : queryColFilter
-          ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
-          : querySearch
-          ? `?page=${page}&type=${newFilter}&search=${search}`
-          : `?page=${page}&type=${newFilter}`
+            ? `?page=${page}&type=${newFilter}&approval=${queryApproval}&colFilter=${queryColFilter}`
+            : queryApproval && querySearch
+              ? `?page=${page}&type=${newFilter}&approval=${queryApproval}&search=${search}`
+              : queryColFilter && querySearch
+                ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}&search=${search}`
+                : queryApproval
+                  ? `?page=${page}&type=${newFilter}&approval=${queryApproval}`
+                  : queryColFilter
+                    ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
+                    : querySearch
+                      ? `?page=${page}&type=${newFilter}&search=${search}`
+                      : `?page=${page}&type=${newFilter}`
       );
       handleFilterClose();
     }
@@ -1167,9 +1167,8 @@ export default function Account(props) {
             >
               <div
                 id="resourceOperations"
-                className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${
-                  accountClass['account_header-mobile']
-                }`}
+                className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${accountClass['account_header-mobile']
+                  }`}
                 style={isMobile && !isTablet ? { flex: 1 } : {}}
               >
                 <Grid style={{ display: 'flex', flex: 1 }}>
@@ -1277,7 +1276,7 @@ export default function Account(props) {
                           closeActions();
                         }}
                       >
-                        Add {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords.length} />
+                        Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords.length} />
                       </MenuItem>
                     )}
                     {accountPermissions.isUpdate && (
@@ -1460,9 +1459,8 @@ export default function Account(props) {
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
-              singleApproveDisapproveAccount.accountName
-            } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
+              } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -1477,9 +1475,8 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
-              multipleApproveDisapproveAccount.selectedRecords
-            } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
+              } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,
@@ -1506,11 +1503,11 @@ export default function Account(props) {
             isCustomer={false}
             api="/warehouse"
             isAddingWarehouse={isAddingWarehouse}
-            addWarehouse={(selectedPlants:any) => {
+            addWarehouse={(selectedPlants: any) => {
               setAddingWarehouse(true)
               axiosInstance().post(`/customer-account/assign-warehouse`, {
-                ids: selectedRecords.map((d:any) => d._id),
-                warehouse: selectedPlants.map((d:any) => d._id),
+                ids: selectedRecords.map((d: any) => d._id),
+                warehouse: selectedPlants.map((d: any) => d._id),
               }).then(() => {
                 fetchAccounts();
                 setAddingWarehouse(false)
@@ -1521,7 +1518,7 @@ export default function Account(props) {
                 setOpenAddPlantsDialog(false)
               })
             }}
-            onClose={() => setOpenAddPlantsDialog(false) }
+            onClose={() => setOpenAddPlantsDialog(false)}
             renderedFrom={renderedFrom}
             assignedWarehouse={[]}
           />
