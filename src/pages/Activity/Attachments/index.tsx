@@ -322,7 +322,7 @@ export default function Attachment() {
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip className="cursor-stop" title={permissions.quoteBuilder.isRead ? "Signed Quote Attachment can not be deleted": "You don't have permission to delete attachment"}>
+        <Tooltip className="cursor-stop" title={permissions.quoteBuilder.isRead ? "Signed Quote Attachment can not be deleted" : "You don't have permission to delete attachment"}>
           <IconButton size="small" aria-label="Delete">
             <DeleteIcon fontSize="small" color="disabled" />
           </IconButton>
@@ -478,7 +478,12 @@ export default function Attachment() {
                   value={resource}
                   onChange={(event, newValue) => {
                     setResource(newValue);
-                    setFilter([])
+                    if (newValue) {
+                      setFilter((prevState) => ([...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]))
+                    }
+                    else {
+                      setFilter([])
+                    }
                   }}
                   size="small"
                   renderInput={(params) =>
@@ -557,7 +562,7 @@ export default function Attachment() {
                       onClose={closeActions}
                     >
                       <MenuItem
-                        disabled={permissions.attachment.isDelete ? !selectedRecords.some((records) => records.canEdit): true}
+                        disabled={permissions.attachment.isDelete ? !selectedRecords.some((records) => records.canEdit) : true}
                         onClick={() => {
                           showConfirmBox(null);
                           closeActions();

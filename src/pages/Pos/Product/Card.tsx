@@ -60,7 +60,7 @@ const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal }) => {
 
     return (
         <div className={classes.flexGrow1}>
-            <div id="scrollableDiv" style={{ height: "90vh", overflowY: "auto" }}>
+            <div id="scrollableDiv" style={{ height: "80vh", overflowY: "auto" }}>
                 <InfiniteScroll
                     dataLength={products.length}
                     next={() => { fetchMoreData() }}

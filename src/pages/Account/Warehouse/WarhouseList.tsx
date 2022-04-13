@@ -20,7 +20,7 @@ import { useData } from "../../../StateProvider/Provider";
 
 let searchTimeout;
 
-const WarhouseList = ({api, isCustomer=false, addWarehouse, onClose, isAddingWarehouse, renderedFrom, assignedWarehouse }) => {
+const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAddingWarehouse, renderedFrom, assignedWarehouse }) => {
 
     const localStorageSelectedRecords = `${renderedFrom}_selected`
     const toastConfig = useContext(CustomToastContext)
@@ -159,7 +159,7 @@ const WarhouseList = ({api, isCustomer=false, addWarehouse, onClose, isAddingWar
                                     variant="contained"
                                     disabled={!getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length || isAddingWarehouse}
                                     endIcon={isAddingWarehouse && <CircularProgress size={20} color='primary' />} >
-                                    Add{getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length + ")" : ""}
+                                    Assign {getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length + ")" : ""}
                                 </Button>
                             </Box>
                         </Grid>
