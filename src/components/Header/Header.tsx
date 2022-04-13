@@ -1024,7 +1024,7 @@ const Header = ({ toggleDrawer }) => {
               </IconButton>
             </div>
             <Link to="/">
-              <img className={classes.logo} src={SVG('LogoPng')} alt="equip logo" title="eQuipt Logo" />
+              <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
             </Link>
             <Box marginLeft={2} className={classes.servicesButton}>
               {/* <Button
