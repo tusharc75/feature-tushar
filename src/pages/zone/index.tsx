@@ -140,8 +140,8 @@ const Zone = () => {
   const ActionsRenderer = (params) => (
     <Fragment>
       <Tooltip
-        className={permissions.zone.isCreate ? '' : 'cursor-stop'}
-        title={permissions.zone.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
+        className={permissions?.zone?.isCreate ? '' : 'cursor-stop'}
+        title={permissions?.zone?.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
       >
         <IconButton
           size="small"
@@ -154,7 +154,7 @@ const Zone = () => {
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
       </Tooltip>
-      {permissions.zone.isDelete && params?.data?.createdById == user?.user?._id ? (
+      {permissions?.zone?.isDelete && params?.data?.createdById == user?.user?._id ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -233,9 +233,9 @@ const Zone = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions.zone.isDelete;
+          finalObject['canDelete'] = permissions?.zone?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions.zone.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.zone?.isUpdate;
           return {
             ...finalObject
 
@@ -341,7 +341,7 @@ const Zone = () => {
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.zone}
+            permissions={permissions?.zone}
             module="zone"
             api={'/zone'}
             afterImportCompleted={() => {
@@ -434,7 +434,7 @@ const Zone = () => {
                 </Grid>
 
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.zone.isCreate && (
+                  {permissions?.zone?.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
@@ -449,7 +449,7 @@ const Zone = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions.zone.isDelete && (
+                  {permissions?.zone?.isDelete && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="default"
@@ -498,7 +498,7 @@ const Zone = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.zone}
+              permissions={permissions?.zone}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
                 setZoneId(data.id);

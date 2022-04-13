@@ -59,7 +59,7 @@ const UserSetupDialog = ({ open, close, onSuccess, userIds, isDisable = false, u
                 return (
                     <ApprovalProcessDialog
                         openApprovalProcessDialog={open}
-                        hasPermissionToUpdateApprovalProcess={permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin}
+                        hasPermissionToUpdateApprovalProcess={permissions?.user?.isUpdate && user?.user?.userType === userType.brandAdmin}
                         onSuccess={() => {
                             if (isRoleSetUpPermission) {
                                 setActiveStep((prevStep) => prevStep + 1)

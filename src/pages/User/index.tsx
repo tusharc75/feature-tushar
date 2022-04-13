@@ -194,7 +194,7 @@ const User: FC = () => {
             <FileCopyIcon fontSize="small" color="primary" />
           </IconButton>
         </Tooltip> */}
-        {permissions.user.isDelete ? (
+        {permissions?.user?.isDelete ? (
 
           params.data.isBrandAdmin ? (
             <Tooltip
@@ -388,9 +388,9 @@ const User: FC = () => {
 
 
           let finalObject = prepareDataForGrid(u);
-          finalObject["canDelete"] = permissions.user.isDelete;
+          finalObject["canDelete"] = permissions?.user?.isDelete;
           finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-          finalObject["allowedToEdit"] = permissions.user.isUpdate;
+          finalObject["allowedToEdit"] = permissions?.user?.isUpdate;
 
           let res = {
             ...finalObject,
@@ -657,7 +657,7 @@ const User: FC = () => {
         >
           <ApprovalProcessDialog
             openApprovalProcessDialog={showApprovalProcessDialog}
-            hasPermissionToUpdateApprovalProcess={permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin}
+            hasPermissionToUpdateApprovalProcess={permissions?.user?.isUpdate && user?.user?.userType === userType.brandAdmin}
             onSuccess={() =>
               setShowApprovalProcessDialog(false)
             }
@@ -702,7 +702,7 @@ const User: FC = () => {
             sm={1}
             xs={2}>
             <ImportExportLinks
-              permissions={permissions.user}
+              permissions={permissions?.user}
               module="user(s)"
               api={"/user"}
               afterImportCompleted={() => {
@@ -729,7 +729,7 @@ const User: FC = () => {
             <Header
               onSearch={handleSearch}
               searchVal={search}
-              userPermissions={permissions.user}
+              userPermissions={permissions?.user}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               openApprovalProcessDialog={() => setShowApprovalProcessDialog(true)}
@@ -770,7 +770,7 @@ const User: FC = () => {
           {isMobile && !isTablet ? <CustomSwipableList
             allowSelection={true}
             allowSwipe={true}
-            permissions={permissions.user}
+            permissions={permissions?.user}
             primaryField={columns?.find(d => d.field === "concatedName")}
             onClick={(d) => {
               history.push(`${routes.userDetail.path}/${d._id}`)

@@ -437,7 +437,7 @@ const TransferInventory = () => {
               <CustomSwipableList
                 allowSelection={true}
                 allowSwipe={true}
-                permissions={permissions.transferInventory}
+                permissions={permissions?.transferInventory}
                 primaryField={columns?.find((d) => d.primaryField)}
                 onClick={(data) => {
                   history.push(`${routes.transferInventoryDetail.path}/${data._id}`);

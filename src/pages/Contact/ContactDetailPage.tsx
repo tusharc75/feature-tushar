@@ -841,7 +841,7 @@ const ContactDetailsPage = (props) => {
                       isInContact={true}
                     />
                   </Box>
-                 {!isOffline && contactResource === "customerContact" && permissions?.productInventory.isUpdate && <Box hidden={currentTabIndex !== 2}>
+                 {(!isOffline && contactResource === "customerContact" && permissions?.hasOwnProperty("productInventory")) && <Box hidden={currentTabIndex !== 2}>
                     <Warehouse
                       reference={contactResource}
                       api={contactApi}
