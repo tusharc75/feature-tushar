@@ -34,6 +34,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { IoPricetagsSharp } from 'react-icons/io5';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
+import AddRepairType from './RepairType/AddRepairTypes';
 import { camelCase } from 'lodash';
 
 const ignoreField = ['qty', 'priceTemplate'];
@@ -48,7 +49,8 @@ const Product = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
   const [productColoums, setProductColoums] = useState([]);
   const [productRendererNames, setProductRendererNames] = useState([]);
   const [columns, setColumns] = useState(null);
@@ -511,6 +513,24 @@ const Product = () => {
     }
   };
 
+  const handleSubmit = (ids: string[]) => {
+    setSubmitting(true);
+    axiosInstance()
+      .post(`${routes.product.path}/assign-repair-type`, {
+        repairType: ids,
+        ids: selectedRecords.map((d:{_id:string}) => d._id)
+      })
+      .then(() => {
+        fetchProduct()
+        setSubmitting(false);
+        setOpenAddDialog(false);
+      })
+      .catch((err) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
   const searchInnner = (
     <Autocomplete
       style={{ width: '250px' }}
@@ -733,7 +753,7 @@ const Product = () => {
                         {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                       </Button>
                     )}
-                    {productPermissions.isDelete && (
+                    
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
                         color="default"
@@ -745,7 +765,7 @@ const Product = () => {
                       >
                         {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
                       </Button>
-                    )}
+                    
                     <Menu
                       anchorEl={anchorEl}
                       keepMounted
@@ -758,7 +778,22 @@ const Product = () => {
                       open={Boolean(anchorEl)}
                       onClose={closeActions}
                     >
-                      <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                      <MenuItem disabled={!productPermissions.isDelete} onClick={() => {
+                        setShowDeleteConfirmBox(true)
+                        closeActions()
+                      }}
+                      >
+                        Delete
+                      </MenuItem>
+                      <MenuItem 
+                        disabled={!productPermissions.isUpdate && !permissions?.hasOwnProperty("repairType")} 
+                        onClick={() => {
+                          setOpenAddDialog(true)
+                          closeActions()
+                        }}
+                      >
+                        Assign Repair Types
+                      </MenuItem>
                     </Menu>
                   </Grid>
                 </Box>
@@ -839,6 +874,15 @@ const Product = () => {
       </div>
       {open && (
         <CreateProduct isClone={isClone} productId={productId} handleClose={handleClose} isRedirectToDetailPage={true} openFrom="productMaster" />
+      )}
+      {openAddDialog && (
+        <AddRepairType
+          handleSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+          renderedFrom={`${renderedFrom}_repair-type_grid-1`}
+          close={() => setOpenAddDialog(false)}
+          exisitingIds={[]}
+        />
       )}
       {showDeleteConfirmBox && (
         <ConfirmationDialog
