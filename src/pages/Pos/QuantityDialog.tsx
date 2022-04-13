@@ -26,7 +26,7 @@ const QuantityDialog = ({ handleCloseDialog, handleAddToCart, product }) => {
         <CustomDialogHeader title="Add To Cart" showRequiredLabel={true} onClose={handleCloseDialog} />
         <CustomDialogContent>
             <List style={{ padding: 0 }}>
-                <ListItem divider key={product._id}>
+                <ListItem divider key={product?._id}>
                     <ListItemAvatar>
                         <Avatar
                             src={product?.productImage}
