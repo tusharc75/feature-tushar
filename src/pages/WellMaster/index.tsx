@@ -444,7 +444,7 @@ const WellMaster = () => {
                         <CustomSwipableList
                             allowSelection={true}
                             allowSwipe={true}
-                            permissions={permissions.wellMaster}
+                            permissions={permissions?.wellMaster}
                             primaryField={columns?.find(d => d.primaryField)}
                             onClick={(data) => {
                             }}

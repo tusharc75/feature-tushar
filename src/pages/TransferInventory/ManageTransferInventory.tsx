@@ -267,7 +267,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                         item
                                         xs={
                                           (plantFields.includes(field.fieldName) &&
-                                            permissions?.warehouse.isCreate &&
+                                            permissions?.warehouse?.isCreate &&
                                             field.fieldName === 'transferFromPlant' &&
                                             !transferFromDisable) ||
                                             (field.fieldName === 'transfertoPlant' && !transferToDisable)
@@ -322,7 +322,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                                       {((field.fieldName === 'transferFromPlant' && !transferFromDisable) ||
                                         (field.fieldName === 'transfertoPlant' && !transferToDisable)) &&
                                         plantFields.includes(field.fieldName) &&
-                                        permissions?.warehouse.isCreate && (
+                                        permissions?.warehouse?.isCreate && (
                                           <Grid item xs={1}>
                                             <HtmlTooltip title="Add new plant">
                                               <IconButton

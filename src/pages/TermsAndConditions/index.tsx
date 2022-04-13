@@ -53,7 +53,7 @@ export default function TermsAndCondition(props) {
 
   useEffect(() => {
     if (permissions) {
-      setActionsPermissions(permissions[termsAndCondition.permission]);
+      setActionsPermissions(permissions?.[termsAndCondition.permission]);
     }
   }, [permissions]);
 
@@ -367,7 +367,7 @@ export default function TermsAndCondition(props) {
           <CustomSwipableList
             allowSelection={true}
             allowSwipe={true}
-            permissions={permissions.termsAndConditions}
+            permissions={permissions?.termsAndConditions}
             primaryField={columns?.find((d) => d.field === 'TACName')}
             onClick={(d) => {
               setShowCreateDialog({ open: true, isClone: false });

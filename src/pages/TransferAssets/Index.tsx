@@ -501,7 +501,7 @@ const TransferAsset = () => {
               <CustomSwipableList
                 allowSelection={true}
                 allowSwipe={true}
-                permissions={permissions.transferAsset}
+                permissions={permissions?.transferAsset}
                 primaryField={columns?.find((d) => d.primaryField)}
                 onClick={(data) => {
                   history.push(`${routes.transferAssetDetail.path}/${data._id}`);
