@@ -1,5 +1,5 @@
-import { useState, useEffect, Fragment } from 'react';
-import { Box, Grid } from '@material-ui/core';
+import { useState, useEffect, Fragment, useContext } from 'react';
+import { Box, Grid, Paper, Typography } from '@material-ui/core';
 import { useParams, useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
@@ -8,15 +8,21 @@ import CustomContainer from '../../../components/CustomContainer';
 import axiosInstance from "src/axios/axiosInstance";
 
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import Skeleton from '@material-ui/lab/Skeleton';
+import DetailsPageHeader from 'src/components/DetailsPageHeader';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 
 const ProductDetails = () => {
 
-    const { state: { user, permissions, selectedEntity } }: any = useData();
+    const toastConfig = useContext(CustomToastContext);
     const { id } = useParams();
     const [productData, setProductData] = useState(null);
+    const [productDataFields, setProductDataFields] = useState([]);
 
     useEffect(() => {
+        fetchFields()
         if (id) {
             fetchProductData();
         }
@@ -33,26 +39,64 @@ const ProductDetails = () => {
             });
     }
 
-
+    const fetchFields = () => {
+        axiosInstance()
+            .get('/field?resource=Product')
+            .then(({ data }) => {
+                setProductDataFields(data.data);
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    };
 
     return (<Fragment>
         <Grid container className="headerbox">
-            <Grid item md={4} sm={11} xs={10}>
-                <CustomBreadCrumbs routes={[routes.pos, { title: productData?.productName }]} />
-            </Grid>
-            <Grid item md={8} sm={11} xs={10}>
+            <CustomBreadCrumbs routes={[routes.pos, { title: productData?.productName }]} />
+        </Grid>
+        <Grid container spacing={1} className="detail-container">
+            <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
+                <Paper>
+                    {!productData ? (
+                        <div>
+                            <Skeleton variant="text" width="150px" height="40px" />
+                            <Box display="flex">
+                                <Skeleton
+                                    style={{ borderRadius: 6 }}
+                                    width="120px"
+                                    height="80px"
+                                />
+                                <Box marginX={1} />
+                                <Skeleton
+                                    style={{ borderRadius: 6 }}
+                                    width="120px"
+                                    height="80px"
+                                />
+                            </Box>
+                        </div>
+                    ) : (
+
+                        <DetailsPageHeader
+                            heading={productData?.productName}
+                            mainPoints={null}
+                            showHeading={true}
+                        >
+                        </DetailsPageHeader>
+                    )}
+                    <Box>
+                        {!productData || !productDataFields.length ? (
+                            <Grid container spacing={2} style={{ padding: "8px" }}>
+                                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                            </Grid>
+                        ) : (
+                            <>
+                                <DetailsPage data={productData} fields={productDataFields} />
+                            </>
+                        )}
+                    </Box>
+                </Paper>
             </Grid>
         </Grid>
-        <CustomContainer>
-            <div className="header-panel">
-                {productData ?
-                    <h5>{productData?.productName}</h5> :
-                    <Box p={2} height={500} bgcolor="white">
-                        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                    </Box>
-                }
-            </div>
-        </CustomContainer>
     </Fragment>
     );
 };
