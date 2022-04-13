@@ -97,21 +97,13 @@ const ProductRepairType = (props: Props) => {
           };
           return res;
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: data.length,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: data.count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
+
+        dispatch({
+          type: 'initialize',
+          data: rows,
+          count: data.length
+        });
+
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
