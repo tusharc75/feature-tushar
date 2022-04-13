@@ -42,7 +42,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       disabled: false,
       cellRenderer: 'commonRenderer',
       cellEditor: 'numericCellEditor',
-      editable: permissions?.transferInventory.isUpdate
+      editable: permissions?.transferInventory?.isUpdate
     }
   ];
 
@@ -143,7 +143,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inTransit]?.includes(transferInventoryData?.status) ? (
       <>
         <GridDeleteIcon
-          hasDeletePermission={permissions?.transferInventory.isUpdate}
+          hasDeletePermission={permissions?.transferInventory?.isUpdate}
           ownerId={transferInventoryData?.createdBy.user._id}
           userId={user?.user?._id}
           onDelete={() => {

@@ -298,7 +298,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     {field.fieldName === 'transfertoPlant' && (
                                       <Grid item xs={12} sm={6} md={6}>
                                         <Grid container spacing={1} alignItems="center">
-                                          <Grid item xs={isMainInfoEditable ? 12 : !isMainInfoEditable && permissions?.warehouse.isCreate ? 11 : 12}>
+                                          <Grid item xs={isMainInfoEditable ? 12 : !isMainInfoEditable && permissions?.warehouse?.isCreate ? 11 : 12}>
                                             <FormTypes
                                               isNew={Boolean(transferAssetId)}
                                               {...field}
@@ -324,7 +324,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                               size="small"
                                             />
                                           </Grid>
-                                          {!isMainInfoEditable && permissions?.warehouse.isCreate && (
+                                          {!isMainInfoEditable && permissions?.warehouse?.isCreate && (
                                             <Grid item xs={1}>
                                               <HtmlTooltip title="Add new plant">
                                                 <IconButton size="small" onClick={() => setTransferToPlantOpen({ open: true, isClone: false })}>
@@ -371,7 +371,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                         <Grid container spacing={1} alignItems="center">
                                           <Grid
                                             item
-                                            xs={isMainInfoEditable ? 12 : !isMainInfoEditable && permissions?.supplierAccount.isCreate ? 11 : 12}
+                                            xs={isMainInfoEditable ? 12 : !isMainInfoEditable && permissions?.supplierAccount?.isCreate ? 11 : 12}
                                           >
                                             <FormTypes
                                               isNew={Boolean(transferAssetId)}
@@ -399,7 +399,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                               size="small"
                                             />
                                           </Grid>
-                                          {!isMainInfoEditable && permissions?.supplierAccount.isCreate && (
+                                          {!isMainInfoEditable && permissions?.supplierAccount?.isCreate && (
                                             <Grid item xs={1}>
                                               <HtmlTooltip title="Add new supplier account">
                                                 <IconButton size="small" onClick={() => setSupplierOpen({ open: true, isClone: false })}>
@@ -444,7 +444,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                         <Grid container spacing={1} alignItems="center">
                                           <Grid
                                             item
-                                            xs={isMainInfoEditable ? 12 : !isMainInfoEditable && permissions?.customerAccount.isCreate ? 11 : 12}
+                                            xs={isMainInfoEditable ? 12 : !isMainInfoEditable && permissions?.customerAccount?.isCreate ? 11 : 12}
                                           >
                                             <FormTypes
                                               isNew={Boolean(transferAssetId)}
@@ -472,7 +472,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                               size="small"
                                             />
                                           </Grid>
-                                          {!isMainInfoEditable && permissions?.customerAccount.isCreate && (
+                                          {!isMainInfoEditable && permissions?.customerAccount?.isCreate && (
                                             <Grid item xs={1}>
                                               <HtmlTooltip title="Add new customer account">
                                                 <IconButton size="small" onClick={() => setCustomerOpen({ open: true, isClone: false })}>
@@ -544,7 +544,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                               ) : field.fieldName === 'transferFromPlant' ? (
                                 <Grid key={index2} item xs={12} sm={6} md={6}>
                                   <Grid container spacing={1} alignItems="center">
-                                    <Grid item xs={isMainInfoEditable ? 12 : !isMainInfoEditable && permissions?.warehouse.isCreate ? 11 : 12}>
+                                    <Grid item xs={isMainInfoEditable ? 12 : !isMainInfoEditable && permissions?.warehouse?.isCreate ? 11 : 12}>
                                       <FormTypes
                                         isNew={Boolean(transferAssetId)}
                                         {...field}
@@ -572,7 +572,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                         }}
                                       />
                                     </Grid>
-                                    {!isEditable && !isMainInfoEditable && permissions?.warehouse.isCreate && (
+                                    {!isEditable && !isMainInfoEditable && permissions?.warehouse?.isCreate && (
                                       <Grid item xs={1}>
                                         <HtmlTooltip title="Add new plant">
                                           <IconButton size="small" onClick={() => setPlantsOpen({ open: true, isClone: false })}>

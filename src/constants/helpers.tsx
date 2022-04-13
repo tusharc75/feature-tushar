@@ -937,16 +937,16 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
       });
     }
 
-    sidebarFieldsKeys.forEach((d) => {
-      if (!permissions.hasOwnProperty(d)) {
-        permissions[d] = {
-          isCreate: false,
-          isRead: false,
-          isUpdate: false,
-          isDelete: false
-        };
-      }
-    });
+    // sidebarFieldsKeys.forEach((d) => {
+    //   if (!permissions.hasOwnProperty(d)) {
+    //     permissions[d] = {
+    //       isCreate: false,
+    //       isRead: false,
+    //       isUpdate: false,
+    //       isDelete: false
+    //     };
+    //   }
+    // });
 
     localStorage.setItem('routes', JSON.stringify(routesAndTitle));
     return permissions;

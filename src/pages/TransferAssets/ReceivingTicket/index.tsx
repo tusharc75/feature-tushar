@@ -275,7 +275,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           )}
         </Box>
         {!isTransferEnded && <Box marginTop={isMobile && !isTablet ? 2 : 0}>
-          {permissions?.transferAsset.isUpdate && (
+          {permissions?.transferAsset?.isUpdate && (
             <Button
               variant="contained"
               size="small"
@@ -326,7 +326,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             </Button>
           )}
           <Box component="span" mx={1} />
-          {permissions?.transferAsset.isUpdate && selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("receivingTicket") &&
+          {permissions?.transferAsset?.isUpdate && selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("receivingTicket") &&
             f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedRecords?.length ? (
             <Button
               variant="contained"

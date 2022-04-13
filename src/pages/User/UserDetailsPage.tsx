@@ -123,7 +123,7 @@ const UserDetailsPage = () => {
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
 
   // const [isChangingPermission, setIsChangingPermission] = useState(false);
-  const [hasPermissionToUpdateApprovalProcess] = useState(permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin);
+  const [hasPermissionToUpdateApprovalProcess] = useState(permissions?.user?.isUpdate && user?.user?.userType === userType.brandAdmin);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [deleteUserRec, setDeleteUserRec] = useState(undefined);
   const [roleDeleteRec, setRoleDeleteRec] = useState(undefined);
@@ -318,7 +318,7 @@ const UserDetailsPage = () => {
 
         setOrgChartData(orgChartData);
 
-        setUserPermissions(data.permissions);
+        setUserPermissions(data?.permissions);
         setLoading(false);
       })
       .catch((error) => {
@@ -449,7 +449,7 @@ const UserDetailsPage = () => {
 
   const DeleteUser = () => {
     if (deleteUserRec) {
-      if (permissions.user.isDelete) {
+      if (permissions?.user?.isDelete) {
         axiosInstance()
           .put(`/user/remove`, { ids: [deleteUserRec] })
           .then(({ data }) => {
@@ -687,7 +687,7 @@ const UserDetailsPage = () => {
                       {isMobile && !isTablet ? <BiReset size={20} /> : 'Reset Password'}
                     </Button>
                   )}
-                  {permissions.user.isUpdate ? (
+                  {permissions?.user?.isUpdate ? (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
@@ -700,7 +700,7 @@ const UserDetailsPage = () => {
                       {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   ) : null}
-                  {permissions.user.isDelete ? (
+                  {permissions?.user?.isDelete ? (
                     <DeleteButton
                       text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
                       disabled={user?.user?._id === id || userData?.userType === userType.brandAdmin}
@@ -887,7 +887,7 @@ const UserDetailsPage = () => {
                         <Grid item xs={12} sm={12} md={12} lg={12}>
                           <Box width="100%" padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between">
                             <Typography variant="subtitle2">Assigned Entity ({entities?.length || 0})</Typography>
-                            {permissions.entity.isUpdate && permissions.role.isUpdate && (
+                            {permissions?.entity?.isUpdate && permissions?.role?.isUpdate && (
                               <IconButton title="Assign entities" color="primary" size="small" onClick={entityDialogOpen}>
                                 <ControlPoint />
                               </IconButton>
@@ -1209,7 +1209,7 @@ const UserDetailsPage = () => {
               </Grid> */}
 
               <div className="p-3">
-                {permissions[opportunity.opportunityResource]?.isRead && (
+                {permissions?.[opportunity.opportunityResource]?.isRead && (
                   <OpportunityAccordionInUserDetail
                     opportunities={[...(opportunityRelatedData?.Owner ?? []), ...(opportunityRelatedData?.Collaborator ?? [])]}
                     recordsPerLine={3}
@@ -1221,7 +1221,7 @@ const UserDetailsPage = () => {
                     isAllowedToEdit={false}
                   />
                 )}
-                {permissions[lead.leadResource]?.isRead && (
+                {permissions?.[lead.leadResource]?.isRead && (
                   <LeadAccordionInUserDetailPage
                     leads={[...(leadsRelatedData?.Owner ?? []), ...(leadsRelatedData?.Collaborator ?? [])]}
                     recordsPerLine={3}
@@ -1233,7 +1233,7 @@ const UserDetailsPage = () => {
                     isAllowedToEdit={false}
                   />
                 )}
-                {permissions[customerAccount.accountResource]?.isRead && (
+                {permissions?.[customerAccount.accountResource]?.isRead && (
                   <AccountAccordionDetail
                     type="customer"
                     accounts={[...(customerAccountRelatedData?.Owner ?? []), ...(customerAccountRelatedData?.Collaborator ?? [])]}
@@ -1246,7 +1246,7 @@ const UserDetailsPage = () => {
                     isAllowedToEdit={false}
                   />
                 )}
-                {permissions[supplierAccount.accountResource]?.isRead && (
+                {permissions?.[supplierAccount.accountResource]?.isRead && (
                   <AccountAccordionDetail
                     type="supplier"
                     accounts={[...(supplierAccountRelatedData?.Owner ?? []), ...(supplierAccountRelatedData?.Collaborator ?? [])]}
@@ -1259,7 +1259,7 @@ const UserDetailsPage = () => {
                     isAllowedToEdit={false}
                   />
                 )}
-                {permissions[customerContact.contactResource]?.isRead && (
+                {permissions?.[customerContact.contactResource]?.isRead && (
                   <ContactAccordionInDetailPage
                     type="customer"
                     contacts={[...(customerContactRelatedData?.Owner ?? []), ...(customerContactRelatedData?.Collaborator ?? [])]}
@@ -1272,7 +1272,7 @@ const UserDetailsPage = () => {
                     isAllowedToEdit={false}
                   />
                 )}
-                {permissions[supplierContact.contactResource]?.isRead && (
+                {permissions?.[supplierContact.contactResource]?.isRead && (
                   <ContactAccordionInDetailPage
                     type="supplier"
                     contacts={[...(supplierContactRelatedData?.Owner ?? []), ...(supplierContactRelatedData?.Collaborator ?? [])]}
@@ -1286,13 +1286,13 @@ const UserDetailsPage = () => {
                   />
                 )}
                 {
-                  permissions[quoteBuilder.qbResource]?.isRead && (
+                  permissions?.[quoteBuilder.qbResource]?.isRead && (
                     <QuotesInAccordion  
                       recordsPerLine={3}
                       quotes={[...(quotesRelatedData?.Owner ?? []), ...(quotesRelatedData?.Collaborator ?? [])]}
                       expanded={false}
                       fetchData={() => fetchUserRelatedDetail()}
-                      quoteBuilderPermission={permissions[quoteBuilder.qbResource]}
+                      quoteBuilderPermission={permissions?.[quoteBuilder.qbResource]}
                       isAllowedToUpdate={false}
                     />
                   )                

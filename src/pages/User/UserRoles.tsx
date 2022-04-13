@@ -56,7 +56,7 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                         className={permissions?.role?.isRead ? "link text-truncate" : "text-truncate"}
                       >
                         {
-                          permissions.role.isRead ?
+                          permissions?.role?.isRead ?
                             <Link to={`/role/detail/${obj._id}`}>
                               {obj.name || ""}
                             </Link>
@@ -76,7 +76,7 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                       </Typography>
                     }
                   />
-                  {permissions.user.isUpdate && (
+                  {permissions?.user?.isUpdate && (
                     <ListItemSecondaryAction
                       className={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin ? "cursor-stop" : "cursor-pointer"}
                       title={

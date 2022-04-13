@@ -358,7 +358,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           <Box component="span" mx={1} />
         </Box>
         {allowedToEdit && !isTransferEnded && <Box >
-          {permissions?.transferAsset.isUpdate && (
+          {permissions?.transferAsset?.isUpdate && (
             <Fragment>
               <Button
                 variant="outlined"
@@ -457,7 +457,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                 >
                   Replace Assets</MenuItem>
 
-                {permissions?.transferAsset.isUpdate && (selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("loadingTicket") &&
+                {permissions?.transferAsset?.isUpdate && (selectedRecords.length && selectedRecords?.filter(f => f.hasOwnProperty("loadingTicket") &&
                   f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length === selectedRecords?.length) ?
                   <MenuItem
                     onClick={() => {
@@ -477,7 +477,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           <CustomSwipableList
             allowSelection={allowedToEdit}
             allowSwipe={true}
-            permissions={permissions.transferAsset}
+            permissions={permissions?.transferAsset}
             primaryField={columns?.find((d) => d.field)}
             onClick={(data) => {
               history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
