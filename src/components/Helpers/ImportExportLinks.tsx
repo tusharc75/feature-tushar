@@ -56,7 +56,7 @@ export default function ImportExportLinks({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => { },
+  onExportToExcelSuccess = () => {},
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
@@ -244,12 +244,14 @@ export default function ImportExportLinks({
         </label> */}
       </div>
       <Menu id="import-export-links" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem>
-          <label htmlFor="importFromExcel" className="cursor-pointer">
-            {ImportInput}
-            Import from Excel
-          </label>
-        </MenuItem>
+        {permissions?.isCreate && (
+          <MenuItem>
+            <label htmlFor="importFromExcel" className="cursor-pointer">
+              {ImportInput}
+              Import from Excel
+            </label>
+          </MenuItem>
+        )}
         <MenuItem
           onClick={() => {
             exportToExcel();
