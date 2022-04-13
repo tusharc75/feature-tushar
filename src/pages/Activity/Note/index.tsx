@@ -337,7 +337,12 @@ const Note = () => {
                   value={resource}
                   onChange={(event, newValue) => {
                     setResource(newValue);
-                    setFilter([])
+                    if (newValue) {
+                      setFilter((prevState) => ([...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]))
+                    }
+                    else {
+                      setFilter([])
+                    }
                   }}
                   size="small"
                   renderInput={(params) =>
