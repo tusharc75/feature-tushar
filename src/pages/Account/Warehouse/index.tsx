@@ -21,7 +21,7 @@ import { styles } from "@material-ui/pickers/views/Calendar/Calendar";
 import { MdAdd } from "react-icons/md";
 import WarhouseList from "./WarhouseList";
 
-const Warehouse = ({reference, api, id, renderedFrom, accountId = '' }) => {
+const Warehouse = ({ reference, api, id, renderedFrom, accountId = '' }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -151,35 +151,31 @@ const Warehouse = ({reference, api, id, renderedFrom, accountId = '' }) => {
 
     return (<>
         <Box display="flex" justifyContent="space-between" m={1}>
-            <Box display="flex" alignItems="center">
+            <Box display="flex" pt={1} alignItems="center">
                 <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    variant={'contained'}
                     color="primary"
                     size="small"
-                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    disabled={loading}
                     onClick={() => {
                         setOpenAssignWarehouse(true);
                     }}
                 >
-                    {isMobile && !isTablet ? <MdAdd size={23} /> : `Add ${routes.warehouse.title}`}
+                    {`Assign ${routes.warehouse.title}`}
                 </Button>
             </Box>
-            <div className="d-flex gap-2">
-                <Box display={"flex"} justifyContent="flex-end">
-                    {permissions?.warehouse?.isDelete && <Button
-                        variant={isMobile && !isTablet ? "text" : "contained"}
-                        color="primary"
-                        size="small"
-                        disabled={selectedRecords.length === 0 || isDeleting}
-                        onClick={() => {
-                            setShowConfirmBox({ open: true, data: selectedRecords })
-                        }}>
-                        Delete
-                    </Button>}
-                    <Box mx={1} />
-                </Box>
-            </div>
+            <Box display="flex" pt={1} justifyContent="flex-end">
+                <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    disabled={selectedRecords.length === 0 || isDeleting}
+                    onClick={() => {
+                        setShowConfirmBox({ open: true, data: selectedRecords })
+                    }}>
+                    Delete
+                </Button>
+                <Box mx={1} />
+            </Box>
         </Box>
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns ?

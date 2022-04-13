@@ -961,16 +961,16 @@ export default function Contact(props) {
                         </MenuItem>
                       )}
                       {contactPermissions.isUpdate && (
-                      <MenuItem
-                        disabled={selectedRecords.length === 0 || [...new Set(selectedRecords.map((d) => d.accountNameId))].length > 1}
-                        onClick={() => {
-                          setOpenAddPlantsDialog(true)
-                          closeActions();
-                        }}
-                      >
-                        Add {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords.length} />
-                      </MenuItem>
-                    )}
+                        <MenuItem
+                          disabled={selectedRecords.length === 0 || [...new Set(selectedRecords.map((d) => d.accountNameId))].length > 1}
+                          onClick={() => {
+                            setOpenAddPlantsDialog(true)
+                            closeActions();
+                          }}
+                        >
+                          Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords.length} />
+                        </MenuItem>
+                      )}
                       {contactPermissions.isUpdate && (
                         <MenuItem
                           disabled={selectedRecords.length === 0}
@@ -1156,30 +1156,30 @@ export default function Contact(props) {
             />
           ) : null}
           {openAddPlantsDialog &&
-          <WarhouseList
-            isCustomer={true}
-            api={`/customer-account/${selectedRecords[0].accountNameId}/warehouse`}
-            isAddingWarehouse={isAddingWarehouse}
-            addWarehouse={(selectedPlants:any) => {
-              setAddingWarehouse(true)
-              axiosInstance().post(`/customer-contact/assign-warehouse`, {
-                ids: selectedRecords.map((d:any) => d._id),
-                warehouse: selectedPlants.map((d:any) => d._id),
-              }).then(() => {
-                getContacts();
-                setAddingWarehouse(false)
-                setOpenAddPlantsDialog(false)
-              }).catch(err => {
-                toastConfig.setToastConfig(err)
-                setAddingWarehouse(false)
-                setOpenAddPlantsDialog(false)
-              })
-            }}
-            onClose={() => setOpenAddPlantsDialog(false) }
-            renderedFrom={renderedFrom}
-            assignedWarehouse={[]}
-          />
-        }
+            <WarhouseList
+              isCustomer={true}
+              api={`/customer-account/${selectedRecords[0]?.accountNameId}/warehouse`}
+              isAddingWarehouse={isAddingWarehouse}
+              addWarehouse={(selectedPlants: any) => {
+                setAddingWarehouse(true)
+                axiosInstance().post(`/customer-contact/assign-warehouse`, {
+                  ids: selectedRecords.map((d: any) => d._id),
+                  warehouse: selectedPlants.map((d: any) => d._id),
+                }).then(() => {
+                  getContacts();
+                  setAddingWarehouse(false)
+                  setOpenAddPlantsDialog(false)
+                }).catch(err => {
+                  toastConfig.setToastConfig(err)
+                  setAddingWarehouse(false)
+                  setOpenAddPlantsDialog(false)
+                })
+              }}
+              onClose={() => setOpenAddPlantsDialog(false)}
+              renderedFrom={renderedFrom}
+              assignedWarehouse={[]}
+            />
+          }
           {showEntityDialog ? (
             <EntitySelectionsDialog
               open={showEntityDialog}
