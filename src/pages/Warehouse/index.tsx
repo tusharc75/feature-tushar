@@ -100,8 +100,8 @@ const AddressResource = () => {
   //  Grid Variables - End
 
   useEffect(() => {
-    if (permissions && permissions.warehouse) {
-      setWarehousePermissions(permissions.warehouse);
+    if (permissions && permissions?.warehouse) {
+      setWarehousePermissions(permissions?.warehouse);
     }
   }, [permissions]);
 
@@ -569,7 +569,7 @@ const AddressResource = () => {
             isMobile && !isTablet ? <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.warehouse}
+              permissions={permissions?.warehouse}
               primaryField={columns?.find(d => d.field)}
               onClick={(data) => {
                 history.push(`${routes.warehouseDetail.path}/${data._id}`)

@@ -222,7 +222,7 @@ export default function AssignedEntities({
                           </Typography>
                         </Grid>
                         <Grid item xs={8} justify="flex-start">
-                          {permissions.user.isDelete && !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
+                          {permissions?.user?.isDelete && !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
                             <DeleteButton
                               text="Un-assign Entity"
                               onClick={() => handleDeleteEntity()}
@@ -234,7 +234,7 @@ export default function AssignedEntities({
                     </Box>
                   </Grid>
                   <Grid item xs={2} container justify="flex-end">
-                    {permissions.user.isUpdate && (
+                    {permissions?.user?.isUpdate && (
                       <IconButton
                         color="primary"
                         size="small"

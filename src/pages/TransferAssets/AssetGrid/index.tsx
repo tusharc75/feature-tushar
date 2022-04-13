@@ -194,7 +194,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     <Fragment>
       {allowedToEdit &&
         <Box display="flex" justifyContent="space-between" mx="4px">
-          {permissions?.transferAsset.isUpdate && <Button
+          {permissions?.transferAsset?.isUpdate && <Button
             variant={'contained'}
             color="primary"
             size="small"
@@ -205,7 +205,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           >
             {isMobile && !isTablet ? "Add assets" : `Add ${routes.serializedAsset.title}`}
           </Button>}
-          {permissions?.transferAsset.isUpdate && <Button
+          {permissions?.transferAsset?.isUpdate && <Button
             variant={isMobile ? 'outlined' : 'contained'}
             size="small"
             color="primary"
@@ -226,7 +226,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
             <CustomSwipableList
               allowSelection={allowedToEdit}
               allowSwipe={allowedToEdit}
-              permissions={permissions.transferAsset}
+              permissions={permissions?.transferAsset}
               primaryField={columns?.find(d => d.primaryField)}
               onClick={(data) => {
                 history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
