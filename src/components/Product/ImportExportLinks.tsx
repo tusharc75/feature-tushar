@@ -234,18 +234,20 @@ export default function ImportExportLinks({
         </label> */}
       </div>
       <Menu id="import-export-links" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem
-          onClick={() => {
-            setIsSelection(true);
-            setIsUploadDialog(true);
-            handleClose();
-          }}
-        >
-          <label htmlFor="importFromExcel" className="cursor-pointer">
-            {/* {ImportInput} */}
-            Import from Excel
-          </label>
-        </MenuItem>
+        {permissions?.isCreate && (
+          <MenuItem
+            onClick={() => {
+              setIsSelection(true);
+              setIsUploadDialog(true);
+              handleClose();
+            }}
+          >
+            <label htmlFor="importFromExcel" className="cursor-pointer">
+              {/* {ImportInput} */}
+              Import from Excel
+            </label>
+          </MenuItem>
+        )}
         <MenuItem
           onClick={() => {
             exportToExcel();
