@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.93.1](https://github.com/vebholic/oms_frontend/compare/v2.93.0...v2.93.1) (2022-04-13)
+
+
+### Bug Fixes
+
+* bug fix ([4417af2](https://github.com/vebholic/oms_frontend/commit/4417af2f9dca29b80cf8c56dc277f8b0115c84ee))
+* bug fix ([67fc5e2](https://github.com/vebholic/oms_frontend/commit/67fc5e2d38b8e269dcd3c273b3a0f257495a2f21))
+* bug fix ([b30ee16](https://github.com/vebholic/oms_frontend/commit/b30ee1699582abd8e09df4aafa9900ce02ac30e6))
+* bug fix ([42a39a6](https://github.com/vebholic/oms_frontend/commit/42a39a653943e19e8ba6b4eb678ba14684b39591))
+* pos changes ([3bce32f](https://github.com/vebholic/oms_frontend/commit/3bce32f2f6a4ae65073bef005d983bda1b60fec6))
+* pos quantity dialog ([888aafb](https://github.com/vebholic/oms_frontend/commit/888aafbb1d44f365dc820190279dcda4bc13f1e1))
+
 ## [2.93.0](https://github.com/vebholic/oms_frontend/compare/v2.92.2...v2.93.0) (2022-04-12)
 
 
