@@ -127,7 +127,7 @@ const ForgetPassword = () => {
                             <Box textAlign="center">
                                 <img
                                     className={classes.logo}
-                                    src={SVG("LogoPng")}
+                                    src={SVG("LogoNew")}
                                     alt="equip logo"
                                     title="eQuipt Logo"
                                 />
@@ -144,11 +144,11 @@ const ForgetPassword = () => {
                                                 component={TextField}
                                                 name='email'
                                                 type='email'
+                                                size="small"
                                                 label='Email'
                                                 variant='outlined'
                                                 style={{ width: 260 }}
                                             />
-
                                             {isSubmitting && <LinearProgress />}
                                             <Box textAlign="right" className="p-2">
                                                 <MuiLink component={Link} to="/login">
