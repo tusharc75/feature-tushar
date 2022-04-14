@@ -26,6 +26,7 @@ import imgComputer from './svg/bglaptop.svg';
 import total_cost from './svg/total_cost.svg';
 import profit from './svg/profit.svg';
 import booked_value from './svg/booked_value.svg';
+import logoNew from './svg/logoNew.svg';
 
 
 
@@ -33,6 +34,8 @@ export const SVG = (name) => {
   switch (name) {
     case "Logo":
       return logo;
+    case "LogoNew":
+      return logoNew;
     case "Menu Icon":
       return menu_icon;
     case "Dashboard":

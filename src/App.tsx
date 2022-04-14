@@ -677,7 +677,7 @@ function App() {
             <PrivateRoute exact path={`${routes.pos.path}`}>
               <Pos />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.posProductDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes.posProductDetail.path}/:id/:warehouseId`}>
               <PosProductDetails />
             </PrivateRoute>
             <PrivateRoute exact path={"/dashboard-builder/:id"}>
