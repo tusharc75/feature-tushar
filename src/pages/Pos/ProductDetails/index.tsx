@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import { Box, Grid, makeStyles, Paper } from '@material-ui/core';
+import { Box, Button, Grid, makeStyles, Paper } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
@@ -9,6 +9,9 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import Carousel from 'react-material-ui-carousel';
 import { BsImage } from 'react-icons/bs';
 import styles from "./product-detail-page.module.scss";
+import { MdAdd, MdAddShoppingCart, MdOutlineHorizontalRule } from 'react-icons/md';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import QuantityDialog from '../QuantityDialog';
 
 const useStyles = makeStyles(() => ({
     mainDetail: {
@@ -56,10 +59,11 @@ const ProductDetails = () => {
 
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
-    const { id } = useParams();
+    const { id, warehouseId } = useParams();
     const [productData, setProductData] = useState(null);
     const [productImages, setProductImages] = useState([])
     const [cartProduct, setCartProduct] = useState(null)
+    const [qtyDialog, setQtyDialog] = useState(false)
 
     useEffect(() => {
         if (id) {
@@ -71,7 +75,7 @@ const ProductDetails = () => {
 
     const fetchProductData = () => {
         axiosInstance()
-            .get(`/pos/product/${id}`)
+            .get(`/pos/product/${id}/${warehouseId}`)
             .then(({ data: { data } }) => {
                 setProductData(data?.productData)
                 if (data?.productData.hasOwnProperty(["sliderImage"])) {
@@ -94,6 +98,62 @@ const ProductDetails = () => {
                 toastConfig.setToastConfig(error);
             });
     }
+
+    const handleAddToCart = (product, qty = null) => {
+        if (product?.length === 1) {
+
+            let data = [{
+                "product": product[0]._id,
+                "qty": parseInt(qty || 1),
+                "warehouse": warehouseId
+            }]
+            axiosInstance().post(`/pos/cart`, data)
+                .then(({ data }) => {
+                    fetchCart()
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: 'success',
+                        message: "Add to cart successfully"
+                    });
+                }).catch((error) => {
+                    toastConfig.setToastConfig(error)
+                });
+        }
+        setQtyDialog(false)
+    }
+
+    const handleUpdateCart = (product, operation) => {
+        let data = {
+            "_id": product._id,
+            "qty": operation === "add" ? parseInt(product?.qty || 0) + 1 : parseInt(product?.qty || 0) - 1,
+        }
+        if (data?.qty) {
+            axiosInstance().put(`/pos/cart`, data)
+                .then(({ data }) => {
+                    fetchCart()
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: 'success',
+                        message: data.message
+                    });
+                }).catch((error) => {
+                    toastConfig.setToastConfig(error)
+                });
+        }
+        else {
+            axiosInstance().put(`/pos/cart/remove`, { ids: [data._id] })
+                .then(({ data }) => {
+                    fetchCart()
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: 'success',
+                        message: data.message
+                    });
+                }).catch((error) => {
+                    toastConfig.setToastConfig(error)
+                });
+        }
+    };
 
     return (<Fragment>
         <Grid container className="headerbox">
@@ -150,39 +210,39 @@ const ProductDetails = () => {
                                         {
                                             productData?.productShortDetail && <div className="my-3 px-5" dangerouslySetInnerHTML={{ __html: productData?.productShortDetail }}></div>
                                         }
-                                        {/* <Box p={1}>
-                                {cartProduct ?
-                                    <>
-                                        <Button variant="outlined" color="primary" onClick={() => { }}>
-                                            <MdAdd color="primary" fontSize="small" />
-                                        </Button>
-                                        <Button color="primary" disabled>
-                                            {`${cartProduct?.qty}`}
-                                        </Button>
-                                        <Button variant="outlined" color="primary" onClick={() => { }}>
-                                            <MdOutlineHorizontalRule fontSize="small" color="primary" />
-                                        </Button>
-                                    </>
-                                    : <>
-                                        <HtmlTooltip title={productData?.inventory ? 'Add to cart' : 'No inventory'} >
-                                            <span>
-                                                <Button
-                                                    variant="outlined"
-                                                    size="medium"
-                                                    disabled={!productData?.inventory || productData?.inventory === 0}
-                                                    aria-label="Add to cart"
-                                                    onClick={() => {
-                                                        // setAssignCartProductQty(params.data)
-                                                    }}
-                                                    color={productData?.inventory ? "secondary" : "inherit"}
-                                                    startIcon={<MdAddShoppingCart />}
-                                                >
-                                                    Add to cart
-                                                </Button>
-                                            </span>
-                                        </HtmlTooltip>
-                                    </>}
-                            </Box> */}
+                                        <Box p={1}>
+                                            {cartProduct ?
+                                                <>
+                                                    <Button variant="outlined" color="primary" onClick={() => { handleUpdateCart(cartProduct, "add") }}>
+                                                        <MdAdd color="primary" fontSize="small" />
+                                                    </Button>
+                                                    <Button color="primary" disabled>
+                                                        {`${cartProduct?.qty}`}
+                                                    </Button>
+                                                    <Button variant="outlined" color="primary" onClick={() => { handleUpdateCart(cartProduct, "subtract") }}>
+                                                        <MdOutlineHorizontalRule fontSize="small" color="primary" />
+                                                    </Button>
+                                                </>
+                                                : <>
+                                                    <HtmlTooltip title={productData?.inventory?.inventory ? 'Add to cart' : 'No inventory'} >
+                                                        <span>
+                                                            <Button
+                                                                variant="outlined"
+                                                                size="medium"
+                                                                disabled={!productData?.inventory?.inventory || productData?.inventory?.inventory === 0}
+                                                                aria-label="Add to cart"
+                                                                onClick={() => {
+                                                                    setQtyDialog(true)
+                                                                }}
+                                                                color={productData?.inventory ? "secondary" : "inherit"}
+                                                                startIcon={<MdAddShoppingCart />}
+                                                            >
+                                                                Add to cart
+                                                            </Button>
+                                                        </span>
+                                                    </HtmlTooltip>
+                                                </>}
+                                        </Box>
                                     </Grid>
                                 </Grid> : <Grid container className="py-4 px-2">
                                     <Grid item xs={4} className="d-flex flex-column align-items-center">
@@ -245,6 +305,13 @@ const ProductDetails = () => {
                 </Paper>
             </Grid>
         </Grid>
+        {qtyDialog &&
+            <QuantityDialog
+                handleAddToCart={handleAddToCart}
+                product={productData}
+                handleCloseDialog={() => { setQtyDialog(false) }}
+            />
+        }
     </Fragment>
     );
 };

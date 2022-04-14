@@ -33,7 +33,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
 
     const ProductNameRenderer = (params) => (
         params?.value ? (
-            <Link className="link text-truncate" title={params.value} to={`${routes.posProductDetail.path}/${params.data?._id}`}>
+            <Link className="link text-truncate" title={params.value} to={`${routes.posProductDetail.path}/${params.data?._id}/${params.data?.plantId}`}>
                 {params.value}
             </Link>
         ) : (

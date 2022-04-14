@@ -10,6 +10,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { GiStockpiles } from 'react-icons/gi';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Box } from '@material-ui/core';
+import queryString from 'query-string';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
@@ -31,8 +32,20 @@ import { MdAdd, MdFilterList, MdSort, RiFileTransferFill, GiCargoShip, RiFolderT
 import MobileSortDialog from 'src/components/MobileSortDialog';
 import MobileFilterDialog from 'src/components/MobileFilterDialog';
 import { camelCase } from 'lodash';
+import HideWhenOffline from 'src/components/HideWhenOffline';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 
 const TransferInventory = () => {
+  const TransferInventoryType = [
+    {
+      key: `All ${routes.transferInventory.title}`,
+      value: 1,
+    },
+    {
+      key: `My ${routes.transferInventory.title}`,
+      value: 2,
+    },
+  ];
   const renderedFrom = camelCase(routes?.transferInventory.title)
   const toastConfig = useContext(CustomToastContext);
   const [showManageTransferInventoryDialog, setShowManageTransferInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -51,6 +64,9 @@ const TransferInventory = () => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const [fromRental, setFromRental] = useState(history.location?.state?.rental);
+  const { type }: any = queryString.parse(history.location.search);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [filter, setFilter] = useState(`All ${routes.transferInventory.title}`);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -63,7 +79,7 @@ const TransferInventory = () => {
 
   useEffect(() => {
     fetchTransferInventory();
-  }, [page, limit, filters, sorting, search, fromRental, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, fromRental, selectedEntity, showFilteredRecordsOnly, selectedType]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -130,7 +146,7 @@ const TransferInventory = () => {
   };
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+    let deepFilter = `?page=${page}&limit=${limit}&filterTransferInventory=${selectedType}`;
 
     if (fromRental) {
       let filterById = [];
@@ -195,6 +211,19 @@ const TransferInventory = () => {
         setDeleting(false);
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const handleTransferInventoryTypeSel = (filterValues) => {
+    setSelectedType(filterValues);
+    history.push(`?type=${filterValues}`)
+  }
+
+  const handleFilter = (event, newFilter) => {
+    if (newFilter != null) {
+      setFilter(newFilter);
+      handleTransferInventoryTypeSel(TransferInventoryType.find((d) => d.key === newFilter).value);
+
+    }
   };
 
   const ActionsRenderer = (params) => (
@@ -303,7 +332,7 @@ const TransferInventory = () => {
                 <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
                 <span className="listingHeader">{routes.transferInventory?.title} </span>
               </div>
-              {isMobile && !isTablet && (
+              {isMobile && !isTablet ? (
                 <div className="d-flex ">
                   <Button
                     onClick={handleClickOpen}
@@ -348,7 +377,23 @@ const TransferInventory = () => {
                     dispatch={dispatch}
                   />
                 </div>
-              )}
+              ):
+              <HideWhenOffline>
+                <div className={`align-items-center gap-1 layout-for-mobile `}>
+                  {TransferInventoryType && (
+                    <ToggleButtonGroup size="small" className="ml-2" value={TransferInventoryType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                      {TransferInventoryType.map((k, index) => {
+                        return (
+                          <ToggleButton value={k.key} key={index}>
+                            {k.key}
+                          </ToggleButton>
+                        );
+                      })}
+                    </ToggleButtonGroup>
+                  )}
+                </div>
+              </HideWhenOffline>
+            }
               {/* {fromRental && (
                 <Chip
                   className="ml-3"

@@ -78,6 +78,7 @@ const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal }) => {
                                 <ProductCard
                                     key={index}
                                     product={product}
+                                    plantId={plantId}
                                     setAssignCartProductQty={setAssignCartProductQty}
                                     disabledCart={!product?.inventory || product?.inventory === 0} />
                             ))}

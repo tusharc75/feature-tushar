@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.94.0](https://github.com/vebholic/oms_frontend/compare/v2.93.1...v2.94.0) (2022-04-14)
+
+
+### Features
+
+* layout pos changes product details ([1e5d1be](https://github.com/vebholic/oms_frontend/commit/1e5d1bef8046564820e9cb01f2ce4c464094ce21))
+* pos product details page ([5f2827f](https://github.com/vebholic/oms_frontend/commit/5f2827f815527f962ab9a4a2856f0832340226ca))
+* pos product page design ([39c7e75](https://github.com/vebholic/oms_frontend/commit/39c7e75a17bf967bb447347cfd4449c0518eef21))
+* **product:** add repair type tab ([5c75dea](https://github.com/vebholic/oms_frontend/commit/5c75deaba1d51592d463a2991c5731985fab80e2))
+
+
+### Bug Fixes
+
+* bug fix ([c5c38f9](https://github.com/vebholic/oms_frontend/commit/c5c38f978a767d21cf89845b079b71e823299f89))
+* bug fix ([138e15c](https://github.com/vebholic/oms_frontend/commit/138e15c5f3c38a7c39a5718caa6bb55f0a003228))
+* bug fix ([77a53ea](https://github.com/vebholic/oms_frontend/commit/77a53ea37ef7d5d488d2bb5133356369eff5731a))
+* bug fix ([b62334d](https://github.com/vebholic/oms_frontend/commit/b62334d4fd5842fe3476fa53aee21fdc4e1f0aa5))
+* bug fix ([9ffc632](https://github.com/vebholic/oms_frontend/commit/9ffc632846eced2b8505cb622c5eeafd40728375))
+* import to excell show according isCreate permission issue in small screen PO-1448 ([9912005](https://github.com/vebholic/oms_frontend/commit/9912005f1ca23c3d5c75e48b080a39071f2595ba))
+* **product repair type:** fix ([28d0835](https://github.com/vebholic/oms_frontend/commit/28d08355fadcbbb23edff29d3757e373885fefa9))
+* **product:** add repair type menu option ([8792e70](https://github.com/vebholic/oms_frontend/commit/8792e703976eef711223a479be9527bb2058c341))
+
 ### [2.93.1](https://github.com/vebholic/oms_frontend/compare/v2.93.0...v2.93.1) (2022-04-13)
 
 
