@@ -224,12 +224,12 @@ const ProductDetails = () => {
                                                     </Button>
                                                 </>
                                                 : <>
-                                                    <HtmlTooltip title={productData?.inventory ? 'Add to cart' : 'No inventory'} >
+                                                    <HtmlTooltip title={productData?.inventory?.inventory ? 'Add to cart' : 'No inventory'} >
                                                         <span>
                                                             <Button
                                                                 variant="outlined"
                                                                 size="medium"
-                                                                disabled={!productData?.inventory || productData?.inventory === 0}
+                                                                disabled={!productData?.inventory?.inventory || productData?.inventory?.inventory === 0}
                                                                 aria-label="Add to cart"
                                                                 onClick={() => {
                                                                     setQtyDialog(true)
