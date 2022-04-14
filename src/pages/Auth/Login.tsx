@@ -199,7 +199,7 @@ const Login = () => {
           </Grid>
           <Grid item sm={6} md={7} xs={12} className={classes.formSide}>
             <Box textAlign="center">
-              <img className={classes.logo} src={SVG('LogoPng')} alt="equip logo" title="eQuipt Logo" />
+              <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
               <Box my={4} />
               <Formik
                 initialValues={{
