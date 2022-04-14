@@ -26,7 +26,7 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-const ProductCad = ({ product, showSkeleton = false, setAssignCartProductQty = null, disabledCart = false }) => {
+const ProductCad = ({ product, plantId = null, showSkeleton = false, setAssignCartProductQty = null, disabledCart = false }) => {
     const history = useHistory();
     const classes = useStyles();
     const [productImages, setProductImages] = useState([])
@@ -49,7 +49,7 @@ const ProductCad = ({ product, showSkeleton = false, setAssignCartProductQty = n
                         showSkeleton ? <Skeleton width={120} height={30} /> : <h4
                             className="cursor-pointer"
                             onClick={() => {
-                                history.push(`${routes.posProductDetail.path}/${product._id}`);
+                                history.push(`${routes.posProductDetail.path}/${product._id}/${plantId}`);
                             }}
                         >{`${product?.productName} `}</h4>
                     }
@@ -85,7 +85,7 @@ const ProductCad = ({ product, showSkeleton = false, setAssignCartProductQty = n
                                 <div key={i} className={classes.imageContainer}>
                                     <img className={classes.img} src={image}
                                         onClick={() => {
-                                            history.push(`${routes.posProductDetail.path}/${product._id}`);
+                                            history.push(`${routes.posProductDetail.path}/${product._id}/${plantId}`);
                                         }}
                                     />
                                 </div>
