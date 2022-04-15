@@ -22,20 +22,19 @@ const useStyles = makeStyles(() => ({
         gridTemplateColumns: "minmax(300px, 1fr) minmax(250px , 0.6fr)",
         "@media screen and (max-width: 960px)": {
             gridTemplateColumns: "minmax(300px, 1fr)",
-
         }
     },
     imageContainer: {
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
-        minHeight: "300px",
-        height: "70vh",
-        "@media screen and (max-width: 960px)": {
-            height: "30vh",
-            width: "40%",
-            margin: "auto"
-        }
+        // alignItems: "center",
+        // minHeight: "300px",
+        // height: "70vh",
+        // margin: "auto",
+        // "@media screen and (max-width: 960px)": {
+        //     height: "30vh",
+        //     width: "40%",
+        // }
     },
     img: {
         height: "500px",
@@ -178,58 +177,54 @@ const ProductDetails = () => {
             <Grid item xs={12} sm={12} md={12} lg={12}>
                 <Paper>
                     <div className="container">
-                        <Box>
-                            {productData ?
-                                <Grid container className={`${classes.mainDetail} py-4 px-2`} spacing={4}>
-                                    <Grid className="d-flex flex-column align-items-center">
-                                        <Box display="flex" justifyContent="center" alignItems="center" className='w-100' >
-                                            <div className='position-relative w-100'>
-                                                {productImages.length > 0 ? (
-                                                    <Carousel
-                                                        strictIndexing
-                                                        animation="slide"
-                                                        autoPlay={false}
-                                                        navButtonsAlwaysInvisible
-                                                        cycleNavigation={false}
-                                                        indicators={productImages.length > 1}
-                                                        timeout={150}
-                                                        navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
-                                                            style: {
-                                                                opacity: 0.4,
-                                                                padding: 5,
-                                                                borderRadius: "50%"
-                                                            }
-                                                        }}
-                                                    >
-                                                        {productImages.map((image: any, i) => (
-                                                            <div key={i} className={classes.imageContainer}>
-                                                                <img src={image} style={{ height: "100%", width: "80%", maxWidth: "400px", backgroundRepeat: "no-repeat" }} />
-                                                            </div>
-                                                        ))}
-                                                    </Carousel>
-                                                ) : (
-                                                    <div>
-                                                        <BsImage className={styles.product_no_image} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </Box>
-                                    </Grid>
-                                    <Grid className="px-0 py-0 my-3" style={{ border: "1px solid grey" }}>
+                        <Box> {productData ?
+                            <Grid container className={`py-5`} spacing={4}>
+                                <Grid xs={12} sm={6} md={6} lg={6} style={{ maxHeight: "450px", minHeight: "450px" }} className="d-flex flex-column align-items-center">
+                                    {productImages.length > 0 ? (
+                                        <Carousel
+                                            strictIndexing
+                                            animation="slide"
+                                            autoPlay={productImages.length > 1 ? true : false}
+                                            navButtonsAlwaysInvisible
+                                            cycleNavigation={productImages.length > 1 ? true : false}
+                                            indicators={productImages.length > 1 ? true : false}
+                                            timeout={150}
+                                            navButtonsProps={{
+                                                style: {
+                                                    opacity: 0.4,
+                                                    padding: 5,
+                                                    borderRadius: "50%"
+                                                }
+                                            }}
+                                        >
+                                            {productImages.map((image: any, i) => (
+                                                <div key={i} className={classes.imageContainer}>
+                                                    <img src={image} style={{ width: "95%", height: "100%", maxHeight: "400px", backgroundRepeat: "no-repeat" }} />
+                                                </div>
+                                            ))}
+                                        </Carousel>
+                                    ) : (
+                                        <div>
+                                            <BsImage className={styles.product_no_image} />
+                                        </div>
+                                    )}
+                                </Grid>
+                                <Grid xs={12} sm={6} md={6} lg={6}>
+                                    <Box border={1} borderColor="grey.300" borderRadius={5} style={{ height: "100%" }}>
                                         <Grid className='px-2 py-2 first-content-Layout'>
                                             <h4>{productData.productCategory?.optionLabel}</h4>
-                                            <div className="w-100 d-flex align-items-center gap-2 justify-content-space-between" >
-                                                <h2 style={{ color: "white", fontSize: "1.5rem" }}>{productData.productName}</h2>
-                                            </div>
+                                            <h2 className='pt-1 pb-1' style={{ color: "white", fontSize: "1.5rem" }}>{productData.productName}</h2>
                                             {productData?.inventory ?
                                                 <h4>{`Inventory - ${productData?.inventory}`}</h4> :
                                                 <h4>{`No inventory`}</h4>
                                             }
                                         </Grid>
                                         {productData?.productShortDetail &&
-                                            <div className="my-3 px-3" dangerouslySetInnerHTML={{ __html: productData?.productShortDetail }}></div>
+                                            <Box pl={3} pt={2}>
+                                                <div dangerouslySetInnerHTML={{ __html: productData?.productShortDetail }}></div>
+                                            </Box>
                                         }
-                                        <Box p={2}>
+                                        <Box pl={3} pt={2}>
                                             {cartProduct ?
                                                 <Box display="flex" flexDirection="row"  >
                                                     <IconButton
@@ -284,63 +279,62 @@ const ProductDetails = () => {
                                                     </HtmlTooltip>
                                                 </>}
                                         </Box>
-                                    </Grid>
-                                </Grid> :
-                                <Grid container className="py-4 px-2">
-                                    <Grid item xs={4} className="d-flex flex-column align-items-center">
-                                        <Box display="flex" justifyContent="center" alignItems="center">
-                                            <Skeleton width={200} height={200} />
-                                        </Box>
-                                        <Skeleton width={120} height={50} />
-                                    </Grid>
-                                    <Grid item xs={8}>
-                                        <Skeleton width={70} height={50} />
-                                        <Skeleton width={100} height={50} />
-                                        <Skeleton width={120} height={50} />
-                                        <Skeleton width={150} height={50} />
-                                        <Grid container className="mt-4">
-                                            <Grid item xs={12} md={6} className="d-flex flex-column gap-3">
-                                                <Grid container spacing={2}>
-                                                    <Grid item xs={6}>
-                                                        <Skeleton width="100%" height={70} />
-                                                    </Grid>
-                                                    <Grid item xs={6}>
-                                                        <Skeleton width="100%" height={70} />
-                                                    </Grid>
-                                                </Grid>
-                                                <Grid container spacing={2}>
-                                                    <Grid item xs={6}>
-                                                        <Skeleton width="100%" height={70} />
-                                                    </Grid>
-                                                    <Grid item xs={6}>
-                                                        <Skeleton width="100%" height={70} />
-                                                    </Grid>
-                                                </Grid>
-                                                <Box className="my-3 d-flex gap-4 align-items-baseline">
-                                                    {
-                                                        <div className="d-flex align-items-center gap-2">
-                                                            <Skeleton width={100} height={50} />
-                                                            <Skeleton width={100} height={50} />
-                                                        </div>
-                                                    }
-                                                </Box>
-                                                <Skeleton width={150} height={70} />
-                                            </Grid>
-                                        </Grid>
-
-                                    </Grid>
+                                    </Box>
                                 </Grid>
-                            }
-                            <br></br>
-                            <hr />
-                            <br></br>
+                            </Grid> :
+                            <Grid container className="py-4 px-2">
+                                <Grid item xs={6} className="d-flex flex-column align-items-center">
+                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                        <Skeleton width={200} height={200} />
+                                    </Box>
+                                    <Skeleton width={120} height={50} />
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Skeleton width={70} height={50} />
+                                    <Skeleton width={100} height={50} />
+                                    <Skeleton width={120} height={50} />
+                                    <Skeleton width={150} height={50} />
+                                    <Grid container className="mt-4">
+                                        <Grid item xs={12} md={6} className="d-flex flex-column gap-3">
+                                            <Grid container spacing={2}>
+                                                <Grid item xs={6}>
+                                                    <Skeleton width="100%" height={70} />
+                                                </Grid>
+                                                <Grid item xs={6}>
+                                                    <Skeleton width="100%" height={70} />
+                                                </Grid>
+                                            </Grid>
+                                            <Grid container spacing={2}>
+                                                <Grid item xs={6}>
+                                                    <Skeleton width="100%" height={70} />
+                                                </Grid>
+                                                <Grid item xs={6}>
+                                                    <Skeleton width="100%" height={70} />
+                                                </Grid>
+                                            </Grid>
+                                            <Box className="my-3 d-flex gap-4 align-items-baseline">
+                                                {
+                                                    <div className="d-flex align-items-center gap-2">
+                                                        <Skeleton width={100} height={50} />
+                                                        <Skeleton width={100} height={50} />
+                                                    </div>
+                                                }
+                                            </Box>
+                                            <Skeleton width={150} height={70} />
+                                        </Grid>
+                                    </Grid>
+
+                                </Grid>
+                            </Grid>
+                        }
                             {productData?.productLongDetail &&
-                                <Fragment>
-                                    <div className="d-flex w-100 align-items-center justify-content-center my-3">
-                                        <h1>Product Details</h1>
+                                <Box pb={3}>
+                                    <Box mt={3} mb={3} border={1} borderColor="grey.100"></Box>
+                                    <div className="w-100 my-3 mb-2">
+                                        <h2>Product Details</h2>
                                     </div>
-                                    <div className="px-5" dangerouslySetInnerHTML={{ __html: productData?.productLongDetail }}></div>
-                                </Fragment>
+                                    <div dangerouslySetInnerHTML={{ __html: productData?.productLongDetail }}></div>
+                                </Box>
                             }
                         </Box>
                     </div>
