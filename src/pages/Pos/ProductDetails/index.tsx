@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import { Box, Button, Grid, makeStyles, Paper } from '@material-ui/core';
+import { Box, Button, Grid, makeStyles, Paper, IconButton } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
@@ -12,6 +12,9 @@ import styles from "./product-detail-page.module.scss";
 import { MdAdd, MdAddShoppingCart, MdOutlineHorizontalRule } from 'react-icons/md';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import QuantityDialog from '../QuantityDialog';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Remove';
 
 const useStyles = makeStyles(() => ({
     mainDetail: {
@@ -72,6 +75,19 @@ const ProductDetails = () => {
         }
     }, [id]);
 
+    const handleDeleteCart = (product) => {
+        axiosInstance().put(`/pos/cart/remove`, { ids: [product._id] })
+            .then(({ data }) => {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: data.message
+                });
+                fetchCart()
+            }).catch((error) => {
+                toastConfig.setToastConfig(error)
+            });
+    };
 
     const fetchProductData = () => {
         axiosInstance()
@@ -101,7 +117,6 @@ const ProductDetails = () => {
 
     const handleAddToCart = (product, qty = null) => {
         if (product?.length === 1) {
-
             let data = [{
                 "product": product[0]._id,
                 "qty": parseInt(qty || 1),
@@ -110,11 +125,6 @@ const ProductDetails = () => {
             axiosInstance().post(`/pos/cart`, data)
                 .then(({ data }) => {
                     fetchCart()
-                    toastConfig.setToastConfig({
-                        open: true,
-                        type: 'success',
-                        message: "Add to cart successfully"
-                    });
                 }).catch((error) => {
                     toastConfig.setToastConfig(error)
                 });
@@ -131,11 +141,6 @@ const ProductDetails = () => {
             axiosInstance().put(`/pos/cart`, data)
                 .then(({ data }) => {
                     fetchCart()
-                    toastConfig.setToastConfig({
-                        open: true,
-                        type: 'success',
-                        message: data.message
-                    });
                 }).catch((error) => {
                     toastConfig.setToastConfig(error)
                 });
@@ -210,25 +215,46 @@ const ProductDetails = () => {
                                         {
                                             productData?.productShortDetail && <div className="my-3 px-5" dangerouslySetInnerHTML={{ __html: productData?.productShortDetail }}></div>
                                         }
-                                        <Box p={1}>
+                                        <Box p={1} pt={2}>
                                             {cartProduct ?
-                                                <>
-                                                    <Button variant="outlined" color="primary" onClick={() => { handleUpdateCart(cartProduct, "add") }}>
-                                                        <MdAdd color="primary" fontSize="small" />
-                                                    </Button>
-                                                    <Button color="primary" disabled>
-                                                        {`${cartProduct?.qty}`}
-                                                    </Button>
-                                                    <Button variant="outlined" color="primary" onClick={() => { handleUpdateCart(cartProduct, "subtract") }}>
-                                                        <MdOutlineHorizontalRule fontSize="small" color="primary" />
-                                                    </Button>
-                                                </>
+                                                <Box display="flex" flexDirection="row"  >
+                                                    <IconButton
+                                                        color="secondary"
+                                                        size="small"
+                                                        style={{ border: "1px solid" }}
+                                                        onClick={() => { handleUpdateCart(cartProduct, "add") }}>
+                                                        <AddIcon fontSize="small" />
+                                                    </IconButton >
+                                                    <IconButton
+                                                        disabled
+                                                        size="small">
+                                                        <Box pl={1} pr={1}>
+                                                            {`${cartProduct?.qty}`}
+                                                        </Box>
+                                                    </IconButton>
+                                                    <IconButton
+                                                        style={{ border: "1px solid" }}
+                                                        color="secondary"
+                                                        size="small"
+                                                        onClick={() => { handleUpdateCart(cartProduct, "subtract") }}>
+                                                        <RemoveIcon fontSize="small" />
+                                                    </IconButton>
+                                                    <Box pl={1}>
+                                                        <IconButton
+                                                            style={{ border: "1px solid", color: "red" }}
+                                                            color="secondary"
+                                                            size="small"
+                                                            onClick={() => { handleDeleteCart(cartProduct) }}>
+                                                            <DeleteOutlineIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Box>
+                                                </Box>
                                                 : <>
                                                     <HtmlTooltip title={productData?.inventory?.inventory ? 'Add to cart' : 'No inventory'} >
                                                         <span>
                                                             <Button
                                                                 variant="outlined"
-                                                                size="medium"
+                                                                size="small"
                                                                 disabled={!productData?.inventory?.inventory || productData?.inventory?.inventory === 0}
                                                                 aria-label="Add to cart"
                                                                 onClick={() => {
@@ -304,7 +330,7 @@ const ProductDetails = () => {
                     </div>
                 </Paper>
             </Grid>
-        </Grid>
+        </Grid >
         {qtyDialog &&
             <QuantityDialog
                 handleAddToCart={handleAddToCart}
@@ -312,7 +338,7 @@ const ProductDetails = () => {
                 handleCloseDialog={() => { setQtyDialog(false) }}
             />
         }
-    </Fragment>
+    </Fragment >
     );
 };
 

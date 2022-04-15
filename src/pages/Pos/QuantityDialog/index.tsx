@@ -9,21 +9,35 @@ import {
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
+import { isMobile, isTablet } from 'react-device-detect';
 
 const QuantityDialog = ({ handleCloseDialog, handleAddToCart, product }) => {
 
-
     const [productQty, setProductQty] = useState(1)
-
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     return (<Dialog
         fullWidth
         maxWidth="sm"
         open={true}
-        onClose={handleCloseDialog}
+        fullScreen={fullScreen || (isMobile || isTablet)}
+        onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+                handleCloseDialog()
+            }
+        }}
         aria-labelledby="assign-roles-dialog"
     >
-        <CustomDialogHeader title="Add To Cart" showRequiredLabel={true} onClose={handleCloseDialog} />
+        <CustomDialogHeader
+            title="Add To Cart"
+            showRequiredLabel={true}
+            onClose={handleCloseDialog}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+            }}
+            showManimizeMaximize={true}
+        />
         <CustomDialogContent>
             <List style={{ padding: 0 }}>
                 <ListItem divider key={product?._id}>

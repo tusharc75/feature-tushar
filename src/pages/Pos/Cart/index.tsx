@@ -15,6 +15,7 @@ import {
     ListItemIcon,
     ListItemText,
     Typography,
+    Box
 } from "@material-ui/core";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "src/axios/axiosInstance";
@@ -22,10 +23,16 @@ import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
 import { MdAdd, MdOutlineHorizontalRule } from "react-icons/md";
+import { isMobile, isTablet } from 'react-device-detect';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Remove';
+import { CustomDialogTransition } from "../../../constants/helpers";
 
-const AssignCartDialog = ({ handleCloseDialog, fetchCart, products }) => {
+const AssignCartDialog = ({ handleCloseDialog, fetchCart, products, handleDeleteCart }) => {
 
     const toastConfig = useContext(CustomToastContext);
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     const handleUpdateCart = (product, operation) => {
         let data = {
@@ -36,11 +43,6 @@ const AssignCartDialog = ({ handleCloseDialog, fetchCart, products }) => {
             axiosInstance().put(`/pos/cart`, data)
                 .then(({ data }) => {
                     fetchCart()
-                    toastConfig.setToastConfig({
-                        open: true,
-                        type: 'success',
-                        message: data.message
-                    });
                 }).catch((error) => {
                     toastConfig.setToastConfig(error)
                 });
@@ -59,15 +61,30 @@ const AssignCartDialog = ({ handleCloseDialog, fetchCart, products }) => {
                 });
         }
     };
-    
+
     return (<Dialog
         fullWidth
+        fullScreen={fullScreen || (isMobile || isTablet)}
         maxWidth="sm"
+        TransitionComponent={CustomDialogTransition}
         open={true}
-        onClose={handleCloseDialog}
+        onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+                handleCloseDialog()
+            }
+        }}
         aria-labelledby="assign-roles-dialog"
     >
-        <CustomDialogHeader title="Cart" showRequiredLabel={false} onClose={handleCloseDialog} />
+        <CustomDialogHeader
+            title={`Cart (${products?.length})`}
+            showRequiredLabel={false}
+            onClose={handleCloseDialog}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+            }}
+            showManimizeMaximize={true}
+        />
         <CustomDialogContent>
             {products?.length ? (
                 <List style={{ padding: 0 }}>
@@ -79,18 +96,39 @@ const AssignCartDialog = ({ handleCloseDialog, fetchCart, products }) => {
                                     alt={product?.product?.optionLabel ?? ''}
                                 />
                             </ListItemAvatar>
-                            <ListItemText
-                                primary={product?.product?.optionLabel}
-                            />
-                            <Button variant="outlined" color="primary" onClick={() => { handleUpdateCart(product, "add") }}>
-                                <MdAdd color="primary" fontSize="small" />
-                            </Button>
-                            <Button color="primary" disabled>
-                                {`${product?.qty}`}
-                            </Button>
-                            <Button variant="outlined" color="primary" onClick={() => { handleUpdateCart(product, "subtract") }}>
-                                <MdOutlineHorizontalRule fontSize="small" color="primary" />
-                            </Button>
+                            <ListItemText primary={product?.product?.optionLabel} />
+                            <Box display="flex" flexDirection="row"  >
+                                <IconButton
+                                    color="secondary"
+                                    size="small"
+                                    style={{ border: "1px solid" }}
+                                    onClick={() => { handleUpdateCart(product, "add") }}>
+                                    <AddIcon fontSize="small" />
+                                </IconButton >
+                                <IconButton
+                                    disabled
+                                    size="small">
+                                    <Box pl={1} pr={1}>
+                                        {`${product?.qty}`}
+                                    </Box>
+                                </IconButton>
+                                <IconButton
+                                    style={{ border: "1px solid" }}
+                                    color="secondary"
+                                    size="small"
+                                    onClick={() => { handleUpdateCart(product, "subtract") }}>
+                                    <RemoveIcon fontSize="small" />
+                                </IconButton>
+                                <Box pl={1}>
+                                    <IconButton
+                                        style={{ border: "1px solid", color: "red" }}
+                                        color="secondary"
+                                        size="small"
+                                        onClick={() => { handleDeleteCart(product) }}>
+                                        <DeleteOutlineIcon fontSize="small" />
+                                    </IconButton>
+                                </Box>
+                            </Box>
                         </ListItem>
                     ))}
                 </List>

@@ -20,7 +20,7 @@ import ProductGrid from './Product/Grid';
 import ProductCard from './Product/Card';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import QuantityDialog from './QuantityDialog';
-
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 
 const Pos = () => {
 
@@ -37,7 +37,7 @@ const Pos = () => {
     const [cartProduct, setCartProduct] = useState([])
     const [assignCartProductQty, setAssignCartProductQty] = useState(null)
 
-    const [viewType, setViewType] = useState("grid");
+    const [viewType, setViewType] = useState("card");
 
     useEffect(() => {
         getPlants()
@@ -120,6 +120,20 @@ const Pos = () => {
         }
     };
 
+    const handleDeleteCart = (product) => {
+        axiosInstance().put(`/pos/cart/remove`, { ids: [product._id] })
+            .then(({ data }) => {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: data.message
+                });
+                fetchCart()
+            }).catch((error) => {
+                toastConfig.setToastConfig(error)
+            });
+    };
+
     return (<Fragment>
         <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
@@ -194,14 +208,14 @@ const Pos = () => {
                                 color="primary"
                                 aria-label="outlined primary button group">
                                 <Button
+                                    size={isMobile ? 'small' : 'medium'}
                                     variant={viewType === "grid" ? "contained" : "outlined"}
-                                    size='small'
                                     onClick={() => setViewType("grid")}
                                 >
                                     <MdList fontSize="small" color="primary" />
                                 </Button>
                                 <Button
-                                    size='small'
+                                    size={isMobile ? 'small' : 'medium'}
                                     variant={viewType === "card" ? "contained" : "outlined"}
                                     onClick={() => setViewType("card")}
                                 >
@@ -213,10 +227,11 @@ const Pos = () => {
                                 aria-label="Cart"
                                 color="primary"
                                 title="Cart"
+                                size={isMobile ? 'small' : 'medium'}
                                 onClick={() => { setCartDialog(true) }}
                             >
                                 <Badge badgeContent={cartProduct?.length} color="secondary">
-                                    <MdShoppingCart />
+                                    <ShoppingCartIcon />
                                 </Badge>
                             </IconButton>
                         </Box>
@@ -255,6 +270,7 @@ const Pos = () => {
                     fetchCart={fetchCart}
                     products={cartProduct}
                     handleCloseDialog={() => { setCartDialog(false) }}
+                    handleDeleteCart={handleDeleteCart}
                 />
             }
             {qtyDialog &&

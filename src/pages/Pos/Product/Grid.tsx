@@ -7,8 +7,6 @@ import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomT
 import { gridLoadingTimeout, isObjectEmpty } from "src/constants/helpers";
 import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, ImageRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
-import { isMobile, isTablet } from "react-device-detect";
-import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import { MdAddShoppingCart } from "react-icons/md";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { prepareDataForGrid } from '../../../constants/helpers';
@@ -124,38 +122,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
 
     return (
         <Fragment>
-            {columns && frameWorkComponent ? isMobile && !isTablet ?
-                <CustomSwipableList
-                    allowSelection={false}
-                    allowSwipe={true}
-                    permissions={permissions}
-                    primaryField={columns?.find(d => d.field === "productName")}
-                    onClick={(data) => {
-                    }}
-                    dataRows={dataRows}
-                    selectedRecords={selectedRecords}
-                    dispatch={dispatch}
-                    onEdit={(data) => {
-                    }}
-                    extraParamsToCheckDelete={true}
-                    onDelete={(data) => {
-                    }}
-                    rowCount={rowCount}
-                    page={page}
-                    loading={loading}
-                    chips={
-                        [{
-                            label: `Quantity: `,
-                            field: "qty",
-                            forceShow: true
-                        }]
-                    }
-                    onCreate={null}
-                    showClone={false}
-                    fullHeight={true}
-                    renderedFrom={renderedFrom}
-                    onClone={() => { }}
-                /> :
+            {columns && frameWorkComponent ? 
                 <CustomAgGrid
                     columns={columns}
                     dataRows={dataRows}
