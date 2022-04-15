@@ -26,8 +26,10 @@ const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal }) => {
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-        if (plantId) fetchProducts();
-    }, [searchVal]);
+        if (plantId) {
+            fetchProducts();
+        }
+    }, [searchVal, plantId]);
 
     const fetchProducts = () => {
         setProducts([]);
@@ -36,6 +38,7 @@ const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal }) => {
         axiosInstance().get(api).then(({ data: { data, count } }) => {
             setProducts([...data]);
             setHasMore(data.length !== count);
+            setLoading(false);
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             setLoading(false);

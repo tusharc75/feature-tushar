@@ -135,7 +135,7 @@ export default function ManageContact(props) {
         .then(({ data: { data } }) => {
           const { _id, firstName, lastName, middleName, email, reportsTo, ...rest } = data
 
-         setCloneHeading(`${firstName} ${middleName} ${lastName}`);
+         setCloneHeading(`${firstName ?? ''} ${middleName ?? ''} ${lastName ?? ''}`);
 
           
        

@@ -91,7 +91,7 @@ const ProductCad = ({ product, plantId = null, showSkeleton = false, setAssignCa
                                 </div>
                             ))}
                         </Carousel> : <BsImage className={`${styles.no_image} cursor-pointer`} onClick={() => {
-                            history.push(`${routes.posProductDetail.path}/${product?._id}`);
+                            history.push(`${routes.posProductDetail.path}/${product?._id}/${plantId}`);
                         }} />)
                     }
 
