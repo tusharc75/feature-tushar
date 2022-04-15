@@ -18,7 +18,7 @@ import { useData } from "../../StateProvider/Provider";
 import { GlobalChatContext } from "../../StateProvider/GlobalChatContext";
 import "./Sidebar.scss";
 import { ChevronRight, ExpandMore, ExpandLess } from "@material-ui/icons";
-import { kebabCase, lowerCase } from "lodash";
+import { kebabCase, lowerCase, sortBy } from "lodash";
 import { FaUserTie, FaDatabase, FaHandshake, FaRegistered } from "react-icons/fa";
 import { BsCalendarFill } from "react-icons/bs";
 import { MdDashboard, MdDescription, MdLocalActivity } from "react-icons/md";
@@ -160,7 +160,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
 
   const listItems = () => {
     if (user) {
-      const sections = [];
+      var sections = [];
 
       let entityData;
       if (user?.entity && user.entity.length) {
@@ -182,6 +182,19 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           }
         });
       }
+      let levalOrderBy = [
+        "CRM+",
+        "CRM +",
+        "ROM",
+        "Accounts",
+        "Product Setup",
+        "Activities",
+        "Admin Portal",
+      ];
+      sections = sortBy(sections, function (item: any) {
+        return levalOrderBy?.indexOf(item)
+      });
+
 
       return sections.map((section) => {
         const lists = user.role.sideBar.filter(
