@@ -1176,7 +1176,6 @@ export default function Contact(props) {
                 })
               }}
               onClose={() => setOpenAddPlantsDialog(false)}
-              renderedFrom={renderedFrom}
               assignedWarehouse={[]}
             />
           }

@@ -23,7 +23,7 @@ const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal }) => {
     const [page, setPage] = useState(1);
     const [products, setProducts] = useState([]);
     const [hasMore, setHasMore] = useState(false)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         if (plantId) {
@@ -87,10 +87,9 @@ const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal }) => {
                             ))}
                         </div> : (loading === true ?
                             <div className={`${styles.product_list_container}`}>
-                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((_, index: number) => (
+                                {[...Array(20).keys()].map((_, index: number) => (
                                     <ProductCard key={index} product={null} showSkeleton={true} />
-                                ))
-                                }
+                                ))}
                             </div> :
                             <div className="d-flex align-items-center justify-content-center w-100 border" style={{ height: 200 }}>
                                 <h3>No Products Found</h3>

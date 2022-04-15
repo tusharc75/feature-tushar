@@ -27,7 +27,6 @@ export default function Scan({ onClose, plantId, setAssignCartProductQty }) {
         setScanResult({ open: false, result: null })
     }
 
-
     const fetchProduct = (barcode) => {
         const updatedFilters = [];
         updatedFilters.push({
