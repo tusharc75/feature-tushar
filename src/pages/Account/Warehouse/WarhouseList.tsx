@@ -17,12 +17,15 @@ import { startCase } from "lodash";
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
+import { camelCase } from 'lodash';
 
 let searchTimeout;
 
-const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAddingWarehouse, renderedFrom, assignedWarehouse }) => {
+const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAddingWarehouse, assignedWarehouse }) => {
 
+    const renderedFrom = camelCase(routes?.warehouse?.title)
     const localStorageSelectedRecords = `${renderedFrom}_selected`
+
     const toastConfig = useContext(CustomToastContext)
     const { state: { selectedEntity } }: any = useData();
     const [gridApi, setGridApi] = useState(null);

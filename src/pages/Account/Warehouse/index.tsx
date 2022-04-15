@@ -20,10 +20,14 @@ import ConfirmationDialogRaw from "src/components/Helpers/ConfirmationDialog";
 import { styles } from "@material-ui/pickers/views/Calendar/Calendar";
 import { MdAdd } from "react-icons/md";
 import WarhouseList from "./WarhouseList";
+import { camelCase } from 'lodash'
 
-const Warehouse = ({ reference, api, id, renderedFrom, accountId = '' }) => {
+const Warehouse = ({ reference, api, id, accountId = '' }) => {
 
     const toastConfig = useContext(CustomToastContext);
+    const renderedFrom = camelCase(routes?.warehouse.title)
+    const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
     const { state: { user, permissions } }: any = useData();
     const history = useHistory();
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -32,7 +36,6 @@ const Warehouse = ({ reference, api, id, renderedFrom, accountId = '' }) => {
     const [columns, setColumns] = useState(null)
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
     const { getColumnData } = useColumns();
-    const localStorageSelectedRecords = `${renderedFrom}_selected`;
     const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null });
     const [isDeleting, setIsDeleting] = useState(false);
     const [openAssignWarehouse, setOpenAssignWarehouse] = useState(false);
@@ -249,7 +252,6 @@ const Warehouse = ({ reference, api, id, renderedFrom, accountId = '' }) => {
                 isAddingWarehouse={isAddingWarehouse}
                 addWarehouse={handleAddWarehouse}
                 onClose={() => { setOpenAssignWarehouse(false) }}
-                renderedFrom={renderedFrom}
                 assignedWarehouse={dataRows.map(d => d._id)}
             />
         }

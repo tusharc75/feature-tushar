@@ -294,6 +294,9 @@ function App() {
         redirectToAnotherScreen = parsedParams.redirect;
       }
     }
+    if (user?.user?.customerContactId) {
+      redirectToAnotherScreen = routes?.pos?.path
+    }
 
     return !user ? (
       // <Suspense fallback={<div>Loading...</div>}>
