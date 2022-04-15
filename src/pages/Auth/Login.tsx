@@ -111,13 +111,13 @@ const Login = () => {
       }
     }
   }, [invalidAzureLogin, counter]);
+
   const handleSubmit = async (values) => {
     setSubmitting(true);
     const data = {
       email: values.email,
       password: values.password
     };
-
     axiosInstance()
       .post('/user/login', data)
       .then(async ({ data: response }) => {

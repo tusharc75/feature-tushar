@@ -45,14 +45,13 @@ const ProductCad = ({ product, plantId = null, showSkeleton = false, setAssignCa
         <Fragment>
             <div className={styles.product_card}>
                 <div className={styles.title}>
-                    {
-                        showSkeleton ? <Skeleton width={120} height={30} /> : <h4
-                            className="cursor-pointer"
-                            onClick={() => {
-                                history.push(`${routes.posProductDetail.path}/${product._id}/${plantId}`);
-                            }}
-                        >{`${product?.productName} `}</h4>
-                    }
+                    {showSkeleton ? <Skeleton width={120} height={30} /> : <h4
+                        className={styles.cardProductName}
+                        onClick={() => {
+                            history.push(`${routes.posProductDetail.path}/${product._id}/${plantId}`);
+                        }}
+                        title={product?.productName}
+                    >{`${product?.productName}`}</h4>}
                 </div>
                 <Box
                     display="flex"
@@ -72,7 +71,7 @@ const ProductCad = ({ product, plantId = null, showSkeleton = false, setAssignCa
                                 className: "indicators-pops"
                             }}
                             cycleNavigation={false}
-                            navButtonsProps={{          // Change the colors and radius of the actual buttons. THIS STYLES BOTH BUTTONS
+                            navButtonsProps={{
                                 style: {
                                     top: "38%",
                                     opacity: 0.3,
@@ -94,25 +93,23 @@ const ProductCad = ({ product, plantId = null, showSkeleton = false, setAssignCa
                             history.push(`${routes.posProductDetail.path}/${product?._id}/${plantId}`);
                         }} />)
                     }
-
                 </Box>
-
-                <div className={styles.text}>
+                <div className={styles.text} style={{ bottom: "0px" }}>
                     <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <div>
-                            {
-                                showSkeleton ? <Skeleton width={100} height={30} /> : (product.mrp && parseInt(product.mrp) !== 0) &&
-                                    <>
-                                        <span className={styles.amount}>{formatAmountWithCurrency(product.currency, product.mrp).fullFormatAmount}</span>
-                                        {(product.discount && parseInt(product.discount) !== 0) && <span className={styles.amount_stricked}>{formatAmountWithCurrency(product.currency, product.mrp).fullFormatAmount}</span>}
-                                    </>
-                            }
+                        <div>  {showSkeleton ? <Skeleton width={100} height={30} /> :
+                            (product.inventory ?
+                                <span >
+                                    <span style={{ fontSize: "10px" }}>Inventory</span>
+                                    <br></br>
+                                    <span className={styles.amount}>{product.inventory}</span></span> :
+                                <span >{"No inventory"}</span>)
+                        }
                         </div>
-                        <div>
-                            {!disabledCart && (showSkeleton ? <Skeleton width={30} height={30} /> : <Avatar className={`${styles.cart_icon} cursor-pointer`} onClick={() => { setAssignCartProductQty(product) }}>
+                        <div> {!disabledCart && (showSkeleton ? <Skeleton width={30} height={30} /> :
+                            <Avatar className={`${styles.cart_icon} cursor-pointer`} onClick={() => { setAssignCartProductQty(product) }}>
                                 <MdAddShoppingCart size={18} />
                             </Avatar>)
-                            }
+                        }
                         </div>
                     </Box>
                 </div>

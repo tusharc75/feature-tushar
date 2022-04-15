@@ -67,6 +67,8 @@ const ProductDetails = () => {
     const [productImages, setProductImages] = useState([])
     const [cartProduct, setCartProduct] = useState(null)
     const [qtyDialog, setQtyDialog] = useState(false)
+    const [loadingCart, setLoadingCart] = useState(false)
+
 
     useEffect(() => {
         if (id) {
@@ -122,14 +124,17 @@ const ProductDetails = () => {
                 "qty": parseInt(qty || 1),
                 "warehouse": warehouseId
             }]
+            setLoadingCart(true)
             axiosInstance().post(`/pos/cart`, data)
                 .then(({ data }) => {
                     fetchCart()
+                    setLoadingCart(false)
+                    setQtyDialog(false)
                 }).catch((error) => {
                     toastConfig.setToastConfig(error)
+                    setLoadingCart(false)
                 });
         }
-        setQtyDialog(false)
     }
 
     const handleUpdateCart = (product, operation) => {
@@ -138,17 +143,22 @@ const ProductDetails = () => {
             "qty": operation === "add" ? parseInt(product?.qty || 0) + 1 : parseInt(product?.qty || 0) - 1,
         }
         if (data?.qty) {
+            setLoadingCart(true)
             axiosInstance().put(`/pos/cart`, data)
                 .then(({ data }) => {
                     fetchCart()
+                    setLoadingCart(false)
                 }).catch((error) => {
                     toastConfig.setToastConfig(error)
+                    setLoadingCart(false)
                 });
         }
         else {
+            setLoadingCart(true)
             axiosInstance().put(`/pos/cart/remove`, { ids: [data._id] })
                 .then(({ data }) => {
                     fetchCart()
+                    setLoadingCart(false)
                     toastConfig.setToastConfig({
                         open: true,
                         type: 'success',
@@ -206,22 +216,27 @@ const ProductDetails = () => {
                                         </Box>
                                     </Grid>
                                     <Grid className="px-0 py-0 my-3" style={{ border: "1px solid grey" }}>
-                                        <Grid className=' px-2 py-2 first-content-Layout'>
-                                            <h5>{productData.productCategory?.optionLabel}</h5>
+                                        <Grid className='px-2 py-2 first-content-Layout'>
+                                            <h4>{productData.productCategory?.optionLabel}</h4>
                                             <div className="w-100 d-flex align-items-center gap-2 justify-content-space-between" >
                                                 <h2 style={{ color: "white", fontSize: "1.5rem" }}>{productData.productName}</h2>
                                             </div>
+                                            {productData?.inventory ?
+                                                <h4>{`Inventory - ${productData?.inventory}`}</h4> :
+                                                <h4>{`No inventory`}</h4>
+                                            }
                                         </Grid>
-                                        {
-                                            productData?.productShortDetail && <div className="my-3 px-5" dangerouslySetInnerHTML={{ __html: productData?.productShortDetail }}></div>
+                                        {productData?.productShortDetail &&
+                                            <div className="my-3 px-3" dangerouslySetInnerHTML={{ __html: productData?.productShortDetail }}></div>
                                         }
-                                        <Box p={1} pt={2}>
+                                        <Box p={2}>
                                             {cartProduct ?
                                                 <Box display="flex" flexDirection="row"  >
                                                     <IconButton
                                                         color="secondary"
                                                         size="small"
                                                         style={{ border: "1px solid" }}
+                                                        disabled={cartProduct?.qty >= productData?.inventory}
                                                         onClick={() => { handleUpdateCart(cartProduct, "add") }}>
                                                         <AddIcon fontSize="small" />
                                                     </IconButton >
@@ -250,12 +265,12 @@ const ProductDetails = () => {
                                                     </Box>
                                                 </Box>
                                                 : <>
-                                                    <HtmlTooltip title={productData?.inventory?.inventory ? 'Add to cart' : 'No inventory'} >
+                                                    <HtmlTooltip title={productData?.inventory ? 'Add to cart' : 'No inventory'} >
                                                         <span>
                                                             <Button
                                                                 variant="outlined"
                                                                 size="small"
-                                                                disabled={!productData?.inventory?.inventory || productData?.inventory?.inventory === 0}
+                                                                disabled={!productData?.inventory}
                                                                 aria-label="Add to cart"
                                                                 onClick={() => {
                                                                     setQtyDialog(true)
@@ -270,7 +285,8 @@ const ProductDetails = () => {
                                                 </>}
                                         </Box>
                                     </Grid>
-                                </Grid> : <Grid container className="py-4 px-2">
+                                </Grid> :
+                                <Grid container className="py-4 px-2">
                                     <Grid item xs={4} className="d-flex flex-column align-items-center">
                                         <Box display="flex" justifyContent="center" alignItems="center">
                                             <Skeleton width={200} height={200} />
@@ -336,6 +352,8 @@ const ProductDetails = () => {
                 handleAddToCart={handleAddToCart}
                 product={productData}
                 handleCloseDialog={() => { setQtyDialog(false) }}
+                cartQty={0}
+                loading={loadingCart}
             />
         }
     </Fragment >
