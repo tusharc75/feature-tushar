@@ -2,7 +2,7 @@ import { useEffect, useState, useContext, Fragment } from 'react';
 import { Container, Grid, Paper, Box, Typography, Button, List, ListItem, ListItemText, ListSubheader } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
-import { kebabCase } from 'lodash';
+import { kebabCase, sortBy } from 'lodash';
 import styles from './Dashboard.module.scss';
 import crmImage from '../../assets/eQuip_t-homepage-design-trs-small-size.-in-png.png';
 import { SiCivicrm } from 'react-icons/si';
@@ -88,7 +88,7 @@ function Dashboard() {
     //   }]
     // }
 
-    const data = arr.map((sec) => {
+    var data = arr.map((sec) => {
       // const list = allData?.filter((u) => sec === u.sectionName && u.isRead);
       const list = allData?.filter((u) => {
         if (u?.name === 'Product Builder' && process.env.REACT_APP_ENV === 'staging') {
@@ -97,7 +97,6 @@ function Dashboard() {
         if (("hiddenResource" in u) && u?.hiddenResource) {
           return false
         }
-
         return sec === u.sectionName && u.isRead;
       });
 
@@ -109,7 +108,10 @@ function Dashboard() {
         case 'CRM +':
           icon = <SiCivicrm size={32} />;
           text = 'Convert leads and close sales deals faster.';
-
+          break;
+        case 'CRM+':
+          icon = <SiCivicrm size={32} />;
+          text = 'Convert leads and close sales deals faster.';
           break;
 
         case 'Accounts':
@@ -149,8 +151,19 @@ function Dashboard() {
         items: list
       };
     });
+    let levalOrderBy = [
+      "CRM+",
+      "CRM +",
+      "ROM",
+      "Accounts",
+      "Product Setup",
+      "Activities",
+      "Admin Portal",
+    ];
+    data = sortBy(data, function (item: any) {
+      return levalOrderBy?.indexOf(item?.head)
+    });
     setSections(data);
-
     // (async () => {
     //   try {
     //     axiosInstance()
