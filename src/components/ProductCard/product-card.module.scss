@@ -95,11 +95,12 @@
     }
 
     .amount {
-      font-size: 18px;
+      font-size: 15px;
       font-weight: bold;
       color: var(--primary);
       padding: 10px 0 0;
     }
+
 
     .amount_stricked {
       font-size: 12px;
@@ -108,6 +109,18 @@
       text-decoration: line-through;
     }
   }
+
+  .cardProductName {
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    cursor: pointer;
+    height: 40px;
+  }
+
   .rating {
     font-size: 10px;
     display: flex;

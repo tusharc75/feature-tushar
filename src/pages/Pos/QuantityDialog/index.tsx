@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { Fragment, useState, useEffect, useContext } from "react";
 import {
     Avatar, Button, Dialog, List,
     ListItem,
@@ -10,11 +10,28 @@ import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
 import { isMobile, isTablet } from 'react-device-detect';
+import { Formik, Form, Field } from 'formik';
+import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
+import CustomButton from 'src/components/Helpers/CustomButton';
 
-const QuantityDialog = ({ handleCloseDialog, handleAddToCart, product }) => {
+const QuantityDialog = ({ handleCloseDialog, handleAddToCart, product, cartQty = 0, loading }) => {
 
-    const [productQty, setProductQty] = useState(1)
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
+    const handleSubmit = (values) => {
+        handleAddToCart([product], parseInt(values?.qty))
+    }
+
+    function validate(values) {
+        const errors = {};
+        if (values.qty <= 0) {
+            errors["qty"] = "Please enter valid qty"
+        }
+        if ((parseInt(values.qty) + cartQty) > (product?.inventory)) {
+            errors["qty"] = "qty not more than inventory"
+        }
+        return errors;
+    }
 
     return (<Dialog
         fullWidth
@@ -28,56 +45,69 @@ const QuantityDialog = ({ handleCloseDialog, handleAddToCart, product }) => {
         }}
         aria-labelledby="assign-roles-dialog"
     >
-        <CustomDialogHeader
-            title="Add To Cart"
-            showRequiredLabel={true}
-            onClose={handleCloseDialog}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-                setFullScreen(prevState => !prevState)
-            }}
-            showManimizeMaximize={true}
-        />
-        <CustomDialogContent>
-            <List style={{ padding: 0 }}>
-                <ListItem divider key={product?._id}>
-                    <ListItemAvatar>
-                        <Avatar
-                            src={product?.productImage}
-                            alt={product?.productName ?? ''}
-                        />
-                    </ListItemAvatar>
-                    <ListItemText primary={product?.productName} />
-                    <TextField
-                        label="Qty"
-                        variant="outlined"
-                        type="number"
-                        required={true}
-                        name="qty"
-                        margin="dense"
-                        value={productQty}
-                        onChange={(e) =>
-                            setProductQty(parseInt(e.target.value))
-                        }
+        <Formik initialValues={{ qty: 1 }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+            {({ submitForm, touched, errors, setFieldValue, values }) => (
+                <Form autoComplete="off" autoCorrect="off" noValidate>
+                    <CustomDialogHeader
+                        title="Add To Cart"
+                        showRequiredLabel={true}
+                        onClose={handleCloseDialog}
+                        isMinimized={!fullScreen}
+                        onMinimizeMaximize={() => {
+                            setFullScreen(prevState => !prevState)
+                        }}
+                        showManimizeMaximize={true}
                     />
-                </ListItem>
-            </List>
-        </CustomDialogContent>
-        <CustomDialogFooter>
-            <Button
-                onClick={() => {
-                    if (productQty) {
-                        handleAddToCart([product], productQty)
-                    }
-                }}
-                color="primary"
-                size="small"
-                variant="contained"
-                disabled={productQty > 0 ? false : true}
-            >
-                Add to cart
-            </Button>
-        </CustomDialogFooter>
+                    <CustomDialogContent>
+                        <List style={{ padding: 0 }}>
+                            <ListItem divider key={product?._id}>
+                                <ListItemAvatar>
+                                    <Avatar
+                                        src={product?.productImage}
+                                        alt={product?.productName ?? ''}
+                                    />
+                                </ListItemAvatar>
+                                <ListItemText
+                                    primary={product?.productName}
+                                    secondary={`Inventory - ${product?.inventory}`}
+                                />
+                                {product?.inventory ?
+                                    <Field
+                                        component={TextFieldFormik}
+                                        margin="dense"
+                                        type="number"
+                                        label="Qty"
+                                        name="qty"
+                                        variant="outlined"
+                                        value={values['qty']}
+                                        error={touched['qty'] && Boolean(errors['qty'])}
+                                        helperText={touched['qty'] && errors['qty']}
+                                        onChange={(e) => {
+                                            setFieldValue('qty', e.target.value);
+                                        }}
+                                    />
+                                    :
+                                    <span>No inventory</span>
+                                }
+                            </ListItem>
+                        </List>
+                    </CustomDialogContent>
+                    <CustomDialogFooter>
+                        {product?.inventory &&
+                            <CustomButton
+                                loading={loading}
+                                disabled={loading}
+                                variant="contained"
+                                color="primary"
+                                type="submit"
+                                onClick={submitForm}>
+                                Add to cart
+                            </CustomButton>
+                        }
+                    </CustomDialogFooter>
+                </Form>
+            )}
+        </Formik>
     </Dialog>
     );
 };

@@ -33,11 +33,11 @@ const Pos = () => {
     const { state: { user, permissions, selectedEntity } }: any = useData();
     const [scanDialog, setScanDialog] = useState(false)
     const [cartDialog, setCartDialog] = useState(false)
-    const [qtyDialog, setQtyDialog] = useState(false)
-    const [cartProduct, setCartProduct] = useState([])
-    const [assignCartProductQty, setAssignCartProductQty] = useState(null)
 
-    const [viewType, setViewType] = useState("card");
+    const [qtyDialog, setQtyDialog] = useState({ open: false, product: null })
+    const [cartProduct, setCartProduct] = useState([])
+    const [viewType, setViewType] = useState(localStorage.getItem("pos_ViewType") ? localStorage.getItem("pos_ViewType") : "card");
+    const [loadingCart, setLoadingCart] = useState(false)
 
     useEffect(() => {
         getPlants()
@@ -61,37 +61,33 @@ const Pos = () => {
     }
 
     const fetchCart = () => {
-        return new Promise((resolve, reject) => {
-            axiosInstance().get(`/pos/cart`)
-                .then(({ data: { data } }) => {
-                    setCartProduct(data)
-                    resolve(data)
-                })
-                .catch((error) => {
-                    toastConfig.setToastConfig(error);
-                    reject(error)
-                });
-        });
+        axiosInstance().get(`/pos/cart`)
+            .then(({ data: { data } }) => {
+                setCartProduct(data)
+            })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
     }
 
     const handleAddToCart = async (product, qty) => {
         if (product?.length === 1) {
-            let tempCart
-            if (cartProduct.length === 0) { tempCart = await fetchCart() }
-            let tempCartProduct = cartProduct.length === 0 ? tempCart.find(d => d.product.optionValue === product[0]._id) : cartProduct.find(d => d.product.optionValue === product[0]._id)
+            let tempCartProduct = cartProduct.find(d => d.product.optionValue === product[0]._id)
             if (tempCartProduct) {
                 let data = {
                     "_id": tempCartProduct._id,
                     "qty": parseInt(tempCartProduct?.qty || 0) + qty,
                 }
+                setLoadingCart(true)
                 axiosInstance().put(`/pos/cart`, data)
                     .then(({ data }) => {
                         fetchCart()
-                        setQtyDialog(false)
+                        setQtyDialog({ open: false, product: null })
+                        setLoadingCart(false)
                         toastConfig.setToastConfig({
                             open: true,
                             type: 'success',
-                            message: data.message
+                            message: "Add to cart successfully"
                         });
                     }).catch((error) => {
                         toastConfig.setToastConfig(error)
@@ -103,10 +99,12 @@ const Pos = () => {
                     "qty": parseInt(qty),
                     "warehouse": plantId ?? product[0]?.plantId
                 }]
+                setLoadingCart(true)
                 axiosInstance().post(`/pos/cart`, data)
                     .then(({ data }) => {
                         fetchCart()
-                        setQtyDialog(false)
+                        setQtyDialog({ open: false, product: null })
+                        setLoadingCart(false)
                         toastConfig.setToastConfig({
                             open: true,
                             type: 'success',
@@ -121,6 +119,7 @@ const Pos = () => {
     };
 
     const handleDeleteCart = (product) => {
+        setLoadingCart(true)
         axiosInstance().put(`/pos/cart/remove`, { ids: [product._id] })
             .then(({ data }) => {
                 toastConfig.setToastConfig({
@@ -128,11 +127,17 @@ const Pos = () => {
                     type: 'success',
                     message: data.message
                 });
+                setLoadingCart(false)
                 fetchCart()
             }).catch((error) => {
                 toastConfig.setToastConfig(error)
             });
     };
+
+    const handleChangeViewType = (type) => {
+        setViewType(type)
+        localStorage.setItem("pos_ViewType", type)
+    }
 
     return (<Fragment>
         <Grid container className="headerbox">
@@ -210,14 +215,14 @@ const Pos = () => {
                                 <Button
                                     size={isMobile ? 'small' : 'medium'}
                                     variant={viewType === "grid" ? "contained" : "outlined"}
-                                    onClick={() => setViewType("grid")}
+                                    onClick={() => handleChangeViewType("grid")}
                                 >
                                     <MdList fontSize="small" color="primary" />
                                 </Button>
                                 <Button
                                     size={isMobile ? 'small' : 'medium'}
                                     variant={viewType === "card" ? "contained" : "outlined"}
-                                    onClick={() => setViewType("card")}
+                                    onClick={() => handleChangeViewType("card")}
                                 >
                                     <MdBorderAll fontSize="small" color="primary" />
                                 </Button>
@@ -242,16 +247,14 @@ const Pos = () => {
                 <ProductGrid
                     renderedFrom={renderedFrom}
                     setAssignCartProductQty={(data) => {
-                        setQtyDialog(true)
-                        setAssignCartProductQty(data)
+                        setQtyDialog({ open: true, product: data })
                     }}
                     plantId={plantId}
                     searchVal={searchVal} />
                 :
                 <ProductCard
                     setAssignCartProductQty={(data) => {
-                        setQtyDialog(true)
-                        setAssignCartProductQty(data)
+                        setQtyDialog({ open: true, product: data })
                     }}
                     plantId={plantId}
                     searchVal={searchVal} />
@@ -259,8 +262,7 @@ const Pos = () => {
             {scanDialog &&
                 <Scan
                     setAssignCartProductQty={(data) => {
-                        setQtyDialog(true)
-                        setAssignCartProductQty(data)
+                        setQtyDialog({ open: true, product: data })
                     }}
                     plantId={plantId}
                     onClose={() => setScanDialog(false)} />
@@ -273,11 +275,14 @@ const Pos = () => {
                     handleDeleteCart={handleDeleteCart}
                 />
             }
-            {qtyDialog &&
+            {qtyDialog.open &&
                 <QuantityDialog
                     handleAddToCart={handleAddToCart}
-                    product={assignCartProductQty}
-                    handleCloseDialog={() => { setQtyDialog(false) }}
+                    product={qtyDialog.product}
+                    handleCloseDialog={() => { setQtyDialog({ open: false, product: null }) }}
+                    cartQty={cartProduct.find(d => d.product.optionValue === qtyDialog.product._id) ?
+                        cartProduct.find(d => d.product.optionValue === qtyDialog.product._id)?.qty : 0}
+                    loading={loadingCart}
                 />
             }
         </CustomContainer>
