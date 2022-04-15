@@ -847,7 +847,6 @@ const ContactDetailsPage = (props) => {
                       api={contactApi}
                       id={id}
                       accountId={contactData?.accountName?.optionValue}
-                      renderedFrom={`${camelCase(contactResource)}_grid1`} 
                     />
                   </Box>}
                 </>

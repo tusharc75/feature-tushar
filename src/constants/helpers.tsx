@@ -317,7 +317,7 @@ export const RESOURCE_LABEL = {
   zone: "Zone",
   wellMaster: "Well Master",
   bulkAssetCreation: "Bulk Asset Creation",
-  pos: "POS",
+  pos: "eRECS",
   repairType: "Repair Types"
 };
 

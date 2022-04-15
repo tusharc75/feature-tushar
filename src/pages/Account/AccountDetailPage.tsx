@@ -1132,7 +1132,7 @@ export default function AccountDetailPage(props) {
                         reference={accountResource}
                         api={accountApi}
                         id={id}
-                        renderedFrom={`${camelCase(accountResource)}_grid1`} />
+                      />
                     </TabPanel>}
                   <div className="p-3">
                     {permissions?.opportunity?.isRead && (

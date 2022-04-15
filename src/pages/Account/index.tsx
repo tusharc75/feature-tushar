@@ -1519,7 +1519,6 @@ export default function Account(props) {
               })
             }}
             onClose={() => setOpenAddPlantsDialog(false)}
-            renderedFrom={renderedFrom}
             assignedWarehouse={[]}
           />
         }
