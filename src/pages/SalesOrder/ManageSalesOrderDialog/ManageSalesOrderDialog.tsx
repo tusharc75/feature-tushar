@@ -200,7 +200,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
             if (salesOrderId) {
                 try {
                     let data;
-                    const response: any = await axiosInstance().get(`${salesOrder.salesOrderApi}/` + salesOrderId);
+                    const response: any = await axiosInstance().get(`${salesOrder.api}/` + salesOrderId);
                     data = response?.data?.data;
 
                     if (isClone) {
@@ -265,7 +265,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
         setLoading(true);
         if (salesOrderId && isClone === false) {
             values._id = salesOrderId
-            axiosInstance().put(`${salesOrder.salesOrderApi}`, values).then(({ data }) => {
+            axiosInstance().put(`${salesOrder.api}`, values).then(({ data }) => {
                 setLoading(false);
                 onSuccess()
                 toastConfig.setToastConfig({
@@ -280,7 +280,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
 
         }
         else {
-            axiosInstance().post(`${salesOrder.salesOrderApi}`, values).then(({ data: { data, message } }) => {
+            axiosInstance().post(`${salesOrder.api}`, values).then(({ data: { data, message } }) => {
                 history.push(`${routes.salesOrderDetail.path}/${data._id}`)
                 setLoading(false);
                 onSuccess(data)
