@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.95.2](https://github.com/vebholic/oms_frontend/compare/v2.95.1...v2.95.2) (2022-04-18)
+
+### [2.95.1](https://github.com/vebholic/oms_frontend/compare/v2.95.0...v2.95.1) (2022-04-17)
+
+## [2.95.0](https://github.com/vebholic/oms_frontend/compare/v2.94.0...v2.95.0) (2022-04-16)
+
+
+### Features
+
+* **InventoryTransfer:** Filter added of All and my ([6fd5e66](https://github.com/vebholic/oms_frontend/commit/6fd5e667689d315e9df44e1d23f690b6cdc77002))
+
+
+### Bug Fixes
+
+* bug fix ([6ec52ef](https://github.com/vebholic/oms_frontend/commit/6ec52efc948a7fff1e2cff88c4e0c474d60cf6cd))
+* bug fix ([f069358](https://github.com/vebholic/oms_frontend/commit/f0693584d3533b1996239f2ceb3f79b3930c79f8))
+* bug fix ([99f4a67](https://github.com/vebholic/oms_frontend/commit/99f4a671e2bacd9af04ebb3cd817921232458849))
+* bug fix ([6b0a08e](https://github.com/vebholic/oms_frontend/commit/6b0a08e81470b1679d58df9fc2df229bff803653))
+* bug fix ([d77ec16](https://github.com/vebholic/oms_frontend/commit/d77ec1605ca9c567eea0ada9cc2a22fbc7416c06))
+* bug fix ([cf79b9a](https://github.com/vebholic/oms_frontend/commit/cf79b9a7c994295ba5e7e099886ccd26335c48cb))
+* bug fix ([e79c823](https://github.com/vebholic/oms_frontend/commit/e79c823fde0781fcba97cec74b026ef1166a8e11))
+* bug fix ([761725a](https://github.com/vebholic/oms_frontend/commit/761725a14448551b48bac6083298b1744fd304d2))
+* bug fix ([2cf3135](https://github.com/vebholic/oms_frontend/commit/2cf31353886f4392e08df6b43d6ede15ad28667d))
+* pos product detail cart changes ([715c175](https://github.com/vebholic/oms_frontend/commit/715c175e5fbff2c78e15a561e9419426a49b489b))
+* pos product detail inventory issue ([a5f0aee](https://github.com/vebholic/oms_frontend/commit/a5f0aee6dff42e1821c7812bd422abed1f0a189e))
+
 ## [2.94.0](https://github.com/vebholic/oms_frontend/compare/v2.93.1...v2.94.0) (2022-04-14)
 
 

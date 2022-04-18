@@ -65,7 +65,6 @@ const SalesOrder = () => {
     show: false,
     salesOrderName: ''
   });
-  const { salesOrderResource } = salesOrder;
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
@@ -86,7 +85,7 @@ const SalesOrder = () => {
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource[salesOrderResource]}`);
+    const response = await axiosInstance().get(`/field?resource=Sales Order`);
     data = response?.data?.data;
     let columns = [];
     let rendererNames = [];
@@ -140,7 +139,7 @@ const SalesOrder = () => {
     dispatch({ type: 'loading', loading: true });
 
     axiosInstance()
-      .put(`${salesOrder.salesOrderApi}/remove`, {
+      .put(`${salesOrder.api}/remove`, {
         ids: [singleSalesOrderDelete.id]
       })
       .then(({ data }) => {
@@ -161,7 +160,7 @@ const SalesOrder = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions.salesOrder.isCreate ? (
+      {permissions?.salesOrder?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"
@@ -182,7 +181,7 @@ const SalesOrder = () => {
       )}
 
       <GridDeleteIcon
-        hasDeletePermission={permissions.salesOrder.isDelete}
+        hasDeletePermission={permissions?.salesOrder?.isDelete}
         ownerId={user?.user?._id}
         userId={user?.user?._id}
         onDelete={() =>
@@ -286,7 +285,7 @@ const SalesOrder = () => {
     }
 
     axiosInstance()
-      .get(`${salesOrder.salesOrderApi}${queryString}`)
+      .get(`${salesOrder.api}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
@@ -373,7 +372,7 @@ const SalesOrder = () => {
     }
     if (recordsToDelete.length > 0) {
       axiosInstance()
-        .put(`${salesOrder.salesOrderApi}/remove`, {
+        .put(`${salesOrder.api}/remove`, {
           ids: recordsToDelete
         })
         .then(({ data }) => {
@@ -406,9 +405,9 @@ const SalesOrder = () => {
             <Grid item xs={12} sm={12}>
               <Grid container justify="flex-end">
                 <ImportExportLinks
-                  permissions={permissions.salesOrder}
+                  permissions={permissions?.salesOrder}
                   module="salesOrder"
-                  api={salesOrder.salesOrderApi}
+                  api={salesOrder.api}
                   afterImportCompleted={() => { }}
                   isExportAllOrSomeFeature={true}
                   total={rowCount}
@@ -437,7 +436,7 @@ const SalesOrder = () => {
               options={SalesOrderType}
               onSearch={handleSearch}
               searchVal={search}
-              SalesOrderPermissions={permissions.salesOrder}
+              SalesOrderPermissions={permissions?.salesOrder}
               onCreate={clickCreateNew}
               showConfirmBox={showConfirmBox}
               canDelete={selectedRecords.length === 0}
@@ -469,7 +468,7 @@ const SalesOrder = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.salesOrder}
+              permissions={permissions?.salesOrder}
               primaryField={columns?.find(d => d.field === "salesOrderNo")}
               onClick={(data) => {
                 history.push(`${routes.salesOrderDetail.path}/${data._id}`)

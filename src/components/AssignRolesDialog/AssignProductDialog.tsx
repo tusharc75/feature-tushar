@@ -126,7 +126,7 @@ const AssignProductDialog = ({
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = false;
                 finalObject["id"] = u._id;
-                finalObject["qty"] = 0;
+                finalObject["qty"] = 1;
                 const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id)
                 if (qtyAdded.length) {
                     finalObject["qty"] = qtyAdded[0].qty;

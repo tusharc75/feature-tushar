@@ -61,7 +61,7 @@ const LoadingTicket = ({ renderedFrom, currentStep, salesOrderData, fetchSalesOr
       var deliveryTicketList: any = []
       dispatch({ type: "loading", loading: true });
 
-      const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/${salesOrderData._id}/inventory`)
+      const response = await axiosInstance().get(`${salesOrder.api}/${salesOrderData._id}/inventory`)
       setAssignedSerializedAsset(response?.data?.data)
       productAssets = response?.data?.data
       productAssets = productAssets.map(d => d.inventory).map(u => ({ ...u, productName: u?.product?.optionLabel }))
@@ -166,7 +166,7 @@ const LoadingTicket = ({ renderedFrom, currentStep, salesOrderData, fetchSalesOr
       {/* <Button
         onClick={() => {
           setDownlodingFile(true);
-          axiosInstance().get(`/${salesOrder.salesOrderApi}/${salesOrderData._id}/pdf`)
+          axiosInstance().get(`/${salesOrder.api}/${salesOrderData._id}/pdf`)
             .then(({ data }) => {
               axiosInstance()
                 .get(`user/download?fileName=${data.data.fileName}`, {
