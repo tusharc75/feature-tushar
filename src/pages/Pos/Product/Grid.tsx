@@ -25,9 +25,9 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
 
     const columns = [
         { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "productNameRenderer" },
-        { field: "productImage", headerName: "Product Image", show: true, disabled: true, cellRenderer: "imageRenderer" },
+        { field: "productImage", headerName: "Product Image", show: false, cellRenderer: "imageRenderer" },
         { field: "inventory", headerName: "Inventory", show: true, disabled: true, cellRenderer: "commonRenderer" },
-        { field: "productCategory", headerName: "Product Category", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productCategory", headerName: "Product Category", show: false, cellRenderer: "commonRenderer" },
     ]
 
     const ProductNameRenderer = (params) => (

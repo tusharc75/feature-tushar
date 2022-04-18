@@ -14,14 +14,15 @@ const QtyButton = ({ cart, fetchCart, product, warehouse }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const [qtyDialog, setQtyDialog] = useState(false)
-    const [cartQty, setCartQty] = useState(0)
+    const [loading, setLoading] = useState(false)
+    const [cartProduct, setCartProduct] = useState(null)
 
     useEffect(() => {
         if (cart?.find(d => d.product.optionValue === product?._id)) {
-            setCartQty(cart?.find(d => d.product.optionValue === product?._id)?.qty)
+            setCartProduct(cart?.find(d => d.product.optionValue === product?._id))
         }
         else {
-            setCartQty(0)
+            setCartProduct(null)
         }
     }, [cart]);
 
@@ -32,8 +33,10 @@ const QtyButton = ({ cart, fetchCart, product, warehouse }) => {
                 "qty": parseInt(qty || 1),
                 "warehouse": warehouse
             }]
+            setLoading(true)
             axiosInstance().post(`/pos/cart`, data)
                 .then(({ data }) => {
+                    setLoading(false)
                     setQtyDialog(false)
                     fetchCart()
                 }).catch((error) => {
@@ -44,8 +47,8 @@ const QtyButton = ({ cart, fetchCart, product, warehouse }) => {
 
     const handleUpdateCart = (operation) => {
         let data = {
-            "_id": product?._id,
-            "qty": operation === "add" ? parseInt(product?.qty || 0) + 1 : parseInt(product?.qty || 0) - 1,
+            "_id": cartProduct?._id,
+            "qty": operation === "add" ? parseInt(cartProduct?.qty || 0) + 1 : parseInt(cartProduct?.qty || 0) - 1,
         }
         if (data?.qty) {
             axiosInstance().put(`/pos/cart`, data)
@@ -56,7 +59,7 @@ const QtyButton = ({ cart, fetchCart, product, warehouse }) => {
                 });
         }
         else {
-            axiosInstance().put(`/pos/cart/remove`, { ids: [product?._id] })
+            axiosInstance().put(`/pos/cart/remove`, { ids: [cartProduct?._id] })
                 .then(({ data }) => {
                     fetchCart()
                     toastConfig.setToastConfig({
@@ -71,7 +74,7 @@ const QtyButton = ({ cart, fetchCart, product, warehouse }) => {
     };
 
     const handleDeleteCart = () => {
-        axiosInstance().put(`/pos/cart/remove`, { ids: [product?._id] })
+        axiosInstance().put(`/pos/cart/remove`, { ids: [cartProduct?._id] })
             .then(({ data }) => {
                 fetchCart()
                 toastConfig.setToastConfig({
@@ -85,13 +88,13 @@ const QtyButton = ({ cart, fetchCart, product, warehouse }) => {
     };
 
     return (<Fragment>
-        {cartQty ?
+        {cartProduct ?
             <Box>
                 <IconButton
                     color="secondary"
                     size="small"
                     style={{ border: "1px solid" }}
-                    disabled={cartQty >= product?.inventory}
+                    disabled={cartProduct?.qty >= product?.inventory}
                     onClick={() => { handleUpdateCart("add") }}>
                     <AddIcon fontSize="small" />
                 </IconButton >
@@ -99,7 +102,7 @@ const QtyButton = ({ cart, fetchCart, product, warehouse }) => {
                     disabled
                     size="small">
                     <Box pl={1} pr={1}>
-                        {`${cartQty}`}
+                        {`${cartProduct?.qty}`}
                     </Box>
                 </IconButton>
                 <IconButton
@@ -132,14 +135,14 @@ const QtyButton = ({ cart, fetchCart, product, warehouse }) => {
                 Add to cart
             </Button>
         }
-        {qtyDialog &&
+        {qtyDialog ?
             <QuantityDialog
                 handleAddToCart={handleAddToCart}
                 product={product}
                 handleCloseDialog={() => { setQtyDialog(false) }}
-                cartQty={cartQty}
-                loading={false}
-            />
+                cartQty={cartProduct?.qty}
+                loading={loading}
+            /> : null
         }
     </Fragment>
     );
