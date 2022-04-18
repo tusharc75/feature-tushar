@@ -18,7 +18,7 @@ import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import Steps from './Steps';
+import Steps from '../RentalManagement/Steps';
 import Productpackage from './Productpackage';
 import AdditionalCost from './AdditionalCost';
 import SerializedAsset from './SerializedAsset';
@@ -107,13 +107,13 @@ const SalesOrderDetails = () => {
   }, [id]);
 
   useEffect(() => {
-    if ( currentStep !== null && currentStep >= 0 && currentStep <= 5) {
+    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
       updateProcessStatus(salesOrderProcessSteps[currentStep])
     }
   }, [currentStep]);
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance().put(`${salesOrder.salesOrderApi}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
+    axiosInstance().put(`${salesOrder.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -146,7 +146,7 @@ const SalesOrderDetails = () => {
 
     try {
       let data;
-      const response: any = await axiosInstance().get(`${salesOrder.salesOrderApi}/${id}`);
+      const response: any = await axiosInstance().get(`${salesOrder.api}/${id}`);
       data = response?.data?.data;
 
 
@@ -180,7 +180,7 @@ const SalesOrderDetails = () => {
 
   const handleDelete = () => {
     axiosInstance()
-      .put(`${salesOrder.salesOrderApi}/remove`, { ids: [id] })
+      .put(`${salesOrder.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
         history.goBack();
@@ -193,7 +193,7 @@ const SalesOrderDetails = () => {
 
   const updateJobStatus = (status) => {
     // need to change the api
-    axiosInstance().patch(`${salesOrder.salesOrderApi}/status/${salesOrderData._id}`, { status: status }).then(({ data: { data } }) => {
+    axiosInstance().patch(`${salesOrder.api}/status/${salesOrderData._id}`, { status: status }).then(({ data: { data } }) => {
       fetchSalesOrderData();
       if (status === "Invoiced") {
         setCurrentStep(4)
@@ -347,17 +347,18 @@ const SalesOrderDetails = () => {
                       <Productpackage
                         salesOrderData={salesOrderData}
                         setNextStep={setNextStep}
-                        currencySymbol={currencySymbol} 
+                        currencySymbol={currencySymbol}
                         renderedFrom={`${renderedFrom}_grid-1`}
-                        />
+                        showActivity={showActivity}
+                      />
                     )}
                     {currentStep === 1 && salesOrderData &&
                       <AdditionalCost
                         salesOrderData={salesOrderData}
-                        setNextStep={setNextStep} 
-                        renderedFrom={`${renderedFrom}_grid-2`}  
+                        setNextStep={setNextStep}
+                        renderedFrom={`${renderedFrom}_grid-2`}
                       />}
-                    {currentStep === 2 && salesOrderData && (
+                    {/* {currentStep === 2 && salesOrderData && (
                       <SerializedAsset
                         salesOrderData={salesOrderData}
                         setNextStep={setNextStep}
@@ -376,16 +377,15 @@ const SalesOrderDetails = () => {
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-4`}  
                       />
-                    )}
-
-                    {(currentStep === 4) && salesOrderData && (
+                    )} */}
+                    {(currentStep === 2) && salesOrderData && (
                       <Invoice
                         salesOrderData={salesOrderData}
                         setNextStep={setNextStep}
                         fetchSalesOrderData={fetchSalesOrderData}
                         updateJobStatus={updateJobStatus}
                         statusOptions={statusOptions}
-                        renderedFrom={`${renderedFrom}_grid-5`}  
+                        renderedFrom={`${renderedFrom}_grid-5`}
                       />
                     )}
                   </Paper>

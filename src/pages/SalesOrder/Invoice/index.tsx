@@ -21,6 +21,7 @@ import { prepareDataForGrid } from "../../../constants/helpers";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import { Link } from "react-router-dom";
 import { startCase } from "lodash";
+import { fetch_salesOrder_product_fields, fetch_salesOrder_cost_fields } from '../../../components/SalesOrder/helper';
 
 
 const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobStatus, statusOptions, renderedFrom }) => {
@@ -67,12 +68,9 @@ const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobSt
 
   const fetchFields = async () => {
     try {
-      let fields = []
-      const resultProduct = await axiosInstance().get("/field/child?resource=Sales Order Product")
-      fields = CURReplaceByCurrencySingle(resultProduct?.data?.data, salesOrderData.currency)
-      const resultCost = await axiosInstance().get("/field/child?resource=Sales Order Cost")
-      fields = [...fields, ...CURReplaceByCurrencySingle(resultCost?.data?.data, salesOrderData.currency)]
-
+      let fields = await fetch_salesOrder_product_fields(salesOrderData?.currency)
+      const resultCost = await fetch_salesOrder_cost_fields(salesOrderData?.currency)
+      fields = [...fields, ...resultCost]
       let rendererNames = [];
       genrateColoum(fields, columns, rendererNames, false, renderedFrom);
       let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
@@ -95,9 +93,9 @@ const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobSt
     let material: any = []
     let additionalcost: any = []
     try {
-      const resultMaterial = await axiosInstance().get(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`)
+      const resultMaterial = await axiosInstance().get(`${salesOrder.api}/productpackage/${salesOrderData._id}`)
       material = resultMaterial?.data?.data?.material;
-      const resultCost = await axiosInstance().get(`${salesOrder.salesOrderApi}/additionalcost/${salesOrderData._id}`)
+      const resultCost = await axiosInstance().get(`${salesOrder.api}/additionalcost/${salesOrderData._id}`)
       additionalcost = resultCost?.data?.data;
       material?.forEach((item) => {
         if (!item.parentId) {
@@ -127,7 +125,7 @@ const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobSt
 
   const handlePDF = (type) => {
     setDownlodingFile(type);
-    axiosInstance().get(`${salesOrder.salesOrderApi}/${salesOrderData._id}/pdf`).then(({ data }) => {
+    axiosInstance().get(`${salesOrder.api}/${salesOrderData._id}/pdf`).then(({ data }) => {
       axiosInstance().get(`user/download?fileName=${data.data.fileName}`, {
         responseType: "blob",
       })
@@ -203,14 +201,14 @@ const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobSt
 
   return (<>
     <Box display="flex" justifyContent="space-between" m={1}>
-      {/* <Box display="flex" alignItems="center">
-        {permissions?.rentalManagement?.isRead && (
+      <Box display="flex" alignItems="center">
+        {permissions?.salesOrder?.isRead && (
           <Button
             variant="outlined"
             color="primary"
             type="button"
             size="small"
-            disabled={downlodingFile === "Preview" ? true : (false || isOffline)}
+            disabled={downlodingFile === "Preview" ? true : false}
             startIcon={isMobile ? '' : <AiFillFilePdf />}
             onClick={() => handlePDF("Preview")}
           >
@@ -218,13 +216,13 @@ const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobSt
           </Button>
         )}
         <Box mx={1} />
-        {permissions?.rentalManagement?.isRead && (
+        {permissions?.salesOrder?.isRead && (
           <Button
             variant="outlined"
             color="primary"
             type="button"
             size="small"
-            disabled={downlodingFile === "Download" ? true : (false || isOffline)}
+            disabled={downlodingFile === "Download" ? true : false}
             startIcon={isMobile ? '' : <AiFillFilePdf />}
             onClick={() => handlePDF("Download")}
           >
@@ -232,11 +230,12 @@ const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobSt
           </Button>
         )}
         <Box mx={1} />
-        {permissions?.rentalManagement?.isRead && <Button
-          variant={isMobile ? "outlined" : "contained"}
+        {permissions?.salesOrder?.isRead && <Button
+          variant="outlined"
           color="primary"
           size="small"
-          disabled={downlodingFile === "Email" ? true : (false || isOffline)}
+          disabled={downlodingFile === "Email" ? true : false}
+          startIcon={isMobile ? '' : <MdEmail />}
           onClick={() => {
             fetchEmailsData()
             handlePDF("Email")
@@ -244,7 +243,7 @@ const Invoice = ({ salesOrderData, setNextStep, fetchSalesOrderData, updateJobSt
         >
           {isMobile ? <MdEmail size={22} /> : downlodingFile === "Email" ? "Please wait..." : `Send Email`}
         </Button>}
-      </Box> */}
+      </Box>
     </Box>
     <Grid item xs={12} md={12} sm={12} className="mt-3">
       {columns && frameWorkComponent ?
