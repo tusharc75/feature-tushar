@@ -98,13 +98,13 @@ const AssignCartDialog = ({ handleCloseDialog, fetchCart, products, handleDelete
                             </ListItemAvatar>
                             <ListItemText
                                 primary={product?.product?.optionLabel}
-                                secondary={`Inventory - ${product?.inventory?.inventory}`} />
+                                secondary={`Inventory - ${product?.inventory?.availableInventory}`} />
                             <Box display="flex" flexDirection="row"  >
                                 <IconButton
                                     color="secondary"
                                     size="small"
                                     style={{ border: "1px solid" }}
-                                    disabled={product?.qty >= product?.inventory?.inventory}
+                                    disabled={product?.qty >= product?.inventory?.availableInventory}
                                     onClick={() => { handleUpdateCart(product, "add") }}>
                                     <AddIcon fontSize="small" />
                                 </IconButton >

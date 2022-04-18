@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 
-const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, searchVal, productCategory }) => {
+const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, searchVal, productCategory, refreshData }) => {
 
     const toastConfig = useContext(CustomToastContext);
 
@@ -26,7 +26,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
     const columns = [
         { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "productNameRenderer" },
         { field: "productImage", headerName: "Product Image", show: false, cellRenderer: "imageRenderer" },
-        { field: "inventory", headerName: "Inventory", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "availableInventory", headerName: "Inventory", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productCategory", headerName: "Product Category", show: false, cellRenderer: "commonRenderer" },
     ]
 
@@ -69,7 +69,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
         if (plantId) {
             fetchProducts();
         }
-    }, [page, limit, filters, sorting, search, plantId, productCategory]);
+    }, [page, limit, filters, sorting, search, plantId, productCategory, refreshData]);
 
     useEffect(() => {
         dispatch({ type: 'search', search: searchVal });
