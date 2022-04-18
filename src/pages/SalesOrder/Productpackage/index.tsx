@@ -1,37 +1,30 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer, useMemo } from "react";
 import { Grid, Box, Button, Paper, Typography, IconButton, CircularProgress, Tab, Tabs, ButtonGroup, Container, InputAdornment, useMediaQuery } from "@material-ui/core";
-import { Autocomplete, Skeleton } from "@material-ui/lab";
-import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../../axios/axiosInstance";
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import AddExistingProductInventory from "./AddExistingProductInventory";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
-import { camelCase, startCase, orderBy, sum } from "lodash";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import Add from "@material-ui/icons/Add";
 import moment from "moment";
-import {
-    getUniqueCurrencies, gridLoadingTimeout, salesOrder, defaultActivityShow,
-    dateFormat, pricingCondition, generateUniqueId, treeToFlatArray, formatAmountWithCurrency
-} from "../../../constants/helpers";
+import { salesOrder, dateFormat, pricingCondition, formatAmountWithCurrency } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import SalesOrderQtyDialog from './SalesOrderQtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
 import InfoIcon from "@material-ui/icons/Info";
+import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
 
-const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedFrom }) => {
+const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActivity, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
 
     const isSmallScreen = useMediaQuery('(max-width:1300px)');
     const isTabletScreen = useMediaQuery('(max-width:960px)');
-    const [showActivity, setActivityShow] = useState(defaultActivityShow);
     const [isUpdating, setUpdating] = useState(false);
 
     const [selectedProducts, setSelectedProducts] = useState([])
@@ -48,6 +41,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
     const [allFields, setAllFields] = useState([]);
+    const [isRateRequired, setIsRateRequired] = useState(false);
 
 
     useEffect(() => {
@@ -55,10 +49,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
     }, []);
 
     const fetchFields = async () => {
-        var data = []
-        const response = await axiosInstance().get(`/field/child?resource=Sales Order Product`)
-        data = response?.data?.data
-        data = CURReplaceByCurrencySingle(data, salesOrderData.currency)
+        var data = await fetch_salesOrder_product_fields(salesOrderData?.currency)
         setAllFields(JSON.parse(JSON.stringify(data)))
         const coloum: any = [{
             accessor: 'detail',
@@ -101,6 +92,9 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
             )
         }]
         data.forEach(element => {
+            if (element.fieldName === "price" && element.required) {
+                setIsRateRequired(true);
+            }
             if (element.type === "date") {
                 coloum.push({
                     accessor: element.fieldName,
@@ -193,7 +187,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
         setNextStep(false)
         var data: any = []
         var inventory: any = []
-        const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`)
+        const response = await axiosInstance().get(`${salesOrder.api}/productpackage/${salesOrderData._id}`)
         data = response?.data?.data
         setMaterial(JSON.parse(JSON.stringify(data.material)))
         inventory = data.inventory;
@@ -201,7 +195,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
         rows.forEach((parent, i) => {
             parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
             parent.qtyDisplay = parent.qty;
-            parent.isValid = parent["finalPrice_" + salesOrderData?.currency?.toLowerCase()] ? true : false;
+            parent.isValid = parent["finalPrice_" + salesOrderData?.currency?.toLowerCase()] ? true : !isRateRequired;
             parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
             parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
             if (parent.type === "package") {
@@ -209,7 +203,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
                 subRows.forEach((_subRow, j) => {
                     _subRow.detail = (i + 1) + "." + (j + 1) + " - " + _subRow.productDetail?.productName
                     _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`
-                    _subRow.isValid = _subRow["finalPrice_" + salesOrderData?.currency?.toLowerCase()] ? true : false;
+                    _subRow.isValid = _subRow["finalPrice_" + salesOrderData?.currency?.toLowerCase()] ? true : !isRateRequired;
                     _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
                     _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
                 })
@@ -264,7 +258,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
             }
         })
 
-        axiosInstance().post(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`, { material })
+        axiosInstance().post(`${salesOrder.api}/productpackage/${salesOrderData._id}`, { material })
             .then(() => {
                 setAddExistingProductDialog({ open: false, type: "", parentId: null })
                 fetchProductInventory()
@@ -289,7 +283,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
             delete element.subRows
         });
         setUpdating(true);
-        axiosInstance().put(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`, { material: rows }).then(() => {
+        axiosInstance().put(`${salesOrder.api}/productpackage/${salesOrderData._id}`, { material: rows }).then(() => {
             setUpdating(false)
             setIsProductEdit({ open: false, isBulkedit: false })
             fetchProductInventory()
@@ -301,7 +295,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
 
     const handleDelete = (rows) => {
         setDeleting(true)
-        axiosInstance().put(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData?._id}/delete`, { ids: rows })
+        axiosInstance().put(`${salesOrder.api}/productpackage/${salesOrderData?._id}/delete`, { ids: rows })
             .then(() => {
                 setDeleting(false)
                 fetchProductInventory()
@@ -319,8 +313,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, renderedF
     }
 
     const calculatePrice = (arr: any[]) => {
-        //materialType can be =["product","packages","productCategory"]
-        //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
         if (salesOrderData) {
             const data: any = {}
             data.conditionType = ["Rent"]

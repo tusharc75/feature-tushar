@@ -3,8 +3,6 @@ import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import axiosInstance from "../../../axios/axiosInstance";
-import { groupBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
@@ -15,16 +13,11 @@ import CustomButton from '../../../components/Helpers/CustomButton'
 import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
-import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
+import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
+import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
 import moment from "moment";
 
-function findCommonElements(inArrays) {
-  if (typeof inArrays === "undefined") return undefined;
-  if (typeof inArrays[0] === "undefined") return undefined;
-  return intersection.apply(this, inArrays);
-}
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -61,73 +54,75 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
   const ref = useRef(null);
 
   useEffect(() => {
-    axiosInstance().get("/field/child?resource=Sales Order Product").then(({ data: { data } }) => {
-      data = CURReplaceByCurrencySingle(data, salesOrderData.currency)
-      setAllFields(JSON.parse(JSON.stringify(data)))
-      if (isBulkedit) {
-        let unitArray: any = []
-        let pricingMethodArray: any = []
-        selectedProducts?.forEach(element => {
-          if (element?.[`${element.type}Detail`]?.unit) {
-            unitArray.push([...element?.[`${element.type}Detail`].unit])
-          }
-          if (element?.[`${element.type}Detail`].pricingMethod) {
-            pricingMethodArray.push([...element?.[`${element.type}Detail`].pricingMethod])
-          }
-        });
-        let unit: any = unitArray.shift().filter(function (v) {
-          return unitArray.every(function (a) {
-            return a.indexOf(v) !== -1;
-          });
-        });
-        let pricingMethod: any = pricingMethodArray.shift().filter(function (v) {
-          return pricingMethodArray.every(function (a) {
-            return a.indexOf(v) !== -1;
-          });
-        });
-        const unitOptions: any = arrayToDropwdownOption(unit)
-        const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
-        data.forEach((element) => {
-          if (element.fieldName === "unit") {
-            element.option = unitOptions;
-          }
-          if (element.fieldName === "pricingMethod") {
-            element.option = pricingMethodOptions;
-          }
-          element.required = false;
-          element.isFormula = false;
-          element.isMulitFormula = false;
-        })
-        setInitialData({
-          fields: data,
-          values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", tenure: "" },
-        });
-      }
-      else {
-        let unitOptions: any = []
-        let pricingMethodOptions: any = []
-        if (rowData?.[`${rowData.type}Detail`]?.unit) {
-          unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].unit);
-        }
-        if (rowData?.[`${rowData.type}Detail`].pricingMethod) {
-          pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].pricingMethod);
-        }
-        data.forEach(element => {
-          if (element.fieldName === "unit") {
-            element.option = unitOptions;
-          }
-          if (element.fieldName === "pricingMethod") {
-            element.option = pricingMethodOptions;
-          }
-        });
-        setInitialData({
-          fields: data,
-          values: getObjKeysWithValues(rowData, data),
-        });
-      }
-      EvaluteproductFields(data);
-    })
+    fetchFields()
   }, []);
+
+  const fetchFields = async () => {
+    var data = await fetch_salesOrder_product_fields(salesOrderData?.currency)
+    setAllFields(JSON.parse(JSON.stringify(data)))
+    if (isBulkedit) {
+      let unitArray: any = []
+      let pricingMethodArray: any = []
+      selectedProducts?.forEach(element => {
+        if (element?.[`${element.type}Detail`]?.unit) {
+          unitArray.push([...element?.[`${element.type}Detail`]?.unit])
+        }
+        if (element?.[`${element.type}Detail`]?.pricingMethod) {
+          pricingMethodArray.push([...element?.[`${element.type}Detail`]?.pricingMethod])
+        }
+      });
+      let unit: any = unitArray?.shift().filter(function (v) {
+        return unitArray?.every(function (a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+      let pricingMethod: any = pricingMethodArray?.shift()?.filter(function (v) {
+        return pricingMethodArray?.every(function (a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+      const unitOptions: any = arrayToDropwdownOption(unit)
+      const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
+      data.forEach((element) => {
+        if (element.fieldName === "unit") {
+          element.option = unitOptions;
+        }
+        if (element.fieldName === "pricingMethod") {
+          element.option = pricingMethodOptions;
+        }
+        element.required = false;
+        element.isFormula = false;
+        element.isMulitFormula = false;
+      })
+      setInitialData({
+        fields: data,
+        values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", tenure: "" },
+      });
+    }
+    else {
+      let unitOptions: any = []
+      let pricingMethodOptions: any = []
+      if (rowData?.[`${rowData.type}Detail`]?.unit) {
+        unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.unit);
+      }
+      if (rowData?.[`${rowData.type}Detail`].pricingMethod) {
+        pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
+      }
+      data.forEach(element => {
+        if (element.fieldName === "unit") {
+          element.option = unitOptions;
+        }
+        if (element.fieldName === "pricingMethod") {
+          element.option = pricingMethodOptions;
+        }
+      });
+      setInitialData({
+        fields: data,
+        values: getObjKeysWithValues(rowData, data),
+      });
+    }
+    EvaluteproductFields(data);
+  }
 
   const EvaluteproductFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
