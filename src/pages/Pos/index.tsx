@@ -33,6 +33,8 @@ const Pos = () => {
     const { state: { user, permissions, selectedEntity } }: any = useData();
     const [scanDialog, setScanDialog] = useState(false)
     const [cartDialog, setCartDialog] = useState(false)
+    const [productCategoryList, setProductCategoryList] = useState([]);
+    const [productCategory, setProductCategory] = useState(null);
 
     const [qtyDialog, setQtyDialog] = useState({ open: false, product: null })
     const [cartProduct, setCartProduct] = useState([])
@@ -41,6 +43,7 @@ const Pos = () => {
 
     useEffect(() => {
         getPlants()
+        getProductCategory()
         fetchCart()
     }, [])
 
@@ -57,6 +60,17 @@ const Pos = () => {
                 }))
                 setPlantId(row[0].warehouseId)
                 setPlantOptions(row);
+            });
+    }
+
+    const getProductCategory = () => {
+        axiosInstance()
+            .get('/pos/product-category')
+            .then(({ data: { data } }) => {
+                setProductCategoryList(data);
+                if (data?.find((e) => e.name === "Parts")) {
+                    setProductCategory(data?.find((e) => e.name === "Parts")?._id);
+                }
             });
     }
 
@@ -189,6 +203,35 @@ const Pos = () => {
                                     />
                             )}
                         />
+                        <Autocomplete
+                            style={{ width: '250px' }}
+                            options={productCategoryList}
+                            getOptionLabel={(option: any) => (option ? option.name : '')}
+                            getOptionSelected={(option: any, val) => option._id === val}
+                            value={
+                                productCategoryList.find((data) => data._id === productCategory)
+                                    ? productCategoryList.find((data) => data._id === productCategory)
+                                    : ''
+                            }
+                            onChange={(e, val) => {
+                                setProductCategory(val && val._id ? val._id : '');
+                            }}
+                            renderInput={(params) =>
+                                isMobile && !isTablet ? (
+                                    <TextField
+                                        {...params}
+                                        margin="dense"
+                                        name="productCategory"
+                                        placeholder="Product Category"
+                                        variant="standard"
+                                        fullWidth
+                                        className={isMobile ? 'serchBox' : ''}
+                                    />
+                                ) : (
+                                    <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
+                                )
+                            }
+                        />
                     </Grid>
                     <Grid md={6} sm={12} xs={12} container className={styles2.filter_side}>
                         <Box className={isMobile ? styles2.mobile_filter_side_header : styles2.filter_side_header} component="div">
@@ -250,6 +293,7 @@ const Pos = () => {
                         setQtyDialog({ open: true, product: data })
                     }}
                     plantId={plantId}
+                    productCategory={productCategory}
                     searchVal={searchVal} />
                 :
                 <ProductCard
@@ -257,6 +301,7 @@ const Pos = () => {
                         setQtyDialog({ open: true, product: data })
                     }}
                     plantId={plantId}
+                    productCategory={productCategory}
                     searchVal={searchVal} />
             }
             {scanDialog &&

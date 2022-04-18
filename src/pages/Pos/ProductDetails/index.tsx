@@ -15,6 +15,7 @@ import QuantityDialog from '../QuantityDialog';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
+import Parts from '../Parts';
 
 const useStyles = makeStyles(() => ({
     mainDetail: {
@@ -86,6 +87,7 @@ const ProductDetails = () => {
     const [productData, setProductData] = useState(null);
     const [productImages, setProductImages] = useState([])
     const [cartProduct, setCartProduct] = useState(null)
+    const [cart, setCart] = useState([])
     const [qtyDialog, setQtyDialog] = useState(false)
     const [isHovering, setHovering] = useState(false)
     const [loadingCart, setLoadingCart] = useState(false)
@@ -104,19 +106,7 @@ const ProductDetails = () => {
         }
     }, [id]);
 
-    const handleDeleteCart = (product) => {
-        axiosInstance().put(`/pos/cart/remove`, { ids: [product._id] })
-            .then(({ data }) => {
-                toastConfig.setToastConfig({
-                    open: true,
-                    type: 'success',
-                    message: data.message
-                });
-                fetchCart()
-            }).catch((error) => {
-                toastConfig.setToastConfig(error)
-            });
-    };
+
 
     const fetchProductData = () => {
         axiosInstance()
@@ -137,6 +127,7 @@ const ProductDetails = () => {
     const fetchCart = () => {
         axiosInstance().get(`/pos/cart`)
             .then(({ data: { data } }) => {
+                setCart(data)
                 setCartProduct(data.find(d => d.product.optionValue === id))
             })
             .catch((error) => {
@@ -203,6 +194,19 @@ const ProductDetails = () => {
         const yAxis =  e.nativeEvent.offsetY / height * 85;
         setImageTransform({xAxis, yAxis})
     }
+    const handleDeleteCart = (product) => {
+        axiosInstance().put(`/pos/cart/remove`, { ids: [product._id] })
+            .then(({ data }) => {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: data.message
+                });
+                fetchCart()
+            }).catch((error) => {
+                toastConfig.setToastConfig(error)
+            });
+    };
 
     return (<Fragment>
         <Grid container className="headerbox">
@@ -385,10 +389,15 @@ const ProductDetails = () => {
                                             <Skeleton width={150} height={70} />
                                         </Grid>
                                     </Grid>
-
                                 </Grid>
                             </Grid>
                         }
+                            <Parts
+                                product={id}
+                                warehouse={warehouseId}
+                                fetchCart={fetchCart}
+                                cart={cart}
+                            />
                             {productData?.productLongDetail &&
                                 <Box pb={3}>
                                     <Box mt={3} mb={3} border={1} borderColor="grey.100"></Box>

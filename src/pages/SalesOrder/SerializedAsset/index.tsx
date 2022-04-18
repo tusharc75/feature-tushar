@@ -14,13 +14,11 @@ import moment from "moment";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import CustomReactTable from "../../../components/CustomReactTable/CustomReactTable";
 import ManagePurchaseOrder from "../../PurchaseOrder/ManagePurchaseOrder";
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { uniqBy } from 'lodash';
-import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
-import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { useHistory } from "react-router-dom";
 import InfoIcon from '@material-ui/icons/Info';
+import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
 
 const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol, renderedFrom }) => {
 
@@ -45,10 +43,7 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
   }, []);
 
   const fetchFields = async () => {
-    var data = []
-    const response = await axiosInstance().get(`/field/child?resource=Sales Order Product`)
-    data = response?.data?.data
-    data = CURReplaceByCurrencySingle(data, salesOrderData.currency)
+    var data = await fetch_salesOrder_product_fields(salesOrderData?.currency)
     const coloum: any = [{
       accessor: 'detail',
       Header: 'Detail',
@@ -171,7 +166,7 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
     setNextStep(false)
     try {
       var data: any = []
-      const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/productpackage/${salesOrderData._id}`)
+      const response = await axiosInstance().get(`${salesOrder.api}/productpackage/${salesOrderData._id}`)
       data = response?.data?.data
       const rows = data.material.filter((e) => e.parentId === null)
       rows.forEach((parent, i) => {
@@ -280,7 +275,7 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
     // })
     if (data.length) {
       setAdding(true)
-      axiosInstance().post(`${salesOrder.salesOrderApi}/${salesOrderData._id}/inventory`, { "products": data })
+      axiosInstance().post(`${salesOrder.api}/${salesOrderData._id}/inventory`, { "products": data })
         .then(({ data }) => {
           setAddSerializedAssetDialog(false)
           fetchProductInventory()
@@ -303,7 +298,7 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
   const handleRemoveInventory = () => {
     if (deleteData.length >= 1) {
       setDeleting(true)
-      axiosInstance().put(`${salesOrder.salesOrderApi}/${salesOrderData._id}/inventory/remove`, { products: deleteData })
+      axiosInstance().put(`${salesOrder.api}/${salesOrderData._id}/inventory/remove`, { products: deleteData })
         .then(() => {
           setDeleting(false)
           fetchProductInventory()

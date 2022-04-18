@@ -64,7 +64,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom }) => {
                 gridApi.setRowData([]);
             }
             var data: any = []
-            const response = await axiosInstance().get(`${salesOrder.salesOrderApi}/additionalcost/${salesOrderData._id}`)
+            const response = await axiosInstance().get(`${salesOrder.api}/additionalcost/${salesOrderData._id}`)
             data = response?.data?.data
             let rows = data?.map((item) => {
                 let res: any = {
@@ -109,7 +109,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom }) => {
     );
 
     const handleAddCost = (rows) => {
-        axiosInstance().post(`${salesOrder.salesOrderApi}/additionalcost/${salesOrderData._id}/add`, { additionalCost: rows })
+        axiosInstance().post(`${salesOrder.api}/additionalcost/${salesOrderData._id}/add`, { additionalCost: rows })
             .then(() => {
                 fetchAdditionalCost()
                 setShowCostDialog(false)
@@ -119,7 +119,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom }) => {
     }
 
     const handleUpdateCost = (rows) => {
-        axiosInstance().put(`${salesOrder.salesOrderApi}/additionalcost/${salesOrderData._id}/update`, { additionalCost: rows })
+        axiosInstance().put(`${salesOrder.api}/additionalcost/${salesOrderData._id}/update`, { additionalCost: rows })
             .then(() => {
                 fetchAdditionalCost()
                 setShowCostDialog(false)
@@ -129,7 +129,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom }) => {
     }
 
     const handleDeleteCost = (ids) => {
-        axiosInstance().post(`${salesOrder.salesOrderApi}/additionalcost/${salesOrderData._id}/delete`, { ids })
+        axiosInstance().post(`${salesOrder.api}/additionalcost/${salesOrderData._id}/delete`, { ids })
             .then(() => {
                 fetchAdditionalCost()
             }).catch((error) => {
