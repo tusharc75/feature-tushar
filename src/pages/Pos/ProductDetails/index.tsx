@@ -188,7 +188,7 @@ const ProductDetails = () => {
         }
     };
 
-    function hoverOverImage(e:React.MouseEvent<HTMLImageElement>) {
+    const hoverOverImage = (e:React.MouseEvent<HTMLImageElement>) => {
         const {width, height} = imageRef.current.getBoundingClientRect();
         const xAxis =  e.nativeEvent.offsetX / width * 80;
         const yAxis =  e.nativeEvent.offsetY / height * 85;
@@ -254,7 +254,8 @@ const ProductDetails = () => {
                                                         src={image} 
                                                         style={{ 
                                                             width: "95%", 
-                                                            height: "100%", 
+                                                            height: "100%",
+                                                            maxHeight: "400px", 
                                                             backgroundRepeat: "no-repeat" 
                                                         }} />
                                                        
