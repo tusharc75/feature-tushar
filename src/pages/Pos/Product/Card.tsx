@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal }) => {
+const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal, productCategory }) => {
 
     const limit = 20
     const classes = useStyles();
@@ -29,12 +29,19 @@ const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal }) => {
         if (plantId) {
             fetchProducts();
         }
-    }, [searchVal, plantId]);
+    }, [searchVal, plantId, productCategory]);
 
     const fetchProducts = () => {
         setProducts([]);
         setLoading(true);
         let api = searchVal ? `/pos?wareHouse=${plantId}&page=0&limit=${limit}&search=${searchVal}` : `/pos?wareHouse=${plantId}&page=0&limit=${limit}`;
+        const filterById = [];
+        if (productCategory && productCategory !== '') {
+            filterById.push({ field: 'productCategory', term: productCategory });
+        }
+        if (filterById.length) {
+            api = api + '&filterById=' + JSON.stringify(filterById) + '&filterType=and';
+        }
         axiosInstance().get(api).then(({ data: { data, count } }) => {
             setProducts([...data]);
             setHasMore(data.length !== count);
@@ -48,6 +55,13 @@ const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal }) => {
     const fetchMoreData = () => {
         setTimeout(() => {
             let api = searchVal ? `/pos?wareHouse=${plantId}&page=${page}&limit=${limit}&search=${searchVal}` : `/pos?wareHouse=${plantId}&page=${page}&limit=${limit}`;
+            const filterById = [];
+            if (productCategory && productCategory !== '') {
+                filterById.push({ field: 'productCategory', term: productCategory });
+            }
+            if (filterById.length) {
+                api = api + '&filterById=' + JSON.stringify(filterById) + '&filterType=and';
+            }
             axiosInstance().get(api).then(({ data: { data, count } }) => {
                 setPage(prevState => prevState + 1)
                 setProducts(prevState => [...prevState, ...data]);
