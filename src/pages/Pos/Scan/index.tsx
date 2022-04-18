@@ -37,9 +37,11 @@ export default function Scan({ onClose, plantId, setAssignCartProductQty }) {
         axiosInstance().get(`/pos?wareHouse=${plantId}${deepFilter}`).then(({ data: { data, count } }) => {
             if (data?.length === 1) {
                 setAssignCartProductQty(data[0])
+                setSearchText(null)
             }
             else if (data?.length) {
                 setScanResult({ open: true, result: data })
+                setSearchText(null)
             }
         }).catch((error) => {
             toastConfig.setToastConfig(error);

@@ -27,7 +27,7 @@ const QuantityDialog = ({ handleCloseDialog, handleAddToCart, product, cartQty =
         if (values.qty <= 0) {
             errors["qty"] = "Please enter valid qty"
         }
-        if ((parseInt(values.qty) + cartQty) > (product?.inventory)) {
+        if (parseInt(values.qty) > (product?.availableInventory)) {
             errors["qty"] = "qty not more than inventory"
         }
         return errors;
@@ -69,9 +69,9 @@ const QuantityDialog = ({ handleCloseDialog, handleAddToCart, product, cartQty =
                                 </ListItemAvatar>
                                 <ListItemText
                                     primary={product?.productName}
-                                    secondary={`Inventory - ${product?.inventory}`}
+                                    secondary={`Inventory - ${product?.availableInventory}`}
                                 />
-                                {product?.inventory ?
+                                {product?.availableInventory ?
                                     <Field
                                         component={TextFieldFormik}
                                         margin="dense"
@@ -93,7 +93,7 @@ const QuantityDialog = ({ handleCloseDialog, handleAddToCart, product, cartQty =
                         </List>
                     </CustomDialogContent>
                     <CustomDialogFooter>
-                        {product?.inventory &&
+                        {product?.availableInventory &&
                             <CustomButton
                                 loading={loading}
                                 disabled={loading}
