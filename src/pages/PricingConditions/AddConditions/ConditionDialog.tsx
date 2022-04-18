@@ -52,7 +52,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                 if (element?.[`${element.materialType}Detail`]?.unit) {
                     unitArray.push([...element?.[`${element.materialType}Detail`].unit])
                 }
-                if (element?.[`${element.materialType}Detail`].pricingMethod) {
+                if (element?.[`${element.materialType}Detail`]?.pricingMethod) {
                     pricingMethodArray.push([...element?.[`${element.materialType}Detail`].pricingMethod])
                 }
             });
@@ -61,7 +61,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                     return a.indexOf(v) !== -1;
                 });
             });
-            let pricingMethod: any = pricingMethodArray?.shift().filter(function (v) {
+            let pricingMethod: any = pricingMethodArray?.shift()?.filter(function (v) {
                 return pricingMethodArray?.every(function (a) {
                     return a.indexOf(v) !== -1;
                 });
