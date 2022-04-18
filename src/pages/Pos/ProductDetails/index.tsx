@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
+import { useState, useEffect, Fragment, useContext, useRef } from 'react';
 import { Box, Button, Grid, makeStyles, Paper, IconButton } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
@@ -28,6 +28,7 @@ const useStyles = makeStyles(() => ({
     imageContainer: {
         display: "flex",
         justifyContent: "center",
+        position: "relative"
         // alignItems: "center",
         // minHeight: "300px",
         // height: "70vh",
@@ -36,6 +37,26 @@ const useStyles = makeStyles(() => ({
         //     height: "30vh",
         //     width: "40%",
         // }
+    },
+    zoomWrapper: {
+      position: 'absolute',
+      overflow: 'hidden',
+      left: "calc(10% + 500px)",
+      top: "10%",
+      width: 400,
+      height: 400,
+      boxShadow: "10px 10px 20px 10px rgba(0,0,0,0.2)",
+      zIndex: 9999999
+    },
+    zoomContainer: {
+      width: '200%',
+      height: '200%',
+      left: "50%",
+      top: "50%",
+      transform: "translate(-50%, -50%)",
+      display: 'flex',
+      justifyContent: "center",
+      alignItems: 'center',
     },
     img: {
         height: "500px",
@@ -68,7 +89,14 @@ const ProductDetails = () => {
     const [cartProduct, setCartProduct] = useState(null)
     const [cart, setCart] = useState([])
     const [qtyDialog, setQtyDialog] = useState(false)
+    const [isHovering, setHovering] = useState(false)
     const [loadingCart, setLoadingCart] = useState(false)
+    const [imageTransform, setImageTransform] = useState({
+        xAxis: 0,
+        yAxis: 0
+    })
+    const [hoverImage, setHoverImage] = useState("")
+    const imageRef = useRef<HTMLImageElement>(null)
 
 
     useEffect(() => {
@@ -160,6 +188,12 @@ const ProductDetails = () => {
         }
     };
 
+    function hoverOverImage(e:React.MouseEvent<HTMLImageElement>) {
+        const {width, height} = imageRef.current.getBoundingClientRect();
+        const xAxis =  e.nativeEvent.offsetX / width * 80;
+        const yAxis =  e.nativeEvent.offsetY / height * 85;
+        setImageTransform({xAxis, yAxis})
+    }
     const handleDeleteCart = (product) => {
         axiosInstance().put(`/pos/cart/remove`, { ids: [product._id] })
             .then(({ data }) => {
@@ -184,12 +218,13 @@ const ProductDetails = () => {
                     <div className="container">
                         <Box> {productData ?
                             <Grid container className={`py-5`} spacing={4}>
-                                <Grid xs={12} sm={6} md={6} lg={6} style={{ maxHeight: "450px", minHeight: "450px" }} className="d-flex flex-column align-items-center">
+                                <Grid item xs={12} sm={6} md={6} lg={6} style={{ maxHeight: "450px", minHeight: "450px" }} className="d-flex flex-column align-items-center">
                                     {productImages.length > 0 ? (
+                                        <>
                                         <Carousel
                                             strictIndexing
                                             animation="slide"
-                                            autoPlay={productImages.length > 1 ? true : false}
+                                            autoPlay={productImages.length > 1 && !isHovering ? true : false}
                                             navButtonsAlwaysInvisible
                                             cycleNavigation={productImages.length > 1 ? true : false}
                                             indicators={productImages.length > 1 ? true : false}
@@ -203,18 +238,44 @@ const ProductDetails = () => {
                                             }}
                                         >
                                             {productImages.map((image: any, i) => (
-                                                <div key={i} className={classes.imageContainer}>
-                                                    <img src={image} style={{ width: "95%", height: "100%", maxHeight: "400px", backgroundRepeat: "no-repeat" }} />
+                                                <div key={i} onMouseLeave={() => {
+                                                    setHoverImage('');
+                                                        setHovering(false)
+                                                    }} 
+                                                    onMouseEnter={() => {
+                                                        setHoverImage(image);
+                                                        setHovering(true)
+                                                    }}
+                                                        onMouseMove={hoverOverImage}  className={classes.imageContainer}
+                                                        ref={imageRef}
+                                                        >
+                                                    <img 
+                                                        
+                                                        src={image} 
+                                                        style={{ 
+                                                            width: "95%", 
+                                                            height: "100%", 
+                                                            backgroundRepeat: "no-repeat" 
+                                                        }} />
+                                                       
                                                 </div>
                                             ))}
                                         </Carousel>
+                                            {isHovering && 
+                                            <div className={classes.zoomWrapper}>
+                                              <div className={classes.zoomContainer} style={{transform: `translate(-${imageTransform.xAxis}%, -${imageTransform.yAxis}%)`}}>
+                                                <img style={{width: "100%", height: "auto"}} src={hoverImage} /> 
+                                              </div>
+                                            </div>
+                                            }
+                                        </>
                                     ) : (
                                         <div>
                                             <BsImage className={styles.product_no_image} />
                                         </div>
                                     )}
                                 </Grid>
-                                <Grid xs={12} sm={6} md={6} lg={6}>
+                                <Grid item xs={12} sm={6} md={6} lg={6}>
                                     <Box border={1} borderColor="grey.300" borderRadius={5} style={{ height: "100%" }}>
                                         <Grid className='px-2 py-2 first-content-Layout'>
                                             <h4>{productData.productCategory?.optionLabel}</h4>
