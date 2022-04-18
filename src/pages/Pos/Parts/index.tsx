@@ -41,8 +41,8 @@ const Parts = ({ product, warehouse, fetchCart, cart }) => {
                                         <Link className="cursor-pointer" to={`${routes.posProductDetail.path}/${row._id}/${warehouse}`}>{row.productName}</Link>
                                     </TableCell>
                                     <TableCell component="th" scope="row" width="20%"  >
-                                        {row?.inventory ?
-                                            <Typography>Inventory-{row?.inventory}</Typography>
+                                        {row?.availableInventory ?
+                                            <Typography>Inventory-{row?.availableInventory}</Typography>
                                             : <Typography>No inventory</Typography>}
                                     </TableCell>
                                     <TableCell component="th" scope="row" width="40%" align="right" >
@@ -51,6 +51,7 @@ const Parts = ({ product, warehouse, fetchCart, cart }) => {
                                             cart={cart}
                                             warehouse={warehouse}
                                             fetchCart={fetchCart}
+                                            onSucess={() => { fetchProduct() }}
                                         />
                                     </TableCell>
                                 </TableRow>
