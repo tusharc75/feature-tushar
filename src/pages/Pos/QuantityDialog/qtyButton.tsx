@@ -10,7 +10,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import QuantityDialog from "./index";
 
 
-const QtyButton = ({ cart, fetchCart, product, warehouse }) => {
+const QtyButton = ({ cart, fetchCart, product, warehouse, onSucess }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const [qtyDialog, setQtyDialog] = useState(false)
@@ -39,6 +39,7 @@ const QtyButton = ({ cart, fetchCart, product, warehouse }) => {
                     setLoading(false)
                     setQtyDialog(false)
                     fetchCart()
+                    onSucess()
                 }).catch((error) => {
                     toastConfig.setToastConfig(error)
                 });
@@ -54,6 +55,7 @@ const QtyButton = ({ cart, fetchCart, product, warehouse }) => {
             axiosInstance().put(`/pos/cart`, data)
                 .then(({ data }) => {
                     fetchCart()
+                    onSucess()
                 }).catch((error) => {
                     toastConfig.setToastConfig(error)
                 });
@@ -77,6 +79,7 @@ const QtyButton = ({ cart, fetchCart, product, warehouse }) => {
         axiosInstance().put(`/pos/cart/remove`, { ids: [cartProduct?._id] })
             .then(({ data }) => {
                 fetchCart()
+                onSucess()
                 toastConfig.setToastConfig({
                     open: true,
                     type: 'success',
@@ -94,7 +97,7 @@ const QtyButton = ({ cart, fetchCart, product, warehouse }) => {
                     color="secondary"
                     size="small"
                     style={{ border: "1px solid" }}
-                    disabled={cartProduct?.qty >= product?.inventory}
+                    disabled={cartProduct?.qty >= product?.availableInventory}
                     onClick={() => { handleUpdateCart("add") }}>
                     <AddIcon fontSize="small" />
                 </IconButton >
@@ -124,12 +127,12 @@ const QtyButton = ({ cart, fetchCart, product, warehouse }) => {
             : <Button
                 variant="outlined"
                 size="small"
-                disabled={!product?.inventory}
+                disabled={!product?.availableInventory}
                 aria-label="Add to cart"
                 onClick={() => {
                     setQtyDialog(true)
                 }}
-                color={product?.inventory ? "secondary" : "inherit"}
+                color={product?.availableInventory ? "secondary" : "inherit"}
                 startIcon={<MdAddShoppingCart />}
             >
                 Add to cart

@@ -97,11 +97,11 @@ const ProductCad = ({ product, plantId = null, showSkeleton = false, setAssignCa
                 <div className={styles.text} style={{ bottom: "0px" }}>
                     <Box display="flex" justifyContent="space-between" alignItems="center">
                         <div>  {showSkeleton ? <Skeleton width={100} height={30} /> :
-                            (product.inventory ?
+                            (product.availableInventory ?
                                 <span >
                                     <span style={{ fontSize: "10px" }}>Inventory</span>
                                     <br></br>
-                                    <span className={styles.amount}>{product.inventory}</span></span> :
+                                    <span className={styles.amount}>{product.availableInventory}</span></span> :
                                 <span >{"No inventory"}</span>)
                         }
                         </div>
