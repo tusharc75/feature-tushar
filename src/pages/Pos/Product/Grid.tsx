@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 
-const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, searchVal }) => {
+const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, searchVal, productCategory }) => {
 
     const toastConfig = useContext(CustomToastContext);
 
@@ -69,7 +69,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
         if (plantId) {
             fetchProducts();
         }
-    }, [page, limit, filters, sorting, search, plantId]);
+    }, [page, limit, filters, sorting, search, plantId, productCategory]);
 
     useEffect(() => {
         dispatch({ type: 'search', search: searchVal });
@@ -89,6 +89,13 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
         }
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+        }
+        const filterById = [];
+        if (productCategory && productCategory !== '') {
+            filterById.push({ field: 'productCategory', term: productCategory });
+        }
+        if (filterById.length) {
+            deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + '&filterType=and';
         }
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
@@ -123,7 +130,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
 
     return (
         <Fragment>
-            {columns && frameWorkComponent ? 
+            {columns && frameWorkComponent ?
                 <CustomAgGrid
                     columns={columns}
                     dataRows={dataRows}
