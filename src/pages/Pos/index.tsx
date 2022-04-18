@@ -68,6 +68,9 @@ const Pos = () => {
             .get('/pos/product-category')
             .then(({ data: { data } }) => {
                 setProductCategoryList(data);
+                if (data?.find((e) => e.name === "Parts")) {
+                    setProductCategory(data?.find((e) => e.name === "Parts")?._id);
+                }
             });
     }
 

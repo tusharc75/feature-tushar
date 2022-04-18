@@ -3,8 +3,8 @@ import { Box, Paper, TableContainer, TableRow, TableCell, TableBody, Table, Typo
 import routes from '../../../components/Helpers/Routes';
 import axiosInstance from "src/axios/axiosInstance";
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Link } from 'react-router-dom';
 import QtyButton from './../QuantityDialog/qtyButton';
+import { Link } from 'react-router-dom';
 
 const Parts = ({ product, warehouse, fetchCart, cart }) => {
 
@@ -16,7 +16,7 @@ const Parts = ({ product, warehouse, fetchCart, cart }) => {
     }, [product, warehouse]);
 
     const fetchProduct = () => {
-        axiosInstance().get(`/pos?wareHouse=620dd7e82e39b606d4945dd5&page=0&limit=20`)
+        axiosInstance().get(`/pos/bom/${product}/${warehouse}`)
             .then(({ data: { data } }) => {
                 setParts(data)
             })
