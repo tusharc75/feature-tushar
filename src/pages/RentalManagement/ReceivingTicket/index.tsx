@@ -45,6 +45,7 @@ import AddSerializedAsset from "../SerializedAsset/AddSerializedAsset";
 import ReplaceAssetReason from "../../../components/RentalManagment/ReplaceAssetReason";
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 import ConsumeProduct from "../../../components/RentalManagment/ConsumeProduct";
+import { useData } from "../../../StateProvider/Provider";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -98,6 +99,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
   const [seletedProducts, setSeletedProducts] = useState([]);
 
+  const { state: { user, permissions, selectedEntity } }: any = useData();
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -117,7 +120,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   useEffect(() => {
     fetchRecords();
     if (!isOffline) {
-      fetchRepairJob()
+      if (permissions?.repairJob?.isRead) {
+        fetchRepairJob()
+      }
     }
   }, []);
 
@@ -797,7 +802,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           >
             {`Transfer to another ${routes.rentalManagement.title}`}</MenuItem>
 
-          {(selectedRecords.length && selectedRecords?.filter(f =>
+          {(permissions?.repairJob?.isCreate && selectedRecords.length && selectedRecords?.filter(f =>
             ((f.hasOwnProperty("receivingTicketId") && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
               (f.hasOwnProperty("returnTicketId") && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) || f.status === INVENTORY_STATUS.scrap)
             && [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.available, INVENTORY_STATUS.needRecert, INVENTORY_STATUS.needRepair].includes(f.status)
@@ -1098,7 +1103,9 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         onSuccess={(obj) => {
           handleAddAssetToRepairJob(obj?._id)
           setShowRepairJobDialog(false);
-          fetchRepairJob()
+          if (permissions?.repairJob?.isRead) {
+            fetchRepairJob()
+          }
           fetchRecords()
         }}
       />
