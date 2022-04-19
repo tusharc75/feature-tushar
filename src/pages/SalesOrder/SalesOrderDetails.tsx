@@ -352,12 +352,12 @@ const SalesOrderDetails = () => {
                         showActivity={showActivity}
                       />
                     )}
-                    {currentStep === 1 && salesOrderData &&
+                    {/* {currentStep === 1 && salesOrderData &&
                       <AdditionalCost
                         salesOrderData={salesOrderData}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
-                      />}
+                      />} */}
                     {/* {currentStep === 2 && salesOrderData && (
                       <SerializedAsset
                         salesOrderData={salesOrderData}
@@ -378,7 +378,7 @@ const SalesOrderDetails = () => {
                         renderedFrom={`${renderedFrom}_grid-4`}  
                       />
                     )} */}
-                    {(currentStep === 2) && salesOrderData && (
+                    {(currentStep === 1) && salesOrderData && (
                       <Invoice
                         salesOrderData={salesOrderData}
                         setNextStep={setNextStep}

@@ -362,11 +362,11 @@ const routes = {
   },
   pos: {
     title: (storedRoutes && storedRoutes.pos && storedRoutes.pos.title) ? storedRoutes.pos?.title : RESOURCE_LABEL.pos,
-    path: "/pos",
+    path: "/erecs",
   },
   posProductDetail: {
     title: (storedRoutes && storedRoutes.pos && storedRoutes.pos.title) ? storedRoutes.pos?.title : RESOURCE_LABEL.pos,
-    path: "/pos/product",
+    path: "/erecs/product",
   },
   repairType: {
     title: (storedRoutes && storedRoutes.repairType && storedRoutes.repairType.title) ? storedRoutes.repairType?.title : RESOURCE_LABEL.repairType,
