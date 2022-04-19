@@ -153,6 +153,7 @@ export default [
         hasExport: false,
         hasTableView: false,
         filters: [
+          { key: 'salesRep', title: 'Sales Rep', multiple: false },
           { key: 'subMarketSegment', title: 'Sub Market Segment', multiple: false },
           { key: 'marketSegment', title: 'Market Segment', multiple: false },
           { key: 'countrySellTo', title: 'Country Sell To', multiple: false },
@@ -171,6 +172,7 @@ export default [
         hasTableView: false,
         filters: [
           { key: 'status', title: 'Status', multiple: false },
+          { key: 'salesRep', title: 'Sales Rep', multiple: false },
           { key: 'subMarketSegment', title: 'Sub Market Segment', multiple: false },
           { key: 'marketSegment', title: 'Market Segment', multiple: false },
           { key: 'countrySellTo', title: 'Country Sell To', multiple: false },
@@ -190,6 +192,7 @@ export default [
         hasTableView: false,
         filters: [
           { key: 'status', title: 'Status', multiple: false },
+          { key: 'salesRep', title: 'Sales Rep', multiple: false },
           { key: 'customerAccount', title: 'Customer Account', multiple: false },
           { key: 'marketSegment', title: 'Market Segment', multiple: false },
           { key: 'subMarketSegment', title: 'Sub Market Segment', multiple: false },
