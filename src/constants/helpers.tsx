@@ -56,7 +56,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 
 export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 //export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
-export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Ready To Invoice'];
+export const salesOrderProcessSteps = ['Add Products', 'Ready To Invoice'];
 export const purchaseOrderSteps = ['Add Product', 'Services and Consumables', 'Issue', 'Receiving Asset'];
 export const rentalManagementSteps = [
   'Add Products',
