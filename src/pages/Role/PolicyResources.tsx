@@ -41,7 +41,7 @@ const PolicyResources = (
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {policyResources.filter((item) => permissions[camelCase(item.resource)].isRead).map((resource, outerIndex) => (
+                    {policyResources?.filter((item) => permissions[camelCase(item?.resource)]?.isRead).map((resource, outerIndex) => (
                         <>
                             <TableRow>
                                 <TableCell style={{ minWidth: 300 }}>
@@ -53,7 +53,7 @@ const PolicyResources = (
                                                 aria-label="expand row"
                                                 onClick={() => setOpen((prevState) => ({ ...prevState, [camelCase(resource.resource)]: !(open[camelCase(resource.resource)]) }))}
                                             >
-                                                {open[camelCase(resource.resource)] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                                                {open[camelCase(resource?.resource)] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
                                             </IconButton>
                                         </Box>}
                                     </Box>

@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal, productCategory }) => {
+const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal, productCategory, refreshData }) => {
 
     const limit = 20
     const classes = useStyles();
@@ -29,7 +29,7 @@ const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal, produc
         if (plantId) {
             fetchProducts();
         }
-    }, [searchVal, plantId, productCategory]);
+    }, [searchVal, plantId, productCategory, refreshData]);
 
     const fetchProducts = () => {
         setProducts([]);
@@ -97,7 +97,7 @@ const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal, produc
                                     product={product}
                                     plantId={plantId}
                                     setAssignCartProductQty={setAssignCartProductQty}
-                                    disabledCart={!product?.inventory || product?.inventory === 0} />
+                                    disabledCart={!product?.availableInventory || product?.availableInventory === 0} />
                             ))}
                         </div> : (loading === true ?
                             <div className={`${styles.product_list_container}`}>

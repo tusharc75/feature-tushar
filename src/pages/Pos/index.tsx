@@ -40,6 +40,7 @@ const Pos = () => {
     const [cartProduct, setCartProduct] = useState([])
     const [viewType, setViewType] = useState(localStorage.getItem("pos_ViewType") ? localStorage.getItem("pos_ViewType") : "card");
     const [loadingCart, setLoadingCart] = useState(false)
+    const [refreshData, setRefreshData] = useState(false)
 
     useEffect(() => {
         getPlants()
@@ -96,6 +97,7 @@ const Pos = () => {
                 axiosInstance().put(`/pos/cart`, data)
                     .then(({ data }) => {
                         fetchCart()
+                        setRefreshData(!refreshData)
                         setQtyDialog({ open: false, product: null })
                         setLoadingCart(false)
                         toastConfig.setToastConfig({
@@ -117,6 +119,7 @@ const Pos = () => {
                 axiosInstance().post(`/pos/cart`, data)
                     .then(({ data }) => {
                         fetchCart()
+                        setRefreshData(!refreshData)
                         setQtyDialog({ open: false, product: null })
                         setLoadingCart(false)
                         toastConfig.setToastConfig({
@@ -128,7 +131,6 @@ const Pos = () => {
                         toastConfig.setToastConfig(error)
                     });
             }
-
         }
     };
 
@@ -294,6 +296,7 @@ const Pos = () => {
                     }}
                     plantId={plantId}
                     productCategory={productCategory}
+                    refreshData={refreshData}
                     searchVal={searchVal} />
                 :
                 <ProductCard
@@ -302,6 +305,7 @@ const Pos = () => {
                     }}
                     plantId={plantId}
                     productCategory={productCategory}
+                    refreshData={refreshData}
                     searchVal={searchVal} />
             }
             {scanDialog &&
@@ -316,7 +320,10 @@ const Pos = () => {
                 <Cart
                     fetchCart={fetchCart}
                     products={cartProduct}
-                    handleCloseDialog={() => { setCartDialog(false) }}
+                    handleCloseDialog={() => {
+                        setCartDialog(false)
+                        setRefreshData(!refreshData)
+                    }}
                     handleDeleteCart={handleDeleteCart}
                 />
             }
@@ -325,8 +332,6 @@ const Pos = () => {
                     handleAddToCart={handleAddToCart}
                     product={qtyDialog.product}
                     handleCloseDialog={() => { setQtyDialog({ open: false, product: null }) }}
-                    cartQty={cartProduct.find(d => d.product.optionValue === qtyDialog.product._id) ?
-                        cartProduct.find(d => d.product.optionValue === qtyDialog.product._id)?.qty : 0}
                     loading={loadingCart}
                 />
             }
