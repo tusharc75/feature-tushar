@@ -476,31 +476,35 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
           <Grid item xs={12} md={12} sm={12}>
             <Box display="flex" justifyContent="space-between" m={1}>
               <Box display="flex">
-                <Button
-                  variant={isMobile ? 'contained' : 'contained'}
-                  color="primary"
-                  size="small"
-                  disabled={isOffline}
-                  style={!isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-                  onClick={() => {
-                    setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
-                  }}
-                >
-                  {isMobile && !isTablet ? 'Product' : `Add ${routes.product.title}`}
-                </Button>
+                {permissions?.product?.isRead &&
+                  <Button
+                    variant={isMobile ? 'contained' : 'contained'}
+                    color="primary"
+                    size="small"
+                    disabled={isOffline}
+                    style={!isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
+                    onClick={() => {
+                      setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
+                    }}
+                  >
+                    {isMobile && !isTablet ? 'Product' : `Add ${routes.product.title}`}
+                  </Button>
+                }
                 <Box mx={isMobile ? 0.5 : 1} />
-                <Button
-                  variant={isMobile ? 'contained' : 'contained'}
-                  color="primary"
-                  size="small"
-                  style={!isMobile && !isTablet ? { color: 'var(--colorOpportunity)' } : {}}
-                  disabled={isOffline}
-                  onClick={() => {
-                    setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                  }}
-                >
-                  {isMobile && !isTablet ? 'Package' : `Add ${routes.packages.title}`}
-                </Button>
+                {permissions?.packages?.isRead &&
+                  <Button
+                    variant={isMobile ? 'contained' : 'contained'}
+                    color="primary"
+                    size="small"
+                    style={!isMobile && !isTablet ? { color: 'var(--colorOpportunity)' } : {}}
+                    disabled={isOffline}
+                    onClick={() => {
+                      setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+                    }}
+                  >
+                    {isMobile && !isTablet ? 'Package' : `Add ${routes.packages.title}`}
+                  </Button>
+                }
               </Box>
               {isMobile ? (
                 <Box display="flex">

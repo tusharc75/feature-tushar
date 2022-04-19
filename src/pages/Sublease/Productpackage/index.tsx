@@ -406,29 +406,33 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                         <Box display="flex">
                             {subleaseData.status === SUBLEASE_STATUS.new &&
                                 <Fragment>
-                                    <Button
-                                        variant={isMobile && !isTablet ? "text" : "contained"}
-                                        color="primary"
-                                        size="small"
-                                        style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
-                                        onClick={() => {
-                                            setAddExistingProductDialog({ open: true, type: "product", parentId: null });
-                                        }}
-                                    >
-                                        {isMobile && !isTablet ? <MdAdd size={20} /> : `Add ${routes.product.title}`}
-                                    </Button>
+                                    {permissions?.product?.isRead &&
+                                        <Button
+                                            variant={isMobile && !isTablet ? "text" : "contained"}
+                                            color="primary"
+                                            size="small"
+                                            style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
+                                            onClick={() => {
+                                                setAddExistingProductDialog({ open: true, type: "product", parentId: null });
+                                            }}
+                                        >
+                                            {isMobile && !isTablet ? <MdAdd size={20} /> : `Add ${routes.product.title}`}
+                                        </Button>
+                                    }
                                     <Box mx={1} />
-                                    <Button
-                                        variant={isMobile && !isTablet ? "text" : "contained"}
-                                        color="primary"
-                                        size="small"
-                                        style={isMobile && !isTablet ? { color: "var(--colorOpportunity)" } : {}}
-                                        onClick={() => {
-                                            setAddExistingProductDialog({ open: true, type: "package", parentId: null });
-                                        }}
-                                    >
-                                        {isMobile && !isTablet ? <FiPackage size={18} /> : `Add ${routes.packages.title}`}
-                                    </Button>
+                                    {permissions?.packages?.isRead &&
+                                        <Button
+                                            variant={isMobile && !isTablet ? "text" : "contained"}
+                                            color="primary"
+                                            size="small"
+                                            style={isMobile && !isTablet ? { color: "var(--colorOpportunity)" } : {}}
+                                            onClick={() => {
+                                                setAddExistingProductDialog({ open: true, type: "package", parentId: null });
+                                            }}
+                                        >
+                                            {isMobile && !isTablet ? <FiPackage size={18} /> : `Add ${routes.packages.title}`}
+                                        </Button>
+                                    }
                                 </Fragment>
                             }
                         </Box>
