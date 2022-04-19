@@ -341,27 +341,31 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
     return (<Fragment>
         <Box display="flex" justifyContent="space-between" m={1}>
             <Box display="flex" alignItems="center">
-                <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                        setAddExistingProductDialog({ open: true, type: "product", parentId: null });
-                    }}
-                >
-                    {`Add ${routes.product.title}`}
-                </Button>
+                {permissions?.product?.isRead &&
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                            setAddExistingProductDialog({ open: true, type: "product", parentId: null });
+                        }}
+                    >
+                        {`Add ${routes.product.title}`}
+                    </Button>
+                }
                 <Box mx={1} />
-                <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                        setAddExistingProductDialog({ open: true, type: "package", parentId: null });
-                    }}
-                >
-                    {`Add ${routes.packages.title}`}
-                </Button>
+                {permissions?.packages?.isRead &&
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                            setAddExistingProductDialog({ open: true, type: "package", parentId: null });
+                        }}
+                    >
+                        {`Add ${routes.packages.title}`}
+                    </Button>
+                }
             </Box>
             <Box display="flex">
                 <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? "Bulk edit selected records" : "Select records to edit"}>

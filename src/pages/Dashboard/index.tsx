@@ -2,7 +2,7 @@ import { useEffect, useState, useContext, Fragment } from 'react';
 import { Container, Grid, Paper, Box, Typography, Button, List, ListItem, ListItemText, ListSubheader } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
-import { kebabCase, sortBy } from 'lodash';
+import { camelCase, kebabCase, sortBy } from 'lodash';
 import styles from './Dashboard.module.scss';
 import crmImage from '../../assets/eQuip_t-homepage-design-trs-small-size.-in-png.png';
 import { SiCivicrm } from 'react-icons/si';
@@ -180,17 +180,12 @@ function Dashboard() {
   }, [user, selectedEntity]);
 
   const handleRoutes = (item) => {
-    return `/${kebabCase(item.name)}`;
-
-    //  Use below code to handle special route cases
-    // switch (item.name) {
-
-    //   case "T&Cs":
-    //     return "/terms-conditions";
-
-    //   default:
-    //     return `/${kebabCase(item.name)}`;
-    // }
+    switch (item.name) {
+      case "Pos":
+        return routes.pos.path;
+      default:
+        return `/${kebabCase(item.name)}`;
+    }
   };
 
   return (

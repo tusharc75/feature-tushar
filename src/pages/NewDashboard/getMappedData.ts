@@ -16,6 +16,8 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     const offeredVolumeData = [];
     const offeredValueData = [];
     const offeredCostData = [];
+    const bookedMarginData = []
+    const offeredMarginData = []
     const labels = [];
     const budget = [];
     const volumeUnit = data[0]?.volumeUnit;
@@ -35,24 +37,32 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
           getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedCost || 0, currencyFrom, currencyTo),
           getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedValue || 0, currencyFrom, currencyTo),
           getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedCost || 0, currencyFrom, currencyTo),
+          getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedMargin || 0, currencyFrom, currencyTo),
+          getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedMargin || 0, currencyFrom, currencyTo),
           getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget || 0, currencyFrom, currencyTo)
         ]);
         const bookedValue: any = salesData[0]?.rates[currencyTo];
         const bookedCost: any = salesData[1]?.rates[currencyTo];
         const offeredValue: any = salesData[2]?.rates[currencyTo];
         const offeredCost: any = salesData[3]?.rates[currencyTo];
-        const budgetData: any = salesData[4]?.rates[currencyTo];
+        const bookedMargin: any = salesData[4]?.rates[currencyTo]
+        const offeredMargin: any = salesData[5]?.rates[currencyTo]
+        const budgetData: any = salesData[6]?.rates[currencyTo];
 
         bookedValueData.push(bookedValue || 0);
         bookedCostData.push(bookedCost || 0);
         offeredValueData.push(offeredValue || 0);
         offeredCostData.push(offeredCost || 0);
+        bookedMarginData.push(bookedMargin || 0);
+        offeredMargin.push(offeredMargin || 0)
         budget.push(budgetData || 0);
       } else {
         bookedValueData.push(d.totalBookedValue || 0);
         bookedCostData.push(d.totalBookedCost || 0);
         offeredValueData.push(d.totalOfferedValue || 0);
         offeredCostData.push(d.totalOfferedCost || 0);
+        bookedMarginData.push(d.totalBookedMargin || 0);
+        offeredMarginData.push(d.totalOfferedMargin || 0);
         budget.push(d.budget || 0);
       }
 
@@ -70,12 +80,14 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
       let totalOfferedValue = offeredValueData.reduce((acc, val) => acc + val);
       let totalOfferedCost = offeredCostData.reduce((acc, val) => acc + val);
       let totalOfferedVolume = offeredVolumeData.reduce((acc, val) => acc + val);
+      let totalBookedMargin = bookedMarginData.reduce((acc, val) => acc + val);
+      let totalOfferedMargin = offeredMarginData.reduce((acc, val) => acc + val);
 
-      const grossMarginPercent = totalBookedValue && totalBookedCost ? Math.floor(((totalBookedValue - totalBookedCost) / totalBookedCost) * 100) : 0;
+      const grossMarginPercent = totalBookedMargin && totalBookedValue ? Math.floor(((totalBookedMargin - totalBookedValue) / totalBookedMargin) * 100) : 0;
       const offeredMarginPercent =
-        totalOfferedValue && totalOfferedCost ? Math.floor(((totalOfferedValue - totalOfferedCost) / totalOfferedCost) * 100) : 0;
-      const grossMargin = totalBookedValue && totalBookedCost ? totalBookedValue - totalBookedCost : 0;
-      const offeredMargin = totalOfferedValue && totalOfferedCost ? totalOfferedValue - totalOfferedCost : 0;
+      totalOfferedMargin && totalOfferedValue ? Math.floor(((totalOfferedMargin - totalOfferedValue) / totalOfferedMargin) * 100) : 0;
+      const grossMargin = totalBookedMargin && totalBookedValue ? totalBookedValue / totalBookedValue : 0;
+      const offeredMargin = totalOfferedMargin && totalOfferedValue ? totalOfferedMargin / totalOfferedValue : 0;
       const hitRatioValue = totalBookedValue && totalOfferedValue ? totalBookedValue / totalOfferedValue : 0;
       const hitRatioCost = totalBookedCost && totalOfferedCost ? totalBookedCost / totalOfferedCost : 0;
       const hitRatioMargin = grossMargin && offeredMargin ? grossMargin / offeredMargin : 0;
@@ -569,13 +581,13 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
         totalSell = d.totalSell;
         totalCost = d.totalCost;
       }
-      topProductsData.push({ ...d, totalSell, totalCost });
+      topProductsData.push({ ...d, totalSell, totalCost, totalVolume: d.totalBookedVolume });
     }
 
     dataObject = topProductsData.map((d) => {
       return {
         productCategory: d.productCategory,
-        totalAmount: d.totalSell ?? 0
+        'totalVolume (MT)': d.totalVolume ?? 0
       };
     });
   }
@@ -807,7 +819,6 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
         dataset.push(totalCount);
       }
     });
-
 
     dataObject = {
       labels: labels,

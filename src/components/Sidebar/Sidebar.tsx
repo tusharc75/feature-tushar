@@ -30,6 +30,7 @@ import { CustomOfflineContext } from "../../StateProvider/OfflineContext/Offline
 
 
 import { AccountCircle } from "@material-ui/icons";
+import routes from "../Helpers/Routes";
 const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -149,6 +150,15 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     setToggleDrawer(!toggleDrawer);
     if (toggleDrawer) {
       setOpen({});
+    }
+  };
+
+  const handleRoutes = (item) => {
+    switch (item.name) {
+      case "Pos":
+        return routes.pos.path;
+      default:
+        return `/${kebabCase(item.name)}`;
     }
   };
 
@@ -348,7 +358,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                         <Link
                           className="sub-list"
                           key={j}
-                          to={`/${kebabCase(lowerCase(item.name))}`}
+                          to={handleRoutes(item)}
                         >
                           <ListItem
                             button

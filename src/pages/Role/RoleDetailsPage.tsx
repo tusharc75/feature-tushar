@@ -199,7 +199,7 @@ const RoleDetailsPage = () => {
   const handlePolicyResourceCheckBox = async (field) => {
     const resources = Object.keys(resourceCheckbox);
     resources.map((key) => {
-      const isAllFieldChecked = policyResources.filter((item) => item.resource === startCase(key)).some((obj) => field[obj.fieldName] === false)
+      const isAllFieldChecked = policyResources?.filter((item) => item.resource === startCase(key))?.some((obj) => field[obj.fieldName] === false)
       if (!isAllFieldChecked) {
         setResourceCheckBox((prevState) => ({ ...prevState, [key]: true }))
       }
