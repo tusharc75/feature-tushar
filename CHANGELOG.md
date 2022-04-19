@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.96.0](https://github.com/vebholic/oms_frontend/compare/v2.95.2...v2.96.0) (2022-04-19)
+
+
+### Features
+
+* product category filter in POS ([9f22026](https://github.com/vebholic/oms_frontend/commit/9f220265a73a338faaf4b9ea97afb02ea7899013))
+* **product detail:** zoom in effect on hover ([102dc99](https://github.com/vebholic/oms_frontend/commit/102dc9974c5d03ec662461eef42bba98e4f73276))
+
+
+### Bug Fixes
+
+* bug fix ([dd963b5](https://github.com/vebholic/oms_frontend/commit/dd963b56a6a0c3d6565a8e589a380f954760e944))
+* bug fix ([b046f07](https://github.com/vebholic/oms_frontend/commit/b046f074e553c419c33c5b7c517394a13fac7181))
+* bug fix ([5f11b29](https://github.com/vebholic/oms_frontend/commit/5f11b29900588ecebad2bee09cbbd727af88193f))
+* bug fix ([1b05e78](https://github.com/vebholic/oms_frontend/commit/1b05e78b2058650b33b624f4b38e6820ebc3b48f))
+* bug fix ([dbb2bfb](https://github.com/vebholic/oms_frontend/commit/dbb2bfb84a9b15e9f274d1e26f3d6b2a599c4e36))
+* **detail:** fix ([45112b7](https://github.com/vebholic/oms_frontend/commit/45112b77681342cd34077846600b49a4c677f2cf))
+* **product detail:** conflict fix ([b668ac0](https://github.com/vebholic/oms_frontend/commit/b668ac07b03d14dc2b676e0d233a999a8201d614))
+
 ### [2.95.2](https://github.com/vebholic/oms_frontend/compare/v2.95.1...v2.95.2) (2022-04-18)
 
 ### [2.95.1](https://github.com/vebholic/oms_frontend/compare/v2.95.0...v2.95.1) (2022-04-17)
