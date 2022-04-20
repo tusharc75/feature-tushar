@@ -271,6 +271,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                     setAddMaterialDialog({ open: false, materialType: "" })
                 }}
                 handleAdd={handleAdd}
+                ignoreIds={condition?.map((e) => e.materialId)}
             />
         )}
 
