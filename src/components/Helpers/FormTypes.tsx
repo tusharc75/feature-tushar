@@ -491,12 +491,12 @@ const FormTypes = (props) => {
   };
 
   const addFieldOption = (optionData) => {
-    if (fieldData && fieldData.isDependentDropdown) {
+    if (fieldData && fieldData?.isDependentDropdown) {
       if (Array.isArray(optionData)) {
-        optionData[0][fieldData.dropdowDependentOn] = values[fieldData.dropdowDependentOn];
+        optionData[0][fieldData?.dropdowDependentOn] = values[fieldData?.dropdowDependentOn];
       }
       else {
-        optionData[fieldData.dropdowDependentOn] = values[fieldData.dropdowDependentOn];
+        optionData[fieldData?.dropdowDependentOn] = values[fieldData?.dropdowDependentOn];
       }
     }
     const data = {
@@ -904,8 +904,8 @@ const FormTypes = (props) => {
           <Autocomplete
             {...rest}
             disabled={fieldData?.isUneditable || rest?.disabled}
-            options={fieldData && fieldData.isDependentDropdown ?
-              option.filter((_f) => _f[fieldData.dropdowDependentOn] === values[fieldData.dropdowDependentOn]) :
+            options={fieldData && fieldData?.isDependentDropdown ?
+              option.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn]) :
               option.filter(f => f.optionLabel)}
             freeSolo={type === 'dropDown' && !lookup}
             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
@@ -1509,8 +1509,8 @@ const FormTypes = (props) => {
             multiple
             freeSolo={!lookup}
             disableCloseOnSelect={true}
-            options={fieldData && fieldData.isDependentDropdown ?
-              option.filter((_f) => _f[fieldData.dropdowDependentOn] === values[fieldData.dropdowDependentOn]) :
+            options={fieldData && fieldData?.isDependentDropdown ?
+              option.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn]) :
               //  Some times for resource dropdown we are not getting optionLabel, and multi-select breaks
               option.filter(f => f.optionLabel)}
             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}

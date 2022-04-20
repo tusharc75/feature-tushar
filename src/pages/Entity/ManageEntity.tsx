@@ -236,6 +236,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                                     <FormTypes
                                       isNew={isNew}
                                       {...field}
+                                      fieldData={field}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -253,60 +254,10 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                                       tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                     />
-                                  ) : field.fieldName === 'address' ? (
-                                    <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Grid container spacing={1}>
-                                        <Grid item xs={permissions?.entity?.isCreate ? 10 : 11} sm={permissions?.entity?.isCreate ? 10 : 11} md={permissions?.entity?.isCreate ? 10 : 11}>
-                                          <FormTypes
-                                            isNew={isNew}
-                                            {...field}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            // options={addressOptions}
-                                            setFieldValue={(name, value) => {
-                                              // handleValuesChange({ [name]: value })
-                                              setFieldValue(name, value)
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-
-                                          />
-                                        </Grid>
-                                        {permissions?.entity?.isCreate && (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title="Add Address" className="mt-1">
-                                              <IconButton
-                                                onClick={() => {
-                                                  setAddressOpen({ open: true, isClone: false });
-                                                }}
-                                                // disabled={!isNew && field.disableOnEdit}
-                                                size="small"
-                                              >
-                                                <AddIcon color={'primary'} />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Grid>
-                                        )}
-
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    </Grid>
                                   ) : (
                                     <FormTypes
                                       isNew={isNew}
+                                      fieldData={field}
                                       {...field}
                                       values={values}
                                       errors={errors}
