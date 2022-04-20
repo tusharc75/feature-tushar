@@ -178,6 +178,9 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
         else {
           const createFields = filterData.map(m => m.fieldData)
           let tempObjKeysWithValues = getObjKeys("", createFields);
+          if (createFields.some((e) => e.fieldName === "currency")) {
+            tempObjKeysWithValues["currency"] = user?.brandCurrency;
+          }
           if (createFields?.some((e) => e.fieldName === "projectManager")) {
             tempObjKeysWithValues["projectManager"] = user._id;
           }
