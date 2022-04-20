@@ -228,6 +228,10 @@ export default function ManageOpportunityDialog({
         });
 
         let initialData = getObjKeys('', newFields);
+
+        if (filterData.some((e) => e.fieldData.fieldName === "currency")) {
+          initialData["currency"] = user.user?.brandCurrency;
+        }
         if (isClone && opportunityId) {
           const {
             data: { data }
