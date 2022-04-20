@@ -31,7 +31,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-    const [columns, setColumns] = useState([]);
+    const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [materialList, setMaterialList] = useState([]);
     const { getColumnData } = useColumns();
@@ -44,6 +44,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         : [
             { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
         ]
+
     useEffect(() => {
         fetchMaterial()
     }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
@@ -115,9 +116,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 let columns = []
                 let rendererNames = []
                 data.forEach(o => {
-                    let currentColumn = type === "product" ?
-                        getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
-                        : getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path)
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, type === "product" ? routes.productDetail.path : routes.packagesDetail.path)
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

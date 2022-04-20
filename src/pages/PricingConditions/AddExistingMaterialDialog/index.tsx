@@ -4,21 +4,11 @@ import { Autocomplete, Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "../../../axios/axiosInstance";
 import routes from "../../../components/Helpers/Routes";
-import { useData } from "../../../StateProvider/Provider";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
-import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
-import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
-import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
-import { isMobile } from "react-device-detect";
-import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
-import HtmlTooltip from "../../../components/CustomTooltipTitle";
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
 import { prepareDataForGrid } from "../../../constants/helpers";
-import { GrBusinessService } from "react-icons/all";
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import Dialog from '@material-ui/core/Dialog'
 import { CustomDialogTransition } from "../../../constants/helpers";
@@ -26,16 +16,18 @@ import useColumns, { getStaticFields, getFrameworkComponents } from "../../../co
 import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, product, packages } from '../../../constants/helpers';
 import SearchBox from "../../../components/Helpers/SearchBox";
 
-const AddExistingMaterialDialog = ({ type, handleAdd, handleClose }) => {
+const AddExistingMaterialDialog = ({ type, handleAdd, handleClose, ignoreIds }) => {
+
+    const renderedFrom = "AddExistingMaterialDialog";
+    const localStorageSelectedRecords = `${renderedFrom}_selected`
 
     const toastConfig = useContext(CustomToastContext);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
     const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
 
-    const [materialList, setMaterialList] = useState([]);
     const [resource, setResource] = useState(type === "product" ? "Product" : "Packages");
 
     const { getColumnData } = useColumns();
@@ -75,7 +67,6 @@ const AddExistingMaterialDialog = ({ type, handleAdd, handleClose }) => {
         }
         const queryString = getQueryString();
         axiosInstance().get(`${type === "product" ? product.api : packages.packageApi}${queryString}`).then(({ data }) => {
-            setMaterialList(JSON.parse(JSON.stringify(data.data)));
             let rows = data.data.map((item) => {
                 let res = {
                     ...prepareDataForGrid(item),
@@ -92,6 +83,13 @@ const AddExistingMaterialDialog = ({ type, handleAdd, handleClose }) => {
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
+        if (ignoreIds?.length) {
+            deepFilter = deepFilter + `&ignoreIds=${JSON.stringify(ignoreIds)}`
+        }
+        if (showFilteredRecordsOnly) {
+            const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords?.map(m => m._id))}`;
+        }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
             Object.keys(filters).forEach(field => {
@@ -136,12 +134,12 @@ const AddExistingMaterialDialog = ({ type, handleAdd, handleClose }) => {
                             <Button
                                 color="primary"
                                 variant="contained"
-                                disabled={selectedRecords.length ? false : true}
+                                disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.length ? false : true}
                                 onClick={() => {
-                                    handleAdd(selectedRecords)
+                                    handleAdd([...getLocalStorageArrayData(localStorageSelectedRecords)])
                                 }}
                             >
-                                {selectedRecords.length ? `(${selectedRecords.length}) Add` : "Add"}
+                                {[...getLocalStorageArrayData(localStorageSelectedRecords)]?.length ? `(${[...getLocalStorageArrayData(localStorageSelectedRecords)]?.length}) Add` : "Add"}
                             </Button>
                         </Box>
                     </Grid>
@@ -161,7 +159,7 @@ const AddExistingMaterialDialog = ({ type, handleAdd, handleClose }) => {
                     allowAction={false}
                     loading={loading}
                     refreshGrid={fetchMaterial}
-                    renderedFrom={"AddExistingMaterialDialog"}
+                    renderedFrom={renderedFrom}
                     showOnlyShowFilteredRecordSwitch={true}
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}

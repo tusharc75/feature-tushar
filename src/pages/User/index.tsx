@@ -34,6 +34,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ResourceTransferDialog from "../../components/ResourceTransferDialog"
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 
 
 let userTimeout: ReturnType<typeof setTimeout>;
@@ -81,23 +82,50 @@ const User: FC = () => {
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([])
   const localStorageSelectedRecords = `${renderedFrom}_selected`
 
-  const columns = [
-    {
-      field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
-    },
-    { field: "email", headerName: "Email", show: true, cellRenderer: "emailRenderer" },
+  const { getColumnData } = useColumns();
+  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [columns, setColumns] = useState([])
+
+  const extraColumns = [
+    { field: "regionalWideRole", headerName: "Assigned Roles", filter: false, sortable: false, show: true, cellRenderer: "regionalWideRoleRenderer" },
     { field: "status", headerName: "Status", show: true, filter: false, sortable: false, cellRenderer: "statusRenderer" },
-    // {
-    //   field: "companyWideRole", headerName: "Company Wide Role(s)", filter: false, show: true,
-    //   cellRenderer: "companyWideRoleRenderer", width: 300
-    // },
-    {
-      field: "regionalWideRole", headerName: "Assigned Roles", filter: false, sortable: false, show: true,
-      cellRenderer: "regionalWideRoleRenderer"
-    },
-    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
   ];
+
+  useEffect(() => {
+    fetchFields()
+    fetchAllUsers()
+    fetchLoggedInUserEntities()
+    fetchLoggedInUserRole()
+  }, [])
+
+  const fetchFields = () => {
+    axiosInstance()
+      .get(`/field?resource=User&view=true`)
+      .then(({ data: { data } }) => {
+        let columns = [];
+        let rendererNames = [];
+        data.forEach((o) => {
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.userDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
+            }
+          }
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          statusRenderer: StatusRenderer,
+          regionalWideRoleRenderer: RegionalWideRoleRenderer,
+          actionsRenderer: ActionsRenderer
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns = [...columns, ...extraColumns, ...getStaticFields()];
+        setColumns([...columns]);
+      });
+  };
+
   if (columnState) {
     columns.forEach((item) => {
       columnState.forEach((d) => {
@@ -107,21 +135,7 @@ const User: FC = () => {
       });
     });
   }
-
-  const NameRenderer = params => (<div className="d-flex align-items-center">
-    <Link
-      title={params.value}
-      className="link"
-      to={`${routes.userDetail.path}/${params.data.id}`}
-    >
-      {params.value}
-    </Link>
-    {params.data.isBrandAdmin ? <Tooltip title="Brand Admin">
-      <AccountCircleIcon color="primary" className="ml-2" fontSize="small" />
-    </Tooltip> : ""}
-  </div>
-  );
-
+  
   const StatusRenderer = params => <div style={{ width: 150 }}>
     {params.value ? (
       <Tooltip title="Inactive">
@@ -137,24 +151,6 @@ const User: FC = () => {
       </Tooltip>
     )}{" "}
   </div>;
-
-  const CompanyWideRoleRenderer = params => params.value ? (
-    <>
-      <h5 className="createBy d-flex">
-        <Link className="link" title={params.value}
-          to={`${routes.roleDetail.path}/${params.data.companyWideRoleId}`}
-        >
-          {params.value}
-        </Link>
-        {
-          params.data.restCompanyWideRoles.length > 0 &&
-          <span className="createdAtTime badge-date">
-            {`+${params.data.restCompanyWideRoles.length} more..`}
-          </span>
-        }
-      </h5>
-    </>
-  ) : <NoDataCell />
 
   const RegionalWideRoleRenderer = params => params.value ? (
     <>
@@ -231,18 +227,6 @@ const User: FC = () => {
         )}
       </>
     );
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    statusRenderer: StatusRenderer,
-    emailRenderer: CommonRendererWithCopy,
-    createdByRenderer: CreatedByRenderer,
-    companyWideRoleRenderer: CompanyWideRoleRenderer,
-    regionalWideRoleRenderer: RegionalWideRoleRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    commonRenderer: CommonRenderer
-  };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -330,11 +314,6 @@ const User: FC = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, filters, sorting, entityRoleRedirectDetails]);
 
-  useEffect(() => {
-    fetchAllUsers()
-    fetchLoggedInUserEntities()
-    fetchLoggedInUserRole()
-  }, [])
   const fetchLoggedInUserRole = async () => {
     let roleIds = [];
     await axiosInstance().get(`/user/${user.user?._id}`).then(({ data: { data } }) => {
@@ -816,24 +795,23 @@ const User: FC = () => {
             showClone={false}
             onClone={() => { }}
             renderedFrom={renderedFrom} />
-
             :
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={110}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchUsers}
-            />}
-
+            Object.keys(frameWorkComponent).length > 0 ?
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameWorkComponent}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                actionWidth={110}
+                loading={loading}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchUsers}
+              /> : null}
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (
           <MessageDialog

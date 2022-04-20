@@ -14,6 +14,7 @@ import { AiFillAccountBook } from 'react-icons/ai';
 import { TextField, InputAdornment } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import routes from 'src/components/Helpers/Routes';
+import { staticHiddenResource } from "../../constants/helpers"
 
 function Dashboard() {
   const history = useHistory();
@@ -94,7 +95,7 @@ function Dashboard() {
         if (u?.name === 'Product Builder' && process.env.REACT_APP_ENV === 'staging') {
           return false;
         }
-        if (("hiddenResource" in u) && u?.hiddenResource) {
+        if (u?.isHidden || staticHiddenResource?.includes(u?.name)) {
           return false
         }
         return sec === u.sectionName && u.isRead;
@@ -271,20 +272,18 @@ function Dashboard() {
                           <Paper className={styles.back_box}>
                             <Box padding={2}>
                               <Grid>
-                                {
-                                  <Box height="215px" style={{ overflowY: 'auto' }} className={styles.back_box_content}>
-                                    {
-                                      section.items.
-                                        filter((item) => !(("hiddenResource" in item) && item?.hiddenResource)).map((item) => (
-                                          <div key={item.name}>
-                                            <Box marginY={1} component="div" className={styles.list_component}>
-                                              <Typography paragraph className={styles.hover_list_box}>
-                                                <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
-                                              </Typography>
-                                            </Box>
-                                          </div>
-                                        ))}
-                                  </Box>
+                                {<Box height="215px" style={{ overflowY: 'auto' }} className={styles.back_box_content}>
+                                  {section.items.
+                                    filter((item) => !(item?.isHidden)).map((item) => (
+                                      <div key={item.name}>
+                                        <Box marginY={1} component="div" className={styles.list_component}>
+                                          <Typography paragraph className={styles.hover_list_box}>
+                                            <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
+                                          </Typography>
+                                        </Box>
+                                      </div>
+                                    ))}
+                                </Box>
                                 }
                               </Grid>
                             </Box>
