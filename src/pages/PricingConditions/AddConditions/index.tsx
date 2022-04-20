@@ -12,15 +12,7 @@ import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
-import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
-import { FaCartArrowDown, FaCartPlus } from "react-icons/fa";
-import { ConsoleView, isMobile } from "react-device-detect";
-import CustomSwipableList from "../../../components/SwipableListComponents/CustomSwipableList";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
-import { prepareDataForGrid, productTemplate } from "../../../constants/helpers";
-import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns, genrateColoum } from "../../../constants/columns"
-import { GrBusinessService } from "react-icons/all";
 import AddExistingMaterialDialog from "../AddExistingMaterialDialog";
 import ConditionDialog from "./ConditionDialog";
 import { startCase } from 'lodash';
@@ -157,6 +149,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         { field: "pricingMethod", headerName: "Pricing Method", show: true, cellRenderer: "commonRenderer" },
     ];
 
+    console.log(condition)
+
     return (<Fragment>
         <Box display="flex" justifyContent="space-between" m={1} mt={2}>
             <Box display="flex" alignItems="center">
@@ -245,6 +239,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                     setAddMaterialDialog({ open: false, materialType: "" })
                 }}
                 handleAdd={handleAdd}
+                ignoreIds={condition?.map((e) => e.materialId)}
             />
         )}
         {(showDialog.open && conditionData) && (

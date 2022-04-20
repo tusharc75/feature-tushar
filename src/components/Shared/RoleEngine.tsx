@@ -32,12 +32,14 @@ const RoleEngine = (props: RoleProps) => {
   const [isCreateChecked, setIsCreateChecked] = useState(false);
   const [isUpdateChecked, setIsUpdateChecked] = useState(false);
   const [isDeleteChecked, setIsDeleteChecked] = useState(false);
+  const [isHiddenChecked, setIsHiddenChecked] = useState(false);
 
   useEffect(() => {
     let isAnyReadFoundUnchecked = false;
     let isAnyCreateFoundUnchecked = false;
     let isAnyUpdateFoundUnchecked = false;
     let isAnyDeleteFoundUnchecked = false;
+    let isAnyHiddenFoundUnchecked = false
 
     resource.forEach((_resource) => {
 
@@ -83,12 +85,19 @@ const RoleEngine = (props: RoleProps) => {
       if (_resource.isDelete === false && !_resource.isDeleteDisabled && isAnyDeleteFoundUnchecked === false) {
         isAnyDeleteFoundUnchecked = true
       }
+
+      if (!_resource.isHidden && isAnyHiddenFoundUnchecked === false) {
+        isAnyHiddenFoundUnchecked = true
+      }
+
+
     });
 
     setIsReadChecked(!isAnyReadFoundUnchecked);
     setIsCreateChecked(!isAnyCreateFoundUnchecked);
     setIsUpdateChecked(!isAnyUpdateFoundUnchecked);
     setIsDeleteChecked(!isAnyDeleteFoundUnchecked);
+    setIsHiddenChecked(!isAnyHiddenFoundUnchecked);
 
   }, [field, resource])
 
@@ -332,10 +341,22 @@ const RoleEngine = (props: RoleProps) => {
                 label="Delete"
               />
             </TableCell>
+            <TableCell align="center">
+              <FormControlLabel
+                control={<Checkbox
+                  disabled={isDisable}
+                  checked={isHiddenChecked}
+                  onChange={(e) => {
+                    setIsHiddenChecked(e.target.checked)
+                    updateRoles("isHidden", e.target.checked)
+                  }}
+                />}
+                label="Hidden"
+              />
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {/* <Container maxWidth={"md"}> */}
           {resource.map((_resource, outerIndex) => {
             const resourceFields = field
               .filter((_field) => _field.fieldData.resource === _resource.name)
@@ -431,6 +452,17 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
               "resource",
               _resource.resourceId,
               "isDelete"
+            )}
+          />
+        </TableCell>
+        <TableCell align="center">
+          <Checkbox
+            disabled={isDisable}
+            checked={!!_resource.isHidden}
+            onChange={handleChange(
+              'resource',
+              _resource.resourceId,
+              'isHidden',
             )}
           />
         </TableCell>

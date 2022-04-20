@@ -81,7 +81,7 @@ export default function ManageLeadDialog({
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [formValues, setFormValues] = useState({})
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [cloneHeading,setCloneHeading] = useState('')
+  const [cloneHeading, setCloneHeading] = useState('')
 
   useEffect(() => {
     if (isNew) {
@@ -241,7 +241,7 @@ export default function ManageLeadDialog({
           axiosInstance()
             .get(`${leadApi}/${leadId}?entity=${selectedEntity}`)
             .then(({ data: { data } }) => {
-              
+
               const { _id, firstName, lastName, middleName, ...rest } = data
 
               setCloneHeading(`${firstName || ''} ${middleName || ''} ${lastName || ''}`)
@@ -584,9 +584,11 @@ export default function ManageLeadDialog({
                                                 setNewMarketSegmentId(null);
                                                 handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : "")
                                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                setNewSubMarketSegmentId(null);
-                                                handleValuesChange(formFieldNames.subMarketSegment, "")
-                                                setFieldValue(formFieldNames.subMarketSegment, "")
+                                                if (leadData?.fields?.some((e) => e.fieldName === formFieldNames.subMarketSegment)) {
+                                                  setNewSubMarketSegmentId(null);
+                                                  handleValuesChange(formFieldNames.subMarketSegment, "")
+                                                  setFieldValue(formFieldNames.subMarketSegment, "")
+                                                }
                                                 marketSegmentChange(val && val.optionValue ? val.optionValue : "");
                                               }}
                                               size="small"

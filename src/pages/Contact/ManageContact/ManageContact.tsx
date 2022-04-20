@@ -25,6 +25,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import ManageContactDialog from './index';
 import ManageAddressDialog from "../../../components/Address/ManageAddressDialog"
 import axiosInstance from "../../../axios/axiosInstance";
+import routes from 'src/components/Helpers/Routes';
 
 const arr = [...Array(9).keys()];
 
@@ -96,9 +97,9 @@ export default function ManageContact(props) {
           });
         }
       }
-      
+
       const addressDataDropdown = contactData.fields.find((d) => d.fieldName === "mailingAddress")?.option ?? [];
-      setAddressDataSource(addressDataDropdown)  
+      setAddressDataSource(addressDataDropdown)
 
       if (fromProject) {
         setOwnerCollaboratorCommonDataSource(owners);
@@ -128,17 +129,17 @@ export default function ManageContact(props) {
   }, [contactData.fields]);
 
 
-  useEffect(()=>{
+  useEffect(() => {
     if (contactId) {
       axiosInstance()
         .get(`/${contactApi}/${contactId}`)
         .then(({ data: { data } }) => {
           const { _id, firstName, lastName, middleName, email, reportsTo, ...rest } = data
 
-         setCloneHeading(`${firstName ?? ''} ${middleName ?? ''} ${lastName ?? ''}`);
+          setCloneHeading(`${firstName ?? ''} ${middleName ?? ''} ${lastName ?? ''}`);
 
-          
-       
+
+
         })
     }
   })
@@ -271,14 +272,9 @@ export default function ManageContact(props) {
               setShowConfirmDialog(true);
             }
           }}
-          title={
-            isClone
-              ? `Clone - ${cloneHeading}`
-              : isNew
-                ? contactResource === 'customerContact'
-                  ? 'Add Customer Contact'
-                  : 'Add Supplier Contact'
-                : `Editing ${contactData.initialValues?.firstName ?? ''} ${contactData.initialValues?.lastName ?? ''}`
+          title={isClone ? `Clone - ${cloneHeading}` : isNew
+            ? contactResource === 'customerContact' ? `Add ${routes?.customerContact?.title}` : `Add ${routes?.supplierContact?.title}`
+            : `Editing ${contactData?.initialValues?.firstName ?? ''} ${contactData?.initialValues?.lastName ?? ''}`
           }
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
@@ -637,19 +633,19 @@ export default function ManageContact(props) {
                           setAddressOpen({ open: false, isClone: false })
                           if (data?.isAlreadyExist === true) {
                             let tempAddress = addressDataSource.find(d => d?.optionLabel === data?.fullAddress)
-                            setFieldValue("mailingAddress", [tempAddress.optionValue, ...values.mailingAddress ])
-                           
+                            setFieldValue("mailingAddress", [tempAddress.optionValue, ...values.mailingAddress])
+
                           }
                           else {
-                          setFieldValue("mailingAddress", [data._id, ...values.mailingAddress ])
-                          setAddressDataSource((prevState) => [...prevState,
-                          {
-                            default: false,
-                            optionLabel: data.fullAddress,
-                            optionValue: data._id,
-                            order: addressDataSource.length + 1,
-                          }]);
-                        }
+                            setFieldValue("mailingAddress", [data._id, ...values.mailingAddress])
+                            setAddressDataSource((prevState) => [...prevState,
+                            {
+                              default: false,
+                              optionLabel: data.fullAddress,
+                              optionValue: data._id,
+                              order: addressDataSource.length + 1,
+                            }]);
+                          }
                         }}
                       />
                     )}
