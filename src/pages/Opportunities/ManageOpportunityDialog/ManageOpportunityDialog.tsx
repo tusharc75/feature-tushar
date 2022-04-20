@@ -246,7 +246,7 @@ export default function ManageOpportunityDialog({
           }
         }
 
-        if (!isClone && isNew) {
+        if (!isClone && isNew && filterData?.some((e) => e.fieldName === "currency")) {
           const selectedEntityDetails = user?.entity?.find((d) => d?._id === selectedEntity);
           if (selectedEntityDetails) {
             initialData['currency'] = selectedEntityDetails.currency || '';
@@ -499,13 +499,19 @@ export default function ManageOpportunityDialog({
                                                 }));
 
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                                setFieldValue('marketSegment', value?.marketSegment ?? '');
-                                                setFieldValue('subMarketSegment', value?.subMarketSegment ?? '');
-
-                                                setFieldValue('countryBillTo', value?.billingAddress?.length > 0 ? value?.billingAddress : []);
-                                                setFieldValue('countrySellTo', value?.shippingAddress?.length > 0 ? value?.shippingAddress : []);
-
-                                                marketSegmentChange(value?.marketSegment ?? '');
+                                                if (entityData?.fields?.some((e) => e.fieldName === "marketSegment")) {
+                                                  setFieldValue('marketSegment', value?.marketSegment ?? '');
+                                                  marketSegmentChange(value?.marketSegment ?? '');
+                                                }
+                                                if (entityData?.fields?.some((e) => e.fieldName === "subMarketSegment")) {
+                                                  setFieldValue('subMarketSegment', value?.subMarketSegment ?? '');
+                                                }
+                                                if (entityData?.fields?.some((e) => e.fieldName === "countryBillTo")) {
+                                                  setFieldValue('countryBillTo', value?.billingAddress?.length > 0 ? value?.billingAddress : []);
+                                                }
+                                                if (entityData?.fields?.some((e) => e.fieldName === "countrySellTo")) {
+                                                  setFieldValue('countrySellTo', value?.shippingAddress?.length > 0 ? value?.shippingAddress : []);
+                                                }
 
                                                 // onCountryBillToDropDownOpen(value && value.optionValue ? value.optionValue : '');
                                                 // onCountrySellToDropDownOpen(value && value.optionValue ? value.optionValue : '');

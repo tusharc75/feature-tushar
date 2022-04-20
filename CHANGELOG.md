@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.97.0](https://github.com/vebholic/oms_frontend/compare/v2.96.0...v2.97.0) (2022-04-20)
+
+
+### Features
+
+* image upload button add in rich text editor ([8b445e3](https://github.com/vebholic/oms_frontend/commit/8b445e3ae328d75b9f43a42bfcde0514c391950b))
+
+
+### Bug Fixes
+
+* bug fix ([24e7a79](https://github.com/vebholic/oms_frontend/commit/24e7a7907384168381a91470235ff3f349eee37f))
+* bug fix ([6b29d3d](https://github.com/vebholic/oms_frontend/commit/6b29d3db6098c4df2df53c00f69aebce90c6eb81))
+* bug fix ([84fb92d](https://github.com/vebholic/oms_frontend/commit/84fb92d42ad11c96a090b9bf20d3ccbdc5080b34))
+* **dashboard:** fix and change' ([05b5c51](https://github.com/vebholic/oms_frontend/commit/05b5c518c32ab225a251d641c73e44650de4a927))
+
 ## [2.96.0](https://github.com/vebholic/oms_frontend/compare/v2.95.2...v2.96.0) (2022-04-19)
 
 

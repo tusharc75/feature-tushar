@@ -35,6 +35,8 @@ import { kebabCase, orderBy, uniqBy, camelCase } from 'lodash';
 //   }
 // };
 
+export const staticHiddenResource = ["Dashboard", "Report"]
+
 export const defaultActivityShow = false;
 
 export const vapidKey = 'BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4';
@@ -191,6 +193,7 @@ export const sidebarResource = {
   bulkAssetCreation: 'Bulk Asset Creation',
   pos: 'Pos',
   repairType: 'Repair Type',
+  report: "Report"
 };
 
 export const resourceNames = {
@@ -250,7 +253,8 @@ export const resourceNames = {
   transferInventory: 'Transfer Inventory',
   wellMaster: 'Well Master',
   bulkAssetCreation: 'Bulk Asset Creation',
-  pos: 'Pos'
+  pos: 'Pos',
+  report: "Report"
 };
 
 export const primaryFields = {
@@ -319,7 +323,8 @@ export const RESOURCE_LABEL = {
   wellMaster: "Well Master",
   bulkAssetCreation: "Bulk Asset Creation",
   pos: "eRECS",
-  repairType: "Repair Types"
+  repairType: "Repair Types",
+  report: "Report"
 };
 
 export const CHILD_RESOURCE = {
