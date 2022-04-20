@@ -27,6 +27,7 @@ import { SiCivicrm } from "react-icons/si";
 import { AiFillSetting } from "react-icons/ai"
 import { BsChatLeftTextFill } from "react-icons/bs"
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
+import { staticHiddenResource } from "../../constants/helpers"
 
 
 import { AccountCircle } from "@material-ui/icons";
@@ -187,7 +188,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
 
       if (entityData?.resource && entityData.resource.length) {
         entityData.resource.forEach((item) => {
-          if (!sections.includes(item.sectionName) && item.isRead) {
+          if (!sections.includes(item.sectionName) && item.isRead && item.sectionName !== "") {
             sections.push(item.sectionName);
           }
         });
@@ -204,7 +205,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       sections = sortBy(sections, function (item: any) {
         return levalOrderBy?.indexOf(item)
       });
-
 
       return sections.map((section) => {
         const lists = user.role.sideBar.filter(
@@ -223,7 +223,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             if (item?.name === "Product Builder" && process.env.REACT_APP_ENV === 'staging') {
               return false
             }
-            if (("hiddenResource" in item) && item?.hiddenResource) {
+            if (item?.isHidden || staticHiddenResource?.includes(item?.name)) {
               return false
             }
             return item.isRead === true
@@ -291,7 +291,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                   .join(" ")}
               />
             </ListItem>
-            {!isOffline &&
+            {(permissions?.dashboard?.isRead && !isOffline) &&
               <Link to="/dashboards">
                 <Tooltip title={!toggleDrawer ? "Dashboards" : ""}>
                   <ListItem
@@ -305,9 +305,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                     <ListItemText primary="Dashboards" />
                   </ListItem>
                 </Tooltip>
-              </Link>
-            }
-            {(permissions?.rentalManagement?.isRead && !isOffline) &&
+              </Link>}
+            {(permissions?.report?.isRead && !isOffline) &&
               <Link to="/reports">
                 <Tooltip title={!toggleDrawer ? "Reports" : ""}>
                   <ListItem
