@@ -70,16 +70,10 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
       let totalOfferedCost = offeredCostData.reduce((acc, val) => acc + val);
       let totalOfferedVolume = offeredVolumeData.reduce((acc, val) => acc + val);
 
-      const grossMarginPercent =
-        totalBookedCost && totalBookedValue
-          ? Math.floor(((totalBookedValue - totalBookedCost) / totalBookedValue / (totalBookedValue - totalBookedCost)) * 100)
-          : 0;
-      const offeredMarginPercent =
-        totalOfferedCost && totalOfferedValue
-          ? Math.floor(((totalOfferedValue - totalOfferedCost) / totalOfferedValue / (totalOfferedValue - totalOfferedCost)) * 100)
-          : 0;
-      const grossMargin = totalBookedValue && totalBookedCost ? (totalBookedValue - totalBookedCost) / totalBookedValue : 0;
-      const offeredMargin = totalOfferedCost && totalOfferedValue ? (totalOfferedValue - totalOfferedCost) / totalOfferedValue : 0;
+      const grossMarginPercent = totalBookedCost && totalBookedValue ? ((totalBookedValue - totalBookedCost) / totalBookedValue) * 100 : 0;
+      const offeredMarginPercent = totalOfferedCost && totalOfferedValue ? ((totalOfferedValue - totalOfferedCost) / totalOfferedValue) * 100 : 0;
+      const grossMargin = totalBookedValue && totalBookedCost ? totalBookedValue - totalBookedCost : 0;
+      const offeredMargin = totalOfferedCost && totalOfferedValue ? totalOfferedValue - totalOfferedCost : 0;
       const hitRatioValue = totalBookedValue && totalOfferedValue ? totalBookedValue / totalOfferedValue : 0;
       const hitRatioCost = totalBookedCost && totalOfferedCost ? totalBookedCost / totalOfferedCost : 0;
       const hitRatioMargin = grossMargin && offeredMargin ? grossMargin / offeredMargin : 0;
@@ -96,7 +90,7 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
             : 0,
           ['Booked Gross Margin']: `${
             grossMargin ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, grossMargin).fullFormatAmount : 0
-          } (${grossMarginPercent}%)`
+          } (${grossMarginPercent > 0 ? grossMarginPercent.toFixed(2) : 0}%)`
         };
 
         dataObject = {
@@ -123,7 +117,7 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
             : 0,
           ['Offered Gross Margin']: `${
             offeredMargin ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, offeredMargin).fullFormatAmount : 0
-          } (${offeredMarginPercent}%)`
+          } (${offeredMarginPercent > 0 ? offeredMarginPercent.toFixed(2) : 0}%)`
         };
 
         dataObject = {
