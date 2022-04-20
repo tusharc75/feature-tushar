@@ -149,7 +149,9 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
 
               let tempData = { ...rest }
               let tempObjKeysWithValues = getObjKeysWithValues(tempData, newFields)
-              tempObjKeysWithValues["projectManager"] = user._id
+              if (newFields?.some((e) => e.fieldName === "projectManager")) {
+                tempObjKeysWithValues["projectManager"] = user._id
+              }
               setInitialData({
                 fields: newFields,
                 values: tempObjKeysWithValues,
@@ -176,7 +178,12 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
         else {
           const createFields = filterData.map(m => m.fieldData)
           let tempObjKeysWithValues = getObjKeys("", createFields);
-          tempObjKeysWithValues["projectManager"] = user._id;
+          if (createFields.some((e) => e.fieldName === "currency")) {
+            tempObjKeysWithValues["currency"] = user?.brandCurrency;
+          }
+          if (createFields?.some((e) => e.fieldName === "projectManager")) {
+            tempObjKeysWithValues["projectManager"] = user._id;
+          }
           setInitialData({
             fields: createFields,
             values: tempObjKeysWithValues,
@@ -433,12 +440,14 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                               onChange={(e, val) => {
                                                 setNewMarketSegmentId(null);
                                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                setNewSubMarketSegmentId(null);
-                                                setFieldValue(formFieldNames.subMarketSegment, "")
-                                                handleValuesChange({
-                                                  [field.fieldName]: val && val.optionValue ? val.optionValue : "",
-                                                  [formFieldNames.subMarketSegment]: ""
-                                                })
+                                                if (initialData?.fields?.some((e) => e.fieldName === formFieldNames.subMarketSegment)) {
+                                                  setNewSubMarketSegmentId(null);
+                                                  setFieldValue(formFieldNames.subMarketSegment, "")
+                                                  handleValuesChange({
+                                                    [field.fieldName]: val && val.optionValue ? val.optionValue : "",
+                                                    [formFieldNames.subMarketSegment]: ""
+                                                  })
+                                                }
                                                 marketSegmentChange(val && val.optionValue ? val.optionValue : "");
                                               }}
                                               size="small"
@@ -667,11 +676,13 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                                       field.fieldName,
                                                       value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
                                                     );
-                                                    setFieldValue("projectManager", "");
-                                                    handleValuesChange({
-                                                      [field.fieldName]: value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [],
-                                                      "projectManager": ""
-                                                    })
+                                                    if (initialData?.fields?.some((e) => e.fieldName === "projectManager")) {
+                                                      setFieldValue("projectManager", "");
+                                                      handleValuesChange({
+                                                        [field.fieldName]: value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [],
+                                                        "projectManager": ""
+                                                      })
+                                                    }
                                                   }}
                                                 />
                                               ) : field.fieldName === "projectManager" ? (
