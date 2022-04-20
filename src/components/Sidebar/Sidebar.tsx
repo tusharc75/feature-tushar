@@ -181,14 +181,14 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       }
 
       user.role.sideBar.forEach((item) => {
-        if (!sections.includes(item.sectionName) && item.isRead) {
+        if (!sections.includes(item.sectionName) && item.isRead && !item.isHidden) {
           sections.push(item.sectionName);
         }
       });
 
       if (entityData?.resource && entityData.resource.length) {
         entityData.resource.forEach((item) => {
-          if (!sections.includes(item.sectionName) && item.isRead && item.sectionName !== "") {
+          if (!sections.includes(item.sectionName) && item.isRead && !item.isHidden && item.sectionName !== "") {
             sections.push(item.sectionName);
           }
         });
