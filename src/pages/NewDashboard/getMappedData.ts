@@ -16,12 +16,9 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     const offeredVolumeData = [];
     const offeredValueData = [];
     const offeredCostData = [];
-    const bookedMarginData = []
-    const offeredMarginData = []
     const labels = [];
     const budget = [];
     const volumeUnit = data[0]?.volumeUnit;
-    const currency = data[0]?.currency;
 
     data = data.sort((a, b) => {
       const aDate = new Date(a.date).getTime();
@@ -37,32 +34,24 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
           getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedCost || 0, currencyFrom, currencyTo),
           getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedValue || 0, currencyFrom, currencyTo),
           getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedCost || 0, currencyFrom, currencyTo),
-          getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedMargin || 0, currencyFrom, currencyTo),
-          getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedMargin || 0, currencyFrom, currencyTo),
           getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget || 0, currencyFrom, currencyTo)
         ]);
         const bookedValue: any = salesData[0]?.rates[currencyTo];
         const bookedCost: any = salesData[1]?.rates[currencyTo];
         const offeredValue: any = salesData[2]?.rates[currencyTo];
         const offeredCost: any = salesData[3]?.rates[currencyTo];
-        const bookedMargin: any = salesData[4]?.rates[currencyTo]
-        const offeredMargin: any = salesData[5]?.rates[currencyTo]
-        const budgetData: any = salesData[6]?.rates[currencyTo];
+        const budgetData: any = salesData[4]?.rates[currencyTo];
 
         bookedValueData.push(bookedValue || 0);
         bookedCostData.push(bookedCost || 0);
         offeredValueData.push(offeredValue || 0);
         offeredCostData.push(offeredCost || 0);
-        bookedMarginData.push(bookedMargin || 0);
-        offeredMargin.push(offeredMargin || 0)
         budget.push(budgetData || 0);
       } else {
         bookedValueData.push(d.totalBookedValue || 0);
         bookedCostData.push(d.totalBookedCost || 0);
         offeredValueData.push(d.totalOfferedValue || 0);
         offeredCostData.push(d.totalOfferedCost || 0);
-        bookedMarginData.push(d.totalBookedMargin || 0);
-        offeredMarginData.push(d.totalOfferedMargin || 0);
         budget.push(d.budget || 0);
       }
 
@@ -80,14 +69,17 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
       let totalOfferedValue = offeredValueData.reduce((acc, val) => acc + val);
       let totalOfferedCost = offeredCostData.reduce((acc, val) => acc + val);
       let totalOfferedVolume = offeredVolumeData.reduce((acc, val) => acc + val);
-      let totalBookedMargin = bookedMarginData.reduce((acc, val) => acc + val);
-      let totalOfferedMargin = offeredMarginData.reduce((acc, val) => acc + val);
 
-      const grossMarginPercent = totalBookedMargin && totalBookedValue ? Math.floor(((totalBookedMargin - totalBookedValue) / totalBookedMargin) * 100) : 0;
+      const grossMarginPercent =
+        totalBookedCost && totalBookedValue
+          ? Math.floor(((totalBookedValue - totalBookedCost) / totalBookedValue / (totalBookedValue - totalBookedCost)) * 100)
+          : 0;
       const offeredMarginPercent =
-      totalOfferedMargin && totalOfferedValue ? Math.floor(((totalOfferedMargin - totalOfferedValue) / totalOfferedMargin) * 100) : 0;
-      const grossMargin = totalBookedMargin && totalBookedValue ? totalBookedValue / totalBookedValue : 0;
-      const offeredMargin = totalOfferedMargin && totalOfferedValue ? totalOfferedMargin / totalOfferedValue : 0;
+        totalOfferedCost && totalOfferedValue
+          ? Math.floor(((totalOfferedValue - totalOfferedCost) / totalOfferedValue / (totalOfferedValue - totalOfferedCost)) * 100)
+          : 0;
+      const grossMargin = totalBookedValue && totalBookedCost ? (totalBookedValue - totalBookedCost) / totalBookedValue : 0;
+      const offeredMargin = totalOfferedCost && totalOfferedValue ? (totalOfferedValue - totalOfferedCost) / totalOfferedValue : 0;
       const hitRatioValue = totalBookedValue && totalOfferedValue ? totalBookedValue / totalOfferedValue : 0;
       const hitRatioCost = totalBookedCost && totalOfferedCost ? totalBookedCost / totalOfferedCost : 0;
       const hitRatioMargin = grossMargin && offeredMargin ? grossMargin / offeredMargin : 0;
@@ -96,17 +88,21 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
       if (chart.uniqueId === 'bookedRevenueCard') {
         const cardData = {
           ['Total Booked Volume']: `${totalBookedVolume.toFixed(2)} ${volumeUnit}`,
-          ['Total Booked Value']: totalBookedValue ? formatAmountWithCurrency(currencyTo || currencyFrom, totalBookedValue).fullFormatAmount : 0,
-          ['Total Booked Cost']: totalBookedCost ? formatAmountWithCurrency(currencyTo || currencyFrom, totalBookedCost).fullFormatAmount : 0,
+          ['Total Booked Value']: totalBookedValue
+            ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalBookedValue).fullFormatAmount
+            : 0,
+          ['Total Booked Cost']: totalBookedCost
+            ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalBookedCost).fullFormatAmount
+            : 0,
           ['Booked Gross Margin']: `${
-            grossMargin ? formatAmountWithCurrency(currencyTo || currencyFrom, grossMargin).fullFormatAmount : 0
+            grossMargin ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, grossMargin).fullFormatAmount : 0
           } (${grossMarginPercent}%)`
         };
 
         dataObject = {
           additionalData: {
             volumeUnit,
-            currency,
+            currencyTo,
             ['Total Booked Volume']: isNaN(hitRatioVolume) ? 0 : hitRatioVolume * 100,
             ['Total Booked Value']: isNaN(hitRatioValue) ? 0 : hitRatioValue * 100,
             ['Total Booked Cost']: isNaN(hitRatioCost) ? 0 : hitRatioCost * 100,
@@ -119,10 +115,14 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
       if (chart.uniqueId === 'offeredRevenueCard') {
         const cardData = {
           ['Total Offered Volume']: `${totalOfferedVolume.toFixed(2)} ${volumeUnit}`,
-          ['Total Offered Value']: totalOfferedValue ? formatAmountWithCurrency(currencyTo || currencyFrom, totalOfferedValue).fullFormatAmount : 0,
-          ['Total Offered Cost']: totalOfferedCost ? formatAmountWithCurrency(currencyTo || currencyFrom, totalOfferedCost).fullFormatAmount : 0,
+          ['Total Offered Value']: totalOfferedValue
+            ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalOfferedValue).fullFormatAmount
+            : 0,
+          ['Total Offered Cost']: totalOfferedCost
+            ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalOfferedCost).fullFormatAmount
+            : 0,
           ['Offered Gross Margin']: `${
-            offeredMargin ? formatAmountWithCurrency(currencyTo || currencyFrom, offeredMargin).fullFormatAmount : 0
+            offeredMargin ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, offeredMargin).fullFormatAmount : 0
           } (${offeredMarginPercent}%)`
         };
 
