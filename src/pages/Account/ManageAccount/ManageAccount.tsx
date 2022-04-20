@@ -27,6 +27,7 @@ import ManageMarketSegmentDialog from "../../MarketSegment/ManageMarketSegmentDi
 import { FaDiceOne } from "react-icons/fa";
 import ManageAccountDialog from "./index";
 import ManageAddressDialog from "../../../components/Address/ManageAddressDialog";
+import routes from "src/components/Helpers/Routes";
 
 const arr = [...Array(9).keys()];
 
@@ -347,17 +348,9 @@ export default function ManageAccount(props) {
               setShowConfirmDialog(true)
             }
           }}
-          title={
-            isClone
-              ?
-              `Clone - ${accountNameForClone}`
-              :
-              isNew
-                ? accountResource === "customerAccount" ? "Add Customer Account" : "Add Supplier Account"
-                : `Editing ${accountData.initialValues.accountName
-                  ? accountData.initialValues.accountName
-                  : ""
-                }`
+          title={isClone ? `Clone - ${accountNameForClone}` :
+            isNew ? accountResource === "customerAccount" ? `Add ${routes?.customerAccount?.title}` : `Add ${routes?.supplierAccount?.title}`
+              : `Editing ${accountData.initialValues.accountName ? accountData.initialValues.accountName : ""}`
           }
         />
         {accountData.fields.length > 0 ? (

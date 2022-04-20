@@ -17,7 +17,6 @@ import useColumns, { getStaticFields, getFrameworkComponents } from "../../../co
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 import { reducer, intialState, } from "../../../components/AgGridComponents/CustomAgGrid";
-//import { getColumnData } from "../../../constants/columns"
 
 
 
