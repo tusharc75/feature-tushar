@@ -199,6 +199,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         "ROM",
         "Accounts",
         "Product Setup",
+        "Dynamic Forms",
         "Activities",
         "Admin Portal",
       ];
