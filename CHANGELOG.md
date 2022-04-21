@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.97.1](https://github.com/vebholic/oms_frontend/compare/v2.97.0...v2.97.1) (2022-04-21)
+
+
+### Bug Fixes
+
+* bug fix ([33bb77d](https://github.com/vebholic/oms_frontend/commit/33bb77d705f5efad3cca67fbde320a4deb607734))
+* bug fix ([635f926](https://github.com/vebholic/oms_frontend/commit/635f92649712bd1f345197d5d5b3d3ab03aa1e33))
+* bug fix ([3f7a497](https://github.com/vebholic/oms_frontend/commit/3f7a497e301211d859069d8406154588decfab6a))
+* bug fix ([7eb1c08](https://github.com/vebholic/oms_frontend/commit/7eb1c08c00e7e291f96cbd14c98cd642420d0d88))
+* **dashboard:** fix ([2ff6931](https://github.com/vebholic/oms_frontend/commit/2ff693119938afe2dd68866a59307559bf5256a3))
+* **dashboard:** fix margin percent ([0530fef](https://github.com/vebholic/oms_frontend/commit/0530fef93a296bcf16064b03f762ba7af9fdb863))
+* initialized currency in project sale and opportunity dialog ([9a2cf40](https://github.com/vebholic/oms_frontend/commit/9a2cf40d00861cdec512a62e9bd82313992e4684))
+* lead and project sales field conditions ([be8ab03](https://github.com/vebholic/oms_frontend/commit/be8ab03da7e510e6be8ef854a5ae92aa9b742597))
+* oppurtunity dialog fixes ([3176d8d](https://github.com/vebholic/oms_frontend/commit/3176d8dd3bfb93101c13025696b9a5da26f29045))
+
 ## [2.97.0](https://github.com/vebholic/oms_frontend/compare/v2.96.0...v2.97.0) (2022-04-20)
 
 

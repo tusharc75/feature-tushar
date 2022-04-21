@@ -35,6 +35,8 @@ import { camelCase } from "lodash";
 import { isMobile, isTablet } from 'react-device-detect'
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { setUpindexDB, objectStore, insertUpdate, findAll, findOne } from '../../constants/indexdbhelper';
+import { CheckboxRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+
 
 let rentalManagementTimeout;
 
@@ -93,6 +95,10 @@ const RentalManagement = () => {
     fetchGridColumns()
   }, [])
 
+  const extraColumns = [
+    { field: "subleaseAssets", headerName: "Sublease Assets", show: true, filter: false, sortable: false, cellRenderer: "checkboxRenderer" },
+  ];
+
   useEffect(() => {
     return history.listen(location => {
       const { type }: any = queryString.parse(history.location.search);
@@ -148,10 +154,14 @@ const RentalManagement = () => {
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
+      checkboxRenderer: CheckboxRenderer,
       actionsRenderer: ActionsRenderer
     }
     setFrameWorkComponent({ ...tempFrameworkComponent })
     let staticFields = getStaticFields()
+    if (permissions?.sublease) {
+      staticFields = [...extraColumns, ...staticFields]
+    }
     staticFields.forEach(field => {
       columns.push(checkStaticField(renderedFrom, field))
     })
