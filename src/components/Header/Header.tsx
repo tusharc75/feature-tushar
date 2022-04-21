@@ -770,6 +770,7 @@ const Header = ({ toggleDrawer }) => {
 
   const entitiesMenu = (
     <Menu
+    style={{ marginTop:'40px'}}
       anchorEl={entitiesEl}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       keepMounted
