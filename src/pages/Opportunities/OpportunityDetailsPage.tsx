@@ -40,8 +40,8 @@ import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { SVG } from '../../assets';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
-import {MdDelete, MdEdit} from "react-icons/md";
-import {BiEdit} from "react-icons/bi";
+import { MdDelete, MdEdit } from "react-icons/md";
+import { BiEdit } from "react-icons/bi";
 import contactClass from "../Contact/contact.module.scss";
 import accountClass from "../Account/account.module.scss";
 
@@ -572,7 +572,7 @@ function OpportunityDetailsPage() {
       </Grid>
       <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
         <div>
-          <Paper style={isMobile ?{width:"98%"} : {}}>
+          <Paper style={isMobile ? { width: "98%" } : {}}>
             {!opportunityData ? (
               <div>
                 <Skeleton variant="text" width="150px" height="40px" />
@@ -591,13 +591,13 @@ function OpportunityDetailsPage() {
               >
                 {allowedToEdit ? (
                   <Button variant={isMobile && !isTablet ? "text" : "contained"}
-                          color="primary"
-                          size="small"
-                          onClick={handleOpenUpdateDialog}
-                          className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
-                          style={isMobile && !isTablet ? {color:"#43aeaa"} : {}}
+                    color="primary"
+                    size="small"
+                    onClick={handleOpenUpdateDialog}
+                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                    style={isMobile && !isTablet ? { color: "#43aeaa" } : {}}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20}/> : "Edit"}
+                    {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
                   </Button>
                 ) : null}
                 {opportunityPermissions.isDelete &&
@@ -605,9 +605,9 @@ function OpportunityDetailsPage() {
                   user?.user?._id &&
                   opportunityData.owner.optionValue === user.user._id ? (
                   <DeleteButton
-                      text={isMobile && !isTablet ? <MdDelete size={20}/> : "Delete"}
-                      onClick={() => setShowConfirmBox(true)}
-                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                    text={isMobile && !isTablet ? <MdDelete size={20} /> : "Delete"}
+                    onClick={() => setShowConfirmBox(true)}
+                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
 
                   />
                 ) : null}
@@ -619,7 +619,7 @@ function OpportunityDetailsPage() {
               activeStep={activeStep}
               handleMarkAsCompleted={handleMarkAsCompleted}
             />
-           
+
 
             {loading ? (
               <Grid container spacing={2}>
@@ -640,7 +640,7 @@ function OpportunityDetailsPage() {
             )}
 
             <div className="p-3">
-              {opportunityData && (
+              {opportunityData && permissions?.supplierContact?.isRead && (
                 <OpportunityContacts
                   contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
                   title="Supplier Contacts"
@@ -660,7 +660,7 @@ function OpportunityDetailsPage() {
                   isAllowedToUpdate={allowedToEdit}
                 />
               )}
-              {opportunityData && (
+              {opportunityData && permissions?.customerContact?.isRead && (
                 <OpportunityContacts
                   contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
                   title="Customer Contacts"
