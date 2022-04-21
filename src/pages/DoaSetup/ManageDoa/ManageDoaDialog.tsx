@@ -80,10 +80,10 @@ const DoaDialog = ({
       : null
   );
 
-  const tempUserList = from === 'EntityDetailPage' ? userList.filter((v) => v.id !== selectedEntity[0]) : userList.filter((v) => v.id !== 'self');
+  const tempUserList = from === 'EntityDetailPage' ? userList?.filter((v) => v?.id !== selectedEntity[0]) : userList?.filter((v) => v?.id !== 'self');
   const fetchDoa = useCallback(() => {
-    doa.length > 0
-      ? setUsers(doa.map((d) => ({ ...d, user: d.user.map((e) => e._id).toString() })))
+    doa?.length > 0
+      ? setUsers(doa.map((d) => ({ ...d, user: d?.user?.map((e) => e?._id)?.toString() })))
       : setUsers([{ user: tempUserList ? tempUserList[0]?.name : '', amount: 0, disable: false }]);
   }, []);
 

@@ -218,7 +218,7 @@ const BulkAssetCreationDetailsPage = () => {
                                 </div>
                             ) : (
                                 <DetailsPageHeader heading={bulkAssetCreationData?.baNumber} mainPoints={null} showHeading={true}>
-                                    {permissions?.bulkAssetCreation?.isUpdate && allowedToEdit &&
+                                    {permissions?.bulkAssetCreation?.isUpdate && allowedToEdit && !["Completed"]?.includes(bulkAssetCreationData?.status) &&
                                         (
                                             <Button
                                                 variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -299,11 +299,10 @@ const BulkAssetCreationDetailsPage = () => {
                                                         steps={bulkAssetCreationSteps}
                                                         currentStep={currentStep}
                                                         setCurrentStep={setCurrentStep}
-                                                        isStepEnded={false}
+                                                        isStepEnded={["Completed"]?.includes(bulkAssetCreationData?.status)}
                                                         setStepFullScreen={() => setStepFullScreen(true)}
                                                     />
                                                     <ContentFullScreen title={bulkAssetCreationSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
-
                                                         {currentStep === 0 && (
                                                             <Product
                                                                 bulkAssetCreationData={bulkAssetCreationData}
