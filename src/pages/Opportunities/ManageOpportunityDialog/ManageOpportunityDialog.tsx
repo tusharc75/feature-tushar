@@ -1081,8 +1081,10 @@ export default function ManageOpportunityDialog({
                                                       onChange={(e, val) => {
                                                         setNewMarketSegmentId(null);
                                                         setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                                        setNewSubMarketSegmentId(null);
-                                                        setFieldValue(formFieldNames.subMarketSegment, '');
+                                                        if (entityData?.fields?.some((e) => e.fieldName === formFieldNames.subMarketSegment)) {
+                                                          setNewSubMarketSegmentId(null);
+                                                          setFieldValue(formFieldNames.subMarketSegment, '');
+                                                        }
                                                         marketSegmentChange(val && val.optionValue ? val.optionValue : '');
                                                       }}
                                                       size="small"

@@ -128,10 +128,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       icon: <BsCalendarFill size={15} className="sidebar-icon" />,
     },
     {
-      key: "CRM",
-      icon: <FaHandshake size={15} className="sidebar-icon" />,
-    },
-    {
       key: "Activities",
       icon: <MdLocalActivity size={15} className="sidebar-icon" />,
     },
@@ -141,6 +137,10 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     },
     {
       key: "CRM +",
+      icon: <SiCivicrm size={15} className="sidebar-icon" />,
+    },
+    {
+      key: "CRM+",
       icon: <SiCivicrm size={15} className="sidebar-icon" />,
     },
   ];

@@ -123,7 +123,7 @@ const CreateRole = ({
         delete newData.isDeleteDisabled
         delete newData.isReadDisabled
         delete newData.isUpdateDisabled
-
+        delete newData.isHiddenDisabled
         return newData
       })
       const fields = field.map(f => {
@@ -131,7 +131,8 @@ const CreateRole = ({
         delete newData.isCreateDisabled
         delete newData.isReadDisabled
         delete newData.isUpdateDisabled
-
+        delete newData.isHiddenDisabled
+        delete newData.isHidden
         return newData
       })
       setSubmitting(true);
