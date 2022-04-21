@@ -1166,7 +1166,7 @@ export default function QuoteProcess(props) {
       setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
     } else {
       axiosInstance()
-        .get(`/${customerAccount.accountApi}/related/${quoteData?.customerAccountName?.optionValue}`)
+        .get(`/${customerAccount.accountApi}/related/${quoteData?.customerAccount?.optionValue}`)
         .then(({ data: { data } }) => {
           let relatedContacts =
             data[sidebarResource[customerContact.contactResource]] && data[sidebarResource[customerContact.contactResource]]['Account_Name']
@@ -1199,8 +1199,8 @@ export default function QuoteProcess(props) {
           access: true
         },
         {
-          type: quoteData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
-          referenceId: quoteData?.customerAccountName ? quoteData?.customerAccountName?.optionValue : quoteData?.supplierAccountName?.optionValue,
+          type: quoteData?.customerAccount ? customerAccount?.accountResource : supplierAccount?.accountResource,
+          referenceId: quoteData?.customerAccount ? quoteData?.customerAccount?.optionValue : quoteData?.supplierAccountName?.optionValue,
           access: false
         },
         {

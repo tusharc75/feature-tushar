@@ -487,7 +487,8 @@ export default function ManageQuoteDialog({
           }
         });
         let initialData = getObjKeys("", newFields);
-        if (isRenderedFromOpportunity || isRenderedFromProjectSales) {
+        if ((isRenderedFromOpportunity || isRenderedFromProjectSales)
+          && (entityData?.fields?.some((e) => e.fieldName === "opportunity") || entityData?.fields?.some((e) => e.fieldName === "projectSales"))) {
           if (opportunityName) {
             initialData["quoteName"] = opportunityName;
           }
@@ -498,7 +499,7 @@ export default function ManageQuoteDialog({
             const selectedEntityDetails = user?.entity?.find(d => d?._id === selectedEntity)
             const defaultQuotePdfTemplateId = user.user?.quotePDFTemplate ?? '';
 
-            if (selectedEntityDetails) {
+            if (selectedEntityDetails && entityData?.fields?.some((e) => e.fieldName === "currency")) {
               initialData["currency"] = selectedEntityDetails.currency || "";
               setCurrencySymbol(
                 getUniqueCurrencies().find(
@@ -506,7 +507,9 @@ export default function ManageQuoteDialog({
                 )?.symbolNative
               );
             }
-            initialData["pDFTemplate"] = defaultQuotePdfTemplateId;
+            if (entityData?.fields?.some((e) => e.fieldName === "pDFTemplate")) {
+              initialData["pDFTemplate"] = defaultQuotePdfTemplateId;
+            }
           }
         }
 
@@ -545,10 +548,11 @@ export default function ManageQuoteDialog({
     if (
       accountId &&
       accountResource !== customerAccount.accountResource &&
-      !isRenderedFromOpportunity
+      !isRenderedFromOpportunity &&
+      entityData?.fields?.some((e) => e.fieldName === "supplierAccountName")
     )
       values["supplierAccountName"] = [accountId];
-    if (values.customerContactName === "") {
+    if (values.customerContactName === "" && entityData?.fields?.some((e) => e.fieldName === "customerContactName")) {
       values.customerContactName = [];
     }
     if (cloneQuoteWithVersionNumber > 0) {
@@ -586,11 +590,12 @@ export default function ManageQuoteDialog({
     if (
       accountId &&
       accountResource !== customerAccount.accountResource &&
-      !isRenderedFromOpportunity
+      !isRenderedFromOpportunity &&
+      entityData?.fields?.some((e) => e.fieldName === "supplierAccountName")
     )
       values["supplierAccountName"] = [accountId];
     setLoading(true);
-    if (values.customerContactName === "") {
+    if (values.customerContactName === "" && entityData?.fields?.some((e) => e.fieldName === "customerContactName")) {
       values.customerContactName = [];
     }
     axiosInstance()
@@ -1010,27 +1015,45 @@ export default function ManageQuoteDialog({
                                                   ? value.optionValue
                                                   : ""
                                               );
-                                              setFieldValue(
-                                                "customerContactName",
-                                                []
-                                              );
-                                              setFieldValue(
-                                                "projectSales",
-                                                ""
-                                              );
-                                              setFieldValue("marketSegment", value?.marketSegment ?? '');
-                                              setFieldValue("subMarketSegment", value?.subMarketSegment ?? '');
-                                              marketSegmentChange(value?.marketSegment ?? '');
-                                              setFieldValue("opportunity", "");
-                                              // setFieldValue('countryBillTo', value?.billingAddress ?? '');
-                                              // setFieldValue('countrySellTo', value?.shippingAddress ?? '');
-                                              setFieldValue('countryBillTo', value?.billingAddress?.length > 0 ? value?.billingAddress : []);
-                                              setFieldValue('countrySellTo', value?.shippingAddress?.length > 0 ? value?.shippingAddress : []);
+                                              if (entityData?.fields?.some((e) => e.fieldName === "customerContactName")) {
+                                                setFieldValue(
+                                                  "customerContactName",
+                                                  []
+                                                );
+                                                handleValuesChange({
+                                                  "customerContactName": [],
+                                                })
+                                              }
+                                              if (entityData?.fields?.some((e) => e.fieldName === "projectSales")) {
+                                                setFieldValue(
+                                                  "projectSales",
+                                                  ""
+                                                );
+                                                handleValuesChange({
+                                                  "projectSales": ""
+                                                })
+                                              }
+                                              if (entityData?.fields?.some((e) => e.fieldName === "marketSegment")) {
+                                                marketSegmentChange(value?.marketSegment ?? '');
+                                                setFieldValue("marketSegment", value?.marketSegment ?? '');
+                                              }
+                                              if (entityData?.fields?.some((e) => e.fieldName === "subMarketSegment")) {
+                                                setFieldValue("subMarketSegment", value?.subMarketSegment ?? '');
+                                              }
+                                              if (entityData?.fields?.some((e) => e.fieldName === "opportunity")) {
+                                                setFieldValue("opportunity", "");
+                                                handleValuesChange({
+                                                  "opportunity": ""
+                                                })
+                                              }
+                                              if (entityData?.fields?.some((e) => e.fieldName === "countryBillTo")) {
+                                                setFieldValue('countryBillTo', value?.billingAddress?.length > 0 ? value?.billingAddress : []);
+                                              }
+                                              if (entityData?.fields?.some((e) => e.fieldName === "countrySellTo")) {
+                                                setFieldValue('countrySellTo', value?.shippingAddress?.length > 0 ? value?.shippingAddress : []);
+                                              }
                                               handleValuesChange({
                                                 [field.fieldName]: value && value.optionValue ? value.optionValue : "",
-                                                "customerContactName": [],
-                                                "projectSales": "",
-                                                "opportunity": ""
                                               })
                                             }}
                                           />
@@ -1803,8 +1826,10 @@ export default function ManageQuoteDialog({
                                                 onChange={(e, val) => {
                                                   setNewMarketSegmentId(null);
                                                   setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                  setNewSubMarketSegmentId(null);
-                                                  setFieldValue(formFieldNames.subMarketSegment, "")
+                                                  if (entityData?.fields?.some((e) => e.fieldName === formFieldNames.subMarketSegment)) {
+                                                    setNewSubMarketSegmentId(null);
+                                                    setFieldValue(formFieldNames.subMarketSegment, "")
+                                                  }
                                                   marketSegmentChange(val && val.optionValue ? val.optionValue : "");
                                                 }}
                                                 size="small"
@@ -2156,8 +2181,12 @@ export default function ManageQuoteDialog({
                         updateAccountDropdown(data);
 
                         setFieldValue("customerAccountName", data._id);
-                        setFieldValue("customerContactName", "");
-                        onProjectSalesDropDownOpen(data._id)
+                        if (entityData?.fields?.some((e) => e.fieldName === "customerContactName")) {
+                          setFieldValue("customerContactName", "");
+                        }
+                        if (entityData?.fields?.some((e) => e.fieldName === "projectSales")) {
+                          onProjectSalesDropDownOpen(data._id)
+                        }
                       }}
                       isRedirectToDetailPage={false}
                     />
@@ -2225,8 +2254,13 @@ export default function ManageQuoteDialog({
                       }}
                       onSuccess={({ data }) => {
                         setShowAddProjectSalesDialog(false)
-                        let tempAccountId = values["customerAccountName"] ? values["customerAccountName"] : accountId
-                        updateProjectSalesDropdown({ ...data, accountId: tempAccountId });
+                        if (entityData?.fields?.some((e) => e.fieldName === "customerAccountName")) {
+                          let tempAccountId = values["customerAccountName"] ? values["customerAccountName"] : accountId
+                          updateProjectSalesDropdown({ ...data, accountId: tempAccountId });
+                        }
+                        else {
+                          updateProjectSalesDropdown({ ...data, accountId: "" });
+                        }
                         setFieldValue("projectSales", data._id);
                       }}
                       accountId={
