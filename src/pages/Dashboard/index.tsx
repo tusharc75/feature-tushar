@@ -158,6 +158,7 @@ function Dashboard() {
       "ROM",
       "Accounts",
       "Product Setup",
+      "Dynamic Forms",
       "Activities",
       "Admin Portal",
     ];
