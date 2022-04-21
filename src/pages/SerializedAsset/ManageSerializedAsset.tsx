@@ -11,7 +11,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, serializedAsset, setFieldsInAscendingOrder } from '../../constants/helpers';
+import { CustomDialogTransition, serializedAsset, setFieldsInAscendingOrder, supplierAccount } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -24,6 +24,7 @@ import { useData } from '../../StateProvider/Provider';
 import CreateProductCategory from '../ProductCategory/CreateProductCategory';
 import CreateProduct from "../../components/Product/CreateProduct";
 import ManageWarehouse from "../Warehouse/ManageWarehouse"
+import ManageAccountDialog from "../Account/ManageAccount";
 
 const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null, isNew = true }) => {
 
@@ -42,8 +43,10 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
   const [plantsOpen, setPlantsOpen] = useState({ open: false, isClone: false });
   const [productOpen, setProductOpen] = useState({ open: false, isClone: false });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [showAddSupplierAccountDialog, setShowAddSupplierAccountDialog] = useState({ open: false, fieldName: "" });
+  const [accountData, setAccountData] = useState([]);
 
-  const { permissions } = useData();
+  const { state: { permissions } }: any = useData();
 
   useEffect(() => {
     axiosInstance()
@@ -60,6 +63,12 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
         setProductCategoryOptions(categoryOptions);
         setPlantsCategoryOptions(plantsOptions);
         setProductDescriptionOptions(productOptions)
+
+        const supplierAccountOptions = fieldsDataForUpdate?.find((obj) => obj?.lookupResource === "Supplier Account");
+        if (supplierAccountOptions) {
+          setAccountData(supplierAccountOptions.option);
+        }
+
         setAllFields(productInventoryId ? fieldsDataForUpdate : fieldsDataForCreate)
         if (productInventoryId) {
           axiosInstance()
@@ -202,13 +211,8 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                 <Grid key={index2} item xs={12} sm={6} md={6}>
                                   {field.fieldName === 'product' ? (
                                     <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions?.isCreate ? 10 : 11}
-                                          sm={permissions?.isCreate ? 10 : 11}
-                                          md={permissions?.isCreate ? 10 : 11}
-                                        >
+                                      <Box display="flex">
+                                        <Box flexGrow={1}>
                                           <FormTypes
                                             isNew={Boolean(productInventoryId)}
                                             {...field}
@@ -245,39 +249,27 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                               sessionStorage.setItem('productCategoryName', JSON.stringify(productLabel))
                                             }}
                                           />
-                                        </Grid>
-                                        <Grid item xs={1} sm={1} md={1}>
-                                          <Tooltip title="Add Product Description" className="mt-1">
-                                            <IconButton
-                                              onClick={() => {
-                                                setProductOpen({ open: true, isClone: false });
-                                              }}
-                                              disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
-                                              size="small"
-                                            >
-                                              <AddIcon color={Boolean(productInventoryId) && field.disableOnEdit && !isClone ? 'disabled' : 'primary'} />
-                                            </IconButton>
-                                          </Tooltip>
-                                        </Grid>
-
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
+                                        </Box>
+                                        {permissions?.product?.isCreate &&
+                                          <Box className="ml-1 mt-1">
+                                            <Tooltip title={`Add ${routes.product.title}`}>
+                                              <IconButton
+                                                onClick={() => {
+                                                  setProductOpen({ open: true, isClone: false });
+                                                }}
+                                                disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                                size="small"
+                                              >
+                                                <AddIcon color={Boolean(productInventoryId) && field.disableOnEdit && !isClone ? 'disabled' : 'primary'} />
+                                              </IconButton>
                                             </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
+                                          </Box>}
+                                      </Box>
                                     </Grid>
                                   ) : field.fieldName === 'productCategory' ? (
                                     <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions?.isCreate ? 10 : 11}
-                                          sm={permissions?.isCreate ? 10 : 11}
-                                          md={permissions?.isCreate ? 10 : 11}
-                                        >
+                                      <Box display="flex">
+                                        <Box flexGrow={1}>
                                           <FormTypes
                                             isNew={Boolean(productInventoryId)}
                                             {...field}
@@ -307,38 +299,27 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                               sessionStorage.setItem('productCategoryName', JSON.stringify(label))
                                             }}
                                           />
-                                        </Grid>
-                                        <Grid item xs={1} sm={1} md={1}>
-                                          <Tooltip title="Add Product Category" className="mt-1">
-                                            <IconButton
-                                              onClick={() => {
-                                                setOpen({ open: true, isClone: false });
-                                              }}
-                                              disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
-                                              size="small"
-                                            >
-                                              <AddIcon color={Boolean(productInventoryId) && field.disableOnEdit && !isClone ? 'disabled' : 'primary'} />
-                                            </IconButton>
-                                          </Tooltip>
-                                        </Grid>
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
+                                        </Box>
+                                        {permissions?.productCategory?.isCreate &&
+                                          <Box className="ml-1 mt-1">
+                                            <Tooltip title={`Add ${routes?.productCategory?.title}`} >
+                                              <IconButton
+                                                onClick={() => {
+                                                  setOpen({ open: true, isClone: false });
+                                                }}
+                                                disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                                size="small"
+                                              >
+                                                <AddIcon color={Boolean(productInventoryId) && field.disableOnEdit && !isClone ? 'disabled' : 'primary'} />
+                                              </IconButton>
                                             </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
+                                          </Box>}
+                                      </Box>
                                     </Grid>
                                   ) : field.fieldName === 'warehouse' ? (
                                     <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions?.isCreate ? 10 : 11}
-                                          sm={permissions?.isCreate ? 10 : 11}
-                                          md={permissions?.isCreate ? 10 : 11}
-                                        >
+                                      <Box display="flex">
+                                        <Box flexGrow={1}>
                                           <FormTypes
                                             isNew={Boolean(productInventoryId)}
                                             {...field}
@@ -362,71 +343,103 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                               }
                                             }}
                                           />
-                                        </Grid>
-                                        <Grid item xs={1} sm={1} md={1}>
-                                          <Tooltip title="Add Plants" className="mt-1">
-                                            <IconButton
-                                              onClick={() => {
-                                                setPlantsOpen({ open: true, isClone: false });
-                                              }}
-                                              disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
-                                              size="small"
-                                            >
-                                              <AddIcon color={Boolean(productInventoryId) && field.disableOnEdit && !isClone ? 'disabled' : 'primary'} />
-                                            </IconButton>
-                                          </Tooltip>
-                                        </Grid>
-
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
+                                        </Box>
+                                        {permissions?.warehouse?.isCreate &&
+                                          <Box className="ml-1 mt-1">
+                                            <Tooltip title="Add Plants">
+                                              <IconButton
+                                                onClick={() => {
+                                                  setPlantsOpen({ open: true, isClone: false });
+                                                }}
+                                                disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                                size="small"
+                                              >
+                                                <AddIcon color={Boolean(productInventoryId) && field.disableOnEdit && !isClone ? 'disabled' : 'primary'} />
+                                              </IconButton>
                                             </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
+                                          </Box>}
+                                      </Box>
                                     </Grid>
-                                  ) : field.fieldName === 'status' ? (
-                                    <FormTypes
-                                      isNew={Boolean(productInventoryId)}
-                                      {...field}
-                                      disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                    />
-                                  ) : (
-                                    <FormTypes
-                                      isNew={Boolean(productInventoryId)}
-                                      {...field}
-                                      disabled={(Boolean(productInventoryId) && field.disableOnEdit && !isClone) || (field.fieldName === 'assetNumber' && field.isUneditable)}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        handleValuesChange({ [name]: value });
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                    />
-                                  )}
+                                  ) : field?.lookupResource === "Supplier Account" ? (
+                                    <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                      <Box display="flex">
+                                        <Box flexGrow={1}>
+                                          <FormTypes
+                                            {...field}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            fieldData={field}
+                                            type={field.type}
+                                            options={accountData}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                            doNotShowInfoTooltip={true}
+                                            onChange={(e, value) => {
+                                              setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                            }}
+                                          />
+                                        </Box>
+                                        {permissions.supplierAccount?.isCreate &&
+                                          <Box>
+                                            <Tooltip title={`Create ${field?.fieldLabel}`}>
+                                              <IconButton
+                                                onClick={() => { setShowAddSupplierAccountDialog({ open: true, fieldName: field?.fieldName }); }}
+                                                disabled={!isClone ? field.disableOnEdit : false}
+                                                size="small"
+                                              >
+                                                <AddIcon color={isClone ? "primary" : field.disableOnEdit ? "disabled" : "primary"} />
+                                              </IconButton>
+                                            </Tooltip>
+                                          </Box>}
+                                      </Box>
+                                    </Grid>)
+                                    : field.fieldName === 'status' ? (
+                                      <FormTypes
+                                        isNew={Boolean(productInventoryId)}
+                                        {...field}
+                                        disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                      />
+                                    ) : (
+                                      <FormTypes
+                                        isNew={Boolean(productInventoryId)}
+                                        {...field}
+                                        disabled={(Boolean(productInventoryId) && field.disableOnEdit && !isClone) || (field.fieldName === 'assetNumber' && field.isUneditable)}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          handleValuesChange({ [name]: value });
+                                          setFieldValue(name, value);
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                      />
+                                    )}
                                 </Grid>
                               ))}
                             </Grid>
@@ -519,6 +532,35 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                       }}
                     />
                   )}
+                  {showAddSupplierAccountDialog.open && (
+                    <ManageAccountDialog
+                      open={showAddSupplierAccountDialog.open}
+                      onClose={() => {
+                        setShowAddSupplierAccountDialog({ open: false, fieldName: "" });
+                      }}
+                      id={null}
+                      accountResource={supplierAccount.accountResource}
+                      accountApi={supplierAccount.accountApi}
+                      isGetAccountData={true}
+                      onGetAddedAccount={({ data }) => {
+                        setAccountData((prevState) => {
+                          return [
+                            ...prevState,
+                            {
+                              optionValue: data._id,
+                              optionLabel: data.accountName,
+                              order: accountData.length,
+                              default: false,
+                              billingAddress: data?.billingAddress,
+                              shippingAddress: data?.shippingAddress
+                            }
+                          ];
+                        });
+                        setFieldValue(showAddSupplierAccountDialog.fieldName, data._id);
+                      }}
+                      isRedirectToDetailPage={false}
+                    />
+                  )}
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   <Button
@@ -564,8 +606,9 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
           <Box p={2} height={500} bgcolor="white">
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-        )}
-      </Dialog>
+        )
+        }
+      </Dialog >
 
     </>
   );

@@ -279,8 +279,8 @@ const ProductDetailsPage = () => {
       axiosInstance()
         .get(`product/${id}/warehouse`)
         .then(async ({ data: { data } }) => {
+          data = data?.filter((e) => e.warehouse)
           setProductWarehouseData(data);
-
           setInventoriesData(data);
           setLoadingWarehouse(false);
         })
@@ -415,7 +415,7 @@ const ProductDetailsPage = () => {
                 {permissions?.serializedAsset && <Tab label="Parent Product" value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
                 {permissions?.serializedAsset && <Tab label="Child Product" value={3} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
                 {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <Tab value={4} label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />}
-                {permissions?.repairType && 
+                {permissions?.repairType &&
                   <Tab label="Repair Types" value={5} aria-controls="a11y-tabpanel-5" id="a11y-tab-5" />
                 }
               </Tabs>
@@ -472,7 +472,7 @@ const ProductDetailsPage = () => {
               )}
             </Paper>
           </Grid>
-          {permissions?.serializedAsset ? (
+          {(permissions?.serializedAsset && permissions?.serializedAsset?.isRead) ? (
             <Grid item xs={12} sm={12} md={4} lg={4}>
               <Paper style={{ overflow: 'hidden' }}>
                 <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
