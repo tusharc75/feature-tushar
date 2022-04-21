@@ -488,7 +488,7 @@ export default function ManageQuoteDialog({
         });
         let initialData = getObjKeys("", newFields);
         if ((isRenderedFromOpportunity || isRenderedFromProjectSales)
-          && (entityData?.fields?.some((e) => e.fieldName === "opportunity") || entityData?.fields?.some((e) => e.fieldName === "projectSales"))) {
+          && (filterData?.some((e) => e.fieldData.fieldName === "opportunity") || filterData?.some((e) => e.fieldData.fieldName === "projectSales"))) {
           if (opportunityName) {
             initialData["quoteName"] = opportunityName;
           }
@@ -499,7 +499,7 @@ export default function ManageQuoteDialog({
             const selectedEntityDetails = user?.entity?.find(d => d?._id === selectedEntity)
             const defaultQuotePdfTemplateId = user.user?.quotePDFTemplate ?? '';
 
-            if (selectedEntityDetails && entityData?.fields?.some((e) => e.fieldName === "currency")) {
+            if (selectedEntityDetails && filterData?.some((e) => e.fieldData.fieldName === "currency")) {
               initialData["currency"] = selectedEntityDetails.currency || "";
               setCurrencySymbol(
                 getUniqueCurrencies().find(
@@ -507,7 +507,7 @@ export default function ManageQuoteDialog({
                 )?.symbolNative
               );
             }
-            if (entityData?.fields?.some((e) => e.fieldName === "pDFTemplate")) {
+            if (filterData?.some((e) => e.fieldData.fieldName === "pDFTemplate")) {
               initialData["pDFTemplate"] = defaultQuotePdfTemplateId;
             }
           }
