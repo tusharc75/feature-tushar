@@ -518,7 +518,7 @@ const Product = () => {
     axiosInstance()
       .post(`${routes.product.path}/assign-repair-type`, {
         repairType: ids,
-        ids: selectedRecords.map((d:{_id:string}) => d._id)
+        ids: selectedRecords.map((d: { _id: string }) => d._id)
       })
       .then(() => {
         fetchProduct()
@@ -753,19 +753,19 @@ const Product = () => {
                         {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                       </Button>
                     )}
-                    
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        disabled={selectedRecords.length ? false : true}
-                        aria-controls="action-menu"
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                      >
-                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                      </Button>
-                    
+
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      disabled={selectedRecords.length ? false : true}
+                      aria-controls="action-menu"
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    >
+                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                    </Button>
+
                     <Menu
                       anchorEl={anchorEl}
                       keepMounted
@@ -785,15 +785,16 @@ const Product = () => {
                       >
                         Delete
                       </MenuItem>
-                      <MenuItem 
-                        disabled={!productPermissions.isUpdate && !permissions?.hasOwnProperty("repairType")} 
-                        onClick={() => {
-                          setOpenAddDialog(true)
-                          closeActions()
-                        }}
-                      >
-                        Assign Repair Types
-                      </MenuItem>
+                      {permissions?.repairType?.isRead &&
+                        <MenuItem
+                          disabled={!productPermissions.isUpdate && !permissions?.hasOwnProperty("repairType")}
+                          onClick={() => {
+                            setOpenAddDialog(true)
+                            closeActions()
+                          }}
+                        >
+                          {`Assign ${routes?.repairType?.title}`}
+                        </MenuItem>}
                     </Menu>
                   </Grid>
                 </Box>
