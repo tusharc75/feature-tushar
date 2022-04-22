@@ -306,7 +306,7 @@ const Steps = (props) => {
         tempComment = [tempComment];
       }
       let dataObj = {
-        status: selectedOption?.trim() + " by Customer",
+        status: selectedOption === "Others" ? selectedOption?.trim() : selectedOption?.trim() + " by Customer",
         manual: true,
         comment: tempComment
       };
