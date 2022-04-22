@@ -40,7 +40,7 @@ const useStyles = makeStyles(() => ({
     justifyContent: 'center'
   },
   logo: {
-    width: '150px',
+    width: '140px',
     height: '100%'
   }
 }));
