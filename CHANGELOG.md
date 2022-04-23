@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.98.0](https://github.com/vebholic/oms_frontend/compare/v2.97.2...v2.98.0) (2022-04-23)
+
+
+### Features
+
+* quote details stepper full screen option ([e8b5242](https://github.com/vebholic/oms_frontend/commit/e8b52423bd65770a4faa2712c24ff36203ab8f00))
+
+
+### Bug Fixes
+
+* bug fix ([9dadfe4](https://github.com/vebholic/oms_frontend/commit/9dadfe46e967a993fbbfdf0c5f48efacd8cb751b))
+* bug fix ([b329141](https://github.com/vebholic/oms_frontend/commit/b329141bbded5ae243cdb2fafa4d8ad400494558))
+
 ### [2.97.2](https://github.com/vebholic/oms_frontend/compare/v2.97.1...v2.97.2) (2022-04-22)
 
 
