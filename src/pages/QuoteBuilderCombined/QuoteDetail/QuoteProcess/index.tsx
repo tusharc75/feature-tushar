@@ -1474,7 +1474,7 @@ export default function QuoteProcess(props) {
                           size="small"
                           color="primary"
                         >
-                          {isMobile && !isTablet ? '' : `Offer to Customer`}
+                          {isMobile && !isTablet ? '' : `Offered Outside of System`}
                         </Button>
                       )}</span>
 
@@ -1517,16 +1517,12 @@ export default function QuoteProcess(props) {
                     </Button>
                   </Tooltip>
                   {permissions[qbResource]?.isUpdate &&
-                    (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some((d) => d === user?.user?._id)) && (
+                    (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
                       <Tooltip title="Edit Quote PDF Template">
                         <Button
                           onClick={() => {
                             quoteData?.pDFTemplate.optionValue &&
-                              history.push(`/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}`, {
-                                quoteData: quoteData,
-                                version: currentVersion,
-                                redirectTo: `/quotes/detail/${quoteData._id}`
-                              });
+                              history.push(`/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}?quote=${quoteData._id}&version=${currentVersion}`);
                           }}
                           variant="outlined"
                           size="small"

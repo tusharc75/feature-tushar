@@ -201,8 +201,8 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
 
     const handleAddProduct = (rows) => {
         setAddingProducts(true)
-        let tempProductArray = rows.map(d => ({
-            "productId": d._id,
+        let tempProductArray = rows?.map(d => ({
+            "productId": d.productId,
             "qty": d.qty ? parseInt(d.qty) : 1,
             "expectedDelivery": purchaseOrderData?.deliveryDate
         }))
