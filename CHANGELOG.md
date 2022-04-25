@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.98.2](https://github.com/vebholic/oms_frontend/compare/v2.98.1...v2.98.2) (2022-04-25)
+
+### [2.98.1](https://github.com/vebholic/oms_frontend/compare/v2.98.0...v2.98.1) (2022-04-24)
+
+## [2.98.0](https://github.com/vebholic/oms_frontend/compare/v2.97.2...v2.98.0) (2022-04-23)
+
+
+### Features
+
+* quote details stepper full screen option ([e8b5242](https://github.com/vebholic/oms_frontend/commit/e8b52423bd65770a4faa2712c24ff36203ab8f00))
+
+
+### Bug Fixes
+
+* bug fix ([9dadfe4](https://github.com/vebholic/oms_frontend/commit/9dadfe46e967a993fbbfdf0c5f48efacd8cb751b))
+* bug fix ([b329141](https://github.com/vebholic/oms_frontend/commit/b329141bbded5ae243cdb2fafa4d8ad400494558))
+
+### [2.97.2](https://github.com/vebholic/oms_frontend/compare/v2.97.1...v2.97.2) (2022-04-22)
+
+
+### Bug Fixes
+
+* bug fix ([be14849](https://github.com/vebholic/oms_frontend/commit/be14849c0ff02d0e7c71fbe4ddf4d59dca8cadcc))
+* bug fix ([5631c47](https://github.com/vebholic/oms_frontend/commit/5631c4786ef761b05efefaa3a7883eda9e379450))
+* bug fix ([87140be](https://github.com/vebholic/oms_frontend/commit/87140bea3ae364e35ac726097e12df9bb07ba3d3))
+* bug fx ([b75cdd3](https://github.com/vebholic/oms_frontend/commit/b75cdd38d7b5f8465f7d2e4d150603b38f709f6c))
+* **dashboard:** fix ([eface8f](https://github.com/vebholic/oms_frontend/commit/eface8f0ab32cdfecb65e58a224d4214130b0075))
+* manage quote conditional field changes ([01d4f15](https://github.com/vebholic/oms_frontend/commit/01d4f1521e568c2b0ba4c503d6fd12ad839c5786))
+* manage quote data initialization fix ([117bf78](https://github.com/vebholic/oms_frontend/commit/117bf782f7a481abc8ca779ce93ed5628df66974))
+* opportunity bug fixes ([6b1ac30](https://github.com/vebholic/oms_frontend/commit/6b1ac309f61e799bfcd4c9d9a13dd0f8cd23fedd))
+
 ### [2.97.1](https://github.com/vebholic/oms_frontend/compare/v2.97.0...v2.97.1) (2022-04-21)
 
 

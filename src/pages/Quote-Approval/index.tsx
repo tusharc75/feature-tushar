@@ -15,6 +15,7 @@ import { FcUnlock } from 'react-icons/fc';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CodeValidation from "./CodeValidation";
 import axiosInstance from "../../axios/axiosInstance";
+import { SVG } from '../../assets';
 
 const useStyles = makeStyles(() => ({
     header: {
@@ -53,7 +54,7 @@ const QuoteApproval = () => {
 
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
-    
+
     const { id } = useParams();
     const [replied, setReplied] = useState(false);
     const [validQuote, setValidQuote] = useState(true);
@@ -158,7 +159,7 @@ const QuoteApproval = () => {
                             <Grid item xs={12} md={1} sm={2}>
                                 <img
                                     className={classes.logo}
-                                    src="https://equip-t.com/wp-content/uploads/2021/05/cropped-eQuip-T-logo-green-tech.png"
+                                    src={SVG('LogoNew')}
                                     alt="equip logo"
                                     title="eQuipt Logo"
                                 />
@@ -181,7 +182,7 @@ const QuoteApproval = () => {
                                 <Grid item xs={12} md={1} sm={2}>
                                     <img
                                         className={classes.logo}
-                                        src="https://equip-t.com/wp-content/uploads/2021/05/cropped-eQuip-T-logo-green-tech.png"
+                                        src={SVG('LogoNew')}
                                         alt="equip logo"
                                         title="eQuipt Logo"
                                     />

@@ -70,14 +70,14 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
       let totalOfferedCost = offeredCostData.reduce((acc, val) => acc + val);
       let totalOfferedVolume = offeredVolumeData.reduce((acc, val) => acc + val);
 
-      const grossMarginPercent = totalBookedCost && totalBookedValue ? ((totalBookedValue - totalBookedCost) / totalBookedValue) * 100 : 0;
-      const offeredMarginPercent = totalOfferedCost && totalOfferedValue ? ((totalOfferedValue - totalOfferedCost) / totalOfferedValue) * 100 : 0;
-      const grossMargin = totalBookedValue && totalBookedCost ? totalBookedValue - totalBookedCost : 0;
-      const offeredMargin = totalOfferedCost && totalOfferedValue ? totalOfferedValue - totalOfferedCost : 0;
+      const grossMargin =  totalBookedValue === 0 && totalBookedCost === 0 ? 0 : totalBookedValue - totalBookedCost;
+      const offeredMargin = totalOfferedValue === 0 && totalOfferedCost === 0 ? 0 : totalOfferedValue - totalOfferedCost;
       const hitRatioValue = totalBookedValue && totalOfferedValue ? totalBookedValue / totalOfferedValue : 0;
       const hitRatioCost = totalBookedCost && totalOfferedCost ? totalBookedCost / totalOfferedCost : 0;
       const hitRatioMargin = grossMargin && offeredMargin ? grossMargin / offeredMargin : 0;
       const hitRatioVolume = totalBookedVolume && totalOfferedVolume ? totalBookedVolume / totalOfferedVolume : 0;
+      const grossMarginPercent = totalBookedValue !==0 && totalBookedCost !== 0 ? ((totalBookedValue - totalBookedCost) / totalBookedValue) * 100 : 0;
+      const offeredMarginPercent = totalOfferedValue !== 0 && totalOfferedCost !== 0 ? ((totalOfferedValue - totalOfferedCost) / totalOfferedValue) * 100 : 0;
 
       if (chart.uniqueId === 'bookedRevenueCard') {
         const cardData = {

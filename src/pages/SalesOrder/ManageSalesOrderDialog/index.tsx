@@ -58,7 +58,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
     const [newAddedAccountId, setNewAddedAccountId] = useState(null);
 
     const [salesDetails, setSalesDetails] = useState(null);
-    const[cloneHeading, setCloneHeading] = useState('');
+    const [cloneHeading, setCloneHeading] = useState('');
     const [countryBillToDropDown, setCountryBillToDropDown] = useState([]);
     const [countrySellToDropDown, setCountrySellToDropDown] = useState([]);
     const [countryBillToMainData, setCountryBillToMainData] = useState([]);
@@ -191,7 +191,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
             fieldData = response?.data?.data;
             fieldData?.forEach((e: any) => {
                 if (e?.fieldData?.fieldName === "warehouse" && e?.fieldData?.option) {
-                    e.fieldData.option = e?.fieldData?.option?.filter((a) => a.entity?.includes(selectedEntity));
+                    e.fieldData.option = e?.fieldData?.option?.filter((a) => !a?.entity || a?.entity?.length === 0 || a?.entity?.includes(selectedEntity));
                 }
             })
             const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);

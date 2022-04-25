@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
 
   logo: {
     paddingTop: "8px",
-    width: '140px'
+    width: '120px'
   },
 
   search: {
@@ -120,9 +120,9 @@ const useStyles = makeStyles((theme) => ({
   },
   brandLogo: {
     maxWidth: '10%',
-    height: '45px',
+    height: '40px',
     borderRadius: '4px',
-    marginRight: '5px'
+    marginRight: '5px',
   },
   entitySelect: {
     fontSize: '16px',
@@ -770,6 +770,7 @@ const Header = ({ toggleDrawer }) => {
 
   const entitiesMenu = (
     <Menu
+      style={{ marginTop: '40px' }}
       anchorEl={entitiesEl}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       keepMounted

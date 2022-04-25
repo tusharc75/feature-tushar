@@ -47,6 +47,8 @@ import { isMobile, isTablet } from "react-device-detect";
 import MobileStepper from '@material-ui/core/MobileStepper';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
+import HtmlTooltip from "src/components/CustomTooltipTitle";
+import { FiMaximize2 } from "react-icons/fi";
 
 const useStyles = makeStyles((theme) => ({
   backButton: {
@@ -118,7 +120,7 @@ const useStyles = makeStyles((theme) => ({
     color: "#6ca826",
     fontWeight: "bold",
   },
-  rejectedByDoa: {                
+  rejectedByDoa: {
     color: "#d60f0f",
     fontWeight: "bold",
   },
@@ -128,13 +130,13 @@ const useStyles = makeStyles((theme) => ({
     },
 
   },
-  "@media only screen and (max-width: 980px)" : {
+  "@media only screen and (max-width: 980px)": {
     pbStepper: {
-        "& .MuiStepLabel-iconContainer":{
-             display:"none"
-        }
+      "& .MuiStepLabel-iconContainer": {
+        display: "none"
+      }
     }
-}
+  }
 }));
 
 const useColorlibStepIconStyles = makeStyles((theme) => ({
@@ -174,6 +176,7 @@ const Steps = (props) => {
     DOAData = null,
     quoteData,
     globalLoading = false,
+    setStepFullScreen,
     children
   } = props;
   const classes = useStyles();
@@ -303,7 +306,7 @@ const Steps = (props) => {
         tempComment = [tempComment];
       }
       let dataObj = {
-        status: selectedOption?.trim() + " by Customer",
+        status: selectedOption === "Others" ? selectedOption?.trim() : selectedOption?.trim() + " by Customer",
         manual: true,
         comment: tempComment
       };
@@ -364,57 +367,57 @@ const Steps = (props) => {
   return (
     <div>
       {
-        isMobile && !isTablet ? 
-        // <div>
-        //   <MobileStepper
-        //     style={{ background: "#dee2e6" }}
-        //     variant="dots"
-        //     steps={DOAData ? DOAData.length : steps.length}
-        //     position="bottom"
-        //     activeStep={activeStep}
-        //     nextButton={
-        //       !allowedToEdit ||
-        //         loading || globalLoading ||
-        //         !nextStep ||
-        //         versionStatus.includes("Sent for DOA") ||
-        //         versionStatus.includes("Accepted  by DOA") ||
-        //         steps[currentStep]?.key === "DOA Process" ||
-        //         approvedQuote.approved
-        //         ? <Button size="small" disabled variant="contained">
-        //           {steps[activeStep + 1]?.label ?? ""}
-        //         </Button>
-        //         : <Button size="small" disabled={loading} color="primary" onClick={handleNext} variant="contained" endIcon={<KeyboardArrowRight />}>
-        //           {steps[activeStep + 1]?.label ?? ""}
-        //         </Button>
-        //     }
-        //     backButton={
-        //       currentStep <= 0 || !allowedToEdit ||
-        //         versionStatus.includes("Rejected by Customer") ||
-        //         (steps.length === 5 && currentStep > 3) ||
-        //         versionStatus.includes("Sent for DOA") ||
-        //         (steps.length === 6 && currentStep >= 4) ||
-        //         versionStatus.includes("Sent to Customer") ||
-        //         loading || globalLoading
-        //         ? <Button size="small" disabled variant="contained" startIcon={<KeyboardArrowLeft />}>
-        //           {steps[activeStep - 1]?.label ?? ""}
-        //         </Button>
-        //         : <Button size="small" disabled={loading} color="primary" onClick={handleBack} variant="contained" startIcon={<KeyboardArrowLeft />}>
-        //           {steps[activeStep - 1]?.label ?? ""}
-        //         </Button>
-        //     }
-        //   />
-        // </div> 
-        <CustomMobileStepperOpportunities 
-        stepName={((activeStep + 1) + "/" + steps.length) + " " + steps[activeStep]?.label} 
-        nextButton={
-            !allowedToEdit ||
+        isMobile && !isTablet ?
+          // <div>
+          //   <MobileStepper
+          //     style={{ background: "#dee2e6" }}
+          //     variant="dots"
+          //     steps={DOAData ? DOAData.length : steps.length}
+          //     position="bottom"
+          //     activeStep={activeStep}
+          //     nextButton={
+          //       !allowedToEdit ||
+          //         loading || globalLoading ||
+          //         !nextStep ||
+          //         versionStatus.includes("Sent for DOA") ||
+          //         versionStatus.includes("Accepted  by DOA") ||
+          //         steps[currentStep]?.key === "DOA Process" ||
+          //         approvedQuote.approved
+          //         ? <Button size="small" disabled variant="contained">
+          //           {steps[activeStep + 1]?.label ?? ""}
+          //         </Button>
+          //         : <Button size="small" disabled={loading} color="primary" onClick={handleNext} variant="contained" endIcon={<KeyboardArrowRight />}>
+          //           {steps[activeStep + 1]?.label ?? ""}
+          //         </Button>
+          //     }
+          //     backButton={
+          //       currentStep <= 0 || !allowedToEdit ||
+          //         versionStatus.includes("Rejected by Customer") ||
+          //         (steps.length === 5 && currentStep > 3) ||
+          //         versionStatus.includes("Sent for DOA") ||
+          //         (steps.length === 6 && currentStep >= 4) ||
+          //         versionStatus.includes("Sent to Customer") ||
+          //         loading || globalLoading
+          //         ? <Button size="small" disabled variant="contained" startIcon={<KeyboardArrowLeft />}>
+          //           {steps[activeStep - 1]?.label ?? ""}
+          //         </Button>
+          //         : <Button size="small" disabled={loading} color="primary" onClick={handleBack} variant="contained" startIcon={<KeyboardArrowLeft />}>
+          //           {steps[activeStep - 1]?.label ?? ""}
+          //         </Button>
+          //     }
+          //   />
+          // </div> 
+          <CustomMobileStepperOpportunities
+            stepName={((activeStep + 1) + "/" + steps.length) + " " + steps[activeStep]?.label}
+            nextButton={
+              !allowedToEdit ||
                 loading || globalLoading ||
                 !nextStep ||
                 versionStatus.includes("Sent for DOA") ||
                 versionStatus.includes("Accepted  by DOA") ||
                 steps[currentStep]?.key === "DOA Process" ||
                 approvedQuote.approved
-                ? <Button size="small" disabled variant="text" endIcon={<AiOutlineRight /> }  className="ml-1 MobileStep-next-back-button">
+                ? <Button size="small" disabled variant="text" endIcon={<AiOutlineRight />} className="ml-1 MobileStep-next-back-button">
                   {"Next"}
                 </Button>
                 : <Button size="small" disabled={loading} color="primary" onClick={handleNext} variant="text" endIcon={<AiOutlineRight />} className="ml-1 MobileStep-next-back-button">
@@ -422,22 +425,22 @@ const Steps = (props) => {
                 </Button>
 
 
-        } backButton={
-          currentStep <= 0 || !allowedToEdit ||
-          versionStatus.includes("Rejected by Customer") ||
-          (steps.length === 5 && currentStep > 3) ||
-          versionStatus.includes("Sent for DOA") ||
-          (steps.length === 6 && currentStep >= 4) ||
-          versionStatus.includes("Sent to Customer") ||
-          loading || globalLoading
-          ? <Button size="small" disabled variant="text" startIcon={<AiOutlineLeft />} className="mr-1 MobileStep-next-back-button">
-            {"Back"}
-          </Button>
-          : <Button size="small" disabled={loading} color="primary" onClick={handleBack} variant="text" startIcon={<AiOutlineLeft />} className="mr-1 MobileStep-next-back-button">
-            {"Back"}
-          </Button>
-           }   /> 
-           :  
+            } backButton={
+              currentStep <= 0 || !allowedToEdit ||
+                versionStatus.includes("Rejected by Customer") ||
+                (steps.length === 5 && currentStep > 3) ||
+                versionStatus.includes("Sent for DOA") ||
+                (steps.length === 6 && currentStep >= 4) ||
+                versionStatus.includes("Sent to Customer") ||
+                loading || globalLoading
+                ? <Button size="small" disabled variant="text" startIcon={<AiOutlineLeft />} className="mr-1 MobileStep-next-back-button">
+                  {"Back"}
+                </Button>
+                : <Button size="small" disabled={loading} color="primary" onClick={handleBack} variant="text" startIcon={<AiOutlineLeft />} className="mr-1 MobileStep-next-back-button">
+                  {"Back"}
+                </Button>
+            } />
+          :
           <>
             <div className="position-relative">
               {!versionStatus.includes("Accepted by Customer") &&
@@ -736,6 +739,16 @@ const Steps = (props) => {
                             }
                           >
                             {label.label}
+                            {(setStepFullScreen && currentStep === i) &&
+                              <HtmlTooltip title={`Full Screen`}>
+                                <IconButton
+                                  aria-label="Full Screen"
+                                  onClick={setStepFullScreen}
+                                  size="small"
+                                  className="ml-2 p-0"
+                                >
+                                  <FiMaximize2 />
+                                </IconButton></HtmlTooltip>}
                           </StepLabel>
                         </Step>
                       ))}

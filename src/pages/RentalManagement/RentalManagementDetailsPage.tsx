@@ -23,7 +23,7 @@ import {
 } from '../../constants/helpers';
 import Steps from './Steps';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
-import ManageRentalManagementDialog from './ManageRental/ManageRentalManagementDialog';
+import ManageRentalManagementDialog from './ManageRental';
 import Activity from '../../components/Activity';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import HideWhenOffline from '../../components/HideWhenOffline';

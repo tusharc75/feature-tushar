@@ -60,6 +60,7 @@ const ProductBuilder = (props) => {
     permissions,
     fromQuote,
     setColumnForPDFExcel,
+    fullScreen = false
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -683,7 +684,7 @@ const ProductBuilder = (props) => {
               isClientSideGrid={true}
               onCellValueChanged={onCellValueChanged}
               loading={loading}
-              className="product-builder-edit-grid"
+              className={!fullScreen ? "product-builder-edit-grid" : "ag-grid-listing-grid"}
               renderedFrom={routes.productBuilder.title}
               saveColumnOptions={true}
               priceTemplateField={priceTemplateField}
