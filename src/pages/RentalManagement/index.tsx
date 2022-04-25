@@ -27,7 +27,7 @@ import CustomAgGrid, {
   intialState,
 } from "../../components/AgGridComponents/CustomAgGrid";
 import RentalManagementHeader from "./RentalManagementHeader";
-import ManageRentalManagementDialog from "./ManageRental/ManageRentalManagementDialog";
+import ManageRentalManagementDialog from "./ManageRental";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"

@@ -13,7 +13,7 @@ import { prepareDataForGrid, DELIVERY_TICKET_REFRENCE_TYPE, getObjKeys, DELIVERY
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../../constants/useColumns"
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import ManageRentalManagementDialog from '../ManageRental/ManageRentalManagementDialog';
+import ManageRentalManagementDialog from '../ManageRental';
 
 const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onClose, onSuccess }) => {
 
