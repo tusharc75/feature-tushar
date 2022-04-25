@@ -332,6 +332,10 @@ const routes = {
     title: (storedRoutes && storedRoutes.reports && storedRoutes.reports.title) ? storedRoutes.reports?.title : "Reports",
     path: "/reports",
   },
+  resourceCalendar: {
+    title: (storedRoutes && storedRoutes.resourceCalendar && storedRoutes.resourceCalendar.title) ? storedRoutes.resourceCalendar?.title : "Resource Calendar",
+    path: "/resource-calendar",
+  },
   eCommercePolicy: {
     title: (storedRoutes && storedRoutes.eCommercePolicy && storedRoutes.eCommercePolicy.title) ? storedRoutes.eCommercePolicy?.title : "e-Commerce Policy",
     path: "/e-commerce-policy",
