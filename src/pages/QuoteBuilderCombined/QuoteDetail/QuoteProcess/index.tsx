@@ -1517,7 +1517,7 @@ export default function QuoteProcess(props) {
                     </Button>
                   </Tooltip>
                   {permissions[qbResource]?.isUpdate &&
-                    (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some((d) => d === user?.user?._id)) && (
+                    (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
                       <Tooltip title="Edit Quote PDF Template">
                         <Button
                           onClick={() => {
