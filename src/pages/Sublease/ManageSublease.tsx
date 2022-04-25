@@ -71,7 +71,7 @@ const ManageSublease = ({ isClone = false, subleaseId = null, onClose, onSuccess
             let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             data?.forEach((e: any) => {
                 if (e?.fieldData?.fieldName === "warehouse" && e?.fieldData?.option) {
-                    setOptionsPlantsEntity(e?.fieldData?.option?.filter((a) => a.entity?.includes(selectedEntity)));
+                    setOptionsPlantsEntity(e?.fieldData?.option?.filter((a) => !a?.entity || a?.entity?.length === 0 || a?.entity?.includes(selectedEntity)));
                 }
             })
             if (subleaseId) {

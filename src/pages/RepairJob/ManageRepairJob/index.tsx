@@ -63,13 +63,12 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
     setLoading(true);
     axiosInstance().get('/field?resource=Repair Job').then(({ data: { data } }) => {
       data = data.filter((obj) => obj?.fieldData?.fieldName !== "rentalJob");
-      
+
       const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       const plantsOptions = data.find((obj) => ["plant", "warehouse"].indexOf(obj?.fieldData.fieldName) > -1)?.fieldData?.option ?? [];
-      const plantOptionsEntity = plantsOptions?.filter((a) => { if (a.entity?.includes(selectedEntity)) { return a } });
-      setOptionsPlantsEntity(plantOptionsEntity)
+      setOptionsPlantsEntity(plantsOptions?.filter((a) => !a?.entity || a?.entity?.length === 0 || a?.entity?.includes(selectedEntity)));
 
       if (repairJobId) {
         axiosInstance().get(`${repairJob.api}/` + repairJobId).then(({ data: { data } }) => {

@@ -1474,7 +1474,7 @@ export default function QuoteProcess(props) {
                           size="small"
                           color="primary"
                         >
-                          {isMobile && !isTablet ? '' : `Offer to Customer`}
+                          {isMobile && !isTablet ? '' : `Offered Outside of System`}
                         </Button>
                       )}</span>
 
@@ -1522,11 +1522,7 @@ export default function QuoteProcess(props) {
                         <Button
                           onClick={() => {
                             quoteData?.pDFTemplate.optionValue &&
-                              history.push(`/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}`, {
-                                quoteData: quoteData,
-                                version: currentVersion,
-                                redirectTo: `/quotes/detail/${quoteData._id}`
-                              });
+                              history.push(`/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}?quote=${quoteData._id}&version=${currentVersion}`);
                           }}
                           variant="outlined"
                           size="small"
