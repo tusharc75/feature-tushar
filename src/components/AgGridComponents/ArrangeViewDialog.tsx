@@ -20,7 +20,9 @@ import { DragHandle } from '@material-ui/icons';
 import { XYCoord } from 'dnd-core';
 import { DndProvider, useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import update from 'immutability-helper';
+import { isMobile, isTablet } from 'react-device-detect';
 
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
@@ -207,7 +209,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
                 Toggle and Drag & Drop to arrange
               </ListSubheader>
               <TextField
-                type='search'
+                type="search"
                 value={searchVal}
                 onChange={(e) => setSearchVal(e.target.value)}
                 size="small"
@@ -240,7 +242,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
             </ListItem>
           ))} */}
           {!searchVal ? (
-            <DndProvider backend={HTML5Backend}>
+            <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
               {sortedColumns.map((column, index) => (
                 <RenderListItem
                   key={column.field}

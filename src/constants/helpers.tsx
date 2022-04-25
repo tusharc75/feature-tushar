@@ -193,7 +193,8 @@ export const sidebarResource = {
   bulkAssetCreation: 'Bulk Asset Creation',
   pos: 'Pos',
   repairType: 'Repair Type',
-  report: "Report"
+  report: "Report",
+  resourceCalendar: 'Resource Calendar'
 };
 
 export const resourceNames = {
@@ -254,7 +255,8 @@ export const resourceNames = {
   wellMaster: 'Well Master',
   bulkAssetCreation: 'Bulk Asset Creation',
   pos: 'Pos',
-  report: "Report"
+  report: "Report",
+  resourceCalendar: 'Resource Calendar'
 };
 
 export const primaryFields = {
@@ -324,7 +326,8 @@ export const RESOURCE_LABEL = {
   bulkAssetCreation: "Bulk Asset Creation",
   pos: "eRECS",
   repairType: "Repair Types",
-  report: "Report"
+  report: "Report",
+  resourceCalendar: 'Resource Calendar'
 };
 
 export const CHILD_RESOURCE = {
@@ -1704,6 +1707,11 @@ export const REPORT_LIST = [
   { title: sidebarResource.opportunity, key: 'opportunity' },
   { title: sidebarResource.quoteBuilder, key: 'quoteBuilder' },
   { title: sidebarResource.projectSales, key: 'projectSales' }
+];
+
+export const RESOURCE_CALENDAR = [
+  { title: sidebarResource.rentalManagement, key: 'rentalManagement' },
+  { title: sidebarResource.quoteBuilder, key: 'quoteBuilder' },
 ];
 
 export const getApi = (resource: string) => {
