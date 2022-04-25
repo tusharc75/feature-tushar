@@ -29,7 +29,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
-import ManageSalesOrderDialog from './ManageSalesOrderDialog/ManageSalesOrderDialog';
+import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { camelCase } from 'lodash'
 

@@ -73,7 +73,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
       .get('/field?resource=Transfer Asset')
       .then(({ data: { data } }) => {
         data = data.filter((obj) => obj?.fieldData?.fieldName !== "rentalJob");
-      
+
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
@@ -556,7 +556,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                         name={field.fieldName}
                                         fieldData={field}
                                         type={field.type}
-                                        options={plantsCategoryOptions?.filter((o: any) => o?.entity.includes(selectedEntity)) ?? []}
+                                        options={plantsCategoryOptions?.filter((o: any) => !o?.entity || o?.entity?.length === 0 || o?.entity?.includes(selectedEntity)) ?? []}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
