@@ -18,7 +18,7 @@ import {
   gridLoadingTimeout, deliveryTicket, rentalManagement,
   sidebarResource, serializedAsset as productInventoryHelperObject, INVENTORY_STATUS, DELIVERY_TICKET_STATUS, RENTAL_INTERNAL_ASSET_STATUS,
   DELIVERY_TICKET_TYPE, DELIVERY_TICKET_REFRENCE_TYPE,
-  repairJob, DELIVERY_FROM_TO_TYPE, COLOUR_MASTER
+  repairJob, DELIVERY_FROM_TO_TYPE, COLOUR_MASTER, REPAIR_JOB_STATUS
 } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
@@ -494,6 +494,12 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { "ids": selectedRecords?.map(s => s._id) })
       .then(({ data }) => {
+        axiosInstance()
+          .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
+          .then(({ data: { data } }) => { })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
