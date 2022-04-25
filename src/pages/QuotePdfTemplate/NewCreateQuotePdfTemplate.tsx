@@ -191,14 +191,7 @@ export default function NewCreateQuotePdfTemplate() {
             setVersion(queryParams.version)
             if (data?._id) {
               setHasPermissionToUpdate(true);
-            } else if (
-              tempPdfTemplate.owner &&
-              tempPdfTemplate.owner !== undefined &&
-              user.user._id !== tempPdfTemplate.owner &&
-              !tempPdfTemplate.collaborator?.some((d) => d === user.user._id)
-            ) {
-              setHasPermissionToUpdate(false);
-            }
+            } 
             tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
           } catch (e) {
             toastConfig.setToastConfig(e);
