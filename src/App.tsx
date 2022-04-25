@@ -125,6 +125,8 @@ import Pos from './pages/Pos';
 import PosProductDetails from './pages/Pos/ProductDetails';
 import RepairType from './pages/RepairType';
 import RepairTypeDetailsPage from './pages/RepairType/RepairTypeDetailsPage';
+import ResourceCalendar from './pages/ResourceCalender';
+import ResourceCalendarData from './pages/ResourceCalender/ResourceCalendar';
 
 var notificationInterval: any = null;
 
@@ -655,6 +657,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
               <Report />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
+              <ResourceCalendar />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.resourceCalendar.path}/:resource`}>
+              <ResourceCalendarData />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.eCommercePolicy.path}`}>
               <EcommercePolicy />
