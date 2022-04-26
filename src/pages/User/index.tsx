@@ -76,7 +76,7 @@ const User: FC = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [deleteUser, setDeleteUser] = useState<any>({})
+  const [deleteUser, setDeleteUser] = useState<any>([])
   const [allUsers, setAllUsers] = useState([])
   const [entityAccess, setEntityAccess] = useState([])
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([])
@@ -135,7 +135,7 @@ const User: FC = () => {
       });
     });
   }
-  
+
   const StatusRenderer = params => <div style={{ width: 150 }}>
     {params.value ? (
       <Tooltip title="Inactive">
@@ -208,7 +208,7 @@ const User: FC = () => {
               <IconButton
                 aria-label="Delete"
                 onClick={() => {
-                  setDeleteUser(params?.data)
+                  setDeleteUser([params?.data])
                   setShowDeleteDialog(true)
                 }}
               >
@@ -716,7 +716,6 @@ const User: FC = () => {
               openRegionalRolesDialog={handleRegionalRolesOpenDialog}
               rolesActionDisabled={selectedRecords.length === 0}
               approvalProcessActionDisabled={selectedRecords.length === 0 || !(user?.user?.userType === userType.brandAdmin)}
-              canDelete={selectedRecords.length > 1}
               selectedRecordsLength={selectedRecords.length}
               entityRoleRedirectDetails={entityRoleRedirectDetails}
               onEntityRoleRedirectDetailRemove={() => {
@@ -731,8 +730,8 @@ const User: FC = () => {
               }}
               userSetupDisabled={selectedRecords.length === 0}
               manageDeleteUser={() => {
-                if (selectedRecords[0] && selectedRecords[0]?._id) {
-                  setDeleteUser(selectedRecords[0])
+                if (selectedRecords) {
+                  setDeleteUser(selectedRecords)
                   setShowDeleteDialog(true)
                 }
               }}
@@ -762,7 +761,7 @@ const User: FC = () => {
             }}
             extraParamsToCheckDelete={true}
             onDelete={(d) => {
-              setDeleteUser(d)
+              setDeleteUser([d])
               setShowDeleteDialog(true)
             }}
             rowCount={rowCount}
@@ -868,14 +867,14 @@ const User: FC = () => {
           showDeleteDialog ?
             <ResourceTransferDialog
               open={true}
-              fromResource={{ ...deleteUser, name: deleteUser?.concatedName ?? '' }}
+              fromResource={deleteUser}
               allResourceData={allUsers.filter(user => user.optionValue !== deleteUser?._id)}
               onClose={() => {
-                setDeleteUser({})
+                setDeleteUser([])
                 setShowDeleteDialog(false)
               }}
               handleDelete={() => {
-                setDeleteUser({})
+                setDeleteUser([])
                 setShowDeleteDialog(false)
                 fetchUsers()
               }}

@@ -28,10 +28,17 @@ export default function ResourceTransferDialog(props) {
 
     const handleTransfer = () => {
         setLoading(true)
-        let api = resource === "User" ? `user/resource-change/${fromResource?._id}/${toResource?.optionValue}` : `entity/entity-change/${fromResource?._id}/${toResource?.optionValue}`
-        if (fromResource?._id && toResource?.optionValue) {
+        let tempData = null
+        if (fromResource.length > 0) {
+            tempData = {
+                "users": fromResource.map(d => d._id)
+            }
+        }
+
+        let api = resource === "User" ? `user/resource-change/${toResource?.optionValue}` : `entity/entity-change/${fromResource?._id}/${toResource?.optionValue}`
+        if (fromResource && toResource?.optionValue) {
             axiosInstance()
-                .put(api)
+                .put(api, tempData)
                 .then((data) => {
                     setLoading(false)
                     setShowConfirmDialog(true)
@@ -43,12 +50,12 @@ export default function ResourceTransferDialog(props) {
 
     const handleDeleteResource = () => {
 
-        let deleteId = fromResource?._id ? fromResource?._id : selectedRecords[0]?._id ? selectedRecords[0]?._id : ""
+        let deleteId = Array.isArray(fromResource) ? fromResource.map(d => d._id) : fromResource?._id ? fromResource?._id : selectedRecords[0]?._id ? selectedRecords[0]?._id : ""
         let api = resource === "Entity" ? `${entityApi}/remove` : `/user/remove`
         if (deleteId && api) {
             setDeleteLoading(true)
             axiosInstance(api)
-                .put(api, { ids: [deleteId] })
+                .put(api, { ids: Array.isArray(deleteId) ? deleteId : [deleteId] })
                 .then(({ data }) => {
                     setDeleteLoading(false)
                     toastConfig.setToastConfig({
