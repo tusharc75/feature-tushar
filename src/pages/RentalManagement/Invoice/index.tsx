@@ -252,7 +252,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
         qty: 1,
       })
     })
-    
+
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
     childProduct.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
@@ -293,7 +293,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
             }
             else {
               const file = new Blob([data], { type: 'application/pdf' });
-              generateBase64forFile(file, 'pdf');
+              generateBase64forFile(file, 'pdf', PDFType);
             }
           })
           .catch((err) => {
@@ -314,18 +314,23 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
       })
   }
 
-  const generateBase64forFile = (blobData, type) => {
+  const generateBase64forFile = (blobData, type, PDFType) => {
     let reader = new FileReader();
     reader.readAsDataURL(blobData);
     reader.onloadend = function () {
       let base64data: any = reader.result;
       if (type === 'pdf') {
-        const attachments = [{
+        const attachments = {
           base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
           contentType: base64data.split(';')[0].split(':')[1],
-          name: `Rental-${rentalManagementData.rentalJobName}`
-        }];
-        setEmailAttachments(attachments)
+          name: `Rental-${PDFType}-${rentalManagementData.rentalJobName}`
+        };
+        setEmailAttachments((prevState) => {
+          return [
+            ...prevState,
+            attachments,
+          ];
+        });
         setSendEmail(true)
       }
     };
@@ -454,6 +459,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
           startIcon={isMobile ? '' : <MdEmail />}
           onClick={() => {
             fetchEmailsData()
+            handlePDF("Email", "Detail")
             handlePDF("Email", "Regular")
           }}
         >
@@ -512,6 +518,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
             setSendEmail(false);
             setDownlodingFile(null);
             setFullScreen(false);
+            setEmailAttachments([])
           }}
           fetchData={() => {
             setSendEmail(false);
