@@ -46,7 +46,7 @@ import SerializedAsset from './SerializedAsset';
 import LoadingTicket from './LoadingTicket';
 import ReceivingTicket from './ReceivingTicket';
 import Invoice from './Invoice';
-import RentalManagementViews from './RoadMapViews/RentalManagementViews';
+import RentalManagementViews from './RoadMapViews';
 import { camelCase } from 'lodash';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
 
