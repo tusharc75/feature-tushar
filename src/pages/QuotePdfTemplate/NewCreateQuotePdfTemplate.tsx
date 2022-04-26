@@ -21,8 +21,6 @@ import { Autocomplete } from '@material-ui/lab';
 import { useData } from '../../StateProvider/Provider';
 import { quoteBuilder, RESOURCE_LABEL } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import { Add, Cancel, Delete } from '@material-ui/icons';
-import Dropdown from 'src/components/Helpers/FormTypes/Dropdown';
 import CustomTable from './customTable/customTable';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
@@ -163,21 +161,6 @@ export default function NewCreateQuotePdfTemplate() {
     });
   }
 
-  // const fetchFieldUsingResource = async () => {
-  //   const tableData = data?.tables?.map(async (d) => {
-  //     const fetchedFieldData = await fetchFieldData(d?.resourceName);
-  //     return {
-  //       ...d,
-  //       fieldOptions: fetchedFieldData ?? []
-  //     };
-  //   });
-  //   const allTableData = await Promise.all(tableData);
-  //   if (allTableData.length) {
-  //     setTable(allTableData);
-  //   }
-  //   console.log(allTableData);
-  // };
-
   useEffect(() => {
     if (id && id !== '0') {
       (async () => {
@@ -191,7 +174,7 @@ export default function NewCreateQuotePdfTemplate() {
             setVersion(queryParams.version)
             if (data?._id) {
               setHasPermissionToUpdate(true);
-            } 
+            }
             tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
           } catch (e) {
             toastConfig.setToastConfig(e);
@@ -241,25 +224,6 @@ export default function NewCreateQuotePdfTemplate() {
               owner: data?.owner && data.owner !== undefined ? data?.owner : user.user._id,
               collaborator: data?.collaborator ? data?.collaborator : []
             });
-
-            const tableData = data?.tables?.map(async (d) => {
-              const fetchedFieldData = await fetchFieldData(d?.resourceName);
-              return {
-                ...d,
-                fieldOptions: fetchedFieldData ?? []
-              };
-            });
-            const allTableData = await Promise.all(tableData);
-            if (allTableData.length) {
-              setTable(allTableData);
-            }
-
-            // setTable(
-            //   data?.tables.map((d) => {
-            //     return { ...d, fieldOptions: [] };
-            //   })
-            // );
-            // await fetchFieldUsingResource();
             setDetails({
               header: data?.header,
               footer: data?.footer,
@@ -275,6 +239,19 @@ export default function NewCreateQuotePdfTemplate() {
               !data?.collaborator?.some((d) => d === user.user._id)
             ) {
               setHasPermissionToUpdate(false);
+            }
+            if (data?.tables && data?.tables?.length) {
+              const tableData = data?.tables?.map(async (d) => {
+                const fetchedFieldData = await fetchFieldData(d?.resourceName);
+                return {
+                  ...d,
+                  fieldOptions: fetchedFieldData ?? []
+                };
+              });
+              const allTableData = await Promise.all(tableData);
+              if (allTableData.length) {
+                setTable(allTableData);
+              }
             }
           } catch (e) {
             toastConfig.setToastConfig(e);
