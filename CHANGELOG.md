@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.99.0](https://github.com/vebholic/oms_frontend/compare/v2.98.2...v2.99.0) (2022-04-26)
+
+
+### Features
+
+* **resource calender:** working on it ([8c97f50](https://github.com/vebholic/oms_frontend/commit/8c97f509937979819f06572e2bc36430008023f0))
+
+
+### Bug Fixes
+
+* bug fix ([c6f4591](https://github.com/vebholic/oms_frontend/commit/c6f45911fd941a2ad0489e10dd1570d5181ec073))
+* bug fix ([ab9a5bb](https://github.com/vebholic/oms_frontend/commit/ab9a5bb09a87d7b8de6ae30b97d57163df1c0844))
+* collaborator issue fix ([3a51128](https://github.com/vebholic/oms_frontend/commit/3a5112830178ed0e00186dda2c547718c470bb30))
+* pdf template save ([3363134](https://github.com/vebholic/oms_frontend/commit/3363134dce7a8ee1f2701e68ac1a717546801877))
+* quote pdf template changes ([fc7e88c](https://github.com/vebholic/oms_frontend/commit/fc7e88c1f4b2fbb2d56e74dc105429543830332f))
+* quote pdf template from quote ([c3d5aa2](https://github.com/vebholic/oms_frontend/commit/c3d5aa2251ebb0d268a9e330d19916e425129b40))
+
 ### [2.98.2](https://github.com/vebholic/oms_frontend/compare/v2.98.1...v2.98.2) (2022-04-25)
 
 ### [2.98.1](https://github.com/vebholic/oms_frontend/compare/v2.98.0...v2.98.1) (2022-04-24)

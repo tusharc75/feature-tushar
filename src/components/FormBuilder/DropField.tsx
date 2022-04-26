@@ -12,6 +12,8 @@ import { Properties } from './Properties';
 import { checkFieldDependency } from '../../constants/formulaUtility';
 import FieldList from './FieldList';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import HtmlTooltip from "../CustomTooltipTitle";
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 
 const style = {
   backgroundColor: 'white',
@@ -230,6 +232,11 @@ export const DropField = ({
                 </Box>
               </Grid>
               <Grid item xs={2} container justify="flex-end">
+                <Box mt={1}>
+                  <HtmlTooltip title={`Field Name - ${data?.fieldName}`}>
+                    <InfoOutlinedIcon fontSize="small" color='primary' />
+                  </HtmlTooltip>
+                </Box>
                 <IconButton aria-label="setting" onClick={handleClick}>
                   <MoreHorizIcon fontSize="small" />
                 </IconButton>
