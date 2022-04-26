@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flow-renderer';
 import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -251,82 +251,78 @@ const RepairJobViews = (props) => {
     }
   };
 
-  return (
-    <>
-      <ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
-        <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
-          <Box>
-            <Button
-              variant={'outlined'}
-              color="default"
-              size="small"
-              onClick={() => {
-                setColorInfo(!colorInfo);
-              }}
-              aria-controls="action-menu"
-            >
-              {'Color Info'} {colorInfo ? <ExpandLess /> : <ExpandMore />}
-            </Button>
-          </Box>
-          {colorInfo && (
-            <Box>
-              <div style={{ marginLeft: 'auto', marginRight: 'auto', position: 'absolute', zIndex: 9999 }}>
-                <Paper elevation={3} variant="outlined">
-                  <Box display="flex" flexDirection="column">
-                    {Object.keys(customNodeStyles).map((key) => {
-                      return (
-                        <Box p={1}>
-                          <div
-                            style={{
-                              display: 'inline-flex',
-                              height: '12px',
-                              width: '12px',
-                              marginRight: '5px',
-                              borderRadius: '100%',
-                              background: `${customNodeStyles[key].background}`,
-                              borderColor: `1px solid ${customNodeStyles[key].borderColor}`
-                            }}
-                          ></div>
-                          {customNodeStyles[key].name}
-                        </Box>
-                      );
-                    })}
-                  </Box>
-                </Paper>
-              </div>
-            </Box>
-          )}
+  return (<ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
+    <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+      <Box>
+        <Button
+          variant={'outlined'}
+          color="default"
+          size="small"
+          onClick={() => {
+            setColorInfo(!colorInfo);
+          }}
+          aria-controls="action-menu"
+        >
+          {'Color Info'} {colorInfo ? <ExpandLess /> : <ExpandMore />}
+        </Button>
+      </Box>
+      {colorInfo && (
+        <Box>
+          <div style={{ marginLeft: 'auto', marginRight: 'auto', position: 'absolute', zIndex: 9999 }}>
+            <Paper elevation={3} variant="outlined">
+              <Box display="flex" flexDirection="column">
+                {Object.keys(customNodeStyles).map((key) => {
+                  return (
+                    <Box p={1}>
+                      <div
+                        style={{
+                          display: 'inline-flex',
+                          height: '12px',
+                          width: '12px',
+                          marginRight: '5px',
+                          borderRadius: '100%',
+                          background: `${customNodeStyles[key].background}`,
+                          borderColor: `1px solid ${customNodeStyles[key].borderColor}`
+                        }}
+                      ></div>
+                      {customNodeStyles[key].name}
+                    </Box>
+                  );
+                })}
+              </Box>
+            </Paper>
+          </div>
         </Box>
-        <div style={fullScreenOpen ? { height: '95vh' } : { height: '57vh' }}>
-          {!loading ? (
-            flowData.length ? (
-              <>
-                <ReactFlowProvider>
-                  <ReactFlow
-                    elements={flowData || []}
-                    onLoad={onLoad}
-                    selectNodesOnDrag={false}
-                    snapToGrid={true}
-                    snapGrid={[15, 15]}
-                    onElementClick={onElementClick}
-                  >
-                    <Controls>
-                      <ControlButton onClick={() => (fullScreenOpen ? setFullScreenOpen(false) : setFullScreenOpen(true))}>
-                        <MdZoomOutMap />
-                      </ControlButton>
-                    </Controls>
-                  </ReactFlow>
-                </ReactFlowProvider>
-              </>
-            ) : (
-              <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
-            )
-          ) : (
-            <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Views...</div>
-          )}
-        </div>
-      </ContentFullScreen>
-    </>
+      )}
+    </Box>
+    <div style={fullScreenOpen ? { height: '95vh' } : { height: '68vh' }}>
+      {!loading ? (flowData.length ? (
+        <Fragment>
+          <ReactFlowProvider>
+            <ReactFlow
+              elements={flowData || []}
+              onLoad={onLoad}
+              selectNodesOnDrag={false}
+              snapToGrid={true}
+              snapGrid={[15, 15]}
+              onElementClick={onElementClick}
+            >
+              <Controls>
+                <ControlButton onClick={() => (fullScreenOpen ? setFullScreenOpen(false) : setFullScreenOpen(true))}>
+                  <MdZoomOutMap />
+                </ControlButton>
+              </Controls>
+            </ReactFlow>
+          </ReactFlowProvider>
+        </Fragment>
+      ) : (
+        <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
+      )
+      ) : (
+        <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Views...</div>
+      )}
+    </div>
+  </ContentFullScreen>
   );
 };
 export default RepairJobViews;

@@ -13,7 +13,6 @@ import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import NoDataCell from '../../components/Helpers/NoDataCell';
 import RepairJobHeader from './RepairJobHeader';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
