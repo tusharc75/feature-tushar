@@ -8,8 +8,8 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { MdZoomOutMap } from 'react-icons/md';
-import { ExpandMore } from '@material-ui/icons';
-import { Box, Button } from '@material-ui/core';
+import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import { Box, Button, Paper } from '@material-ui/core';
 
 const customNodeStyles = {
   repairJob: {
@@ -56,6 +56,7 @@ const RepairJobViews = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
   const [dropdown, setDropdown] = useState(false);
+  const [colorInfo, setColorInfo] = useState(false);
 
   useEffect(() => {
     fetchViewsData();
@@ -253,84 +254,53 @@ const RepairJobViews = (props) => {
   return (
     <>
       <ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
+        <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+          <Box>
+            <Button
+              variant={'outlined'}
+              color="default"
+              size="small"
+              onClick={() => {
+                setColorInfo(!colorInfo);
+              }}
+              aria-controls="action-menu"
+            >
+              {'Color Info'} {colorInfo ? <ExpandLess /> : <ExpandMore />}
+            </Button>
+          </Box>
+          {colorInfo && (
+            <Box>
+              <div style={{ marginLeft: 'auto', marginRight: 'auto', position: 'absolute', zIndex: 9999 }}>
+                <Paper elevation={3} variant="outlined">
+                  <Box display="flex" flexDirection="column">
+                    {Object.keys(customNodeStyles).map((key) => {
+                      return (
+                        <Box p={1}>
+                          <div
+                            style={{
+                              display: 'inline-flex',
+                              height: '12px',
+                              width: '12px',
+                              marginRight: '5px',
+                              borderRadius: '100%',
+                              background: `${customNodeStyles[key].background}`,
+                              borderColor: `1px solid ${customNodeStyles[key].borderColor}`
+                            }}
+                          ></div>
+                          {customNodeStyles[key].name}
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                </Paper>
+              </div>
+            </Box>
+          )}
+        </Box>
         <div style={fullScreenOpen ? { height: '95vh' } : { height: '57vh' }}>
           {!loading ? (
             flowData.length ? (
               <>
-                <div>
-                  <Box marginLeft={2} marginTop={2}>
-                    <label style={{ width: '50%', display: 'inline-block', position: 'relative' }}>
-                      <Button
-                        variant={'outlined'}
-                        color="default"
-                        size="small"
-                        onClick={() => {
-                          setDropdown(!dropdown);
-                        }}
-                        aria-controls="action-menu"
-                      >
-                        {'Node Color'} <ExpandMore />
-                      </Button>
-                      <ul
-                        style={
-                          dropdown
-                            ? {
-                                display: 'block',
-                                position: 'absolute',
-                                top: '100%',
-                                border: '1px solid #ccc',
-                                borderRadius: '4px',
-                                padding: 0,
-                                margin: '2px 0 0 0',
-                                boxShadow: '0 0 6px 0 rgba(0,0,0,0.1)',
-                                backgroundColor: '#ffffff',
-                                listStyleType: 'none'
-                              }
-                            : {
-                                display: 'none'
-                              }
-                        }
-                      >
-                        <div style={{ width: '100%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}>
-                          {Object.keys(customNodeStyles).map((key) => {
-                            return (
-                              <li
-                                style={{
-                                  display: 'inline'
-                                }}
-                              >
-                                <div
-                                  style={{
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    paddingLeft: '5px',
-                                    paddingRight: '5px',
-                                    paddingBottom: '1px',
-                                    paddingTop: '1px'
-                                    // borderBottom: '1px solid grey'
-                                  }}
-                                >
-                                  <div
-                                    style={{
-                                      display: 'inline-flex',
-                                      height: '12px',
-                                      width: '12px',
-                                      marginRight: '3px',
-                                      borderRadius: '100%',
-                                      background: `${customNodeStyles[key].background}`,
-                                      borderColor: `1px solid ${customNodeStyles[key].borderColor}`
-                                    }}
-                                  ></div>
-                                  {customNodeStyles[key].name}
-                                </div>
-                              </li>
-                            );
-                          })}
-                        </div>
-                      </ul>
-                    </label>
-                  </Box>
-                </div>
                 <ReactFlowProvider>
                   <ReactFlow
                     elements={flowData || []}
