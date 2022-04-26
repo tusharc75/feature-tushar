@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Calendar, momentLocalizer, View } from 'react-big-calendar';
+import { useParams, useHistory } from 'react-router-dom';
+import { camelCase, startCase } from 'lodash';
 import moment from 'moment';
-import { useParams } from 'react-router-dom';
-import { camelCase } from 'lodash';
+
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
+import { Box } from '@material-ui/core';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
 
 const localizer = momentLocalizer(moment);
 
@@ -16,24 +20,30 @@ const formats = {
 
 const MyCalendar = (props: Props) => {
   const { resource } = useParams();
-  const resourceName = camelCase(resource);
+  const history = useHistory();
+  const [resourcecamelCase] = useState(camelCase(resource));
+  const [resourceStartCase] = useState(startCase(resource));
   const [events, setEvents] = useState([]);
   const [range, setRange] = useState();
+  const [dateRange, setDateRange] = useState({
+    estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
+    estimateEndDate: moment().endOf('month').format('MM/DD/YYYY')
+  });
   const [view, setView] = useState<View>('month');
 
   useEffect(() => {
     const deepFilter = [
       {
         field: 'estimateStartDate',
-        term: moment().format('02/01/2022')
+        term: dateRange.estimateStartDate
       },
       {
         field: 'estimateEndDate',
-        term: moment().format('02/04/2022')
+        term: dateRange.estimateEndDate
       }
     ];
     axiosInstance()
-      .get(`${routes.rentalManagement.path}?deepFilter=${JSON.stringify(deepFilter)}`)
+      .get(`${resource}?deepFilter=${JSON.stringify(deepFilter)}`)
       .then(({ data: { data } }) => {
         const eventsData = data.map((d: any) => ({
           id: d._id,
@@ -46,8 +56,11 @@ const MyCalendar = (props: Props) => {
         setEvents(eventsData);
       })
       .catch((err) => {});
-    console.log(moment().toDate());
-  }, [resource]);
+  }, [resource, dateRange]);
+
+  // useEffect(() => {
+  //   console.log(view);
+  // }, [view]);
 
   const onRangeChange = useCallback(
     (range) => {
@@ -64,21 +77,45 @@ const MyCalendar = (props: Props) => {
   );
 
   return (
-    <Calendar
-      defaultDate={moment().toDate()}
-      defaultView="day"
-      events={events}
-      localizer={localizer}
-      formats={formats}
-      style={{ height: 'calc(100vh - 80px)' }}
-      popup={true}
-      views={{ month: true, week: true, day: true }}
-      eventPropGetter={(obj) => ({})}
-      onSelectEvent={(event: any) => {}}
-      onRangeChange={onRangeChange}
-      onView={onView}
-      view={view}
-    />
+    <>
+      <div className="headerbox">
+        <CustomBreadCrumbs
+          routes={[
+            {
+              title: 'Resource Calender',
+              path: '/resource-calendar'
+            },
+            { title: resourceStartCase, path: '' }
+          ]}
+        />
+      </div>
+      <CustomContainer styles={{ minHeight: 'calc(100vh-200px)' }}>
+        <Calendar
+          defaultDate={moment().toDate()}
+          defaultView="day"
+          events={events}
+          localizer={localizer}
+          formats={formats}
+          popup={true}
+          onNavigate={(date) => {
+            if (view === 'month') {
+              setDateRange({
+                estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
+                estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
+              });
+            }
+          }}
+          views={{ month: true, week: true, day: true }}
+          eventPropGetter={(obj) => ({})}
+          onSelectEvent={(event: any) => {
+            history.push(`${routes[resourcecamelCase].path}/detail/${event.id}`);
+          }}
+          onRangeChange={onRangeChange}
+          onView={onView}
+          view={view}
+        />
+      </CustomContainer>
+    </>
   );
 };
 

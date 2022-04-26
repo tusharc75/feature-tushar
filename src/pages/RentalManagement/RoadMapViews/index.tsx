@@ -1,15 +1,16 @@
 import _ from 'lodash';
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, Fragment } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
 import { DELIVERY_TICKET_TYPE, INVENTORY_STATUS, rentalManagement, RENTAL_STATUS, COLOUR_MASTER } from '../../../constants/helpers';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { MdZoomOutMap } from 'react-icons/md';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+import { Box, Button, Paper } from '@material-ui/core';
+import { ExpandMore, ExpandLess } from '@material-ui/icons';
 
 const customNodeStyles = {
   rentalJob: {
@@ -65,6 +66,7 @@ const customNodeStyles = {
     ...COLOUR_MASTER.returnTicket
   }
 };
+
 const customDeliveredNodeStyle = {
   loadingTicket: {
     name: 'Loading Ticket',
@@ -92,13 +94,14 @@ const customDeliveredNodeStyle = {
 };
 
 const RentalManagementViews = (props) => {
+
   const { rentalName, rentalId, status } = props;
-  const { isOffline } = useContext(CustomOfflineContext);
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [fullDialogueOpen, setFullDialogueOpen] = useState(false);
+  const [colorInfo, setColorInfo] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -381,12 +384,12 @@ const RentalManagementViews = (props) => {
           source: purchaseArr.includes(item.inventoryDetail.purchaseOrder)
             ? `${item.inventoryDetail.purchaseOrder}`
             : subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset
-            ? `${item.inventoryDetail.supplierAccount}`
-            : bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation)
-            ? `${item.inventoryDetail.bulkAssetCreation}`
-            : allAssets[item.inventoryDetail.assetNumber] !== undefined
-            ? allAssets[item.inventoryDetail.assetNumber]
-            : `${item._id}`,
+              ? `${item.inventoryDetail.supplierAccount}`
+              : bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation)
+                ? `${item.inventoryDetail.bulkAssetCreation}`
+                : allAssets[item.inventoryDetail.assetNumber] !== undefined
+                  ? allAssets[item.inventoryDetail.assetNumber]
+                  : `${item._id}`,
           arrowHeadType: 'arrow',
           target: `${item.inventoryDetail.assetNumber}`
         });
@@ -790,67 +793,77 @@ const RentalManagementViews = (props) => {
     }
   };
 
-  return (
-    <>
-      <ContentFullScreen title="Views" fullScreen={fullDialogueOpen} setFullScreen={false} isheader={false}>
-        <div style={fullDialogueOpen ? { height: '95vh' } : { height: '68vh' }}>
-          {!loading ? (
-            flowData.length ? (
-              <>
-                <ReactFlowProvider>
-                  <ReactFlow
-                    elements={flowData || []}
-                    onLoad={onLoad}
-                    selectNodesOnDrag={false}
-                    snapToGrid={true}
-                    snapGrid={[15, 15]}
-                    onElementClick={onElementClick}
-                  >
-                    <div style={{ width: '85%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}>
-                      {Object.keys(customNodeStyles).map((key) => {
-                        return (
-                          <div
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              paddingLeft: '5px',
-                              paddingRight: '5px'
-                            }}
-                          >
-                            <div
-                              style={{
-                                height: '12px',
-                                width: '12px',
-                                marginRight: '3px',
-                                borderRadius: '100%',
-                                background: `${customNodeStyles[key].background}`,
-                                borderColor: `1px solid ${customNodeStyles[key].borderColor}`
-                              }}
-                            ></div>
-                            {customNodeStyles[key].name}
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {/* <Controls /> */}
-                    <Controls>
-                      <ControlButton onClick={() => (fullDialogueOpen ? setFullDialogueOpen(false) : setFullDialogueOpen(true))}>
-                        <MdZoomOutMap />
-                      </ControlButton>
-                    </Controls>
-                  </ReactFlow>
-                </ReactFlowProvider>
-              </>
-            ) : (
-              <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
-            )
-          ) : (
-            <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Views...</div>
-          )}
-        </div>
-      </ContentFullScreen>
-    </>
+  return (<ContentFullScreen title="Views" fullScreen={fullDialogueOpen} setFullScreen={false} isheader={false}>
+    <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+      <Box>
+        <Button
+          variant={'outlined'}
+          color="default"
+          size="small"
+          onClick={() => {
+            setColorInfo(!colorInfo);
+          }}
+          aria-controls="action-menu"
+        >
+          {'Color Info'} {colorInfo ? <ExpandLess /> : <ExpandMore />}
+        </Button>
+      </Box>
+      {colorInfo &&
+        <Box>
+          <div style={{ marginLeft: 'auto', marginRight: 'auto', position: 'absolute', zIndex: 9999 }}>
+            <Paper elevation={3} variant="outlined" >
+              <Box display="flex" flexDirection="column">
+                {Object.keys(customNodeStyles).map((key) => {
+                  return (<Box p={1}>
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        height: '12px',
+                        width: '12px',
+                        marginRight: '5px',
+                        borderRadius: '100%',
+                        background: `${customNodeStyles[key].background}`,
+                        borderColor: `1px solid ${customNodeStyles[key].borderColor}`
+                      }}
+                    ></div>
+                    {customNodeStyles[key].name}
+                  </Box>
+                  );
+                })}
+              </Box>
+            </Paper>
+          </div>
+        </Box>}
+    </Box>
+    <div style={fullDialogueOpen ? { height: '95vh' } : { height: '68vh' }}>
+      {!loading ? (
+        flowData.length ? (
+          <Fragment>
+            <ReactFlowProvider>
+              <ReactFlow
+                elements={flowData || []}
+                onLoad={onLoad}
+                selectNodesOnDrag={false}
+                snapToGrid={true}
+                snapGrid={[15, 15]}
+                onElementClick={onElementClick}
+              >
+                <Controls>
+                  <ControlButton onClick={() => (fullDialogueOpen ? setFullDialogueOpen(false) : setFullDialogueOpen(true))}>
+                    <MdZoomOutMap />
+                  </ControlButton>
+                </Controls>
+              </ReactFlow>
+            </ReactFlowProvider>
+          </Fragment>
+        ) : (
+          <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
+        )
+      ) : (
+        <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Views...</div>
+      )}
+    </div>
+  </ContentFullScreen>
   );
 };
 

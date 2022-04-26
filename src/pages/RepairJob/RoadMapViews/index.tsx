@@ -8,6 +8,8 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { MdZoomOutMap } from 'react-icons/md';
+import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import { Box, Button, Paper } from '@material-ui/core';
 
 const customNodeStyles = {
   repairJob: {
@@ -53,6 +55,8 @@ const RepairJobViews = (props) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
+  const [dropdown, setDropdown] = useState(false);
+  const [colorInfo, setColorInfo] = useState(false);
 
   useEffect(() => {
     fetchViewsData();
@@ -250,46 +254,70 @@ const RepairJobViews = (props) => {
   return (
     <>
       <ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
-        <div style={fullScreenOpen ? { height: '95vh' } : { height: '57vh' }}>
-          {!loading ? (
-            flowData.length ? (
-              <ReactFlowProvider>
-                <ReactFlow
-                  elements={flowData || []}
-                  onLoad={onLoad}
-                  selectNodesOnDrag={false}
-                  snapToGrid={true}
-                  snapGrid={[15, 15]}
-                  onElementClick={onElementClick}
-                >
-                  <div style={{ width: '58%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}>
+        <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
+          <Box>
+            <Button
+              variant={'outlined'}
+              color="default"
+              size="small"
+              onClick={() => {
+                setColorInfo(!colorInfo);
+              }}
+              aria-controls="action-menu"
+            >
+              {'Color Info'} {colorInfo ? <ExpandLess /> : <ExpandMore />}
+            </Button>
+          </Box>
+          {colorInfo && (
+            <Box>
+              <div style={{ marginLeft: 'auto', marginRight: 'auto', position: 'absolute', zIndex: 9999 }}>
+                <Paper elevation={3} variant="outlined">
+                  <Box display="flex" flexDirection="column">
                     {Object.keys(customNodeStyles).map((key) => {
                       return (
-                        <div
-                          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', paddingLeft: '5px', paddingRight: '5px' }}
-                        >
+                        <Box p={1}>
                           <div
                             style={{
+                              display: 'inline-flex',
                               height: '12px',
                               width: '12px',
-                              marginRight: '3px',
+                              marginRight: '5px',
                               borderRadius: '100%',
                               background: `${customNodeStyles[key].background}`,
                               borderColor: `1px solid ${customNodeStyles[key].borderColor}`
                             }}
                           ></div>
                           {customNodeStyles[key].name}
-                        </div>
+                        </Box>
                       );
                     })}
-                  </div>
-                  <Controls>
-                    <ControlButton onClick={() => (fullScreenOpen ? setFullScreenOpen(false) : setFullScreenOpen(true))}>
-                      <MdZoomOutMap />
-                    </ControlButton>
-                  </Controls>
-                </ReactFlow>
-              </ReactFlowProvider>
+                  </Box>
+                </Paper>
+              </div>
+            </Box>
+          )}
+        </Box>
+        <div style={fullScreenOpen ? { height: '95vh' } : { height: '57vh' }}>
+          {!loading ? (
+            flowData.length ? (
+              <>
+                <ReactFlowProvider>
+                  <ReactFlow
+                    elements={flowData || []}
+                    onLoad={onLoad}
+                    selectNodesOnDrag={false}
+                    snapToGrid={true}
+                    snapGrid={[15, 15]}
+                    onElementClick={onElementClick}
+                  >
+                    <Controls>
+                      <ControlButton onClick={() => (fullScreenOpen ? setFullScreenOpen(false) : setFullScreenOpen(true))}>
+                        <MdZoomOutMap />
+                      </ControlButton>
+                    </Controls>
+                  </ReactFlow>
+                </ReactFlowProvider>
+              </>
             ) : (
               <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
             )
