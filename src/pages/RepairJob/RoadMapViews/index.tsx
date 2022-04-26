@@ -8,6 +8,8 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { MdZoomOutMap } from 'react-icons/md';
+import { ExpandMore } from '@material-ui/icons';
+import { Box, Button } from '@material-ui/core';
 
 const customNodeStyles = {
   repairJob: {
@@ -53,6 +55,7 @@ const RepairJobViews = (props) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
+  const [dropdown, setDropdown] = useState(false);
 
   useEffect(() => {
     fetchViewsData();
@@ -253,43 +256,98 @@ const RepairJobViews = (props) => {
         <div style={fullScreenOpen ? { height: '95vh' } : { height: '57vh' }}>
           {!loading ? (
             flowData.length ? (
-              <ReactFlowProvider>
-                <ReactFlow
-                  elements={flowData || []}
-                  onLoad={onLoad}
-                  selectNodesOnDrag={false}
-                  snapToGrid={true}
-                  snapGrid={[15, 15]}
-                  onElementClick={onElementClick}
-                >
-                  <div style={{ width: '58%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}>
-                    {Object.keys(customNodeStyles).map((key) => {
-                      return (
-                        <div
-                          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', paddingLeft: '5px', paddingRight: '5px' }}
-                        >
-                          <div
-                            style={{
-                              height: '12px',
-                              width: '12px',
-                              marginRight: '3px',
-                              borderRadius: '100%',
-                              background: `${customNodeStyles[key].background}`,
-                              borderColor: `1px solid ${customNodeStyles[key].borderColor}`
-                            }}
-                          ></div>
-                          {customNodeStyles[key].name}
+              <>
+                <div>
+                  <Box marginLeft={2} marginTop={2}>
+                    <label style={{ width: '50%', display: 'inline-block', position: 'relative' }}>
+                      <Button
+                        variant={'outlined'}
+                        color="default"
+                        size="small"
+                        onClick={() => {
+                          setDropdown(!dropdown);
+                        }}
+                        aria-controls="action-menu"
+                      >
+                        {'Node Color'} <ExpandMore />
+                      </Button>
+                      <ul
+                        style={
+                          dropdown
+                            ? {
+                                display: 'block',
+                                position: 'absolute',
+                                top: '100%',
+                                border: '1px solid #ccc',
+                                borderRadius: '4px',
+                                padding: 0,
+                                margin: '2px 0 0 0',
+                                boxShadow: '0 0 6px 0 rgba(0,0,0,0.1)',
+                                backgroundColor: '#ffffff',
+                                listStyleType: 'none'
+                              }
+                            : {
+                                display: 'none'
+                              }
+                        }
+                      >
+                        <div style={{ width: '100%', marginLeft: 'auto', marginRight: 'auto', marginTop: '10px' }}>
+                          {Object.keys(customNodeStyles).map((key) => {
+                            return (
+                              <li
+                                style={{
+                                  display: 'inline'
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    paddingLeft: '5px',
+                                    paddingRight: '5px',
+                                    paddingBottom: '1px',
+                                    paddingTop: '1px'
+                                    // borderBottom: '1px solid grey'
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: 'inline-flex',
+                                      height: '12px',
+                                      width: '12px',
+                                      marginRight: '3px',
+                                      borderRadius: '100%',
+                                      background: `${customNodeStyles[key].background}`,
+                                      borderColor: `1px solid ${customNodeStyles[key].borderColor}`
+                                    }}
+                                  ></div>
+                                  {customNodeStyles[key].name}
+                                </div>
+                              </li>
+                            );
+                          })}
                         </div>
-                      );
-                    })}
-                  </div>
-                  <Controls>
-                    <ControlButton onClick={() => (fullScreenOpen ? setFullScreenOpen(false) : setFullScreenOpen(true))}>
-                      <MdZoomOutMap />
-                    </ControlButton>
-                  </Controls>
-                </ReactFlow>
-              </ReactFlowProvider>
+                      </ul>
+                    </label>
+                  </Box>
+                </div>
+                <ReactFlowProvider>
+                  <ReactFlow
+                    elements={flowData || []}
+                    onLoad={onLoad}
+                    selectNodesOnDrag={false}
+                    snapToGrid={true}
+                    snapGrid={[15, 15]}
+                    onElementClick={onElementClick}
+                  >
+                    <Controls>
+                      <ControlButton onClick={() => (fullScreenOpen ? setFullScreenOpen(false) : setFullScreenOpen(true))}>
+                        <MdZoomOutMap />
+                      </ControlButton>
+                    </Controls>
+                  </ReactFlow>
+                </ReactFlowProvider>
+              </>
             ) : (
               <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
             )
