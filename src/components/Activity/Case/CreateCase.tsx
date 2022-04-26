@@ -36,6 +36,7 @@ import { useData } from '../../../StateProvider/Provider';
 import Loader from '../../Loader';
 import { dateFormat } from '../../../constants/helpers';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
+import { map } from 'lodash';
 
 const CaseSchema = object().shape({
   name: string().required('Please enter case name'),
@@ -66,11 +67,24 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
     if (id) {
       await GetCaseDetail(id)
         .then(({ data }) => {
+          if (data?.assignee && data?.assignee !== "") {
+            if (typeof data?.assignee === "string") {
+              data['assignee'] = [{ userId: data?.assignee }];
+            }
+            else {
+              data['assignee'] = data?.assignee?.map((assignee) => ({
+                userId: assignee
+              }));
+            }
+          }
+          else {
+            data['assignee'] = []
+          }
           setInitialValues(null);
           setInitialValues(data);
           setFormValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       let initialData = {
         name: '',
@@ -264,6 +278,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                               touched={touched}
                               required={true}
                               setFieldValue={(name, value) => {
+                                console.log(name, value);
                                 handleValuesChange({ [name]: value });
                                 setFieldValue(name, value);
                               }}

@@ -234,7 +234,7 @@ const RepairJobDetails = () => {
       <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
         <div>
           <div>
-            <Paper style={{ height: '650px' }}>
+            <Paper>
               {repairJobData ? (
                 <DetailsPageHeader heading={repairJobData?.repairJobName} mainPoints={null} showHeading={true}>
                   {permissions?.repairJob?.isUpdate && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (

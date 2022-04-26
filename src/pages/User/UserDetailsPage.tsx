@@ -337,7 +337,7 @@ const UserDetailsPage = () => {
     setUserTrackingDataLoading(true);
     const parsedFromTime = convertDate(trackingTime.between.from);
     const parsedToTime = convertDate(trackingTime.between.to);
-    const {from, to} = trackingTime.between
+    const { from, to } = trackingTime.between
 
     const hour = 1000 * 60 * 60;
     const day = 1000 * 60 * 60 * 24;
@@ -358,7 +358,7 @@ const UserDetailsPage = () => {
           return aDate - bDate;
         });
 
-      
+
 
         data.forEach((obj) => {
           labels.push(moment(obj?.date).format('DD/MMM'));
@@ -368,7 +368,7 @@ const UserDetailsPage = () => {
           labels: labels,
           datasets: [
             {
-              label: `Total Duration (${dateDiff > 90 ? "In Days": "In Hours"})`,
+              label: `Total Duration (${dateDiff > 90 ? "In Days" : "In Hours"})`,
               data: dataSets,
               borderColor: 'rgba(75,192,192,1)'
             }
@@ -395,9 +395,9 @@ const UserDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          name: `${user.firstName} ${user.lastName}`
-        }))
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`
+      }))
       : [];
 
     setUserList(rows);
@@ -1287,7 +1287,7 @@ const UserDetailsPage = () => {
                 )}
                 {
                   permissions?.[quoteBuilder.qbResource]?.isRead && (
-                    <QuotesInAccordion  
+                    <QuotesInAccordion
                       recordsPerLine={3}
                       quotes={[...(quotesRelatedData?.Owner ?? []), ...(quotesRelatedData?.Collaborator ?? [])]}
                       expanded={false}
@@ -1295,7 +1295,7 @@ const UserDetailsPage = () => {
                       quoteBuilderPermission={permissions?.[quoteBuilder.qbResource]}
                       isAllowedToUpdate={false}
                     />
-                  )                
+                  )
                 }
               </div>
             </Paper>
@@ -1424,8 +1424,8 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
               : roleDeleteRec
-              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
-              : ''
+                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
+                : ''
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -1486,7 +1486,7 @@ const UserDetailsPage = () => {
         <ResourceTransferDialog
           open={showConfirmBox}
           resource="User"
-          fromResource={{ ...userData, name: `${userData.firstName} ${userData.lastName}` }}
+          fromResource={[userData]}
           allResourceData={allUsers}
           onClose={() => setShowConfirmBox(false)}
           handleDelete={() => {

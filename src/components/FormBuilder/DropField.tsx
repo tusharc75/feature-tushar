@@ -232,7 +232,7 @@ export const DropField = ({
                 </Box>
               </Grid>
               <Grid item xs={2} container justify="flex-end">
-                <Box mt={1}>
+                <Box mt={1} style={{ cursor: "pointer" }} onClick={() => { navigator.clipboard.writeText(data?.fieldName) }}>
                   <HtmlTooltip title={`Field Name - ${data?.fieldName}`}>
                     <InfoOutlinedIcon fontSize="small" color='primary' />
                   </HtmlTooltip>
