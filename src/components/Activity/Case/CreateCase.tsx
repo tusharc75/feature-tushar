@@ -67,14 +67,24 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
     if (id) {
       await GetCaseDetail(id)
         .then(({ data }) => {
-          data['assignee'] = data?.assignee?.map((assignee) => ({
-            userId: assignee
-          }));
+          if (data?.assignee && data?.assignee !== "") {
+            if (typeof data?.assignee === "string") {
+              data['assignee'] = [{ userId: data?.assignee }];
+            }
+            else {
+              data['assignee'] = data?.assignee?.map((assignee) => ({
+                userId: assignee
+              }));
+            }
+          }
+          else {
+            data['assignee'] = []
+          }
           setInitialValues(null);
           setInitialValues(data);
           setFormValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       let initialData = {
         name: '',
