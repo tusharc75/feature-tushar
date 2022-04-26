@@ -64,14 +64,14 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
     if (id) {
       await GetTaskDetail(id)
         .then(({ data }) => {
-          data['assignee'] = data.assignee.map((assignee) => ({
+          data['assignee'] = data?.assignee?.map((assignee) => ({
             userId: assignee
           }));
           setInitialValues(null);
           setInitialValues(data);
           setFormValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       let initialData = {
         name: '',
