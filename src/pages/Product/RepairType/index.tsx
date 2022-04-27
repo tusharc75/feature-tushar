@@ -242,9 +242,9 @@ const ProductRepairType = (props: Props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => {}}
+            onEdit={() => { }}
             extraParamsToCheckDelete={false}
-            onDelete={() => {}}
+            onDelete={() => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -252,7 +252,7 @@ const ProductRepairType = (props: Props) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -284,7 +284,10 @@ const ProductRepairType = (props: Props) => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete the ${routes.repairType?.title} ? `}
-          onClose={() => setShowDeleteConfirmBox(false)}
+          onClose={() => {
+            setDeleteRecord(null)
+            setShowDeleteConfirmBox(false)
+          }}
           onOk={handleDelete}
           okBtnLoading={isDeleting}
         />

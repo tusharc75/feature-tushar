@@ -558,10 +558,9 @@ const SalesOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.salesOrderName ? 'Sales Order' : 'Sales Orders'}   ${deleteRecord.salesOrderName || ''
-              }?`}
+            message={`Are you sure you want to delete ${routes?.salesOrder?.title?.toLowerCase()} ${deleteRecord?.salesOrderName || ''} ?`}
             onClose={() => {
-              if (deleteRecord) setDeleteRecord({});
+              setDeleteRecord(null);
               setIsConformDialogVisible(false);
             }}
             okBtnLoading={deleteLoading}

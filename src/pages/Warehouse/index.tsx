@@ -624,7 +624,8 @@ const AddressResource = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes.warehouse.title.toLowerCase()} ${deleteRecord ? deleteRecord?._id ? deleteRecord?.warehouseName : "" : ""}?`}
+            message={`Are you sure you want to delete ${routes?.warehouse?.title?.toLowerCase()} 
+            ${deleteRecord ? deleteRecord?._id ? deleteRecord?.warehouseName : "" : ""}?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false)
