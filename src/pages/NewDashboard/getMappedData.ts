@@ -70,14 +70,16 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
       let totalOfferedCost = offeredCostData.reduce((acc, val) => acc + val);
       let totalOfferedVolume = offeredVolumeData.reduce((acc, val) => acc + val);
 
-      const grossMargin =  totalBookedValue === 0 && totalBookedCost === 0 ? 0 : totalBookedValue - totalBookedCost;
+      const grossMargin = totalBookedValue === 0 && totalBookedCost === 0 ? 0 : totalBookedValue - totalBookedCost;
       const offeredMargin = totalOfferedValue === 0 && totalOfferedCost === 0 ? 0 : totalOfferedValue - totalOfferedCost;
       const hitRatioValue = totalBookedValue && totalOfferedValue ? totalBookedValue / totalOfferedValue : 0;
       const hitRatioCost = totalBookedCost && totalOfferedCost ? totalBookedCost / totalOfferedCost : 0;
       const hitRatioMargin = grossMargin && offeredMargin ? grossMargin / offeredMargin : 0;
       const hitRatioVolume = totalBookedVolume && totalOfferedVolume ? totalBookedVolume / totalOfferedVolume : 0;
-      const grossMarginPercent = totalBookedValue !==0 && totalBookedCost !== 0 ? ((totalBookedValue - totalBookedCost) / totalBookedValue) * 100 : 0;
-      const offeredMarginPercent = totalOfferedValue !== 0 && totalOfferedCost !== 0 ? ((totalOfferedValue - totalOfferedCost) / totalOfferedValue) * 100 : 0;
+      const grossMarginPercent =
+        totalBookedValue !== 0 && totalBookedCost !== 0 ? ((totalBookedValue - totalBookedCost) / totalBookedValue) * 100 : 0;
+      const offeredMarginPercent =
+        totalOfferedValue !== 0 && totalOfferedCost !== 0 ? ((totalOfferedValue - totalOfferedCost) / totalOfferedValue) * 100 : 0;
 
       if (chart.uniqueId === 'bookedRevenueCard') {
         const cardData = {
@@ -685,6 +687,10 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     };
   }
 
+  /**
+   * Assets Dashboard Stuff Begins Here
+   */
+
   if (chart.uniqueId === 'assetsByMap') {
     dataObject = data;
   }
@@ -744,27 +750,11 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
   }
 
   if (chart.uniqueId === 'assetCount') {
-    const getSum = (array, column) => {
-      let values = array.map((item) => parseInt(item[column]) || 0);
-      return values.reduce((a, b) => a + b);
-    };
-
-    const ignoreId = ['productName', '_id'];
-    let labels = [];
-    let values = [];
-
-    Object.keys(data.data[0]).forEach((label: any) => {
-      if (!ignoreId.includes(label)) {
-        const val = getSum(data.data, label);
-        if (val) {
-          values.push(val);
-          labels.push(label);
-        }
-      }
-    });
+    let labels = data.map((d: { status: string }) => d.status).filter((d: { count: number }) => d.count !== 0);
+    let values = data.map((d: { count: number }) => d.count).filter((d: { count: number }) => d.count !== 0);
 
     dataObject = {
-      labels: labels,
+      labels,
       datasets: [
         {
           label: '(%) Utilization',
@@ -786,39 +776,24 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     };
 
     if (chart.hasTableView) {
-      const tableData = data.data.map((d: any) => {
-        const oldData = { ...d };
-        delete oldData.productName;
-        delete oldData._id;
-
-        const total = Object.values(oldData).reduce((acc: number, val: number) => acc + val);
-
-        return {
-          ['Product']: d.productName,
-          ['Total Assets']: total
-        };
-      });
+      const tableData = data.map((d: { status: string; count: number }) => ({
+        ['Status']: d.status,
+        ['Count']: d.count
+      }));
       Object.assign(dataObject, { tableData });
     }
   }
 
   if (chart.uniqueId === 'rentalByCustomer') {
-    let labels = [];
-    let dataset = [];
+    let labels = data.map((d: { accountName: string }) => d.accountName);
+    let dataset = data.map((d: { count: number }) => d.count);
 
-    data.forEach(async (_d: any) => {
-      if (_d?.rentalJob.length > 0) {
-        labels.push(_d.accountName);
-        let totalCount = _d.rentalJob.map((c: { count: boolean; status: string }) => c.count).reduce((acc, val) => acc + val);
-        dataset.push(totalCount);
-      }
-    });
+    console.log('ASSET CUSTOMER', { labels, dataset });
 
     dataObject = {
-      labels: labels,
+      labels,
       datasets: [
         {
-          label: '(%) Utilization',
           data: dataset,
           backgroundColor: [
             'rgba(255, 99, 132, 1)',
@@ -854,12 +829,9 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
     };
 
     if (chart.hasTableView) {
-      const tableData = data.map((d: any) => ({
-        ['Account Name']: d?.accountName,
-        ['No. Rental Jobs']:
-          d?.rentalJob.length === 0
-            ? 0
-            : d?.rentalJob.map((c: { count: boolean; status: string }) => c.count).reduce((acc: number, val: number) => acc + val)
+      const tableData = data.map((d: { accountName: string; count: number }) => ({
+        ['Account Name']: d.accountName,
+        ['Rental Jobs Count']: d.count
       }));
 
       Object.assign(dataObject, { tableData });
