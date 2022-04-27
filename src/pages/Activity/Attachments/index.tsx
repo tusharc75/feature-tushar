@@ -585,6 +585,7 @@ export default function Attachment() {
             permissions={permissions.attachment}
             primaryField={columns?.find(d => d.primaryField)}
             onClick={(data) => {
+              handleActivityOpen(data)
             }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}
