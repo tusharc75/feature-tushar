@@ -30,6 +30,8 @@ export type ChartDataType = {
   hasExport: boolean;
   uniqueId: string;
   axis?: string;
+  hasStatus?: boolean;
+  statusOptions?: { optionValue: string; optionLabel: string }[];
   numberOfCards?: number;
 };
 interface Props {
@@ -39,18 +41,6 @@ interface Props {
   filterData: any;
   globalFilters: GlobalFiltersType;
 }
-
-const StatusOptions1 = [
-  { optionLabel: 'Open', optionValue: 'open' },
-  { optionLabel: 'Won', optionValue: 'won' }
-];
-
-const StatusOptions2 = [
-  { optionLabel: 'Open', optionValue: 'open' },
-  { optionLabel: 'Won', optionValue: 'won' },
-  { optionLabel: 'Lost', optionValue: 'lost' },
-  { optionLabel: 'Offered', optionValue: 'offered' }
-];
 
 const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
   const theme = useTheme();
@@ -110,8 +100,8 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
 
     const keys = Object.keys(params);
     keys.forEach((key) => {
-      if(Array.isArray(params[key]) && params[key].length > 0) {
-        url = `${url}${key}=${JSON.stringify(params[key].map((p:any) => p.optionValue))}&`
+      if (Array.isArray(params[key]) && params[key].length > 0) {
+        url = `${url}${key}=${JSON.stringify(params[key].map((p: any) => p.optionValue))}&`;
       }
 
       if (params[key]) {
@@ -121,7 +111,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
         if (key !== 'between' && params[key].optionValue) {
           url = `${url}${key}=${params[key].optionValue}&`;
         }
-        if (key === 'status' && !params[key].optionValue) {
+        if (key === 'status' && !params[key].optionValue && !globalFilters.dashboardType?.includes('Asset')) {
           url = `${url}${key}=open&`;
         }
       }
@@ -152,7 +142,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
         setChartData(chartData);
         setLoading(false);
       })
-      .catch((err:any) => {
+      .catch((err: any) => {
         setToastConfig(err);
         setLoading(false);
       });
@@ -267,11 +257,11 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                   isScreenSmall={isScreenSmall}
                   currency={globalFilters.currency || currency}
                   selectedDashboard={globalFilters?.dashboardType}
-                  />
-                  ) : chart.type === 'map' ? (
-                    <MapView height={isScreenSmall ? 350 : chart.col <= 6 ? 400 : 500} data={chartData} />
-                    ) : (
-                      <Chart
+                />
+              ) : chart.type === 'map' ? (
+                <MapView height={isScreenSmall ? 350 : chart.col <= 6 ? 400 : 500} data={chartData} />
+              ) : (
+                <Chart
                   id={chart.uniqueId}
                   type={chart.type}
                   data={chartData}
@@ -281,7 +271,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                   }}
                 />
               )
-              ) : (
+            ) : (
               <TableView
                 id={chart.uniqueId}
                 type={chart.type}
@@ -302,9 +292,10 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           filters={chart.filters}
           values={filterValues}
           setValues={setFilterValues}
+          isAssetDashboard={globalFilters.dashboardType?.includes('Asset')}
           filterOptions={{
             ...filterData,
-            [idsWithAdditionStatus.includes(chart.uniqueId) && 'status']: chart.uniqueId === 'openQuote' ? StatusOptions1 : StatusOptions2
+            [chart.hasStatus && 'status']: chart.statusOptions
           }}
         />
       )}
