@@ -11,6 +11,7 @@
   --white: #ffffff;
   --aliceblue: aliceblue;
   --productRed: #fe6168;
+  --logoColor: #288c8c;
 
   --warning: #fd7e14;
   --white: #fff;
@@ -460,6 +461,17 @@ body::-webkit-scrollbar-thumb {
 .loading-dots:after {
   content: "";
   animation: dot-animation 2s infinite;
+}
+
+.logo-bg-color {
+  background-color: var(--logoColor) !important;
+  color: white !important;
+
+  &:disabled {
+    background-color: lightgray !important;
+    color: var(--primary);
+    cursor: not-allowed;
+  }
 }
 
 @keyframes dot-animation {

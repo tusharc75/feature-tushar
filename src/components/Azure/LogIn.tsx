@@ -27,7 +27,7 @@ const LogIn = () => {
           fullWidth
           startIcon={<SiMicrosoftoffice />}
           variant="outlined"
-          color="primary"
+          className="logo-bg-color"
           onClick={() => instance.logout()}
         >
           Log Out
@@ -37,8 +37,8 @@ const LogIn = () => {
         <Button
           startIcon={<SiMicrosoftoffice />}
           fullWidth
+          className="logo-bg-color"
           variant="contained"
-          color="secondary"
           onClick={azureLogin}
         >
           Office 365 Login
