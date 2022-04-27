@@ -149,7 +149,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         { field: "pricingMethod", headerName: "Pricing Method", show: true, cellRenderer: "commonRenderer" },
     ];
 
-    console.log(condition)
 
     return (<Fragment>
         <Box display="flex" justifyContent="space-between" m={1} mt={2}>

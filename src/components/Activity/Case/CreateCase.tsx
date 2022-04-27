@@ -278,7 +278,6 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                               touched={touched}
                               required={true}
                               setFieldValue={(name, value) => {
-                                console.log(name, value);
                                 handleValuesChange({ [name]: value });
                                 setFieldValue(name, value);
                               }}

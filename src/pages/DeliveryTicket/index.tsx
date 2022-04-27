@@ -497,7 +497,7 @@ const DeliveryTicket = () => {
               open={isConfirmDialogVisible}
               message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}}   ${deleteRecord.ticketName || ''}?`}
               onClose={() => {
-                if (deleteRecord) setDeleteRecord({});
+                setDeleteRecord(null);
                 setIsConformDialogVisible(false);
               }}
               okBtnLoading={deleteLoading}

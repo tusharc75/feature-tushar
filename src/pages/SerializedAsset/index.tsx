@@ -772,9 +772,12 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.serializedAsset.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
             } ? `}
-          onClose={() => setShowDeleteConfirmBox(false)}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false)
+          }}
           onOk={handleDelete}
         />
       )}
