@@ -19,31 +19,27 @@ import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
 
-function RentalManagementHeader(props) {
-
-
-  const {
-    selectedRecords,
-    onTypeChange,
-    options,
-    onSearch,
-    searchVal,
-    onCreate,
-    RentalManagementPermissions,
-    showConfirmBox,
-    icon,
-    heading,
-    children,
-    columns,
-    dispatch,
-    showTransferEntityDialog,
-    selectedType,
-    fetchRentalManagement,
-    gridApi
-    // showCloneRentalManagementDialog
-  } = props;
-
-
+function RentalManagementHeader({
+  selectedRecords,
+  onTypeChange,
+  options,
+  onSearch,
+  searchVal,
+  onCreate,
+  RentalManagementPermissions,
+  showConfirmBox,
+  icon,
+  heading,
+  children,
+  columns,
+  dispatch,
+  showTransferEntityDialog,
+  selectedType,
+  fetchRentalManagement,
+  gridApi,
+  filters
+  // showCloneRentalManagementDialog
+}) {
 
   const {
     state: { selectedEntity }
@@ -130,14 +126,13 @@ function RentalManagementHeader(props) {
     await clearAll(objectStore.deliveryTicket);
     closeActions();
   };
-  
+
   let toggleInner = options && (
-    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
+    <ToggleButtonGroup size="small" className="toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
       {options.map((k, index) => {
-        return (
-          <ToggleButton value={k.key} key={index}>
-            {k.key}
-          </ToggleButton>
+        return (<ToggleButton value={k.key} key={index}>
+          {k.key}
+        </ToggleButton>
         );
       })}
     </ToggleButtonGroup>
@@ -177,7 +172,6 @@ function RentalManagementHeader(props) {
                 columns={columns}
                 dispatch={dispatch}
               />
-
               <Button
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
@@ -192,14 +186,14 @@ function RentalManagementHeader(props) {
               >
                 Filter
               </Button>
-
               <MobileFilterDialog
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
                 contentPart={toggleInner}
-                secHeading={['Filter Rental Job']}
                 columns={columns}
                 dispatch={dispatch}
+                filters={filters}
+                title={routes?.rentalManagement?.title}
               />
             </Grid>
           </>

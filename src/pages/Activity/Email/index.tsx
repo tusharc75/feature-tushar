@@ -79,7 +79,7 @@ const Email = () => {
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [columns] = useState([
     { field: 'to', headerName: 'Recipient', show: true, disabled: true, cellRenderer: 'recipentRenderer' },
-    { field: 'relatedTo', headerName: 'Related To', show: true, disabled: true, primaryField: true, cellRenderer: 'referenceRenderer' },
+    { field: 'relatedTo', headerName: 'Related To', show: true, disabled: true, cellRenderer: 'referenceRenderer' },
     {
       field: 'subject',
       headerName: 'Subject',
@@ -541,7 +541,12 @@ const Email = () => {
             allowSwipe={true}
             permissions={permissions.note}
             primaryField={columns?.find((d) => d.primaryField)}
-            onClick={(data) => { }}
+            onClick={(data) => {
+              if (permissions?.email?.isUpdate) {
+                setOpen(true);
+                setEmailId(data.id);
+              }
+            }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}

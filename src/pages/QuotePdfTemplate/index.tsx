@@ -363,14 +363,14 @@ const QuotePdfTemplate: FC = () => {
                     >
                       Filter
                     </Button>
-
                     <MobileFilterDialog
                       isOpen={isOpenDialog}
                       handleClose={handleFilterClose}
                       contentPart={null}
-                      secHeading={['Filter PDF Templates']}
                       columns={columns}
                       dispatch={dispatch}
+                      title={routes?.quotePdfTemplate?.title}
+                      filters={filters}
                     />
                   </Grid>
                 </>

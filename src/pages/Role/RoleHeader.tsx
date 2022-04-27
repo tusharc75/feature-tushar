@@ -27,6 +27,7 @@ const RoleHeader = (props) => {
     userDialogOpen,
     columns,
     dispatch,
+    filters
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState(localStorage.getItem(localStorageKeys.currentSelectedRoleType) ?
@@ -121,9 +122,10 @@ const RoleHeader = (props) => {
                       isOpen={isOpenDialog}
                       handleClose={handleFilterClose}
                       contentPart={null}
-                      secHeading={['Filter Roles']}
                       columns={columns}
                       dispatch={dispatch}
+                      title={routes?.role?.title}
+                      filters={filters}
                     />
                   </Grid>
                 </>

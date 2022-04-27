@@ -1,3 +1,22 @@
+import { INVENTORY_STATUS } from 'src/constants/helpers';
+
+const QuoteOptions = [
+  { optionLabel: 'Open', optionValue: 'open' },
+  { optionLabel: 'Won', optionValue: 'won' },
+  { optionLabel: 'Lost', optionValue: 'lost' },
+  { optionLabel: 'Offered', optionValue: 'offered' }
+];
+
+const CustomerRentalStatus = [
+  { optionLabel: 'Open', optionValue: 'open' },
+  { optionLabel: 'Close', optionValue: 'close' }
+];
+
+const RentalStatus = Object.keys(INVENTORY_STATUS).map((key) => ({
+  optionValue: INVENTORY_STATUS[key],
+  optionLabel: INVENTORY_STATUS[key]
+}));
+
 export default [
   {
     name: 'CRM + Dashboard',
@@ -13,6 +32,7 @@ export default [
         axis: '',
         hasExport: false,
         hasTableView: false,
+        hasStatus: false,
         filters: []
       },
       {
@@ -26,6 +46,7 @@ export default [
         axis: '',
         hasExport: false,
         hasTableView: false,
+        hasStatus: false,
         filters: []
       },
       {
@@ -38,6 +59,7 @@ export default [
         axis: 'x',
         hasExport: true,
         hasTableView: true,
+        hasStatus: false,
         filters: [
           { key: 'salesRep', title: 'Sales Reps', multiple: false },
           { key: 'customerAccount', title: 'Customer Account', multiple: false },
@@ -58,6 +80,7 @@ export default [
         axis: 'x',
         hasExport: true,
         hasTableView: false,
+        hasStatus: false,
         filters: [
           { key: 'salesRep', title: 'Sales Rep', multiple: false },
           { key: 'customerAccount', title: 'Customer Account', multiple: false },
@@ -76,6 +99,7 @@ export default [
         axis: 'x',
         hasExport: true,
         hasTableView: true,
+        hasStatus: false,
         filters: [
           { key: 'salesRep', title: 'Sales Rep', multiple: false },
           { key: 'customerAccount', title: 'Customer Account', multiple: false },
@@ -95,6 +119,7 @@ export default [
         axis: 'x',
         hasExport: true,
         hasTableView: true,
+        hasStatus: false,
         filters: [
           { key: 'salesRep', title: 'Sales Rep', multiple: false },
           { key: 'customerAccount', title: 'Customer Account', multiple: false },
@@ -114,6 +139,7 @@ export default [
         axis: 'x',
         hasExport: true,
         hasTableView: true,
+        hasStatus: false,
         filters: [
           { key: 'salesRep', title: 'Sales Rep', multiple: false },
           { key: 'customerAccount', title: 'Customer Account', multiple: false },
@@ -133,6 +159,7 @@ export default [
         axis: 'x',
         hasExport: true,
         hasTableView: true,
+        hasStatus: false,
         filters: [
           { key: 'salesRep', title: 'Sales Rep', multiple: false },
           { key: 'customerAccount', title: 'Customer Account', multiple: false },
@@ -152,6 +179,7 @@ export default [
         axis: 'x',
         hasExport: false,
         hasTableView: false,
+        hasStatus: false,
         filters: [
           { key: 'salesRep', title: 'Sales Rep', multiple: false },
           { key: 'subMarketSegment', title: 'Sub Market Segment', multiple: false },
@@ -170,6 +198,8 @@ export default [
         axis: 'y',
         hasExport: false,
         hasTableView: false,
+        hasStatus: true,
+        statusOptions: QuoteOptions,
         filters: [
           { key: 'status', title: 'Status', multiple: false },
           { key: 'salesRep', title: 'Sales Rep', multiple: false },
@@ -190,6 +220,8 @@ export default [
         axis: 'x',
         hasExport: false,
         hasTableView: false,
+        hasStatus: true,
+        statusOptions: QuoteOptions,
         filters: [
           { key: 'status', title: 'Status', multiple: false },
           { key: 'salesRep', title: 'Sales Rep', multiple: false },
@@ -210,6 +242,7 @@ export default [
         axis: 'x',
         hasExport: true,
         hasTableView: false,
+        hasStatus: false,
         filters: [
           { key: 'salesRep', title: 'Sales Rep', multiple: false },
           { key: 'customerAccount', title: 'Customer Account', multiple: false },
@@ -229,6 +262,7 @@ export default [
         uniqueId: 'opportunityTrend',
         hasExport: false,
         hasTableView: false,
+        hasStatus: false,
         filters: [
           { key: 'salesRep', title: 'Sales Rep', multiple: false },
           { key: 'customerAccount', title: 'Customer Account', multiple: false },
@@ -248,124 +282,7 @@ export default [
         axis: 'x',
         hasExport: false,
         hasTableView: false,
-        filters: [
-          { key: 'salesRep', title: 'Sales Rep', multiple: false },
-          { key: 'customerAccount', title: 'Customer Account', multiple: false },
-          { key: 'marketSegment', title: 'Market Segment', multiple: false },
-          { key: 'subMarketSegment', title: 'Sub Market Segment', multiple: false },
-          { key: 'countrySellTo', title: 'Country Sell To', multiple: false },
-          { key: 'countryBillTo', title: 'Country Bill To', multiple: false }
-        ]
-      }
-    ]
-  },
-  {
-    name: 'New Dashboard',
-    charts: [
-      {
-        col: 6,
-        title: 'Opportunity trends',
-        kpi: 'trend/opportunities',
-        type: 'bar',
-        axis: 'x',
-        hasFilter: true,
-        uniqueId: 'opportunityTrend',
-        hasExport: false,
-        hasTableView: false,
-        filters: [
-          { key: 'salesRep', title: 'Sales Rep', multiple: false },
-          { key: 'customerAccount', title: 'Customer Account', multiple: false },
-          { key: 'marketSegment', title: 'Market Segment', multiple: false },
-          { key: 'subMarketSegment', title: 'Sub Market Segment', multiple: false },
-          { key: 'countrySellTo', title: 'Country Sell To', multiple: false },
-          { key: 'countryBillTo', title: 'Country Bill To', multiple: false }
-        ]
-      },
-      {
-        col: 6,
-        title: 'Created Leads',
-        kpi: 'created/leads',
-        type: 'bar',
-        hasFilter: true,
-        uniqueId: 'createdLead',
-        axis: 'x',
-        hasExport: false,
-        hasTableView: false,
-        filters: [
-          { key: 'salesRep', title: 'Sales Rep', multiple: false },
-          { key: 'customerAccount', title: 'Customer Account', multiple: false },
-          { key: 'marketSegment', title: 'Market Segment', multiple: false },
-          { key: 'subMarketSegment', title: 'Sub Market Segment', multiple: false },
-          { key: 'countrySellTo', title: 'Country Sell To', multiple: false },
-          { key: 'countryBillTo', title: 'Country Bill To', multiple: false }
-        ]
-      },
-      {
-        col: 5,
-        title: 'Open Quotes',
-        kpi: 'open-quote',
-        type: 'doughnut',
-        hasFilter: true,
-        uniqueId: 'openQuote',
-        axis: 'x',
-        hasExport: false,
-        hasTableView: false,
-        filters: [
-          { key: 'status', title: 'Status', multiple: false },
-          { key: 'subMarketSegment', title: 'Sub Market Segment', multiple: false },
-          { key: 'marketSegment', title: 'Market Segment', multiple: false },
-          { key: 'countrySellTo', title: 'Country Sell To', multiple: false },
-          { key: 'countryBillTo', title: 'Country Bill To', multiple: false }
-        ]
-      },
-      {
-        col: 7,
-        title: 'Open opportunities by Customer Account',
-        kpi: 'opportunities/customer-account',
-        type: 'bar',
-        hasFilter: true,
-        uniqueId: 'openOpportinityByCustomer',
-        axis: 'y',
-        hasExport: false,
-        hasTableView: false,
-        filters: [
-          { key: 'status', title: 'Status', multiple: false },
-          { key: 'subMarketSegment', title: 'Sub Market Segment', multiple: false },
-          { key: 'marketSegment', title: 'Market Segment', multiple: false },
-          { key: 'countrySellTo', title: 'Country Sell To', multiple: false },
-          { key: 'countryBillTo', title: 'Country Bill To', multiple: false }
-        ]
-      },
-
-      {
-        col: 6,
-        title: 'Open quotes by Sales Rep',
-        kpi: 'quote/sales-rep',
-        type: 'pie',
-        hasFilter: true,
-        uniqueId: 'openQuoteByRep',
-        axis: 'x',
-        hasExport: false,
-        hasTableView: false,
-        filters: [
-          { key: 'status', title: 'Status', multiple: false },
-          { key: 'customerAccount', title: 'Customer Account', multiple: false },
-          { key: 'marketSegment', title: 'Market Segment', multiple: false },
-          { key: 'subMarketSegment', title: 'Sub Market Segment', multiple: false },
-          { key: 'countrySellTo', title: 'Country Sell To', multiple: false },
-          { key: 'countryBillTo', title: 'Country Bill To', multiple: false }
-        ]
-      },
-      {
-        col: 6,
-        title: 'Top selling product categories',
-        kpi: 'products',
-        type: 'list',
-        hasFilter: true,
-        uniqueId: 'topCategory',
-        axis: 'x',
-        hasExport: true,
-        hasTableView: false,
+        hasStatus: false,
         filters: [
           { key: 'salesRep', title: 'Sales Rep', multiple: false },
           { key: 'customerAccount', title: 'Customer Account', multiple: false },
@@ -389,9 +306,16 @@ export default [
         uniqueId: 'assetsByMap',
         hasExport: false,
         hasTableView: false,
+        hasStatus: true,
+        statusOptions: RentalStatus,
         filters: [
+          {
+            key: 'status',
+            title: 'Status',
+            multiple: false
+          },
           { key: 'productCategory', title: 'Product Category', multiple: true },
-          { key: 'productDescription', title: "Product Master", multiple: true }
+          { key: 'productDescription', title: 'Product Master', multiple: true }
         ]
       },
       {
@@ -403,14 +327,15 @@ export default [
         uniqueId: 'utilizationChart1',
         hasExport: true,
         hasTableView: false,
+        hasStatus: false,
         filters: [
           { key: 'productCategory', title: 'Product Category', multiple: true },
-          { key: 'productDescription', title: "Product Master", multiple: true }
+          { key: 'productDescription', title: 'Product Master', multiple: true }
         ]
       },
       {
         col: 6,
-        title: 'Assets by Category',
+        title: 'Assets Utilization by Category',
         kpi: 'assets-in-use-by-category',
         type: 'bar',
         axis: 'x',
@@ -418,34 +343,42 @@ export default [
         uniqueId: 'utilizationChart2',
         hasExport: true,
         hasTableView: true,
+        hasStatus: false,
         filters: [
           { key: 'productCategory', title: 'Product Category', multiple: true },
-          { key: 'productDescription', title: "Product Master", multiple: true }
+          { key: 'productDescription', title: 'Product Master', multiple: true }
         ]
       },
       {
         col: 6,
         title: 'Asset Count',
-        kpi: 'product-with-status-count',
+        kpi: 'assets-status-count',
         type: 'pie',
         hasFilter: true,
         uniqueId: 'assetCount',
         hasExport: true,
         hasTableView: true,
-        filters: [
-          { key: 'productCategory', title: 'Product Category', multiple: true },
-        ]
+        hasStatus: false,
+        filters: [{ key: 'productCategory', title: 'Product Category', multiple: true }]
       },
       {
         col: 6,
         title: 'Rental Job by Customers',
-        kpi: 'customer-in-resource',
+        kpi: 'customer-in-rental',
         type: 'pie',
-        hasFilter: false,
+        hasFilter: true,
         uniqueId: 'rentalByCustomer',
         hasExport: true,
         hasTableView: true,
-        filters: []
+        hasStatus: true,
+        statusOptions: CustomerRentalStatus,
+        filters: [
+          {
+            key: 'status',
+            title: 'Status',
+            multiple: false
+          }
+        ]
       },
       {
         col: 12,
@@ -456,6 +389,7 @@ export default [
         uniqueId: 'assetStats',
         hasExport: false,
         hasTableView: false,
+        hasStatus: false,
         filters: []
       }
     ]

@@ -445,9 +445,10 @@ const PurchaseOrder = () => {
                                         isOpen={isOpenDialog}
                                         handleClose={handleFilterClose}
                                         contentPart={null}
-                                        secHeading={['Filter Purchase Order']}
                                         columns={columns}
                                         dispatch={dispatch}
+                                        title={routes?.purchaseOrder?.title}
+                                        filters={filters}
                                     />
                                 </Grid>
                             </>

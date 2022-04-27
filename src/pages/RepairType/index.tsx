@@ -324,9 +324,10 @@ const RepairType = () => {
                                     isOpen={isOpenDialog}
                                     handleClose={handleFilterClose}
                                     contentPart={null}
-                                    secHeading={['Filter Purchase Order']}
                                     columns={columns}
                                     dispatch={dispatch}
+                                    title={routes?.repairType?.title}
+                                    filters={filters}
                                 />
                             </Grid>
                         ) : null}

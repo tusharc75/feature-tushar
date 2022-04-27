@@ -411,9 +411,10 @@ const BulkAssetCreation = () => {
                                         isOpen={isOpenDialog}
                                         handleClose={handleFilterClose}
                                         contentPart={null}
-                                        secHeading={['Filter Purchase Order']}
                                         columns={columns}
                                         dispatch={dispatch}
+                                        title={routes?.bulkAssetCreation?.title}
+                                        filters={filters}
                                     />
                                 </Grid>
                             </>

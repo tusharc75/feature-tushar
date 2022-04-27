@@ -460,9 +460,10 @@ const AddressResource = () => {
                     isOpen={isOpenDialog}
                     handleClose={handleClose}
                     contentPart={null}
-                    secHeading={["Filter Plants"]}
                     columns={columns}
                     dispatch={dispatch}
+                    title={routes?.warehouse?.title}
+                    filters={filters}
                   />
                 </div>}
             </Grid>

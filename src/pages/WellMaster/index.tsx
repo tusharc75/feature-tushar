@@ -372,9 +372,10 @@ const WellMaster = () => {
                                         isOpen={isOpenDialog}
                                         handleClose={handleFilterClose}
                                         contentPart={null}
-                                        secHeading={['Filter Well Master']}
                                         columns={columns}
                                         dispatch={dispatch}
+                                        title={routes?.wellMaster?.title}
+                                        filters={filters}
                                     />
                                 </Grid>
                             </>

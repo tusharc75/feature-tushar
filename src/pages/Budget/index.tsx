@@ -424,9 +424,10 @@ function Budget() {
                       isOpen={isOpenDialog}
                       handleClose={handleClose}
                       contentPart={null}
-                      secHeading={["Filter Budget"]}
                       columns={columns}
                       dispatch={dispatch}
+                      title={routes?.budget?.title}
+                      filters={filters}
                     />
                   </div>
                 }

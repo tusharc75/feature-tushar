@@ -259,8 +259,16 @@ const Login = () => {
                         </Box>
                       </Box>
                       <Box width={260} className="mt-2">
-                        <Button disabled={isSubmitting} fullWidth variant="contained" color="secondary" type="submit" onClick={submitForm}>
-                          {isSubmitting ? <CircularProgress size={22} /> : 'Login'}
+                        <Button
+                          disabled={isSubmitting}
+                          fullWidth
+                          variant="contained"
+                          className="logo-bg-color"
+                          type="submit"
+                          onClick={submitForm}
+                          startIcon={isSubmitting && <CircularProgress color='inherit' size={20} />}
+                        >
+                          Login
                         </Button>
 
                         <Box className="mt-2">
@@ -269,9 +277,9 @@ const Login = () => {
                               <span>Not authorized loging out in {counter}</span>
                             ) : (
                               <Button
+                                className="logo-bg-color"
                                 variant="contained"
                                 fullWidth
-                                color="secondary"
                                 startIcon={<SiMicrosoftoffice />}
                                 disabled={isSubmitting}
                                 onClick={() => instance.logoutPopup()}
