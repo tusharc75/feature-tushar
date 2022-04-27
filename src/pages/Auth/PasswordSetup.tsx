@@ -6,7 +6,7 @@ import {
   Grid,
   Paper,
   Button,
-  LinearProgress,
+  CircularProgress,
 } from "@material-ui/core";
 import { Formik, Form, Field } from "formik";
 import { TextField } from "formik-material-ui";
@@ -166,13 +166,13 @@ const PasswordSetup = () => {
                       required
                     />
                     <br />
-                    {isSubmitting && <LinearProgress />}
                     <Button
                       variant="contained"
-                      color="primary"
+                      className="logo-bg-color"
                       size="small"
                       disabled={isSubmitting}
                       onClick={submitForm}
+                      startIcon={isSubmitting && <CircularProgress size={20} color='inherit' /> }
                     >
                       Submit
                     </Button>
