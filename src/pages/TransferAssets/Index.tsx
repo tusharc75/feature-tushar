@@ -595,11 +595,11 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.transferAsset?.title?.toLowerCase()
+          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()
             } ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''} ? `}
           onClose={() => {
-            setShowDeleteConfirmBox(false);
             setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
           okBtnLoading={isDeleting}

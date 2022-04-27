@@ -514,7 +514,10 @@ const WellMaster = () => {
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
                 message={`Are you sure you want to delete the ${routes.wellMaster?.title} ? `}
-                onClose={() => setShowDeleteConfirmBox(false)}
+                onClose={() => {
+                    setDeleteRecord(null);
+                    setShowDeleteConfirmBox(false)
+                }}
                 onOk={handleDelete}
             />
         }

@@ -20,10 +20,10 @@ import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd,MdSort,MdFilterList } from 'react-icons/all';
+import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
 import MobileFilterDialog from "../../components/MobileFilterDialog";
 import MobileSortDialog from "../../components/MobileSortDialog";
-import {camelCase} from 'lodash'
+import { camelCase } from 'lodash'
 
 let priceTemplateTimeout;
 
@@ -301,10 +301,10 @@ const PriceTemplate: FC = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
-          <div className="d-flex align-items-center">
-              <CgTemplate size={22} style={{ paddingBottom: '3px' }} /> <span className="listingHeader">{routes.priceTemplate.title}</span>
-             </div>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+              <div className="d-flex align-items-center">
+                <CgTemplate size={22} style={{ paddingBottom: '3px' }} /> <span className="listingHeader">{routes.priceTemplate.title}</span>
+              </div>
               {isMobile && !isTablet && (
                 <div className="d-flex ">
                   <Button
@@ -463,8 +463,11 @@ const PriceTemplate: FC = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure, you want to delete price template ${deleteRecord?._id ? deleteRecord?.name : ''} ?`}
-            onClose={() => setShowDeleteConfirmBox(false)}
+            message={`Are you sure, you want to delete ${routes?.priceTemplate?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.name : ''} ?`}
+            onClose={() => {
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false)
+            }}
             onOk={handleDelete}
           />
         )}
