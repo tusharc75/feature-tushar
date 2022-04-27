@@ -9,21 +9,22 @@ interface Props {
   values: any;
   setValues: any;
   filterOptions: any;
+  isAssetDashboard: boolean;
 }
 
-const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values, setValues }: Props) => {
+const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values, setValues, isAssetDashboard }: Props) => {
   React.useEffect(() => {
     if (!filters) return;
     filters.forEach((filter) => {
       setValues((prevState: any) => ({
         ...prevState,
-        [filter.key]: filter.multiple ? [] : filter.key === 'status' ? { optionValue: 'open', optionLabel: 'Open' } : {}
+        [filter.key]: filter.multiple ? [] : filter.key === 'status' && !isAssetDashboard ? { optionValue: 'open', optionLabel: 'Open' } : {}
       }));
     });
   }, [filters]);
 
   const handleChange = (key: string, val: any) => {
-    if (key === 'status' && !val) {
+    if (key === 'status' && !val && !isAssetDashboard) {
       setValues((prevState: any) => ({ ...prevState, [key]: { optionValue: 'open', optionLabel: 'Open' } }));
       return;
     }
