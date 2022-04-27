@@ -347,6 +347,7 @@ const Entity: FC = () => {
             columns={columns}
             openUserDialog={handleOpenDialog}
             anyEntitySelected={selectedRecords.length > 0} //single select entity can assign user
+            filters={filters}
           />
         </div>
 

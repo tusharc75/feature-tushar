@@ -1072,9 +1072,10 @@ export default function Account(props) {
                         isOpen={isOpenDialog}
                         handleClose={handleFilterClose}
                         contentPart={toggleInner}
-                        secHeading={['Filter Accounts']}
                         columns={columns}
                         dispatch={dispatch}
+                        title={routes?.[accountResource]?.title}
+                        filters={filters}
                       />
                     </Grid>
                   </>

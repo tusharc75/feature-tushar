@@ -776,7 +776,7 @@ const QuoteBuilders = () => {
               }}
               columns={columns}
               dispatch={dispatch}
-
+              filters={filters}
             >
               {accountDetails.accountId && (
                 <Chip

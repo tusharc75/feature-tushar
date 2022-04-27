@@ -29,7 +29,8 @@ const ProjectStrategyHeader = (props) => {
     setEntities,
     columns,
     dispatch,
-    children
+    children,
+    filters
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
@@ -127,9 +128,10 @@ const ProjectStrategyHeader = (props) => {
               isOpen={isOpenDialog}
               handleClose={handleClose}
               contentPart={toggleInner}
-              secHeading={['Filter ProjectSales']}
               columns={columns}
               dispatch={dispatch}
+              title={routes?.projectSales?.title}
+              filters={filters}
             />
           </div>
         ) : (

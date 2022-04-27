@@ -23,12 +23,12 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import './style.scss';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import useColumns, {getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
 import { FcProcess } from "react-icons/fc";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
-import {BsBuilding,AiFillMail} from "react-icons/all";
+import { BsBuilding, AiFillMail } from "react-icons/all";
 
 const LeadTypes = [
   {
@@ -49,7 +49,7 @@ const Leads = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const {getColumnData} = useColumns();
+  const { getColumnData } = useColumns();
   const { leadResource, leadApi } = lead;
   const [selectedType, setSelectedType] = useState(1);
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
@@ -588,6 +588,7 @@ const Leads = () => {
       <CustomContainer>
         <div className="header-panel">
           <LeadsHeader
+            filters={filters}
             userId={user?.user?._id}
             selectedType={selectedType}
             onTypeChange={handleLeadTypeSel}
@@ -648,14 +649,14 @@ const Leads = () => {
               ]}
               chips={[
                 {
-                  icon:<BsBuilding />,
+                  icon: <BsBuilding />,
                   label: "Company: ",
                   field: "company",
                 },
                 {
-                  icon:<AiFillMail/>,
-                  label:"Email",
-                  field:"email"
+                  icon: <AiFillMail />,
+                  label: "Email",
+                  field: "email"
 
                 }
               ]}

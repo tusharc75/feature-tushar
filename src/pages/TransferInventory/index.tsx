@@ -372,9 +372,10 @@ const TransferInventory = () => {
                     isOpen={isOpenDialog}
                     handleClose={handleClose}
                     contentPart={null}
-                    secHeading={['Filter Transfer Inventories']}
                     columns={columns}
                     dispatch={dispatch}
+                    title={routes?.transferInventory?.title}
+                    filters={filters}
                   />
                 </div>
               ):

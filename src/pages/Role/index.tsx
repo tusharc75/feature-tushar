@@ -31,7 +31,7 @@ import { camelCase } from "lodash";
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 let roleTimeout;
 
-const Roles: FC = () => { 
+const Roles: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory()
   const {
@@ -368,6 +368,7 @@ const Roles: FC = () => {
               userDialogOpen={userDialogOpen}
               dispatch={dispatch}
               columns={columns}
+              filters={filters}
             />
           </div>
 

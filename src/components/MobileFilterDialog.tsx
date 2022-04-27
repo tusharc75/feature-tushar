@@ -22,7 +22,7 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function MobileFilterDialog({ isOpen, handleClose, contentPart, secHeading = null, columns, dispatch, filters = null, title = null }) {
+export default function MobileFilterDialog({ isOpen, handleClose, contentPart, columns, dispatch, filters, title }) {
 
   const toastConfig = React.useContext(CustomToastContext);
   const [inputFields, setInputFields] = React.useState(null);
@@ -106,7 +106,7 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
   >
     <DialogContent className="mobile-filter-content">
       <div className='d-flex justify-content-space-between align-items-center pb-3'>
-        <h3 className=" sub-filter-heading">{title ? `Filter ${title}` : secHeading}</h3>
+        <h3 className=" sub-filter-heading">{title ? `Filter ${title}` : `Filter`}</h3>
         <MdClose size={20} style={{ color: "rgb(244, 67, 54)" }} onClick={handleClose} />
       </div>
       {contentPart}

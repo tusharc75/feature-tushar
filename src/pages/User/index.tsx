@@ -742,6 +742,7 @@ const User: FC = () => {
               handleUnAssignBrandAdmin={handleUnAssignBrandAdmin}
               columns={columns}
               dispatch={dispatch}
+              filters={filters}
             />
           </div>
 
