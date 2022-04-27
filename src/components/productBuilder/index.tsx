@@ -608,7 +608,6 @@ const ProductBuilder = (props) => {
         {
           isMobile && !isTablet ?
             <CustomSwipableList
-
               allowSelection={Editable}
               allowSwipe={Editable}
               permissions={permissions}

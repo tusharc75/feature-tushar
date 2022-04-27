@@ -477,9 +477,6 @@ const Zone = () => {
                       disabled={!(permissions?.zone.isDelete && !selectedRecords?.some((record) => record.createdById !== user?.user?._id))}
                       onClick={() => {
                         closeActions();
-                        {
-                          selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                        }
                         setShowDeleteConfirmBox(true);
                       }}
                     >
@@ -525,7 +522,7 @@ const Zone = () => {
                 }
               ]}
               chips={[
-               
+
               ]}
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
@@ -560,14 +557,17 @@ const Zone = () => {
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete zone  ${deleteRecord?._id ? deleteRecord?.name : ''}?`}
-            onClose={() => setShowDeleteConfirmBox(false)}
+            onClose={() => {
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false)
+            }}
             onOk={handleDelete}
           />
         )}
 
         {open?.open && (
           <CreateZone
-          isUpdateDisabled={false}
+            isUpdateDisabled={false}
             zoneId={zoneId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}

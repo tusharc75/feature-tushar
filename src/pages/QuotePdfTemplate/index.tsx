@@ -492,8 +492,8 @@ const QuotePdfTemplate: FC = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure, you want to delete Quote Pdf template ${deleteRecord?._id ? deleteRecord?.name : ''} ?`}
-            onClose={() => setShowDeleteConfirmBox(false)}
+            message={`Are you sure, you want to delete ${routes?.quotePdfTemplate?.title?.toLowerCase()} ${deleteRecord?.name || ''} ?`}
+            onClose={() => { setDeleteRecord(null); setShowDeleteConfirmBox(false) }}
             onOk={handleDelete}
           />
         )}

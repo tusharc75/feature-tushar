@@ -683,8 +683,11 @@ const ProductCategory = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete product category  ${deleteRecord?._id ? deleteRecord?.name : ''}?`}
-            onClose={() => setShowDeleteConfirmBox(false)}
+            message={`Are you sure you want to delete ${routes?.productCategory?.title?.toLowerCase()}  ${deleteRecord?.name || ''} ?`}
+            onClose={() => {
+              setDeleteRecord(null)
+              setShowDeleteConfirmBox(false)
+            }}
             onOk={handleDelete}
           />
         )}
