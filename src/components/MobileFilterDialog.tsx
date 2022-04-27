@@ -1,19 +1,17 @@
 import * as React from 'react';
 import './MobileFilterDialog.scss';
 import TextField from '@material-ui/core/TextField';
-import { Add, Delete } from '@material-ui/icons';
-import { MdAdd, MdClose } from 'react-icons/all';
+import { Delete } from '@material-ui/icons';
+import { MdClose } from 'react-icons/all';
 import { Autocomplete } from '@material-ui/lab';
-import { Grid, Button, ButtonGroup, IconButton, Dialog, DialogContent, Slide } from '@material-ui/core';
+import { Button, IconButton, Dialog, DialogContent, Slide } from '@material-ui/core';
 import { v4 as uuidv4 } from 'uuid';
 import { makeStyles } from '@material-ui/core/styles';
 import { TransitionProps } from '@material-ui/core/transitions';
-import { Formik, Form, FieldArray } from 'formik';
 import { CustomToastContext } from '../StateProvider/CustomToastContext/CustomToastContext';
-import Container from '@material-ui/core/Container';
-import RemoveIcon from '@material-ui/icons/Remove';
-import AddIcon from '@material-ui/icons/Add';
-import Icon from '@material-ui/core/Icon';
+import { isObjectEmpty } from "../constants/helpers";
+import { Box } from "@material-ui/core";
+import Card from '@material-ui/core/Card';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -24,94 +22,69 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    '& .MuiTextField-root': {
-      margin: theme.spacing(1)
-    }
-  },
-  button: {
-    margin: theme.spacing(1)
-  }
-}));
+export default function MobileFilterDialog({ isOpen, handleClose, contentPart, columns, dispatch, filters, title }) {
 
-export default function MobileFilterDialog({ isOpen, handleClose, contentPart, secHeading, columns, dispatch }) {
-  const [showFilter, setShowFilter] = React.useState(false);
-  const [open, setOpen] = React.useState(isOpen);
-  const [close, setClose] = React.useState(handleClose);
   const toastConfig = React.useContext(CustomToastContext);
-  const classes = useStyles();
-  const [inputFields, setInputFields] = React.useState([{ id: uuidv4(), firstName: '', lastName: '' }]);
-  const [fieldData, setFieldData] = React.useState([null]);
+  const [inputFields, setInputFields] = React.useState(null);
 
-  const handleAddFilter = () => {
-    if (!showFilter) {
-      setShowFilter(true);
-    } else {
-      setShowFilter(false);
+  React.useEffect(() => {
+    if (!isObjectEmpty(filters)) {
+      const data = [];
+      Object.keys(filters).forEach((field) => {
+        data.push({
+          id: uuidv4(),
+          fieldName: field,
+          fieldValue: filters[field].filter,
+        });
+      });
+      console.log(data)
+      setInputFields(data)
     }
-  };
+    else {
+      setInputFields([])
+    }
+  }, [filters, isOpen]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    var result = Object.assign.apply(
-      {},
-      inputFields.map((v, i) => ({ [v.firstName]: { filter: v.lastName } }))
-    );
+    var result = {};
+    inputFields?.forEach((v) => {
+      if (v.fieldValue && v.fieldValue !== "") {
+        result[v.fieldName] = { filter: v.fieldValue };
+      }
+    })
     dispatch({ type: 'filter', filters: result });
-
     toastConfig.setToastConfig({
       open: true,
       type: 'success',
       message: 'Filtered Successfully'
     });
-
     handleClose();
-    setInputFields([{ id: uuidv4(), firstName: '', lastName: '' }]);
-    setFieldData(columns);
+    setInputFields([]);
   };
 
   const handleChangeInput = (id, event) => {
-    const newInputFields = inputFields.map((i) => {
+    const newInputFields = inputFields?.map((i) => {
       if (id === i.id) {
-        i[event.target.name] = event.target.value;
+        i["fieldValue"] = event.target.value;
       }
       return i;
     });
-
     setInputFields(newInputFields);
   };
 
   const handleChangeAutocomplete = (id, value) => {
-    const newInputFields = inputFields.map((i) => {
+    const newInputFields = inputFields?.map((i) => {
       if (id === i.id) {
-        i.firstName = value?.field;
+        i.fieldName = value?.field;
       }
       return i;
     });
-    let inputedValue = newInputFields.map((i,index)=>{return i.firstName});
-  
-    if(inputedValue?.length === 1){
-      let newColumns = columns.filter((item)=> item.field !== inputedValue[0])
-      setFieldData(newColumns)
-  }
-  if(inputedValue?.length === 0){
-  setFieldData(columns)
-}
-    if(inputedValue?.length > 1){
-      let newColumns = []
-      for(let i = 0; i < inputedValue.length; i++){
-        newColumns = (i === 0 ? columns : newColumns).filter((item)=> item.field !== inputedValue[i])
-        setFieldData(newColumns)
-      }
-     
-       
-  }
     setInputFields(newInputFields);
   };
 
   const handleAddFields = () => {
-    setInputFields([...inputFields, { id: uuidv4(), firstName: '', lastName: '' }]);
+    setInputFields([...inputFields, { id: uuidv4(), fieldName: '', fieldValue: '' }]);
   };
 
   const handleRemoveFields = (id) => {
@@ -121,123 +94,95 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, s
       1
     );
     setInputFields(values);
-      let newValues = values.map((i,id)=>{return i.firstName});
-      
-      if(newValues?.length === 1){
-          let newColumns = columns.filter((item)=> item.field !== newValues[0])
-    setFieldData(newColumns)
-      }
-      if(newValues?.length === 0){
-      setFieldData(columns)
-    }
-    if(newValues?.length > 1){
-      let newColumns = []
-      for(let i = 0; i < newValues.length; i++){
-        newColumns = (i === 0 ? columns : newColumns).filter((item)=> item.field !== newValues[i])
-        setFieldData(newColumns)
-      }
-     
-       
-  }
-
   };
 
-  React.useEffect(() => {
-    if (columns) {
-      setFieldData(columns);
-    }
-  }, [columns]);
-
-  return (
-    <div>
-      <Dialog
-        open={isOpen}
-        TransitionComponent={Transition}
-        keepMounted
-        onClose={handleClose}
-        aria-describedby="alert-dialog-slide-description"
-        className="mobile-filter-root"
-      >
-        <DialogContent className="mobile-filter-content">
-          <div className='d-flex justify-content-space-between align-items-center pb-3'>
-          <h3 className=" sub-filter-heading">{secHeading}</h3>  
-          <MdClose size={20} style={{color:"rgb(244, 67, 54)"}} onClick={handleClose}/>
-          </div>
-          {contentPart}
-          {inputFields?.length > 0 ? (
-            <form className={classes.root} onSubmit={handleSubmit}>
-              {inputFields.map((inputField) => (
-                <div key={inputField.id}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={8}>
-                      <Autocomplete
-                        id="country-select-demo"
-                        style={{ marginTop: '20px' }}
-                        options={fieldData}
-                     
-                        autoHighlight
-                        getOptionLabel={(option: any) => (option?.headerName ? option?.headerName : '')}
-                        renderOption={(option) => <React.Fragment>{option?.headerName}</React.Fragment>}
-                     
-                        onChange={(event, value) => {
-                          
-                        
-                          if(value !== null){
-                         
-                            handleChangeAutocomplete(inputField.id, value);
-                            let newCloumn = fieldData?.filter((item) => item.field !== value?.field);
-                            setFieldData(newCloumn);
-                          }else{
-                            handleChangeAutocomplete(inputField.id, '');
-                          }
-                         
-                        }}
-                        renderInput={(params) => <TextField {...params} name="" label="Choose a Field" variant="filled"  />}
-                      />
-
-                   
-                      <TextField
-                        name="lastName"
-                        label="Filter Text"
-                        variant="filled"
-                        value={inputField.lastName}
-                        onChange={(event) => handleChangeInput(inputField.id, event)}
-                      />
-                    </Grid>
-                    <Grid item xs={4}>
-                      <div style={{ marginTop: '50px' }}>
-                        <IconButton aria-label="delete" style={{ color:'#f44336' }} onClick={() => handleRemoveFields(inputField.id)}>
-                          <Delete />
-                        </IconButton>
-                        <IconButton onClick={handleAddFields}>
-                          <Add />
-                        </IconButton>
-                      </div>
-                    </Grid>
-                  </Grid>
-                </div>
-              ))}
-              <div className="submit_filter_button">
-                <Button type="submit" color="primary" size="large" className="mobile_button submit" variant="text" onClick={handleSubmit}>
-                  Submit
-                </Button>
-              </div>
-            </form>
-          ) : (
-            <div className="filter_add_button">
-              <Button
-                variant="text"
-                color="primary"
-                size="small"
-                className="mobile_button add"
-                onClick={handleAddFields}            
-              >
-                <MdAdd size={25} />
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
+  return (<Dialog
+    open={isOpen}
+    TransitionComponent={Transition}
+    keepMounted
+    onClose={handleClose}
+    aria-describedby="alert-dialog-slide-description"
+    className="mobile-filter-root"
+  >
+    <DialogContent className="mobile-filter-content">
+      <div className='d-flex justify-content-space-between align-items-center pb-3'>
+        <h3 className=" sub-filter-heading">{title ? `Filter ${title}` : `Filter`}</h3>
+        <MdClose size={20} style={{ color: "rgb(244, 67, 54)" }} onClick={handleClose} />
+      </div>
+      {contentPart}
+      <form onSubmit={handleSubmit}>
+        {inputFields?.map((field) => (
+          <Box mt={1} key={field.id}>
+            <Card variant="outlined" >
+              <Box p={1}>
+                <Box display="flex">
+                  <Box flexGrow={1}>
+                    <Autocomplete
+                      id={`fieldName_${field.id}`}
+                      options={columns}
+                      autoHighlight
+                      getOptionLabel={(option: any) => option?.headerName}
+                      renderOption={(option) => option?.headerName}
+                      onChange={(event, value) => {
+                        if (value !== null) {
+                          handleChangeAutocomplete(field.id, value);
+                        } else {
+                          handleChangeAutocomplete(field.id, '');
+                        }
+                      }}
+                      value={columns?.find(v => v.field === field?.fieldName) || {}}
+                      renderInput={(params) => <TextField
+                        {...params}
+                        name={`fieldName_${field.id}`}
+                        label="Select Field"
+                        margin='dense'
+                        variant="outlined"
+                      />}
+                    />
+                  </Box>
+                  <Box ml={1}>
+                    <IconButton aria-label="delete" onClick={() => handleRemoveFields(field.id)}>
+                      <Delete color="error" />
+                    </IconButton>
+                  </Box>
+                </Box>
+                <TextField
+                  name={`fieldValue_${field.id}`}
+                  label="Filter Text"
+                  variant="outlined"
+                  margin='dense'
+                  fullWidth
+                  value={field.fieldValue}
+                  onChange={(event) => handleChangeInput(field.id, event)}
+                />
+              </Box>
+            </Card>
+          </Box>
+        ))}
+        <Box display="flex" mt={2} justifyContent="center">
+          <Button
+            variant="text"
+            color="primary"
+            size="small"
+            className="mobile_button"
+            onClick={handleAddFields}
+          >
+            Add Filter
+          </Button>
+        </Box>
+        <Box display="flex" mt={2} justifyContent="center">
+          <Button
+            type="submit"
+            color="primary"
+            size="large"
+            className="mobile_button"
+            variant="text"
+            onClick={handleSubmit}>
+            Submit
+          </Button>
+        </Box>
+      </form>
+    </DialogContent>
+  </Dialog>
   );
 }

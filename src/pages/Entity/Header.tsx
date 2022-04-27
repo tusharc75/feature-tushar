@@ -23,7 +23,8 @@ const EntityHeader = (props) => {
     manageDeleteEntity,
     canDelete,
     columns,
-    dispatch
+    dispatch,
+    filters
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [sortOpen, setSortOpen] = useState(false);
@@ -109,9 +110,10 @@ const EntityHeader = (props) => {
                 isOpen={isOpenDialog}
                 handleClose={handleFilterClose}
                 contentPart={null}
-                secHeading={['Filter Entity']}
                 columns={columns}
                 dispatch={dispatch}
+                title={routes?.entity?.title}
+                filters={filters}
               />
             </Grid>
           </>

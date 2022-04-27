@@ -302,7 +302,6 @@ const RentalManagement = () => {
 
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
-
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
@@ -496,6 +495,7 @@ const RentalManagement = () => {
               // }}
               gridApi={gridApi}
               fetchRentalManagement={fetchRentalManagement}
+              filters={filters}
             >
               {accountDetails.accountId && (
                 <Chip

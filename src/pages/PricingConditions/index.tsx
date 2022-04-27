@@ -318,9 +318,10 @@ const PricingConditions = () => {
                       isOpen={isOpenDialog}
                       handleClose={handleFilterClose}
                       contentPart={null}
-                      secHeading={['Filter Pricing Setup']}
                       columns={columns}
                       dispatch={dispatch}
+                      title={routes?.pricingCondition?.title}
+                      filters={filters}
                     />
                   </Grid>
                 </>

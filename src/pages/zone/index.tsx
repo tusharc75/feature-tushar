@@ -392,7 +392,6 @@ const Zone = () => {
                       columns={columns}
                       dispatch={dispatch}
                     />
-
                     <Button
                       id="demo-customized-button"
                       aria-controls="demo-customized-menu"
@@ -407,14 +406,14 @@ const Zone = () => {
                     >
                       Filter
                     </Button>
-
                     <MobileFilterDialog
                       isOpen={isOpenDialog}
                       handleClose={handleFilterClose}
                       contentPart={null}
-                      secHeading={['Filter Zone']}
                       columns={columns}
                       dispatch={dispatch}
+                      title={routes?.zone?.title}
+                      filters={filters}
                     />
                   </Grid>
                 </>

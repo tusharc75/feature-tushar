@@ -348,9 +348,10 @@ const PriceTemplate: FC = () => {
                     isOpen={isOpenDialog}
                     handleClose={handleClose}
                     contentPart={null}
-                    secHeading={['Filter Price Templates']}
                     columns={columns}
                     dispatch={dispatch}
+                    title={routes?.priceTemplate?.title}
+                    filters={filters}
                   />
                 </div>
               )}

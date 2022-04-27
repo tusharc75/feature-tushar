@@ -26,7 +26,7 @@ import { useHistory } from 'react-router-dom';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
 import { StayPrimaryPortraitSharp } from "@material-ui/icons";
 import { BiDollar } from "react-icons/bi";
-import { SiMarketo,AiFillFileMarkdown,GiArrowScope,FaPercentage,FaAward,SiStatuspage,GoVersions} from "react-icons/all";
+import { SiMarketo, AiFillFileMarkdown, GiArrowScope, FaPercentage, FaAward, SiStatuspage, GoVersions } from "react-icons/all";
 import { camelCase } from "lodash";
 
 function reducer(state, action) {
@@ -127,7 +127,7 @@ const ProjectSales: FC = () => {
   const {
     state: { user, permissions, selectedEntity },
   }: any = useData();
-  const {getColumnData} = useColumns();
+  const { getColumnData } = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -386,7 +386,7 @@ const ProjectSales: FC = () => {
             finalObject["isChecked"] = selectedRecords.some(s => s._id === project._id);
             finalObject["allowedToEdit"] = finalObject["projectManagerId"] === user?.user._id;
 
-            finalObject["owerCollaboratorInitialsOrImages"] = [{initials:finalObject["projectManager"]}];
+            finalObject["owerCollaboratorInitialsOrImages"] = [{ initials: finalObject["projectManager"] }];
             return {
               ...finalObject,
               isManager: user.user._id === project?.projectManager?.optionValue,
@@ -556,19 +556,19 @@ const ProjectSales: FC = () => {
               setShowDeleteWarningConfirmBox={setShowDeleteWarningConfirmBox}
               setShowEntityDialog={setShowEntityDialog}
               setEntities={setEntities}
-              
+              filters={filters}
             >
               {accountDetails.accountId && (
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`${accountDetails.resource === customerAccount.accountResource ? 'Customer' : 'Supplier'} Account: ${accountDetails.accountName
-                  }`}
-                onDelete={() => {
-                  setAccountDetails({ accountId: null, accountName: null, resource: null });
-                }}
-              />
-            )}
+                <Chip
+                  className="ml-3"
+                  color="primary"
+                  label={`${accountDetails.resource === customerAccount.accountResource ? 'Customer' : 'Supplier'} Account: ${accountDetails.accountName
+                    }`}
+                  onDelete={() => {
+                    setAccountDetails({ accountId: null, accountName: null, resource: null });
+                  }}
+                />
+              )}
             </ProjectHeader>
           </div>
 
@@ -598,42 +598,42 @@ const ProjectSales: FC = () => {
                   loading={loading}
                   additionalDetails={[
 
-                    { 
+                    {
                       icon: <BiDollar size={18} />,
-                      field:"amount"
+                      field: "amount"
                     }
                   ]}
                   chips={[
                     {
-                      icon:<FaAward/>,
+                      icon: <FaAward />,
                       label: "Award Date : ",
                       field: "awardDate",
 
                     },
-                  {
-                    icon:<AiFillFileMarkdown/>,
-                    label:"Market:",
-                    field:"marketSegment",
-                  },
-                  {
-                    icon:<SiMarketo />,
-                    label:"Sub-Market:",
-                    field:"subMarketSegment"
-                  },
-                  {
-                    icon:<GiArrowScope/>,
-                    label:"Scope:",
-                    field:"scope"
-                  },
+                    {
+                      icon: <AiFillFileMarkdown />,
+                      label: "Market:",
+                      field: "marketSegment",
+                    },
+                    {
+                      icon: <SiMarketo />,
+                      label: "Sub-Market:",
+                      field: "subMarketSegment"
+                    },
+                    {
+                      icon: <GiArrowScope />,
+                      label: "Scope:",
+                      field: "scope"
+                    },
                   ]}
                   onCreate={false}
                   showClone={true}
                   onClone={(data) => {
                     setIsOpen({ open: true, isClone: true, idToClone: data._id })
-                   }}
+                  }}
                   renderedFrom={renderedFrom}
                 />
-                 :
+                :
                 <CustomAgGrid
                   columns={columns}
                   dataRows={dataRows}

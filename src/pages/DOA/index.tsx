@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import { Link } from "react-router-dom";
-import {MdSort, MdFilterList} from "react-icons/all";
+import { MdSort, MdFilterList } from "react-icons/all";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -178,19 +178,19 @@ const DOARequest = () => {
   return (
     <Fragment>
       <Grid container className="headerbox">
-      <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-          <CustomBreadCrumbs routes={[{ title: routes.DOARequest.title }]} />
+        <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+          <div className="d-flex align-items-center">
+            <CustomBreadCrumbs routes={[{ title: routes.DOARequest.title }]} />
           </div>
         </Grid>
       </Grid>
       <CustomContainer>
         <div className="header-panel">
           <Grid container>
-          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
               <div className="d-flex align-items-center">
-              <GiAbstract055 />{" "}
-              <span className="listingHeader">{routes.DOARequest.title}</span>
+                <GiAbstract055 />{" "}
+                <span className="listingHeader">{routes.DOARequest.title}</span>
               </div>
               {isMobile && (
                 <>
@@ -238,9 +238,10 @@ const DOARequest = () => {
                       isOpen={isOpenDialog}
                       handleClose={handleFilterClose}
                       contentPart={null}
-                      secHeading={['Filter DOA Request']}
                       columns={columns}
                       dispatch={dispatch}
+                      title={routes?.DOARequest?.title}
+                      filters={{}}
                     />
                   </Grid>
                 </>

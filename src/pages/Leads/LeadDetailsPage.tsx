@@ -22,9 +22,9 @@ import { isMobile, isTablet } from 'react-device-detect';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
-import {MdDelete, MdEdit} from "react-icons/md";
-import {FaFunnelDollar} from "react-icons/all";
-import {BiEdit} from "react-icons/bi";
+import { MdDelete, MdEdit } from "react-icons/md";
+import { FaFunnelDollar } from "react-icons/all";
+import { BiEdit } from "react-icons/bi";
 import contactClass from "../Contact/contact.module.scss";
 import accountClass from "../Account/account.module.scss";
 
@@ -379,7 +379,7 @@ const LeadDetailsPage = () => {
         </Grid>
         <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
           <div>
-            <Paper style={isMobile ?{width:"98%"} : {}}>
+            <Paper style={isMobile ? { width: "98%" } : {}}>
               {!leadData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -399,24 +399,24 @@ const LeadDetailsPage = () => {
                 >
                   {leadsPermissions.isUpdate && allowedToEdit && (
                     <Button
-                        variant={isMobile && !isTablet ? "text" : "contained"}
-                        color="primary"
-                        size="small"
-                        onClick={handleOpneUpdateDialog}
-                        className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
-                        style={isMobile && !isTablet ? {color:"#43aeaa"} : {}}
+                      variant={isMobile && !isTablet ? "text" : "contained"}
+                      color="primary"
+                      size="small"
+                      onClick={handleOpneUpdateDialog}
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                      style={isMobile && !isTablet ? { color: "#43aeaa" } : {}}
                     >
-                      {isMobile && !isTablet ? <BiEdit size={20}/> : "Edit"}
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
                     </Button>
                   )}
                   {!isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && (
                     <>
                       <Button
-                          variant={isMobile && !isTablet ? "text" : "contained"}
+                        variant={isMobile && !isTablet ? "text" : "contained"}
                         color="primary"
                         size="small"
-                          className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
-                          style={isMobile && !isTablet ? {color:"var(--warning-light)" , borderColor:"var(--warning-light)"} : {}}
+                        className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
+                        style={isMobile && !isTablet ? { color: "var(--warning-light)", borderColor: "var(--warning-light)" } : {}}
                         onClick={() => {
                           const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter((d) => d).join(' ');
                           setConvertLeadToOpportunityConfirmationDialog({
@@ -427,14 +427,13 @@ const LeadDetailsPage = () => {
                           });
                         }}
                       >
-                        {isMobile && !isTablet ? <FaFunnelDollar size={19}/> : "Convert Lead To Opportunity"}
+                        {isMobile && !isTablet ? <FaFunnelDollar size={19} /> : "Convert Lead To Opportunity"}
                       </Button>
                     </>
                   )}
-                  {leadsPermissions.isDelete && allowedToDelete && <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20}/> : "Delete"} onClick={() => setShowConfirmBox(true)} className={isMobile  ? accountClass.mobile_button_layout : ""}/>}
+                  {leadsPermissions.isDelete && allowedToDelete && <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : "Delete"} onClick={() => setShowConfirmBox(true)} className={isMobile ? accountClass.mobile_button_layout : ""} />}
                 </DetailsPageHeader>
               )}
-
               <ProcessFlow
                 disableBackNext={leadsPermissions.isUpdate && allowedToEdit ? false : true}
                 steps={steps}
@@ -443,7 +442,6 @@ const LeadDetailsPage = () => {
                 hideBackButton={isLeadAlreadyConvertedToOpportunity}
                 className="stepper-box-layout"
               />
-
               {loading ? (
                 <Grid container spacing={2}>
                   {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
@@ -471,44 +469,7 @@ const LeadDetailsPage = () => {
             </Paper>
           </div>
           <div className="position-relative">
-            {/* {showActivity ?
-              <Paper>
-                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropright className="icon" />
-                </span>}
-                {!leadData ? (
-                  <Box>
-                    <Skeleton variant="text" width="100px" height="25px" />
-                    <Box marginY={1} />
-                    {[0, 1, 2, 3, 4].map((i, index) => (
-                      <Skeleton key={index} width="100%" height="50px" />
-                    ))}
-                  </Box>
-                ) : (
-                  <div>
-                    <Activity
-                      restrictedAddActivities={leadsPermissions.isUpdate && allowedToEdit ? [] : ['Attachment', 'Case']}
-                      relatedTo={[
-                        {
-                          type: leadResource,
-                          referenceId: leadData._id,
-                          access: true
-                        }
-                      ]}
-                      resourceId={leadData._id}
-                      resource={leadResource}
-                      handleActivityRefresh={() => { }}
-                      emails={[leadData?.email ?? '']}
-                    />
-                  </div>
-                )}
-              </Paper>
-              :
-              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-                <IoIosArrowDropleft className="icon" />
-              </span>} */}
-
-            <Paper>
+            <Paper style={isMobile ? { marginBottom: "50px" } : {}}>
               {!isMobile && !isTablet && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
                 {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
               </span>}
@@ -541,10 +502,8 @@ const LeadDetailsPage = () => {
                 )}
               </div>
             </Paper>
-
           </div>
         </div>
-
         {convertLeadToOpportunityConfirmationDialog.open ? (
           <ConfirmationDialog
             open={convertLeadToOpportunityConfirmationDialog.open}

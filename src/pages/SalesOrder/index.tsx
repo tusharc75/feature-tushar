@@ -445,6 +445,7 @@ const SalesOrder = () => {
               showTransferEntityDialog={handleTransferEntityDialog}
               columns={columns}
               dispatch={dispatch}
+              filters={filters}
             >
               {accountDetails.accountId && (
                 <Chip
