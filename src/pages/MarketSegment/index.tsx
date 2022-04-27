@@ -381,9 +381,10 @@ const MarketSegment = () => {
                       isOpen={isOpenDialog}
                       handleClose={handleFilterClose}
                       contentPart={null}
-                      secHeading={['Filter Market Segment']}
                       columns={columns}
                       dispatch={dispatch}
+                      title={routes?.marketSegment?.title}
+                      filters={filters}
                     />
                   </Grid>
                 </>

@@ -10,6 +10,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { MdAdd, MdSort, MdFilterList } from 'react-icons/md';
+import routes from 'src/components/Helpers/Routes';
 
 function RepairJobHeader(props) {
   const {
@@ -29,6 +30,7 @@ function RepairJobHeader(props) {
     selectedType,
     columns,
     dispatch,
+    filters
     // showCloneRentalManagementDialog
   } = props;
 
@@ -148,9 +150,10 @@ function RepairJobHeader(props) {
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
                 contentPart={toggleInner}
-                secHeading={['Filter Repair Job']}
                 columns={columns}
                 dispatch={dispatch}
+                title={routes?.repairJob?.title}
+                filters={filters}
               />
             </Grid>
           </>

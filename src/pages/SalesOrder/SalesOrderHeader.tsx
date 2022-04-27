@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
 import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
@@ -7,9 +7,10 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
 import { isMobile, isTablet } from "react-device-detect";
-import { MdAdd,MdSort,MdFilterList } from "react-icons/all";
+import { MdAdd, MdSort, MdFilterList } from "react-icons/all";
 import MobileSortDialog from "../../components/MobileSortDialog";
 import MobileFilterDialog from "../../components/MobileFilterDialog";
+import routes from 'src/components/Helpers/Routes';
 
 
 
@@ -30,7 +31,8 @@ function SalesOrderHeader(props) {
     children,
     columns,
     dispatch,
-    showTransferEntityDialog
+    showTransferEntityDialog,
+    filters
     // showCloneRentalManagementDialog
   } = props;
 
@@ -74,7 +76,7 @@ function SalesOrderHeader(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
-  
+
     }
   };
   let toggleInner = options && (
@@ -98,71 +100,70 @@ function SalesOrderHeader(props) {
 
   return (
     <Grid className={styles.filter_side_container} container>
-     <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
-      <div className="d-flex align-items-center">
-        {icon} <span className="listingHeader">{heading}</span>
-       </div>
-        {isMobile && !isTablet ? 
-        <div className="d-flex ">
-        <Button
-        onClick={handleClickOpen}
-        id="demo-customized-button"
-        aria-controls="demo-customized-menu"
-        aria-haspopup="true"
-        // aria-expanded={open ? 'true' : undefined}
-        color="secondary"
-        variant="text"
-        disableElevation
-        startIcon={<MdSort />}
-      >
-        Sort 
-        </Button>
+      <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+        <div className="d-flex align-items-center">
+          {icon} <span className="listingHeader">{heading}</span>
+        </div>
+        {isMobile && !isTablet ?
+          <div className="d-flex ">
+            <Button
+              onClick={handleClickOpen}
+              id="demo-customized-button"
+              aria-controls="demo-customized-menu"
+              aria-haspopup="true"
+              // aria-expanded={open ? 'true' : undefined}
+              color="secondary"
+              variant="text"
+              disableElevation
+              startIcon={<MdSort />}
+            >
+              Sort
+            </Button>
 
-        <MobileSortDialog
-        isOpen={open}
-        handleClose={handleClickClose}
-        contentPart={toggleInner}
-        secHeading={["Sort SalesOrder"]}
-        columns={columns}
-        dispatch={dispatch}
-        />
-
-
-
-        <Button
-        id="demo-customized-button"
-        aria-controls="demo-customized-menu"
-        aria-haspopup="true"
-        // aria-expanded={open ? 'true' : undefined}
-        variant="text"
-        color="secondary"
-        disableElevation
-        startIcon={<MdFilterList />}
-        onClick={handleOpen}
-      >
-        Filter 
-        </Button>
+            <MobileSortDialog
+              isOpen={open}
+              handleClose={handleClickClose}
+              contentPart={toggleInner}
+              secHeading={["Sort SalesOrder"]}
+              columns={columns}
+              dispatch={dispatch}
+            />
 
 
-        <MobileFilterDialog
-        isOpen={isOpenDialog}
-        handleClose={handleClose}
-        contentPart={toggleInner}
-        secHeading={["Filter SalesOrder"]}
-        columns={columns}
-        dispatch={dispatch}
-        />
-        </div> : options && (
-          <ToggleButtonGroup size="small" className="ml-2" value={filter} exclusive onChange={handleFilter}>
-            {options.map((k, index) => {
-              return (
-                <ToggleButton value={k.key} key={index}>
-                  {k.key}
-                </ToggleButton>
-              );
-            })}
-          </ToggleButtonGroup>
-        )}
+
+            <Button
+              id="demo-customized-button"
+              aria-controls="demo-customized-menu"
+              aria-haspopup="true"
+              // aria-expanded={open ? 'true' : undefined}
+              variant="text"
+              color="secondary"
+              disableElevation
+              startIcon={<MdFilterList />}
+              onClick={handleOpen}
+            >
+              Filter
+            </Button>
+            <MobileFilterDialog
+              isOpen={isOpenDialog}
+              handleClose={handleClose}
+              contentPart={toggleInner}
+              columns={columns}
+              dispatch={dispatch}
+              title={routes?.salesOrder?.title}
+              filters={filters}
+            />
+          </div> : options && (
+            <ToggleButtonGroup size="small" className="ml-2" value={filter} exclusive onChange={handleFilter}>
+              {options.map((k, index) => {
+                return (
+                  <ToggleButton value={k.key} key={index}>
+                    {k.key}
+                  </ToggleButton>
+                );
+              })}
+            </ToggleButtonGroup>
+          )}
         {children}
       </Grid>
       <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>

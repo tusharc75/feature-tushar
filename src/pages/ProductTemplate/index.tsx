@@ -369,15 +369,14 @@ const ProductTemplate: FC = () => {
                                     >
                                         Filter
                                     </Button>
-
-
                                     <MobileFilterDialog
                                         isOpen={isOpenDialog}
                                         handleClose={handleClose}
                                         contentPart={null}
-                                        secHeading={["Filter Product Template"]}
                                         columns={columns}
                                         dispatch={dispatch}
+                                        title={routes?.productTemplate?.title}
+                                        filters={filters}
                                     />
                                 </div>}
 

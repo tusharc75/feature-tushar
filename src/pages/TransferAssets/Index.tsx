@@ -390,9 +390,10 @@ const TransferAsset = () => {
                     isOpen={isOpenDialog}
                     handleClose={handleClose}
                     contentPart={null}
-                    secHeading={["Filter Transfer Assests"]}
                     columns={columns}
                     dispatch={dispatch}
+                    title={routes?.transferAsset?.title}
+                    filters={filters}
                   />
                 </div>
                 :

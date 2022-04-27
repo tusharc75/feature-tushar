@@ -837,9 +837,10 @@ export default function Contact(props) {
                           isOpen={isOpenDialog}
                           handleClose={handleFilterClose}
                           contentPart={toggleInner}
-                          secHeading={['Filter Accounts']}
                           columns={columns}
                           dispatch={dispatch}
+                          title={routes?.[contactResource]?.title}
+                          filters={filters}
                         />
                       </Grid>
                     </>

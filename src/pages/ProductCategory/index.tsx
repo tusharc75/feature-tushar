@@ -530,9 +530,10 @@ const ProductCategory = () => {
                       isOpen={isOpenDialog}
                       handleClose={handleFilterClose}
                       contentPart={null}
-                      secHeading={['Filter Product Category']}
                       columns={columns}
                       dispatch={dispatch}
+                      title={routes?.productCategory?.title}
+                      filters={filters}
                     />
                   </Grid>
                 </>

@@ -463,6 +463,7 @@ const RepairJob = () => {
             icon={<FaRegistered className="headerLogo" />}
             heading={routes.repairJob.title}
             showTransferEntityDialog={handleTransferEntityDialog}
+            filters={filters}
           // showCloneRepairJobDialog={() => {
           //   handleShowCloneRepairJobDialog()
           // }}

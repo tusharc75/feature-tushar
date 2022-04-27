@@ -21,7 +21,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { MdAdd,MdSort, MdFilterList} from 'react-icons/md';
+import { MdAdd, MdSort, MdFilterList } from 'react-icons/md';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 
@@ -240,11 +240,11 @@ export default function TermsAndCondition(props) {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
               <div className="d-flex align-items-center">
-              <IoDocumentTextOutline className="headerLogo" /> <span className="listingHeader">{routes.termsAndConditions.title}</span>
+                <IoDocumentTextOutline className="headerLogo" /> <span className="listingHeader">{routes.termsAndConditions.title}</span>
               </div>
-              {isMobile && !isTablet &&(
+              {isMobile && !isTablet && (
                 <>
                   <Grid style={{ display: 'inline-flex' }}>
                     <Button
@@ -270,7 +270,6 @@ export default function TermsAndCondition(props) {
                       columns={columns}
                       dispatch={dispatch}
                     />
-
                     <Button
                       id="demo-customized-button"
                       aria-controls="demo-customized-menu"
@@ -285,14 +284,14 @@ export default function TermsAndCondition(props) {
                     >
                       Filter
                     </Button>
-
                     <MobileFilterDialog
                       isOpen={isOpenDialog}
                       handleClose={handleFilterClose}
                       contentPart={null}
-                      secHeading={['Filter TermsandCondition']}
                       columns={columns}
                       dispatch={dispatch}
+                      title={routes?.termsAndConditions?.title}
+                      filters={filters}
                     />
                   </Grid>
                 </>
@@ -319,7 +318,7 @@ export default function TermsAndCondition(props) {
                       onClick={() => setShowCreateDialog({ open: true, isClone: false })}
                       startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                     >
-                      {isMobile && !isTablet ? <MdAdd size={23}/> : "Add"}
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
                     </Button>
                   )}
 
@@ -332,7 +331,7 @@ export default function TermsAndCondition(props) {
                     onClick={openActions}
                     aria-controls="action-menu"
                   >
-                    {isMobile && !isTablet ? "" :  "Actions" } <ExpandMore/>
+                    {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -381,16 +380,16 @@ export default function TermsAndCondition(props) {
               setEditRecord(cloneDeep(d));
             }}
             extraParamsToCheckDelete={false}
-            onDelete={(d) => {}}
+            onDelete={(d) => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
             additionalDetails={[]}
             chips={[]}
             owerCollaboratorInitialsOrImages=""
-            onCreate={() => {}}
+            onCreate={() => { }}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={'termsAndConditions'}
           />
         ) : (
