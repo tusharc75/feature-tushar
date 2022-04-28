@@ -456,14 +456,13 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         <Box mx={1} />
         {allowedToEdit &&
           <Button
-            variant={isMobile && !isTablet ? 'text' : 'outlined'}
+            variant={'outlined'}
             color="primary"
             aria-controls="simple-menu"
             aria-haspopup="true"
             disabled={!allowUpdateStatus || selectedRecords.length === 0 || selectedRecords?.some(f => f.type === "Product") || isOffline}
             size="small"
             onClick={handleClick}
-            style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
             endIcon={<ArrowDropDownIcon />}>
             {'Change Status'}
           </Button>
