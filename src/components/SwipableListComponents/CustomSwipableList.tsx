@@ -72,7 +72,7 @@ export default function CustomSwipableList({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={isAllChecked}
+                  checked={isAllChecked && dataRows?.every((d) => d?.isChecked === true)}
                   onChange={(e) => {
                     setIsAllChecked(e.target.checked);
                     const updatedMetadata = dataRows.map((d) => {
