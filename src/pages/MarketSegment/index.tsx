@@ -381,9 +381,10 @@ const MarketSegment = () => {
                       isOpen={isOpenDialog}
                       handleClose={handleFilterClose}
                       contentPart={null}
-                      secHeading={['Filter Market Segment']}
                       columns={columns}
                       dispatch={dispatch}
+                      title={routes?.marketSegment?.title}
+                      filters={filters}
                     />
                   </Grid>
                 </>
@@ -517,8 +518,11 @@ const MarketSegment = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete market segment  ${deleteRecord?._id ? deleteRecord?.name : ''}?`}
-            onClose={() => setShowDeleteConfirmBox(false)}
+            message={`Are you sure you want to delete ${routes?.marketSegment?.title?.toLowerCase()} ${deleteRecord?.name || ''}?`}
+            onClose={() => {
+              setDeleteRecord(null)
+              setShowDeleteConfirmBox(false)
+            }}
             onOk={handleDelete}
           />
         )}

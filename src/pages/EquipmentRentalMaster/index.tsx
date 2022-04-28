@@ -201,13 +201,13 @@ const EquipmentRentalMaster = () => {
                     permissions={[]}
                     primaryField={columns?.find(d => d.primaryField)}
                     onClick={(data) => {
-                        
+
                     }}
                     dataRows={dataRows}
                     selectedRecords={selectedRecords}
                     dispatch={dispatch}
                     onEdit={(data) => {
-                      
+
                     }}
                     extraParamsToCheckDelete={true}
                     onDelete={handleDelete}
@@ -250,7 +250,10 @@ const EquipmentRentalMaster = () => {
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
                 message={`Are you sure you want to delete the product inventory ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ?`}
-                onClose={() => setShowDeleteConfirmBox(false)}
+                onClose={() => {
+                    setDeleteRecord(null)
+                    setShowDeleteConfirmBox(false)
+                }}
                 onOk={handleDelete}
             />
         }

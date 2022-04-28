@@ -424,9 +424,10 @@ function Budget() {
                       isOpen={isOpenDialog}
                       handleClose={handleClose}
                       contentPart={null}
-                      secHeading={["Filter Budget"]}
                       columns={columns}
                       dispatch={dispatch}
+                      title={routes?.budget?.title}
+                      filters={filters}
                     />
                   </div>
                 }
@@ -569,7 +570,10 @@ function Budget() {
                 ? `Are you sure you want to delete the budget ${deleteRecord?.name} ?`
                 : 'Are you sure you want to delete selected budget(s) ?'
             }
-            onClose={() => setShowDeleteConfirmBox(false)}
+            onClose={() => {
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false)
+            }}
             onOk={handleDelete}
           />
         )}

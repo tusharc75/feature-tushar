@@ -324,9 +324,10 @@ const RepairType = () => {
                                     isOpen={isOpenDialog}
                                     handleClose={handleFilterClose}
                                     contentPart={null}
-                                    secHeading={['Filter Purchase Order']}
                                     columns={columns}
                                     dispatch={dispatch}
+                                    title={routes?.repairType?.title}
+                                    filters={filters}
                                 />
                             </Grid>
                         ) : null}
@@ -435,8 +436,11 @@ const RepairType = () => {
         {showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the ${routes.repairType?.title} ? `}
-                onClose={() => setShowDeleteConfirmBox(false)}
+                message={`Are you sure you want to delete the ${routes.repairType?.title?.toLowerCase()} ${deleteRecord?.repairType || ""} ? `}
+                onClose={() => {
+                    setDeleteRecord(null);
+                    setShowDeleteConfirmBox(false)
+                }}
                 onOk={handleDelete}
             />
         }

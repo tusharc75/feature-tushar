@@ -541,7 +541,12 @@ const Email = () => {
             allowSwipe={true}
             permissions={permissions.note}
             primaryField={columns?.find((d) => d.primaryField)}
-            onClick={(data) => { }}
+            onClick={(data) => {
+              if (permissions?.email?.isUpdate) {
+                setOpen(true);
+                setEmailId(data.id);
+              }
+            }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}

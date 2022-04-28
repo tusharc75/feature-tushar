@@ -445,9 +445,10 @@ const PurchaseOrder = () => {
                                         isOpen={isOpenDialog}
                                         handleClose={handleFilterClose}
                                         contentPart={null}
-                                        secHeading={['Filter Purchase Order']}
                                         columns={columns}
                                         dispatch={dispatch}
+                                        title={routes?.purchaseOrder?.title}
+                                        filters={filters}
                                     />
                                 </Grid>
                             </>
@@ -654,7 +655,10 @@ const PurchaseOrder = () => {
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
                 message={`Are you sure you want to delete the ${routes?.purchaseOrder.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
-                onClose={() => setShowDeleteConfirmBox(false)}
+                onClose={() => {
+                    setDeleteRecord(null)
+                    setShowDeleteConfirmBox(false)
+                }}
                 onOk={handleDelete}
             />
         }

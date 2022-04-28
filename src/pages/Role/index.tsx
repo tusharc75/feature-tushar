@@ -31,7 +31,7 @@ import { camelCase } from "lodash";
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 let roleTimeout;
 
-const Roles: FC = () => { 
+const Roles: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory()
   const {
@@ -368,6 +368,7 @@ const Roles: FC = () => {
               userDialogOpen={userDialogOpen}
               dispatch={dispatch}
               columns={columns}
+              filters={filters}
             />
           </div>
 
@@ -433,10 +434,9 @@ const Roles: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete role ${deleteRecord.name || ""
-              }?`}
+            message={`Are you sure you want to delete role ${deleteRecord?.name || ""}?`}
             onClose={() => {
-              if (deleteRecord) setDeleteRecord({});
+              setDeleteRecord(null);
               setIsConformDialogVisible(false);
             }}
             okBtnLoading={deleteLoading}

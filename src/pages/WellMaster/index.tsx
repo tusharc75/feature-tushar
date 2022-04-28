@@ -372,9 +372,10 @@ const WellMaster = () => {
                                         isOpen={isOpenDialog}
                                         handleClose={handleFilterClose}
                                         contentPart={null}
-                                        secHeading={['Filter Well Master']}
                                         columns={columns}
                                         dispatch={dispatch}
+                                        title={routes?.wellMaster?.title}
+                                        filters={filters}
                                     />
                                 </Grid>
                             </>
@@ -513,7 +514,10 @@ const WellMaster = () => {
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
                 message={`Are you sure you want to delete the ${routes.wellMaster?.title} ? `}
-                onClose={() => setShowDeleteConfirmBox(false)}
+                onClose={() => {
+                    setDeleteRecord(null);
+                    setShowDeleteConfirmBox(false)
+                }}
                 onOk={handleDelete}
             />
         }

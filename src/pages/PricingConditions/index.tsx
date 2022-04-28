@@ -318,9 +318,10 @@ const PricingConditions = () => {
                       isOpen={isOpenDialog}
                       handleClose={handleFilterClose}
                       contentPart={null}
-                      secHeading={['Filter Pricing Setup']}
                       columns={columns}
                       dispatch={dispatch}
+                      title={routes?.pricingCondition?.title}
+                      filters={filters}
                     />
                   </Grid>
                 </>
@@ -450,12 +451,11 @@ const PricingConditions = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={
-            deleteRecord?._id
-              ? `Are you sure you want to delete the pricing condition ${deleteRecord?.name} ?`
-              : 'Are you sure you want to delete selected pricingCondition(s) ?'
-          }
-          onClose={() => setShowDeleteConfirmBox(false)}
+          message={`Are you sure you want to delete ${routes?.pricingCondition?.title?.toLowerCase()}  ${deleteRecord?.conditionName || ''} ?`}
+          onClose={() => {
+            setDeleteRecord(null)
+            setShowDeleteConfirmBox(false)
+          }}
           onOk={handleDelete}
         />
       )}

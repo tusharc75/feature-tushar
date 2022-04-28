@@ -369,15 +369,14 @@ const ProductTemplate: FC = () => {
                                     >
                                         Filter
                                     </Button>
-
-
                                     <MobileFilterDialog
                                         isOpen={isOpenDialog}
                                         handleClose={handleClose}
                                         contentPart={null}
-                                        secHeading={["Filter Product Template"]}
                                         columns={columns}
                                         dispatch={dispatch}
+                                        title={routes?.productTemplate?.title}
+                                        filters={filters}
                                     />
                                 </div>}
 
@@ -480,8 +479,11 @@ const ProductTemplate: FC = () => {
                 {showDeleteConfirmBox &&
                     <ConfirmationDialog
                         open={showDeleteConfirmBox}
-                        message={`Are you sure you want to delete product template ${deleteRecord?._id ? deleteRecord?.name : ""}?`}
-                        onClose={() => setShowDeleteConfirmBox(false)}
+                        message={`Are you sure you want to delete ${routes?.productTemplate?.title?.toLowerCase()} ${deleteRecord?.name || ""} ?`}
+                        onClose={() => {
+                            setDeleteRecord(null)
+                            setShowDeleteConfirmBox(false)
+                        }}
                         onOk={handleDelete}
                     />
                 }

@@ -372,28 +372,29 @@ const TransferInventory = () => {
                     isOpen={isOpenDialog}
                     handleClose={handleClose}
                     contentPart={null}
-                    secHeading={['Filter Transfer Inventories']}
                     columns={columns}
                     dispatch={dispatch}
+                    title={routes?.transferInventory?.title}
+                    filters={filters}
                   />
                 </div>
-              ):
-              <HideWhenOffline>
-                <div className={`align-items-center gap-1 layout-for-mobile `}>
-                  {TransferInventoryType && (
-                    <ToggleButtonGroup size="small" className="ml-2" value={TransferInventoryType[selectedType - 1].key} exclusive onChange={handleFilter}>
-                      {TransferInventoryType.map((k, index) => {
-                        return (
-                          <ToggleButton value={k.key} key={index}>
-                            {k.key}
-                          </ToggleButton>
-                        );
-                      })}
-                    </ToggleButtonGroup>
-                  )}
-                </div>
-              </HideWhenOffline>
-            }
+              ) :
+                <HideWhenOffline>
+                  <div className={`align-items-center gap-1 layout-for-mobile `}>
+                    {TransferInventoryType && (
+                      <ToggleButtonGroup size="small" className="ml-2" value={TransferInventoryType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                        {TransferInventoryType.map((k, index) => {
+                          return (
+                            <ToggleButton value={k.key} key={index}>
+                              {k.key}
+                            </ToggleButton>
+                          );
+                        })}
+                      </ToggleButtonGroup>
+                    )}
+                  </div>
+                </HideWhenOffline>
+              }
               {/* {fromRental && (
                 <Chip
                   className="ml-3"
@@ -576,11 +577,11 @@ const TransferInventory = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.transferInventory?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.transferNumber || '' : ''
-            }?`}
+          message={`Are you sure you want to delete the ${routes?.transferInventory?.title?.toLowerCase()} 
+          ${deleteRecord?._id ? deleteRecord?.transferNumber || '' : ''}?`}
           onClose={() => {
-            setShowDeleteConfirmBox(false);
             setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
           okBtnLoading={isDeleting}

@@ -651,9 +651,10 @@ const Product = () => {
                       isOpen={isOpenDialog}
                       handleClose={handleFilterClose}
                       contentPart={searchInnner}
-                      secHeading={['Filter Purchase Order']}
                       columns={columns}
                       dispatch={dispatch}
+                      title={routes?.product?.title}
+                      filters={filters}
                     />
                   </Grid>
                 </>
@@ -889,7 +890,10 @@ const Product = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete the product ${deleteRecord?._id ? deleteRecord?.productName : ''} ?`}
-          onClose={() => setShowDeleteConfirmBox(false)}
+          onClose={() => {
+            setDeleteRecord(null)
+            setShowDeleteConfirmBox(false)
+          }}
           onOk={handleDelete}
         />
       )}

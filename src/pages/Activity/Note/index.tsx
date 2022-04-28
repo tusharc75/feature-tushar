@@ -448,6 +448,9 @@ const Note = () => {
             permissions={permissions.note}
             primaryField={columns?.find(d => d.primaryField)}
             onClick={(data) => {
+              if (permissions?.note?.isUpdate) {
+                handleActivityOpen(data)
+              }
             }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}

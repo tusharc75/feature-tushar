@@ -36,7 +36,8 @@ const Header = (props) => {
     isUnAssignBrandAdmin,
     handleUnAssignBrandAdmin,
     columns,
-    dispatch
+    dispatch,
+    filters
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [isOpenDialog, setisOpenDialog] = useState(false);
@@ -120,9 +121,10 @@ const Header = (props) => {
                 isOpen={isOpenDialog}
                 handleClose={handleFilterClose}
                 contentPart={null}
-                secHeading={['Filter Users']}
                 columns={columns}
                 dispatch={dispatch}
+                title={routes?.user?.title}
+                filters={filters}
               />
             </Grid>
           </>

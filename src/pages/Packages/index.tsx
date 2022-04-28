@@ -499,6 +499,7 @@ const PackageList = () => {
                             heading={routes.packages.title}
                             showTransferEntityDialog={handleTransferEntityDialog}
                             openAssingToProduct={openAssingToProduct}
+                            filters={filters}
                         // showClonepackagesDialog={() => {
                         //   handleShowClonepackagesDialog()
                         // }}
