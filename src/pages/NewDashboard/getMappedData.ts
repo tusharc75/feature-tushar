@@ -787,6 +787,7 @@ export default async (chart: ChartDataType, data: any, currencyTo: string, curre
   if (chart.uniqueId === 'rentalByCustomer') {
     let labels = data.map((d: { accountName: string }) => d.accountName);
     let dataset = data.map((d: { count: number }) => d.count);
+    
     dataObject = {
       labels,
       datasets: [
