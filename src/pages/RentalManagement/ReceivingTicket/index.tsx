@@ -671,12 +671,14 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         </Button>}
         <Box mx={1} />
         {allowedToEdit &&
-          <Button variant={isMobile && !isTablet ? 'text' : 'outlined'} color="primary" aria-controls="simple-menu"
+          <Button
+            variant={'outlined'}
+            color="primary"
+            aria-controls="simple-menu"
             aria-haspopup="true"
             disabled={selectedRecords?.length === 0 || isOffline}
             size="small"
             onClick={handleClick}
-            style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
             endIcon={<ArrowDropDownIcon />}>
             {'Change Status'}
           </Button>
