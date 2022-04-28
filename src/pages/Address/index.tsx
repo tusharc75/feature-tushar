@@ -366,9 +366,16 @@ const Address = () => {
             <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
               <FaWarehouse size={20} style={{ paddingBottom: '3px' }} /> <span className="listingHeader">Address</span>
             </Grid>
-            <Grid md={6} sm={6} xs={12} className={styles.filter_side}>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+              className={`d-flex align-items-center gap-1 ${styles.filter_side}`}
+              justify={isMobile ? 'flex-start' : 'flex-end'}
+            >
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <div style={{ display: 'flex', flex: 1 }}>
+                <Grid style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
                     onSearch={handleSearch}
                     searchbox={styles.search_box_input}
@@ -378,22 +385,22 @@ const Address = () => {
                     value={search}
                     placeholder={`Search ${routes.address.title}`}
                   />
-                </div>
+                </Grid>
 
-                <div style={{ display: 'flex', gap: '5px' }}>
+                <Grid style={{ display: 'flex', gap: '5px' }}>
                   {addressPermissions.isCreate && (
                     <Button
                       onClick={() => {
                         setAddressResource(null);
                         setOpen({ title: 'Add New Address', open: true, edit: false, isClone: false });
                       }}
-                      variant={isMobile ? 'text' : 'contained'}
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
                       size="small"
                       color="primary"
-                      className={isMobile ? 'mobile_button' : styles.add_submit_btn}
-                      startIcon={isMobile ? null : <AddOutlined />}
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                     >
-                      {isMobile ? <MdAdd size={23} /> : 'Add'}
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
 
@@ -401,15 +408,15 @@ const Address = () => {
                     <>
                       {' '}
                       <Button
-                        variant={isMobile ? 'text' : 'contained'}
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
                         color="default"
                         size="small"
                         onClick={openActions}
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
-                        className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                       >
-                        {isMobile ? '' : 'Actions'} <ExpandMore />
+                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -427,7 +434,7 @@ const Address = () => {
                       </Menu>{' '}
                     </>
                   )}
-                </div>
+                </Grid>
               </Box>
             </Grid>
           </Grid>
