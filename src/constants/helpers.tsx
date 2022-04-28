@@ -1211,6 +1211,12 @@ export const determineLightOrDark = (color: any) => {
   }
 };
 
+/**
+ * Convert Miliseconds to Hour
+ */
+
+export const msToHour = (ms:number) => {let hour = ms/(1000*60*60); return hour.toFixed(1)}
+
 //  Currencies Short Form Symbols
 // const SI_SYMBOL = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"];
 
