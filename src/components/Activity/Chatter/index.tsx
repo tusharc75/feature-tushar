@@ -57,8 +57,8 @@ const Chatter = (props: any) => {
   useEffect(() => {
     if (!token || !chatterId) return;
 
-    const s = io(`${backendApi}/chatter`, {
-      path: backendApi?.includes('/api') ? '/api/socket.io/' : '/socket.io/',
+    const s = io(`/chatter`, {
+      path: `${backendApi}/socket.io/`,
       auth: {
         token
       },
