@@ -119,8 +119,8 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
     return (
         <Box mt={2}>
             {isMobile && !isTablet ? <CustomSwipableList
-                allowSelection={true}
-                allowSwipe={true}
+                allowSelection={false}
+                allowSwipe={false}
                 permissions={permissions}
                 primaryField={columns?.find(d => d.field === "productName")}
                 onClick={(data) => { }}
@@ -128,7 +128,6 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
                 dataRows={dataRows}
                 dispatch={dispatch}
                 onEdit={() => {
-
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={() => {
@@ -136,13 +135,18 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
                 rowCount={rowCount}
                 page={page}
                 loading={loading}
-                chips={[]}
                 onCreate={null}
                 showClone={false}
                 fullHeight={true}
                 renderedFrom={renderedFrom}
                 onClone={() => {
                 }}
+                chips={[
+                    {
+                        label: "Qty: ",
+                        field: "qty",
+                    },
+                ]}
             /> :
                 columns ?
                     <CustomAgGrid
