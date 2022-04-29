@@ -34,6 +34,7 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import PropTypes from 'prop-types';
 import { MdDelete } from "react-icons/md";
 import { AiFillCaretLeft, AiFillCaretRight } from "react-icons/ai";
+import { isMobile, isTablet } from "react-device-detect";
 
 
 function TabPanel(props) {
@@ -452,7 +453,8 @@ const CustomerAccounts = (props) => {
             handleClose();
           }}
         >
-          Create New
+          {isMobile && !isTablet ? "New" : "Create New"}
+
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -465,7 +467,7 @@ const CustomerAccounts = (props) => {
             handleClose();
           }}
         >
-          Add Existing
+          {isMobile && !isTablet ? "Add" : "Add Existing"}
         </MenuItem>
       </Menu>
     );
@@ -575,31 +577,29 @@ const CustomerAccounts = (props) => {
                 } */}
 
                 <Button
-                  variant="contained"
+                  variant={isMobile && !isTablet ? "outlined" : "contained"}
+                  style={isMobile && !isTablet ? { color: "var(--info-dark)", marginLeft: "auto" } : { marginLeft: "auto" }}
                   color="primary"
                   size="small"
-                  style={{ marginLeft: "auto" }}
                   onClick={() => {
                     setShowAccountCreateDialog(true);
 
                   }}
                 >
-                  Create New
-
+                  {isMobile && !isTablet ? "New" : "Create New"}
                 </Button>
 
                 <Button
-                  variant="contained"
+                  variant={isMobile && !isTablet ? "outlined" : "contained"}
+                  style={isMobile && !isTablet ? { color: "var(--info-dark)", marginLeft: "10px" } : { marginLeft: "10px" }}
                   color="primary"
                   size="small"
-                  style={{ marginLeft: "10px" }}
                   onClick={() => {
                     handleOpenDialog("customer-account");
 
                   }}
                 >
-                  Add Existing
-
+                  {isMobile && !isTablet ? "Add" : "Add Existing"}
                 </Button>
 
 

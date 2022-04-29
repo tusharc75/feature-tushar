@@ -152,7 +152,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 setColumns([...columns, ...defaultColumns])
             })
     }
-    
+
     const fetchPackageProduct = (packageId) => {
         if (type === "package") {
             axiosInstance().get(`${packages.packageApi}/get-products/${packageId}`).then(({ data: { data } }) => {
@@ -196,7 +196,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         }, gridLoadingTimeout);
     }
 
-  
+
     return (<Fragment>
         <Dialog
             fullScreen={true}
@@ -208,13 +208,15 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             <div className="listing-grid p-3">
                 <Box mb={2}>
                     <Grid container >
-                        <Grid item xs={12} sm={12} container justify="flex-end">
+                        <Grid item xs={10} sm={10} md={11} container justify="flex-end">
                             <SearchBox
                                 onSearch={handleSearch}
                                 searchbox="terms_header_search_bar"
                                 width="300px"
                                 value={search}
                             />
+                        </Grid>
+                        <Grid item xs={2} sm={2} md={1} container justify="flex-end">
                             <Box ml={1}>
                                 <Button
                                     size="small"

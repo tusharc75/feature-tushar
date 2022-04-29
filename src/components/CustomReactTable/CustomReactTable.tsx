@@ -15,6 +15,7 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import CustomReactTableHeaderOptions from './CustomReactTableHeaderOptions';
+import { isMobile, isTablet } from "react-device-detect";
 
 const IndeterminateCheckbox = React.forwardRef(
     ({ indeterminate, ...rest }: any, ref) => {
@@ -112,8 +113,8 @@ export default function CustomReactTable({
                     </span>
                 ),
                 sticky: "left",
-                width: 70,
-                minWidth: 70,
+                width: isMobile && !isTablet ? 40 : 70,
+                minWidth: isMobile && !isTablet ? 40 : 70,
                 //maxWidth: 70,
                 canDrag: false,
                 Cell: ({ row }) =>
