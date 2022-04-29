@@ -57,7 +57,8 @@ const Chatter = (props: any) => {
   useEffect(() => {
     if (!token || !chatterId) return;
 
-    const s = io(`${backendApi}/chatter`, {
+    const s = io(`${backendApi?.replace("/api", "")}/chatter`, {
+      path: backendApi?.includes('/api') ? '/api/socket.io' : '/socket.io',
       auth: {
         token
       },
@@ -97,17 +98,17 @@ const Chatter = (props: any) => {
     try {
       await axiosInstance().put(`/chatter/${chatterId}`, { message });
       setSending(false)
-      
+
       // setMessages((prevState) => [
-        //   {
-          //     message,
-          //     date: new Date().toISOString(),
-          //     userName: `${user?.firstName} ${user?.lastName}`,
-          //     userid: user._id
-          //   },
-          //   ...prevState
-          // ]);
-        } catch (error) {
+      //   {
+      //     message,
+      //     date: new Date().toISOString(),
+      //     userName: `${user?.firstName} ${user?.lastName}`,
+      //     userid: user._id
+      //   },
+      //   ...prevState
+      // ]);
+    } catch (error) {
       setSending(false)
       setToastConfig(error);
     }
