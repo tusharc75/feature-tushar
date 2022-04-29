@@ -58,7 +58,7 @@ const Chatter = (props: any) => {
     if (!token || !chatterId) return;
 
     const s = io(`${backendApi}/chatter`, {
-      path: backendApi?.includes('/api') ? '/api/socket.io' : '/socket.io',
+      path: backendApi?.includes('/api') ? '/api/' : '/',
       auth: {
         token
       },
