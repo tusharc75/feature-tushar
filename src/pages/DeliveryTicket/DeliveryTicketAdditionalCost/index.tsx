@@ -1,23 +1,11 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from "react";
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../../axios/axiosInstance";
 import { Box, CircularProgress, TextField } from "@material-ui/core";
-import SearchBox from '../../../components/Helpers/SearchBox'
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
 import { gridLoadingTimeout, CustomDialogTransition, packages, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData, deliveryTicket } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import Dialog from "@material-ui/core/Dialog/Dialog";
-import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
-import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
-import { startCase } from "lodash";
 import { genrateColoum, getColumnData, getFrameworkComponents, getStaticFields } from "../../../constants/columns";
-import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
-import { findOne, objectStore } from "src/constants/indexdbhelper";
 import { CustomOfflineContext } from "src/StateProvider/OfflineContext/OfflineContext";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
@@ -82,16 +70,15 @@ const DeliveryTicketAdditionalCost = ({ renderedFrom, additionalCost }) => {
     return (
         <Box mt={2}>
             {isMobile && !isTablet ? <CustomSwipableList
-                allowSelection={true}
-                allowSwipe={true}
+                allowSelection={false}
+                allowSwipe={false}
                 permissions={permissions}
-                primaryField={columns?.find(d => d.field === "productName")}
+                primaryField={columns?.find(d => d.field === "costType")}
                 onClick={(data) => { }}
                 selectedRecords={[]}
                 dataRows={dataRows}
                 dispatch={dispatch}
                 onEdit={() => {
-
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={() => {
@@ -99,13 +86,22 @@ const DeliveryTicketAdditionalCost = ({ renderedFrom, additionalCost }) => {
                 rowCount={rowCount}
                 page={page}
                 loading={loading}
-                chips={[]}
                 onCreate={null}
                 showClone={false}
                 fullHeight={true}
                 renderedFrom={renderedFrom}
                 onClone={() => {
                 }}
+                chips={[
+                    {
+                        label: "Description: ",
+                        field: "description",
+                    },
+                    {
+                        label: "Qty: ",
+                        field: "qty",
+                    },
+                ]}
             /> :
                 columns ?
                     <CustomAgGrid

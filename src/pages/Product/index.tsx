@@ -833,12 +833,7 @@ const Product = () => {
                   field: 'mrp'
                 }
               ]}
-              chips={[
-                {
-                  label: 'Quantity',
-                  field: 'qty'
-                }
-              ]}
+              chips={[]}
               owerCollaboratorInitialsOrImages=""
               onCreate={() => {
                 OpenProduct(null);
