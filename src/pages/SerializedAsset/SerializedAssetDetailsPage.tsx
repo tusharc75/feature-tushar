@@ -601,9 +601,6 @@ const SerializedAssetDetailsPage = () => {
                             Asset History
                           </h3>
                         </div>
-                        {isMobile && <div>
-                          <CustomTimeline dataRows={productInventoryHistoryData} />
-                        </div>}
                         <Grid item xs={12} sm={12} md={12} lg={12} className="mt-1">
                           {!isMobile && columns ?
                             <CustomAgGrid
@@ -623,12 +620,16 @@ const SerializedAssetDetailsPage = () => {
                               renderedFrom={`${renderedFrom}_grid-1`}
                               refreshGrid={fetchProductInventoryHistory}
                             />
-                            : <Box
-                              p={2}
-                              height={500}
-                              bgcolor="white">
-                              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                            </Box>
+                            :
+                            isMobile ? <div>
+                              <CustomTimeline dataRows={productInventoryHistoryData} />
+                            </div> :
+                              <Box
+                                p={2}
+                                height={500}
+                                bgcolor="white">
+                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                              </Box>
                           }
                         </Grid>
                       </div>
