@@ -97,9 +97,9 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
         let rows = data.map((u) => {
           u["hideSelection"] = u.status === INVENTORY_STATUS.lost;
           let finalObject = prepareDataForGrid(u, user);
-          finalObject["canDelete"] = false;
+          finalObject["allowedToEdit"] = allowedToEdit && permissions?.repairJob?.isUpdate;
+          finalObject["canDelete"] = u?.status === INVENTORY_STATUS.reserved;
           finalObject["isChecked"] = false;
-          finalObject["allowedToEdit"] = allowedToEdit;
           return finalObject;
         });
         if (rows.length) {
@@ -118,7 +118,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
     <Link to={`${routes.serializedAssetDetail.path}/${params.data._id}`} className="link cursor-pointer">
       {params.value}
     </Link>
-
   );
 
   const ActionsRenderer = (params) => (
@@ -171,7 +170,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
       <Box display="flex" justifyContent="space-between" m={1}  >
         <Box display="flex">
           <Button
-            variant={isMobile && !isTablet ? "text" : "contained"}
+            variant={isMobile && !isTablet ? "outlined" : "contained"}
             color="primary"
             type="button"
             style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
@@ -180,23 +179,21 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               setAddSerializedAssetDialog(true)
             }}
           >
-            {isMobile && !isTablet ? <MdAdd size={23} /> : `Add ${routes.serializedAsset.title}`}
+            {isMobile && !isTablet ? `Add` : `Add ${routes.serializedAsset.title}`}
           </Button>
         </Box>
         <Box display="flex" className="gap-2">
           {repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed &&
             <Button
-              variant={isMobile && !isTablet ? "text" : "outlined"}
+              variant={"outlined"}
               color="primary"
               aria-controls="simple-menu"
               aria-haspopup="true"
               disabled={selectedRecords.length === 0 || !allowUpdateStatus}
               size="small"
-              style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
-
               onClick={handleClick}
               endIcon={<ArrowDropDownIcon />}>
-              {isMobile && !isTablet ? <RiExchangeFundsLine size={20} /> : "Change Status"}
+              {"Change Status"}
             </Button>
           }
           <Menu
@@ -225,17 +222,16 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
             }}>Lost</MenuItem>
           </Menu>
           <Button
-            variant={isMobile && !isTablet ? "text" : "contained"}
+            variant={isMobile && !isTablet ? "outlined" : "contained"}
             color="primary"
             type="button"
-            style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
             size="small"
             disabled={selectedRecords.length === 0}
             onClick={() => {
               setShowEditAssetDialog({ open: true, isBulkedit: true, inventory: null, selectedRecords: selectedRecords })
             }}
           >
-            {isMobile && !isTablet ? <RiEditCircleLine size={20} /> : "Bulk Edit"}
+            {"Bulk Edit"}
           </Button>
           <Button
             variant={isMobile && !isTablet ? "text" : "contained"}
@@ -258,16 +254,16 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
           <CustomSwipableList
             allowSelection={allowedToEdit}
             allowSwipe={allowedToEdit}
-            permissions={permissions}
+            permissions={{ isCreate: false, isUpdate: true, isDelete: true }}
             primaryField={columns?.find(d => d.field)}
             onClick={(data) => {
-              setShowEditAssetDialog({ open: true, isBulkedit: false, inventory: data?.inventory, selectedRecords: [] })
+              history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
             }}
             dataRows={dataRows}
             selectedRecords={true}
             dispatch={dispatch}
             onEdit={(data) => {
-              history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
+              setShowEditAssetDialog({ open: true, isBulkedit: false, inventory: data.inventory, selectedRecords: [] })
             }}
             extraParamsToCheckDelete={true}
             onDelete={(data) => {
