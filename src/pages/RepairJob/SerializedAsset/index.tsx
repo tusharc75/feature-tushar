@@ -116,10 +116,10 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         axiosInstance().get(`${repairJob.api}/${repairJobData._id}/assets`)
             .then(({ data }) => {
                 let rows: any = data?.data.map((u) => {
-                    let finalObject = prepareDataForGrid(u, user);
+                    let finalObject: any = prepareDataForGrid(u, user);
                     finalObject["canDelete"] = false;
                     finalObject["isChecked"] = false;
-                    finalObject["allowedToEdit"] = true;
+                    finalObject["allowedToEdit"] = finalObject?.repairTypeId ? true : false;
                     finalObject["hideSelection"] = [INVENTORY_STATUS.lost].includes(u.status);
                     return finalObject;
                 });
@@ -323,17 +323,16 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                         </Menu>
                         <Box mx={1} />
                         <Button
-                            variant={isMobile && !isTablet ? "text" : "contained"}
+                            variant={isMobile && !isTablet ? "outlined" : "contained"}
                             color="primary"
                             type="button"
                             size="small"
-                            style={isMobile && !isTablet ? { color: "#FFFF5C" } : {}}
                             disabled={selectedRecords.length === 0 || selectedRecords.some(s => s.repaired === true || s.repairTypeId) || checkUniqcurrentOwnerType()}
                             onClick={() => {
                                 setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...selectedRecords.map(m => m._id)] })
                             }}
                         >
-                            {isMobile && !isTablet ? <GiAutoRepair /> : "Complete Repair"}
+                            {isMobile && !isTablet ? "Complete" : "Complete Repair"}
                         </Button>
                         <Box mx={1} />
                         <Button
@@ -401,7 +400,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 isMobile && !isTablet ? <CustomSwipableList
                     allowSelection={allowedToEdit}
                     allowSwipe={allowedToEdit && repairJobData && repairJobData["status"] !== REPAIR_JOB_STATUS.completed ? true : false}
-                    permissions={true}
+                    permissions={{ isCreate: false, isUpdate: true, isDelete: true }}
                     primaryField={columns?.find(d => d.field)}
                     onClick={(data) => {
                         history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
@@ -409,12 +408,11 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                     dataRows={dataRows}
                     selectedRecords={selectedRecords}
                     dispatch={dispatch}
-                    onEdit={() => {
-
+                    onEdit={(data) => {
+                        setRepairProcessDialog({ open: true, assetId: data._id, assetNumber: data.assetNumber, repaired: data.repaired })
                     }}
                     extraParamsToCheckDelete={true}
                     onDelete={() => {
-
                     }}
                     rowCount={rowCount}
                     page={page}
