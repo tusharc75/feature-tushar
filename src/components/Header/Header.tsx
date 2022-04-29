@@ -281,8 +281,8 @@ const Header = ({ toggleDrawer }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const s = io(`/user`, {
-      path: `${backendApi}/api/socket.io/`,
+    const s = io(`${backendApi?.replace("/api", "")}/user`, {
+      path: backendApi?.includes('/api') ? '/api/socket.io/' : '/socket.io/',
       auth: {
         token
       },
