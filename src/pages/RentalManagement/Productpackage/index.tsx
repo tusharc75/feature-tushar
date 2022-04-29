@@ -478,11 +478,11 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
               <Box display="flex">
                 {permissions?.product?.isRead &&
                   <Button
-                    variant={isMobile ? 'contained' : 'contained'}
                     color="primary"
                     size="small"
                     disabled={isOffline}
-                    style={!isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
+                    variant={isMobile && !isTablet ? "outlined" : "contained"}
+                    style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
                     }}
@@ -493,10 +493,10 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 <Box mx={isMobile ? 0.5 : 1} />
                 {permissions?.packages?.isRead &&
                   <Button
-                    variant={isMobile ? 'contained' : 'contained'}
                     color="primary"
                     size="small"
-                    style={!isMobile && !isTablet ? { color: 'var(--colorOpportunity)' } : {}}
+                    variant={isMobile && !isTablet ? "outlined" : "contained"}
+                    style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
                     disabled={isOffline}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
@@ -536,18 +536,12 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                       title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}
                     >
                       <MenuItem onClick={() => setIsProductEdit({ open: true, isBulkedit: true })} disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}>
-                        <ListItemIcon>
-                          <MdEdit size={16} />
-                        </ListItemIcon>
                         <ListItemText>Bulk edit</ListItemText>
                       </MenuItem>
                     </HtmlTooltip>
                     <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
                       <MenuItem disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
                         onClick={() => { handleDeleteMultiple() }}>
-                        <ListItemIcon>
-                          <MdDelete size={16} />
-                        </ListItemIcon>
                         <ListItemText>Delete</ListItemText>
                       </MenuItem>
                     </HtmlTooltip>
