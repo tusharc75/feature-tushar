@@ -10,8 +10,6 @@ import { gridLoadingTimeout, CustomDialogTransition, packages, product, isObject
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import Dialog from "@material-ui/core/Dialog/Dialog";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import { startCase } from "lodash";
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
@@ -63,7 +61,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 finalObject["isChecked"] = false;
                 finalObject["id"] = u._id;
                 finalObject["type"] = type;
-                finalObject["qty"] = 0;
+                finalObject["qty"] = 1;
                 const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id)
                 if (qtyAdded.length) {
                     finalObject["qty"] = qtyAdded[0].qty;
