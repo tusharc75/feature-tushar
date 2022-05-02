@@ -107,7 +107,8 @@ import CustomerSign from './pages/DeliveryTicket/CustomerSign';
 import EcommercePolicy from './pages/EcommercePolicy';
 import Sublease from './pages/Sublease';
 import SubleaseDetailsPage from './pages/Sublease/SubleaseDetailsPage';
-import NewDashboard from './pages/NewDashboard-Test';
+import NewDashboard from './pages/NewDashboard';
+import NewDashboardTest from './pages/NewDashboard-Test';
 import TransferInventory from './pages/TransferInventory';
 import TransferInventoryDetailPage from './pages/TransferInventory/TransferInventoryDetailPage';
 import Zone from './pages/zone';
@@ -566,6 +567,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={'/dashboards'}>
               <NewDashboard />
+            </PrivateRoute>
+            <PrivateRoute exact path={'/new-dashboard'}>
+              <NewDashboardTest />
             </PrivateRoute>
             {/* <Route exact path={"/dashboards"}>
               <KpiDashboard />
