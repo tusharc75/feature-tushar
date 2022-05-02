@@ -448,13 +448,13 @@ const Address = () => {
               permissions={permissions.address}
               primaryField={columns?.find((d) => d.field)}
               onClick={(data) => {
-                history.push(`${routes.warehouseDetail.path}/${data._id}`);
+                history.push(`${routes.addressDetail.path}/${data._id}`);
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.address.path}/${data._id}?openEdit=true`);
+                history.push(`${routes.addressDetail.path}/${data._id}?openEdit=true`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {

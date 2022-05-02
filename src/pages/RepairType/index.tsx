@@ -102,7 +102,7 @@ const RepairType = () => {
             count = data?.count;
             let rows = dataToProcess.map((u) => {
                 let finalObject = prepareDataForGrid(u);
-                finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                finalObject["isChecked"] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some(s => s._id === u._id);
                 finalObject["canDelete"] = false;
                 let res = {
                     ...finalObject,
@@ -165,7 +165,7 @@ const RepairType = () => {
             ids.push(deleteRecord._id)
         }
         else {
-            ids = selectedRecords.map(d => d._id);
+            ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map(d => d._id);
         }
         axiosInstance().put(`${repairType.api}/remove`, { "ids": ids }).then(() => {
             fetchData();
@@ -381,13 +381,13 @@ const RepairType = () => {
                         permissions={permissions.repairType}
                         primaryField={columns?.find(d => d.primaryField)}
                         onClick={(data) => {
-                            history.push(`${routes.repairJobDetail.path}/${data._id}`)
+                            history.push(`${routes.repairTypeDetail.path}/${data._id}`)
                         }}
                         dataRows={dataRows}
-                        selectedRecords={selectedRecords}
+                        selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                         dispatch={dispatch}
                         onEdit={(data) => {
-                            history.push(`${routes.repairJobDetail.path}/${data._id}?openEdit=true`)
+                            history.push(`${routes.repairTypeDetail.path}/${data._id}?openEdit=true`)
                         }}
                         extraParamsToCheckDelete={true}
                         onDelete={(data) => {
