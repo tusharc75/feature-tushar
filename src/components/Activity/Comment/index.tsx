@@ -20,6 +20,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 500,
   },
   avatar: {
+    fontSize: "small",
     color: "#fff",
     backgroundColor: theme.palette.primary.main,
   },
@@ -44,7 +45,7 @@ export const Comment = ({ referenceId }) => {
         setComment(data.comment);
         setCurrentUser(data.currentUser);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const postComment = () => {
@@ -59,7 +60,7 @@ export const Comment = ({ referenceId }) => {
         setValue("");
         fetchComment();
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const classes = useStyles();
@@ -102,7 +103,7 @@ export const Comment = ({ referenceId }) => {
             <TextField
               id="outlined-multiline-static"
               label="Comment"
-              placeholder="Add a comment..."              
+              placeholder="Add a comment..."
               fullWidth
               rows={2}
               value={value}

@@ -72,12 +72,12 @@ const NonSerializedAssetProductInventory = ({ onSuccess, onClose, productId, pro
             <Box marginY={2}>
                 <Grid spacing={3} container>
                     <>
-                        <Grid item xs={12} sm={6} md={6}>
+                        <Grid item xs={6} sm={6} md={6}>
                             <Typography className="m-2 text-center" variant="subtitle2" >
                                 {routes.warehouse.title}
                             </Typography>
                         </Grid>
-                        <Grid item xs={12} sm={6} md={6}>
+                        <Grid item xs={6} sm={6} md={6}>
                             <Typography className="m-2 text-center" variant="subtitle2" >
                                 Quantity
                             </Typography>
@@ -85,12 +85,12 @@ const NonSerializedAssetProductInventory = ({ onSuccess, onClose, productId, pro
                         {
                             inventoryData && inventoryData.map((_element, index) => (
                                 <>
-                                    <Grid key={index} item xs={12} sm={6} md={6}>
+                                    <Grid key={index} item xs={6} sm={6} md={6}>
                                         <Typography className="m-2 text-center">
                                             {_element?.warehouse?.name}
                                         </Typography>
                                     </Grid>
-                                    <Grid key={index} item xs={12} sm={6} md={6}>
+                                    <Grid key={index} item xs={6} sm={6} md={6}>
                                         <TextField
                                             key={index}
                                             id="outlined-multiline-static"

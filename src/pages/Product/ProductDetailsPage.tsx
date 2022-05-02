@@ -31,6 +31,10 @@ import Parts from './Parts';
 import ParentProduct from './ParentProduct';
 import NonSerializedAssetProductInventory from './inventory';
 import ProductRepairType from './RepairType';
+import { MdDelete } from 'react-icons/md';
+import accountClass from '../Account/account.module.scss';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiEdit } from 'react-icons/bi';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -388,11 +392,20 @@ const ProductDetailsPage = () => {
               ) : (
                 <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
                   {permissions?.product?.isUpdate && (
-                    <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                      Edit
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      color="primary"
+                      size="small"
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                      onClick={handleOpenUpdateDialog}>
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   )}
-                  {permissions?.product?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                  {permissions?.product?.isDelete && <DeleteButton
+                    text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
+                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                    onClick={() => setShowConfirmBox(true)} />}
                 </DetailsPageHeader>
               )}
               <Tabs

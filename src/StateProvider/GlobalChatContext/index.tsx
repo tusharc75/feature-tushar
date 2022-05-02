@@ -16,7 +16,8 @@ export const GlobalChatProvider = ({ children }) => {
 
   useEffect(() => {
     if (!token) return;
-    const s = io(`${backendApi}/users/room`, {
+    const s = io(`${backendApi?.replace("/api", "")}/users/room`, {
+      path: backendApi?.includes('/api') ? '/api/socket.io/' : '/socket.io/',
       auth: { token },
       reconnectionAttempts: 5,
       reconnectionDelay: 5000,

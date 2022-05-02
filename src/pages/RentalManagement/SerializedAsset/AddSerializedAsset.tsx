@@ -411,7 +411,7 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                                             className={isMobile && !isTablet ? 'mobile_button' : ""}
                                             endIcon={isAdding && <CircularProgress size={20} />}
                                         >
-                                            {isMobile && !isTablet ? <MdAdd size={23} /> : 'Transfer to Job Plant'}
+                                            {'Transfer to Job Plant'}
                                             {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ")" : ""}
                                         </Button>
                                     </Box>

@@ -37,9 +37,6 @@ export default function CustomSwipableList({
   additionalDetails = [],
   owerCollaboratorInitialsOrImages = null
 }) {
-  useEffect(() => {
-    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
-  }, []);
 
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -52,6 +49,10 @@ export default function CustomSwipableList({
     onDelete: null
   });
 
+  useEffect(() => {
+    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+  }, []);
+
   const generateChipStyle = (chipColorVariable, value) => {
     if (value) {
       return {
@@ -63,11 +64,6 @@ export default function CustomSwipableList({
     return {};
   };
 
-  const handleOpenMenu = (event) => {
-    event.stopPropagation();
-    setAnchorEl(event.currentTarget);
-  };
-
   return (
     <>
       {allowSelection && (
@@ -76,7 +72,7 @@ export default function CustomSwipableList({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={isAllChecked}
+                  checked={isAllChecked && dataRows?.every((d) => d?.isChecked === true)}
                   onChange={(e) => {
                     setIsAllChecked(e.target.checked);
                     const updatedMetadata = dataRows.map((d) => {
@@ -98,7 +94,6 @@ export default function CustomSwipableList({
           </Grid>
         </Grid>
       )}
-
       <div style={{ overflowY: 'auto', height: fullHeight === true ? 'auto' : 'calc(100vh - 215px)', backgroundColor: '#F5F7F9' }} id="scrollableDiv">
         <div>
           <InfiniteScroll
@@ -124,9 +119,7 @@ export default function CustomSwipableList({
                 <Grid
                   key={d._id}
                   container
-                  className={`py-2 border-bottom card-shadow mt-2 mb-2 ${index === 0 ? 'mt-1 mb-1' : ''} ${
-                    checkError && checkError(d) ? 'red-data-row' : ''
-                  }`}
+                  className={`py-2 border-bottom card-shadow mt-2 mb-2 ${index === 0 ? 'mt-1 mb-1' : ''} ${checkError && checkError(d) ? 'red-data-row' : ''}`}
                 >
                   {allowSelection && !d.hideSelection && (
                     <Grid item xs={1} sm={1}>
@@ -150,7 +143,6 @@ export default function CustomSwipableList({
                       />
                     </Grid>
                   )}
-
                   <Grid item xs={11} sm={11} className="pl-2">
                     <div className="heading-with-icon">
                       {primaryField && (
@@ -160,7 +152,7 @@ export default function CustomSwipableList({
                           </span>
                         </h4>
                       )}
-                      {allowSwipe && permissions?.isUpdate && d.allowedToEdit && permissions?.isDelete  && (
+                      {allowSwipe && permissions?.isUpdate && d.allowedToEdit && permissions?.isDelete && (
                         <div className="icon-layout mr-2 d-flex align-items-center gap-1">
                           {showClone && permissions?.isCreate && (
                             <IconButton
@@ -217,8 +209,8 @@ export default function CustomSwipableList({
                                   c.setBackground && c.setBackground(d)
                                     ? c.setBackground(d)
                                     : c.chipColorVariable
-                                    ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase())
-                                    : {}
+                                      ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase())
+                                      : {}
                                 }
                               />
                             ) : (
@@ -245,7 +237,6 @@ export default function CustomSwipableList({
                 </Grid>
               ))
             }
-
             <Menu
               id="menu-actions"
               anchorEl={anchorEl}
