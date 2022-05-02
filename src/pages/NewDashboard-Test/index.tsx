@@ -79,9 +79,11 @@ const DashbaordNew = () => {
     axiosInstance()
       .get('/dashboard-master')
       .then(({ data: { data } }) => {
-        setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name }));
-        setCharts(data[0].charts);
-        setDashboardList(data);
+        if (data?.length) {
+          setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name }));
+          setCharts(data[0].charts);
+          setDashboardList(data);
+        }
       })
       .catch((err) => {
         setToastConfig(err);
