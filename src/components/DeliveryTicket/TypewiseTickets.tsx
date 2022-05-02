@@ -161,6 +161,14 @@ const TypewiseTickets = ({ refrenceType, refrenceId, renderedFrom }) => {
                                 field: "status",
                             },
                             {
+                                label: "Pickup From : ",
+                                field: "pickupFrom",
+                            },
+                            {
+                                label: "Delivery To : ",
+                                field: "deliveryTo",
+                            },
+                            {
                                 label: "Loading Ticket : ",
                                 field: "loadingTicket",
                                 onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`)
