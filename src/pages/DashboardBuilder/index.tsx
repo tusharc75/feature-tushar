@@ -37,7 +37,7 @@ const Dashboards = () => {
   ];
 
   const NameRenderer = (params) => (
-    <Link className="link" to={`dashboard-builder/${params.data._id}`} title={params.value}>
+    <Link className="link" to={`dashboard-master/${params.data._id}`} title={params.value}>
       {params.value}
     </Link>
   );
@@ -116,19 +116,19 @@ const Dashboards = () => {
   return (
     <React.Fragment>
       <div className="headerbox">
-        <CustomBreadCrumbs routes={[{ title: 'Dashboard List' }]} />
+        <CustomBreadCrumbs routes={[{ title: 'Dashboard Master' }]} />
       </div>
       <CustomContainer>
         <Box className="header-panel" display="flex" justifyContent="space-between" alignItems={'center'}>
           <Box display={'flex'} alignItems="center">
             <MdDashboardCustomize size={22} className="headerLogo" />
             <Box ml={1}>
-              <span className="listingHeader">Dashboards List</span>
+              <span className="listingHeader">Dashboards Master</span>
             </Box>
           </Box>
           <Box py={'6px'}>
-            <Button color="primary" variant="contained" size="small" disableRipple onClick={() => history.push(`dashboard-builder/new`)}>
-              Create
+            <Button color="primary" variant="contained" size="small" disableRipple onClick={() => history.push(`dashboard-master/new`)}>
+              Add
             </Button>
             <Box component="span" ml={1} />
             <DeleteButton
