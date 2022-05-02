@@ -595,7 +595,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   return (<Fragment>
     {allowedToEdit &&
       <Box display="flex" justifyContent="flex-end" pt={1} pb={2} >
-        <Box display="flex" alignItems="center" justifyContent={isMobile ? "space-between" : "flex-end"} paddingX={1} gridColumnGap={8} flex={1}>
+        <Box display="flex" alignItems="center" justifyContent={"flex-end"} paddingX={1} gridColumnGap={8} flex={1}>
           <Box display="flex" gridColumnGap={5}>
             <Button
               variant="contained"

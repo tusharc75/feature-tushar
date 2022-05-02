@@ -44,7 +44,7 @@ type TableContent = {
 
 const useClasses = makeStyles(() => ({
   table: {
-    minWidth: 650
+    // minWidth: 650
   },
   input: {
     display: 'none'
