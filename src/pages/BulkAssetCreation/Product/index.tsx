@@ -26,11 +26,13 @@ import CustomRenderCell from "src/components/Helpers/CustomRenderCell";
 import InfoIcon from "@material-ui/icons/Info";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import BulkAssetCreationQtyDialog from "./BulkAssetCreationQtyDialog";
+import styles from "../../Leads/Header.module.scss";
 
 const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProduct, renderedFrom, fetchData, handleUpdateData, allowedToEdit }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
+    const [anchorEl, setAnchorEl] = useState(null);
 
     const [columns, setColumns] = useState([{ field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" }])
@@ -264,6 +266,14 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
             });
     }
 
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
+
     return (
         <Fragment>
             {allowedToEdit && <Box display="flex" justifyContent="space-between" m={1}>
@@ -276,47 +286,62 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                             setAddProductDialog(true);
                         }}
                     >
-                        {isMobile && !isTablet ? "Add" : `Add  ${routes.product.title}`}
+                        {`Add  ${routes.product.title}`}
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
                     <Box display={"flex"} justifyContent="flex-end">
                         <Button
-                            variant={isMobile && !isTablet ? "text" : "contained"}
-                            color="primary"
+                            // disabled={Boolean(!selectedBrand)}
+                            variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                            color="default"
                             size="small"
-                            disabled={selectedRecords.length === 0}
-                            onClick={() => {
-                                setIsBulkEdit(true)
-                                setShowProductDialog(true)
-                            }}
+                            onClick={openActions}
+                            className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                            aria-controls="action-menu"
                         >
-                            Bulk Edit
+                            {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
                         </Button>
-                        <Box mx={1} />
-                        {permissions?.bulkAssetCreation?.isDelete && <Button
-                            variant={isMobile && !isTablet ? "text" : "contained"}
-                            color="primary"
-                            size="small"
-                            disabled={selectedRecords.length === 0 || loadingButton}
-                            onClick={() => {
-                                setShowDeleteConfirmBox(true)
-                                setDeleteBulkAssetCreationProduct(selectedRecords.map(d => d._id))
-                            }}>
-                            Delete
-                        </Button>}
-                        <Box mx={1} />
-                        {permissions?.bulkAssetCreation?.isUpdate && <Button
-                            variant={isMobile && !isTablet ? "text" : "contained"}
-                            color="primary"
-                            size="small"
-                            disabled={selectedRecords.length === 0 || loadingButton}
-                            onClick={() => {
-                                createAsset()
-                            }}>
-                            {`Create ${routes.serializedAsset.title}`}
-                        </Button>}
-                        <Box mx={1} />
+                        <Menu
+                            anchorEl={anchorEl}
+                            keepMounted
+                            getContentAnchorEl={null}
+                            anchorOrigin={{
+                                vertical: "bottom",
+                                horizontal: "left",
+                            }}
+                            id="action-menu"
+                            open={Boolean(anchorEl)}
+                            onClose={closeActions}
+                        >
+                            <MenuItem
+                                color="primary"
+                                disabled={selectedRecords.length === 0}
+                                onClick={() => {
+                                    setIsBulkEdit(true)
+                                    setShowProductDialog(true)
+                                }}
+                            >
+                                Bulk Edit
+                            </MenuItem>
+                            {permissions?.bulkAssetCreation?.isDelete && <MenuItem
+                                color="primary"
+                                disabled={selectedRecords.length === 0 || loadingButton}
+                                onClick={() => {
+                                    setShowDeleteConfirmBox(true)
+                                    setDeleteBulkAssetCreationProduct(selectedRecords.map(d => d._id))
+                                }}>
+                                Delete
+                            </MenuItem>}
+                            {permissions?.bulkAssetCreation?.isUpdate && <MenuItem
+                                color="primary"
+                                disabled={selectedRecords.length === 0 || loadingButton}
+                                onClick={() => {
+                                    createAsset()
+                                }}>
+                                {`Create ${routes.serializedAsset.title}`}
+                            </MenuItem>}
+                        </Menu>
                     </Box>
                 </div>
             </Box>}

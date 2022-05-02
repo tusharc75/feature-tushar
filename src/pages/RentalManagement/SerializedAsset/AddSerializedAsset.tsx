@@ -429,7 +429,7 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                                             className={isMobile && !isTablet ? 'mobile_button' : ""}
                                             endIcon={isAdding && <CircularProgress size={20} />}
                                         >
-                                            {isMobile && !isTablet ? <MdAdd size={23} /> :
+                                            {
                                                 refrenceType === "Rental Job" ? 'Add to Job' :
                                                     refrenceType === "ReplaceAsset" ? "Replace" : 'Add'
                                             }

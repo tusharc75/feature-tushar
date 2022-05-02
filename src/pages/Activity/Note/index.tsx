@@ -328,12 +328,12 @@ const Note = () => {
         {filter &&
           <div className="header-panel">
             <Grid container className={styles.filter_side_container}>
-              <Grid item xs={6} md={6} sm={12} className="d-flex align-items-center gap-1">
+              <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
                 <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title}</span>
                 <Autocomplete
                   options={resourceOptions}
                   getOptionLabel={(option) => option.optionLabel}
-                  style={{ width: "250px" }}
+                  style={{ width: isMobile && !isTablet ? '60%' : "250px" }}
                   value={resource}
                   onChange={(event, newValue) => {
                     setResource(newValue);
@@ -347,7 +347,9 @@ const Note = () => {
                   size="small"
                   renderInput={(params) =>
                     isMobile && !isTablet ? (
-                      <TextField {...params} label="Select Resource" variant="standard" className={isMobile ? 'serchBox' : ''} />
+                      <TextField {...params} label="Select Resource"               
+                      size="small"
+                      variant="outlined" className={isMobile ? 'serchBox' : ''} />
                     ) : (
                       <TextField {...params} label="Select Resource" variant="outlined" />
                     )

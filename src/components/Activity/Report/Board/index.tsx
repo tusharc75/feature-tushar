@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Grid, Typography,Tooltip, Dialog, TextField, IconButton } from '@material-ui/core';
+import { Box, Grid, Typography, Tooltip, Dialog, TextField, IconButton } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import { DndProvider } from 'react-dnd';
@@ -130,7 +130,7 @@ const Board = ({ type, filter }) => {
   const updateStatus = (id: string, updatedData: any) => {
     axiosInstance()
       .put(`${type}/${id}`, { status: updatedData.status })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((err) => {
         fetchBoard();
       });
@@ -138,11 +138,11 @@ const Board = ({ type, filter }) => {
 
   return (
     <>
-      <Box display="flex" style={{paddingBottom:"18px"}} pb={1}>
+      <Box display="flex" style={{ paddingBottom: "18px" }} pb={1}>
         <Autocomplete
           options={resourceOptions}
           getOptionLabel={(option) => option.optionLabel}
-          style={{ width: '50%' }}
+          style={{ width: isMobile && !isTablet ? '100%' : '50%' }}
           value={resource}
           onChange={(event, newValue) => {
             setResource(newValue);
@@ -150,7 +150,9 @@ const Board = ({ type, filter }) => {
           size="small"
           renderInput={(params) =>
             isMobile && !isTablet ? (
-              <TextField {...params} label="Select Resource" variant="standard" className={isMobile ? 'serchBox' : ''} />
+              <TextField {...params} label="Select Resource"
+                size="small"
+                variant="outlined" className={isMobile ? 'serchBox' : ''} />
             ) : (
               <TextField {...params} label="Select Resource" variant="outlined" />
             )
@@ -177,7 +179,7 @@ const Board = ({ type, filter }) => {
         <Grid container spacing={2} className={classes.activityMainBlock}>
           {statusList.map((data, index) => {
             return (
-              <Grid item md={3} xs={12} sm={4} style={{paddingTop:"0px"}} key={index}>
+              <Grid item md={3} xs={12} sm={4} style={{ paddingTop: "0px" }} key={index}>
                 <div className={classes.block}>
                   {!loading && (
                     <Box p={1} className="fixedBoardHeader">
@@ -191,19 +193,19 @@ const Board = ({ type, filter }) => {
                       </Typography>
                       {permissions && permissions[type?.toLowerCase()]?.isCreate ? (
                         <Tooltip
-                        title={`Create ${type}`}
+                          title={`Create ${type}`}
                         >
-                        <IconButton
-                          size="small"
-                          style={{ float: 'right', marginTop: '-25px' }}
-                          onClick={() => {
-                            setSelectedStatus(data.status);
-                            setOpenDialog(true);
-                            setFullScreen(false);
-                          }}
-                        >
-                          <Add fontSize="small" />
-                        </IconButton>
+                          <IconButton
+                            size="small"
+                            style={{ float: 'right', marginTop: '-25px' }}
+                            onClick={() => {
+                              setSelectedStatus(data.status);
+                              setOpenDialog(true);
+                              setFullScreen(false);
+                            }}
+                          >
+                            <Add fontSize="small" />
+                          </IconButton>
                         </Tooltip>
                       ) : null}
                     </Box>
