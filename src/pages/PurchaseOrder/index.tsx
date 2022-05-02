@@ -49,7 +49,9 @@ const PurchaseOrder = () => {
             value: 2,
         },
     ];
+
     let renderedFrom = camelCase(routes.purchaseOrder?.title)
+    const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
@@ -66,9 +68,6 @@ const PurchaseOrder = () => {
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
-    const [isAllChecked, setIsAllChecked] = useState(false);
-    const [clonedData, setClonedData] = useState([])
-    const localStorageSelectedRecords = `${renderedFrom}_selected`;
     const [isOpenDialog, setisOpenDialog] = useState(false)
 
     const [fromRental, setFromRental] = useState(history.location?.state?.rental);
@@ -95,14 +94,12 @@ const PurchaseOrder = () => {
                 let rendererNames = []
                 data.forEach(o => {
                     let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.purchaseOrderDetail.path)
-
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData]
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
                             rendererNames.push(currentColumn?.rendererName)
                         }
                     }
-
                 })
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
                 tempFrameworkComponent = {
@@ -117,11 +114,9 @@ const PurchaseOrder = () => {
 
     const fetchPurchaseOrder = () => {
         dispatch({ type: "loading", loading: true });
-
         if (gridApi) {
             gridApi.setRowData([]);
         }
-
         const queryString = getQueryString();
         let dataToProcess, count;
         axiosInstance().get(`${purchaseOrder.api}${queryString}`).then(({ data }) => {
@@ -130,32 +125,26 @@ const PurchaseOrder = () => {
 
             let rows = dataToProcess.map((u) => {
                 const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
-
                 let finalObject = prepareDataForGrid(u);
-                finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                finalObject["isChecked"] = selectedRecords?.some(s => s._id === u._id);
                 finalObject["allowedToEdit"] = (
                     [...(u.collaborator ?? []), u.owner].some(
                         (d) => d?.optionValue === user?.user?._id
                     )
                 );
-
                 finalObject["owerCollaboratorInitialsOrImages"] = [];
                 if (finalObject["owner"])
                     finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
-
                 finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
                     if (f.initials) {
                         f.initials = f.initials.split(" ").map((i) => i[0]).join("");
                     }
                 })
-
                 let res = {
                     ...finalObject,
                 };
                 return res;
             });
-            setIsAllChecked(false);
-            setClonedData(data)
             if (appendRows) {
                 dispatch({
                     type: "initialize", data: [...dataRows, ...rows],
@@ -167,22 +156,6 @@ const PurchaseOrder = () => {
                     selectedRecords: rows.filter(f => f.isChecked === true)
                 });
             }
-
-            if (gridApi) {
-                try {
-                    let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
-                    if (oldSelectedRecords.length > 0) {
-                        gridApi.forEachNode(function (node) {
-                            node.setSelected(
-                                oldSelectedRecords.some((o) => o === node.data._id)
-                            );
-                        });
-                    }
-                } catch (ex) {
-                    console.error("Error in getting selected records from local storage")
-                }
-            }
-
             dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
@@ -197,21 +170,17 @@ const PurchaseOrder = () => {
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}&filterPurchaseOrders=${selectedType}`;
         let filterById = [];
-
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
         }
-
         if (fromSalesOrder) {
             filterById.push({ field: "salesOrder", term: fromSalesOrder?._id });
         }
-
         if (filterById.length > 0) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
         }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
-
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: replaceFieldName(field),
@@ -220,11 +189,9 @@ const PurchaseOrder = () => {
             });
             deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
         }
-
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
-
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
         }
@@ -232,24 +199,8 @@ const PurchaseOrder = () => {
             const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
             deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
         }
-
         return deepFilter;
     };
-
-    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-
-
-    if (columnState) {
-        columns.map((item) => {
-            columnState.map((d) => {
-                if (d.colId == item.field) {
-                    item.show = !d.hide;
-                }
-            });
-        });
-    }
-
-
 
     const handleDelete = () => {
         let ids = []
@@ -269,7 +220,6 @@ const PurchaseOrder = () => {
         });
     }
 
-
     const handlePurchaseOrderTypeSel = (filterValues) => {
         setSelectedType(filterValues);
         history.push(`?type=${filterValues}`)
@@ -279,15 +229,12 @@ const PurchaseOrder = () => {
         if (newFilter != null) {
             setFilter(newFilter);
             handlePurchaseOrderTypeSel(PurchaseOrderType.find((d) => d.key === newFilter).value);
-
         }
     };
 
-
     const ActionsRenderer = params => (
         <>
-            {
-                permissions?.purchaseOrder?.isCreate &&
+            {permissions?.purchaseOrder?.isCreate &&
                 <HtmlTooltip title="Clone">
                     <IconButton
                         size="small"
@@ -348,19 +295,11 @@ const PurchaseOrder = () => {
 
     const handleClickClose = () => {
         setSortOpen(false);
-
     };
 
     const handleFilterClose = () => {
         setisOpenDialog(false);
     };
-
-
-
-
-
-
-
 
 
     return (<Fragment>
@@ -468,9 +407,6 @@ const PurchaseOrder = () => {
                                     )}
                                 </div>
                             </HideWhenOffline>}
-
-
-
                         {fromRental && (
                             <Chip
                                 className="ml-3"
@@ -503,9 +439,7 @@ const PurchaseOrder = () => {
                                     value={search}
                                     style={isMobile ? { flex: 1 } : {}}
                                 />
-
                             </Grid>
-
                             <Grid style={{ display: "flex", gap: "5px" }}>
                                 {permissions?.purchaseOrder?.isCreate &&
                                     <Button onClick={() => {
@@ -513,7 +447,6 @@ const PurchaseOrder = () => {
                                     }} variant={isMobile && !isTablet ? "text" : "contained"} size="small" color="primary" className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
                                         startIcon={isMobile && !isTablet ? null : <AddOutlined />}> {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}</Button>
                                 }
-
                                 {/* <HtmlTooltip title="Please select some purchase orders">
                                     <span>
                                         <Button
@@ -595,24 +528,9 @@ const PurchaseOrder = () => {
                                     field: "status",
                                 },
                                 {
-                                    label: "Tax Schedule: ",
-                                    field: "taxSchedule",
-                                },
-                                {
-                                    label: "Country Bill To: ",
-                                    field: "countryBillTo",
-                                },
-                                {
-                                    label: "Country Sell To: ",
-                                    field: "countrysellTo",
-                                },
-                                {
                                     label: "SupplierContact:  ",
                                     field: "supplierContact",
                                 },
-
-
-
                             ]}
                             onCreate={false}
                             showClone={true}
@@ -637,8 +555,7 @@ const PurchaseOrder = () => {
                         /> : null
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
-        {
-            showManagePurchaseOrderDialog.open &&
+        {showManagePurchaseOrderDialog.open &&
             <ManagePurchaseOrder
                 isClone={showManagePurchaseOrderDialog.isClone}
                 purchaseOrderId={showManagePurchaseOrderDialog.idToClone}

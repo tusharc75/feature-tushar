@@ -288,7 +288,9 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed &&
                     <Fragment>
                         <Button
-                            variant="outlined" color="primary" aria-controls="simple-menu"
+                            variant="outlined"
+                            color="primary"
+                            aria-controls="simple-menu"
                             aria-haspopup="true"
                             disabled={selectedRecords.length === 0 || !allowUpdateStatus}
                             size="small"
@@ -321,6 +323,19 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                                 setStatusToUpdate({ open: true, isUpdating: false, status: "Lost", message: "" })
                             }}>Lost</MenuItem>
                         </Menu>
+                        <Box mx={1} />
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            disabled={selectedRecords.length === 0 || selectedRecords.some(s => s.repaired === true || s.repairTypeId) || checkUniqcurrentOwnerType()}
+                            onClick={() => {
+                                setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...selectedRecords.map(m => m._id)] })
+                            }}
+                        >
+                            {isMobile && !isTablet ? "Complete" : "Complete Repair"}
+                        </Button>
+                        <Box mx={1} />
                         <Button
                             variant="outlined"
                             color="default"
@@ -370,14 +385,6 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                                     }
                                 }}>
                                 Send to Supplier
-                            </MenuItem>
-                            <MenuItem
-                                disabled={selectedRecords.length === 0 || selectedRecords.some(s => s.repaired === true || s.repairTypeId) || checkUniqcurrentOwnerType()}
-                                onClick={() => {
-                                    setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...selectedRecords.map(m => m._id)] })
-                                }}
-                            >
-                                {isMobile && !isTablet ? "Complete" : "Complete Repair"}
                             </MenuItem>
                             {/* <MenuItem
                                 disabled={(selectedRecords.length === 0 || checkUniqSupplier() || selectedRecords.some(s => s.repaired === true))}
