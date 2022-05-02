@@ -92,7 +92,7 @@ const DashboardBuilder = () => {
     axiosInstance()
       .post(baseURL, {
         name: name.trim(),
-        charts: formData
+        charts: formData.map((form) => ({...form, kpi: form.kpi.kpi}))
       })
       .then(() => {
         setToastConfig({
@@ -143,7 +143,7 @@ const DashboardBuilder = () => {
       <div className="headerbox">
         <CustomBreadCrumbs
           routes={[
-            { title: 'Dashboard Builder', path: '/dashboard-builder' },
+            { title: 'Dashboard Builder', path: '/dashboard-master' },
             { title: !isNew ? name : 'New', path: '' }
           ]}
         />
@@ -168,7 +168,7 @@ const DashboardBuilder = () => {
               variant="contained"
               size="small"
               disableRipple
-              disabled={formData.length === 0 || isSubmitting || (!isNew && compareData.oldData === compareData.newData)}
+              disabled={!Boolean(name) || formData.length === 0 || isSubmitting || (!isNew && compareData.oldData === compareData.newData)}
               onClick={handleClickSave}
               startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
             >

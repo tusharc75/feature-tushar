@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/styles';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 
-import { CHART_TYPES, FILTERS_OPTIONS, GRAPH_TYPES, IFormDataType, defaultFormConfigs } from './builderHelpers';
+import { CHART_TYPES, FILTERS_OPTIONS, KPIListType, GRAPH_TYPES, kpiList, IFormDataType, defaultFormConfigs } from './builderHelpers';
 
 const useClasses = makeStyles(() => ({
   container: {
@@ -40,7 +40,7 @@ const Builder = (props: Props) => {
     }
   }, [selectedData]);
 
-  const handleChange = (name: string, val: string | boolean | any[] | number) => {
+  const handleChange = (name: string, val: any) => {
     setFormValues((prevState) => ({ ...prevState, [name]: val }));
   };
 
@@ -85,34 +85,20 @@ const Builder = (props: Props) => {
   return (
     <Box component={Paper} p={1.5} className={classes.container}>
       <div>
-        <Box mt={2}>
-          <FormControl component="fieldset">
-            <FormLabel required component="legend">
-              Column Size
-            </FormLabel>
-            <RadioGroup
-              aria-label="column"
-              name="column"
-              value={formValues.column}
-              className={classes.column}
-              onChange={(e) => {
-                let value: any = e.target.value;
-                value = value.includes('custom') ? value : Number(value);
-                handleChange('column', value);
-              }}
-            >
-              <FormControlLabel value={3} control={<Radio />} label="Col 3" />
-              <FormControlLabel value={6} control={<Radio />} label="Col 6" />
-              <FormControlLabel value={12} control={<Radio />} label="Col 12" />
-              {/* <FormControlLabel value={'custom'} control={<Radio />} label="Custom" /> */}
-            </RadioGroup>
-          </FormControl>
+        <Box>
+          <TextField
+            required
+            value={formValues.chartTitle}
+            onChange={(e) => handleChange('chartTitle', e.target.value)}
+            size="small"
+            fullWidth
+            variant="outlined"
+            label={`Title`}
+            helperText={errors && !Boolean(formValues.chartTitle) && errors?.chartTitle}
+            error={errors && !Boolean(formValues.chartTitle) && Boolean(errors?.chartTitle)}
+          />
         </Box>
-        {/* {isNaN(formValues.column) && (
-          <Box mt={2}>
-            <TextField required size="small" fullWidth variant="outlined" label={`Custom Column`} />
-          </Box>
-        )} */}
+
         <Box mt={2}>
           <Autocomplete
             size="small"
@@ -133,6 +119,7 @@ const Builder = (props: Props) => {
             )}
           />
         </Box>
+
         {formValues.graphType === 'Chart' && (
           <Box mt={2}>
             <Autocomplete
@@ -157,18 +144,33 @@ const Builder = (props: Props) => {
         )}
 
         <Box mt={2}>
-          <TextField
-            required
-            value={formValues.chartTitle}
-            onChange={(e) => handleChange('chartTitle', e.target.value)}
+          <Autocomplete
             size="small"
-            fullWidth
-            variant="outlined"
-            label={`Title`}
-            helperText={errors && !Boolean(formValues.chartTitle) && errors?.chartTitle}
-            error={errors && !Boolean(formValues.chartTitle) && Boolean(errors?.chartTitle)}
+            options={kpiList}
+            value={formValues.kpi}
+            onChange={(_, val: KPIListType) => {
+              handleChange('kpi', val);
+            }}
+            getOptionLabel={(option) => option.name}
+            getOptionSelected={(option, value) => option.kpi === value.kpi}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                required
+                label="KPI"
+                variant="outlined"
+                helperText={errors && !Boolean(formValues.kpi) && errors?.kpi}
+                error={errors && !Boolean(formValues.kpi) && Boolean(errors?.kpi)}
+              />
+            )}
           />
         </Box>
+
+        {/* {isNaN(formValues.column) && (
+          <Box mt={2}>
+            <TextField required size="small" fullWidth variant="outlined" label={`Custom Column`} />
+          </Box>
+        )} */}
 
         <Box mt={2}>
           <FormGroup row>
@@ -202,6 +204,16 @@ const Builder = (props: Props) => {
               }
               label="Exports"
             />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  disabled={formValues.graphType === 'Map'}
+                  checked={formValues.hasStatus}
+                  onChange={(e) => handleChange('hasStatus', e.target.checked)}
+                />
+              }
+              label="Status"
+            />
           </FormGroup>
         </Box>
 
@@ -210,6 +222,7 @@ const Builder = (props: Props) => {
             <Autocomplete
               multiple
               size="small"
+              disableCloseOnSelect
               options={FILTERS_OPTIONS}
               value={formValues.filters}
               onChange={(_, val) => handleChange('filters', val)}
@@ -228,6 +241,29 @@ const Builder = (props: Props) => {
             />
           </Box>
         )}
+        <Box mt={2}>
+          <FormControl component="fieldset">
+            <FormLabel required component="legend">
+              Column Size
+            </FormLabel>
+            <RadioGroup
+              aria-label="column"
+              name="column"
+              value={formValues.column}
+              className={classes.column}
+              onChange={(e) => {
+                let value: any = e.target.value;
+                value = value.includes('custom') ? value : Number(value);
+                handleChange('column', value);
+              }}
+            >
+              <FormControlLabel value={3} control={<Radio />} label="Col 3" />
+              <FormControlLabel value={6} control={<Radio />} label="Col 6" />
+              <FormControlLabel value={12} control={<Radio />} label="Col 12" />
+              {/* <FormControlLabel value={'custom'} control={<Radio />} label="Custom" /> */}
+            </RadioGroup>
+          </FormControl>
+        </Box>
       </div>
 
       <Box>

@@ -107,7 +107,7 @@ import CustomerSign from './pages/DeliveryTicket/CustomerSign';
 import EcommercePolicy from './pages/EcommercePolicy';
 import Sublease from './pages/Sublease';
 import SubleaseDetailsPage from './pages/Sublease/SubleaseDetailsPage';
-import NewDashboard from './pages/NewDashboard';
+import NewDashboard from './pages/NewDashboard-Test';
 import TransferInventory from './pages/TransferInventory';
 import TransferInventoryDetailPage from './pages/TransferInventory/TransferInventoryDetailPage';
 import Zone from './pages/zone';
@@ -691,10 +691,10 @@ function App() {
             <PrivateRoute exact path={`${routes.posProductDetail.path}/:id/:warehouseId`}>
               <PosProductDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={"/dashboard-builder/:id"}>
+            <PrivateRoute exact path={"/dashboard-master/:id"}>
               <DashboardBuilder />
             </PrivateRoute>
-            <PrivateRoute exact path={"/dashboard-builder"}>
+            <PrivateRoute exact path={"/dashboard-master"}>
               <DashboardsList />
             </PrivateRoute>
             <Route exact path={'/customer-sign/:id'}>
