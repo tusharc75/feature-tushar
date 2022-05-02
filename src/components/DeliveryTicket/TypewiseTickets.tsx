@@ -142,7 +142,7 @@ const TypewiseTickets = ({ refrenceType, refrenceId, renderedFrom }) => {
                         permissions={true}
                         primaryField={columns?.find(d => d.field)}
                         onClick={(data) => {
-                            history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
+                            history.push(`${routes.deliveryTicketDetail.path}/${data._id}`)
                         }}
                         dataRows={dataRows}
                         selectedRecords={selectedRecords}
@@ -161,10 +161,13 @@ const TypewiseTickets = ({ refrenceType, refrenceId, renderedFrom }) => {
                                 field: "status",
                             },
                             {
-                                label: "Loading Ticket : ",
-                                field: "loadingTicket",
-                                onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`)
-                            }
+                                label: "Pickup From : ",
+                                field: "pickupFrom",
+                            },
+                            {
+                                label: "Delivery To : ",
+                                field: "deliveryTo",
+                            },
                         ]}
                         owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                         onCreate={false}

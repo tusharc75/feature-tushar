@@ -16,7 +16,7 @@ import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRepairJob from './ManageRepairJob';
 import queryString from 'query-string';
-import { BiFoodMenu } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import TabPanel from 'src/components/TabPanel';
 import HideWhenOffline from 'src/components/HideWhenOffline';
@@ -31,6 +31,8 @@ import { camelCase } from 'lodash';
 import { RiFlowChart } from 'react-icons/ri';
 import RepairJobViews from './RoadMapViews/index';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+import { isMobile, isTablet } from 'react-device-detect';
+import accountClass from '../Account/account.module.scss';
 
 function a11yProps(index: any) {
   return {
@@ -238,8 +240,15 @@ const RepairJobDetails = () => {
               {repairJobData ? (
                 <DetailsPageHeader heading={repairJobData?.repairJobName} mainPoints={null} showHeading={true}>
                   {permissions?.repairJob?.isUpdate && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
-                    <Button variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                      Edit
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenUpdateDialog}
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                    >
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   )}
                   {/* {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}

@@ -92,7 +92,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                   <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
                   : row.original?.type === "package" ?
                     <a className="link text-truncate" href={`${routes.packagesDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
-                    : <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original.inventory}`} target="_blank">{row.original.detail}</a>
+                    : row.original?.type === "asset" && !row.original?.isNonSerializeAsset ?
+                      <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original.inventory}`} target="_blank">{row.original.detail}</a>
+                      : row.original.detail
                 : row.original.detail}
             </p>
             <Chip
