@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from "react";
 import { Grid, Box, Button, Paper, Typography, IconButton, Tab, Tabs, ButtonGroup, Container, InputAdornment, TextField, MenuItem, Menu } from "@material-ui/core";
-import { Autocomplete, Skeleton } from "@material-ui/lab";
-import { useParams, useHistory } from "react-router-dom";
 import axiosInstance from "src/axios/axiosInstance";
 import routes from "src/components/Helpers/Routes";
 import { useData } from "src/StateProvider/Provider";
@@ -28,14 +26,15 @@ import InfoIcon from "@material-ui/icons/Info";
 import { RiEditCircleLine } from "react-icons/ri";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 
-const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit:hasPermission }) => {
+const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
     const allowedToEdit = hasPermission || permissions?.purchaseOrder.isUpdate
-    const [columns, setColumns] = useState([{ field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "nameRenderer" },
-    { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" }])
 
+    const [columns, setColumns] = useState([
+        { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" }])
 
     const [addProductDialog, setAddProductDialog] = useState(false);
     const [isAddingProducts, setAddingProducts] = useState(false);
@@ -200,9 +199,10 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     };
 
     const handleAddProduct = (rows) => {
+        console.log(rows)
         setAddingProducts(true)
         let tempProductArray = rows?.map(d => ({
-            "productId": d.productId,
+            "productId": d.productId || d._id,
             "qty": d.qty ? parseInt(d.qty) : 1,
             "expectedDelivery": purchaseOrderData?.deliveryDate
         }))
