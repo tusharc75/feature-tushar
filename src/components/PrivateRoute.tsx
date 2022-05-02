@@ -66,7 +66,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'transfer-inventory',
         'zone',
         'well-master',
-        'dashboard-builder',
+        'dashboard-master',
         'bulk-asset-creation',
         'erecs',
         'resource-calendar'

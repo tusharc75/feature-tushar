@@ -44,7 +44,7 @@ const ReplaceAssetReason = ({ handleClose, loading, handleSucess }) => {
               <TextField
                 variant="outlined"
                 type="text"
-                label={`Please enter the reason for replacement`}
+                label={`reason for replacement`}
                 required={true}
                 name="reason"
                 fullWidth

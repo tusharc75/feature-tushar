@@ -43,6 +43,11 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     right: '0',
     color: 'white'
+  },
+  darkExpandIcon: {
+    position: 'absolute',
+    right: '0',
+    color: theme.palette.info.dark,
   }
 }));
 
@@ -56,7 +61,7 @@ export default function ImportExportLinks({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => {},
+  onExportToExcelSuccess = () => { },
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
@@ -274,7 +279,7 @@ export default function ImportExportLinks({
       </Menu>
       {isMobile && (
         <IconButton onClick={handleClick}>
-          <IoIosArrowDropdown className={classes.expandIcon} />
+          <IoIosArrowDropdown className={isBackgroundWhite ? classes.darkExpandIcon : classes.expandIcon} />
         </IconButton>
       )}
     </div>
@@ -297,7 +302,7 @@ export default function ImportExportLinks({
       </Menu>
       {isMobile && (
         <IconButton onClick={handleClick}>
-          <IoIosArrowDropdown className={classes.expandIcon} />
+          <IoIosArrowDropdown className={isBackgroundWhite ? classes.darkExpandIcon : classes.expandIcon} />
         </IconButton>
       )}
     </div>

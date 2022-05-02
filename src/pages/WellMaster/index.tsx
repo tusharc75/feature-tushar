@@ -31,7 +31,6 @@ import MobileSortDialog from "../../components/MobileSortDialog";
 import MobileFilterDialog from "../../components/MobileFilterDialog"
 import { camelCase } from "lodash";
 import DeleteIcon from "@material-ui/icons/Delete";
-import { Link } from "react-router-dom";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 
 let searchTimeout;
@@ -40,7 +39,7 @@ const WellMaster = () => {
 
     const renderedFrom = camelCase(routes?.wellMaster.title)
     const localStorageSelectedRecords = `${renderedFrom}_selected`
-
+    const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
 
     const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -82,33 +81,17 @@ const WellMaster = () => {
                 let columns = [];
                 let rendererNames = [];
                 data.forEach((o) => {
-                    if (o?.fieldData?.primaryField === true) {
-                        columns = [
-                            ...columns,
-                            {
-                                field: o?.fieldData?.fieldName,
-                                headerName: o?.fieldData?.fieldLabel,
-                                primaryField: true,
-                                show: true,
-                                disabled: true,
-                                cellRenderer: 'nameRenderer'
-                            }
-                        ];
-                    } else {
-                        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.wellMaster.path);
-
-                        if (currentColumn !== null) {
-                            columns = [...columns, currentColumn?.columnData];
-                            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                                rendererNames.push(currentColumn?.rendererName);
-                            }
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes?.wellMasterDetail?.path);
+                    if (currentColumn !== null) {
+                        columns = [...columns, currentColumn?.columnData];
+                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                            rendererNames.push(currentColumn?.rendererName);
                         }
                     }
                 });
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
                 tempFrameworkComponent = {
                     ...tempFrameworkComponent,
-                    nameRenderer: NameRenderer,
                     actionsRenderer: ActionsRenderer
                 };
                 setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -128,19 +111,9 @@ const WellMaster = () => {
             dataToProcess = data?.data;
             count = data?.count;
             let rows = dataToProcess.map((u) => {
-                const { owner, collaborator } = u;
-                let finalObject = prepareDataForGrid(u);
-                finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-                finalObject["canDelete"] = false;
-                finalObject["allowedToEdit"] = (
-                    [...(u.collaborator ?? []), u.owner].some(
-                        (d) => d?.optionValue === user?.user?._id
-                    )
-                );
-                let res = {
-                    ...finalObject,
-                };
-                return res;
+                let finalObject = prepareDataForGrid(u, user);
+                finalObject["isChecked"] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some(s => s._id === u._id);
+                return finalObject;
             });
             if (appendRows) {
                 dispatch({
@@ -204,23 +177,18 @@ const WellMaster = () => {
             ids.push(deleteRecord._id)
         }
         else {
-            ids = selectedRecords.map(d => d._id);
+            ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map(d => d._id);
         }
         axiosInstance().put(`${wellMaster.api}/remove`, { "ids": ids }).then(() => {
-            fetchData();
+            localStorage.removeItem(localStorageSelectedRecords)
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
             setAnchorEl(null)
+            fetchData();
         }).catch((error) => {
             toastConfig.setToastConfig(error)
         });
     }
-
-    const NameRenderer = (params) => (
-        <Link className="link" title={params.value} to={`${routes.wellMasterDetail.path}/${params.data._id}`}>
-            {params.value}
-        </Link>
-    );
 
     const ActionsRenderer = params => (
         <>
@@ -367,7 +335,6 @@ const WellMaster = () => {
                                     >
                                         Filter
                                     </Button>
-
                                     <MobileFilterDialog
                                         isOpen={isOpenDialog}
                                         handleClose={handleFilterClose}
@@ -404,13 +371,12 @@ const WellMaster = () => {
                                 {permissions?.wellMaster?.isDelete && (
                                     <>
                                         <Button
-                                            //disabled={canDelete}
                                             variant={isMobile && !isTablet ? 'text' : 'outlined'}
                                             color="default"
                                             size="small"
                                             className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                                             onClick={openActions}
-                                            // className={styles.action_submit_btn}
+                                            disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
                                             aria-controls="action-menu"
                                         >
                                             {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
@@ -427,10 +393,13 @@ const WellMaster = () => {
                                             open={Boolean(anchorEl)}
                                             onClose={closeActions}
                                         >
-                                            {permissions?.wellMaster?.isDelete && <MenuItem onClick={() => {
-                                                closeActions()
-                                                setShowDeleteConfirmBox(true)
-                                            }}>Delete</MenuItem>}
+                                            <MenuItem
+                                                disabled={!permissions?.wellMaster?.isDelete}
+                                                onClick={() => {
+                                                    closeActions()
+                                                    setShowDeleteConfirmBox(true)
+                                                }}>Delete
+                                            </MenuItem>
                                         </Menu>
                                     </>
                                 )}
@@ -448,11 +417,13 @@ const WellMaster = () => {
                             permissions={permissions?.wellMaster}
                             primaryField={columns?.find(d => d.primaryField)}
                             onClick={(data) => {
+                                history.push(`${routes.wellMasterDetail.path}/${data._id}`)
                             }}
                             dataRows={dataRows}
-                            selectedRecords={selectedRecords}
+                            selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                             dispatch={dispatch}
                             onEdit={(data) => {
+                                history.push(`${routes.wellMasterDetail.path}/${data._id}`)
                             }}
                             extraParamsToCheckDelete={true}
                             onDelete={(data) => {
@@ -462,18 +433,8 @@ const WellMaster = () => {
                             rowCount={rowCount}
                             page={page}
                             loading={loading}
-                            additionalDetails={[
-                                {
-                                    icon: <FaSuitcase size={18} />,
-                                    field: 'supplierAccount'
-                                }
-                            ]}
-                            chips={[
-                                {
-                                    label: "Status: ",
-                                    field: "status",
-                                },
-                            ]}
+                            additionalDetails={[]}
+                            chips={[]}
                             onCreate={false}
                             showClone={true}
                             onClone={(data) => { setShowManageDialog({ open: true, isClone: true, idToClone: data._id }); }}
@@ -509,11 +470,10 @@ const WellMaster = () => {
                 }}
             />
         }
-        {
-            showDeleteConfirmBox &&
+        {showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the ${routes.wellMaster?.title} ? `}
+                message={`Are you sure you want to delete the ${routes.wellMaster?.title?.toLowerCase()} ${deleteRecord?.wellName || ""} ? `}
                 onClose={() => {
                     setDeleteRecord(null);
                     setShowDeleteConfirmBox(false)
