@@ -21,6 +21,62 @@ export type IFilterType = {
   key: string;
 };
 
+export type KPIListType = {
+  name: string;
+  kpi: string;
+};
+
+export const kpiList: KPIListType[] = [
+  {
+    name: "Total Booked vs Total Offered vs Budget",
+    kpi: "quote/Booked-vs-Offered-vs-Budget"
+  },
+  // {
+  //   name: "Regional Sales",
+  //   kpi: 'regionalSale'
+  // },
+  // {
+  //   name: "Total Offered Value vs Entities",
+  //   kpi: "sales"
+  // },
+  // {
+  //   name: "Total Offered vs Total Booked Value",
+  //   kpi: "sales"
+  // },
+  // {
+  //   name: "Total Booked Volume vs Total Offered Volume vs Budget",
+  //   kpi: "sales"
+  // },
+  // {
+  //   name: "Total Booked GM vs Total Offered GM vs Budget",
+  //   kpi: "sales"
+  // },
+  // {
+  //   name: 'Quotes Status',
+  //   kpi: 'open-quote',
+  // },
+  // {
+  //   name: 'Quotes by Customer Account',
+  //   kpi: 'quote/customer-account'
+  // },
+  // {
+  //   name: 'Quotes by Sales Rep',
+  //   kpi: 'quote/sales-rep'
+  // },
+  // {
+  //   name: 'Top sellling product categories',
+  //   kpi: 'products'
+  // },
+  // {
+  //   name: 'Opportunity Trends',
+  //   kpi: 'trend/opportunities'
+  // },
+  // {
+  //   name: 'Created Leads',
+  //   kpi: 'created/leads'
+  // }
+]
+
 export interface IFormDataType {
   uniqueId?: string;
   column: GridSize | any;
@@ -31,15 +87,21 @@ export interface IFormDataType {
   hasTableView?: boolean;
   hasExport?: boolean;
   filters?: IFilterType[];
+  hasStatus?: boolean;
+  kpi: KPIListType;
+  statusOptions?: { optionValue: string; optionLabel: string }[];
 }
 
-export const defaultFormConfigs = {
+export const defaultFormConfigs: IFormDataType = {
   column: 6,
   graphType: '',
   chartType: '',
   chartTitle: '',
+  kpi: { name: "", kpi: "" },
   hasFilters: false,
   hasTableView: false,
   hasExport: false,
+  statusOptions: [],
+  hasStatus: false,
   filters: []
 };
