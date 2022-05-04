@@ -237,6 +237,9 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                     else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.sublease) {
                         tempInitialData["sublease"] = refrenceData?.refrenceId;
                     }
+                    else if (refrenceType === DELIVERY_TICKET_REFRENCE_TYPE.transferInventory) {
+                        tempInitialData["transferInventory"] = refrenceData?.refrenceId;
+                    }
 
                     tempInitialData["pickupFromType"] = refrenceData?.pickupFromType;
                     tempInitialData["pickupFrom"] = refrenceData?.pickupFrom;
