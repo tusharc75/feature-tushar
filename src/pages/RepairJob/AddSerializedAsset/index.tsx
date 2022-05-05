@@ -28,6 +28,7 @@ import Tooltip from 'src/components/CustomTooltipTitle'
 const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus }) => {
 
   const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorElAction, setAnchorElAction] = useState(null);
   const toastConfig = useContext(CustomToastContext);
 
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false)
@@ -60,6 +61,14 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleClickAction = (event) => {
+    setAnchorElAction(event.currentTarget);
+  };
+
+  const handleCloseAction = () => {
+    setAnchorElAction(null);
   };
 
   const commonColumns = [
@@ -179,7 +188,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               setAddSerializedAssetDialog(true)
             }}
           >
-            {isMobile && !isTablet ? `Add` : `Add ${routes.serializedAsset.title}`}
+            {isMobile && !isTablet ? `Add  ${routes.serializedAsset.title}` : `Add ${routes.serializedAsset.title}`}
           </Button>
         </Box>
         <Box display="flex" className="gap-2">
@@ -221,31 +230,46 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               setStatusToUpdate({ open: true, isUpdating: false, status: "Lost", message: "" })
             }}>Lost</MenuItem>
           </Menu>
+
           <Button
-            variant={isMobile && !isTablet ? "outlined" : "contained"}
+            variant={"outlined"}
             color="primary"
-            type="button"
-            size="small"
             disabled={selectedRecords.length === 0}
-            onClick={() => {
-              setShowEditAssetDialog({ open: true, isBulkedit: true, inventory: null, selectedRecords: selectedRecords })
-            }}
-          >
-            {"Bulk Edit"}
-          </Button>
-          <Button
-            variant={isMobile && !isTablet ? "text" : "contained"}
-            color="primary"
-            style={isMobile && !isTablet ? { color: "red" } : {}}
-            type="button"
             size="small"
-            disabled={selectedRecords.length === 0 || selectedRecords.some(s => s.status !== INVENTORY_STATUS.reserved)}
-            onClick={() => {
-              setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: selectedRecords.map(m => m._id) });
+            onClick={handleClickAction}
+            endIcon={<ArrowDropDownIcon />}>
+            Actions
+          </Button>
+          <Menu
+            id="simple-menu"
+            anchorEl={anchorElAction}
+            keepMounted
+            open={Boolean(anchorElAction)}
+            onClose={handleCloseAction}
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
             }}
           >
-            {isMobile && !isTablet ? <MdDelete size={20} /> : "Delete"}
-          </Button>
+            <MenuItem disabled={selectedRecords.length === 0}
+              onClick={() => {
+                setShowEditAssetDialog({ open: true, isBulkedit: true, inventory: null, selectedRecords: selectedRecords })
+              }}
+            >
+              {"Bulk Edit"}</MenuItem>
+            <MenuItem disabled={selectedRecords.length === 0 || selectedRecords.some(s => s.status !== INVENTORY_STATUS.reserved)}
+              onClick={() => {
+                setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: selectedRecords.map(m => m._id) });
+              }}
+            >
+              {"Delete"}
+            </MenuItem>
+          </Menu>
         </Box>
       </Box>}
     <Grid item xs={12} md={12} sm={12} className="mt-3">

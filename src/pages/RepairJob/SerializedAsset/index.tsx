@@ -288,7 +288,9 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed &&
                     <Fragment>
                         <Button
-                            variant="outlined" color="primary" aria-controls="simple-menu"
+                            variant="outlined"
+                            color="primary"
+                            aria-controls="simple-menu"
                             aria-haspopup="true"
                             disabled={selectedRecords.length === 0 || !allowUpdateStatus}
                             size="small"
@@ -323,9 +325,8 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                         </Menu>
                         <Box mx={1} />
                         <Button
-                            variant={isMobile && !isTablet ? "outlined" : "contained"}
+                            variant="contained"
                             color="primary"
-                            type="button"
                             size="small"
                             disabled={selectedRecords.length === 0 || selectedRecords.some(s => s.repaired === true || s.repairTypeId) || checkUniqcurrentOwnerType()}
                             onClick={() => {

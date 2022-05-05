@@ -92,7 +92,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                   <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
                   : row.original?.type === "package" ?
                     <a className="link text-truncate" href={`${routes.packagesDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
-                    : <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original.inventory}`} target="_blank">{row.original.detail}</a>
+                    : row.original?.type === "asset" && !row.original?.isNonSerializeAsset ?
+                      <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original.inventory}`} target="_blank">{row.original.detail}</a>
+                      : row.original.detail
                 : row.original.detail}
             </p>
             <Chip
@@ -595,7 +597,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   return (<Fragment>
     {allowedToEdit &&
       <Box display="flex" justifyContent="flex-end" pt={1} pb={2} >
-        <Box display="flex" alignItems="center" justifyContent={isMobile ? "space-between" : "flex-end"} paddingX={1} gridColumnGap={8} flex={1}>
+        <Box display="flex" alignItems="center" justifyContent={"flex-end"} paddingX={1} gridColumnGap={8} flex={1}>
           <Box display="flex" gridColumnGap={5}>
             <Button
               variant="contained"
