@@ -16,6 +16,7 @@ import { useData } from 'src/StateProvider/Provider';
 import AddInventory from './AddInventory';
 import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
+import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 
 const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -33,9 +34,29 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const [state, dispatch] = useReducer(gridReducer, gridState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const [isAdding, setIsAdding] = useState(false);
-  const columns = [
-    { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer', primaryField: true },
-    {
+  const [columns, setColumns] = useState([])
+
+  const history = useHistory();
+
+  useEffect(() => {
+    fetchFields()
+  }, []);
+
+  const fetchFields = async () => {
+    const productResult = await axiosInstance().get('/field?resource=Product&view=true')
+    const productFields = productResult?.data?.data?.filter((e) => ["productName", "productNumber", "serializedProduct"].includes(e?.fieldData?.fieldName));
+    productFields?.forEach((e) => {
+      if (e?.fieldData?.fieldName === "productName") {
+        columns.push({ field: "productName", headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" })
+      }
+      if (e?.fieldData?.fieldName === "productNumber") {
+        columns.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+      }
+      if (e?.fieldData?.fieldName === "serializedProduct") {
+        columns.push({ field: "serializedProduct", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "checkboxRenderer" })
+      }
+    })
+    columns.push({
       field: 'qty',
       headerName: 'Quantity',
       show: true,
@@ -43,14 +64,9 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       cellRenderer: 'commonRenderer',
       cellEditor: 'numericCellEditor',
       editable: permissions?.transferInventory?.isUpdate
-    }
-  ];
-
-  const history = useHistory();
-
-  const closeDialog = () => {
-    setAddInventoryDialog(false);
-  };
+    });
+    setColumns([...columns])
+  }
 
   useEffect(() => {
     if (!transferInventoryData) return;
@@ -70,8 +86,10 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         dispatch({ type: 'loading', loading: true });
         let rows = data?.products.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['productId'] = u.product;
-          finalObject['productName'] = u.productDetail.productName;
+          finalObject['productId'] = u?.product;
+          finalObject['productName'] = u?.productDetail?.productName;
+          finalObject['productNumber'] = u?.productDetail?.productNumber;
+          finalObject['serializedProduct'] = u?.productDetail?.serializedProduct;
           finalObject['qty'] = u.qty;
           finalObject['inventory'] = u.inventoryDetail?.inventory || 0;
           return {
@@ -133,7 +151,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     }
   };
 
-  const ProductNameRenderer = (params) => (
+  const NameRenderer = (params) => (
     <Link className="link" title={params.value} to={`/product/detail/${params.data.product}`}>
       {params.value}
     </Link>
@@ -157,7 +175,8 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
 
   const frameworkComponents = {
     commonRenderer: CommonRenderer,
-    productNameRenderer: ProductNameRenderer,
+    nameRenderer: NameRenderer,
+    checkboxRenderer: CheckboxRenderer,
     actionsRenderer: ActionRenderer
   };
 
@@ -171,6 +190,10 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       return;
     }
     updateQTY(data?._id, data.qty);
+  };
+
+  const closeDialog = () => {
+    setAddInventoryDialog(false);
   };
 
   const updateQTY = (id: string, qty: string) => {
@@ -237,7 +260,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
             }}
             extraParamsToCheckDelete={true}
-            onDelete={(data) => {}}
+            onDelete={(data) => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -251,7 +274,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
             onCreate={false}
             showClone={false}
-            onClone={(data) => {}}
+            onClone={(data) => { }}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -272,7 +295,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
             loading={loading}
             onCellValueChanged={onCellValueChanged}
             renderedFrom={renderedFrom}
-            refreshGrid={() => {}}
+            refreshGrid={() => { }}
           />
         )}
       </Box>
