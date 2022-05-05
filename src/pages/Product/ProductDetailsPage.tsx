@@ -90,6 +90,9 @@ const ProductDetailsPage = () => {
   const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const ignoreField = ['priceTemplate', 'brand'];
 
+  const [showConfirmBoxConvert, setShowConfirmBoxConvert] = useState(false);
+
+
   useEffect(() => {
     if (id) {
       getProductFieldsAndData();
@@ -371,6 +374,19 @@ const ProductDetailsPage = () => {
     commonRenderer: CommonRenderer
   };
 
+  const handleConvertSerialized = () => {
+    axiosInstance()
+      .post(`${product.api}/non-serialized-to-serialized`, { products: [id] })
+      .then(() => {
+        setShowConfirmBoxConvert(false);
+        getProductFieldsAndData()
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setShowConfirmBoxConvert(false);
+      });
+  };
+
   return (
     <>
       <Fragment>
@@ -489,7 +505,7 @@ const ProductDetailsPage = () => {
             <Grid item xs={12} sm={12} md={4} lg={4}>
               <Paper style={{ overflow: 'hidden' }}>
                 <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="subtitle2">Plants ({inventoriesData?.length || 0})</Typography>
+                  <Typography variant="subtitle2">{routes?.warehouse?.title} ({inventoriesData?.length || 0})</Typography>
                   {permissions?.serializedAsset?.isCreate && !loadingWarehouse && (
                     <IconButton
                       title="Manage Plant(s)"
@@ -647,6 +663,26 @@ const ProductDetailsPage = () => {
                     )}
                   </Box>
                 }
+                {(permissions?.product?.isUpdate && permissions?.serializedAsset?.isCreate && productData?.serializedProduct === false) &&
+                  <Box p={2} borderTop={1} borderColor="grey.300">
+                    <Button
+                      variant={'outlined'}
+                      color="primary"
+                      onClick={() => { setShowConfirmBoxConvert(true) }}
+                      size="small">
+                      Convert Serialized Product
+                    </Button>
+                    {showConfirmBoxConvert && (
+                      <ConfirmationDialog
+                        open={showConfirmBoxConvert}
+                        message={`Are you sure you want to convert serialized product ?`}
+                        onClose={() => {
+                          setShowConfirmBoxConvert(false);
+                        }}
+                        onOk={handleConvertSerialized}
+                      />
+                    )}
+                  </Box>}
               </Paper>
             </Grid>
           ) : null}
