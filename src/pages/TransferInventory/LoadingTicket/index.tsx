@@ -129,63 +129,69 @@ const LoadingTicket = ({
     { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' }
   ];
 
-  const fetchInventories = () => {
+  const fetchInventories = async () => {
     if (gridApi) {
       gridApi.deselectAll();
     }
     dispatch({ type: 'loading', loading: true });
 
-    axiosInstance()
-      .get(`${routes.transferInventory.path}/${transferInventoryData._id}/product`)
-      .then(({ data: { data } }) => {
-        const { assets, products } = data;
+    try {
+      const {
+        data: { data: productsData }
+      } = await axiosInstance().get(`${routes.transferInventory.path}/${transferInventoryData._id}/product`);
+      const { data: loadingTicketData } = await axiosInstance().get(
+        `${routes.deliveryTicket.path}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${transferInventoryData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+      );
 
-        let rows = [];
+      console.log('Loading Ticket', loadingTicketData);
 
-        if (assets.length > 0) {
-          assets.forEach((asset) => {
-            let obj = { ...asset };
-            const product = products.find((p) => p._id === asset.parentId);
-            obj['assetNumber'] = asset.assetDetail.assetNumber;
-            obj['id'] = asset.asset;
-            obj['qty'] = 1;
-            obj['type'] = 'Asset';
-            obj['serialNumber'] = asset.assetDetail.serialNumber;
-            obj['productName'] = product?.productDetail.productName;
-            obj['productId'] = asset.assetDetail.product;
+      const { assets, products } = productsData;
 
-            rows.push(obj);
-          });
-        }
+      let rows = [];
 
-        let newProducts = products.filter((p) => p.productDetail.serializedProduct === false);
+      if (assets.length > 0) {
+        assets.forEach((asset) => {
+          let obj = { ...asset };
+          const product = products.find((p) => p._id === asset.parentId);
+          obj['assetNumber'] = asset.assetDetail.assetNumber;
+          obj['id'] = asset.asset;
+          obj['qty'] = 1;
+          obj['type'] = 'Asset';
+          obj['serialNumber'] = asset.assetDetail.serialNumber;
+          obj['productName'] = product?.productDetail.productName;
+          obj['productId'] = asset.assetDetail.product;
 
-        if (newProducts.length) {
-          newProducts.forEach((product) => {
-            let obj = { ...product };
-            obj['assetNumber'] = product.productDetail.productName;
-            obj['id'] = product.product;
-            obj['qty'] = product.qty;
-            obj['type'] = 'Product';
-            obj['serialNumber'] = product.productDetail.serialNumber;
-            obj['productName'] = product?.productDetail.productName;
-            obj['productId'] = product.product;
+          rows.push(obj);
+        });
+      }
 
-            rows.push(obj);
-          });
-        }
+      let newProducts = products.filter((p) => p.productDetail.serializedProduct === false);
 
-        dispatch({ type: 'initialize', data: rows, count: rows.length });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      });
+      if (newProducts.length) {
+        newProducts.forEach((product) => {
+          let obj = { ...product };
+          obj['assetNumber'] = product.productDetail.productName;
+          obj['id'] = product.product;
+          obj['qty'] = product.qty;
+          obj['type'] = 'Product';
+          obj['serialNumber'] = product.productDetail.serialNumber;
+          obj['productName'] = product?.productDetail.productName;
+          obj['productId'] = product.product;
+
+          rows.push(obj);
+        });
+      }
+
+      dispatch({ type: 'initialize', data: rows, count: rows.length });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    } catch (err) {
+      toastConfig.setToastConfig(err);
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    }
   };
 
   const frameworkComponents = {
@@ -231,6 +237,11 @@ const LoadingTicket = ({
           <Box>
             <Button variant={'outlined'} color="primary" disabled={selectedRecords.length === 0} onClick={handleLoadingTicketDialog} size="small">
               {`Create Loading Ticket`}
+            </Button>
+          </Box>
+          <Box>
+            <Button variant={'outlined'} color="primary" disabled={selectedRecords.length === 0} onClick={() => {}} size="small">
+              {`Remove Loading Ticket`}
             </Button>
           </Box>
         </Box>
