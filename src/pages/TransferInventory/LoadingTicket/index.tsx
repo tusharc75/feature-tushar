@@ -204,16 +204,16 @@ const LoadingTicket = ({
 
   const handleLoadingTicketDialog = () => {
     const data = {};
-    data['ticketName'] = transferInventoryData.transferNumber;
-    data['refrenceId'] = transferInventoryData._id;
+    data['ticketName'] = transferInventoryData?.transferNumber;
+    data['refrenceId'] = transferInventoryData?._id;
 
     data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
-    data['pickupFrom'] = transferInventoryData.tranferFromPlant.optionValue;
-    data['pickupFromAddress'] = transferInventoryData.tranferFromPlant.address;
+    data['pickupFrom'] = transferInventoryData?.transferFromPlant.optionValue;
+    data['pickupFromAddress'] = transferInventoryData?.transferFromPlant.address;
 
     data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
-    data['deliveryTo'] = transferInventoryData.tranfertoPlant.optionValue;
-    data['deliveryToAddress'] = transferInventoryData.tranfertoPlant.address;
+    data['deliveryTo'] = transferInventoryData?.transfertoPlant.optionValue;
+    data['deliveryToAddress'] = transferInventoryData?.transfertoPlant.address;
 
     data['startDate'] = transferInventoryData?.estimateStartDate;
     data['endDate'] = transferInventoryData?.estimateStartDate;
@@ -239,7 +239,7 @@ const LoadingTicket = ({
               {`Create Loading Ticket`}
             </Button>
           </Box>
-          <Box>
+          <Box ml={1}>
             <Button variant={'outlined'} color="primary" disabled={selectedRecords.length === 0} onClick={() => {}} size="small">
               {`Remove Loading Ticket`}
             </Button>
