@@ -18,7 +18,7 @@ import { useData } from "../../../StateProvider/Provider";
 
 let searchTimeout;
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, isAddingProducts, renderedFrom }) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, isAddingProducts, renderedFrom, refrenceType }) => {
 
     const localStorageSelectedRecords = `${renderedFrom}_selected`
     const toastConfig = useContext(CustomToastContext)
@@ -93,7 +93,9 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             updatedFilters.push({ field: 'packageType', term: 'product' })
         }
         if (type === "product") {
-            updatedFilters.push({ field: 'serializedProduct', term: 'yes' })
+            if (refrenceType !== "purchaseOrder") {
+                updatedFilters.push({ field: 'serializedProduct', term: 'yes' })
+            }
         }
         if (!isObjectEmpty(filters)) {
             Object.keys(filters).forEach(field => {
