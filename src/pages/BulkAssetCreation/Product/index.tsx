@@ -431,6 +431,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                     addProductInventory={handleAddProduct}
                     handleProductInventoryClose={() => { setAddProductDialog(false) }}
                     type={"product"}
+                    refrenceType="bulkAssetCreation"
                     renderedFrom={renderedFrom}
                 />
             }

@@ -11,7 +11,7 @@ import {
     purchaseOrder, PURCHASE_ORDER_STATUS, CHILD_RESOURCE, prepareDataForGrid
 } from "src/constants/helpers";
 import { useData } from "src/StateProvider/Provider";
-import CreateSeriaizedAsset from "./CreateSerializedAsset";
+import CreateSerializedAsset from "./CreateSerializedAsset";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import routes from "src/components/Helpers/Routes";
@@ -25,27 +25,15 @@ import { useHistory } from "react-router-dom";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
 import { IoMdDownload } from "react-icons/io";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
-
-const useStyles = makeStyles(() => ({
-    equal: {
-        color: "green",
-    },
-    later: {
-        color: "yellow",
-    },
-    muchLater: {
-        color: "red",
-    },
-
-}));
+import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 
 const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, statusOptions, handleViewPdf, handleAttachments, renderedFrom }) => {
+
     const toastConfig = useContext(CustomToastContext);
     const {
         state: { user, permissions }
     }: any = useData();
 
-    const classes = useStyles();
     const history = useHistory();
 
     const [showCreateAssetDialog, setShowCreateAssetDialog] = useState(false)
@@ -65,9 +53,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
     const [gridApi, setGridApi] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
 
-    const [columns, setColumns] = useState([
-        { field: "productDescription", headerName: "Product Type", show: true, disabled: true, cellRenderer: "nameRenderer" },
-    ])
+    const [columns, setColumns] = useState([])
 
     const NameRenderer = (params) => (
         <>
@@ -79,8 +65,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                 {params.value}
             </Link>
             <Box padding={1}></Box>
-            {
-                (params.data.actualReceived !== 0 && params.data.actualReceived !== undefined) &&
+            {(params.data.serializedProduct && params.data.actualReceived !== 0 && params.data.actualReceived !== undefined) &&
                 <HtmlTooltip title="Serialized Asset">
                     <span className="d-flex align-items-center gap-2">
                         <Chip label="Asset"
@@ -96,7 +81,6 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                     </span>
                 </HtmlTooltip>
             }
-
         </>
     );
 
@@ -108,12 +92,26 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
 
     const fetchColumns = async () => {
         setLoadingColumns(true)
+        const productResult = await axiosInstance().get('/field?resource=Product&view=true')
+        const productFields = productResult?.data?.data?.filter((e) => ["productName", "productNumber", "serializedProduct"].includes(e?.fieldData?.fieldName));
+        productFields?.forEach((e) => {
+            if (e?.fieldData?.fieldName === "productName") {
+                columns.push({ field: "productName", headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" })
+            }
+            if (e?.fieldData?.fieldName === "productNumber") {
+                columns.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+            }
+            if (e?.fieldData?.fieldName === "serializedProduct") {
+                columns.push({ field: "serializedProduct", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "checkboxRenderer" })
+            }
+        })
         let fields = await fetch_po_product_fields(purchaseOrderData?.currency);
         let rendererNames = [];
         genrateColoum(fields, columns, rendererNames, false, renderedFrom);
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
         tempFrameworkComponent = {
             nameRenderer: NameRenderer,
+            checkboxRenderer: CheckboxRenderer,
             ...tempFrameworkComponent,
         }
         setFrameWorkComponent({ ...tempFrameworkComponent })
@@ -268,11 +266,12 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                     )}
                     <Box mx={1} />
                     {permissions?.purchaseOrder?.isRead && <Button
-                        variant={isMobile && !isTablet ? "text" : "contained"}
+                        variant={isMobile && !isTablet ? "text" : "outlined"}
                         color="primary"
                         size="small"
                         style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
                         disabled={emailButtonLoading}
+                        startIcon={isMobile ? '' : <MdEmail />}
                         onClick={() => {
                             setEmailButtonLoading(true)
                             fetchEmailAttachment()
@@ -282,7 +281,6 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                     </Button>}
                 </Box>
                 <Box mx={1} />
-
             </Box>
         </Box>
         {columns && !loadingColumns ?
@@ -357,7 +355,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
             </Box>
         }
         {showCreateAssetDialog &&
-            <CreateSeriaizedAsset
+            <CreateSerializedAsset
                 purchaseOrderID={purchaseOrderData._id}
                 onClose={() => setShowCreateAssetDialog(false)}
                 onSuccess={() => {

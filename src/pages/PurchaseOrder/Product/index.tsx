@@ -21,10 +21,10 @@ import { prepareDataForGrid } from "src/constants/helpers";
 import { getFrameworkComponents, genrateColoum } from "src/constants/columns"
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
-import CustomRenderCell from "src/components/Helpers/CustomRenderCell";
-import InfoIcon from "@material-ui/icons/Info";
 import { RiEditCircleLine } from "react-icons/ri";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
+import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import { Link } from 'react-router-dom'
 
 const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission }) => {
 
@@ -32,9 +32,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     const { state: { user, permissions } }: any = useData();
     const allowedToEdit = hasPermission || permissions?.purchaseOrder.isUpdate
 
-    const [columns, setColumns] = useState([
-        { field: "productName", headerName: "Product Type", show: true, disabled: true, cellRenderer: "nameRenderer" },
-        { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" }])
+    const [columns, setColumns] = useState([])
 
     const [addProductDialog, setAddProductDialog] = useState(false);
     const [isAddingProducts, setAddingProducts] = useState(false);
@@ -63,6 +61,19 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     }, [columns]);
 
     const fetchFields = async () => {
+        const productResult = await axiosInstance().get('/field?resource=Product&view=true')
+        const productFields = productResult?.data?.data?.filter((e) => ["productName", "productNumber", "serializedProduct"].includes(e?.fieldData?.fieldName));
+        productFields?.forEach((e) => {
+            if (e?.fieldData?.fieldName === "productName") {
+                columns.push({ field: "productName", headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" })
+            }
+            if (e?.fieldData?.fieldName === "productNumber") {
+                columns.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+            }
+            if (e?.fieldData?.fieldName === "serializedProduct") {
+                columns.push({ field: "serializedProduct", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "checkboxRenderer" })
+            }
+        })
         const fields = await fetch_po_product_fields(purchaseOrderData?.currency);
         fields.forEach(element => {
             if (element.fieldName === "price" && element.required) {
@@ -75,6 +86,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
         tempFrameworkComponent = {
             nameRenderer: NameRenderer,
             commonRenderer: CommonRenderer,
+            checkboxRenderer: CheckboxRenderer,
             actionsRenderer: ActionsRenderer,
             ...tempFrameworkComponent,
         }
@@ -99,6 +111,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 };
                 res.productName = item.productDetail?.productName
                 res.productNumber = item.productDetail?.productNumber
+                res.serializedProduct = item.productDetail?.serializedProduct
                 res.productDetail = item.productDetail
                 if (item?.qty === 0) {
                     res.isValid = false;
@@ -140,25 +153,9 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
         });
     }
 
-    const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
-        <span className="link" onClick={() => {
-            setShowProductDialog(true)
-            setSelectedProductData(params.data)
-        }}>
-            <CustomRenderCell value={params.value} />
-        </span>
-        {params.data.productId && <HtmlTooltip title="Details">
-            <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                    window.open(`${routes.productDetail.path}/${params.data.productId}`);
-                }}
-            >
-                <InfoIcon fontSize="small" />
-            </IconButton>
-        </HtmlTooltip>}
-    </span >
+    const NameRenderer = params => (<Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
+        {params.value}
+    </Link>)
 
     const ActionsRenderer = (params) => (
         <>
@@ -189,7 +186,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
         </>
     );
 
-
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -199,7 +195,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     };
 
     const handleAddProduct = (rows) => {
-        console.log(rows)
         setAddingProducts(true)
         let tempProductArray = rows?.map(d => ({
             "productId": d.productId || d._id,
@@ -432,6 +427,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     addProductInventory={handleAddProduct}
                     handleProductInventoryClose={() => { setAddProductDialog(false) }}
                     type={"product"}
+                    refrenceType="purchaseOrder"
                     renderedFrom={renderedFrom}
                 />
             }
