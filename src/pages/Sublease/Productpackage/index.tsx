@@ -562,6 +562,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                 addProductInventory={handleAdd}
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
                 type={addExistingProductDialog.type}
+                refrenceType="sublease"
                 renderedFrom={addExistingProductDialog.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
             />
         }
