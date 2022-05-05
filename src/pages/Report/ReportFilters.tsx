@@ -84,6 +84,9 @@ const ReportFilters = (props: FiltersProps) => {
             lookup: Boolean(d.fieldData?.lookup)
           };
         }
+        if (d.fieldData.type === 'date') {
+          d.fieldData["timeFrame"] = 'custom'
+        }
         return d.fieldData;
       });
     setResourceOptions(optionsData);
@@ -213,19 +216,9 @@ const ReportFilters = (props: FiltersProps) => {
           value={selectedResources ?? []}
           onChange={(_, val) => {
             if (val.filter((f) => f.fieldName === 'all').length > 0) {
-              setSelectedResources(filterOptions.map(d => {
-                if (d.type === 'date') {
-                  d["timeFrame"] = 'custom'
-                }
-                return d
-              }));
+              setSelectedResources(filterOptions);
             } else {
-              setSelectedResources(val.map(d => {
-                if (d.type === 'date') {
-                  d["timeFrame"] = 'custom'
-                }
-                return d
-              }));
+              setSelectedResources(val);
             }
           }}
           fullWidth
