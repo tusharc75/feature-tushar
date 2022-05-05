@@ -3,7 +3,7 @@ import Box from "@material-ui/core/Box/Box";
 import React, { useState, useEffect, useReducer, useContext } from "react";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer,  } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer, } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, Dialog } from "@material-ui/core";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
@@ -12,10 +12,8 @@ import { useData } from "src/StateProvider/Provider";
 import axiosInstance from "src/axios/axiosInstance";
 import { CreateEmail } from "src/components/Activity/Email/CreateEmail";
 import { isMobile, isTablet } from "react-device-detect";
-import { AiFillFilePdf } from "react-icons/ai";
 import routes from "src/components/Helpers/Routes";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
-import { IoMdDownload, MdEmail } from "react-icons/all";
 import { getFrameworkComponents, genrateColoum } from "src/constants/columns"
 import { prepareDataForGrid } from "src/constants/helpers";
 import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
@@ -24,13 +22,11 @@ import { fetch_po_product_fields, fetch_po_service_fields } from '../../../compo
 
 
 const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrentStep, currentStep, handleAttachments, statusOptions, renderedFrom }) => {
+
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
 
-    const [sendEmail, setSendEmail] = useState(false);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-    const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
-    const [generatingPdfFile, setGeneratingFile] = useState(false);
 
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -41,10 +37,8 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
         { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
         { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" }
     ])
+    
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
-    const [downlodingFile, setDownlodingFile] = useState(false)
-    const [pdfFileBase64, setPdfFileBase64] = useState(null);
-    const [emailButtonLoading, setEmailButtonLoading] = useState(false)
 
     const NameRenderer = (params) => (
         <Link
@@ -77,7 +71,6 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
     }
 
     useEffect(() => {
-        fetchEmailsData()
         dispatch({ type: "loading", loading: true });
         let productData = []
         let serviceData = []
@@ -127,118 +120,8 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
         });
     }, []);
 
-    const fetchEmailsData = () => {
-        let ownerCollaboratorEmails = [];
-        if (purchaseOrderData?.collaborator && purchaseOrderData.collaborator.length) {
-            ownerCollaboratorEmails = purchaseOrderData.collaborator.filter((o) => o?.email).map((o) => o?.email);
-        }
-        if (purchaseOrderData?.owner?.email) {
-            ownerCollaboratorEmails.push(purchaseOrderData.owner.email);
-        }
-        let toEmails = [];
-        if (purchaseOrderData?.supplier?.email) {
-            toEmails.push(purchaseOrderData.supplier.email);
-        }
-        setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
-    }
-
-    let attachments = [];
-    if (pdfFileBase64) {
-        attachments.push({
-            base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(',') + 1)),
-            contentType: pdfFileBase64.split(';')[0].split(':')[1],
-            name: `Purchase Order-${purchaseOrderData.purchaseOrderNumber}`
-        });
-    }
-
-    const onSendEmailSuccess = () => {
-        setSendEmail(false);
-        handleAttachments();
-    };
-
-    const fetchEmailAttachment = () => {
-        axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/pdf`)
-            .then(({ data }) => {
-                axiosInstance()
-                    .get(`user/download?fileName=${data.data.fileName}`, {
-                        responseType: "blob",
-                    })
-                    .then(({ data }) => {
-                        const file = new Blob([data], { type: 'application/pdf' });
-                        generateBase64forFile(file, 'pdf');
-                    })
-                    .catch((err) => {
-                        toastConfig.setToastConfig({
-                            open: true,
-                            type: 'error',
-                            message: 'PDF generating error'
-                        });
-                    });
-            }).catch((err) => {
-                toastConfig.setToastConfig(err);
-                setDownlodingFile(false);
-            })
-    }
-
-    const generateBase64forFile = (blobData, type) => {
-        let reader = new FileReader();
-        reader.readAsDataURL(blobData);
-        reader.onloadend = function () {
-            let base64data = reader.result;
-            if (type === 'pdf') {
-                setPdfFileBase64(base64data);
-                setSendEmail(true)
-                setEmailButtonLoading(false)
-            }
-        };
-    };
-
     return (<>
-        <Box display="flex" justifyContent="space-between" m={1}>
-            <Box display="flex" alignItems="center">
-                {permissions?.purchaseOrder?.isRead && !isMobile && (
-                    <Button
-                        variant={isMobile && !isTablet ? "text" : "outlined"}
-                        color="primary"
-                        type="button"
-                        size="small"
-                        style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-                        startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
-                        disabled={downlodingFile}
-                        onClick={() => { handleViewPdf(false) }}
-                    >
-                        {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
-                    </Button>
-                )}
-                <Box mx={1} />
-                {permissions?.purchaseOrder?.isRead && (
-                    <Button
-                        variant={isMobile && !isTablet ? "text" : "outlined"}
-                        color="primary"
-                        type="button"
-                        size="small"
-                        style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
-                        startIcon={isMobile ? '' : <IoMdDownload />}
-                        disabled={downlodingFile}
-                        onClick={() => { handleViewPdf(true) }}
-                    >
-                        {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile ? "Please wait..." : "Download"}
-                    </Button>
-                )}
-                <Box mx={1} />
-                {permissions?.purchaseOrder?.isRead && <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="primary"
-                    size="small"
-                    style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
-                    onClick={() => {
-                        fetchEmailAttachment()
-                        setEmailButtonLoading(true)
-                    }}
-                >
-                    {isMobile && !isTablet ? <MdEmail size={20} /> : `Send Email`}
-                </Button>}
-            </Box>
+        <Box display="flex" justifyContent="flex-end" m={1}>
             {statusOptions?.findIndex(d => d.optionLabel === PURCHASE_ORDER_STATUS.issued) >
                 statusOptions.findIndex(d => d.optionLabel === purchaseOrderData?.status) &&
                 <Box display="flex" justifyContent="flex-end" p="4px">
@@ -322,43 +205,6 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
             }
         </Grid>
-        {sendEmail && (
-            <Dialog
-                open={sendEmail}
-                fullScreen={fullScreen || isMobile || isTablet}
-                TransitionComponent={CustomDialogTransition}
-                aria-labelledby="customized-dialog-title"
-                maxWidth="md"
-                onClose={() => {
-                    setSendEmail(false);
-                    setFullScreen(false);
-                }}
-                fullWidth
-            >
-                <CreateEmail
-                    generatingFile={generatingPdfFile}
-                    handleClose={() => {
-                        setSendEmail(false);
-                        setFullScreen(false);
-                    }}
-                    fetchData={onSendEmailSuccess}
-                    id={purchaseOrderData._id}
-                    isQuoteBuilder={true}
-                    options={userEmails?.to}
-                    cc={userEmails?.cc ?? []}
-                    emailId={null}
-                    qouteBuilderAttachments={attachments}
-                    subject={`${user?.user?.brandName ?? 'Brand'} Offer - ${purchaseOrderData?.purchaseOrderId ?? ''}`}
-                    fromQuote={true}
-                    isMinimized={!fullScreen}
-                    onMinimizeMaximize={() => {
-                        setFullScreen((prevState) => !prevState);
-                    }}
-                    showManimizeMaximize={true}
-                    refrenceType="purchaseOrder"
-                />
-            </Dialog>
-        )}
     </>
     );
 }
