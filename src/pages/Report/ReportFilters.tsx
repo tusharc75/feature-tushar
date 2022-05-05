@@ -68,7 +68,6 @@ const ReportFilters = (props: FiltersProps) => {
   const [showConfirmDialog, setShowConfirmDialog] = React.useState({ open: false, id: null, name: '' });
   const [isDeleting, setDeleting] = React.useState(false);
   const [isStatusPeriod, setIsStatusPeriod] = React.useState(false);
-  const [timeFrame, setTimeFrame] = React.useState<any>('custom');
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
 
   React.useEffect(() => {
@@ -84,6 +83,9 @@ const ReportFilters = (props: FiltersProps) => {
             type: d.fieldData.type,
             lookup: Boolean(d.fieldData?.lookup)
           };
+        }
+        if (d.fieldData.type === 'date') {
+          d.fieldData["timeFrame"] = 'custom'
         }
         return d.fieldData;
       });
@@ -254,10 +256,13 @@ const ReportFilters = (props: FiltersProps) => {
                           <InputLabel id="duration">Select Duration</InputLabel>
                           <Select labelId="duration"
                             id="time-duration"
-                            value={timeFrame}
+                            value={field.timeFrame}
                             onChange={(e) => {
                               handleDuration(e.target.value, field)
-                              setTimeFrame(e.target.value)
+                              const tempArray = [...selectedResources];
+                              let tempIndex = tempArray.findIndex(d => d?.fieldName === field?.fieldName)
+                              tempArray[tempIndex].timeFrame = e.target.value
+                              setSelectedResources(tempArray)
                             }}>
                             <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                             <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
@@ -270,7 +275,7 @@ const ReportFilters = (props: FiltersProps) => {
                       <Grid item xs={12} sm={6}>
                         <KeyboardDatePicker
                           autoOk
-                          disabled={timeFrame !== 'custom'}
+                          disabled={field.timeFrame !== 'custom'}
                           fullWidth
                           size="medium"
                           variant="inline"
@@ -292,7 +297,7 @@ const ReportFilters = (props: FiltersProps) => {
                         <KeyboardDatePicker
                           autoOk
                           fullWidth
-                          disabled={timeFrame !== 'custom'}
+                          disabled={field.timeFrame !== 'custom'}
                           size="medium"
                           variant="inline"
                           inputVariant="outlined"

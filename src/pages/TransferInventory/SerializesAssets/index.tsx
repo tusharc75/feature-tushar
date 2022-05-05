@@ -1,19 +1,17 @@
 import React, { useReducer, useState, useEffect, useContext, Fragment } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
-import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
-import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { useData } from 'src/StateProvider/Provider';
-import { AiFillFilePdf } from 'react-icons/ai';
-import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
-import { Container, Paper, Typography, Box, Grid, Button, Step, StepLabel, Stepper, Chip } from '@material-ui/core';
+import { IconButton, Container, Paper, Typography, Box, Grid, Button, Step, StepLabel, Stepper, Chip } from '@material-ui/core';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
-import { startCase } from 'lodash';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
+import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
+import NoDataCell from "../../../components/Helpers/NoDataCell";
+import HtmlTooltip from "../../../components/CustomTooltipTitle";
+import { Delete } from "@material-ui/icons";
+import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 
 const SerialzedAssets = ({
   allowedToEdit,
@@ -24,49 +22,47 @@ const SerialzedAssets = ({
   renderedFrom,
   updateTransferInventoryStatus
 }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions }
-  } = useData();
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(gridReducer, gridState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+  const { state: { permissions } } = useData();
+
   const [selectedRecords, setSelectedRecords] = useState([]);
-  const [downlodingFile, setDownlodingFile] = useState(false);
   const [isAdding, setAdding] = useState(false);
-  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, product: [] });
 
-  /*
-   * Ag grid columns
-   */
-  // const columns = [
-  //   { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'productNameRenderer', primaryField: true },
-  //   {
-  //     field: 'qty',
-  //     headerName: 'Quantity',
-  //     show: true,
-  //     disabled: false,
-  //     cellRenderer: 'commonRenderer',
-  //     cellEditor: 'numericCellEditor',
-  //     editable: true
-  //   }
-  // ];
-
-  // const ProductNameRenderer = ({ row }) => (
-
-  // );
+  const [rowsData, setRowsData] = useState(null);
+  const [showConfirmBox, setShowConfirmBox] = useState(false)
+  const [deleteData, setDeleteData] = useState([])
+  const [deleting, setDeleting] = useState(false)
 
   const columns: any = [
     {
-      accessor: 'productName',
-      Header: 'Product Description',
+      accessor: 'detail',
+      Header: 'Details',
       width: 300,
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
-          <Link className="link" title={row.original.productName} to={`/product/detail/${row.original.id}`}>
-            <p>{row.original.productName}</p>
-          </Link>
-          <Chip className="ml-1" label={row.original.isSerialized ? 'Serialized Product' : 'Non-Serialized Product'} size="small" color="primary" />
+          {row.original.type === "product" ?
+            <Fragment>
+              <Link className="link" title={row.original.detail} to={`${routes.productDetail.path}/${row.original.product}`}>
+                <p>{row.original.detail}</p>
+              </Link>
+              <Chip className="ml-1" label={row.original.serializedProduct ? 'Serialized Product' : 'Non-Serialized Product'} size="small" color="primary" />
+            </Fragment>
+            :
+            <Fragment>
+              <Link className="link" title={row.original.detail} to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}>
+                <p>{row.original.detail}</p>
+              </Link>
+              <HtmlTooltip title={`Remove`}>
+                <IconButton size="small" onClick={() => {
+                  setShowConfirmBox(true)
+                  setDeleteData([row.original.assetId])
+                }}>
+                  <Delete fontSize="small" color="error" />
+                </IconButton>
+              </HtmlTooltip>
+            </Fragment>}
         </div>
       )
     },
@@ -76,9 +72,11 @@ const SerialzedAssets = ({
       width: 100,
       Cell: ({ row }) => {
         return (
-          <>
-            {row.original.assetAssigned}/{row.original.totalQty}
-          </>
+          row.original.serializedProduct ?
+            <Fragment>
+              {row.original.assetAssigned}/{row.original.qty}
+            </Fragment>
+            : <NoDataCell />
         );
       }
     },
@@ -87,12 +85,10 @@ const SerialzedAssets = ({
       Header: 'Quantity',
       width: 100,
       Cell: ({ row }) => {
-        return <>{row.original.totalQty}</>;
+        return row.original.type === "product" ? <Fragment>{row.original.qty}</Fragment> : <NoDataCell />;
       }
     }
   ];
-
-  const history = useHistory();
 
   useEffect(() => {
     fetchInventories();
@@ -100,101 +96,93 @@ const SerialzedAssets = ({
 
   const fetchInventories = () => {
     setNextStep(false);
-    dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    axiosInstance()
-      .get(`${routes.transferInventory.path}/${transferInventoryData._id}/product`)
+    axiosInstance().get(`${routes.transferInventory.path}/${transferInventoryData._id}/product`)
       .then(({ data: { data } }) => {
-        dispatch({ type: 'loading', loading: true });
         let rows = data?.products.map((u: any) => {
-          const assetsData = data?.assets.filter((d: any) => d.parentId === u._id);
+          const assetsData = data?.assets.filter((d: any) => d._id === u._id);
           let finalObject = {};
-          finalObject['productName'] = u.productDetail.productName;
-          finalObject['totalQty'] = u.qty;
-          finalObject['qty'] = u.qty - assetsData.length;
-          finalObject['isSerialized'] = u.productDetail.serializedProduct;
-          finalObject['id'] = u.product;
+          finalObject['_id'] = u._id;
+          finalObject['detail'] = u.productDetail.productName;
+          finalObject['product'] = u.product;
+          finalObject['serializedProduct'] = u.productDetail.serializedProduct;
+          finalObject['type'] = "product";
+          finalObject['qty'] = u.qty;
+          finalObject['assetAssigned'] = assetsData?.length;
           finalObject['hideSelection'] = u.productDetail.serializedProduct ? false : true;
-          finalObject['parentId'] = u._id;
-          finalObject['assetAssigned'] = data?.assets.length > 0 ? assetsData.length : 0;
-          finalObject['assets'] = assetsData;
+          finalObject['isValid'] = u.productDetail.serializedProduct ? u.qty - assetsData?.length === 0 ? true : false : true;
+          const subRows = []
+          assetsData?.forEach(ele => {
+            const element = {};
+            element['detail'] = ele?.assetDetail?.assetNumber;
+            element['assetId'] = ele?.asset;
+            element['type'] = "asset";
+            element['isValid'] = true;
+            subRows.push(element)
+          })
+          finalObject['subRows'] = subRows;
           return {
-            ...u,
             ...finalObject
           };
         });
-        
-        dispatch({ type: 'initialize', data: rows, count: data.count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+        if (rows.filter(_rows => _rows.isValid === false).length > 0) {
+          setNextStep(false)
+        } else {
+          setNextStep(true)
+        }
+        setRowsData(rows);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
       });
   };
 
-  useEffect(( ) => {
-    if(dataRows.length === 0) return
-    
-    const unassignedAsset = dataRows.filter((d) => d.assetAssigned !== d.totalQty);
-     
-    if(unassignedAsset.length > 0) {
-      setNextStep(false)
-    } else {
-      setNextStep(true)
-    }
-
-  },[dataRows])
-
-  // const frameworkComponents = {
-  //   commonRenderer: CommonRenderer,
-  //   productNameRenderer: ProductNameRenderer
-  // };
-
   const handleAddSerializedAsset = (assets: any[]) => {
-    let dataToAdd = [];
-
+    let data = [];
     assets.forEach((asset) => {
       let dataObj = {};
-      const inventory = selectedRecords.find((rec: any) => rec.product === asset.productId);
+      const inventory = addSerializedAssetDialog.product.find((rec: any) => rec.id === asset.productId);
       if (inventory) {
         dataObj = {
           asset: asset._id,
-          parentId: inventory.parentId
+          _id: inventory._id
         };
       }
-
-      dataToAdd.push(dataObj);
+      data.push(dataObj);
     });
-
     setAdding(true);
-
-    axiosInstance()
-      .post(`${routes.transferInventory.path}/${transferInventoryData._id}/assets`, {
-        assets: dataToAdd
-      })
+    axiosInstance().post(`${routes.transferInventory.path}/${transferInventoryData._id}/assets`, { assets: data })
       .then(() => {
-        setAddSerializedAssetDialog(false);
+        setAddSerializedAssetDialog({ open: false, product: [] });
         setAdding(false);
         fetchInventories();
       })
-      .catch((err) => {
+      .catch((error) => {
         setAdding(false);
-        setAddSerializedAssetDialog(false);
+        toastConfig.setToastConfig(error)
       });
   };
 
+  const handleRemoveAsset = async () => {
+    setDeleting(true)
+    axiosInstance().put(`${routes.transferInventory.path}/${transferInventoryData._id}/assets/remove`, { ids: deleteData })
+      .then(() => {
+        setDeleting(false)
+        fetchInventories()
+        setDeleteData(null)
+        setShowConfirmBox(false);
+      }).catch((error) => {
+        setDeleting(false)
+        toastConfig.setToastConfig(error)
+        setDeleteData(null)
+      });
+  }
+
   const disableAssignSerializedAssets = () => {
     if (selectedRecords.length === 0) return true;
-    const flatArray = selectedRecords.filter((f) => f.qty !== 0 && f.isSerialized && f.totalQty > f.assetAssigned);
+    const flatArray = selectedRecords.filter((f) => f.qty !== 0 && f.serializedProduct && f.qty > f.assetAssigned);
     return flatArray.length === 0;
   };
+
 
   return (
     <Fragment>
@@ -233,7 +221,7 @@ const SerialzedAssets = ({
           </Grid>
         </Box>
       )} */}
-      {currentStep === 2 && (
+      {/* {currentStep === 2 && (
         <Box mt={1} mr={1} display="flex" justifyContent="flex-end">
           <Button
             onClick={() => {
@@ -273,7 +261,7 @@ const SerialzedAssets = ({
             {downlodingFile ? 'Please wait...' : 'Preview'}
           </Button>
         </Box>
-      )}
+      )} */}
       <Box display="flex" justifyContent="flex-end" alignItems="center" p={1}>
         <Button
           variant="contained"
@@ -281,89 +269,70 @@ const SerialzedAssets = ({
           type="button"
           size="small"
           disabled={disableAssignSerializedAssets()}
-          onClick={() => setAddSerializedAssetDialog(true)}
+          onClick={() => {
+            const product = []
+            selectedRecords?.forEach((e) => {
+              if (e.type === "product") {
+                product.push({
+                  _id: e._id,
+                  id: e.product,
+                  productName: e.detail,
+                  qty: e.qty - e.assetAssigned
+                })
+              }
+            })
+            setAddSerializedAssetDialog({ open: true, product: product })
+          }}
         >
           {'Assign ' + routes.serializedAsset.title}
         </Button>
       </Box>
       <Box mt={1}>
-        {isMobile && !isTablet ? (
-          <CustomSwipableList
-            allowSelection={false}
-            allowSwipe={false}
-            permissions={permissions?.transferInventory}
-            primaryField={columns?.find((d: any) => d.primaryField)}
-            onClick={(data: any) => {
-              history.push(`${routes.productInventory.path}/${data._id}`);
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={() => {}}
-            extraParamsToCheckDelete={true}
-            onDelete={() => {}}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            chips={[
-              {
-                label: 'Quantity: ',
-                field: 'qty'
-              }
-            ]}
-            additionalDetails={[]}
-            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-            onCreate={false}
-            showClone={false}
-            onClone={() => {}}
-            renderedFrom={renderedFrom}
-          />
-        ) : (
-          // <CustomAgGrid
-          //   columns={columns}
-          //   dataRows={dataRows}
-          //   frameworkComponents={frameworkComponents}
-          //   setGridApi={setGridApi}
-          //   dispatch={dispatch}
-          //   rowCount={rowCount}
-          //   limit={limit}
-          //   pageSizes={pageSizes}
-          //   page={page}
-          //   allowAction={false}
-          //   actionWidth={120}
-          //   allowSelection={false}
-          //   isClientSideGrid={true}
-          //   loading={loading}
-          //   renderedFrom={renderedFrom}
-          //   refreshGrid={() => {}}
-          // />
+        {rowsData ?
           <CustomReactTable
             height={'calc(100vh - 365px)'}
             columns={columns}
-            data={dataRows}
-            setWholeRowsCellColor={() => {}}
+            data={rowsData}
             onSelect={setSelectedRecords}
             childrenProperty="subRows"
             uniqueKey="_id"
             hideSelection={false}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
-          />
-        )}
+            setWholeRowsCellColor={(rowData) => {
+              if (!rowData.isValid) return "error";
+              return "";
+            }}
+          /> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+        }
       </Box>
-      {addSerializedAssetDialog && (
+      {addSerializedAssetDialog.open && (
         <AddSerializedAsset
           addSerializedAsset={handleAddSerializedAsset}
           handleSerializedAssetClose={() => {
-            setAddSerializedAssetDialog(false);
+            setAddSerializedAssetDialog({ open: false, product: [] });
           }}
           refrenceType={'Transfer Inventory'}
           refrenceData={null}
           isAdding={isAdding}
-          selectedProducts={selectedRecords}
-          filterByPlant={transferInventoryData?.transferFromPlant.optionValue}
+          selectedProducts={addSerializedAssetDialog.product}
+          filterByPlant={transferInventoryData?.transferFromPlant?.optionValue}
         />
       )}
+      {
+        showConfirmBox && (
+          <ConfirmationDialog
+            open={showConfirmBox}
+            message={`Are you sure you want to remove?`}
+            onClose={() => {
+              setShowConfirmBox(false);
+              setDeleteData([])
+            }}
+            okBtnLoading={deleting}
+            onOk={handleRemoveAsset}
+          />
+        )
+      }
     </Fragment>
   );
 };
