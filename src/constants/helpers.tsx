@@ -60,15 +60,8 @@ export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 //export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 export const salesOrderProcessSteps = ['Add Products', 'Ready To Invoice'];
 export const purchaseOrderSteps = ['Add Product', 'Services and Consumables', 'Issue', 'Receiving Asset'];
-export const rentalManagementSteps = [
-  'Add Products',
-  'Services and Consumables',
-  'Serialized Asset',
-  'Loading Ticket',
-  'Receiving Ticket',
-  'Packing Slip'
-];
-export const transferInventorySteps = ["Add Products", "Serialized Assets", "Loading Ticket", "Receiving Ticket"]
+export const rentalManagementSteps = ['Add Products', 'Services and Consumables', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Packing Slip'];
+export const transferInventorySteps = ["Add Products", "Serialized Assets", "Loading Ticket"]
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Product', 'Serialized Asset'];
 
