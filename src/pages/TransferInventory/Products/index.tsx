@@ -68,7 +68,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       .get(`${routes.transferInventory.path}/${transferInventoryData._id}/product`)
       .then(({ data: { data } }) => {
         dispatch({ type: 'loading', loading: true });
-        let rows = data?.map((u: any) => {
+        let rows = data?.products.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['productId'] = u.product;
           finalObject['productName'] = u.productDetail.productName;
