@@ -68,7 +68,7 @@ export const rentalManagementSteps = [
   'Receiving Ticket',
   'Packing Slip'
 ];
-export const transferInventorySteps = ["Add Products", "Processing", "Delivered"]
+export const transferInventorySteps = ["Add Products", "Serialized Assets", "Loading Ticket", "Receiving Ticket"]
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Product', 'Serialized Asset'];
 
