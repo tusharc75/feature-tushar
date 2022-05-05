@@ -68,7 +68,7 @@ export const rentalManagementSteps = [
   'Receiving Ticket',
   'Packing Slip'
 ];
-export const transferInventorySteps = ["Add Products", "Processing", "Delivered"]
+export const transferInventorySteps = ["Add Products", "Serialized Assets", "Loading Ticket", "Receiving Ticket"]
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Product', 'Serialized Asset'];
 
@@ -1215,7 +1215,7 @@ export const determineLightOrDark = (color: any) => {
  * Convert Miliseconds to Hour
  */
 
-export const msToHour = (ms:number) => {let hour = ms/(1000*60*60); return hour.toFixed(1)}
+export const msToHour = (ms: number) => { let hour = ms / (1000 * 60 * 60); return hour.toFixed(1) }
 
 //  Currencies Short Form Symbols
 // const SI_SYMBOL = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"];
@@ -1633,7 +1633,8 @@ export const DELIVERY_TICKET_REFRENCE_TYPE = {
   transferAsset: 'Transfer Asset',
   repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
-  sublease: 'Sublease'
+  sublease: 'Sublease',
+  transferInventory: 'Transfer Inventory'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {

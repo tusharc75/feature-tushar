@@ -24,7 +24,8 @@ import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import Products from './Products';
-import Processing from './Processing';
+import Processing from './SerializesAssets';
+import LoadingTicket from './LoadingTicket';
 import { camelCase } from 'lodash';
 
 const TransferInventoryDetailPage = () => {
@@ -321,12 +322,12 @@ const TransferInventoryDetailPage = () => {
                       />
                     )}
                     {currentStep === 2 && (
-                      <Processing
+                      <LoadingTicket
                         transferInventoryData={transferInventoryData}
                         updateTransferInventoryStatus={updateTransferInventoryStatus}
                         currentStep={currentStep}
                         setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-2`}
+                        renderedFrom={`${renderedFrom}_grid-3`}
                         statusOptions={statusOptions}
                         allowedToEdit={allowedToEdit}
                       />

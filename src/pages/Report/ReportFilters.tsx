@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Box, Container, TextField, Grid, Button, CircularProgress, Typography, IconButton, FormControlLabel, Checkbox } from '@material-ui/core';
+import { Box, Container, TextField, Grid, Button, CircularProgress, Typography, IconButton, FormControlLabel, Checkbox, FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { Delete, List } from '@material-ui/icons';
 import { KeyboardDatePicker } from '@material-ui/pickers';
@@ -9,6 +9,7 @@ import { getObjKeys, dateFormat } from '../../constants/helpers';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmDialog from '../../components/Helpers/ConfirmationDialog';
 import axiosInstance from '../../axios/axiosInstance';
+import moment from 'moment';
 
 interface FiltersProps {
   resource: string;
@@ -67,6 +68,8 @@ const ReportFilters = (props: FiltersProps) => {
   const [showConfirmDialog, setShowConfirmDialog] = React.useState({ open: false, id: null, name: '' });
   const [isDeleting, setDeleting] = React.useState(false);
   const [isStatusPeriod, setIsStatusPeriod] = React.useState(false);
+  const [timeFrame, setTimeFrame] = React.useState<any>('custom');
+  const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
 
   React.useEffect(() => {
     if (!resourceColumns && resourceColumns.length === 0) return;
@@ -145,9 +148,9 @@ const ReportFilters = (props: FiltersProps) => {
     });
     setIsStatusPeriod(
       resource.includes('Serialized Asset') &&
-        Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
-        formValues?.hasOwnProperty('status') &&
-        formValues.status.length > 0
+      Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
+      formValues?.hasOwnProperty('status') &&
+      formValues.status.length > 0
     );
   }, [selectedResources, formValues]);
 
@@ -164,6 +167,37 @@ const ReportFilters = (props: FiltersProps) => {
       return prevState;
     });
   }, [statusPeriod]);
+
+  const handleDuration = (timeFrameTemp, field, isStatus = false) => {
+    switch (timeFrameTemp) {
+      case '1-month':
+        isStatus ?
+          setStatusPeriodDate((prevState) => ({ ...prevState, [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()), [`to_statusPeriod`]: new Date() }))
+          : setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()), [`to_${field.fieldName}`]: new Date() }))
+
+        break;
+      case '3-months':
+        isStatus ?
+          setStatusPeriodDate((prevState) => ({ ...prevState, [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()), [`to_statusPeriod`]: new Date() }))
+          : setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()), [`to_${field.fieldName}`]: new Date() }));
+        break;
+
+      case '6-months':
+        isStatus ?
+          setStatusPeriodDate((prevState) => ({ ...prevState, [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()), [`to_statusPeriod`]: new Date() }))
+          : setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()), [`to_${field.fieldName}`]: new Date() }));
+        break;
+
+      case '1-year':
+        isStatus ?
+          setStatusPeriodDate((prevState) => ({ ...prevState, [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()), [`to_statusPeriod`]: new Date() }))
+          : setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()), [`to_${field.fieldName}`]: new Date() }));
+        break;
+
+      default:
+        break;
+    }
+  }
 
   return (
     <Container maxWidth="sm">
@@ -216,8 +250,27 @@ const ReportFilters = (props: FiltersProps) => {
                   {field.type === 'date' && (
                     <>
                       <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth size="small" variant="outlined">
+                          <InputLabel id="duration">Select Duration</InputLabel>
+                          <Select labelId="duration"
+                            id="time-duration"
+                            value={timeFrame}
+                            onChange={(e) => {
+                              handleDuration(e.target.value, field)
+                              setTimeFrame(e.target.value)
+                            }}>
+                            <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                            <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                            <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                            <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                            <MenuItem value={'custom'}>Custom</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
                         <KeyboardDatePicker
                           autoOk
+                          disabled={timeFrame !== 'custom'}
                           fullWidth
                           size="medium"
                           variant="inline"
@@ -239,6 +292,7 @@ const ReportFilters = (props: FiltersProps) => {
                         <KeyboardDatePicker
                           autoOk
                           fullWidth
+                          disabled={timeFrame !== 'custom'}
                           size="medium"
                           variant="inline"
                           inputVariant="outlined"
@@ -277,9 +331,28 @@ const ReportFilters = (props: FiltersProps) => {
                   <>
                     {' '}
                     <Grid item xs={12} sm={6}>
+                      <FormControl fullWidth size="small" variant="outlined">
+                        <InputLabel id="duration">Select Duration</InputLabel>
+                        <Select labelId="duration"
+                          id="time-duration"
+                          value={statusTimeFrame}
+                          onChange={(e) => {
+                            handleDuration(e.target.value, null, true)
+                            setStatusTimeFrame(e.target.value)
+                          }}>
+                          <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                          <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                          <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                          <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                          <MenuItem value={'custom'}>Custom</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
                       <KeyboardDatePicker
                         autoOk
                         fullWidth
+                        disabled={statusTimeFrame !== 'custom'}
                         size="medium"
                         variant="inline"
                         inputVariant="outlined"
@@ -302,6 +375,7 @@ const ReportFilters = (props: FiltersProps) => {
                         fullWidth
                         size="medium"
                         variant="inline"
+                        disabled={statusTimeFrame !== 'custom'}
                         inputVariant="outlined"
                         name={`to_statusPeriod`}
                         label={`To Status Period`}
