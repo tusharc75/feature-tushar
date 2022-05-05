@@ -57,10 +57,8 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
         axiosInstance().get("/field?resource=Purchase Order").then(({ data: { data } }) => {
             let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-            if (salesOrderId) {
-                fieldsDataForCreate = fieldsDataForCreate.filter(f => f.fieldName !== "rentalJob");
-                fieldsDataForUpdate = fieldsDataForUpdate.filter(f => f.fieldName !== "rentalJob");
-            }
+            fieldsDataForCreate = fieldsDataForCreate.filter(f => f.fieldName !== "rentalJob");
+            fieldsDataForUpdate = fieldsDataForUpdate.filter(f => f.fieldName !== "rentalJob");
             if (purchaseOrderId) {
                 axiosInstance().get(`${purchaseOrder.api}/` + purchaseOrderId).then(({ data: { data } }) => {
                     setPurchaseOrderData(data)
@@ -189,7 +187,6 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
             } else {
                 axiosInstance().post(`${purchaseOrder.api}`, values).then(({ data: { data } }) => {
                     setLoading(false);
-                    // onSuccess(data)
                     history.push(`${purchaseOrder.api}/detail/${data._id}`);
                 }).catch((error) => {
                     setLoading(false);

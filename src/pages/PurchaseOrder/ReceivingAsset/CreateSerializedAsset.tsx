@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState, FC, Fragment } from 'react';
 import { Dialog, Button, Box, TextField, Grid, IconButton, ButtonGroup, Container, InputAdornment } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
-import { Add, Delete } from '@material-ui/icons';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -12,22 +11,19 @@ import { Formik, Form, FieldArray, Field } from 'formik';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from "react-device-detect";
 
-const CreateSerializedAsset = (props) => {
+const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, productList, handleUpdateData, purchaseOrderData }) => {
 
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
-    const { purchaseOrderID, onClose, onSuccess, title, productList, handleUpdateData, purchaseOrderData } = props;
     const [constProductList, setConstProductList] = useState(productList);
     const [wareHouseList, setwareHouseList] = useState([]);
     const [defaultWareHouse, setDefaultWareHouse] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const toastConfig = useContext(CustomToastContext);
-    const {
-        state: { selectedEntity },
-    }: any = useData();
+    const { state: { selectedEntity } }: any = useData();
+
     useEffect(() => {
         axiosInstance()
-            .get(`/warehouse?filterById=[{"field": "entity", "term": "${selectedEntity}"}]`)
+            .get(`/warehouse`)
             .then(({ data: { data, count } }) => {
                 setwareHouseList(data)
                 setDefaultWareHouse(data.find(d => d?._id === purchaseOrderData?.warehouse?.optionValue))
@@ -35,14 +31,15 @@ const CreateSerializedAsset = (props) => {
     }, []);
 
     const handleCreateSerializedAsset = (values) => {
-        let tempArray = values.map(u => ({
-            PurchaseOrderId: purchaseOrderID,
-            productMaster: u.productId,
-            wareHouse: u.warehouse?._id,
-            quantity: parseInt(u?.quantity)
-        }))
         setIsSubmitting(true)
-        axiosInstance().post(`${purchaseOrder.api}/asset-po`, { "purchaseOrder": tempArray }).then(({ data }) => {
+        let data = values.map(u => ({
+            purchaseOrderId: purchaseOrderID,
+            product: u.productId,
+            serializedProduct: u.serializedProduct,
+            warehouse: u.warehouse?._id,
+            qty: parseInt(u?.quantity)
+        }))
+        axiosInstance().post(`${purchaseOrder.api}/asset-po`, data).then(({ data }) => {
             setIsSubmitting(false);
             toastConfig.setToastConfig({
                 open: true,
@@ -100,7 +97,16 @@ const CreateSerializedAsset = (props) => {
                 showManimizeMaximize={true}
             ></CustomDialogHeader>
             <Formik
-                initialValues={{ seriaizedAsset: productList.map(d => ({ "product": d.productDescription, "productId": d.productId, "warehouse": defaultWareHouse || "", "quantity": d.qty - (d.actualReceived || 0), "row": d })) }}
+                initialValues={{
+                    seriaizedAsset: productList.map(d => ({
+                        "product": d.productDescription,
+                        "productId": d.productId,
+                        "warehouse": defaultWareHouse || "",
+                        "quantity": d.qty - (d.actualReceived || 0),
+                        "serializedProduct": d.serializedProduct || false,
+                        "row": d
+                    }))
+                }}
                 enableReinitialize={true}
                 onSubmit={() => { }}>
                 {({ values }) => (
@@ -163,7 +169,6 @@ const CreateSerializedAsset = (props) => {
                                                                                                 ["product"]: newValue,
                                                                                             });
                                                                                         }}
-
                                                                                         renderInput={(params) => <TextField
                                                                                             {...params}
                                                                                             variant="outlined"
@@ -185,6 +190,7 @@ const CreateSerializedAsset = (props) => {
                                                                                                 ["warehouse"]: newValue,
                                                                                             });
                                                                                         }}
+                                                                                        disabled
                                                                                         renderInput={(params) => <TextField
                                                                                             {...params}
                                                                                             variant="outlined"
@@ -227,8 +233,6 @@ const CreateSerializedAsset = (props) => {
                                             </Grid>
                                         </Container>
                                     </Form>
-
-
                                 </Grid>
                             </Box>
                         </CustomDialogContent>
