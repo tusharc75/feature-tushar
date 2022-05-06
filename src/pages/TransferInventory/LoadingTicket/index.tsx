@@ -44,17 +44,17 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
     fetchProducts();
   }, []);
 
-  useEffect(() => {
-    if (!transferInventoryData) return;
-    if (transferInventoryData.status === TRANSFER_INVENTORY_STATUS.delivered) return;
-    if (dataRows && dataRows.length === 0) return;
+  // useEffect(() => {
+  //   if (!transferInventoryData) return;
+  //   if (transferInventoryData.status === TRANSFER_INVENTORY_STATUS.delivered) return;
+  //   if (dataRows && dataRows.length === 0) return;
 
-    const deliveredAssets = dataRows.filter((d) => d?.loadingTicketStatus === 'Delivered');
+  //   const deliveredAssets = dataRows.filter((d) => d?.loadingTicketStatus === 'Delivered');
 
-    if (deliveredAssets.length === dataRows.length) {
-      updateTransferInventoryStatus(TRANSFER_INVENTORY_STATUS.delivered);
-    }
-  }, [transferInventoryData, dataRows]);
+  //   if (deliveredAssets.length === dataRows.length) {
+  //     updateTransferInventoryStatus(TRANSFER_INVENTORY_STATUS.delivered);
+  //   }
+  // }, [transferInventoryData, dataRows]);
 
   const columns = [
     { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
@@ -347,7 +347,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
