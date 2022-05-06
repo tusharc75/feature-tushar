@@ -13,6 +13,10 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageWarehouse from "./ManageWarehouse";
 import DeleteButton from "../../components/Helpers/DeleteButton";
+import { BiEdit } from "react-icons/bi";
+import { isMobile, isTablet } from "react-device-detect";
+import accountClass from '../Account/account.module.scss';
+import { MdDelete } from "react-icons/md";
 
 const WarehouseDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -172,12 +176,15 @@ const WarehouseDetailsPage = () => {
                 >
                   {permissions?.warehouse?.isUpdate && (
                     <Button
-                      variant="contained"
+
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
                       size="small"
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
                       onClick={handleOpenUpdateDialog}
+                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                     >
-                      Edit
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   )}
                   <Box component="span" marginX={1} />
@@ -190,7 +197,8 @@ const WarehouseDetailsPage = () => {
                       }
                     >
                       <DeleteButton
-                        text="Delete"
+                        text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
+                        className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
                         onClick={() => setShowConfirmBox(true)}
                       />
                     </span>

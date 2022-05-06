@@ -702,9 +702,21 @@ const Product = () => {
                   onChange={(e, val) => {
                     setProductTemplate(val && val.optionValue ? val.optionValue : '');
                   }}
-                  renderInput={(params) => (
-                    <TextField {...params} margin="dense" name="productTemplate" label="Product Template" variant="outlined" fullWidth />
-                  )}
+                  renderInput={(params) =>
+                    isMobile && !isTablet ? (
+                      <TextField
+                        {...params}
+                        margin="dense"
+                        name="productTemplate"
+                        placeholder="Product Template"
+                        variant="standard"
+                        fullWidth
+                        className={isMobile ? 'serchBox' : ''}
+                      />
+                    ) : (
+                      <TextField {...params} margin="dense" name="productTemplate" label="Product Template" variant="outlined" fullWidth />
+                    )
+                  }
                 />
               )}
               {isProductType && (
@@ -721,9 +733,20 @@ const Product = () => {
                   onChange={(e, val) => {
                     setProductType(val && val.optionValue ? val.optionValue : '');
                   }}
-                  renderInput={(params) => (
-                    <TextField {...params} margin="dense" name="productType" label="Product Type" variant="outlined" fullWidth />
-                  )}
+                  renderInput={(params) =>
+                    isMobile && !isTablet ? (
+                      <TextField
+                        {...params}
+                        margin="dense"
+                        name="productType"
+                        placeholder="Product Type"
+                        variant="standard"
+                        fullWidth
+                        className={isMobile ? 'serchBox' : ''}
+                      />
+                    ) : (
+                      <TextField {...params} margin="dense" name="productType" label="Product Type" variant="outlined" fullWidth />
+                    )}
                 />
               )}
             </Grid>
