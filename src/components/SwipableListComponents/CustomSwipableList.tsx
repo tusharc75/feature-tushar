@@ -83,7 +83,7 @@ export default function CustomSwipableList({
                       selectedRecords: updatedMetadata.filter((d) => d.isChecked)
                     });
                     dispatch({ type: 'update', data: updatedMetadata });
-                    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(updatedMetadata.filter((d) => d.isChecked).map((m) => m._id)));
+                    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(updatedMetadata.filter((d) => d.isChecked)));
                   }}
                   name="checkedB"
                   color="primary"
@@ -137,7 +137,7 @@ export default function CustomSwipableList({
                           });
 
                           dispatch({ type: 'update', data: dataRows });
-                          localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(dataRows.filter((d) => d.isChecked).map((m) => m._id)));
+                          localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(dataRows.filter((d) => d.isChecked)));
                         }}
                         inputProps={{ 'aria-label': 'primary checkbox' }}
                       />
