@@ -18,21 +18,15 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   gridLoadingTimeout,
-  deliveryTicket
+  deliveryTicket,
+  TRANSFER_INVENTORY_STATUS
 } from 'src/constants/helpers';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map, groupBy } from 'lodash';
+import { AiFillFilePdf } from 'react-icons/ai';
 
-const LoadingTicket = ({
-  allowedToEdit,
-  transferInventoryData,
-  setNextStep,
-  statusOptions,
-  currentStep,
-  renderedFrom,
-  updateTransferInventoryStatus
-}) => {
+const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, renderedFrom, updateTransferInventoryStatus }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -41,12 +35,26 @@ const LoadingTicket = ({
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
+  const [uniqueLoadingTickets, setUniqueLoadingTickets] = useState([]);
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
+  const [downloadingFile, setDownlodingFile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  // useEffect(() => {
+  //   if (!transferInventoryData) return;
+  //   if (transferInventoryData.status === TRANSFER_INVENTORY_STATUS.delivered) return;
+  //   if (dataRows && dataRows.length === 0) return;
+
+  //   const deliveredAssets = dataRows.filter((d) => d?.loadingTicketStatus === 'Delivered');
+
+  //   if (deliveredAssets.length === dataRows.length) {
+  //     updateTransferInventoryStatus(TRANSFER_INVENTORY_STATUS.delivered);
+  //   }
+  // }, [transferInventoryData, dataRows]);
 
   const columns = [
     { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
@@ -100,8 +108,14 @@ const LoadingTicket = ({
     }
     dispatch({ type: 'loading', loading: true });
     try {
-      const { data: { data: productsData } } = await axiosInstance().get(`${routes.transferInventory.path}/${transferInventoryData._id}/product`);
-      const { data: { data: deliveryTicketList } } = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.transferInventory}&refrenceId=${transferInventoryData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`);
+      const {
+        data: { data: productsData }
+      } = await axiosInstance().get(`${routes.transferInventory.path}/${transferInventoryData._id}/product`);
+      const {
+        data: { data: deliveryTicketList }
+      } = await axiosInstance().get(
+        `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.transferInventory}&refrenceId=${transferInventoryData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+      );
 
       const { assets, products } = productsData;
       let rows = [];
@@ -119,25 +133,31 @@ const LoadingTicket = ({
         obj['productId'] = product?.productDetail?._id;
         rows.push(obj);
       });
-      products?.filter((p) => p.productDetail.serializedProduct === false)?.forEach((product) => {
-        let obj = { ...product };
-        obj['assetNumber'] = product.productDetail.productName;
-        obj['_id'] = product.product;
-        obj['qty'] = product.qty;
-        obj['type'] = 'Product';
-        obj['productName'] = product?.productDetail?.productName;
-        obj['productId'] = product?.product;
-        rows.push(obj);
-      });
+      products
+        ?.filter((p) => p.productDetail.serializedProduct === false)
+        ?.forEach((product) => {
+          let obj = { ...product };
+          obj['assetNumber'] = product.productDetail.productName;
+          obj['_id'] = product.product;
+          obj['qty'] = product.qty;
+          obj['type'] = 'Product';
+          obj['productName'] = product?.productDetail?.productName;
+          obj['productId'] = product?.product;
+          rows.push(obj);
+        });
 
-      deliveryTicketList?.map(obj => {
+      const uniqueIdsForTickets = [];
+
+      deliveryTicketList?.map((obj) => {
+        if (uniqueIdsForTickets.includes(obj?._id) === false) {
+          uniqueIdsForTickets.push(obj?._id);
+        }
         rows.map((d, index) => {
           if (obj?.productInventory?.some((p) => p?.optionValue === d?._id)) {
             rows[index]['loadingTicket'] = obj?.ticketName;
             rows[index]['loadingTicketId'] = obj?._id;
             rows[index]['loadingTicketStatus'] = obj?.status;
-          }
-          else if (obj?.products?.some((p) => p?.product === d?._id)) {
+          } else if (obj?.products?.some((p) => p?.product === d?._id)) {
             rows[index]['loadingTicket'] = obj?.ticketName;
             rows[index]['loadingTicketId'] = obj?._id;
             rows[index]['loadingTicketStatus'] = obj?.status;
@@ -146,11 +166,17 @@ const LoadingTicket = ({
         });
       });
 
+      setUniqueLoadingTickets(uniqueIdsForTickets);
+
       dispatch({ type: 'initialize', data: rows, count: rows.length });
-      setTimeout(() => { dispatch({ type: 'loading', loading: false }) }, gridLoadingTimeout);
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
     } catch (err) {
       toastConfig.setToastConfig(err);
-      setTimeout(() => { dispatch({ type: 'loading', loading: false }) }, gridLoadingTimeout);
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
     }
   };
 
@@ -191,49 +217,96 @@ const LoadingTicket = ({
   };
 
   const handelReceiveAssets = () => {
-    setIsLoading(true)
-    let data = {}
+    setIsLoading(true);
+    let data = {};
     const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
     if (loadingTicketIds.length) {
-      data["_ids"] = loadingTicketIds?.map((e) => e);
-      data["status"] = DELIVERY_TICKET_STATUS.delivered
-      data["signatures"] = []
-      axiosInstance().post(`${deliveryTicket.api}/updatebulk`, data).then(({ data: { data } }) => {
-        fetchProducts()
-        setShowConfirmBoxReceive(false)
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Assets Received Successfully`
+      data['_ids'] = loadingTicketIds?.map((e) => e);
+      data['status'] = DELIVERY_TICKET_STATUS.delivered;
+      data['signatures'] = [];
+      axiosInstance()
+        .post(`${deliveryTicket.api}/updatebulk`, data)
+        .then(({ data: { data } }) => {
+          fetchProducts();
+          setShowConfirmBoxReceive(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Assets Received Successfully`
+          });
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          setIsLoading(false);
+          toastConfig.setToastConfig(error);
         });
-        setIsLoading(false)
-      }).catch((error) => {
-        setIsLoading(false)
-        toastConfig.setToastConfig(error);
-      });
     }
-  }
+  };
 
   return (
     <Fragment>
       <Box p={1}>
         <Box display="flex" justifyContent="flex-end">
-          <Box>
+          <Button
+            onClick={() => {
+              setDownlodingFile(true);
+              axiosInstance()
+                .post(`/delivery-ticket/pdf`, { ids: uniqueLoadingTickets })
+                .then(({ data }) => {
+                  axiosInstance()
+                    .get(`user/download?fileName=${data.data.fileName}`, {
+                      responseType: 'blob'
+                    })
+                    .then(({ data }) => {
+                      const file = new Blob([data], { type: 'application/pdf' });
+                      const fileURL = URL.createObjectURL(file);
+                      const pdfWindow = window.open();
+                      pdfWindow.location.href = fileURL;
+                      toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+                      setDownlodingFile(false);
+                    })
+                    .catch((err) => {
+                      toastConfig.setToastConfig(err);
+                      setDownlodingFile(false);
+                    });
+                })
+                .catch((err) => {
+                  toastConfig.setToastConfig(err);
+                  setDownlodingFile(false);
+                });
+            }}
+            variant={isMobile && !isTablet ? 'text' : 'outlined'}
+            color="primary"
+            type="button"
+            size="small"
+            disabled={downloadingFile || dataRows.length === 0}
+            startIcon={<AiFillFilePdf />}
+          >
+            {downloadingFile ? 'Please wait...' : 'Preview'}
+          </Button>
+          <Box ml={1}>
             <Button
               variant={'outlined'}
               color="primary"
               disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
               onClick={handleLoadingTicketDialog}
-              size="small">
+              size="small"
+            >
               {`Create Loading Ticket`}
             </Button>
-            <Box component="span" mx={1} />
+            <Box component="span" ml={1} />
             <Button
               variant={'outlined'}
               color="primary"
-              onClick={() => { setShowConfirmBoxReceive(true) }}
-              disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length}
-              size="small">
+              onClick={() => {
+                setShowConfirmBoxReceive(true);
+              }}
+              disabled={
+                selectedRecords.length === 0 ||
+                selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+              }
+              size="small"
+            >
               {`Receive`}
             </Button>
           </Box>
@@ -316,19 +389,17 @@ const LoadingTicket = ({
           }}
         />
       )}
-      {
-        showConfirmBoxReceive && (
-          <ConfirmationDialog
-            okBtnLoading={isLoading}
-            open={showConfirmBoxReceive}
-            message={`Are you sure you want to receive assets?`}
-            onClose={() => {
-              setShowConfirmBoxReceive(false);
-            }}
-            onOk={handelReceiveAssets}
-          />
-        )
-      }
+      {showConfirmBoxReceive && (
+        <ConfirmationDialog
+          okBtnLoading={isLoading}
+          open={showConfirmBoxReceive}
+          message={`Are you sure you want to receive assets?`}
+          onClose={() => {
+            setShowConfirmBoxReceive(false);
+          }}
+          onOk={handelReceiveAssets}
+        />
+      )}
     </Fragment>
   );
 };

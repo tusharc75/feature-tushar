@@ -15,7 +15,7 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource } from './../../constants/helpers';
+import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from './../../constants/helpers';
 import Loader from '../../components/Loader';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import MomentUtils from '@date-io/moment';
@@ -59,7 +59,7 @@ const Report = () => {
   const [columns, setColumns] = React.useState(null);
   const [gridApi, setGridApi] = React.useState(null);
   const [state, dispatch] = React.useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, sorting, search, limit, pageSizes } = state;
+  const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
 
   const fetchGridColumns = () => {
     setLoadingColumns(true);
@@ -114,13 +114,20 @@ const Report = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }, [showGrid, page, sorting, limit]);
+  }, [showGrid]);
+  React.useEffect(() => {
+    if (showGrid) {
+      fetchResourceData();
+    }
+  }, [page, sorting, search, limit, filters, pageSizes]);
 
   /**
    * Fetch resource data for selected filters,
    * @returns none if no data selected
    */
   const fetchResourceData = () => {
+    setShowGrid(true);
+
     let filterQuery = getFilter();
 
     if (cancelTokenSource) {
@@ -131,7 +138,6 @@ const Report = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    setShowGrid(true);
 
     axiosInstance()
       .get(`${resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'}/report${filterQuery}`, {
@@ -156,6 +162,19 @@ const Report = () => {
           toastConfig.setToastConfig(err);
         }
       });
+  };
+
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case 'createdBy':
+        return 'createdBy.user.concatedName';
+
+      case 'updatedBy':
+        return 'updatedBy.user.concatedName';
+
+      default:
+        return field;
+    }
   };
 
   // Create and return query for filters
@@ -214,6 +233,16 @@ const Report = () => {
       if (deepFilter && deepFilter.length > 0) {
         filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
       }
+    }
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+      Object.keys(filters).forEach((field) => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        });
+      });
+      filterQuery = `${filterQuery}deepFilter=${JSON.stringify(updatedFilters)}&`;
     }
 
     if (statusPeriod && statusPeriodDate) {

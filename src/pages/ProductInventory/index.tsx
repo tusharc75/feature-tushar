@@ -23,80 +23,92 @@ import { camelCase } from 'lodash'
 import useColumns, { getFrameworkComponents, getStaticFields } from "src/constants/useColumns";
 
 const InventoryProduct = () => {
+
     const renderedFrom = camelCase(routes?.productInventory.title)
+    const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
     const toastConfig = useContext(CustomToastContext)
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
-    const [plant, setPlant] = useState('')
-    const [plantOptions, setPlantOptions] = useState([])
     const [plantId, setPlantId] = useState(null);
-    const [plantLabel, setPlantLabel] = useState('');
-    const localStorageSelectedRecords = `${renderedFrom}_selected`;
-    const {
-        state: { permissions },
-    }: any = useData();
+
+    const [plantOptions, setPlantOptions] = useState([])
+    const [frameworkComponents, setFrameworkComponents] = useState({})
+    const [columns, setColumns] = useState([])
+
+    const { state: { permissions } }: any = useData();
     const { getColumnData } = useColumns();
 
     useEffect(() => {
         getPlants()
         fetchProductInventory()
-    }, [plant, plantId, page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+    }, [plantId, page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
     const getPlants = () => {
         axiosInstance()
             .get(`/warehouse?noEntityWise=1`)
             .then(({ data: { data } }) => {
-                plantId === null && setPlantId(data[0]._id)
                 setPlantOptions(data);
-                plantId === null && setPlant(data[0].warehouseName);
+                if (plantId === null && data?.length) {
+                    setPlantId(data[0]._id)
+                }
             });
     }
 
-    const [frameworkComponents, setFrameworkComponents] = useState({})
-    const [columns, setColumns] = useState([])
-
     useEffect(() => {
         fetchGridColumns()
-    },[])
+    }, [])
+
+    const extraColumn = [
+        { field: 'softHold', headerName: 'Soft Hold', show: true, cellRenderer: 'commonRenderer' },
+        { field: 'availableInventory', headerName: 'Available Inventory', show: true, cellRenderer: 'commonRenderer' },
+    ]
 
     const fetchGridColumns = () => {
         axiosInstance()
-          .get('/field?resource=Product Inventory')
-          .then(({ data: { data } }) => {
-            let columns = [];
-            let rendererNames = [];
-            data.forEach((o) => {
-              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
-              if (currentColumn !== null) {
-                if(currentColumn?.columnData.field !== 'plant') {
-                    if(o.fieldData.type === 'number') {
-                        columns.push({...currentColumn?.columnData, cellEditor: "numericCellEditor", editable: permissions?.productInventory.isUpdate})
-                    } else if(o.fieldData.fieldName === "product") {
-                        columns.push({...currentColumn?.columnData, 
-                          field: "productName",
-                          headerName: "Product Description",
-                          cellRenderer: 'productNameRenderer',
-                          primaryField: true
-                        })
-                    } else {
-                        columns.push(currentColumn?.columnData)
+            .get('/field?resource=Product Inventory')
+            .then(({ data: { data } }) => {
+                let columns = [];
+                let rendererNames = [];
+                data.forEach((o) => {
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
+                    if (currentColumn !== null) {
+                        if (currentColumn?.columnData.field !== 'plant') {
+                            if (o.fieldData.type === 'number' && ["inventory", "minInventory", "maxInventory"].includes(o.fieldData.fieldName)) {
+                                columns.push({
+                                    ...currentColumn?.columnData,
+                                    cellEditor: "numericCellEditor",
+                                    editable: permissions?.productInventory?.isUpdate
+                                })
+                            }
+                            else if (o.fieldData.fieldName === "product") {
+                                columns.push({
+                                    ...currentColumn?.columnData,
+                                    field: "productName",
+                                    headerName: o.fieldData.fieldLabel,
+                                    cellRenderer: 'productNameRenderer',
+                                    primaryField: true
+                                })
+                            }
+                            else {
+                                columns.push(currentColumn?.columnData)
+                            }
+                        }
+                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                            if (currentColumn?.columnData.field === "product") {
+                                rendererNames.push("productNameRenderer");
+                            } else {
+                                rendererNames.push(currentColumn?.rendererName);
+                            }
+                        }
                     }
-                }
-                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                  if(currentColumn?.columnData.field === "product") {
-                    rendererNames.push("productNameRenderer");
-                  } else {
-                    rendererNames.push(currentColumn?.rendererName);
-                  }
-                }
-              }
+                });
+                let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+                setFrameworkComponents({ ...tempFrameworkComponent, productNameRenderer: ProductNameRenderer });
+                setColumns([...columns, ...extraColumn]);
             });
-            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-            setFrameworkComponents({ ...tempFrameworkComponent, productNameRenderer: ProductNameRenderer });
-            setColumns(columns);
-          });
-      };
+    };
 
     const fetchProductInventory = () => {
         dispatch({ type: "loading", loading: true });
@@ -104,25 +116,25 @@ const InventoryProduct = () => {
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        plantId && plant && axiosInstance().get(`/product-inventory?wareHouse=${plantId}&${queryString}`).then(({ data }) => {
-            let rows = data.data?.map((u, user) => {
-                let finalObject = prepareDataForGrid(u);
-                finalObject['plant'] = plant;
-                finalObject['productId'] = u._id;
-
-                return {
-                    ...finalObject,
-
-                };
-            });
-            dispatch({ type: "initialize", data: rows, count: data.count });
-            setTimeout(() => {
+        if (plantId) {
+            axiosInstance().get(`/product-inventory?wareHouse=${plantId}&${queryString}`).then(({ data }) => {
+                let rows = data.data?.map((u) => {
+                    let finalObject = prepareDataForGrid(u);
+                    finalObject['productId'] = u._id;
+                    finalObject['availableInventory'] = (u?.inventory || 0) - (u?.softHold || 0);
+                    return {
+                        ...finalObject,
+                    };
+                });
+                dispatch({ type: "initialize", data: rows, count: data.count });
+                setTimeout(() => {
+                    dispatch({ type: "loading", loading: false });
+                }, gridLoadingTimeout);
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
                 dispatch({ type: "loading", loading: false });
-            }, gridLoadingTimeout);
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-            dispatch({ type: "loading", loading: false });
-        });
+            });
+        }
     };
 
     const handleSearch = (e) => {
@@ -175,14 +187,10 @@ const InventoryProduct = () => {
         switch (field) {
             case "productName":
                 return "productName";
-            case "plant":
-                return "plant";
             case "createdBy":
                 return "createdBy.user.concatedName";
-
             case "updatedBy":
                 return "updatedBy.user.concatedName";
-
             default:
                 return field;
         }
@@ -268,7 +276,6 @@ const InventoryProduct = () => {
                     </Grid>
                     <Grid md={6} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`} >
                         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div" >
-
                             <Grid style={{ display: "flex", flex: 1 }}>
                                 <SearchBox
                                     onSearch={handleSearch}
@@ -279,14 +286,11 @@ const InventoryProduct = () => {
                                     value={search}
                                 />
                             </Grid>
-
                         </Box>
                     </Grid>
-
                 </Grid>
             </div>
             {columns && plantId ?
-
                 Object.keys(frameworkComponents).length > 0 ?
                     <CustomAgGridEditable
                         allowSelection={true}

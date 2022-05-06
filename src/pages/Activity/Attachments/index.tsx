@@ -391,11 +391,11 @@ export default function Attachment() {
               fileUrl: u.fileUrl,
               canEdit: u.canEdit,
               createdByDate: u.createdBy.date ?? '',
-              updatedByDate: u?.updatedBy?.date ?? ''
+              updatedByDate: u?.updatedBy?.date ?? '',
+              isChecked: false,
             };
           });
           dispatch({ type: 'initialize', data: rows, count: count });
-
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
           }, gridLoadingTimeout);
