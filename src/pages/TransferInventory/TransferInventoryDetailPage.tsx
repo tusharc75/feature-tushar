@@ -325,8 +325,6 @@ const TransferInventoryDetailPage = () => {
                       <LoadingTicket
                         transferInventoryData={transferInventoryData}
                         updateTransferInventoryStatus={updateTransferInventoryStatus}
-                        currentStep={currentStep}
-                        setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-3`}
                         statusOptions={statusOptions}
                         allowedToEdit={allowedToEdit}
