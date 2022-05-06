@@ -54,8 +54,6 @@ const Note = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords, appendRows } = state;
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([])
   const localStorageSelectedRecords = "notesPage";
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
@@ -223,12 +221,11 @@ const Note = () => {
             createdBy: u.createdBy?.user,
             createdByDate: u.createdBy?.date,
             updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
+            updatedByDate: u.updatedBy?.date,
+            isChecked: false,
           };
           return res;
         });
-        setIsAllChecked(false);
-        setClonedData(data)
         if (appendRows) {
           dispatch({
             type: "initialize", data: [...dataRows, ...rows],
@@ -269,7 +266,6 @@ const Note = () => {
   const handleDeleteNote = async () => {
     if (deleteRecord.id || selectedRecords.length > 0) {
       setOkButtonLoading(true);
-
       axiosInstance()
         .put(`/note/deletemany`, { ids: deleteRecord.id ? [deleteRecord.id] : selectedRecords.map((d) => d._id) })
         .then(({ data }) => {
@@ -329,7 +325,8 @@ const Note = () => {
           <div className="header-panel">
             <Grid container className={styles.filter_side_container}>
               <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
-                <GoNote className="headerLogo" /> <span className="listingHeader">{routes.activityNote.title}</span>
+                <GoNote className="headerLogo" />
+                <span className="listingHeader">{routes.activityNote.title}</span>
                 <Autocomplete
                   options={resourceOptions}
                   getOptionLabel={(option) => option.optionLabel}
@@ -347,9 +344,9 @@ const Note = () => {
                   size="small"
                   renderInput={(params) =>
                     isMobile && !isTablet ? (
-                      <TextField {...params} label="Select Resource"               
-                      size="small"
-                      variant="outlined" className={isMobile ? 'serchBox' : ''} />
+                      <TextField {...params} label="Select Resource"
+                        size="small"
+                        variant="outlined" className={isMobile ? 'serchBox' : ''} />
                     ) : (
                       <TextField {...params} label="Select Resource" variant="outlined" />
                     )

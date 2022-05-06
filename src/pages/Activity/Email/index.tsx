@@ -187,7 +187,8 @@ const Email = () => {
             id: obj._id,
             createdByDate: obj?.createdBy?.date ?? '',
             createdByUser: obj?.createdBy?.user,
-            isCreatedByMe
+            isCreatedByMe,
+            isChecked: false,
           };
           inboxEmailsData.push(currentObject);
           // if (isCreatedByMe) sentEmails.push(currentObject);
