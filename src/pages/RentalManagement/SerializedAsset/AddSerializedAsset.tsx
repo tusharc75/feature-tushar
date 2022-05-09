@@ -397,7 +397,7 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                                         onSearch={handleSearch}
                                         searchbox="terms_header_search_bar"
                                         value={search}
-                                        width={'100%'}
+                                        width={isMobile && !isTablet ? '75%' : "100%"}
                                     />
                                 </Box>
                                 {(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) &&

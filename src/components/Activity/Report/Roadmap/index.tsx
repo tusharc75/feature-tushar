@@ -10,6 +10,7 @@ import Calander from "./Calander";
 import ActivityList from "./ActivityList";
 import CalanderList from "./CalanderList";
 import Loader from "../../../../components/Loader";
+import { isMobile, isTablet } from "react-device-detect";
 
 function Roadmap({ type, filter }) {
   const scrollRef = React.useRef(null);
@@ -92,7 +93,7 @@ function Roadmap({ type, filter }) {
           style={{ position: "absolute" }}
         >
           <Box
-            minWidth={300}
+            minWidth={isMobile && !isTablet ? 110 : 300}
             border={1}
             borderColor="grey.300"
             style={{ position: "relative", overflow: "hidden" }}
