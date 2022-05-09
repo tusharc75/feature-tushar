@@ -19,6 +19,7 @@ import {
   DELIVERY_TICKET_TYPE,
   gridLoadingTimeout,
   deliveryTicket,
+  transferInventory,
   TRANSFER_INVENTORY_STATUS
 } from 'src/constants/helpers';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
@@ -26,7 +27,8 @@ import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket'
 import { uniq, map, groupBy } from 'lodash';
 import { AiFillFilePdf } from 'react-icons/ai';
 
-const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, renderedFrom, updateTransferInventoryStatus }) => {
+const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -35,7 +37,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
-  const [uniqueLoadingTickets, setUniqueLoadingTickets] = useState([]);
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
   const [downloadingFile, setDownlodingFile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,18 +44,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
   useEffect(() => {
     fetchProducts();
   }, []);
-
-  // useEffect(() => {
-  //   if (!transferInventoryData) return;
-  //   if (transferInventoryData.status === TRANSFER_INVENTORY_STATUS.delivered) return;
-  //   if (dataRows && dataRows.length === 0) return;
-
-  //   const deliveredAssets = dataRows.filter((d) => d?.loadingTicketStatus === 'Delivered');
-
-  //   if (deliveredAssets.length === dataRows.length) {
-  //     updateTransferInventoryStatus(TRANSFER_INVENTORY_STATUS.delivered);
-  //   }
-  // }, [transferInventoryData, dataRows]);
 
   const columns = [
     { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
@@ -146,12 +135,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
           rows.push(obj);
         });
 
-      const uniqueIdsForTickets = [];
-
       deliveryTicketList?.map((obj) => {
-        if (uniqueIdsForTickets.includes(obj?._id) === false) {
-          uniqueIdsForTickets.push(obj?._id);
-        }
         rows.map((d, index) => {
           if (obj?.productInventory?.some((p) => p?.optionValue === d?._id)) {
             rows[index]['loadingTicket'] = obj?.ticketName;
@@ -166,7 +150,11 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
         });
       });
 
-      setUniqueLoadingTickets(uniqueIdsForTickets);
+      if (transferInventoryData.status !== TRANSFER_INVENTORY_STATUS.delivered) {
+        if (rows?.filter((d) => d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === rows?.length) {
+          updateStatus(TRANSFER_INVENTORY_STATUS.delivered)
+        }
+      };
 
       dispatch({ type: 'initialize', data: rows, count: rows.length });
       setTimeout(() => {
@@ -250,8 +238,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
           <Button
             onClick={() => {
               setDownlodingFile(true);
-              axiosInstance()
-                .post(`/delivery-ticket/pdf`, { ids: uniqueLoadingTickets })
+              axiosInstance().get(`${transferInventory.api}/${transferInventoryData._id}/pdf`)
                 .then(({ data }) => {
                   axiosInstance()
                     .get(`user/download?fileName=${data.data.fileName}`, {
@@ -393,7 +380,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
         <ConfirmationDialog
           okBtnLoading={isLoading}
           open={showConfirmBoxReceive}
-          message={`Are you sure you want to receive assets?`}
+          message={`Are you sure you want to received?`}
           onClose={() => {
             setShowConfirmBoxReceive(false);
           }}

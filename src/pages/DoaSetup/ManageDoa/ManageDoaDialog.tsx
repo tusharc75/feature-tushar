@@ -9,6 +9,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { getUniqueCurrencies, removeEmptyKeys } from '../../../constants/helpers';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import React from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const DOAType = [
   {
@@ -91,7 +92,7 @@ const DoaDialog = ({
     fetchDoa();
   }, [fetchDoa]);
 
-  
+
   const handleSubmit = async (values) => {
     let doaArray;
     if (selectedType === 2) {
@@ -201,7 +202,7 @@ const DoaDialog = ({
         <>
           {!isRenderedFromUserSetUp && <CustomDialogHeader title={doa?.length > 0 ? 'Edit DOA' : 'Add DOA'} />}
           <Grid container className={classes.doaBox}>
-            <Grid item xs={6} md={6} sm={6}>
+            <Grid item xs={4} md={6} sm={6}>
               <ToggleButtonGroup size="small" value={filter} exclusive onChange={handleFilter}>
                 {DOAType.map((k, index) => {
                   return (
@@ -212,7 +213,7 @@ const DoaDialog = ({
                 })}
               </ToggleButtonGroup>
             </Grid>
-            <Grid item xs={6} md={6} sm={6} className="d-flex justify-content-end">
+            <Grid item xs={8} md={6} sm={6} className="d-flex justify-content-end">
               {selectedType === 2 && (
                 <>
                   <TextField
@@ -225,7 +226,7 @@ const DoaDialog = ({
                     size="small"
                     name="amount"
                     placeholder="Enter minimum DOA amount"
-                    label="Enter minimum DOA amount"
+                    label={isMobile && !isTablet ? "DOA amount" : "Enter minimum DOA amount"}
                     value={doaLowerLimit}
                     onChange={(e) => {
                       setDoaLowerLimit(Number(e.target.value.replace(/[^0-9]/g, '')));
@@ -298,10 +299,10 @@ const DoaDialog = ({
                                     {values.users && values.users.length > 0 ? (
                                       values.users.map((userVal, index) => (
                                         <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center" key={index}>
-                                          <Grid item md={1}>
+                                          <Grid item xs={1} md={1}>
                                             {index + 1}
                                           </Grid>
-                                          <Grid item md={5}>
+                                          <Grid item xs={11} sm={5} md={5}>
                                             <Autocomplete
                                               id="combo-box-demo"
                                               size="small"
@@ -339,7 +340,7 @@ const DoaDialog = ({
                                             />
                                           </Grid>
                                           {selectedType === 2 && (
-                                            <Grid item md={4}>
+                                            <Grid item xs={6} sm={3} md={3}>
                                               <Field
                                                 fullWidth
                                                 InputProps={{
@@ -356,6 +357,7 @@ const DoaDialog = ({
                                                 component={TextField}
                                                 name="amount"
                                                 placeholder="Enter Amount"
+                                                label="Enter Amount"
                                                 value={userVal.amount}
                                                 onChange={(e) => {
                                                   arrayHelpers.replace(index, {
@@ -372,7 +374,7 @@ const DoaDialog = ({
                                               )}
                                             </Grid>
                                           )}
-                                          <Grid item md={2}>
+                                          <Grid item xs={6} sm={3} md={3}>
                                             <ButtonGroup size="medium" aria-label="small outlined button group">
                                               <IconButton
                                                 size="small"
@@ -395,22 +397,24 @@ const DoaDialog = ({
                                               <Tooltip
                                                 title={userVal.disable ? "User Disabled" : "User Enabled"}
                                               >
-                                              <FormControlLabel
-                                                key={1}
-                                                control={
-                                                  <Switch
-                                                    color={userVal.disable ? 'primary' : 'secondary'}
-                                                    checked={userVal.disable}
-                                                    name="disable"
-                                                    onChange={(e) => {
-                                                      arrayHelpers.replace(index, { ...values.users[index],
-                                                        ['disable']: !userVal.disable});
-                                                    }}
-                                                  />
-                                                }
-                                                label=""
-                                              />
-                                            </Tooltip>
+                                                <FormControlLabel
+                                                  key={1}
+                                                  control={
+                                                    <Switch
+                                                      color={userVal.disable ? 'primary' : 'secondary'}
+                                                      checked={userVal.disable}
+                                                      name="disable"
+                                                      onChange={(e) => {
+                                                        arrayHelpers.replace(index, {
+                                                          ...values.users[index],
+                                                          ['disable']: !userVal.disable
+                                                        });
+                                                      }}
+                                                    />
+                                                  }
+                                                  label=""
+                                                />
+                                              </Tooltip>
                                             </ButtonGroup>
                                           </Grid>
                                         </Grid>
