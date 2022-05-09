@@ -6,9 +6,11 @@ $isTransferAsset: #ecc19c;
     // padding: 1rem;
 
     .table {
-        // border: 1px solid #ddd;
 
+        // border: 1px solid #ddd;
         .tr {
+            background: #F6FAFA;
+
             :last-child {
                 .td {
                     border-bottom: 0;
@@ -16,14 +18,25 @@ $isTransferAsset: #ecc19c;
             }
         }
 
+        .tr:nth-of-type(even) {
+            background: white;
+        }
+
         .th[data-sticky-td="true"] {
-            background: #efefef;
+            background: white;
+        }
+
+        .table-header {
+            padding: 8px !important;
+            background-color: #258C89 !important;
+            color: white !important;
+            border-right: 1px solid #258C89 !important;
         }
 
         .th {
             padding: 5px;
-            border-right: 1px solid #ddd;
-            background: #efefef;
+            //border-right: 1px solid #ddd;
+            background: white;
             overflow: hidden;
 
             :last-child {
@@ -47,7 +60,7 @@ $isTransferAsset: #ecc19c;
         }
 
         .td[data-sticky-td="true"] {
-            background: white !important;
+            background: inherit;
         }
 
         .td.error[data-sticky-td="true"] {
@@ -55,44 +68,44 @@ $isTransferAsset: #ecc19c;
         }
 
         .td.isPurchaseOrder[data-sticky-td="true"] {
-            background: $isPurchaseOrder !important;
+            background: $isPurchaseOrder  !important;
         }
 
         .td.isSublease[data-sticky-td="true"] {
-            background: $isSublease !important;
+            background: $isSublease  !important;
         }
 
         .td.isTransferAsset[data-sticky-td="true"] {
-            background: $isTransferAsset !important;
+            background: $isTransferAsset  !important;
         }
 
         .td {
             padding: 5px 10px;
-            border-bottom: 1px solid #ddd;
-            border-right: 1px solid #ddd;
+            //border-bottom: 1px solid #ddd;
+            //border-right: 1px solid #ddd;
 
             .error {
                 background: #efcccc;
                 border-bottom: 1px solid #efcccc;
-                border-right: 1px solid #efcccc;
+                //border-right: 1px solid #efcccc;
             }
 
             .isPurchaseOrder {
                 background: $isPurchaseOrder;
                 border-bottom: 1px solid $isPurchaseOrder;
-                border-right: 1px solid $isPurchaseOrder;
+                //border-right: 1px solid $isPurchaseOrder;
             }
 
             .isSublease {
                 background: $isSublease;
                 border-bottom: 1px solid $isSublease;
-                border-right: 1px solid $isSublease;
+                //border-right: 1px solid $isSublease;
             }
 
             .isTransferAsset {
                 background: $isTransferAsset;
                 border-bottom: 1px solid $isTransferAsset;
-                border-right: 1px solid $isTransferAsset;
+                //border-right: 1px solid $isTransferAsset;
             }
 
             // background-color: #fff;
@@ -113,7 +126,6 @@ $isTransferAsset: #ecc19c;
                 transform: translateX(50%);
                 z-index: 1;
                 touch-action: none;
-
                 // &.isResizing {
                 //     background: red;
                 // }
@@ -121,6 +133,7 @@ $isTransferAsset: #ecc19c;
         }
 
         &.sticky {
+
             .header,
             .footer {
                 position: sticky;
@@ -135,13 +148,13 @@ $isTransferAsset: #ecc19c;
 
             .header {
                 top: 0;
-                background: #efefef;
+                background: #f0f2f3;
                 // box-shadow: 0px 3px 3px #ccc;
             }
 
             .footer {
                 bottom: 0;
-                background: #efefef;
+                background: #f0f2f3;
                 // box-shadow: 0px -3px 3px #ccc;
             }
 
@@ -171,11 +184,11 @@ $isTransferAsset: #ecc19c;
             }
 
             [data-sticky-last-left-td] {
-                box-shadow: 2px 0px 3px #ccc;
+                border-right: 1px solid #ddd;
             }
 
             [data-sticky-first-right-td] {
-                box-shadow: -2px 0px 3px #ccc;
+                border-left: 1px solid #ddd;
             }
         }
     }
