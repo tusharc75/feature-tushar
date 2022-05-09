@@ -28,25 +28,25 @@ export type KPIListType = {
 
 export const kpiList: KPIListType[] = [
   {
-    name: "Total Booked vs Total Offered vs Budget",
-    kpi: "quote/Booked-vs-Offered-vs-Budget"
+    name: "Location Based Asset",
+    kpi: "asset/location-base-assets"
   },
-  // {
-  //   name: "Regional Sales",
-  //   kpi: 'regionalSale'
-  // },
-  // {
-  //   name: "Total Offered Value vs Entities",
-  //   kpi: "sales"
-  // },
-  // {
-  //   name: "Total Offered vs Total Booked Value",
-  //   kpi: "sales"
-  // },
-  // {
-  //   name: "Total Booked Volume vs Total Offered Volume vs Budget",
-  //   kpi: "sales"
-  // },
+  {
+    name: "Asset Status Count",
+    kpi: 'asset/assets-status-count'
+  },
+  {
+    name: "In Use By Category",
+    kpi: "asset/assets-in-use-by-category"
+  },
+  {
+    name: "Asset Total In Use",
+    kpi: "asset/assets-total-in-use"
+  },
+  {
+    name: "Customer in rental",
+    kpi: "asset/customer-in-rental"
+  },
   // {
   //   name: "Total Booked GM vs Total Offered GM vs Budget",
   //   kpi: "sales"
