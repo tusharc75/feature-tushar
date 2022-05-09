@@ -159,9 +159,8 @@ const TransferInventoryDetailPage = () => {
     };
   }
 
-  const updateTransferInventoryStatus = (status: string) => {
-    axiosInstance()
-      .put(`${routes.transferInventory.path}/${id}/status`, { status })
+  const updateStatus = (status: string) => {
+    axiosInstance().put(`${routes.transferInventory.path}/${id}/status`, { status })
       .then(() => {
         toastConfig.setToastConfig({
           open: true,
@@ -169,25 +168,12 @@ const TransferInventoryDetailPage = () => {
           message: `Status updated ${status} Successfully`
         });
         if (status === TRANSFER_INVENTORY_STATUS.delivered) {
-          deliveredTransfer();
           updateProcessStatus(2);
-        } else {
-          fetchTransferInventoryData();
         }
+        fetchTransferInventoryData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-      });
-  };
-
-  const deliveredTransfer = () => {
-    axiosInstance()
-      .patch(`${routes.transferInventory.path}/${id}/complete`)
-      .then(() => {
-        fetchTransferInventoryData();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
       });
   };
 
@@ -196,7 +182,7 @@ const TransferInventoryDetailPage = () => {
       .put(`${routes.transferInventory.path}/${id}/process-status`, {
         processStatus: transferInventorySteps[step]
       })
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -313,7 +299,7 @@ const TransferInventoryDetailPage = () => {
                     {currentStep === 1 && (
                       <Processing
                         transferInventoryData={transferInventoryData}
-                        updateTransferInventoryStatus={updateTransferInventoryStatus}
+                        updateTransferInventoryStatus={updateStatus}
                         currentStep={currentStep}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
@@ -324,9 +310,8 @@ const TransferInventoryDetailPage = () => {
                     {currentStep === 2 && (
                       <LoadingTicket
                         transferInventoryData={transferInventoryData}
-                        updateTransferInventoryStatus={updateTransferInventoryStatus}
+                        updateStatus={updateStatus}
                         renderedFrom={`${renderedFrom}_grid-3`}
-                        statusOptions={statusOptions}
                         allowedToEdit={allowedToEdit}
                       />
                     )}
@@ -365,7 +350,7 @@ const TransferInventoryDetailPage = () => {
                               type: 'transferInventory'
                             }
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                           emails={[]}
                         />
                       </div>
