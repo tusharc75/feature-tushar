@@ -299,22 +299,23 @@ const SerialzedAssets = ({
         >
           {'Assign ' + routes.serializedAsset.title}
         </Button>
-        <Box ml={1}>
-          <Button
-            variant="contained"
-            color="primary"
-            type="button"
-            size="small"
-            disabled={selectedRecords.filter((asset: any) => asset.type === 'asset').length === 0}
-            onClick={() => {
-              const assets = selectedRecords.filter((asset: any) => asset.type === 'asset')
-              setShowConfirmBox(true);
-              setDeleteData(assets.map((a:any) => a.assetId));
-            }}
-          >
-            Remove Serialized Assets
-          </Button>
-        </Box>
+        {selectedRecords.filter((e: any) => e.type === 'asset').length > 0 &&
+          <Box ml={1}>
+            <Button
+              variant="contained"
+              color="primary"
+              type="button"
+              size="small"
+              disabled={selectedRecords.filter((e: any) => e.type === 'asset').length === 0}
+              onClick={() => {
+                const assets = selectedRecords.filter((e: any) => e.type === 'asset')
+                setShowConfirmBox(true);
+                setDeleteData(assets.map((a: any) => a.assetId));
+              }}
+            >
+              Remove
+            </Button>
+          </Box>}
       </Box>
       <Box mt={1}>
         {rowsData ? (
