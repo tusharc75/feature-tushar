@@ -238,7 +238,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           <Button
             onClick={() => {
               setDownlodingFile(true);
-              axiosInstance().get(`/${transferInventory.api}${transferInventoryData._id}/pdf`)
+              axiosInstance().get(`${transferInventory.api}/${transferInventoryData._id}/pdf`)
                 .then(({ data }) => {
                   axiosInstance()
                     .get(`user/download?fileName=${data.data.fileName}`, {
