@@ -49,7 +49,7 @@ const QuantityDialog = ({ handleCloseDialog, handleAddToPickup, product, cartQty
             {({ submitForm, touched, errors, setFieldValue, values }) => (
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                     <CustomDialogHeader
-                        title="Add To Pickup"
+                        title="Pickup"
                         showRequiredLabel={true}
                         onClose={handleCloseDialog}
                         isMinimized={!fullScreen}
@@ -101,7 +101,7 @@ const QuantityDialog = ({ handleCloseDialog, handleAddToPickup, product, cartQty
                                 color="primary"
                                 type="submit"
                                 onClick={submitForm}>
-                                Add to Pickup
+                                Pickup
                             </CustomButton>
                         }
                     </CustomDialogFooter>
