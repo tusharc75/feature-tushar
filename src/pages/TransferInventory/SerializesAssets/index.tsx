@@ -12,15 +12,17 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { Delete } from '@material-ui/icons';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import { isMobile } from 'react-device-detect';
 
 const SerialzedAssets = ({
   allowedToEdit,
   transferInventoryData,
   setNextStep,
-  statusOptions,
-  currentStep,
   renderedFrom,
-  updateTransferInventoryStatus
+  stepFullScreen,
+  isTabletScreen,
+  isSmallScreen,
+  showActivity,
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -234,48 +236,7 @@ const SerialzedAssets = ({
           </Grid>
         </Box>
       )} */}
-      {/* {currentStep === 2 && (
-        <Box mt={1} mr={1} display="flex" justifyContent="flex-end">
-          <Button
-            onClick={() => {
-              setDownlodingFile(true);
-              axiosInstance()
-                .get(`/transfer-inventory/${transferInventoryData._id}/pdf`)
-                .then(({ data }) => {
-                  axiosInstance()
-                    .get(`user/download?fileName=${data.data.fileName}`, {
-                      responseType: 'blob'
-                    })
-                    .then(({ data }) => {
-                      const file = new Blob([data], { type: 'application/pdf' });
-                      const fileURL = URL.createObjectURL(file);
-                      const pdfWindow = window.open();
-                      pdfWindow.location.href = fileURL;
-                      toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-                      setDownlodingFile(false);
-                    })
-                    .catch((err) => {
-                      toastConfig.setToastConfig(err);
-                      setDownlodingFile(false);
-                    });
-                })
-                .catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setDownlodingFile(false);
-                });
-            }}
-            variant={isMobile && !isTablet ? 'text' : 'outlined'}
-            color="primary"
-            type="button"
-            size="small"
-            disabled={downlodingFile || dataRows.length === 0}
-            startIcon={<AiFillFilePdf />}
-          >
-            {downlodingFile ? 'Please wait...' : 'Preview'}
-          </Button>
-        </Box>
-      )} */}
-      <Box display="flex" justifyContent="flex-end" alignItems="center" p={1}>
+      <Box display="flex" justifyContent="flex-end" p={1}>
         <Button
           variant="contained"
           color="primary"
@@ -317,7 +278,16 @@ const SerialzedAssets = ({
             </Button>
           </Box>}
       </Box>
-      <Box mt={1}>
+      <Box
+        zIndex={5}
+        width={
+          stepFullScreen ? "100%" :
+            isTabletScreen ? "calc(100vw)"
+              : isSmallScreen ? "calc(100vw)"
+                : showActivity ? "100%" : "calc(100vw - 103px)"
+        }
+        height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 350px)"}
+      >
         {rowsData ? (
           <CustomReactTable
             height={'calc(100vh - 365px)'}
