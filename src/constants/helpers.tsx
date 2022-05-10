@@ -187,7 +187,8 @@ export const sidebarResource = {
   pos: 'Pos',
   repairType: 'Repair Type',
   report: "Report",
-  resourceCalendar: 'Resource Calendar'
+  resourceCalendar: 'Resource Calendar',
+  cageManagement: "Cage Management",
 };
 
 export const resourceNames = {
@@ -249,7 +250,9 @@ export const resourceNames = {
   bulkAssetCreation: 'Bulk Asset Creation',
   pos: 'Pos',
   report: "Report",
-  resourceCalendar: 'Resource Calendar'
+  resourceCalendar: 'Resource Calendar',
+  cageManagement: "Cage Management",
+
 };
 
 export const primaryFields = {
@@ -320,7 +323,8 @@ export const RESOURCE_LABEL = {
   pos: "eRECS",
   repairType: "Repair Types",
   report: "Report",
-  resourceCalendar: 'Resource Calendar'
+  resourceCalendar: 'Resource Calendar',
+  cageManagement: "Cage Management",
 };
 
 export const CHILD_RESOURCE = {
@@ -558,6 +562,12 @@ export const repairType = {
   route: '/repair-type',
   permission: 'Repair Type',
   resource: 'Repair Type'
+};
+export const cageManagement = {
+  api: '/cage-management',
+  route: '/cage-management',
+  permission: 'Cage Management',
+  resource: 'Cage Management'
 };
 
 export const profileMenuItems = {
